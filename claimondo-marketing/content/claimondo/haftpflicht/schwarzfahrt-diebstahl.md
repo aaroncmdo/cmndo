@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/schwarzfahrt-diebstahl
-meta_title: Schwarzfahrt und Kfz-Diebstahl — Haftung
+meta_title: Schwarzfahrt und Kfz-Diebstahl – Haftung
 type: glossar-spoke
 cluster: H7
 nummer: H7.2
@@ -15,11 +15,11 @@ customer_questions:
   - "unbefugter fahrer haftung halter"
   - "voh zahlt bei diebstahl"
 last_modified: 2026-05-18
-excerpt: Bei Schwarzfahrt (unbefugte Kfz-Nutzung ohne Halter-Erlaubnis) entfällt die Halter-Haftung nach § 7 Abs. 3 StVG, wenn der Halter die Nutzung nicht ermöglicht oder erleichtert hat — der Schwarzfahrer haftet persönlich nach § 18 StVG und § 823 BGB. Ist er zahlungsunfähig oder unbekannt, tritt die Verkehrsopferhilfe (VOH) nach PflVG § 12 ein.
+excerpt: Bei Schwarzfahrt (unbefugte Kfz-Nutzung ohne Halter-Erlaubnis) entfällt die Halter-Haftung nach § 7 Abs. 3 StVG, wenn der Halter die Nutzung nicht ermöglicht oder erleichtert hat – der Schwarzfahrer haftet persönlich nach § 18 StVG und § 823 BGB. Ist er zahlungsunfähig oder unbekannt, tritt die Verkehrsopferhilfe (VOH) nach PflVG § 12 ein.
 keyFacts:
-  - § 7 Abs. 3 StVG — Halter-Haftungsausschluss bei Schwarzfahrt ohne Mitverschulden
-  - § 18 StVG / § 823 BGB — persönliche Haftung des Schwarzfahrers
-  - PflVG § 12 — Verkehrsopferhilfe bei Zahlungsunfähigkeit oder Unbekanntheit
+  - § 7 Abs. 3 StVG – Halter-Haftungsausschluss bei Schwarzfahrt ohne Mitverschulden
+  - § 18 StVG / § 823 BGB – persönliche Haftung des Schwarzfahrers
+  - PflVG § 12 – Verkehrsopferhilfe bei Zahlungsunfähigkeit oder Unbekanntheit
   - Halter haftet weiter, wenn Schlüssel fahrlässig zugänglich war
 related:
   - /haftpflicht/unversicherte-voh
@@ -28,7 +28,7 @@ related:
 meta_description: "Schwarzfahrt/Kfz-Diebstahl: Halterhaftung entfällt nach §7 Abs. 3 StVG, der Schwarzfahrer haftet persönlich (§18 StVG). Verkehrsopferhilfe als Auffangnetz."
 ---
 
-# Schwarzfahrt und Kfz-Diebstahl — Haftung bei unbefugter Nutzung
+# Schwarzfahrt und Kfz-Diebstahl – Haftung bei unbefugter Nutzung
 
 > **Kurz erklärt:** Schwarzfahrt = unbefugte Nutzung eines Kfz ohne Halter-Erlaubnis. Bei Unfall durch Schwarzfahrer entfällt die Halter-Haftung nach § 7 Abs. 3 StVG, **wenn** der Halter die unbefugte Nutzung **nicht ermöglicht oder erleichtert** hat. Schwarzfahrer haftet persönlich nach § 18 StVG / § 823 BGB. Geschädigte können sich an die **Verkehrsopferhilfe** wenden, wenn der Schwarzfahrer zahlungsunfähig ist oder unbekannt bleibt.
 
@@ -44,7 +44,7 @@ meta_description: "Schwarzfahrt/Kfz-Diebstahl: Halterhaftung entfällt nach §7 
 
 ### 2. Schwarzfahrt durch Familienmitglied / Bekannten
 - Halter hat unbefugte Nutzung **ermöglicht** (Schlüssel zugänglich, vorheriges Stillschweigen, mangelhafte Sorgfalt)
-- **Halter-Haftung bleibt** nach § 7 Abs. 1 StVG bestehen — Versicherung des Halters zahlt
+- **Halter-Haftung bleibt** nach § 7 Abs. 1 StVG bestehen – Versicherung des Halters zahlt
 - Versicherer regelt Innen-Ausgleich mit Schwarzfahrer per Regress
 
 ### 3. Schwarzfahrt durch Angestellte / Arbeitnehmer
@@ -75,10 +75,10 @@ Für § 7 Abs. 3 StVG-Befreiung muss der Halter beweisen:
 ## Häufige Fragen
 
 **Wer zahlt bei Unfall mit gestohlenem Auto?**
-Der Schwarzfahrer persönlich nach § 18 StVG / § 823 BGB — bei Zahlungsunfähigkeit oder Unbekanntheit: Verkehrsopferhilfe.
+Der Schwarzfahrer persönlich nach § 18 StVG / § 823 BGB – bei Zahlungsunfähigkeit oder Unbekanntheit: Verkehrsopferhilfe.
 
 **Was, wenn ein Familienmitglied unbefugt das Auto nimmt?**
-Bei verschuldeter Schlüssel-Verwahrung haftet der Halter über § 7 Abs. 1 StVG — die Versicherung zahlt, macht aber Regress gegen den Schwarzfahrer.
+Bei verschuldeter Schlüssel-Verwahrung haftet der Halter über § 7 Abs. 1 StVG – die Versicherung zahlt, macht aber Regress gegen den Schwarzfahrer.
 
 **Was muss ich als Halter bei Diebstahl tun?**
 Sofort Polizei-Anzeige. Bei klar gestohlenem Fahrzeug: § 7 Abs. 3 StVG-Befreiung möglich.
@@ -102,7 +102,7 @@ Ja, bei Zahlungsunfähigkeit oder Unbekanntheit des Schwarzfahrers tritt die VOH
 
 - StVG § 7 Abs. 3, § 18
 - BGB § 823
-- PflVG § 12 — VOH-Eintritt
+- PflVG § 12 – VOH-Eintritt
 
 ---
 
@@ -145,4 +145,4 @@ Ja, bei Zahlungsunfähigkeit oder Unbekanntheit des Schwarzfahrers tritt die VOH
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

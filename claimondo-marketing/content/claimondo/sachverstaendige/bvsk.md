@@ -2,14 +2,14 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/bvsk
-meta_title: BVSK — Bundesverband freier Kfz-Gutachter
+meta_title: BVSK – Bundesverband freier Kfz-Gutachter
 type: glossar-spoke
 cluster: SV
 nummer: SV.1
 primary_keyword: "bvsk sachverständiger"
 secondary_keywords: ["bvsk honorartabelle", "bvsk honorarbefragung", "bvsk mitglied finden"]
 last_modified: 2026-05-23
-excerpt: Der BVSK (Bundesverband der freien Kfz-Sachverständigen) mit über 1.100 Mitgliedern ist der größte deutsche Verband unabhängiger Kfz-Gutachter. Seine alle zwei Jahre erhobene Honorarbefragung ist vom BGH als zulässige Schätzgrundlage anerkannt — ein Honorar nach BVSK-Tabelle ist marktüblich und vom gegnerischen Haftpflichtversicherer voll zu erstatten.
+excerpt: Der BVSK (Bundesverband der freien Kfz-Sachverständigen) mit über 1.100 Mitgliedern ist der größte deutsche Verband unabhängiger Kfz-Gutachter. Seine alle zwei Jahre erhobene Honorarbefragung ist vom BGH als zulässige Schätzgrundlage anerkannt – ein Honorar nach BVSK-Tabelle ist marktüblich und vom gegnerischen Haftpflichtversicherer voll zu erstatten.
 keyFacts:
   - BGH VI ZR 357/13: BVSK-Honorarbefragung = zulässige Schätzgrundlage (§ 287 ZPO)
   - BGH VI ZR 225/13: beglichene Sachverständigenrechnung hat Indizwirkung für Erforderlichkeit
@@ -23,10 +23,10 @@ related:
   - /sachverstaendige/zak
   - /sachverstaendige/pruefdienstleister
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "BVSK — größter Verband freier Kfz-Sachverständiger (1.100+) samt BVSK-Honorartabelle. Warum Sie Ihren Sachverständigen frei wählen (§249 BGB)."
+meta_description: "BVSK – größter Verband freier Kfz-Sachverständiger (1.100+) samt BVSK-Honorartabelle. Warum Sie Ihren Sachverständigen frei wählen (§249 BGB)."
 ---
 
-# BVSK — Bundesverband der freien Kfz-Sachverständigen
+# BVSK – Bundesverband der freien Kfz-Sachverständigen
 
 > **Kurz erklärt:** Der BVSK ist mit über 1.100 Mitgliedern der größte deutsche Verband freier und unabhängiger Kfz-Sachverständiger. Sein wichtigstes Instrument ist die BVSK-Honorarbefragung, die der Bundesgerichtshof als zulässige Schätzgrundlage für Sachverständigenkosten nach § 287 ZPO anerkennt (BGH VI ZR 357/13). Ein Honorar nach der BVSK-Tabelle ist marktüblich und vom gegnerischen Haftpflichtversicherer in voller Höhe zu erstatten.
 
@@ -34,27 +34,27 @@ meta_description: "BVSK — größter Verband freier Kfz-Sachverständiger (1.10
 
 ## Worum es geht
 
-Der BVSK (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen e.V.) vertritt die freien, unabhängigen Sachverständigen-Büros — im Unterschied zu den großen Prüforganisationen wie DEKRA, GTÜ, KÜS oder TÜV. Mit über 1.100 Mitgliedern ist er der Marktführer im Bereich der freien Kfz-Sachverständigen und eine maßgebliche Stimme gegenüber dem Gesamtverband der Deutschen Versicherungswirtschaft (GDV).
+Der BVSK (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen e.V.) vertritt die freien, unabhängigen Sachverständigen-Büros – im Unterschied zu den großen Prüforganisationen wie DEKRA, GTÜ, KÜS oder TÜV. Mit über 1.100 Mitgliedern ist er der Marktführer im Bereich der freien Kfz-Sachverständigen und eine maßgebliche Stimme gegenüber dem Gesamtverband der Deutschen Versicherungswirtschaft (GDV).
 
-Für Sie als unverschuldet Geschädigten ist der BVSK vor allem deshalb relevant, weil seine Standards in der Schadensregulierung — Honorar, Wertminderung, Beilackierung — von der Rechtsprechung anerkannt sind und Ihnen als Argument gegen Versicherer-Kürzungen dienen.
+Für Sie als unverschuldet Geschädigten ist der BVSK vor allem deshalb relevant, weil seine Standards in der Schadensregulierung – Honorar, Wertminderung, Beilackierung – von der Rechtsprechung anerkannt sind und Ihnen als Argument gegen Versicherer-Kürzungen dienen.
 
 ## Die BVSK-Honorarbefragung (BGH-anerkannt)
 
 Das wichtigste Instrument des BVSK ist die alle zwei Jahre erhobene **BVSK-Honorarbefragung** (zuletzt 2024, nächste 2026 erwartet). Sie erfasst die marktüblichen Sachverständigen-Honorare nach Schadenhöhe-Klassen und ist höchstrichterlich anerkannt:
 
-- **BGH VI ZR 357/13** — die BVSK-Honorarbefragung ist eine zulässige Schätzgrundlage für die Sachverständigenkosten nach § 287 ZPO.
-- **BGH VI ZR 67/06** — maßgeblich ist die subjektbezogene Schadensbetrachtung; die Pauschalierung von Nebenkosten ist zulässig, das JVEG ist auf privat beauftragte Sachverständige nicht übertragbar.
-- **BGH VI ZR 225/13** — eine bereits beglichene Sachverständigen-Rechnung hat Indizwirkung für die Erforderlichkeit der Kosten.
+- **BGH VI ZR 357/13** – die BVSK-Honorarbefragung ist eine zulässige Schätzgrundlage für die Sachverständigenkosten nach § 287 ZPO.
+- **BGH VI ZR 67/06** – maßgeblich ist die subjektbezogene Schadensbetrachtung; die Pauschalierung von Nebenkosten ist zulässig, das JVEG ist auf privat beauftragte Sachverständige nicht übertragbar.
+- **BGH VI ZR 225/13** – eine bereits beglichene Sachverständigen-Rechnung hat Indizwirkung für die Erforderlichkeit der Kosten.
 
 Praktisch heißt das: Rechnet Ihr Sachverständiger nach der BVSK-Tabelle ab, ist dieses Honorar marktüblich und vom gegnerischen Haftpflichtversicherer zu erstatten.
 
 ## Das BVSK-Wertminderungsmodell
 
-Mit dem **BVSK-Wertminderungsmodell** liegt eine etablierte Methode zur Berechnung der merkantilen Wertminderung vor. Es berücksichtigt den Wiederbeschaffungswert, den Schadenumfang sowie Korrekturfaktoren für Marke, Alter, Laufleistung und Marktnachfrage. Es steht gleichwertig neben anderen anerkannten Methoden (etwa der MFM-Methode) — im Rahmen der freien Schadensschätzung nach § 287 ZPO ist es eine zulässige Grundlage.
+Mit dem **BVSK-Wertminderungsmodell** liegt eine etablierte Methode zur Berechnung der merkantilen Wertminderung vor. Es berücksichtigt den Wiederbeschaffungswert, den Schadenumfang sowie Korrekturfaktoren für Marke, Alter, Laufleistung und Marktnachfrage. Es steht gleichwertig neben anderen anerkannten Methoden (etwa der MFM-Methode) – im Rahmen der freien Schadensschätzung nach § 287 ZPO ist es eine zulässige Grundlage.
 
 ## Beilackierung
 
-Der BVSK vertritt mit seiner Beilackierungsrichtlinie die Position, dass die Beilackierung angrenzender Bauteile bei modernen Lacken (Mehrschicht, Metallic, Perlmutt) eine anerkannte Reparatur-Notwendigkeit ist — ein Großteil moderner Lackreparaturen erfordert sie. Versicherer streichen diese Position häufig; der Bundesgerichtshof hat sie jedoch als erstattungsfähigen Teil des Schadens bestätigt (**BGH VI ZR 174/24**).
+Der BVSK vertritt mit seiner Beilackierungsrichtlinie die Position, dass die Beilackierung angrenzender Bauteile bei modernen Lacken (Mehrschicht, Metallic, Perlmutt) eine anerkannte Reparatur-Notwendigkeit ist – ein Großteil moderner Lackreparaturen erfordert sie. Versicherer streichen diese Position häufig; der Bundesgerichtshof hat sie jedoch als erstattungsfähigen Teil des Schadens bestätigt (**BGH VI ZR 174/24**).
 
 ## Bagatellgrenze
 
@@ -66,7 +66,7 @@ Als Faustregel gilt eine Bagatellgrenze von rund 715 €: Erst ab diesem Schaden
 - Ein **Honorar nach BVSK-Tabelle** ist marktüblich und voll erstattbar (BGH-Linie).
 - Bei **Versicherer-Kürzungen** dienen die BVSK-Standards als belastbares Gegenargument.
 
-## Typische Versicherer-Einwände — und was dagegen spricht
+## Typische Versicherer-Einwände – und was dagegen spricht
 
 | Einwand des Versicherers | Was dagegen spricht |
 |---|---|
@@ -78,7 +78,7 @@ Als Faustregel gilt eine Bagatellgrenze von rund 715 €: Erst ab diesem Schaden
 
 ## Nächster Schritt für Geschädigte
 
-Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.
+Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region – mit freien Terminen in unter 48 Stunden – finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.
 
 → **Sachverständigen finden: [claimondo.de/gutachter-finden](https://claimondo.de/gutachter-finden)**
 → Telefonisch: **0221 25906530** (Rückruf in unter 15 Minuten)

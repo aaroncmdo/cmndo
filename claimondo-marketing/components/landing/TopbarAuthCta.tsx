@@ -16,7 +16,7 @@ import { roleToPath } from '@/lib/auth/role-redirect'
 import type { AuthenticatedUser } from './LandingTopbar'
 
 type Props = {
-  /** Server-aufgeloester User (Startseite) — null auf Content-Seiten. */
+  /** Server-aufgeloester User (Startseite) – null auf Content-Seiten. */
   initialUser: AuthenticatedUser | null
   portalLabel: string
   portalLabelShort: string

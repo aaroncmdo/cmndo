@@ -161,7 +161,7 @@ export function ScrollPopoverClient({
       if (total <= 0) {
         if (debug)
           console.log(
-            '[popover] scrollHeight <= viewport — Page hat keinen Scroll-Raum, Trigger inaktiv',
+            '[popover] scrollHeight <= viewport – Page hat keinen Scroll-Raum, Trigger inaktiv',
           )
         return
       }
@@ -428,7 +428,7 @@ export function ScrollPopoverClient({
       }}
     >
       <DialogPrimitive.Portal>
-        {/* Full-bleed Backdrop: Navy-Tint + Blur — zieht den Fokus auf das Modal */}
+        {/* Full-bleed Backdrop: Navy-Tint + Blur – zieht den Fokus auf das Modal */}
         <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-claimondo-navy/65 duration-200 backdrop-blur-md data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
 
         <DialogPrimitive.Popup className="fixed left-1/2 top-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-ios-lg border border-white/60 bg-white/95 p-5 shadow-glass-card outline-none backdrop-blur-md duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 sm:max-w-md sm:p-7">
@@ -457,7 +457,7 @@ export function ScrollPopoverClient({
               <DialogPrimitive.Description className="mt-1 text-sm text-claimondo-shield/80">
                 {step === 1 &&
                   'Damit wir den passenden Gutachter zuweisen.'}
-                {step === 2 && 'PLZ oder Adresse — wir kommen NRW-weit.'}
+                {step === 2 && 'PLZ oder Adresse – wir kommen NRW-weit.'}
                 {step === 3 &&
                   'Anruf in 15 Minuten oder lieber wir melden uns?'}
               </DialogPrimitive.Description>
@@ -548,7 +548,7 @@ export function ScrollPopoverClient({
                 )}
               </div>
 
-              {/* Nav-Buttons — versteckt im Callback-Sub-Form, weil das eine eigene Submit-CTA hat */}
+              {/* Nav-Buttons – versteckt im Callback-Sub-Form, weil das eine eigene Submit-CTA hat */}
               {/* Nav-Buttons:
                   - Step 1: keine — Klick auf Fahrzeug-Karte advanced direkt
                   - Step 3 mit Callback-Form: eigene Submit-CTA
@@ -966,7 +966,7 @@ function StandortStep({
           </ul>
         )}
       </div>
-      {/* Geo-Button — alternative zum Tippen, ein-Klick-Pfad fuer Mobile-User */}
+      {/* Geo-Button – alternative zum Tippen, ein-Klick-Pfad fuer Mobile-User */}
       <button
         type="button"
         onClick={useMyLocation}
@@ -984,12 +984,12 @@ function StandortStep({
       </button>
       {geoState === 'denied' && (
         <p className="text-[11px] text-claimondo-shield/70">
-          Standort-Zugriff abgelehnt — bitte oben manuell eingeben.
+          Standort-Zugriff abgelehnt – bitte oben manuell eingeben.
         </p>
       )}
       {geoState === 'unavailable' && (
         <p className="text-[11px] text-claimondo-shield/70">
-          Standort konnte nicht ermittelt werden — bitte oben manuell
+          Standort konnte nicht ermittelt werden – bitte oben manuell
           eingeben.
         </p>
       )}
@@ -1273,7 +1273,7 @@ function KontaktStep({
           className="flex w-full items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98]"
         >
           <Phone className="h-5 w-5" aria-hidden />
-          Jetzt anrufen — {TEL_DISPLAY}
+          Jetzt anrufen – {TEL_DISPLAY}
         </a>
         <button
           type="button"

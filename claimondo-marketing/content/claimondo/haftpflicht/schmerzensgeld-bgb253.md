@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/schmerzensgeld-bgb253
-meta_title: Schmerzensgeld § 253 BGB — Anspruch und Höhe
+meta_title: Schmerzensgeld § 253 BGB – Anspruch und Höhe
 type: glossar-spoke
 cluster: H3
 nummer: H3.9
@@ -17,10 +17,10 @@ customer_questions:
   - "schmerzensgeld ptbs nach unfall"
   - "hacks wellner schmerzensgeldtabelle"
 last_modified: 2026-05-18
-excerpt: Schmerzensgeld nach § 253 Abs. 2 BGB ist die Geldentschädigung für immaterielle Schäden (Schmerzen, Leiden, psychische Folgen) nach Verkehrsunfall — Spannen von 250 € bei Bagatell-HWS bis über 100.000 € bei Polytrauma oder chronischer PTBS, orientiert an der Hacks/Wellner-Schmerzensgeldtabelle. Versicherer-Erstangebote liegen typischerweise 20–40 % des rechnerisch Berechtigten; die Verjährungsfrist beträgt 3 Jahre ab Kenntnis (§ 195 BGB).
+excerpt: Schmerzensgeld nach § 253 Abs. 2 BGB ist die Geldentschädigung für immaterielle Schäden (Schmerzen, Leiden, psychische Folgen) nach Verkehrsunfall – Spannen von 250 € bei Bagatell-HWS bis über 100.000 € bei Polytrauma oder chronischer PTBS, orientiert an der Hacks/Wellner-Schmerzensgeldtabelle. Versicherer-Erstangebote liegen typischerweise 20–40 % des rechnerisch Berechtigten; die Verjährungsfrist beträgt 3 Jahre ab Kenntnis (§ 195 BGB).
 keyFacts:
-  - § 253 Abs. 2 BGB — Anspruchsgrundlage immaterieller Schadensersatz
-  - § 11 StVG — Schmerzensgeld auch bei Gefährdungshaftung
+  - § 253 Abs. 2 BGB – Anspruchsgrundlage immaterieller Schadensersatz
+  - § 11 StVG – Schmerzensgeld auch bei Gefährdungshaftung
   - Hacks/Wellner-Tabelle: anerkannte gerichtliche Orientierungsquelle
   - Spannen: 250 € (Bagatell-HWS) bis 250.000 €+ (Polytrauma)
   - Verjährung: 3 Jahre (§ 195 BGB), bei Spätfolgen 30 Jahre Höchstfrist
@@ -31,12 +31,12 @@ related:
   - /haftpflicht/anwaltskosten-erstattung
   - /decoder/schmerzensgeld-angemessen
   - /decoder/pauschal-abgeltung
-meta_description: "Schmerzensgeld nach §253 BGB: von 250 € bei HWS bis über 100.000 € bei Polytrauma — nach Hacks/Wellner-Tabelle. So setzen Sie eine faire Höhe durch."
+meta_description: "Schmerzensgeld nach §253 BGB: von 250 € bei HWS bis über 100.000 € bei Polytrauma – nach Hacks/Wellner-Tabelle. So setzen Sie eine faire Höhe durch."
 ---
 
-# Schmerzensgeld nach § 253 BGB beim Verkehrsunfall — Anspruch, Höhe, Praxis
+# Schmerzensgeld nach § 253 BGB beim Verkehrsunfall – Anspruch, Höhe, Praxis
 
-> **Kurz erklärt:** Schmerzensgeld nach § 253 BGB ist die Geldentschädigung für **immaterielle Schäden** (Schmerzen, Leiden, psychische Folgen, Lebens-Beeinträchtigung) nach Verkehrsunfall. Bemessung individuell nach Schwere, Dauer, Intensität, Folgen — orientiert an der **Hacks/Wellner-Schmerzensgeldtabelle**. Spannen: 250 € (Bagatell-HWS) bis 100.000 €+ (Polytrauma, chronische PTBS). Versicherer-Erstangebote liegen typischerweise bei **20–40 %** des rechnerisch Berechtigten.
+> **Kurz erklärt:** Schmerzensgeld nach § 253 BGB ist die Geldentschädigung für **immaterielle Schäden** (Schmerzen, Leiden, psychische Folgen, Lebens-Beeinträchtigung) nach Verkehrsunfall. Bemessung individuell nach Schwere, Dauer, Intensität, Folgen – orientiert an der **Hacks/Wellner-Schmerzensgeldtabelle**. Spannen: 250 € (Bagatell-HWS) bis 100.000 €+ (Polytrauma, chronische PTBS). Versicherer-Erstangebote liegen typischerweise bei **20–40 %** des rechnerisch Berechtigten.
 
 ## Auch bekannt als
 
@@ -46,11 +46,11 @@ meta_description: "Schmerzensgeld nach §253 BGB: von 250 € bei HWS bis über 
 
 ## In einem Satz erklärt
 
-Schmerzensgeld ist die Geldentschädigung für Schmerzen und Lebens-Beeinträchtigung nach Verkehrsunfall — bemessen nach Schwere, Dauer und Folgen entsprechend Hacks/Wellner-Schmerzensgeldtabelle.
+Schmerzensgeld ist die Geldentschädigung für Schmerzen und Lebens-Beeinträchtigung nach Verkehrsunfall – bemessen nach Schwere, Dauer und Folgen entsprechend Hacks/Wellner-Schmerzensgeldtabelle.
 
 ## In drei Sätzen erklärt
 
-§ 253 Abs. 2 BGB gewährt einen Anspruch auf billige Entschädigung in Geld bei Verletzung des Körpers, der Gesundheit, der Freiheit oder der sexuellen Selbstbestimmung — bei Verkehrsunfällen also für körperliche und psychische Verletzungen. Die Bemessung folgt nach BGH-Linie zwei Funktionen: **Ausgleichs-Funktion** (materielle Kompensation für Schmerzen, Leiden, Beeinträchtigung) und **Genugtuungs-Funktion** (symbolische Anerkennung des erlittenen Unrechts). Orientierungsgröße ist die **Hacks/Wellner-Schmerzensgeldtabelle** (jährlich, C.H. Beck Verlag) — sie sammelt deutsche Schmerzensgeld-Urteile und gliedert sie nach Verletzungs-Typ, Spannen 250 €–100.000 €+ je nach Schwere.
+§ 253 Abs. 2 BGB gewährt einen Anspruch auf billige Entschädigung in Geld bei Verletzung des Körpers, der Gesundheit, der Freiheit oder der sexuellen Selbstbestimmung – bei Verkehrsunfällen also für körperliche und psychische Verletzungen. Die Bemessung folgt nach BGH-Linie zwei Funktionen: **Ausgleichs-Funktion** (materielle Kompensation für Schmerzen, Leiden, Beeinträchtigung) und **Genugtuungs-Funktion** (symbolische Anerkennung des erlittenen Unrechts). Orientierungsgröße ist die **Hacks/Wellner-Schmerzensgeldtabelle** (jährlich, C.H. Beck Verlag) – sie sammelt deutsche Schmerzensgeld-Urteile und gliedert sie nach Verletzungs-Typ, Spannen 250 €–100.000 €+ je nach Schwere.
 
 ## Die fünf Schlüsselzahlen
 
@@ -58,7 +58,7 @@ Schmerzensgeld ist die Geldentschädigung für Schmerzen und Lebens-Beeinträcht
 - **§ 11 StVG** Schmerzensgeld bei Gefährdungshaftung
 - **Hacks/Wellner-Tabelle** als gerichtliche Standardquelle
 - **2- bis 5-fach** typische Differenz Versicherer-Erstangebot zu rechnerisch Berechtigtem
-- **3 Jahre Verjährung** ab Kenntnis (§ 195 BGB) — bei Spätfolgen bis 30 Jahre
+- **3 Jahre Verjährung** ab Kenntnis (§ 195 BGB) – bei Spätfolgen bis 30 Jahre
 
 ---
 
@@ -66,19 +66,19 @@ Schmerzensgeld ist die Geldentschädigung für Schmerzen und Lebens-Beeinträcht
 
 § 253 Abs. 2 BGB nennt vier Rechtsgüter, deren Verletzung Schmerzensgeld auslöst:
 
-1. **Körper** — Verletzungen der körperlichen Unversehrtheit (HWS-Distorsion, Frakturen, Hämatome, Operationen)
-2. **Gesundheit** — somatische und psychische Beeinträchtigungen (PTBS, Anpassungsstörung, chronischer Schmerz, Tinnitus)
-3. **Freiheit** — Bewegungsfreiheits-Verletzungen (Bettlägrigkeit, Bewegungseinschränkungen)
-4. **Sexuelle Selbstbestimmung** — bei Verkehrsunfall selten relevant
+1. **Körper** – Verletzungen der körperlichen Unversehrtheit (HWS-Distorsion, Frakturen, Hämatome, Operationen)
+2. **Gesundheit** – somatische und psychische Beeinträchtigungen (PTBS, Anpassungsstörung, chronischer Schmerz, Tinnitus)
+3. **Freiheit** – Bewegungsfreiheits-Verletzungen (Bettlägrigkeit, Bewegungseinschränkungen)
+4. **Sexuelle Selbstbestimmung** – bei Verkehrsunfall selten relevant
 
 Zusätzlich: § 11 StVG erweitert den Schmerzensgeld-Anspruch auf die Gefährdungshaftung (also auch ohne Verschulden des Halters).
 
 ---
 
-## Die zwei Funktionen — BGH-Linie
+## Die zwei Funktionen – BGH-Linie
 
 ### Ausgleichs-Funktion
-Materielle Kompensation für die erlittenen Schmerzen, Leiden, Beeinträchtigungen der Lebensführung, dauerhafte Folgen. Was kann mit Geld nicht ersetzt werden — was kann durch Geld erträglicher gemacht werden?
+Materielle Kompensation für die erlittenen Schmerzen, Leiden, Beeinträchtigungen der Lebensführung, dauerhafte Folgen. Was kann mit Geld nicht ersetzt werden – was kann durch Geld erträglicher gemacht werden?
 
 ### Genugtuungs-Funktion
 Symbolische Anerkennung des erlittenen Unrechts durch den Schädiger. Bei grob fahrlässigem oder vorsätzlichem Verhalten erhöhen sich die Beträge tendenziell.
@@ -100,13 +100,13 @@ Die Bemessung erfolgt **individuell** nach allen Umständen des Einzelfalls:
 | **Berufliche Auswirkungen** | Krankschreibung, Berufsausübungs-Verlust, Berufswechsel |
 | **Soziale Folgen** | Vereinsamung, Verlust sozialer Aktivitäten |
 | **Verschulden des Schädigers** | Grob fahrlässig vs. einfache Fahrlässigkeit (erhöhend) |
-| **Vermögensverhältnisse** | Sehr selten — nur in Ausnahmen relevant |
+| **Vermögensverhältnisse** | Sehr selten – nur in Ausnahmen relevant |
 
 ---
 
-## Hacks/Wellner-Schmerzensgeldtabelle — der praktische Maßstab
+## Hacks/Wellner-Schmerzensgeldtabelle – der praktische Maßstab
 
-Die jährlich aktualisierte Hacks/Wellner-Tabelle (C.H. Beck Verlag) sammelt deutsche Schmerzensgeld-Urteile und ordnet sie nach Verletzungs-Typ. Sie ist **Orientierungsquelle deutscher Gerichte** — Versicherer kennen sie ebenfalls und verhandeln darauf, **wenn der Geschädigte sie zitiert**.
+Die jährlich aktualisierte Hacks/Wellner-Tabelle (C.H. Beck Verlag) sammelt deutsche Schmerzensgeld-Urteile und ordnet sie nach Verletzungs-Typ. Sie ist **Orientierungsquelle deutscher Gerichte** – Versicherer kennen sie ebenfalls und verhandeln darauf, **wenn der Geschädigte sie zitiert**.
 
 ### Typische Spannen (Orientierung)
 
@@ -156,11 +156,11 @@ Für die Schmerzensgeld-Bemessung brauchst du:
 5. **Bei psychischen Folgen:** fachpsychotherapeutische oder psychiatrische Diagnose
 6. **Berufliche Auswirkungen** (Krankschreibungen, Arbeitgeber-Bescheinigungen)
 
-§ 287 ZPO erlaubt **erleichtertes Beweismaß** für die Schadenshöhe — der Richter schätzt nach freier Überzeugung, perfekte Dokumentation ist nicht zwingend, hilft aber.
+§ 287 ZPO erlaubt **erleichtertes Beweismaß** für die Schadenshöhe – der Richter schätzt nach freier Überzeugung, perfekte Dokumentation ist nicht zwingend, hilft aber.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Schmerzensgeld niemals alleine verhandeln. Versicherer-Erstangebote liegen typisch 60–80 % unter dem rechnerisch Berechtigten. Anwalt mit Hacks/Wellner-Bezug ist der Hebel.
@@ -174,17 +174,17 @@ ICD-Diagnose, ärztliche Atteste, Behandlungs-Verlauf, Operationen, Funktions-Ei
 Verkehrsrechts-Anwalt prüft, welche Vergleichs-Urteile für deinen Fall einschlägig sind. Konkrete Bezifferung.
 
 **3. Spätfolge-Vorbehalt bei Vergleich zwingend**
-Kein Vergleich ohne Vorbehalt — siehe [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung).
+Kein Vergleich ohne Vorbehalt – siehe [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung).
 
 **4. Bei Versicherer-Erstangebot: ablehnen, gegen-Bezifferung**
-Hacks/Wellner-Bezug mit konkreten Vergleichs-Urteilen — siehe [Decoder „Schmerzensgeld angemessen"](/decoder/schmerzensgeld-angemessen).
+Hacks/Wellner-Bezug mit konkreten Vergleichs-Urteilen – siehe [Decoder „Schmerzensgeld angemessen"](/decoder/schmerzensgeld-angemessen).
 
 ---
 
 ## Häufige Fragen
 
 **Wie viel Schmerzensgeld bekomme ich nach Verkehrsunfall?**
-Individuelle Bemessung — orientiert an Hacks/Wellner-Tabelle. Spannen: 250 € (Bagatell-HWS) bis 100.000 €+ (Polytrauma, chronische PTBS). Bei Mittel-Verletzungen typisch 2.000–10.000 €.
+Individuelle Bemessung – orientiert an Hacks/Wellner-Tabelle. Spannen: 250 € (Bagatell-HWS) bis 100.000 €+ (Polytrauma, chronische PTBS). Bei Mittel-Verletzungen typisch 2.000–10.000 €.
 
 **Wie wird die Höhe konkret berechnet?**
 Nach Schwere, Dauer, Intensität, Folgen, Operationen, psychischen Auswirkungen, beruflichen Folgen, Verschulden des Schädigers. Vergleichs-Urteile aus Hacks/Wellner-Tabelle sind Bezugspunkt.
@@ -196,20 +196,20 @@ Ja. PTBS, Anpassungsstörungen, Fahrangst, Depression sind eigenständig schmerz
 3 Jahre ab Ende des Jahres, in dem du Kenntnis von Schaden und Schädiger hattest (§ 195 BGB). Bei Spätfolgen 30 Jahre Höchstfrist (§ 199 Abs. 2 BGB).
 
 **Was, wenn meine Verletzung nicht in Hacks/Wellner steht?**
-Anwalt sucht analoge Urteile — die Tabelle ist Orientierung, nicht abschließend.
+Anwalt sucht analoge Urteile – die Tabelle ist Orientierung, nicht abschließend.
 
 **Bekomme ich Schmerzensgeld auch bei eigenem Mitverschulden?**
-Bei Mitverschulden anteilige Kürzung — 30 % Mitverschulden = 70 % Schmerzensgeld. Pauschal-Quoten ohne Beweis sind zurückzuweisen.
+Bei Mitverschulden anteilige Kürzung – 30 % Mitverschulden = 70 % Schmerzensgeld. Pauschal-Quoten ohne Beweis sind zurückzuweisen.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) — Anwalts-Kosten zahlt der Versicherer
-- [Verjährung § 195 BGB](/haftpflicht/verjaehrung-bgb195) — Zeit-Limit
-- [Anerkenntnis § 212 BGB](/haftpflicht/anerkenntnis-bgb212) — Verjährungs-Neustart
-- [Decoder „Schmerzensgeld angemessen"](/decoder/schmerzensgeld-angemessen) — Antwort auf niedriges Erstangebot
-- [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung) — Spätfolge-Vorbehalt
+- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) – Anwalts-Kosten zahlt der Versicherer
+- [Verjährung § 195 BGB](/haftpflicht/verjaehrung-bgb195) – Zeit-Limit
+- [Anerkenntnis § 212 BGB](/haftpflicht/anerkenntnis-bgb212) – Verjährungs-Neustart
+- [Decoder „Schmerzensgeld angemessen"](/decoder/schmerzensgeld-angemessen) – Antwort auf niedriges Erstangebot
+- [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung) – Spätfolge-Vorbehalt
 
 ---
 
@@ -223,8 +223,8 @@ Schmerzensgeld ist die wirtschaftlich riskanteste Position der Schadensregulieru
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 253 — [gesetze-im-internet.de/bgb/__253.html](https://www.gesetze-im-internet.de/bgb/__253.html)
-- Straßenverkehrsgesetz § 11 — [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
+- Bürgerliches Gesetzbuch § 253 – [gesetze-im-internet.de/bgb/__253.html](https://www.gesetze-im-internet.de/bgb/__253.html)
+- Straßenverkehrsgesetz § 11 – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
 - Hacks/Wellner Schmerzensgeldtabelle (jährlich, C.H. Beck Verlag)
 - Slizyk, Beck'sche Schmerzensgeld-Tabelle
 - BGH-Rechtsprechung zur Schmerzensgeld-Bemessung, ständige Rechtsprechung
@@ -276,4 +276,4 @@ Schmerzensgeld ist die wirtschaftlich riskanteste Position der Schadensregulieru
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

@@ -48,24 +48,24 @@ const notoSans = Noto_Sans({
 
 /** GEO-Feeds fuer die Autodiscovery im <head>. */
 const FEEDS = [
-  { type: 'application/rss+xml', url: '/feed.xml', title: 'Claimondo — Aktuelle Wissens-Updates' },
-  { type: 'application/rss+xml', url: '/feed/katalog.xml', title: 'Claimondo — Wissens-Katalog' },
+  { type: 'application/rss+xml', url: '/feed.xml', title: 'Claimondo – Aktuelle Wissens-Updates' },
+  { type: 'application/rss+xml', url: '/feed/katalog.xml', title: 'Claimondo – Wissens-Katalog' },
   {
     type: 'application/feed+json',
     url: '/feed.json',
-    title: 'Claimondo — Aktuelle Wissens-Updates (JSON Feed)',
+    title: 'Claimondo – Aktuelle Wissens-Updates (JSON Feed)',
   },
   {
     type: 'application/feed+json',
     url: '/feed/katalog.json',
-    title: 'Claimondo — Wissens-Katalog (JSON Feed)',
+    title: 'Claimondo – Wissens-Katalog (JSON Feed)',
   },
 ]
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Claimondo — Ihr Kfz-Schaden, digital geregelt',
+    default: 'Claimondo – Ihr Kfz-Schaden, digital geregelt',
     template: '%s | Claimondo',
   },
   description:
@@ -94,14 +94,14 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: SITE_URL,
-    title: 'Claimondo — Ihr Kfz-Schaden, digital geregelt',
+    title: 'Claimondo – Ihr Kfz-Schaden, digital geregelt',
     description:
-      'Unabhängige Schadensregulierung nach Kfz-Unfällen. Gutachten, Anwalt, Werkstatt und Auszahlung — kostenlos für unverschuldet Geschädigte.',
+      'Unabhängige Schadensregulierung nach Kfz-Unfällen. Gutachten, Anwalt, Werkstatt und Auszahlung – kostenlos für unverschuldet Geschädigte.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Claimondo — Ihr Kfz-Schaden, digital geregelt',
+    title: 'Claimondo – Ihr Kfz-Schaden, digital geregelt',
     description: 'Unabhängige Schadensregulierung nach Kfz-Unfällen. 0 € für unverschuldet Geschädigte.',
     images: ['/og-default.png'],
   },

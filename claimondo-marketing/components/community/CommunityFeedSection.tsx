@@ -28,7 +28,7 @@ export async function CommunityFeedSection() {
               Aus der Community
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
-              Fachlicher Austausch für Sachverständige, Makler und Werkstätten — Wissen, Urteile,
+              Fachlicher Austausch für Sachverständige, Makler und Werkstätten – Wissen, Urteile,
               Praxistipps.
             </p>
           </div>

@@ -10,7 +10,7 @@ import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 export const metadata: Metadata = {
   title: 'Impressum',
   description:
-    'Impressum von Claimondo — Anbieterkennzeichnung nach § 5 DDG mit Anschrift, Vertretungsberechtigten und Kontaktdaten.',
+    'Impressum von Claimondo – Anbieterkennzeichnung nach § 5 DDG mit Anschrift, Vertretungsberechtigten und Kontaktdaten.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
   alternates: { canonical: '/impressum' },

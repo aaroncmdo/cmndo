@@ -17,12 +17,12 @@ customer_questions:
   - "muss ich beweisen dass ich nicht schuld bin"
   - "welche beweise versicherung autounfall"
 last_modified: 2026-05-18
-excerpt: Im Zivilprozess trägt jede Partei die Beweislast für die ihr günstigen Tatsachen. Beim Verkehrsunfall beweist der Geschädigte Unfall, Schadenshöhe und Kausalität — der Versicherer muss behauptetes Mitverschulden und Schadensminderungsverstöße beweisen. In Anscheinsbeweis-Konstellationen ist die Beweislast zugunsten des Geschädigten verlagert. Die ersten 48 Stunden nach Unfall sind für die Beweissicherung entscheidend.
+excerpt: Im Zivilprozess trägt jede Partei die Beweislast für die ihr günstigen Tatsachen. Beim Verkehrsunfall beweist der Geschädigte Unfall, Schadenshöhe und Kausalität – der Versicherer muss behauptetes Mitverschulden und Schadensminderungsverstöße beweisen. In Anscheinsbeweis-Konstellationen ist die Beweislast zugunsten des Geschädigten verlagert. Die ersten 48 Stunden nach Unfall sind für die Beweissicherung entscheidend.
 keyFacts:
-  - § 286 ZPO — volle richterliche Überzeugung für anspruchsbegründende Tatsachen
-  - § 287 ZPO — erleichtertes Beweismaß für die Schadenshöhe (richterliche Schätzung)
-  - Mitverschulden § 254 BGB — Beweislast liegt beim Versicherer
-  - BGH VI ZR 233/17 — Dashcam-Aufnahmen als Beweis gerichtlich verwertbar
+  - § 286 ZPO – volle richterliche Überzeugung für anspruchsbegründende Tatsachen
+  - § 287 ZPO – erleichtertes Beweismaß für die Schadenshöhe (richterliche Schätzung)
+  - Mitverschulden § 254 BGB – Beweislast liegt beim Versicherer
+  - BGH VI ZR 233/17 – Dashcam-Aufnahmen als Beweis gerichtlich verwertbar
   - 48 Stunden kritisches Zeitfenster für Polizeibericht, Fotos, Zeugen-Adressen
 last_legal_review: pending
 related:
@@ -32,9 +32,9 @@ related:
 meta_description: "Beweislast im Verkehrsunfall: Sie beweisen Unfall, Schaden und Kausalität (§286 ZPO), der Versicherer das Mitverschulden (§254 BGB). Wer was tragen muss."
 ---
 
-# Beweislast im Verkehrsunfall — wer muss was beweisen
+# Beweislast im Verkehrsunfall – wer muss was beweisen
 
-> **Kurz erklärt:** Im Zivilprozess gilt: Jede Seite muss die für ihre Position günstigen Tatsachen beweisen. Für deine Schadensregulierung heißt das: Du beweist Unfall und Schadenshöhe — der Versicherer beweist behauptete Mitverschuldens-Anteile. In Anscheinsbeweis-Konstellationen ist die Beweis-Last sogar **zu deinen Gunsten** verlagert. Die saubere Beweissicherung in den ersten 48 Stunden nach Unfall entscheidet oft den späteren Streit.
+> **Kurz erklärt:** Im Zivilprozess gilt: Jede Seite muss die für ihre Position günstigen Tatsachen beweisen. Für deine Schadensregulierung heißt das: Du beweist Unfall und Schadenshöhe – der Versicherer beweist behauptete Mitverschuldens-Anteile. In Anscheinsbeweis-Konstellationen ist die Beweis-Last sogar **zu deinen Gunsten** verlagert. Die saubere Beweissicherung in den ersten 48 Stunden nach Unfall entscheidet oft den späteren Streit.
 
 ## Auch bekannt als
 
@@ -44,11 +44,11 @@ Beweispflicht · Beweisverteilung · Onus probandi · Beweisrisiko
 
 ## In einem Satz erklärt
 
-Beweislast bedeutet: Wer eine ihm günstige Tatsache behauptet, muss sie auch beweisen — sonst hat das Gericht von ihrem Gegenteil auszugehen.
+Beweislast bedeutet: Wer eine ihm günstige Tatsache behauptet, muss sie auch beweisen – sonst hat das Gericht von ihrem Gegenteil auszugehen.
 
 ## In drei Sätzen erklärt
 
-Im Schadensersatzprozess nach Verkehrsunfall trägt jede Partei die Beweislast für die ihr günstigen Tatsachen: der Geschädigte beweist Unfall-Geschehen und Schadenshöhe, der Versicherer beweist behauptete Mitverschuldens-Anteile oder Schadensminderungs-Verstöße. Bei typisierten Konstellationen ([Anscheinsbeweis](/haftpflicht/anscheinsbeweis)) ist die Beweis-Last umgekehrt — du musst nichts beweisen, der Gegner muss konkret erschüttern. Praktisch entscheidet die **Qualität der frühen Beweissicherung** (Polizeibericht, Zeugen, Fotos, Atteste) oft, wer am Ende durchsetzt — gut dokumentierte Sachverhalte werden in der außergerichtlichen Korrespondenz seltener strittig.
+Im Schadensersatzprozess nach Verkehrsunfall trägt jede Partei die Beweislast für die ihr günstigen Tatsachen: der Geschädigte beweist Unfall-Geschehen und Schadenshöhe, der Versicherer beweist behauptete Mitverschuldens-Anteile oder Schadensminderungs-Verstöße. Bei typisierten Konstellationen ([Anscheinsbeweis](/haftpflicht/anscheinsbeweis)) ist die Beweis-Last umgekehrt – du musst nichts beweisen, der Gegner muss konkret erschüttern. Praktisch entscheidet die **Qualität der frühen Beweissicherung** (Polizeibericht, Zeugen, Fotos, Atteste) oft, wer am Ende durchsetzt – gut dokumentierte Sachverhalte werden in der außergerichtlichen Korrespondenz seltener strittig.
 
 ## Die fünf Schlüsselzahlen
 
@@ -60,7 +60,7 @@ Im Schadensersatzprozess nach Verkehrsunfall trägt jede Partei die Beweislast f
 
 ---
 
-## Wer muss was beweisen — die Grund-Struktur
+## Wer muss was beweisen – die Grund-Struktur
 
 | Position | Beweispflichtig | Typische Beweismittel |
 |---|---|---|
@@ -74,13 +74,13 @@ Im Schadensersatzprozess nach Verkehrsunfall trägt jede Partei die Beweislast f
 
 ---
 
-## Die zwei Beweismaße — § 286 vs. § 287 ZPO
+## Die zwei Beweismaße – § 286 vs. § 287 ZPO
 
-### § 286 ZPO — Strenge Überzeugung
-Für anspruchsbegründende Tatsachen (z. B. Hat der Gegner den Unfall verursacht?) braucht der Richter die volle Überzeugung — keine berechtigten Zweifel mehr.
+### § 286 ZPO – Strenge Überzeugung
+Für anspruchsbegründende Tatsachen (z. B. Hat der Gegner den Unfall verursacht?) braucht der Richter die volle Überzeugung – keine berechtigten Zweifel mehr.
 
-### § 287 ZPO — Erleichtertes Beweismaß für Schadenshöhe
-Für die **Höhe** des Schadens gilt erleichtert: Der Richter schätzt nach freier Überzeugung. Bedeutung: Auch bei nicht millimeter-genauer Berechnung kann ein Schaden zuerkannt werden — wichtig bei psychischen Folgen, chronischen Verläufen, Schmerzensgeld.
+### § 287 ZPO – Erleichtertes Beweismaß für Schadenshöhe
+Für die **Höhe** des Schadens gilt erleichtert: Der Richter schätzt nach freier Überzeugung. Bedeutung: Auch bei nicht millimeter-genauer Berechnung kann ein Schaden zuerkannt werden – wichtig bei psychischen Folgen, chronischen Verläufen, Schmerzensgeld.
 
 → Diese § 287-Regelung schlägt die Versicherer-Standard-Floskel *„nicht objektivierbar"* fast immer.
 
@@ -118,7 +118,7 @@ Hat der Unfall den behaupteten Schaden verursacht?
 **Beweismittel:**
 - Lückenlose Behandlungs-Kette (Hausarzt → Facharzt → ggf. Reha)
 - Sachverständigen-Gutachten (bei strittigen Schadens-Zuordnungen)
-- Vor-/Nach-Vergleich (z. B. Bandscheibenvorfall — frische STIR-Sequenz im MRT)
+- Vor-/Nach-Vergleich (z. B. Bandscheibenvorfall – frische STIR-Sequenz im MRT)
 
 ---
 
@@ -133,28 +133,28 @@ Will der Versicherer eine [Mitverschuldens-Quote](/haftpflicht/mitverschulden-bg
 Fehlt einer davon, ist die Quote unbegründet.
 
 ### 2. Schadensminderungs-Verstoß (§ 254 Abs. 2 BGB)
-Behauptet der Versicherer, du hättest den Schaden mindern können (z. B. zu lange Mietwagen-Anmietung, vernachlässigte Therapie), trägt er die Beweislast — was wäre die zumutbare Alternative gewesen, warum hast du sie nicht genutzt.
+Behauptet der Versicherer, du hättest den Schaden mindern können (z. B. zu lange Mietwagen-Anmietung, vernachlässigte Therapie), trägt er die Beweislast – was wäre die zumutbare Alternative gewesen, warum hast du sie nicht genutzt.
 
 ### 3. Entlastungsgründe (z. B. höhere Gewalt § 7 Abs. 2 StVG)
-Sehr selten erfolgreich — Wildunfälle oder unvermeidbare Wetter-Konstellationen werden im Verkehrsrecht eng ausgelegt.
+Sehr selten erfolgreich – Wildunfälle oder unvermeidbare Wetter-Konstellationen werden im Verkehrsrecht eng ausgelegt.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall sind kritisch — alles, was du dort nicht dokumentierst, lässt sich später schwer rekonstruieren.
+Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall sind kritisch – alles, was du dort nicht dokumentierst, lässt sich später schwer rekonstruieren.
 
 ### 🛠 Vier Schritte zur sauberen Beweissicherung
 
 **1. Vor Ort (binnen Minuten)**
 - Polizei rufen, sofern Pflicht (Verletzung, hoher Schaden, Strittigkeit)
 - Lichtbilder: Schäden, Endposition, Bremsspuren, Verkehrszeichen, Lichtverhältnisse, gegnerische Personalien
-- Zeugen ansprechen — Namen, Telefonnummern, Adresse
+- Zeugen ansprechen – Namen, Telefonnummern, Adresse
 - Unfall-Skizze
 
 **2. Am selben Tag (Stunden)**
-- Notaufnahme oder Hausarzt, **auch wenn du dich okay fühlst** — Adrenalin maskiert Schmerz
+- Notaufnahme oder Hausarzt, **auch wenn du dich okay fühlst** – Adrenalin maskiert Schmerz
 - Schaden-Anzeige an eigene Versicherung
 - Erstes Symptom-Tagebuch beginnen
 
@@ -172,7 +172,7 @@ Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall s
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Sie müssen das beweisen — wir gehen davon aus, dass…"*
+> *„Sie müssen das beweisen – wir gehen davon aus, dass…"*
 
 Bei Anscheinsbeweis-Konstellation: Beweis-Last beim Versicherer, nicht bei dir. Schriftlich darauf hinweisen.
 
@@ -182,43 +182,43 @@ Erleichtertes Beweismaß nach § 287 ZPO greift bei der Schadenshöhe. Pauschal-
 
 > *„Ihre Atteste sind nicht aussagekräftig genug."*
 
-Welche konkreten Befunde fehlen aus Sicht des Versicherers? Pauschal-Kritik nicht akzeptieren — sondern um konkrete Nachforderung bitten oder den Streit ins Gerichtsverfahren bringen (dort entscheidet ein Gerichts-Sachverständiger).
+Welche konkreten Befunde fehlen aus Sicht des Versicherers? Pauschal-Kritik nicht akzeptieren – sondern um konkrete Nachforderung bitten oder den Streit ins Gerichtsverfahren bringen (dort entscheidet ein Gerichts-Sachverständiger).
 
 ---
 
 ## Häufige Fragen
 
 **Wer muss beweisen, wer schuld ist?**
-In der Grundregel trägt der Geschädigte die Beweislast für das Verschulden des Gegners. In Anscheinsbeweis-Konstellationen (Auffahrunfall, Vorfahrt, Rotlicht) ist die Beweis-Last umgekehrt — der Gegner muss erschüttern.
+In der Grundregel trägt der Geschädigte die Beweislast für das Verschulden des Gegners. In Anscheinsbeweis-Konstellationen (Auffahrunfall, Vorfahrt, Rotlicht) ist die Beweis-Last umgekehrt – der Gegner muss erschüttern.
 
 **Was muss ich als Beweis vorlegen?**
 Polizeibericht, Sachverständigen-Gutachten, ärztliche Atteste, Lichtbilder, Zeugen-Adressen. Bei Personenschaden zusätzlich Krankschreibungen und Behandlungs-Belege.
 
 **Muss ich beweisen, dass ich nicht schuld bin?**
-Nein. Mitverschulden muss vom Versicherer bewiesen werden — du musst keine eigene Schuldfreiheit beweisen.
+Nein. Mitverschulden muss vom Versicherer bewiesen werden – du musst keine eigene Schuldfreiheit beweisen.
 
 **Was ist erleichtertes Beweismaß nach § 287 ZPO?**
-Für die Schadens**höhe** reicht eine Schätzung durch den Richter — vollständige Beweisführung wie für die Schadens**entstehung** ist nicht nötig. Wichtig bei chronischen Schmerzen, psychischen Folgen, Schmerzensgeld.
+Für die Schadens**höhe** reicht eine Schätzung durch den Richter – vollständige Beweisführung wie für die Schadens**entstehung** ist nicht nötig. Wichtig bei chronischen Schmerzen, psychischen Folgen, Schmerzensgeld.
 
 **Wie lange habe ich Zeit zur Beweissicherung?**
 Beweise verlieren laufend Beweis-Kraft. Die ersten 48 Stunden sind kritisch, die ersten 4 Wochen sehr wichtig. Spätere Rekonstruktion ist möglich, aber schwieriger.
 
 **Kann eine Dashcam-Aufnahme als Beweis dienen?**
-Ja, der BGH (VI ZR 233/17) hat Dashcam-Aufnahmen als gerichtlich verwertbar anerkannt — sofern datenschutzrechtlich vertretbar (Anlass-bezogen, nicht dauerhafte Vollaufnahme).
+Ja, der BGH (VI ZR 233/17) hat Dashcam-Aufnahmen als gerichtlich verwertbar anerkannt – sofern datenschutzrechtlich vertretbar (Anlass-bezogen, nicht dauerhafte Vollaufnahme).
 
 ---
 
 ## Verwandte Begriffe
 
-- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) — Beweis-Erleichterung in Standard-Fällen
-- [§ 254 BGB Mitverschulden](/haftpflicht/mitverschulden-bgb254) — Beweis-Last des Versicherers
-- [§ 823 BGB Deliktsanspruch](/haftpflicht/verschulden-bgb823) — Anspruchsgrundlage
+- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) – Beweis-Erleichterung in Standard-Fällen
+- [§ 254 BGB Mitverschulden](/haftpflicht/mitverschulden-bgb254) – Beweis-Last des Versicherers
+- [§ 823 BGB Deliktsanspruch](/haftpflicht/verschulden-bgb823) – Anspruchsgrundlage
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit kommt — gut dokumentierte Sachverhalte regulieren Versicherer schneller. Bei strittiger Beweislage helfen spezialisierte Verkehrsrechts-Anwälte, die Beweis-Strategie auf Klage-Festigkeit zu prüfen.
+Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit kommt – gut dokumentierte Sachverhalte regulieren Versicherer schneller. Bei strittiger Beweislage helfen spezialisierte Verkehrsrechts-Anwälte, die Beweis-Strategie auf Klage-Festigkeit zu prüfen.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -226,8 +226,8 @@ Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit 
 
 ## Quellen
 
-- Zivilprozessordnung §§ 286, 287 — [gesetze-im-internet.de/zpo](https://www.gesetze-im-internet.de/zpo/)
-- Bürgerliches Gesetzbuch § 254 — [gesetze-im-internet.de/bgb/__254.html](https://www.gesetze-im-internet.de/bgb/__254.html)
+- Zivilprozessordnung §§ 286, 287 – [gesetze-im-internet.de/zpo](https://www.gesetze-im-internet.de/zpo/)
+- Bürgerliches Gesetzbuch § 254 – [gesetze-im-internet.de/bgb/__254.html](https://www.gesetze-im-internet.de/bgb/__254.html)
 - BGH, Urteil vom 15.05.2018, VI ZR 233/17 (Dashcam-Beweis)
 - BGH, ständige Rechtsprechung zum Anscheinsbeweis
 - Hentschel/König/Dauer, Straßenverkehrsrecht
@@ -277,4 +277,4 @@ Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit 
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

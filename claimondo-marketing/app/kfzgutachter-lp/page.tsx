@@ -42,7 +42,7 @@ import {
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Kfz-Gutachter nach Unfall — unabhängig & kostenfrei | Claimondo',
+  title: 'Kfz-Gutachter nach Unfall – unabhängig & kostenfrei | Claimondo',
   description:
     'Unverschuldeter Unfall? Unabhängiger zertifizierter Kfz-Gutachter vor Ort in unter 48 Stunden. Anwaltlich durchgesetzt, 0 € für Unverschuldete (§249 BGB).',
   robots: { index: false, follow: false },
@@ -277,19 +277,19 @@ function WarumUnabhaengig() {
 const WAS_WIR: { titel: string; text: string }[] = [
   {
     titel: 'Wir vermitteln einen unabhängigen Kfz-Gutachter',
-    text: 'Ein zertifizierter Sachverständiger aus unserem NRW-Netzwerk besichtigt Ihr Fahrzeug vor Ort — meist am Folgetag, in unter 48 Stunden.',
+    text: 'Ein zertifizierter Sachverständiger aus unserem NRW-Netzwerk besichtigt Ihr Fahrzeug vor Ort – meist am Folgetag, in unter 48 Stunden.',
   },
   {
     titel: 'Wir übergeben Ihren Fall an unsere Partnerkanzlei für Verkehrsrecht',
-    text: 'Sobald das Gutachten erstellt ist, übernimmt unsere Partnerkanzlei die Kommunikation mit der gegnerischen Versicherung — vollständig und in Ihrem Namen.',
+    text: 'Sobald das Gutachten erstellt ist, übernimmt unsere Partnerkanzlei die Kommunikation mit der gegnerischen Versicherung – vollständig und in Ihrem Namen.',
   },
   {
     titel: 'Wir setzen alle Ansprüche durch',
-    text: 'Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld — auch wenn die Versicherung kürzt. Kürzungen holt unsere Kanzlei BGH-konform zurück.',
+    text: 'Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld – auch wenn die Versicherung kürzt. Kürzungen holt unsere Kanzlei BGH-konform zurück.',
   },
   {
     titel: 'Sie sehen live, was läuft',
-    text: 'In unserem Kundenportal verfolgen Sie jeden Schritt — vom Gutachter-Termin bis zur Auszahlung. Ø 32 Tage bis das Geld auf Ihrem Konto ist.',
+    text: 'In unserem Kundenportal verfolgen Sie jeden Schritt – vom Gutachter-Termin bis zur Auszahlung. Ø 32 Tage bis das Geld auf Ihrem Konto ist.',
   },
 ]
 
@@ -310,7 +310,7 @@ function WasWirMachen() {
           <p className="mt-3 text-[15px] leading-relaxed text-claimondo-shield">
             Wir disponieren den nächsten freien Gutachter, koordinieren Anwalt und
             Werkstatt und treiben die Versicherung BGH-konform in Verzug. Sie behalten
-            den Live-Status in der Tasche — wir telefonieren.
+            den Live-Status in der Tasche – wir telefonieren.
           </p>
           <ul className="mt-7 space-y-5">
             {WAS_WIR.map((step, i) => (
@@ -332,7 +332,7 @@ function WasWirMachen() {
           <div className="overflow-hidden rounded-ios-lg shadow-claimondo-lg">
             <Image
               src="/kfzgutachter-lp/berater.png"
-              alt="Claimondo-Berater am Telefon — persönlicher Ansprechpartner für Ihre Schadensregulierung"
+              alt="Claimondo-Berater am Telefon – persönlicher Ansprechpartner für Ihre Schadensregulierung"
               width={1536}
               height={1024}
               sizes="(min-width: 768px) 50vw, 100vw"
@@ -348,11 +348,11 @@ function WasWirMachen() {
 const NICHT_UNSERE_SACHE = [
   {
     titel: 'Wertgutachten für Verkauf / Versicherungsabschluss',
-    text: 'Wenn Sie Ihr Auto verkaufen oder eine neue Versicherung abschließen wollen — dafür sind wir nicht zuständig. Wir kümmern uns ausschließlich um Schadensgutachten nach Verkehrsunfällen.',
+    text: 'Wenn Sie Ihr Auto verkaufen oder eine neue Versicherung abschließen wollen – dafür sind wir nicht zuständig. Wir kümmern uns ausschließlich um Schadensgutachten nach Verkehrsunfällen.',
   },
   {
     titel: 'Selbstverschuldete Unfälle / Kasko-Schäden',
-    text: 'Bei selbstverschuldeten Unfällen über die eigene Vollkasko gibt es keinen Anspruch gegen einen gegnerischen Versicherer — unser Modell „0 € für Geschädigte” greift hier nicht.',
+    text: 'Bei selbstverschuldeten Unfällen über die eigene Vollkasko gibt es keinen Anspruch gegen einen gegnerischen Versicherer – unser Modell „0 € für Geschädigte” greift hier nicht.',
   },
   {
     titel: 'Bagatell-Schäden unter 750 €',
@@ -387,11 +387,11 @@ function WasIstNichtUnsereSache() {
 }
 
 const PROZESS = [
-  { nr: '1', titel: 'Schaden melden', text: 'Drei Felder, ohne Anmeldung — online oder telefonisch.' },
+  { nr: '1', titel: 'Schaden melden', text: 'Drei Felder, ohne Anmeldung – online oder telefonisch.' },
   { nr: '2', titel: 'Rückruf in Minuten', text: 'Ihr persönlicher Berater meldet sich in unter 15 Minuten.' },
-  { nr: '3', titel: 'Gutachter vor Ort', text: 'Kfz-Sachverständiger besichtigt in unter 48 Stunden — meist am Folgetag.' },
+  { nr: '3', titel: 'Gutachter vor Ort', text: 'Kfz-Sachverständiger besichtigt in unter 48 Stunden – meist am Folgetag.' },
   { nr: '4', titel: 'Anwalt setzt durch', text: 'Partnerkanzlei reguliert alle Ansprüche gegen die Versicherung.' },
-  { nr: '5', titel: 'Geld auf dem Konto', text: 'Im Schnitt nach 32 Tagen — live im Kundenportal verfolgbar.' },
+  { nr: '5', titel: 'Geld auf dem Konto', text: 'Im Schnitt nach 32 Tagen – live im Kundenportal verfolgbar.' },
 ]
 
 function Prozess() {
@@ -402,7 +402,7 @@ function Prozess() {
           className="text-balance text-2xl font-extrabold text-claimondo-navy sm:text-3xl"
           style={MONTSERRAT}
         >
-          Vom Unfall zur Auszahlung — in 5 Schritten
+          Vom Unfall zur Auszahlung – in 5 Schritten
         </h2>
         <ol className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {PROZESS.map((s) => (
@@ -437,21 +437,21 @@ const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; ic
     schritt: 1,
     titel: 'Gutachter-Termin',
     wert: '< 48 Stunden',
-    sub: 'Wir disponieren binnen Stunden — Termin meist am Folgetag.',
+    sub: 'Wir disponieren binnen Stunden – Termin meist am Folgetag.',
     icon: 'calendar',
   },
   {
     schritt: 2,
     titel: 'Geld auf dem Konto',
     wert: 'Ø 32 Tage',
-    sub: 'Reparatur, Wertminderung, Nutzungsausfall — wir verhandeln, die Gegenseite zahlt.',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall – wir verhandeln, die Gegenseite zahlt.',
     icon: 'euro',
   },
   {
     schritt: 3,
     titel: 'Alles im Portal',
     wert: 'Live',
-    sub: 'Ihr Fall im Handy — jeder Brief, jeder Anruf, jeder Cent.',
+    sub: 'Ihr Fall im Handy – jeder Brief, jeder Anruf, jeder Cent.',
     icon: 'eye',
   },
 ]
@@ -497,7 +497,7 @@ function NrwStandorte() {
         </h2>
         <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-claimondo-shield">
           100+ zertifizierte Sachverständige in Köln, Düsseldorf, Essen,
-          Dortmund und Bochum. Mobile Besichtigung kostenfrei — wir kommen zu
+          Dortmund und Bochum. Mobile Besichtigung kostenfrei – wir kommen zu
           Ihnen, kein Werkstatt-Termin, kein Anfahrtsweg.
         </p>
 
@@ -505,7 +505,7 @@ function NrwStandorte() {
         <div className="mt-7 overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg/40 shadow-claimondo-md sm:mt-10">
           <Image
             src="/kfzgutachter-lp/gutachter-handshake.png"
-            alt="Claimondo-Gutachter begrüßt Kunden vor Ort am Schaden-Fahrzeug — flächendeckend in NRW."
+            alt="Claimondo-Gutachter begrüßt Kunden vor Ort am Schaden-Fahrzeug – flächendeckend in NRW."
             width={1400}
             height={933}
             sizes="(min-width: 768px) 960px, 100vw"
@@ -558,7 +558,7 @@ function NrwStandorte() {
 const FAQS = [
   {
     q: 'Wer redet mit der Versicherung?',
-    a: 'Wir. Sie nicht. Unser Berater übernimmt die komplette Korrespondenz mit der gegnerischen Haftpflichtversicherung — schriftlich und telefonisch. Sie geben uns einmal die Eckdaten, dann führen wir das Gespräch. 60 % der Geschädigten verlieren Geld am Telefon mit der Versicherung. Mit uns nicht.',
+    a: 'Wir. Sie nicht. Unser Berater übernimmt die komplette Korrespondenz mit der gegnerischen Haftpflichtversicherung – schriftlich und telefonisch. Sie geben uns einmal die Eckdaten, dann führen wir das Gespräch. 60 % der Geschädigten verlieren Geld am Telefon mit der Versicherung. Mit uns nicht.',
   },
   {
     q: 'Was kostet ein Kfz-Gutachter nach einem Unfall?',
@@ -570,11 +570,11 @@ const FAQS = [
   },
   {
     q: 'Was ist eine Sicherungsabtretung?',
-    a: 'Sie treten den Anspruch in Höhe des Gutachterhonorars an den Sachverständigen ab — der rechnet anschließend direkt mit der gegnerischen Versicherung ab. Sie unterzeichnen einmal und zahlen nichts vor. Branchen-Standard bei unverschuldetem Unfall.',
+    a: 'Sie treten den Anspruch in Höhe des Gutachterhonorars an den Sachverständigen ab – der rechnet anschließend direkt mit der gegnerischen Versicherung ab. Sie unterzeichnen einmal und zahlen nichts vor. Branchen-Standard bei unverschuldetem Unfall.',
   },
   {
     q: 'Kann die Versicherung das Gutachten kürzen?',
-    a: 'Versicherer wie HUK, LVM oder AXA beauftragen Prüfdienstleister (ControlExpert, K-Expert, DEKRA) und kürzen häufig UPE-Aufschläge, Verbringungskosten und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten — unsere Partnerkanzlei holt die Kürzungen BGH-konform zurück.',
+    a: 'Versicherer wie HUK, LVM oder AXA beauftragen Prüfdienstleister (ControlExpert, K-Expert, DEKRA) und kürzen häufig UPE-Aufschläge, Verbringungskosten und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten – unsere Partnerkanzlei holt die Kürzungen BGH-konform zurück.',
   },
   {
     q: 'Wie viel Wertminderung bekomme ich?',
@@ -628,9 +628,9 @@ function CtaFooter() {
         />
         <div className="relative mx-auto max-w-2xl px-5">
           <h2 className="text-balance text-2xl font-bold sm:text-3xl" style={MONTSERRAT}>
-            Schaden gehabt? Wir reden mit der Versicherung — Sie atmen.
+            Schaden gehabt? Wir reden mit der Versicherung – Sie atmen.
           </h2>
-          <p className="mt-3 text-white/75">Rückruf in unter 15 Minuten — wir übernehmen ab da.</p>
+          <p className="mt-3 text-white/75">Rückruf in unter 15 Minuten – wir übernehmen ab da.</p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href="#lead-form"

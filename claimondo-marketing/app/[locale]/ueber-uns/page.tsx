@@ -85,9 +85,9 @@ export default async function UeberUnsPage() {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
     url: `${SITE_URL}/ueber-uns`,
-    name: 'Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln',
+    name: 'Über Claimondo – Digitale Kfz-Schadensregulierung aus Köln',
     description:
-      'Entitäts-Definition, Mission, Werte und Gründer-Profile von Claimondo — der digitalen Plattform für vollständige Kfz-Schadensregulierung nach §249 BGB.',
+      'Entitäts-Definition, Mission, Werte und Gründer-Profile von Claimondo – der digitalen Plattform für vollständige Kfz-Schadensregulierung nach §249 BGB.',
     primaryImageOfPage: {
       '@type': 'ImageObject',
       url: `${SITE_URL}/brand/team-founders.png`,
@@ -122,7 +122,7 @@ export default async function UeberUnsPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
+      {/* Hero – Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ueber-uns-hero">
         <div
           aria-hidden
@@ -170,7 +170,7 @@ export default async function UeberUnsPage() {
         )
       })()}
 
-      {/* ENTITÄTS-DEFINITION — die ersten 200 Wörter sind GEO-Gold */}
+      {/* ENTITÄTS-DEFINITION – die ersten 200 Wörter sind GEO-Gold */}
       <section className="relative pb-12 pt-4 sm:pb-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
@@ -212,7 +212,7 @@ export default async function UeberUnsPage() {
         </div>
       </section>
 
-      {/* Brand-Manifesto — kurz, prägnant, zitierfähig */}
+      {/* Brand-Manifesto – kurz, prägnant, zitierfähig */}
       <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-4xl px-5 sm:px-6">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
@@ -235,7 +235,7 @@ export default async function UeberUnsPage() {
         </div>
       </section>
 
-      {/* Werte — 4-Pillar */}
+      {/* Werte – 4-Pillar */}
       <section id="werte" className="py-12 sm:py-16">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
@@ -282,7 +282,7 @@ export default async function UeberUnsPage() {
           <div className="relative overflow-hidden rounded-ios-lg border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
             <Image
               src="/brand/team-founders.png"
-              alt="Aaron Sprafke (Geschäftsführer & COO, links) und Nicolas Kitta (Geschäftsführer & CEO, rechts) — die Gründer von Claimondo im Kölner Office"
+              alt="Aaron Sprafke (Geschäftsführer & COO, links) und Nicolas Kitta (Geschäftsführer & CEO, rechts) – die Gründer von Claimondo im Kölner Office"
               width={1600}
               height={800}
               className="h-auto w-full"

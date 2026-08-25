@@ -21,12 +21,12 @@ export function subject(p: Props) {
 
 export function DokumenteAnfrageEmail({ vorname, slots, uploadUrl, brand }: Props) {
   return (
-    <EmailLayout preview={`Claimondo benötigt noch Unterlagen von Ihnen — Jetzt hochladen`} brand={brand}>
+    <EmailLayout preview={`Claimondo benötigt noch Unterlagen von Ihnen – Jetzt hochladen`} brand={brand}>
       <Heading brand={brand}>Hallo {vorname},</Heading>
 
       <Paragraph>
         für die Bearbeitung Ihres Schadenfalls benötigen wir noch folgende Unterlagen von Ihnen.
-        Bitte laden Sie diese über den sicheren Link am Ende dieser E-Mail hoch — das dauert nur wenige Minuten.
+        Bitte laden Sie diese über den sicheren Link am Ende dieser E-Mail hoch – das dauert nur wenige Minuten.
       </Paragraph>
 
       {/* Dokument-Liste */}

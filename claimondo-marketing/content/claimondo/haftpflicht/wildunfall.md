@@ -15,9 +15,9 @@ customer_questions:
   - "wildunfall teilkasko oder vollkasko"
   - "wildunfall bescheinigung jäger"
 last_modified: 2026-05-18
-excerpt: Ein Wildunfall ist kein Haftpflichtfall — der Schaden wird ausschließlich über die eigene Teil- oder Vollkaskoversicherung abgerechnet, sofern vorhanden. Ohne Kasko trägt der Fahrer den Schaden selbst. Voraussetzung für die Kaskoerstattung ist eine Wildunfall-Bescheinigung durch Polizei oder Jagdpächter; bei ausgebrochenem Haustier haftet der Tierhalter nach § 833 BGB.
+excerpt: Ein Wildunfall ist kein Haftpflichtfall – der Schaden wird ausschließlich über die eigene Teil- oder Vollkaskoversicherung abgerechnet, sofern vorhanden. Ohne Kasko trägt der Fahrer den Schaden selbst. Voraussetzung für die Kaskoerstattung ist eine Wildunfall-Bescheinigung durch Polizei oder Jagdpächter; bei ausgebrochenem Haustier haftet der Tierhalter nach § 833 BGB.
 keyFacts:
-  - Kein Haftpflichtfall — kein klassischer Schädiger vorhanden
+  - Kein Haftpflichtfall – kein klassischer Schädiger vorhanden
   - Erstattung über eigene Teilkasko oder Vollkasko (abzüglich Selbstbeteiligung)
   - Ohne Kasko: Geschädigter trägt Schaden vollständig selbst
   - Wildunfall-Bescheinigung (Polizei oder Jagdpächter) zwingend für Kaskoerstattung
@@ -25,12 +25,12 @@ keyFacts:
 related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/kasko-versicherung
-meta_description: "Wildunfall: kein Haftpflichtfall — der Schaden läuft über Ihre Teil- oder Vollkasko abzüglich Selbstbeteiligung. Ohne Kasko tragen Sie ihn selbst."
+meta_description: "Wildunfall: kein Haftpflichtfall – der Schaden läuft über Ihre Teil- oder Vollkasko abzüglich Selbstbeteiligung. Ohne Kasko tragen Sie ihn selbst."
 ---
 
-# Wildunfall — wer zahlt, was zu tun ist
+# Wildunfall – wer zahlt, was zu tun ist
 
-> **Kurz erklärt:** Ein Wildunfall (Kollision mit Reh, Wildschwein, Hirsch etc.) ist **kein Haftpflicht-Fall** — es gibt keinen Schädiger im klassischen Sinn. Erstattet wird der Schaden durch die **eigene Teilkasko-** oder **Vollkasko-Versicherung**, sofern abgeschlossen. Voraussetzung: **Wildunfall-Bescheinigung** durch Polizei oder Jagdpächter. Ausschluss „höhere Gewalt" nach § 7 Abs. 2 StVG greift in Sonderfällen — meist aber regulär ein Eigen-Kasko-Schaden.
+> **Kurz erklärt:** Ein Wildunfall (Kollision mit Reh, Wildschwein, Hirsch etc.) ist **kein Haftpflicht-Fall** – es gibt keinen Schädiger im klassischen Sinn. Erstattet wird der Schaden durch die **eigene Teilkasko-** oder **Vollkasko-Versicherung**, sofern abgeschlossen. Voraussetzung: **Wildunfall-Bescheinigung** durch Polizei oder Jagdpächter. Ausschluss „höhere Gewalt" nach § 7 Abs. 2 StVG greift in Sonderfällen – meist aber regulär ein Eigen-Kasko-Schaden.
 
 ## Auch bekannt als
 
@@ -42,13 +42,13 @@ Wildschaden · Wildtier-Kollision · Reh-Unfall · Wildschwein-Unfall
 |---|---|
 | **Teilkasko** abgeschlossen | Erstattung Sachschaden, abzüglich Selbstbeteiligung |
 | **Vollkasko** abgeschlossen | Wie Teilkasko + ggf. mehr |
-| **Nur Haftpflicht** | Kein Anspruch — Geschädigter trägt Schaden selbst |
+| **Nur Haftpflicht** | Kein Anspruch – Geschädigter trägt Schaden selbst |
 | Wildunfall durch ausgebrochene Haustiere (Hund, Pferd) | Halter haftet nach § 833 BGB |
 
 ## Was im Wildunfall zu tun ist
 
 1. **Anhalten und absichern** (Warnblinklicht, Warndreieck)
-2. **Polizei oder Jagdpächter** informieren — sie stellen die **Wildunfall-Bescheinigung** aus
+2. **Polizei oder Jagdpächter** informieren – sie stellen die **Wildunfall-Bescheinigung** aus
 3. **Foto-Dokumentation** Tier und Schaden
 4. **Niemals** das Tier mitnehmen oder vergraben (Strafbarkeit Jagd-Wilderei)
 5. **Eigene Versicherung** zeitnah informieren
@@ -57,13 +57,13 @@ Wildschaden · Wildtier-Kollision · Reh-Unfall · Wildschwein-Unfall
 ## Häufige Fragen
 
 **Zahlt die Haftpflicht beim Wildunfall?**
-Nein. Wildunfall ist klassisch ein eigener Kasko-Fall — die eigene Teil- oder Vollkasko zahlt.
+Nein. Wildunfall ist klassisch ein eigener Kasko-Fall – die eigene Teil- oder Vollkasko zahlt.
 
 **Was, wenn ich nur Haftpflicht habe?**
 Dann trägst du den Schaden selbst. Ausnahme: nachweisbare Fremdverursachung (z. B. ausgebrochenes Haustier eines Halters).
 
 **Brauche ich eine Wildunfall-Bescheinigung?**
-Ja. Polizei oder Jagdpächter stellen sie aus — Voraussetzung für Kasko-Erstattung.
+Ja. Polizei oder Jagdpächter stellen sie aus – Voraussetzung für Kasko-Erstattung.
 
 **Wer haftet bei ausgebrochenem Pferd / Hund?**
 Tier-Halter nach § 833 BGB. Anspruch direkt gegen Halter und seine Haftpflicht-Versicherung.
@@ -72,7 +72,7 @@ Tier-Halter nach § 833 BGB. Anspruch direkt gegen Halter und seine Haftpflicht-
 
 ## Verwandte Begriffe
 
-- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) — höhere Gewalt
+- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) – höhere Gewalt
 - [Kasko-Versicherung](/haftpflicht/kasko-versicherung)
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
@@ -127,4 +127,4 @@ Tier-Halter nach § 833 BGB. Anspruch direkt gegen Halter und seine Haftpflicht-
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

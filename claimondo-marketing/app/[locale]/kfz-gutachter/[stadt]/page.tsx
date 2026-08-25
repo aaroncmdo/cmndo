@@ -69,8 +69,8 @@ export const revalidate = 3600
 const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',         text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
   { nr: 2, titel: 'Berater meldet sich',    text: 'Persönlicher Rückruf in unter 15 Minuten.' },
-  { nr: 3, titel: 'Kfz-Gutachter vor Ort',  text: 'In unter 48 Stunden besichtigt — meist am Folgetag.' },
-  { nr: 4, titel: 'Anwalt aktiv',           text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.' },
+  { nr: 3, titel: 'Kfz-Gutachter vor Ort',  text: 'In unter 48 Stunden besichtigt – meist am Folgetag.' },
+  { nr: 4, titel: 'Anwalt aktiv',           text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch – auch gegen Kürzungen.' },
   { nr: 5, titel: 'Geld auf dem Konto',     text: 'Ø 32 Tage. Live im Portal verfolgbar.' },
 ] as const
 
@@ -102,15 +102,15 @@ export async function generateMetadata({
   // vollstaendig angezeigt wird. Die Kernaussage "kostenfrei" bleibt damit
   // ueberall erhalten — nur "nach Unfall" faellt bei den langen Namen weg.
   const title = titelMitZusatz(`Kfz-Gutachter ${s.name}`, [
-    ' — kostenfrei nach Unfall',
-    ' — kostenfrei',
+    ' – kostenfrei nach Unfall',
+    ' – kostenfrei',
     '',
   ])
 
   // Social-Vorschauen (Facebook/LinkedIn/WhatsApp) zeigen deutlich mehr Zeichen
   // als die Suchergebnisliste — dort bleibt die vollstaendige Aussage stehen,
   // auch bei langen Ortsnamen. Gleiches Muster wie in /wissen/[slug].
-  const ogTitle = `Kfz-Gutachter ${s.name} — kostenfrei nach Unfall`
+  const ogTitle = `Kfz-Gutachter ${s.name} – kostenfrei nach Unfall`
 
   // Die Beschreibung war bis 18.08.2026 fuer JEDE Stadt derselbe Satz mit
   // ausgetauschtem Ortsnamen — bei 173 Seiten ein Duplicate-Signal. Sie zog
@@ -156,27 +156,27 @@ function buildStadtFaq(s: Stadt, lokaleFaqs: LokaleFaq[] = []) {
     },
     {
       frage: `Wo finde ich einen unabhängigen Kfz-Sachverständigen ${s.h1Anker}?`,
-      antwort: `Claimondo vermittelt ${s.h1Anker} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
+      antwort: `Claimondo vermittelt ${s.h1Anker} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) – wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
     },
     {
       frage: `Welches Gericht ist bei Streitigkeiten zuständig ${s.h1Anker}?`,
-      antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist bis 5.000 € Streitwert das ${s.lokal.amtsgericht} erstinstanzlich zuständig, darüber das ${s.lokal.landgericht} (§ 23 Nr. 1 und § 71 Abs. 1 GVG). Die meisten Kürzungsstreitigkeiten — gekürzte Gutachterkosten, UPE-Aufschläge, Wertminderung, Nutzungsausfall — liegen unter dieser Grenze und werden daher vor dem Amtsgericht geführt. Kürzt eine Versicherung unrechtmäßig oder geht sie gerichtlich gegen ein Gutachten vor, klagt unsere Partnerkanzlei für Verkehrsrecht vor dem jeweils zuständigen Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
+      antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist bis 5.000 € Streitwert das ${s.lokal.amtsgericht} erstinstanzlich zuständig, darüber das ${s.lokal.landgericht} (§ 23 Nr. 1 und § 71 Abs. 1 GVG). Die meisten Kürzungsstreitigkeiten – gekürzte Gutachterkosten, UPE-Aufschläge, Wertminderung, Nutzungsausfall – liegen unter dieser Grenze und werden daher vor dem Amtsgericht geführt. Kürzt eine Versicherung unrechtmäßig oder geht sie gerichtlich gegen ein Gutachten vor, klagt unsere Partnerkanzlei für Verkehrsrecht vor dem jeweils zuständigen Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
     },
     {
       frage: 'Kann ich den Gutachter selbst wählen?',
-      antwort: 'Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung. Deren Angebot, einen eigenen Prüfer zu schicken, müssen Sie nicht annehmen: Ein von der Gegenseite beauftragter Gutachter arbeitet nicht in Ihrem Interesse.',
+      antwort: 'Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen – nicht die gegnerische Versicherung. Deren Angebot, einen eigenen Prüfer zu schicken, müssen Sie nicht annehmen: Ein von der Gegenseite beauftragter Gutachter arbeitet nicht in Ihrem Interesse.',
     },
     {
       frage: 'Reicht ein Kostenvoranschlag der Werkstatt?',
-      antwort: 'Unter etwa 750 € Schaden ja — das ist der Bagatellbereich. Darüber nicht: Ein Kostenvoranschlag beziffert allein die Reparatur. Wertminderung, Nutzungsausfall, Wiederbeschaffungs- und Restwert fehlen darin, und genau diese Positionen machen einen erheblichen Teil der Entschädigung aus.',
+      antwort: 'Unter etwa 750 € Schaden ja – das ist der Bagatellbereich. Darüber nicht: Ein Kostenvoranschlag beziffert allein die Reparatur. Wertminderung, Nutzungsausfall, Wiederbeschaffungs- und Restwert fehlen darin, und genau diese Positionen machen einen erheblichen Teil der Entschädigung aus.',
     },
     {
       frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
       antwort: 'Versicherer wie HUK, LVM und AXA kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten. Unsere Partnerkanzlei holt die Kürzungen vollständig zurück.',
     },
     {
-      frage: 'Was ist eine Sicherungsabtretung — und ist sie sicher?',
-      antwort: 'Bei der Sicherungsabtretung gemäß §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet anschließend direkt mit der Versicherung ab. Sie zahlen keinen Cent vor. Branchen-Standard.',
+      frage: 'Was ist eine Sicherungsabtretung – und ist sie sicher?',
+      antwort: 'Bei der Sicherungsabtretung gemäß §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal – der Gutachter rechnet anschließend direkt mit der Versicherung ab. Sie zahlen keinen Cent vor. Branchen-Standard.',
     },
     {
       frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
@@ -184,15 +184,15 @@ function buildStadtFaq(s: Stadt, lokaleFaqs: LokaleFaq[] = []) {
     },
     {
       frage: 'Bekomme ich nach dem Unfall einen Mietwagen?',
-      antwort: 'Bei unverschuldetem Unfall ja — die gegnerische Haftpflicht trägt nach § 249 BGB einen Mietwagen vergleichbarer Klasse für die Dauer der Reparatur oder Wiederbeschaffung. Alternativ zahlt sie Nutzungsausfall in bar, gestaffelt nach Fahrzeuggruppe und Ausfalltagen. Wer wenig fährt, fährt mit der Barzahlung häufig besser.',
+      antwort: 'Bei unverschuldetem Unfall ja – die gegnerische Haftpflicht trägt nach § 249 BGB einen Mietwagen vergleichbarer Klasse für die Dauer der Reparatur oder Wiederbeschaffung. Alternativ zahlt sie Nutzungsausfall in bar, gestaffelt nach Fahrzeuggruppe und Ausfalltagen. Wer wenig fährt, fährt mit der Barzahlung häufig besser.',
     },
     {
       frage: 'Darf ich meine Werkstatt frei wählen?',
-      antwort: 'Ja, die freie Werkstattwahl bleibt bestehen. Die gegnerische Versicherung darf Sie nicht auf eine Partnerwerkstatt verweisen, wenn Sie in einer markengebundenen Fachwerkstatt reparieren lassen wollen — das gilt besonders bei jungen oder scheckheftgepflegten Fahrzeugen.',
+      antwort: 'Ja, die freie Werkstattwahl bleibt bestehen. Die gegnerische Versicherung darf Sie nicht auf eine Partnerwerkstatt verweisen, wenn Sie in einer markengebundenen Fachwerkstatt reparieren lassen wollen – das gilt besonders bei jungen oder scheckheftgepflegten Fahrzeugen.',
     },
     {
       frage: 'Was bedeutet die 130%-Regel beim Totalschaden?',
-      antwort: 'Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.',
+      antwort: 'Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes – sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.',
     },
   ]
   // Lokale FAQ anhängen — fließen in Akkordeon + FAQPage-Schema. Quelle sind
@@ -319,7 +319,7 @@ export default async function KfzGutachterStadtPage({
             '@context': 'https://schema.org',
             '@type': 'HowTo',
             name: `Schaden ${s.h1Anker} melden und Geld erhalten`,
-            description: `In fünf Schritten vom unverschuldeten Unfall ${s.h1Anker} zur Auszahlung — durchschnittlich 32 Tage, ohne Eigenanteil.`,
+            description: `In fünf Schritten vom unverschuldeten Unfall ${s.h1Anker} zur Auszahlung – durchschnittlich 32 Tage, ohne Eigenanteil.`,
             totalTime: 'P32D',
             step: PROZESS_STEPS.map((p) => ({ '@type': 'HowToStep', position: p.nr, name: p.titel, text: p.text })),
           },
@@ -350,7 +350,7 @@ export default async function KfzGutachterStadtPage({
           NRW-Default statt in die Stadt, aus der der Klick kommt. */}
       <LandingTopbar authenticatedUser={null} finderHref={finderHrefFuerStadt(s)} />
 
-      {/* 1 — Hero Image Band */}
+      {/* 1 – Hero Image Band */}
       <section className="relative h-[280px] overflow-hidden sm:h-[360px]">
         <Image
           src="/marketing-landing-koeln/hero-woman.png"
@@ -373,7 +373,7 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 2 — Hero + Lead-Form */}
+      {/* 2 – Hero + Lead-Form */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="hero-heading">
         <div
           aria-hidden
@@ -447,7 +447,7 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 3 — Trust-Strip */}
+      {/* 3 – Trust-Strip */}
       <TrustStripSection kpis={trustKpis} methodikNote={t('trust_methodik')} />
 
       {/* 3b — Naechster buchbarer Termin (server-gerendert = fuer Crawler UND LLMs lesbar).
@@ -460,7 +460,7 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 4 — Lokal-Block (stadt-spezifische Anker) */}
+      {/* 4 – Lokal-Block (stadt-spezifische Anker) */}
       <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="lokal-heading">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
@@ -776,7 +776,7 @@ export default async function KfzGutachterStadtPage({
         </section>
       )}
 
-      {/* 4d — Hyperlokal: Praktische Hilfe nach dem Unfall (öffentliche Stellen, Doc 38 §6.5) */}
+      {/* 4d – Hyperlokal: Praktische Hilfe nach dem Unfall (öffentliche Stellen, Doc 38 §6.5) */}
       {s.hyperlocal?.oeffentlicheStellen && (
         <section className="bg-white py-16 sm:py-20" aria-labelledby="hilfe-stadt-heading">
           <div className="mx-auto max-w-4xl px-5">
@@ -875,7 +875,7 @@ export default async function KfzGutachterStadtPage({
         )
       })()}
 
-      {/* 4e — Spoke-Town: Anbindung an die Hub-City (Doc 38 P5, minimal-unique) */}
+      {/* 4e – Spoke-Town: Anbindung an die Hub-City (Doc 38 P5, minimal-unique) */}
       {s.spokeLocal && (
         <section className="bg-white py-16 sm:py-20" aria-labelledby="spoke-stadt-heading">
           <div className="mx-auto max-w-3xl px-5">
@@ -966,16 +966,16 @@ export default async function KfzGutachterStadtPage({
         </section>
       )}
 
-      {/* 5 — BGH-Authority */}
+      {/* 5 – BGH-Authority */}
       <BghAuthorityGrid
         headingId="bgh-stadt-heading"
         subline={t('bgh_subline', { ort })}
       />
 
-      {/* 5b — Portal-Mockup (Wie Uber) */}
+      {/* 5b – Portal-Mockup (Wie Uber) */}
       <PortalMockupSection />
 
-      {/* 6 — Prozess */}
+      {/* 6 – Prozess */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="prozess-stadt-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -1043,7 +1043,7 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 7 — Einsatzgebiet / Cross-City */}
+      {/* 7 – Einsatzgebiet / Cross-City */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="einsatzgebiet-stadt-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -1067,7 +1067,7 @@ export default async function KfzGutachterStadtPage({
               <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
                 <Image
                   src="/marketing-landing-koeln/nrw-karte.png"
-                  alt="Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, deutschlandweite Anbindung"
+                  alt="Claimondo Einsatzgebiet – Schwerpunkt Nordrhein-Westfalen, deutschlandweite Anbindung"
                   width={900} height={650}
                   className="h-auto w-full"
                 />
@@ -1099,10 +1099,10 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 7c — Gründer Trust-Anker */}
+      {/* 7c – Gründer Trust-Anker */}
       <FounderSection />
 
-      {/* 8 — FAQ */}
+      {/* 8 – FAQ */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="faq-stadt-heading">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
@@ -1130,7 +1130,7 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 9 — Bottom CTA */}
+      {/* 9 – Bottom CTA */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden

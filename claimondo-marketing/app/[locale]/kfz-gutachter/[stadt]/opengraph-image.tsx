@@ -16,7 +16,7 @@ export const runtime = 'nodejs' // Karte-API-Fetch + Buffer fuer data-URI
 export const dynamic = 'force-dynamic'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
-export const alt = 'Kfz-Gutachter in Ihrer Stadt — Claimondo'
+export const alt = 'Kfz-Gutachter in Ihrer Stadt – Claimondo'
 
 const NAVY = '#0D1B3E'
 const NAVY2 = '#15264f'

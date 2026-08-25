@@ -30,7 +30,7 @@ export function MaklerHubLanding({
           Makler-Attribution (promotion_code_id -> Provision) geht verloren. */}
       <LandingTopbar authenticatedUser={null} finderHref={finderHref} />
 
-      {/* ─── HERO — cinematic navy, Makler als Partner ─── */}
+      {/* ─── HERO – cinematic navy, Makler als Partner ─── */}
       <section className="relative isolate flex min-h-[38rem] items-center overflow-hidden bg-claimondo-navy text-white md:min-h-[min(80vh,46rem)]">
         <div
           aria-hidden
@@ -62,7 +62,7 @@ export function MaklerHubLanding({
             {firma} arbeitet mit <strong className="font-semibold text-white">Claimondo</strong>,
             Deutschlands Plattform für die Kfz-Schadenregulierung. Unverschuldet? Dann ist die
             komplette Abwicklung für Sie <strong className="font-semibold text-white">kostenlos</strong>{' '}
-            — § 249 BGB.
+            – § 249 BGB.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             {/* Primaer-CTA: bewusst Weiss-auf-Navy (max. Kontrast) + groesser/fetter — er muss
@@ -107,9 +107,9 @@ export function MaklerHubLanding({
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
             {firma} ist Ihr vertrauter Ansprechpartner rund um Versicherungen. Für die Kfz-
             Schadenregulierung setzt {firma} auf <strong className="text-claimondo-navy">Claimondo</strong>{' '}
-            — den spezialisierten Partner. So haben Sie nach dem Unfall Ihren Berater <em>und</em> ein
+            – den spezialisierten Partner. So haben Sie nach dem Unfall Ihren Berater <em>und</em> ein
             eingespieltes Experten-Team an Ihrer Seite: unabhängiger Gutachter, Partnerkanzlei für
-            Verkehrsrecht, digitale Abwicklung — alles aus einer Hand.
+            Verkehrsrecht, digitale Abwicklung – alles aus einer Hand.
           </p>
           <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">
             <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-5">
@@ -124,17 +124,17 @@ export function MaklerHubLanding({
             <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-5">
               <Scale className="h-6 w-6 text-claimondo-ondo" aria-hidden />
               <h3 className="mt-3 text-base font-bold text-claimondo-navy">
-                Ihr gutes Recht — durchgesetzt
+                Ihr gutes Recht – durchgesetzt
               </h3>
               <p className="mt-1 text-sm text-claimondo-ondo">
-                Unverschuldet zahlen Sie 0 € — die Gegnerseite trägt Gutachter, Anwalt &amp; Reparatur.
+                Unverschuldet zahlen Sie 0 € – die Gegnerseite trägt Gutachter, Anwalt &amp; Reparatur.
               </p>
             </div>
             <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-5">
               <ShieldCheck className="h-6 w-6 text-claimondo-ondo" aria-hidden />
               <h3 className="mt-3 text-base font-bold text-claimondo-navy">Neutral &amp; unabhängig</h3>
               <p className="mt-1 text-sm text-claimondo-ondo">
-                Ihr Gutachter arbeitet für Sie — nicht für die Versicherung des Unfallgegners.
+                Ihr Gutachter arbeitet für Sie – nicht für die Versicherung des Unfallgegners.
               </p>
             </div>
           </div>
@@ -182,7 +182,7 @@ export function MaklerHubLanding({
       {/* ─── Rechtswissen: BGH stützt Ihre Ansprüche ─── */}
       <BghAuthorityGrid
         headline="Ihre Rechte nach dem unverschuldeten Unfall"
-        subline="Der BGH stützt jeden dieser Ansprüche — Claimondo setzt sie für Sie durch."
+        subline="Der BGH stützt jeden dieser Ansprüche – Claimondo setzt sie für Sie durch."
       />
 
       {/* ─── Service: was Claimondo für Sie übernimmt ─── */}
@@ -204,7 +204,7 @@ export function MaklerHubLanding({
             {firma} und Claimondo kümmern sich.
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-white/80">
-            Starten Sie jetzt — kostenlos und unverbindlich.
+            Starten Sie jetzt – kostenlos und unverbindlich.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
@@ -236,19 +236,19 @@ function FaqMakler({ firma }: { firma: string }) {
   const faqs = [
     {
       q: 'Kostet mich die Schadenregulierung etwas?',
-      a: 'Bei einem unverschuldeten Unfall zahlen Sie 0 € — Gutachter, Reparatur und Anwalt trägt die gegnerische Haftpflichtversicherung (§ 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+      a: 'Bei einem unverschuldeten Unfall zahlen Sie 0 € – Gutachter, Reparatur und Anwalt trägt die gegnerische Haftpflichtversicherung (§ 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
     },
     {
       q: 'Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?',
-      a: 'Nein. Sie haben die freie Wahl des Kfz-Sachverständigen (§ 249 BGB, BGH VI ZR 67/06). Ein unabhängiger Gutachter arbeitet für Sie — nicht für die Versicherung des Unfallgegners.',
+      a: 'Nein. Sie haben die freie Wahl des Kfz-Sachverständigen (§ 249 BGB, BGH VI ZR 67/06). Ein unabhängiger Gutachter arbeitet für Sie – nicht für die Versicherung des Unfallgegners.',
     },
     {
       q: 'Was hat mein Makler mit Claimondo zu tun?',
-      a: `${firma} ist Ihr vertrauter Ansprechpartner für Versicherungen und hat Sie an Claimondo empfohlen — den spezialisierten Partner für die Kfz-Schadenregulierung. Ihr Makler bleibt an Ihrer Seite, Claimondo übernimmt die Abwicklung.`,
+      a: `${firma} ist Ihr vertrauter Ansprechpartner für Versicherungen und hat Sie an Claimondo empfohlen – den spezialisierten Partner für die Kfz-Schadenregulierung. Ihr Makler bleibt an Ihrer Seite, Claimondo übernimmt die Abwicklung.`,
     },
     {
       q: 'Wer kümmert sich um den rechtlichen Teil?',
-      a: 'Die rechtliche Durchsetzung übernimmt unsere Partnerkanzlei für Verkehrsrecht. Claimondo koordiniert den gesamten Ablauf für Sie — von der Gutachtenbeauftragung bis zur Auszahlung.',
+      a: 'Die rechtliche Durchsetzung übernimmt unsere Partnerkanzlei für Verkehrsrecht. Claimondo koordiniert den gesamten Ablauf für Sie – von der Gutachtenbeauftragung bis zur Auszahlung.',
     },
   ]
   return (

@@ -45,7 +45,7 @@ const FAQS = [
   {
     frage: 'Heißt es Kfz-Sachverständiger oder Kfz-Gutachter?',
     antwort:
-      'Beides ist richtig — im Kfz-Schaden werden die Begriffe synonym verwendet. Weder »Sachverständiger« noch »Gutachter« ist als Berufsbezeichnung gesetzlich geschützt. Geregelt ist nur die Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine bestandene IHK-Sachkundeprüfung voraussetzt.',
+      'Beides ist richtig – im Kfz-Schaden werden die Begriffe synonym verwendet. Weder »Sachverständiger« noch »Gutachter« ist als Berufsbezeichnung gesetzlich geschützt. Geregelt ist nur die Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine bestandene IHK-Sachkundeprüfung voraussetzt.',
   },
   {
     frage: 'Brauche ich nach einem Unfall einen eigenen Gutachter?',
@@ -60,12 +60,12 @@ const FAQS = [
   {
     frage: 'Darf die gegnerische Versicherung mir einen Gutachter vorschreiben?',
     antwort:
-      'Nein. Sie haben das Recht auf freie Wahl Ihres Sachverständigen (BGH VI ZR 67/06). Bietet die gegnerische Versicherung einen »eigenen« Gutachter oder eine »kostenlose« Schadensabwicklung an, ist das Schadensteuerung in ihrem Interesse — Sie dürfen das ablehnen und einen unabhängigen Sachverständigen beauftragen.',
+      'Nein. Sie haben das Recht auf freie Wahl Ihres Sachverständigen (BGH VI ZR 67/06). Bietet die gegnerische Versicherung einen »eigenen« Gutachter oder eine »kostenlose« Schadensabwicklung an, ist das Schadensteuerung in ihrem Interesse – Sie dürfen das ablehnen und einen unabhängigen Sachverständigen beauftragen.',
   },
   {
     frage: 'Worauf sollte ich bei der Auswahl achten?',
     antwort:
-      'Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden.',
+      'Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe – Termin in der Regel unter 48 Stunden.',
   },
 ]
 

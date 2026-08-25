@@ -100,7 +100,7 @@ export default function ErsteinschaetzungPage() {
       />
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — Navy Premium-Pattern */}
+      {/* Hero – Navy Premium-Pattern */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ee-hero">
         <div
           aria-hidden

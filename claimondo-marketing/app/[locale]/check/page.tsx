@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/check`)),
       title: t('check.title'),
       description: t('check.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kostenlose Anspruchs-Prüfung — Claimondo' }],
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kostenlose Anspruchs-Prüfung – Claimondo' }],
     },
     twitter: {
       card: 'summary_large_image',

@@ -13,13 +13,13 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Zahlung eingegangen — Rechnung ${p.rechnungsnummer}`
+  return `Zahlung eingegangen – Rechnung ${p.rechnungsnummer}`
 }
 
 export function KanzleiZahlungBestaetigungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Zahlung ${props.brutto} eingegangen — ${props.rechnungsnummer}`}>
-      <Heading>Zahlung eingegangen — Vielen Dank!</Heading>
+    <EmailLayout preview={`Zahlung ${props.brutto} eingegangen – ${props.rechnungsnummer}`}>
+      <Heading>Zahlung eingegangen – Vielen Dank!</Heading>
 
       <Paragraph>
         Hallo {props.ansprechpartner},

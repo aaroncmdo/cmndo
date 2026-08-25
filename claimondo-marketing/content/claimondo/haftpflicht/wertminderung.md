@@ -10,7 +10,7 @@ primary_keyword: "wertminderung autounfall berechnen"
 secondary_keywords: ["merkantile wertminderung", "ruhkopf sahm methode", "halbgewachs höning wertminderung", "wertminderung tabelle"]
 insurer_phrases:
   - "Bei diesem Fahrzeugalter keine Wertminderung"
-  - "Bagatell-Schaden — keine Wertminderung"
+  - "Bagatell-Schaden – keine Wertminderung"
 customer_questions:
   - "wie hoch wertminderung berechnen"
   - "wertminderung bei altem auto"
@@ -19,9 +19,9 @@ customer_questions:
 last_modified: 2026-05-18
 excerpt: Die merkantile Wertminderung ist der Verkaufswert-Verlust eines reparierten Unfallfahrzeugs auf dem Gebrauchtwagenmarkt und wird zusätzlich zu den Reparaturkosten nach § 249 BGB erstattet. Berechnung durch Sachverständige nach Ruhkopf-Sahm, Halbgewachs-Höning, MFM oder Berens-Hettberg-Strunk; typische Spannen: 200–700 € bei Mittelschäden, bis 5.000 € bei Schwerschäden.
 keyFacts:
-  - § 249 BGB — eigenständige Schadensposition neben Reparaturkosten
+  - § 249 BGB – eigenständige Schadensposition neben Reparaturkosten
   - 4 anerkannte Methoden: Ruhkopf-Sahm, Halbgewachs-Höning, MFM, Berens-Hettberg-Strunk
-  - BGH VI ZR 357/03 — Grundsatzurteil zur merkantilen Wertminderung
+  - BGH VI ZR 357/03 – Grundsatzurteil zur merkantilen Wertminderung
   - Bagatellgrenze typisch 1.500 € Reparaturkosten
   - „5 Jahre/100.000 km"-Faustregel ist keine bindende BGH-Linie
 last_legal_review: pending
@@ -30,12 +30,12 @@ related:
   - /haftpflicht/wiederbeschaffungswert
   - /haftpflicht/sv-kosten
   - /decoder/wertminderung-nicht
-meta_description: "Wertminderung: der merkantile Wertverlust trotz Reparatur — eigenständig erstattbar nach §249 BGB (BGH VI ZR 357/03). So wird sie korrekt berechnet."
+meta_description: "Wertminderung: der merkantile Wertverlust trotz Reparatur – eigenständig erstattbar nach §249 BGB (BGH VI ZR 357/03). So wird sie korrekt berechnet."
 ---
 
-# Wertminderung beim Autounfall — Definition, Methoden, Berechnung
+# Wertminderung beim Autounfall – Definition, Methoden, Berechnung
 
-> **Kurz erklärt:** Die merkantile Wertminderung ist der Wertverlust eines reparierten Fahrzeugs auf dem Gebrauchtwagen-Markt — auch bei vollständig sachgerechter Reparatur, weil das Fahrzeug nun als „Unfall-Wagen" gilt. Sie wird **zusätzlich** zu den Reparaturkosten erstattet (§ 249 BGB) und durch einen Sachverständigen nach anerkannten Methoden berechnet (Ruhkopf-Sahm, Halbgewachs-Höning, MFM, Berens-Hettberg-Strunk). Typische Spannen: 200–700 € bei Mittel-, 1.500–5.000 € bei Schwerschäden.
+> **Kurz erklärt:** Die merkantile Wertminderung ist der Wertverlust eines reparierten Fahrzeugs auf dem Gebrauchtwagen-Markt – auch bei vollständig sachgerechter Reparatur, weil das Fahrzeug nun als „Unfall-Wagen" gilt. Sie wird **zusätzlich** zu den Reparaturkosten erstattet (§ 249 BGB) und durch einen Sachverständigen nach anerkannten Methoden berechnet (Ruhkopf-Sahm, Halbgewachs-Höning, MFM, Berens-Hettberg-Strunk). Typische Spannen: 200–700 € bei Mittel-, 1.500–5.000 € bei Schwerschäden.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ Merkantile Wertminderung · Minderwert · Wertverlust nach Unfall · Mercantil-W
 
 ## In einem Satz erklärt
 
-Wertminderung ist der Verkaufswert-Verlust deines Fahrzeugs allein durch den Unfall — auch nach Reparatur — und eigenständige Schadensposition nach § 249 BGB.
+Wertminderung ist der Verkaufswert-Verlust deines Fahrzeugs allein durch den Unfall – auch nach Reparatur – und eigenständige Schadensposition nach § 249 BGB.
 
 ## In drei Sätzen erklärt
 
-Ein als „Unfall-Wagen" deklariertes Fahrzeug erzielt auf dem Gebrauchtwagen-Markt geringere Preise — dieser Wertverlust ist die **merkantile Wertminderung**, eigenständige Schadensposition nach § 249 BGB und in ständiger BGH-Rechtsprechung anerkannt. Berechnet wird sie durch einen unabhängigen Sachverständigen nach einer der vier anerkannten Methoden (Ruhkopf-Sahm, Halbgewachs-Höning, MFM Modifizierte Frankfurter Methode, Berens-Hettberg-Strunk) — die Wahl der Methode ist im Gutachten zu begründen. Die häufig zitierte Faustregel „ab 5 Jahre und 100.000 km keine Wertminderung" ist **keine bindende Grenze**, sondern Orientierung — Einzelfallprüfung entscheidet, insbesondere bei hochwertigen Fahrzeugen.
+Ein als „Unfall-Wagen" deklariertes Fahrzeug erzielt auf dem Gebrauchtwagen-Markt geringere Preise – dieser Wertverlust ist die **merkantile Wertminderung**, eigenständige Schadensposition nach § 249 BGB und in ständiger BGH-Rechtsprechung anerkannt. Berechnet wird sie durch einen unabhängigen Sachverständigen nach einer der vier anerkannten Methoden (Ruhkopf-Sahm, Halbgewachs-Höning, MFM Modifizierte Frankfurter Methode, Berens-Hettberg-Strunk) – die Wahl der Methode ist im Gutachten zu begründen. Die häufig zitierte Faustregel „ab 5 Jahre und 100.000 km keine Wertminderung" ist **keine bindende Grenze**, sondern Orientierung – Einzelfallprüfung entscheidet, insbesondere bei hochwertigen Fahrzeugen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -65,9 +65,9 @@ Ein als „Unfall-Wagen" deklariertes Fahrzeug erzielt auf dem Gebrauchtwagen-Ma
 
 Drei Bedingungen müssen erfüllt sein (BGH-Linie):
 
-1. **Sachgerechte Reparatur** — Wertminderung greift bei reparierten Fahrzeugen, nicht bei Totalschaden.
-2. **Erheblicher Schaden** — über der Bagatell-Schwelle (typisch ab 1.500 € Reparaturkosten).
-3. **Markt-Akzeptanz-Verlust** — feststellbarer Wertverlust auf dem Gebrauchtwagen-Markt.
+1. **Sachgerechte Reparatur** – Wertminderung greift bei reparierten Fahrzeugen, nicht bei Totalschaden.
+2. **Erheblicher Schaden** – über der Bagatell-Schwelle (typisch ab 1.500 € Reparaturkosten).
+3. **Markt-Akzeptanz-Verlust** – feststellbarer Wertverlust auf dem Gebrauchtwagen-Markt.
 
 ---
 
@@ -79,13 +79,13 @@ Formel-basiert: Wertminderung = (Wiederbeschaffungswert + Reparaturkosten) × Fa
 ### Halbgewachs-Höning-Methode
 Differenzierte Bewertung über Schwere des Schadens, Strukturteil-Betroffenheit, Reparatur-Qualität. Berücksichtigt Fahrzeug-Marktattraktivität stärker.
 
-### MFM — Modifizierte Frankfurter Methode
-Moderner Ansatz mit konkreter Marktanalyse — vergleicht Verkaufspreise von „Unfall-" und „unfallfreien" Vergleichsfahrzeugen.
+### MFM – Modifizierte Frankfurter Methode
+Moderner Ansatz mit konkreter Marktanalyse – vergleicht Verkaufspreise von „Unfall-" und „unfallfreien" Vergleichsfahrzeugen.
 
 ### Berens-Hettberg-Strunk-Methode
 Vor allem für Premium-Fahrzeuge und schwerere Schäden konzipiert.
 
-→ Der Sachverständige wählt die Methode entsprechend dem konkreten Fall. Die Versicherer kürzen häufig mit Verweis auf „andere Methode" — das ist nicht zulässig, sofern die SV-Wahl methodisch begründet ist.
+→ Der Sachverständige wählt die Methode entsprechend dem konkreten Fall. Die Versicherer kürzen häufig mit Verweis auf „andere Methode" – das ist nicht zulässig, sofern die SV-Wahl methodisch begründet ist.
 
 ---
 
@@ -103,27 +103,27 @@ Vor allem für Premium-Fahrzeuge und schwerere Schäden konzipiert.
 
 ---
 
-## Fahrzeugalter und Laufleistung — keine starre Grenze
+## Fahrzeugalter und Laufleistung – keine starre Grenze
 
 Die häufig zitierte Faustregel „ab 5 Jahre und 100.000 km keine Wertminderung" ist **keine BGH-Linie**, sondern eine ältere SV-Konvention. In der Praxis:
 
 - **< 3 Jahre / < 50.000 km:** Wertminderung typisch hoch
 - **3–5 Jahre / 50.000–100.000 km:** Wertminderung möglich
-- **> 5 Jahre / > 100.000 km:** schwieriger durchzusetzen, **aber möglich** — insbesondere bei hochwertigen Modellen, gut gepflegten Fahrzeugen, lückenloser Markenwerkstatt-Wartung
+- **> 5 Jahre / > 100.000 km:** schwieriger durchzusetzen, **aber möglich** – insbesondere bei hochwertigen Modellen, gut gepflegten Fahrzeugen, lückenloser Markenwerkstatt-Wartung
 
-Der BGH lehnt eine starre Altersgrenze ab — die Einzelfallprüfung entscheidet. Siehe auch [Decoder „Wertminderung nicht angefallen"](/decoder/wertminderung-nicht).
+Der BGH lehnt eine starre Altersgrenze ab – die Einzelfallprüfung entscheidet. Siehe auch [Decoder „Wertminderung nicht angefallen"](/decoder/wertminderung-nicht).
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Wertminderung steht im Sachverständigen-Gutachten. Ohne explizite Bezifferung im Gutachten wird sie **nicht** automatisch erstattet — du musst sie aktiv geltend machen.
+Wertminderung steht im Sachverständigen-Gutachten. Ohne explizite Bezifferung im Gutachten wird sie **nicht** automatisch erstattet – du musst sie aktiv geltend machen.
 
 ### 🛠 Drei Schritte
 
 **1. SV-Gutachten mit Wertminderungs-Berechnung**
-BVSK-Sachverständiger beauftragen — Wertminderung muss explizit beziffert sein, mit Methodik-Nennung.
+BVSK-Sachverständiger beauftragen – Wertminderung muss explizit beziffert sein, mit Methodik-Nennung.
 
 **2. Im Anspruchsschreiben Wertminderung separat ausweisen**
 Reparaturkosten + Wertminderung getrennt aufführen. Versicherer regulieren oft nur die explizit gestellten Positionen.
@@ -142,10 +142,10 @@ Durch einen Sachverständigen nach einer der vier anerkannten Methoden (Ruhkopf-
 Möglich. Die Faustregel „ab 5 Jahre keine Wertminderung" ist keine BGH-Linie. Bei hochwertigen Marken, guter Pflege und lückenloser Markenwerkstatt-Wartung kann Wertminderung auch jenseits 5 Jahren angesetzt werden.
 
 **Ist Wertminderung steuerpflichtig?**
-Nein. Wertminderung ist Schadensersatz und steuerfrei — wie auch Schmerzensgeld.
+Nein. Wertminderung ist Schadensersatz und steuerfrei – wie auch Schmerzensgeld.
 
 **Bekomme ich Wertminderung bei fiktiver Abrechnung?**
-Ja. Wertminderung ist unabhängig davon, ob du tatsächlich reparierst — sie spiegelt den Marktwert-Verlust.
+Ja. Wertminderung ist unabhängig davon, ob du tatsächlich reparierst – sie spiegelt den Marktwert-Verlust.
 
 **Kann der Versicherer mit eigenem SV-Gutachten widersprechen?**
 Ja, aber dein eigenes SV-Gutachten bleibt gleichwertige Schätzungsgrundlage. Bei Streit entscheidet ein Gerichts-Sachverständiger.
@@ -157,17 +157,17 @@ Ab Differenz von 500 € typisch ja. Anwaltskosten zahlt der Versicherer, BGH-Li
 
 ## Verwandte Begriffe
 
-- [Reparaturkosten](/haftpflicht/reparaturkosten) — Hauptposition neben Wertminderung
-- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — Bezugsgröße
-- [Sachverständigen-Kosten](/haftpflicht/sv-kosten) — SV als Voraussetzung
-- [Decoder „Wertminderung nicht angefallen"](/decoder/wertminderung-nicht) — Antwort auf Verweigerung
-- [Wertminderung berechnen (Rechner & Beispiele)](/kfz-gutachter/wertminderung) — Sanden/Danner-Faustformel, Tabelle nach Alter
+- [Reparaturkosten](/haftpflicht/reparaturkosten) – Hauptposition neben Wertminderung
+- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) – Bezugsgröße
+- [Sachverständigen-Kosten](/haftpflicht/sv-kosten) – SV als Voraussetzung
+- [Decoder „Wertminderung nicht angefallen"](/decoder/wertminderung-nicht) – Antwort auf Verweigerung
+- [Wertminderung berechnen (Rechner & Beispiele)](/kfz-gutachter/wertminderung) – Sanden/Danner-Faustformel, Tabelle nach Alter
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Wertminderung ist eine der häufig „vergessenen" Positionen — Versicherer setzen sie automatisch niedrig oder ganz auf null an. Eigener SV + Anwalt machen den Unterschied von typisch 1.000–3.000 €.
+Wertminderung ist eine der häufig „vergessenen" Positionen – Versicherer setzen sie automatisch niedrig oder ganz auf null an. Eigener SV + Anwalt machen den Unterschied von typisch 1.000–3.000 €.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -175,12 +175,12 @@ Wertminderung ist eine der häufig „vergessenen" Positionen — Versicherer se
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 249 — [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
+- Bürgerliches Gesetzbuch § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH, Urteil vom 23.11.2004, VI ZR 357/03 (Wertminderungs-Grundsatz)
 - BGH-Rechtsprechung zur merkantilen Wertminderung, ständige Rechtsprechung
 - Ruhkopf/Sahm, „Die merkantile Wertminderung des Kraftfahrzeuges nach Unfallschäden"
 - Halbgewachs/Höning-Methode
-- BVSK Sachverständigen-Verband — [bvsk.de](https://www.bvsk.de)
+- BVSK Sachverständigen-Verband – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---
@@ -226,4 +226,4 @@ Wertminderung ist eine der häufig „vergessenen" Positionen — Versicherer se
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

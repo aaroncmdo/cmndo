@@ -15,7 +15,7 @@ export async function MenschenSection() {
 
   return (
     <>
-      {/* D7 — Team-Band Lead "Ein Team hinter Ihrem Fall" */}
+      {/* D7 – Team-Band Lead "Ein Team hinter Ihrem Fall" */}
       <section
         className="relative isolate flex min-h-[28rem] items-end overflow-hidden bg-claimondo-navy text-white md:min-h-[34rem]"
         aria-labelledby="team-band-heading"
@@ -23,7 +23,7 @@ export async function MenschenSection() {
         <div className="absolute inset-0 -z-10">
           <Image
             src="/img/home/team-band.webp"
-            alt="Das Claimondo-Team — Ihre Ansprechpartner für die Schadenregulierung"
+            alt="Das Claimondo-Team – Ihre Ansprechpartner für die Schadenregulierung"
             fill
             sizes="100vw"
             className="object-cover object-center"
@@ -55,10 +55,10 @@ export async function MenschenSection() {
         </div>
       </section>
 
-      {/* 20 — Founder (E-E-A-T) */}
+      {/* 20 – Founder (E-E-A-T) */}
       <FounderSection />
 
-      {/* 6 — Berater (persönliche Begleitung) */}
+      {/* 6 – Berater (persönliche Begleitung) */}
       <BeraterSection />
     </>
   )

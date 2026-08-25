@@ -11,11 +11,11 @@ secondary_keywords: ["130 prozent regel autounfall", "wirtschaftlicher totalscha
 last_modified: 2026-05-18
 excerpt: Versicherungen erklären Reparaturen für „wirtschaftlich nicht sinnvoll" und drängen auf Wiederbeschaffung, sobald Reparaturkosten den Wiederbeschaffungswert annähern. Diese Decoder-Seite erklärt die BGH-130-%-Regel (VI ZR 132/00): Reparaturkosten bis 130 % des Wiederbeschaffungswertes sind vollständig erstattbar, wenn das Fahrzeug behalten und mindestens 6 Monate weitergefahren wird.
 keyFacts:
-  - Kürzungs-Standardsatz: „Reparatur wirtschaftlich nicht sinnvoll — nur Wiederbeschaffungswert"
+  - Kürzungs-Standardsatz: „Reparatur wirtschaftlich nicht sinnvoll – nur Wiederbeschaffungswert"
   - BGH-130-%-Regel (VI ZR 132/00): Reparatur bis 130 % des Wiederbeschaffungswertes erstattbar
   - Voraussetzungen: Integritätsinteresse + sachgerechte Reparatur + 6 Monate Behaltefrist
   - Restwert: maßgeblich ist regional realistisch erzielbarer Marktpreis, nicht Plattform-Angebote
-  - Eigenes SV-Gutachten vor Antwort auf Versicherer-Brief beauftragen — Kosten trägt Versicherer
+  - Eigenes SV-Gutachten vor Antwort auf Versicherer-Brief beauftragen – Kosten trägt Versicherer
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten
@@ -27,13 +27,13 @@ related:
 meta_description: "„Reparatur wirtschaftlich nicht sinnvoll“? Wann der Totalschaden-Trick greift und wie Sie Reparatur oder die 130-%-Regel nach BGH durchsetzen."
 ---
 
-# „Eine Reparatur ist wirtschaftlich nicht sinnvoll" — Decoder
+# „Eine Reparatur ist wirtschaftlich nicht sinnvoll" – Decoder
 
-> **Kurz erklärt:** Versicherer bezeichnen den Schaden gerne als „wirtschaftlich nicht reparabel", sobald die Reparaturkosten in die Nähe des Wiederbeschaffungswertes kommen. Die BGH-Rechtsprechung kennt aber die **130 %-Regel** (BGH VI ZR 132/00 ff.): Liegen die Reparaturkosten bis zu 30 % über dem Wiederbeschaffungswert, hast du Anspruch auf Reparatur in deiner Werkstatt — sofern du das Fahrzeug behältst und sach- und fachgerecht reparieren lässt.
+> **Kurz erklärt:** Versicherer bezeichnen den Schaden gerne als „wirtschaftlich nicht reparabel", sobald die Reparaturkosten in die Nähe des Wiederbeschaffungswertes kommen. Die BGH-Rechtsprechung kennt aber die **130 %-Regel** (BGH VI ZR 132/00 ff.): Liegen die Reparaturkosten bis zu 30 % über dem Wiederbeschaffungswert, hast du Anspruch auf Reparatur in deiner Werkstatt – sofern du das Fahrzeug behältst und sach- und fachgerecht reparieren lässt.
 
 ---
 
-## Was du gerade erhalten hast — wörtlich
+## Was du gerade erhalten hast – wörtlich
 
 Typische Varianten:
 
@@ -41,7 +41,7 @@ Typische Varianten:
 
 > *„Da die Reparaturkosten den Wiederbeschaffungswert übersteigen, liegt ein wirtschaftlicher Totalschaden vor."*
 
-> *„Die 130 %-Grenze ist hier nicht anwendbar — wir gehen von einem unrentablen Reparaturfall aus."*
+> *„Die 130 %-Grenze ist hier nicht anwendbar – wir gehen von einem unrentablen Reparaturfall aus."*
 
 Drei Mechaniken, die fast immer enthalten sind:
 
@@ -55,7 +55,7 @@ Drei Mechaniken, die fast immer enthalten sind:
 
 ### 1. Drei Wege, deine Erstattung zu senken
 
-Bei Schäden im Grenzbereich zum Totalschaden hat der Versicherer drei Stellschrauben — und nutzt typischerweise alle drei:
+Bei Schäden im Grenzbereich zum Totalschaden hat der Versicherer drei Stellschrauben – und nutzt typischerweise alle drei:
 
 1. **Wiederbeschaffungswert niedrig** setzen (deine vergleichbare Auto wäre billiger).
 2. **Restwert hoch** setzen (über Versicherer-Verwertungsplattformen).
@@ -65,7 +65,7 @@ Jede Stellschraube für sich kann ein paar Tausend Euro Differenz machen. Zusamm
 
 ### 2. Restwert-Plattform-Trick
 
-Versicherer arbeiten mit speziellen Online-Restwertbörsen zusammen, die für dein verunfalltes Fahrzeug oft Angebote von **gewerblichen Aufkäufern** generieren — die du als Privatperson **gar nicht realisieren** kannst, ohne erheblichen Aufwand und Risiken. Der BGH hat klargestellt: Maßgeblich ist der **regional realistisch erzielbare** Restwert — nicht ein theoretischer Plattform-Wert.
+Versicherer arbeiten mit speziellen Online-Restwertbörsen zusammen, die für dein verunfalltes Fahrzeug oft Angebote von **gewerblichen Aufkäufern** generieren – die du als Privatperson **gar nicht realisieren** kannst, ohne erheblichen Aufwand und Risiken. Der BGH hat klargestellt: Maßgeblich ist der **regional realistisch erzielbare** Restwert – nicht ein theoretischer Plattform-Wert.
 
 ### 3. Reparatur in deiner Werkstatt verhindern
 
@@ -75,13 +75,13 @@ Wenn der Versicherer Wiederbeschaffung erzwingt, hat er **keinen Stress** mit Ma
 
 ## Was die Rechtsprechung dazu sagt
 
-### Die 130 %-Regel — BGH VI ZR 132/00 (Grundsatz-Urteil)
+### Die 130 %-Regel – BGH VI ZR 132/00 (Grundsatz-Urteil)
 
-Der Geschädigte kann auch dann Reparaturkosten erstattet verlangen, **wenn diese den Wiederbeschaffungswert um bis zu 30 % übersteigen** — vorausgesetzt:
+Der Geschädigte kann auch dann Reparaturkosten erstattet verlangen, **wenn diese den Wiederbeschaffungswert um bis zu 30 % übersteigen** – vorausgesetzt:
 
-1. **Integritätsinteresse** — du willst dein Fahrzeug behalten (kein Verkauf direkt nach Reparatur).
-2. **Sachgerechte Reparatur** — fachmännisch, nach Sachverständigen-Vorgabe.
-3. **6-Monats-Behaltefrist** — du nutzt das Fahrzeug nach Reparatur mindestens 6 Monate weiter (BGH-Linie zur Weiternutzung).
+1. **Integritätsinteresse** – du willst dein Fahrzeug behalten (kein Verkauf direkt nach Reparatur).
+2. **Sachgerechte Reparatur** – fachmännisch, nach Sachverständigen-Vorgabe.
+3. **6-Monats-Behaltefrist** – du nutzt das Fahrzeug nach Reparatur mindestens 6 Monate weiter (BGH-Linie zur Weiternutzung).
 
 ### Konkretes Rechenbeispiel
 
@@ -95,9 +95,9 @@ Der Geschädigte kann auch dann Reparaturkosten erstattet verlangen, **wenn dies
 
 Im Gegenbeispiel bei Reparaturkosten von 20.000 €: 130 %-Grenze gerissen → nur Wiederbeschaffung minus Restwert erstattbar.
 
-### Restwert — BGH-Linie
+### Restwert – BGH-Linie
 
-Maßgeblich ist der **regional realistisch erzielbare** Restwert auf dem allgemeinen Markt — nicht Sonder-Angebote spezialisierter Verwerter. Der von **deinem eigenen Sachverständigen** ermittelte regionale Restwert ist Beweis-Grundlage. Verlangt der Versicherer, dass du das Fahrzeug an seine Plattform-Angebote weiterverkaufst, hast du im Grundsatz **keine Verpflichtung dazu** — du darfst es selbst veräußern oder behalten.
+Maßgeblich ist der **regional realistisch erzielbare** Restwert auf dem allgemeinen Markt – nicht Sonder-Angebote spezialisierter Verwerter. Der von **deinem eigenen Sachverständigen** ermittelte regionale Restwert ist Beweis-Grundlage. Verlangt der Versicherer, dass du das Fahrzeug an seine Plattform-Angebote weiterverkaufst, hast du im Grundsatz **keine Verpflichtung dazu** – du darfst es selbst veräußern oder behalten.
 
 ### Markenwerkstatt-Recht
 
@@ -105,10 +105,10 @@ Bei Fahrzeugen, die jünger als 3 Jahre sind oder lückenlose Markenwerkstatt-Wa
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Eigenes Sachverständigen-Gutachten beauftragen — **bevor** du auf den Versicherer-Brief antwortest. Die Sachverständigen-Kosten zahlt der Versicherer (bei unverschuldetem Unfall).
+Eigenes Sachverständigen-Gutachten beauftragen – **bevor** du auf den Versicherer-Brief antwortest. Die Sachverständigen-Kosten zahlt der Versicherer (bei unverschuldetem Unfall).
 
 ### 🛠 Vier-Schritte-Strategie
 
@@ -119,14 +119,14 @@ BVSK-Mitglied, frei wählbar. Dein SV ermittelt Wiederbeschaffungswert, Reparatu
 Wiederbeschaffungswert × 1,30 = Grenze. Reparaturkosten darunter? → Anspruch auf Reparatur. Knapp darüber? Detail-Gespräch mit SV.
 
 **3. Integritätsinteresse schriftlich darlegen**
-„Ich möchte mein Fahrzeug behalten" — und 6-Monats-Halten zusichern. Beides explizit im Antwortschreiben.
+„Ich möchte mein Fahrzeug behalten" – und 6-Monats-Halten zusichern. Beides explizit im Antwortschreiben.
 
 **4. Restwert-Plattform anfechten**
 Versicherer-Plattform-Restwerte mit eigenem SV-Wert konfrontieren. Bei Differenz > 500 €: schriftlich auf BGH-Linie zur regionalen Erzielbarkeit verweisen.
 
 ---
 
-## Brief-Vorlage — Reparaturanspruch nach 130 %-Regel
+## Brief-Vorlage – Reparaturanspruch nach 130 %-Regel
 
 ```
 Sehr geehrte Damen und Herren,
@@ -171,23 +171,23 @@ Mit freundlichen Grüßen
 
 ## Was der Versicherer als nächstes wahrscheinlich tut
 
-### Reaktion A — „130 %-Regel nicht anwendbar"
+### Reaktion A – „130 %-Regel nicht anwendbar"
 > *„Die 130 %-Regel greift nur unter bestimmten Voraussetzungen, die hier nicht erfüllt sind."*
 
 **Deine Antwort:** Welche Voraussetzung soll konkret fehlen? Integritätsinteresse: ja. 6-Monats-Behalten: zugesichert. Sach- und fachgerechte Reparatur: ja. Bei drei Ja: Regel greift.
 
-### Reaktion B — Restwert-Streit
-> *„Unser Plattform-Restwert ist 8.500 € — höher als Ihre SV-Bewertung."*
+### Reaktion B – Restwert-Streit
+> *„Unser Plattform-Restwert ist 8.500 € – höher als Ihre SV-Bewertung."*
 
 **Deine Antwort:** BGH-Linie zur regionalen Erzielbarkeit. Plattform-Angebote sind keine reguläre Marktbewertung. Eigenes SV-Gutachten ist maßgeblich.
 
-### Reaktion C — Markenwerkstatt verweigern
-> *„Eine Reparatur in der Markenwerkstatt ist nicht erforderlich — eine Partnerwerkstatt reicht."*
+### Reaktion C – Markenwerkstatt verweigern
+> *„Eine Reparatur in der Markenwerkstatt ist nicht erforderlich – eine Partnerwerkstatt reicht."*
 
 **Deine Antwort:** Bei Fahrzeugen < 3 Jahre oder lückenloser Markenwerkstatt-Wartung greift das Markenwerkstatt-Recht (siehe [Werkstattbindung-Decoder](/decoder/werkstatt-netz)).
 
-### Reaktion D — Vergleichs-Druck
-> *„Akzeptieren Sie unsere Wiederbeschaffungs-Lösung — Sie haben Ruhe und schnelle Auszahlung."*
+### Reaktion D – Vergleichs-Druck
+> *„Akzeptieren Sie unsere Wiederbeschaffungs-Lösung – Sie haben Ruhe und schnelle Auszahlung."*
 
 **Deine Antwort:** Schnellere Auszahlung ist kein Argument gegen rechtlich begründete Ansprüche. Bei Reparaturwille: nicht akzeptieren, eigene Wahl behalten.
 
@@ -196,19 +196,19 @@ Mit freundlichen Grüßen
 ## Häufige Fragen
 
 **Was, wenn die Reparaturkosten genau 130,5 % betragen?**
-Knapp über der Grenze → grundsätzlich nur Wiederbeschaffung. Aber: Sachverständigen-Bewertung hat Toleranzen. Sprich mit deinem SV — oft lassen sich Positionen so reorganisieren, dass die 130 % gehalten werden, ohne unsachgerechte Reparatur.
+Knapp über der Grenze → grundsätzlich nur Wiederbeschaffung. Aber: Sachverständigen-Bewertung hat Toleranzen. Sprich mit deinem SV – oft lassen sich Positionen so reorganisieren, dass die 130 % gehalten werden, ohne unsachgerechte Reparatur.
 
 **Muss ich wirklich 6 Monate behalten?**
 Das ist die BGH-Linie. Ein Verkauf vor Ablauf der 6 Monate kann zur **Rückzahlungspflicht** des über dem Wiederbeschaffungswert hinausgehenden Betrags führen. Plane das ein.
 
 **Was, wenn ich nicht reparieren lassen will?**
-Dann hast du nur Anspruch auf **Wiederbeschaffungswert minus Restwert** — auch bei prinzipiell anwendbarer 130 %-Regel. Die Wahl liegt bei dir.
+Dann hast du nur Anspruch auf **Wiederbeschaffungswert minus Restwert** – auch bei prinzipiell anwendbarer 130 %-Regel. Die Wahl liegt bei dir.
 
-**Restwert — muss ich an den Versicherer-Anbieter verkaufen?**
+**Restwert – muss ich an den Versicherer-Anbieter verkaufen?**
 Nein. Du darfst das Fahrzeug behalten, selbst verkaufen oder verschrotten. Der maßgebliche Restwert für die Versicherer-Erstattung ist der regional übliche, nicht ein konkretes Angebot.
 
 **Was, wenn ich keinen eigenen SV beauftrage?**
-Du gehst ein erhebliches Risiko ein. Versicherer-Gutachten neigen zu höherem Restwert und niedrigerem Wiederbeschaffungswert — das verschiebt die Erstattung um teilweise mehrere Tausend Euro zu deinem Nachteil.
+Du gehst ein erhebliches Risiko ein. Versicherer-Gutachten neigen zu höherem Restwert und niedrigerem Wiederbeschaffungswert – das verschiebt die Erstattung um teilweise mehrere Tausend Euro zu deinem Nachteil.
 
 ---
 
@@ -222,12 +222,12 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
 
 ## Quellen
 
-- BGB §§ 249, 251 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- BGB §§ 249, 251 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - BGH, Urteil vom 15.02.2005, VI ZR 70/04 (Integritätsinteresse, 130 %-Regel)
 - BGH, Urteil vom 23.05.2006, VI ZR 192/05 (sach- und fachgerechte Reparatur)
 - BGH, Urteil vom 29.04.2003, VI ZR 393/02 (Restwert, regionale Erzielbarkeit)
 - BGH, Urteil vom 14.05.2013, VI ZR 320/12 (Markenwerkstatt-Recht)
-- BVSK Honorartabelle 2024 — [bvsk.de](https://www.bvsk.de)
+- BVSK Honorartabelle 2024 – [bvsk.de](https://www.bvsk.de)
 - Marktinformationen
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
@@ -282,4 +282,4 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte einschalten.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

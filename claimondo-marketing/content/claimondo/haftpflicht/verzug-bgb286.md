@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verzug-bgb286
-meta_title: Verzug nach § 286 BGB — Regulierung
+meta_title: Verzug nach § 286 BGB – Regulierung
 type: glossar-spoke
 cluster: H4
 nummer: H4.2
@@ -20,7 +20,7 @@ customer_questions:
 last_modified: 2026-05-18
 excerpt: Verzug nach § 286 BGB tritt ein, wenn der Haftpflichtversicherer eine fällige Schadensleistung trotz Mahnung oder nach Ablauf der angemessenen 4-Wochen-Prüfungszeit nicht erbringt. Folgen: 5 Prozentpunkte Verzugszinsen über dem Basiszinssatz, vollständige Anwaltskosten als Verzugsschaden (BGH VI ZR 235/13) sowie Ersatz weiterer Verzögerungsschäden.
 keyFacts:
-  - § 286 BGB — Verzug durch Mahnung oder automatisch nach 4 Wochen
+  - § 286 BGB – Verzug durch Mahnung oder automatisch nach 4 Wochen
   - 5 Prozentpunkte über Basiszinssatz Verzugszinsen (§ 288 BGB)
   - BGH VI ZR 235/13: Anwaltskosten als eigenständiger Verzugsschaden
   - § 286 Abs. 2 Nr. 3 BGB: ernsthafte Ablehnung = Verzug ohne Mahnung
@@ -37,7 +37,7 @@ meta_description: "Verzug nach §286 BGB: Zahlt die Haftpflicht trotz Mahnung od
 
 # Verzug nach § 286 BGB bei der Schadensregulierung
 
-> **Kurz erklärt:** Verzug nach § 286 BGB tritt ein, wenn der Haftpflichtversicherer eine fällige Leistung trotz Mahnung oder nach Ablauf der angemessenen Prüfungszeit nicht erbringt. Folgen: Verzugszinsen von 5 Prozentpunkten über dem Basiszinssatz, volle Erstattung der Anwaltskosten als Verzugsschaden und Schadensersatz wegen Verzögerung. Verzug ist dein wichtigstes Druckmittel gegen Hinhaltetaktiken — und in vielen Fällen tritt er sogar **ohne Mahnung** ein.
+> **Kurz erklärt:** Verzug nach § 286 BGB tritt ein, wenn der Haftpflichtversicherer eine fällige Leistung trotz Mahnung oder nach Ablauf der angemessenen Prüfungszeit nicht erbringt. Folgen: Verzugszinsen von 5 Prozentpunkten über dem Basiszinssatz, volle Erstattung der Anwaltskosten als Verzugsschaden und Schadensersatz wegen Verzögerung. Verzug ist dein wichtigstes Druckmittel gegen Hinhaltetaktiken – und in vielen Fällen tritt er sogar **ohne Mahnung** ein.
 
 ## Auch bekannt als
 
@@ -51,7 +51,7 @@ Verzug nach § 286 BGB bedeutet, dass der Versicherer eine fällige Forderung ni
 
 ## In drei Sätzen erklärt
 
-Verzug entsteht bei Kfz-Haftpflicht-Schäden klassisch durch Mahnung mit Frist (§ 286 Abs. 1 BGB), kann aber auch **ohne Mahnung** automatisch eintreten — etwa bei kalendermäßig bestimmten Fristen, bei ernsthafter und endgültiger Leistungs-Verweigerung des Versicherers oder bei Ablauf der angemessenen Prüfungszeit nach BGH-Linie. Sobald Verzug vorliegt, schuldet der Versicherer **5 Prozentpunkte Verzugszinsen über dem Basiszinssatz** (§ 288 BGB), trägt **vollständig die Anwaltskosten** als Verzugsschaden (BGH VI ZR 235/13) und haftet zusätzlich für **alle weiteren Schäden aus der Verzögerung** (§ 280 BGB). Verzug ist damit das schärfste Eskalations-Werkzeug, das du gegen Verschleppungs-Taktiken in der Hand hast.
+Verzug entsteht bei Kfz-Haftpflicht-Schäden klassisch durch Mahnung mit Frist (§ 286 Abs. 1 BGB), kann aber auch **ohne Mahnung** automatisch eintreten – etwa bei kalendermäßig bestimmten Fristen, bei ernsthafter und endgültiger Leistungs-Verweigerung des Versicherers oder bei Ablauf der angemessenen Prüfungszeit nach BGH-Linie. Sobald Verzug vorliegt, schuldet der Versicherer **5 Prozentpunkte Verzugszinsen über dem Basiszinssatz** (§ 288 BGB), trägt **vollständig die Anwaltskosten** als Verzugsschaden (BGH VI ZR 235/13) und haftet zusätzlich für **alle weiteren Schäden aus der Verzögerung** (§ 280 BGB). Verzug ist damit das schärfste Eskalations-Werkzeug, das du gegen Verschleppungs-Taktiken in der Hand hast.
 
 ## Die fünf Schlüsselzahlen
 
@@ -65,35 +65,35 @@ Verzug entsteht bei Kfz-Haftpflicht-Schäden klassisch durch Mahnung mit Frist (
 
 ## Was Verzug rechtlich genau ist
 
-Verzug ist im Bürgerlichen Gesetzbuch als zivilrechtliches Pflicht-Versäumnis des **Schuldners** geregelt — in unserem Fall ist der Schuldner der gegnerische Haftpflichtversicherer, der den Verkehrsunfall-Schaden ersetzen muss. § 286 BGB unterscheidet zwei Wege, wie Verzug entsteht: mit Mahnung (Absatz 1) und ohne Mahnung (Absatz 2). Beide haben praktische Bedeutung in der Schadensregulierung.
+Verzug ist im Bürgerlichen Gesetzbuch als zivilrechtliches Pflicht-Versäumnis des **Schuldners** geregelt – in unserem Fall ist der Schuldner der gegnerische Haftpflichtversicherer, der den Verkehrsunfall-Schaden ersetzen muss. § 286 BGB unterscheidet zwei Wege, wie Verzug entsteht: mit Mahnung (Absatz 1) und ohne Mahnung (Absatz 2). Beide haben praktische Bedeutung in der Schadensregulierung.
 
 ### Verzug durch Mahnung (§ 286 Abs. 1 BGB)
 Der Geschädigte schickt eine schriftliche Mahnung mit konkreter Frist. Läuft die Frist ergebnislos ab, ist der Versicherer im Verzug. Tag eins des Verzugs ist der erste Tag nach Fristablauf.
 
 ### Verzug ohne Mahnung (§ 286 Abs. 2 BGB)
 Vier Konstellationen lösen Verzug automatisch aus:
-- **Nr. 1 — Kalendermäßige Frist:** Eine vorab gesetzte Frist läuft ab.
-- **Nr. 2 — Zeitabhängig:** Eine Frist „binnen X Tagen nach Y" läuft ab.
-- **Nr. 3 — Ernsthafte und endgültige Leistungs-Verweigerung:** Der Versicherer lehnt klar ab — keine weitere Mahnung erforderlich.
-- **Nr. 4 — Besondere Gründe:** Aus den Umständen ergibt sich, dass eine Mahnung entbehrlich ist. Hierunter fasst die BGH-Rechtsprechung auch den Ablauf der **angemessenen Prüfungszeit** bei Verkehrsunfall-Schäden.
+- **Nr. 1 – Kalendermäßige Frist:** Eine vorab gesetzte Frist läuft ab.
+- **Nr. 2 – Zeitabhängig:** Eine Frist „binnen X Tagen nach Y" läuft ab.
+- **Nr. 3 – Ernsthafte und endgültige Leistungs-Verweigerung:** Der Versicherer lehnt klar ab – keine weitere Mahnung erforderlich.
+- **Nr. 4 – Besondere Gründe:** Aus den Umständen ergibt sich, dass eine Mahnung entbehrlich ist. Hierunter fasst die BGH-Rechtsprechung auch den Ablauf der **angemessenen Prüfungszeit** bei Verkehrsunfall-Schäden.
 
 ### Voraussetzungen im Überblick
 
 | Voraussetzung | Erläuterung |
 |---|---|
 | Fälligkeit | Anspruch ist entstanden und durchsetzbar (§ 271 BGB i. V. m. § 14 VVG). |
-| Mahnung oder Ausnahme | Schriftliche Aufforderung mit Frist — oder einer der vier Ausnahme-Tatbestände. |
-| Vertretenmüssen | Versicherer muss die Verzögerung zu vertreten haben — wird vermutet. |
+| Mahnung oder Ausnahme | Schriftliche Aufforderung mit Frist – oder einer der vier Ausnahme-Tatbestände. |
+| Vertretenmüssen | Versicherer muss die Verzögerung zu vertreten haben – wird vermutet. |
 
 ---
 
 ## Welche Rechtsfolgen Verzug auslöst
 
 ### 1. Verzugszinsen
-Ab Tag eins des Verzugs schuldet der Versicherer **5 Prozentpunkte über dem Basiszinssatz** auf die gesamte berechtigte Forderung — fortlaufend bis zur Erfüllung. Details: [Verzugszinsen nach § 288 BGB](/haftpflicht/verzugszinsen-bgb288).
+Ab Tag eins des Verzugs schuldet der Versicherer **5 Prozentpunkte über dem Basiszinssatz** auf die gesamte berechtigte Forderung – fortlaufend bis zur Erfüllung. Details: [Verzugszinsen nach § 288 BGB](/haftpflicht/verzugszinsen-bgb288).
 
 ### 2. Anwaltskosten als Verzugsschaden
-Mit Verzugs-Eintritt sind Anwaltskosten **eigenständiger Schadensposten** und vollständig erstattbar — auch wenn du den Anwalt **erst nach Verzugs-Eintritt** beauftragst. Diese BGH-Linie (VI ZR 235/13) entzieht dem Versicherer ein häufiges Gegenargument. Details: [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
+Mit Verzugs-Eintritt sind Anwaltskosten **eigenständiger Schadensposten** und vollständig erstattbar – auch wenn du den Anwalt **erst nach Verzugs-Eintritt** beauftragst. Diese BGH-Linie (VI ZR 235/13) entzieht dem Versicherer ein häufiges Gegenargument. Details: [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
 
 ### 3. Schadensersatz wegen Verzögerung (§ 280 BGB)
 Alle weiteren Schäden, die aus der Verzögerung entstehen, sind zusätzlich erstattbar. Typische Beispiele bei Verkehrsunfall-Schäden:
@@ -107,10 +107,10 @@ Verzug zwingt den Versicherer faktisch zum Handeln, weil jede weitere Verzögeru
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Verzug ist nicht selbstverständlich. Er muss **erzeugt** werden — durch klare Fristsetzung und gegebenenfalls Mahnung. Wer nur abwartet, hat zwar irgendwann nach der angemessenen Prüfungszeit Verzug — aber den **Beweis dafür schwer**.
+Verzug ist nicht selbstverständlich. Er muss **erzeugt** werden – durch klare Fristsetzung und gegebenenfalls Mahnung. Wer nur abwartet, hat zwar irgendwann nach der angemessenen Prüfungszeit Verzug – aber den **Beweis dafür schwer**.
 
 ### 🛠 Drei Schritte zum belastbaren Verzug
 
@@ -118,7 +118,7 @@ Verzug ist nicht selbstverständlich. Er muss **erzeugt** werden — durch klare
 4-Wochen-Frist gemäß [BGH-Linie](/haftpflicht/4-wochen-frist), per Einschreiben mit Rückschein. Rückschein archivieren.
 
 **2. Mahnung mit 14-Tage-Frist**
-Nach Ablauf der Anspruchsfrist eine Mahnung schicken — schriftlich, mit klarem Verzugs-Hinweis. Auch per Einschreiben.
+Nach Ablauf der Anspruchsfrist eine Mahnung schicken – schriftlich, mit klarem Verzugs-Hinweis. Auch per Einschreiben.
 
 **3. Klageweg oder Mahnbescheid einleiten**
 Bleibt der Versicherer weiter passiv, ist Mahnbescheid oder Klage der nächste Schritt. Anwaltskosten zahlt der Versicherer.
@@ -156,15 +156,15 @@ Mit freundlichen Grüßen
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Wir haben keine Mahnung erhalten — daher kein Verzug."*
+> *„Wir haben keine Mahnung erhalten – daher kein Verzug."*
 
 Beweise den Zugang per Einschreiben-Rückschein. E-Mail-Mahnungen sind nach BGH-Linie zulässig, aber risikoreicher im Beweis. **Einschreiben mit Rückschein ist Standard.**
 
-> *„Wir prüfen weiter — kein Verzug bei berechtigtem Aufklärungsbedarf."*
+> *„Wir prüfen weiter – kein Verzug bei berechtigtem Aufklärungsbedarf."*
 
 Welcher konkrete Aufklärungsbedarf? Bei klarer Haftungslage ist die Pauschal-Berufung auf „Prüfung" nach BGH-Linie nicht ausreichend. Konkret nachfragen, was geprüft wird.
 
-> *„Die Verzögerung war unverschuldet — wir vertreten die Verzögerung nicht."*
+> *„Die Verzögerung war unverschuldet – wir vertreten die Verzögerung nicht."*
 
 Vertretenmüssen wird gesetzlich **vermutet** (§ 286 Abs. 4 BGB). Beweislast liegt beim Versicherer, nicht bei dir. Standard-Verzögerungen sind im Versicherer-Risiko-Bereich.
 
@@ -173,39 +173,39 @@ Vertretenmüssen wird gesetzlich **vermutet** (§ 286 Abs. 4 BGB). Beweislast li
 ## Häufige Fragen
 
 **Muss ich wirklich eine Mahnung schicken?**
-Nicht immer. Bei klarer Haftungslage tritt Verzug nach Ablauf der angemessenen Prüfungszeit auch **ohne** Mahnung ein (§ 286 Abs. 2 Nr. 4 BGB analog). Praktisch ist eine Mahnung trotzdem sinnvoll — sie macht den Verzugs-Zeitpunkt **beweisbar** und schließt die juristische Diskussion aus.
+Nicht immer. Bei klarer Haftungslage tritt Verzug nach Ablauf der angemessenen Prüfungszeit auch **ohne** Mahnung ein (§ 286 Abs. 2 Nr. 4 BGB analog). Praktisch ist eine Mahnung trotzdem sinnvoll – sie macht den Verzugs-Zeitpunkt **beweisbar** und schließt die juristische Diskussion aus.
 
 **Ab wann läuft die 14-Tage-Frist?**
-Ab Zugang der Mahnung beim Versicherer — nicht ab Absendung. Deshalb: Einschreiben mit Rückschein.
+Ab Zugang der Mahnung beim Versicherer – nicht ab Absendung. Deshalb: Einschreiben mit Rückschein.
 
 **Was, wenn der Versicherer auf die Mahnung mit einem kleinen Teil-Anerkenntnis reagiert?**
-Ein Teilanerkenntnis löst Verjährungs-Neubeginn aus (§ 212 BGB). Die [Verjährungsfrist](/haftpflicht/verjaehrung-bgb195) beginnt für die anerkannten Positionen neu. Für noch offene Positionen läuft die Mahnung trotzdem — Verzug für den Restbetrag.
+Ein Teilanerkenntnis löst Verjährungs-Neubeginn aus (§ 212 BGB). Die [Verjährungsfrist](/haftpflicht/verjaehrung-bgb195) beginnt für die anerkannten Positionen neu. Für noch offene Positionen läuft die Mahnung trotzdem – Verzug für den Restbetrag.
 
 **Was, wenn der Versicherer in Teilen ablehnt?**
-Eine teilweise Ablehnung kann als **ernsthafte und endgültige Leistungs-Verweigerung** im Sinne von § 286 Abs. 2 Nr. 3 BGB gewertet werden — Verzug für den abgelehnten Teil ab Tag der Ablehnung, **ohne** weitere Mahnung erforderlich.
+Eine teilweise Ablehnung kann als **ernsthafte und endgültige Leistungs-Verweigerung** im Sinne von § 286 Abs. 2 Nr. 3 BGB gewertet werden – Verzug für den abgelehnten Teil ab Tag der Ablehnung, **ohne** weitere Mahnung erforderlich.
 
 **Kann auch eine E-Mail als Mahnung gelten?**
 Ja, formell. Aber: Einschreiben mit Rückschein ist der Gold-Standard für den Zugangs-Beweis. Bei E-Mail-Mahnung mindestens Lese-Bestätigung anfordern und Sendeprotokoll archivieren.
 
 **Sind Verzugszinsen wirklich vom Versicherer einklagbar?**
-Ja. Sie sind eigenständige Forderung neben der Hauptforderung. Auf jedem Mahnbescheid und in jeder Klage werden sie als Nebenforderung mitgeführt — ohne zusätzliche Gerichtskosten.
+Ja. Sie sind eigenständige Forderung neben der Hauptforderung. Auf jedem Mahnbescheid und in jeder Klage werden sie als Nebenforderung mitgeführt – ohne zusätzliche Gerichtskosten.
 
 ---
 
 ## Verwandte Begriffe
 
-- [4-Wochen-Regulierungsfrist](/haftpflicht/4-wochen-frist) — Vorgeschalteter Schritt vor Mahnung
-- [§ 288 BGB Verzugszinsen](/haftpflicht/verzugszinsen-bgb288) — Höhe und Berechnung
-- [§ 195 BGB Verjährung](/haftpflicht/verjaehrung-bgb195) — Das parallele Zeit-Risiko
-- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) — Kosten-Schutz bei Eskalation
-- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) — Wenn der Versicherer reagiert
-- [Decoder „Wir prüfen den Sachverhalt"](/decoder/wir-pruefen-sachverhalt) — Häufigster Verzögerungs-Brief
+- [4-Wochen-Regulierungsfrist](/haftpflicht/4-wochen-frist) – Vorgeschalteter Schritt vor Mahnung
+- [§ 288 BGB Verzugszinsen](/haftpflicht/verzugszinsen-bgb288) – Höhe und Berechnung
+- [§ 195 BGB Verjährung](/haftpflicht/verjaehrung-bgb195) – Das parallele Zeit-Risiko
+- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) – Kosten-Schutz bei Eskalation
+- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) – Wenn der Versicherer reagiert
+- [Decoder „Wir prüfen den Sachverhalt"](/decoder/wir-pruefen-sachverhalt) – Häufigster Verzögerungs-Brief
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die Anwaltskosten sind bei unverschuldetem Unfall ab Verzugs-Eintritt **vollständig vom Versicherer zu tragen** — du gehst kein Kostenrisiko ein.
+Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die Anwaltskosten sind bei unverschuldetem Unfall ab Verzugs-Eintritt **vollständig vom Versicherer zu tragen** – du gehst kein Kostenrisiko ein.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -213,12 +213,12 @@ Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die 
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch §§ 271, 280, 286, 288 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
-- Versicherungsvertragsgesetz § 14 — [gesetze-im-internet.de/vvg](https://www.gesetze-im-internet.de/vvg_2008/)
+- Bürgerliches Gesetzbuch §§ 271, 280, 286, 288 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- Versicherungsvertragsgesetz § 14 – [gesetze-im-internet.de/vvg](https://www.gesetze-im-internet.de/vvg_2008/)
 - BGH, Urteil vom 18.07.2017, VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Palandt/Grüneberg, BGB-Kommentar, §§ 286, 288
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht — [verkehrsrecht.de](https://www.verkehrsrecht.de)
+- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 
@@ -267,4 +267,4 @@ Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die 
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte einschalten.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

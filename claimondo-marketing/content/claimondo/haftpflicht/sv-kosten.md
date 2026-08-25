@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/sv-kosten
-meta_title: Sachverständigen-Kosten — wer zahlt, wie hoch
+meta_title: Sachverständigen-Kosten – wer zahlt, wie hoch
 type: glossar-spoke
 cluster: H3
 nummer: H3.4
@@ -17,10 +17,10 @@ customer_questions:
   - "bvsk honorartabelle 2026"
   - "darf ich gutachter selbst aussuchen"
 last_modified: 2026-05-18
-excerpt: Sachverständigen-Kosten sind nach § 249 BGB eigenständige Schadensposition und werden bei unverschuldetem Unfall vollständig vom gegnerischen Haftpflichtversicherer erstattet (BGH VI ZR 67/06). Der Geschädigte hat freie Sachverständigen-Wahl; Honorare richten sich nach der BVSK-Honorartabelle (HB I–V), typisch 300–1.200 € je nach Schadenshöhe — Versicherer-Kürzungen innerhalb der BVSK-Korridore sind unbegründet.
+excerpt: Sachverständigen-Kosten sind nach § 249 BGB eigenständige Schadensposition und werden bei unverschuldetem Unfall vollständig vom gegnerischen Haftpflichtversicherer erstattet (BGH VI ZR 67/06). Der Geschädigte hat freie Sachverständigen-Wahl; Honorare richten sich nach der BVSK-Honorartabelle (HB I–V), typisch 300–1.200 € je nach Schadenshöhe – Versicherer-Kürzungen innerhalb der BVSK-Korridore sind unbegründet.
 keyFacts:
-  - § 249 BGB — SV-Kosten als erstattbare Schadensposition
-  - BGH VI ZR 67/06 — Erstattungs-Grundsatz und freie SV-Wahl
+  - § 249 BGB – SV-Kosten als erstattbare Schadensposition
+  - BGH VI ZR 67/06 – Erstattungs-Grundsatz und freie SV-Wahl
   - BVSK-Honorartabelle: 5 Stufen (HB I–V), ca. 200–2.500 € je nach Schaden
   - Bagatellgrenze: SV ab ca. 750–1.000 € Schadenshöhe sinnvoll
   - Werkstatt-Risiko-Analogie: überhöhtes SV-Honorar ist Schädiger-Risiko
@@ -30,12 +30,12 @@ related:
   - /haftpflicht/wertminderung
   - /haftpflicht/wiederbeschaffungswert
   - /decoder/unser-sachverstaendiger
-meta_description: "Sachverständigen-Kosten nach unverschuldetem Unfall zahlt die gegnerische Haftpflicht voll (§249 BGB). Sie wählen Ihren SV frei — für Sie 0 €."
+meta_description: "Sachverständigen-Kosten nach unverschuldetem Unfall zahlt die gegnerische Haftpflicht voll (§249 BGB). Sie wählen Ihren SV frei – für Sie 0 €."
 ---
 
-# Sachverständigen-Kosten beim Autounfall — wer sie zahlt und wie hoch sie sind
+# Sachverständigen-Kosten beim Autounfall – wer sie zahlt und wie hoch sie sind
 
-> **Kurz erklärt:** Sachverständigen-Kosten sind nach § 249 BGB eigenständige Schadensposition und vom gegnerischen Haftpflichtversicherer **vollständig zu erstatten** (BGH VI ZR 67/06). Du hast nach ständiger BGH-Rechtsprechung **freie Sachverständigen-Wahl**. Die Honorare orientieren sich an der **BVSK-Honorartabelle** — typisch 300–1.200 € je nach Schadenshöhe. Bei unverschuldetem Unfall zahlst du faktisch nichts.
+> **Kurz erklärt:** Sachverständigen-Kosten sind nach § 249 BGB eigenständige Schadensposition und vom gegnerischen Haftpflichtversicherer **vollständig zu erstatten** (BGH VI ZR 67/06). Du hast nach ständiger BGH-Rechtsprechung **freie Sachverständigen-Wahl**. Die Honorare orientieren sich an der **BVSK-Honorartabelle** – typisch 300–1.200 € je nach Schadenshöhe. Bei unverschuldetem Unfall zahlst du faktisch nichts.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ SV-Kosten · Gutachterkosten · BVSK-Honorar · Sachverständigen-Honorar
 
 ## In einem Satz erklärt
 
-Sachverständigen-Kosten sind die Honorarforderung des unabhängigen Kfz-Gutachters — bei unverschuldetem Unfall vollständig vom gegnerischen Haftpflichtversicherer zu tragen.
+Sachverständigen-Kosten sind die Honorarforderung des unabhängigen Kfz-Gutachters – bei unverschuldetem Unfall vollständig vom gegnerischen Haftpflichtversicherer zu tragen.
 
 ## In drei Sätzen erklärt
 
-Bei einem unverschuldeten Verkehrsunfall hast du Anspruch auf einen **eigenen, unabhängigen Kfz-Sachverständigen** (BVSK-Mitglied oder vergleichbar) — die Beauftragung erfolgt durch dich, die Kosten trägt die gegnerische Haftpflichtversicherung als eigenständige Schadensposition nach § 249 BGB (BGH VI ZR 67/06). Die Honorarhöhe orientiert sich an der **BVSK-Honorartabelle** mit Korridoren je Schadenshöhe (HB I bis HB V) — typische Honorare liegen bei 300–1.200 € für Standard-Fälle. Versicherer-Kürzungen sind nach BGH-Linie unbegründet, solange das Honorar in der BVSK-Tabelle bleibt.
+Bei einem unverschuldeten Verkehrsunfall hast du Anspruch auf einen **eigenen, unabhängigen Kfz-Sachverständigen** (BVSK-Mitglied oder vergleichbar) – die Beauftragung erfolgt durch dich, die Kosten trägt die gegnerische Haftpflichtversicherung als eigenständige Schadensposition nach § 249 BGB (BGH VI ZR 67/06). Die Honorarhöhe orientiert sich an der **BVSK-Honorartabelle** mit Korridoren je Schadenshöhe (HB I bis HB V) – typische Honorare liegen bei 300–1.200 € für Standard-Fälle. Versicherer-Kürzungen sind nach BGH-Linie unbegründet, solange das Honorar in der BVSK-Tabelle bleibt.
 
 ## Die fünf Schlüsselzahlen
 
@@ -65,12 +65,12 @@ Bei einem unverschuldeten Verkehrsunfall hast du Anspruch auf einen **eigenen, u
 
 Bei einem Sachschaden ab etwa 750–1.000 € hat der Geschädigte einen Anspruch auf Beauftragung eines eigenen, unabhängigen Sachverständigen. Wichtige Punkte:
 
-- **Du** beauftragst — nicht der Versicherer
-- Wahl ist **frei** — BVSK-Mitglied empfohlen
+- **Du** beauftragst – nicht der Versicherer
+- Wahl ist **frei** – BVSK-Mitglied empfohlen
 - **Vor Reparatur-Beginn** beauftragen (Beweis-Sicherung!)
 - Kosten trägt die gegnerische Haftpflicht (siehe unten)
 
-→ Versicherer-Vorschläge eines „Vertrauens-SV" musst du **nicht** akzeptieren — siehe [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger).
+→ Versicherer-Vorschläge eines „Vertrauens-SV" musst du **nicht** akzeptieren – siehe [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger).
 
 ---
 
@@ -93,20 +93,20 @@ Die BVSK-Honorartabelle ordnet das Sachverständigen-Honorar gestuft nach Schade
 ## Was die Rechtsprechung dazu sagt
 
 ### Erstattungs-Grundsatz nach BGH VI ZR 67/06
-Der BGH hat in ständiger Rechtsprechung bestätigt: Sachverständigen-Kosten sind **erforderliche Wiederherstellungskosten** im Sinne von § 249 BGB. Sie sind unabhängig davon erstattbar, ob das Gutachten letztlich zur Klage führt — die bloße Beauftragung im Schadensfall ist erforderlich.
+Der BGH hat in ständiger Rechtsprechung bestätigt: Sachverständigen-Kosten sind **erforderliche Wiederherstellungskosten** im Sinne von § 249 BGB. Sie sind unabhängig davon erstattbar, ob das Gutachten letztlich zur Klage führt – die bloße Beauftragung im Schadensfall ist erforderlich.
 
-### Honorar-Höhe — BVSK-Tabelle als Maßstab
-Die BVSK-Honorartabelle ist anerkannte **Schätzungsgrundlage**. Honorare innerhalb der Tabelle sind grundsätzlich erstattbar — auch wenn der Versicherer behauptet, das Honorar sei „überhöht".
+### Honorar-Höhe – BVSK-Tabelle als Maßstab
+Die BVSK-Honorartabelle ist anerkannte **Schätzungsgrundlage**. Honorare innerhalb der Tabelle sind grundsätzlich erstattbar – auch wenn der Versicherer behauptet, das Honorar sei „überhöht".
 
 ### Werkstatt-Risiko-Logik gilt auch hier
 Falls der Sachverständige zu hoch berechnet, ist das **Schädiger-Risiko** (Werkstatt-Risiko-Analogie). Du musst nicht überwachen oder den günstigsten SV wählen.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Eigener SV vor Reparatur-Beginn. Ohne Gutachten keine belastbare Schadenshöhe — und ohne belastbare Schadenshöhe keine starke Verhandlungsposition.
+Eigener SV vor Reparatur-Beginn. Ohne Gutachten keine belastbare Schadenshöhe – und ohne belastbare Schadenshöhe keine starke Verhandlungsposition.
 
 ### 🛠 Vier Schritte
 
@@ -126,11 +126,11 @@ Verweise auf BVSK-Korridor und BGH VI ZR 67/06. Bei Differenz Anwalt einschalten
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Die Sachverständigen-Kosten sind überhöht — wir erstatten nur [niedriger Betrag]."*
+> *„Die Sachverständigen-Kosten sind überhöht – wir erstatten nur [niedriger Betrag]."*
 
 BVSK-Tabelle als Referenz. Honorare innerhalb der Tabelle sind nach BGH-Linie erstattbar.
 
-> *„Eigene Sachverständigen-Beauftragung war nicht erforderlich — unser SV hätte gereicht."*
+> *„Eigene Sachverständigen-Beauftragung war nicht erforderlich – unser SV hätte gereicht."*
 
 Falsch. Freie Sachverständigen-Wahl nach BGH-Linie. Versicherer-SV ist Empfehlung, keine Pflicht.
 
@@ -143,7 +143,7 @@ Pauschal-Kürzungen sind unbegründet. SV-Gutachten ist Gesamtleistung.
 ## Häufige Fragen
 
 **Wer zahlt den Kfz-Gutachter nach Unfall?**
-Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06). Du gehst nicht in Vorleistung — der SV rechnet typischerweise direkt mit dem Versicherer ab.
+Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06). Du gehst nicht in Vorleistung – der SV rechnet typischerweise direkt mit dem Versicherer ab.
 
 **Was kostet ein Kfz-Gutachten?**
 Honorar nach BVSK-Tabelle, abhängig von Schadenshöhe. Typische Honorare 300–1.200 € (Standard-Fälle), bei größeren Schäden 1.000–2.500 €. Plus Auslagen + MwSt.
@@ -164,13 +164,13 @@ Werkstatt-Risiko-Logik nach BGH: Schädiger-Risiko, nicht dein Risiko. Du musst 
 
 ## Verwandte Begriffe
 
-- [Reparaturkosten](/haftpflicht/reparaturkosten) — Bewertet vom SV
-- [Wertminderung](/haftpflicht/wertminderung) — Im SV-Gutachten enthalten
-- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — SV-Berechnung
-- [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger) — Versicherer-SV-Strategie
-- [Sachverständige & Verbände](/sachverstaendige) — Verbände, Zertifizierungen & öffentliche Bestellung (öbV)
-- [Was kostet ein Kfz-Gutachten? (Überblick)](/kosten-kfz-gutachten) — Kosten-Hub mit BVSK-Korridoren
-- [Kfz-Gutachter Kosten (Detail)](/kfz-gutachter/kosten) — Sicherungsabtretung, 750-€-Bagatellgrenze
+- [Reparaturkosten](/haftpflicht/reparaturkosten) – Bewertet vom SV
+- [Wertminderung](/haftpflicht/wertminderung) – Im SV-Gutachten enthalten
+- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) – SV-Berechnung
+- [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger) – Versicherer-SV-Strategie
+- [Sachverständige & Verbände](/sachverstaendige) – Verbände, Zertifizierungen & öffentliche Bestellung (öbV)
+- [Was kostet ein Kfz-Gutachten? (Überblick)](/kosten-kfz-gutachten) – Kosten-Hub mit BVSK-Korridoren
+- [Kfz-Gutachter Kosten (Detail)](/kfz-gutachter/kosten) – Sicherungsabtretung, 750-€-Bagatellgrenze
 
 ---
 
@@ -184,10 +184,10 @@ Eigener Sachverständiger ist die wichtigste Entscheidung in der Schadensregulie
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 249 — [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
+- Bürgerliches Gesetzbuch § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH, Urteil vom 23.01.2007, VI ZR 67/06 (SV-Kosten als Schadensposition)
 - BGH-Rechtsprechung zur freien SV-Wahl, ständige Rechtsprechung
-- BVSK Honorartabelle, jeweils aktuelle Fassung — [bvsk.de](https://www.bvsk.de)
+- BVSK Honorartabelle, jeweils aktuelle Fassung – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---
@@ -233,4 +233,4 @@ Eigener Sachverständiger ist die wichtigste Entscheidung in der Schadensregulie
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

@@ -17,7 +17,7 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Zahlung eingegangen — Monatsabrechnung ${p.abrechnungs_nr}`
+  return `Zahlung eingegangen – Monatsabrechnung ${p.abrechnungs_nr}`
 }
 
 function fmtDate(iso: string): string {
@@ -32,7 +32,7 @@ export function AbrechnungBezahltConfirmationEmail(props: Props) {
   const greeting = props.vorname ? `Hallo ${props.vorname},` : 'Hallo,'
 
   return (
-    <EmailLayout preview={`Zahlung ${fmtEuro(props.summe_brutto)} eingegangen — ${props.abrechnungs_nr}`}>
+    <EmailLayout preview={`Zahlung ${fmtEuro(props.summe_brutto)} eingegangen – ${props.abrechnungs_nr}`}>
       <Heading>{greeting}</Heading>
       <Paragraph>
         deine Zahlung für die Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist eingegangen.

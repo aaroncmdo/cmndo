@@ -4,7 +4,7 @@ import PageHeader from '@/components/shared/PageHeader'
 export const metadata: Metadata = {
   title: 'Nutzungsbedingungen',
   description:
-    'Nutzungsbedingungen für die Claimondo-Plattform — Rechte und Pflichten bei der Nutzung von Schadenmeldung, Gutachter-Vermittlung und Kundenportal.',
+    'Nutzungsbedingungen für die Claimondo-Plattform – Rechte und Pflichten bei der Nutzung von Schadenmeldung, Gutachter-Vermittlung und Kundenportal.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
   alternates: { canonical: '/nutzungsbedingungen' },

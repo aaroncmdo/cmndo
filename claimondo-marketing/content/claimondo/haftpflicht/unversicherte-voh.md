@@ -14,9 +14,9 @@ customer_questions:
   - "unversicherter fahrer was tun"
   - "voh antrag wie stellen"
 last_modified: 2026-05-18
-excerpt: Die Verkehrsopferhilfe (VOH) e.V. ist der gesetzliche Garantiefonds nach § 12 PflVG und springt ein, wenn kein regulärer Haftpflichtversicherer zahlt — bei Fahrerflucht, unversichertem Schädiger, Versicherer-Insolvenz oder Diebstahl/Schwarzfahrt. Sachschäden: 500 € Selbstbeteiligung; Personenschäden: keine Selbstbeteiligung.
+excerpt: Die Verkehrsopferhilfe (VOH) e.V. ist der gesetzliche Garantiefonds nach § 12 PflVG und springt ein, wenn kein regulärer Haftpflichtversicherer zahlt – bei Fahrerflucht, unversichertem Schädiger, Versicherer-Insolvenz oder Diebstahl/Schwarzfahrt. Sachschäden: 500 € Selbstbeteiligung; Personenschäden: keine Selbstbeteiligung.
 keyFacts:
-  - § 12 PflVG — gesetzliche Grundlage der VOH
+  - § 12 PflVG – gesetzliche Grundlage der VOH
   - 500 € Selbstbeteiligung bei Sachschäden, 0 € bei Personenschäden
   - Vier Eintrittsfälle: Fahrerflucht, unversicherter Schädiger, Insolvenz, Schwarzfahrt
   - Antrag-Frist: 3 Jahre (allgemeine Verjährung)
@@ -24,12 +24,12 @@ keyFacts:
 related:
   - /haftpflicht/fahrerflucht
   - /haftpflicht/kasko-versicherung
-meta_description: "Verkehrsopferhilfe (§12 PflVG): Fonds bei Fahrerflucht, unversichertem Schädiger, Insolvenz oder Schwarzfahrt — 500 € Selbstbehalt nur bei Sachschäden."
+meta_description: "Verkehrsopferhilfe (§12 PflVG): Fonds bei Fahrerflucht, unversichertem Schädiger, Insolvenz oder Schwarzfahrt – 500 € Selbstbehalt nur bei Sachschäden."
 ---
 
-# Verkehrsopferhilfe e.V. — wann sie einspringt
+# Verkehrsopferhilfe e.V. – wann sie einspringt
 
-> **Kurz erklärt:** Die Verkehrsopferhilfe (VOH) e.V. ist der **Garantiefonds des deutschen Versicherungs-Verbandes** — sie tritt ein, wenn ein eigentlich berechtigter Geschädigter keinen anderen Anspruchsschuldner hat. Vier Hauptfälle: unbekannter Verursacher (Fahrerflucht), unversicherter Schädiger, insolvenz-bedingter Versicherer-Ausfall, vorsätzlich-rechtswidrige Fahrt (Diebstahl/Schwarzfahrt).
+> **Kurz erklärt:** Die Verkehrsopferhilfe (VOH) e.V. ist der **Garantiefonds des deutschen Versicherungs-Verbandes** – sie tritt ein, wenn ein eigentlich berechtigter Geschädigter keinen anderen Anspruchsschuldner hat. Vier Hauptfälle: unbekannter Verursacher (Fahrerflucht), unversicherter Schädiger, insolvenz-bedingter Versicherer-Ausfall, vorsätzlich-rechtswidrige Fahrt (Diebstahl/Schwarzfahrt).
 
 ## Auch bekannt als
 
@@ -47,7 +47,7 @@ VOH · § 12 PflVG · Garantiefonds Kfz
 ## Selbstbeteiligung
 
 - **Sachschäden:** 500 € (Vermeidung Bagatell-Missbrauch)
-- **Personenschäden:** keine Selbstbeteiligung — voll erstattet
+- **Personenschäden:** keine Selbstbeteiligung – voll erstattet
 
 ## Antrags-Voraussetzungen
 
@@ -57,7 +57,7 @@ VOH · § 12 PflVG · Garantiefonds Kfz
 4. **Belege** zu allen Schadenspositionen
 5. **Vorhandene Vollkasko** wird vorrangig genutzt (bei Sachschäden)
 
-→ Antrag direkt bei [verkehrsopferhilfe.de](https://www.verkehrsopferhilfe.de) — Online-Formular.
+→ Antrag direkt bei [verkehrsopferhilfe.de](https://www.verkehrsopferhilfe.de) – Online-Formular.
 
 ## Verfahren
 
@@ -133,4 +133,4 @@ Typisch 8–16 Wochen nach vollständigem Antrag.
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

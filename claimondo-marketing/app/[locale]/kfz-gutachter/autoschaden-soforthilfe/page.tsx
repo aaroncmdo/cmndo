@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/kfz-gutachter/autoschaden-soforthilfe`)),
       title: t('kfz_gutachter_autoschaden_soforthilfe.og_title'),
       description: t('kfz_gutachter_autoschaden_soforthilfe.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Autoschaden — was tun?' }],
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Autoschaden – was tun?' }],
     },
   }
 }
@@ -52,15 +52,15 @@ const SCHRITTE = [
   },
   {
     titel: 'Nichts zugeben, nichts unterschreiben',
-    text: 'Geben Sie weder am Unfallort noch am Telefon ein Schuldeingeständnis ab und unterschreiben Sie keine Erklärung der gegnerischen Versicherung. Bietet die Gegenseite eine »schnelle, kostenlose« Abwicklung an, ist das Schadensteuerung — verweisen Sie freundlich auf Ihren Gutachter und Anwalt.',
+    text: 'Geben Sie weder am Unfallort noch am Telefon ein Schuldeingeständnis ab und unterschreiben Sie keine Erklärung der gegnerischen Versicherung. Bietet die Gegenseite eine »schnelle, kostenlose« Abwicklung an, ist das Schadensteuerung – verweisen Sie freundlich auf Ihren Gutachter und Anwalt.',
   },
   {
     titel: 'Eigenen Gutachter beauftragen',
-    text: 'Bei Schaden über etwa 750 € haben Sie Anspruch auf einen eigenen, unabhängigen Sachverständigen (BGH VI ZR 67/06). Beauftragen Sie nicht den Gutachter der gegnerischen Versicherung — dieser arbeitet in deren Interesse. Termin idealerweise vor jeder Reparatur.',
+    text: 'Bei Schaden über etwa 750 € haben Sie Anspruch auf einen eigenen, unabhängigen Sachverständigen (BGH VI ZR 67/06). Beauftragen Sie nicht den Gutachter der gegnerischen Versicherung – dieser arbeitet in deren Interesse. Termin idealerweise vor jeder Reparatur.',
   },
   {
     titel: 'Schaden melden + Anwalt',
-    text: 'Melden Sie den Schaden — bei Claimondo in 5 Minuten online. Wir koordinieren Gutachter, Werkstatt und Partnerkanzlei. Bei Fremdverschulden trägt die gegnerische Haftpflicht auch die Anwaltskosten (§ 249 BGB).',
+    text: 'Melden Sie den Schaden – bei Claimondo in 5 Minuten online. Wir koordinieren Gutachter, Werkstatt und Partnerkanzlei. Bei Fremdverschulden trägt die gegnerische Haftpflicht auch die Anwaltskosten (§ 249 BGB).',
   },
 ]
 
@@ -68,7 +68,7 @@ const FAQS = [
   {
     frage: 'Muss ich nach einem Autoschaden die Polizei rufen?',
     antwort:
-      'Pflicht ist es bei Personenschaden, Fahrerflucht oder erheblichem Sachschaden mit unklarer Schuld. Bei eindeutigen kleinen Blechschäden mit einvernehmlichem Datenaustausch ist die Polizei nicht zwingend — ein polizeiliches Protokoll hilft aber später als Beweis. Im Zweifel rufen Sie an (110).',
+      'Pflicht ist es bei Personenschaden, Fahrerflucht oder erheblichem Sachschaden mit unklarer Schuld. Bei eindeutigen kleinen Blechschäden mit einvernehmlichem Datenaustausch ist die Polizei nicht zwingend – ein polizeiliches Protokoll hilft aber später als Beweis. Im Zweifel rufen Sie an (110).',
   },
   {
     frage: 'Was sollte ich fotografieren?',
@@ -78,7 +78,7 @@ const FAQS = [
   {
     frage: 'Darf ich mein Auto reparieren lassen, bevor der Gutachter kommt?',
     antwort:
-      'Nein — warten Sie das Gutachten ab. Wird vor der Begutachtung repariert, lässt sich der Schaden nicht mehr neutral dokumentieren, und die Versicherung kürzt oder verweigert die Erstattung. Der Gutachter-Termin ist in der Regel innerhalb von 48 Stunden möglich.',
+      'Nein – warten Sie das Gutachten ab. Wird vor der Begutachtung repariert, lässt sich der Schaden nicht mehr neutral dokumentieren, und die Versicherung kürzt oder verweigert die Erstattung. Der Gutachter-Termin ist in der Regel innerhalb von 48 Stunden möglich.',
   },
   {
     frage: 'Muss ich der gegnerischen Versicherung Auskunft geben?',
@@ -88,7 +88,7 @@ const FAQS = [
   {
     frage: 'Was ist, wenn die Schuldfrage unklar ist?',
     antwort:
-      'Dann sind Beweissicherung und Polizei besonders wichtig. Unfallskizze, Zeugen und Fotos entscheiden später über die Haftungsquote. Auch bei Teilschuld lohnt ein eigener Gutachter — Ihr Schaden wird anteilig erstattet, und ein neutrales Gutachten verhindert überhöhte Mitverschuldens-Quoten der Gegenseite.',
+      'Dann sind Beweissicherung und Polizei besonders wichtig. Unfallskizze, Zeugen und Fotos entscheiden später über die Haftungsquote. Auch bei Teilschuld lohnt ein eigener Gutachter – Ihr Schaden wird anteilig erstattet, und ein neutrales Gutachten verhindert überhöhte Mitverschuldens-Quoten der Gegenseite.',
   },
 ]
 
@@ -113,7 +113,7 @@ export default function AutoschadenSoforthilfePage() {
             url: `${SITE_URL}/kfz-gutachter/autoschaden-soforthilfe`,
           }),
           howToSchema({
-            name: 'Autoschaden — was tun? Die 5 Sofort-Schritte',
+            name: 'Autoschaden – was tun? Die 5 Sofort-Schritte',
             description: 'Die fünf wichtigsten Schritte direkt nach einem Autoschaden, um alle Ansprüche zu sichern.',
             estimatedCost: { currency: 'EUR', value: '0' },
             schritte: SCHRITTE.map((s) => ({ name: s.titel, text: s.text })),
@@ -125,7 +125,7 @@ export default function AutoschadenSoforthilfePage() {
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
-            { name: 'Autoschaden — was tun?', url: '/kfz-gutachter/autoschaden-soforthilfe' },
+            { name: 'Autoschaden – was tun?', url: '/kfz-gutachter/autoschaden-soforthilfe' },
           ]),
         ])}
       />

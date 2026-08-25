@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/anhaenger
-meta_title: Anhänger und Wohnwagen — Haftung
+meta_title: Anhänger und Wohnwagen – Haftung
 type: glossar-spoke
 cluster: H7
 nummer: H7.4
@@ -15,10 +15,10 @@ customer_questions:
   - "auflieger unfall schaden"
   - "anhänger ohne kennzeichen unfall"
 last_modified: 2026-05-18
-excerpt: Anhänger mit eigener Zulassung — Wohnwagen, Pferdeanhänger, Sattelauflieger — benötigen eine eigene Kfz-Haftpflichtversicherung nach § 1 PflVG. Bei einem Unfall haften Zugfahrzeug-Halter und Anhänger-Halter nach § 7 StVG gemeinsam. Kleinanhänger bis 750 kg ohne Bremsanlage sind über die Haftpflicht des Zugfahrzeugs mitversichert.
+excerpt: Anhänger mit eigener Zulassung – Wohnwagen, Pferdeanhänger, Sattelauflieger – benötigen eine eigene Kfz-Haftpflichtversicherung nach § 1 PflVG. Bei einem Unfall haften Zugfahrzeug-Halter und Anhänger-Halter nach § 7 StVG gemeinsam. Kleinanhänger bis 750 kg ohne Bremsanlage sind über die Haftpflicht des Zugfahrzeugs mitversichert.
 keyFacts:
-  - § 1 PflVG — eigene Versicherungspflicht für zulassungspflichtige Anhänger
-  - § 19a StVG — Zugfahrzeug und Anhänger haften als Einheit
+  - § 1 PflVG – eigene Versicherungspflicht für zulassungspflichtige Anhänger
+  - § 19a StVG – Zugfahrzeug und Anhänger haften als Einheit
   - Kleinanhänger ≤ 750 kg ohne Bremse: über Zugfahrzeug mitversichert
   - Lose Ladung vom Anhänger: gesamtschuldnerische Haftung (§ 421 BGB)
   - Mietanhänger: Halter (Verleiher) und Mieter können parallel haften
@@ -28,9 +28,9 @@ related:
 meta_description: "Anhänger-Unfall: Zugfahrzeug- und Anhänger-Halter haften gemeinsam nach §19a StVG, eigene Versicherungspflicht (§1 PflVG). So ordnen Sie die Haftung zu."
 ---
 
-# Anhänger / Wohnwagen / Auflieger — Haftung beim Unfall
+# Anhänger / Wohnwagen / Auflieger – Haftung beim Unfall
 
-> **Kurz erklärt:** Anhänger mit eigener Zulassung (Wohnwagen, Pferdeanhänger, Bootsanhänger, Sattelauflieger) brauchen eine **eigene Kfz-Haftpflichtversicherung** (§ 1 PflVG). Bei Unfall: sowohl der **Zugfahrzeug-Halter** als auch der **Anhänger-Halter** haften nach § 7 StVG — über die Quotierung entscheidet die konkrete Verursachung. Bei Anhängern ohne Zulassungs-Pflicht (Klein-Anhänger bis 750 kg ohne Brems-Anlage) deckt typisch die Kfz-Haftpflicht des Zugfahrzeugs ab.
+> **Kurz erklärt:** Anhänger mit eigener Zulassung (Wohnwagen, Pferdeanhänger, Bootsanhänger, Sattelauflieger) brauchen eine **eigene Kfz-Haftpflichtversicherung** (§ 1 PflVG). Bei Unfall: sowohl der **Zugfahrzeug-Halter** als auch der **Anhänger-Halter** haften nach § 7 StVG – über die Quotierung entscheidet die konkrete Verursachung. Bei Anhängern ohne Zulassungs-Pflicht (Klein-Anhänger bis 750 kg ohne Brems-Anlage) deckt typisch die Kfz-Haftpflicht des Zugfahrzeugs ab.
 
 ## Auch bekannt als
 
@@ -54,14 +54,14 @@ meta_description: "Anhänger-Unfall: Zugfahrzeug- und Anhänger-Halter haften ge
 | Lose Ladung vom Anhänger | Beide gesamtschuldnerisch (§ 421 BGB) |
 | Anhänger ungebremst auffahrend | Zugfahrzeug-Halter |
 
-→ **§ 19a StVG**: Anhänger und Zugfahrzeug sind als **Einheit** zu betrachten — Zwei-Versicherer-Konstellation regelt sich intern.
+→ **§ 19a StVG**: Anhänger und Zugfahrzeug sind als **Einheit** zu betrachten – Zwei-Versicherer-Konstellation regelt sich intern.
 
 ## Was bei Unfall mit Anhänger zu beachten
 
 1. **Sowohl Zugfahrzeug- als auch Anhänger-Versicherung** informieren
 2. **Beide Versicherungen-Adressen** an Geschädigte mitgeben
 3. **§ 19a StVG-Logik**: gemeinsame Haftung der Versicherer
-4. **Innen-Ausgleich** läuft zwischen den Versicherern — nicht dein Problem
+4. **Innen-Ausgleich** läuft zwischen den Versicherern – nicht dein Problem
 
 ## Häufige Fragen
 
@@ -69,7 +69,7 @@ meta_description: "Anhänger-Unfall: Zugfahrzeug- und Anhänger-Halter haften ge
 Ja, mit eigener Zulassung. Kleinanhänger bis 750 kg ohne Bremse: über Zugfahrzeug mitversichert.
 
 **Wer haftet bei Unfall mit Wohnwagen?**
-Beide — Zugfahrzeug-Halter und Wohnwagen-Halter (oft identisch). Bei Schaden zahlt die jeweils einschlägige Versicherung.
+Beide – Zugfahrzeug-Halter und Wohnwagen-Halter (oft identisch). Bei Schaden zahlt die jeweils einschlägige Versicherung.
 
 **Was, wenn der Anhänger fremd ist (Leih, Mietanhänger)?**
 Der Halter (Verleiher / Mietfirma) haftet als Anhänger-Halter, der Mieter ggf. zusätzlich als Fahrer.
@@ -87,8 +87,8 @@ Der Halter (Verleiher / Mietfirma) haftet als Anhänger-Halter, der Mieter ggf. 
 
 ## Quellen
 
-- StVG § 19a — Anhänger
-- PflVG § 1 — Pflichtversicherung
+- StVG § 19a – Anhänger
+- PflVG § 1 – Pflichtversicherung
 
 ---
 
@@ -130,4 +130,4 @@ Der Halter (Verleiher / Mietfirma) haftet als Anhänger-Halter, der Mieter ggf. 
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

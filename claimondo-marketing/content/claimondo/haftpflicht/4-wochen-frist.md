@@ -8,13 +8,13 @@ nummer: H4.1
 primary_keyword: "4 wochen frist versicherung"
 secondary_keywords: ["regulierungsfrist haftpflicht", "wie lange darf versicherung prüfen", "haftpflicht verzug eintritt"]
 last_modified: 2026-05-18
-excerpt: Die 4-Wochen-Regulierungsfrist ist eine BGH-Linie zur angemessenen Prüfungszeit für Kfz-Haftpflichtversicherer nach Verkehrsunfall. Bei klarer Haftungslage und vollständigen Unterlagen reichen 4 Wochen, bei Personenschäden 6–8 Wochen. Nach Fristablauf tritt automatisch Verzug nach § 286 BGB ein — mit Verzugszinsen und voll erstattbaren Anwaltskosten zu Lasten des Versicherers.
+excerpt: Die 4-Wochen-Regulierungsfrist ist eine BGH-Linie zur angemessenen Prüfungszeit für Kfz-Haftpflichtversicherer nach Verkehrsunfall. Bei klarer Haftungslage und vollständigen Unterlagen reichen 4 Wochen, bei Personenschäden 6–8 Wochen. Nach Fristablauf tritt automatisch Verzug nach § 286 BGB ein – mit Verzugszinsen und voll erstattbaren Anwaltskosten zu Lasten des Versicherers.
 keyFacts:
-  - Keine gesetzliche Frist — BGH-Linie zur angemessenen Prüfungszeit
+  - Keine gesetzliche Frist – BGH-Linie zur angemessenen Prüfungszeit
   - Sachschaden klare Haftung: 4 Wochen; Personenschaden: 6–8 Wochen
   - Verzug tritt nach § 286 Abs. 2 Nr. 4 BGB analog ohne Mahnung ein
   - Verzugszinsen: 5 Prozentpunkte über Basiszinssatz (§ 288 BGB)
-  - Anwaltskosten als Verzugsschaden voll erstattbar — BGH VI ZR 235/13
+  - Anwaltskosten als Verzugsschaden voll erstattbar – BGH VI ZR 235/13
 last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286
@@ -28,7 +28,7 @@ meta_description: "4-Wochen-Regulierungsfrist: So lange darf die Kfz-Haftpflicht
 
 # 4-Wochen-Regulierungsfrist nach Verkehrsunfall
 
-> **Kurz erklärt:** Die 4-Wochen-Regulierungsfrist ist eine etablierte BGH-Linie zur angemessenen Prüfungszeit für Kfz-Haftpflichtversicherer. Bei klarer Haftungslage und vollständigen Unterlagen reichen 4 Wochen, bei komplexen Personenschäden 6–8 Wochen. Nach Fristablauf tritt automatisch Verzug ein — mit Verzugszinsen und voll erstattbaren Anwaltskosten zu Lasten des Versicherers.
+> **Kurz erklärt:** Die 4-Wochen-Regulierungsfrist ist eine etablierte BGH-Linie zur angemessenen Prüfungszeit für Kfz-Haftpflichtversicherer. Bei klarer Haftungslage und vollständigen Unterlagen reichen 4 Wochen, bei komplexen Personenschäden 6–8 Wochen. Nach Fristablauf tritt automatisch Verzug ein – mit Verzugszinsen und voll erstattbaren Anwaltskosten zu Lasten des Versicherers.
 
 ---
 
@@ -36,7 +36,7 @@ meta_description: "4-Wochen-Regulierungsfrist: So lange darf die Kfz-Haftpflicht
 
 Wenn du einen Verkehrsunfall hattest und der gegnerische Versicherer für deinen Schaden aufkommen muss, taucht früher oder später die Frage auf: *Wie lange darf der eigentlich „prüfen", bevor er zahlt?*
 
-Eine ausdrückliche gesetzliche Frist gibt es nicht. Aber es gibt eine klare BGH-Linie zur **angemessenen Prüfungszeit**, an der sich Versicherer, Anwälte und Gerichte orientieren. Diese Frist ist dein wichtigster Hebel — wer sie kennt und einsetzt, verhandelt nicht mehr in der Defensive.
+Eine ausdrückliche gesetzliche Frist gibt es nicht. Aber es gibt eine klare BGH-Linie zur **angemessenen Prüfungszeit**, an der sich Versicherer, Anwälte und Gerichte orientieren. Diese Frist ist dein wichtigster Hebel – wer sie kennt und einsetzt, verhandelt nicht mehr in der Defensive.
 
 ---
 
@@ -65,24 +65,24 @@ Die Frist beginnt **nicht** mit dem Unfall. Sie beginnt erst, sobald **alle zur 
 - Beweisfotos
 - Konkrete Bezifferung der Forderung
 
-Reichst du Unterlagen nach, beginnt die Frist neu — aber nur für **diese** Position. Das ist wichtig zu wissen, wenn der Versicherer Salami-Taktik fährt und in immer neuen Schritten neue Unterlagen verlangt.
+Reichst du Unterlagen nach, beginnt die Frist neu – aber nur für **diese** Position. Das ist wichtig zu wissen, wenn der Versicherer Salami-Taktik fährt und in immer neuen Schritten neue Unterlagen verlangt.
 
 ---
 
 ## Was passiert nach Ablauf der Frist
 
-Nach Ablauf der angemessenen Prüfungszeit tritt **automatisch Verzug ein** (§ 286 Abs. 2 Nr. 4 BGB analog) — ohne dass du eine Mahnung schreiben musst. Diese juristische Feinheit ist wichtig: Der Versicherer kann sich nicht darauf berufen, „nie gemahnt worden zu sein".
+Nach Ablauf der angemessenen Prüfungszeit tritt **automatisch Verzug ein** (§ 286 Abs. 2 Nr. 4 BGB analog) – ohne dass du eine Mahnung schreiben musst. Diese juristische Feinheit ist wichtig: Der Versicherer kann sich nicht darauf berufen, „nie gemahnt worden zu sein".
 
-Mit Verzugs-Eintritt entstehen drei eigenständige Schadensposten — alle vom Versicherer zu tragen:
+Mit Verzugs-Eintritt entstehen drei eigenständige Schadensposten – alle vom Versicherer zu tragen:
 
 ### 1. Verzugszinsen
 **5 Prozentpunkte über dem Basiszinssatz** auf die gesamte berechtigte Forderung, ab dem Tag des Verzugs-Eintritts. Detail: [Verzugszinsen nach § 288 BGB](/haftpflicht/verzugszinsen-bgb288).
 
 ### 2. Anwaltskosten
-**Vollständig erstattbar als eigenständiger Verzugsschaden** — und zwar auch dann, wenn du den Anwalt erst nach Verzugs-Eintritt beauftragst (BGH, Urteil vom 18.07.2017, VI ZR 235/13). Du gehst also kein Kostenrisiko ein, wenn du jetzt eskalierst. Detail: [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
+**Vollständig erstattbar als eigenständiger Verzugsschaden** – und zwar auch dann, wenn du den Anwalt erst nach Verzugs-Eintritt beauftragst (BGH, Urteil vom 18.07.2017, VI ZR 235/13). Du gehst also kein Kostenrisiko ein, wenn du jetzt eskalierst. Detail: [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
 
 ### 3. Mahnungs- und Klagekosten
-Sämtliche weiteren Eskalationskosten — Mahnbescheid, Klage, Gerichtskosten — sind ebenfalls Verzugsschaden und werden vom Versicherer getragen, solange deine Forderung berechtigt ist.
+Sämtliche weiteren Eskalationskosten – Mahnbescheid, Klage, Gerichtskosten – sind ebenfalls Verzugsschaden und werden vom Versicherer getragen, solange deine Forderung berechtigt ist.
 
 ---
 
@@ -94,18 +94,18 @@ Diese pauschale Aussage reicht **nicht** für eine Frist-Verlängerung. Der Vers
 
 > *„Wir warten noch auf die Stellungnahme unseres Versicherungsnehmers."*
 
-Das ist ein **interner Vorgang** des Versicherers und kein Aufschub-Grund dir gegenüber. Der Versicherer kann auch ohne Aussage seines VN regulieren — er muss nur **dem Versicherungsnehmer gegenüber** rechtzeitig handeln, nicht **dir gegenüber** verzögern.
+Das ist ein **interner Vorgang** des Versicherers und kein Aufschub-Grund dir gegenüber. Der Versicherer kann auch ohne Aussage seines VN regulieren – er muss nur **dem Versicherungsnehmer gegenüber** rechtzeitig handeln, nicht **dir gegenüber** verzögern.
 
 > *„Bei Personenschäden gilt eine längere Frist."*
 
-Stimmt im Grundsatz — aber nur, soweit konkrete medizinische Aufklärung tatsächlich noch nicht abgeschlossen ist. Eine Pauschal-Berufung auf „Personenschaden" reicht nicht. Liegen Erstbefund und prognostische Einschätzung vor, ist 6 Wochen Standard.
+Stimmt im Grundsatz – aber nur, soweit konkrete medizinische Aufklärung tatsächlich noch nicht abgeschlossen ist. Eine Pauschal-Berufung auf „Personenschaden" reicht nicht. Liegen Erstbefund und prognostische Einschätzung vor, ist 6 Wochen Standard.
 
 ---
 
 ## Was du konkret tun solltest
 
 ### 💡 Die wichtigste Regel
-Die 4-Wochen-Frist wirkt nur, wenn der Versicherer weiß, dass **du** sie kennst. Setze sie aktiv und schriftlich — sonst nutzt sie der Versicherer als Mythos für seine Verzögerungsstrategie.
+Die 4-Wochen-Frist wirkt nur, wenn der Versicherer weiß, dass **du** sie kennst. Setze sie aktiv und schriftlich – sonst nutzt sie der Versicherer als Mythos für seine Verzögerungsstrategie.
 
 ### 🛠 Drei Schritte zur sauberen Fristsetzung
 
@@ -113,7 +113,7 @@ Die 4-Wochen-Frist wirkt nur, wenn der Versicherer weiß, dass **du** sie kennst
 Per Einschreiben mit Rückschein. Alle Unterlagen, eine konkrete Forderungssumme, eine Frist von 4 Wochen ab Eingang.
 
 **2. Eingangsdatum dokumentieren**
-Rückschein aufheben — er ist dein Beweis für den Frist-Beginn.
+Rückschein aufheben – er ist dein Beweis für den Frist-Beginn.
 
 **3. Verzug erzwingen**
 Nach Ablauf: schriftliche Mahnung mit 14-Tage-Frist, dann Anwalt. Die Anwaltskosten zahlt der Versicherer.
@@ -148,12 +148,12 @@ Mit freundlichen Grüßen
 
 ## Verwandte Begriffe
 
-- [§ 286 BGB Verzug](/haftpflicht/verzug-bgb286) — wann und wie Verzug rechtlich eintritt
-- [§ 288 BGB Verzugszinsen](/haftpflicht/verzugszinsen-bgb288) — wie hoch, ab wann, auf welche Beträge
-- [§ 195 BGB Verjährung](/haftpflicht/verjaehrung-bgb195) — die 3-Jahres-Frist und ihre Hemmung
-- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) — wann die Verjährung neu beginnt
-- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) — warum sie dich nichts kosten
-- [Decoder „Wir prüfen den Sachverhalt"](/decoder/wir-pruefen-sachverhalt) — der typische Versicherer-Brief und die richtige Antwort
+- [§ 286 BGB Verzug](/haftpflicht/verzug-bgb286) – wann und wie Verzug rechtlich eintritt
+- [§ 288 BGB Verzugszinsen](/haftpflicht/verzugszinsen-bgb288) – wie hoch, ab wann, auf welche Beträge
+- [§ 195 BGB Verjährung](/haftpflicht/verjaehrung-bgb195) – die 3-Jahres-Frist und ihre Hemmung
+- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) – wann die Verjährung neu beginnt
+- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) – warum sie dich nichts kosten
+- [Decoder „Wir prüfen den Sachverhalt"](/decoder/wir-pruefen-sachverhalt) – der typische Versicherer-Brief und die richtige Antwort
 
 ---
 
@@ -163,13 +163,13 @@ Mit freundlichen Grüßen
 Nein. Die hier dargestellten Fristen beziehen sich auf den **gegnerischen Haftpflichtversicherer** bei unverschuldetem Unfall. Für die eigene Kasko gelten die [vertraglichen Anzeigefristen](/haftpflicht/kasko-versicherung), nicht die BGH-Linie zur Prüfungszeit.
 
 **Was, wenn der Versicherer eine längere Frist verlangt?**
-Konkrete Begründung verlangen. Bei nachvollziehbarem Aufklärungsbedarf maximal 2 zusätzliche Wochen schriftlich gewähren — und das nur **einmal**. Bei wiederholter Verlängerungsbitte: Anwalt einschalten.
+Konkrete Begründung verlangen. Bei nachvollziehbarem Aufklärungsbedarf maximal 2 zusätzliche Wochen schriftlich gewähren – und das nur **einmal**. Bei wiederholter Verlängerungsbitte: Anwalt einschalten.
 
 **Beginnt die Frist neu, wenn ich Unterlagen nachreiche?**
-Nur für die nachgereichten Positionen. Hattest du etwa Reparaturkosten plus Wertminderung gefordert und reichst später ein Schmerzensgeld-Attest nach, läuft die ursprüngliche Frist für Reparaturkosten und Wertminderung weiter — nur für das Schmerzensgeld beginnt eine neue.
+Nur für die nachgereichten Positionen. Hattest du etwa Reparaturkosten plus Wertminderung gefordert und reichst später ein Schmerzensgeld-Attest nach, läuft die ursprüngliche Frist für Reparaturkosten und Wertminderung weiter – nur für das Schmerzensgeld beginnt eine neue.
 
 **Was, wenn ich die Frist zu kurz setze?**
-Eine zu kurze Frist (etwa 7 Tage statt 4 Wochen) ist nicht zwingend unwirksam — sie wird in der Regel als „angemessene Frist" umgedeutet, also als 4-Wochen-Frist behandelt. Trotzdem: 4 Wochen schreiben, um juristische Diskussionen zu vermeiden.
+Eine zu kurze Frist (etwa 7 Tage statt 4 Wochen) ist nicht zwingend unwirksam – sie wird in der Regel als „angemessene Frist" umgedeutet, also als 4-Wochen-Frist behandelt. Trotzdem: 4 Wochen schreiben, um juristische Diskussionen zu vermeiden.
 
 **Was ist mit Auslandsunfällen?**
 Bei Unfällen im Ausland gelten andere Mechaniken über das Grüne-Karte-System. Details im [Eintrag zu Auslandsunfällen](/haftpflicht/auslandsunfall).
@@ -178,7 +178,7 @@ Bei Unfällen im Ausland gelten andere Mechaniken über das Grüne-Karte-System.
 
 ## Wenn du nicht weiter weißt
 
-Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist bereits abgelaufen ist. Wenn ja, übernehmen wir die Korrespondenz mit dem Versicherer über spezialisierte Verkehrsrechts-Anwälte. **Ohne Kostenrisiko für dich**, weil die Anwaltskosten bei unverschuldetem Unfall vom gegnerischen Versicherer getragen werden.
+Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst – und ob die Frist bereits abgelaufen ist. Wenn ja, übernehmen wir die Korrespondenz mit dem Versicherer über spezialisierte Verkehrsrechts-Anwälte. **Ohne Kostenrisiko für dich**, weil die Anwaltskosten bei unverschuldetem Unfall vom gegnerischen Versicherer getragen werden.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -186,13 +186,13 @@ Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch §§ 195, 212, 286, 288 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
-- Versicherungsvertragsgesetz § 14 (Fälligkeit der Geldleistung) — [gesetze-im-internet.de/vvg](https://www.gesetze-im-internet.de/vvg_2008/__14.html)
+- Bürgerliches Gesetzbuch §§ 195, 212, 286, 288 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- Versicherungsvertragsgesetz § 14 (Fälligkeit der Geldleistung) – [gesetze-im-internet.de/vvg](https://www.gesetze-im-internet.de/vvg_2008/__14.html)
 - BGH, Urteil vom 18.07.2017, Aktenzeichen VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Hentschel/König/Dauer, Straßenverkehrsrecht, jeweils aktuelle Auflage
 - Burmann/Heß/Hühnermann/Jahnke, Straßenverkehrsrecht-Kommentar
 - Geigel, Der Haftpflichtprozess, aktuelle Auflage
-- ARGE Verkehrsrecht im Deutschen Anwaltverein — [verkehrsrecht.de](https://www.verkehrsrecht.de)
+- ARGE Verkehrsrecht im Deutschen Anwaltverein – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 
@@ -276,4 +276,4 @@ Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte einschalten.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

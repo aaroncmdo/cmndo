@@ -12,12 +12,12 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Monatsabrechnung ${p.abrechnungsNr} — ${p.monat}`
+  return `Monatsabrechnung ${p.abrechnungsNr} – ${p.monat}`
 }
 
 export function KanzleiMonatsAbrechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Abrechnung ${props.abrechnungsNr} — ${props.summeBrutto}`}>
+    <EmailLayout preview={`Abrechnung ${props.abrechnungsNr} – ${props.summeBrutto}`}>
       <Heading>Monatsabrechnung {props.monat}</Heading>
       <Paragraph>
         Sehr geehrte Damen und Herren von {props.kanzleiName}, anbei die Abrechnung

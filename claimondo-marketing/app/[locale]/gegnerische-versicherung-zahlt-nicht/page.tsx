@@ -66,27 +66,27 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Was kann ich tun, wenn die gegnerische Versicherung nicht zahlt?',
     antwort:
-      'Bei unverschuldetem Unfall haben Sie nach § 249 BGB Anspruch auf vollständigen Schadensersatz. Zahlt der gegnerische Haftpflichtversicherer nach angemessener Prüffrist (in der Regel 4–6 Wochen) nicht oder nur gekürzt, gerät er in Verzug (§ 286 BGB). Sie müssen dann nicht verhandeln: Unsere Partnerkanzlei für Verkehrsrecht setzt die Ansprüche mit BGH-fundierter Begründung durch — bei unverschuldetem Unfall für Sie kostenfrei.',
+      'Bei unverschuldetem Unfall haben Sie nach § 249 BGB Anspruch auf vollständigen Schadensersatz. Zahlt der gegnerische Haftpflichtversicherer nach angemessener Prüffrist (in der Regel 4–6 Wochen) nicht oder nur gekürzt, gerät er in Verzug (§ 286 BGB). Sie müssen dann nicht verhandeln: Unsere Partnerkanzlei für Verkehrsrecht setzt die Ansprüche mit BGH-fundierter Begründung durch – bei unverschuldetem Unfall für Sie kostenfrei.',
   },
   {
     frage: 'Wie lange darf eine Versicherung mit der Regulierung warten?',
     antwort:
-      'Dem Versicherer steht eine angemessene Prüffrist zu — bei klarer Haftungslage typisch 4–6 Wochen ab vollständiger Schadensunterlage. Danach tritt Verzug ein (§ 286 BGB) und es entstehen Verzugszinsen in Höhe von 5 Prozentpunkten über dem Basiszinssatz (§ 288 Abs. 1 BGB).',
+      'Dem Versicherer steht eine angemessene Prüffrist zu – bei klarer Haftungslage typisch 4–6 Wochen ab vollständiger Schadensunterlage. Danach tritt Verzug ein (§ 286 BGB) und es entstehen Verzugszinsen in Höhe von 5 Prozentpunkten über dem Basiszinssatz (§ 288 Abs. 1 BGB).',
   },
   {
-    frage: 'Die Versicherung kürzt meine Rechnung — muss ich das hinnehmen?',
+    frage: 'Die Versicherung kürzt meine Rechnung – muss ich das hinnehmen?',
     antwort:
-      'Nein. Kürzungen bei Sachverständigen-Honorar, Mietwagen oder Reparatur sind häufig unberechtigt. Nach BGH VI ZR 280/22 trägt das Werkstatt- und Sachverständigen-Risiko der Schädiger, nicht der Geschädigte — Sie müssen weder das günstigste Angebot wählen noch fremde Rechnungen überwachen.',
+      'Nein. Kürzungen bei Sachverständigen-Honorar, Mietwagen oder Reparatur sind häufig unberechtigt. Nach BGH VI ZR 280/22 trägt das Werkstatt- und Sachverständigen-Risiko der Schädiger, nicht der Geschädigte – Sie müssen weder das günstigste Angebot wählen noch fremde Rechnungen überwachen.',
   },
   {
     frage: 'Wer zahlt den Anwalt, wenn ich gegen die Versicherung vorgehe?',
     antwort:
-      'Bei unverschuldetem Unfall sind die Kosten der außergerichtlichen anwaltlichen Vertretung erforderlicher Herstellungsaufwand nach § 249 BGB — der gegnerische Haftpflichtversicherer trägt sie. Für Sie entstehen keine Eigenkosten.',
+      'Bei unverschuldetem Unfall sind die Kosten der außergerichtlichen anwaltlichen Vertretung erforderlicher Herstellungsaufwand nach § 249 BGB – der gegnerische Haftpflichtversicherer trägt sie. Für Sie entstehen keine Eigenkosten.',
   },
   {
     frage: 'Was bedeutet eine „Teilregulierung" oder „Pauschalabgeltung"?',
     antwort:
-      'Ein Vergleichsangebot unterhalb des tatsächlichen Schadens. Sie sind nicht verpflichtet, es anzunehmen. Erst ein unabhängiges Gutachten beziffert Reparatur, Wertminderung und Nutzungsausfall vollständig — Grundlage, um den Restbetrag durchzusetzen.',
+      'Ein Vergleichsangebot unterhalb des tatsächlichen Schadens. Sie sind nicht verpflichtet, es anzunehmen. Erst ein unabhängiges Gutachten beziffert Reparatur, Wertminderung und Nutzungsausfall vollständig – Grundlage, um den Restbetrag durchzusetzen.',
   },
 ]
 
@@ -118,7 +118,7 @@ export default function Page() {
           serviceSchema({
             name: 'Durchsetzung gegen die gegnerische Haftpflichtversicherung',
             description:
-              'Wenn die gegnerische Haftpflichtversicherung nach unverschuldetem Unfall nicht oder nur gekürzt zahlt: Verzug nach § 286 BGB, Verzugszinsen nach § 288 BGB und Durchsetzung aller Ansprüche über eine Partnerkanzlei für Verkehrsrecht — für unverschuldet Geschädigte 0 €.',
+              'Wenn die gegnerische Haftpflichtversicherung nach unverschuldetem Unfall nicht oder nur gekürzt zahlt: Verzug nach § 286 BGB, Verzugszinsen nach § 288 BGB und Durchsetzung aller Ansprüche über eine Partnerkanzlei für Verkehrsrecht – für unverschuldet Geschädigte 0 €.',
             url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
           }),
           faqPageSchema(FAQS, {
@@ -229,7 +229,7 @@ export default function Page() {
           </ul>
         </section>
 
-        {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web — Geschwister-Seiten + Cornerstone-Anker. */}
+        {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web – Geschwister-Seiten + Cornerstone-Anker. */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
             {t('verwandt_h2')}
@@ -237,7 +237,7 @@ export default function Page() {
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
             {verwandtLinks.map((label, i) => (
               <li key={VERWANDT_HREFS[i]}>
-                {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg — letzter Link. */}
+                {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg – letzter Link. */}
                 → <Link href={VERWANDT_HREFS[i]} className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{label}</Link>
               </li>
             ))}

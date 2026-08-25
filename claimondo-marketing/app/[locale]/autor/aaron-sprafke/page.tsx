@@ -27,14 +27,14 @@ const SCHWERPUNKTE = [
 ]
 
 export const metadata: Metadata = {
-  title: 'Aaron Sprafke — Mitgründer & COO von Claimondo',
+  title: 'Aaron Sprafke – Mitgründer & COO von Claimondo',
   description:
     'Aaron Sprafke, Mitgründer und COO von Claimondo, über die Schadenregulierung für unverschuldet Geschädigte. Autor der Claimondo-Wissensinhalte.',
   alternates: { canonical: '/autor/aaron-sprafke' },
   openGraph: {
     type: 'profile',
     url: AUTHOR_URL,
-    title: 'Aaron Sprafke — Mitgründer & COO von Claimondo',
+    title: 'Aaron Sprafke – Mitgründer & COO von Claimondo',
     description: 'Mitgründer & COO von Claimondo. Autor der Wissensinhalte zur Kfz-Schadenregulierung.',
     locale: 'de_DE',
     siteName: 'Claimondo',
@@ -101,7 +101,7 @@ export default function Page() {
           <p className="text-base leading-relaxed text-claimondo-shield">
             Aaron Sprafke ist Mitgründer und COO von Claimondo. Mit Claimondo macht er die
             Schadenregulierung nach unverschuldetem Kfz-Unfall für Geschädigte kostenfrei,
-            transparent und digital — von der unabhängigen Begutachtung über die Anwaltsanbindung
+            transparent und digital – von der unabhängigen Begutachtung über die Anwaltsanbindung
             bis zur Auszahlung. Er verantwortet die Wissensinhalte rund um Haftpflichtschaden,
             Versicherer-Praxis und Sachverständige und sorgt dafür, dass jeder Beitrag mit
             BGH-Bezug und einem konkreten nächsten Schritt erklärt ist.

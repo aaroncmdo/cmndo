@@ -63,8 +63,8 @@ export default function Page() {
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
             Standardbriefe der gegnerischen Haftpflichtversicherung folgen Mustern: Wertminderung
             gestrichen, Mietwagen „zu hoch", Gutachten „nicht erforderlich". Jeder Decoder zerlegt ein
-            solches Schreiben Satz für Satz — <strong className="text-claimondo-navy">was der Versicherer
-            schreibt → was er meint → das BGH-konforme Gegenargument</strong> — und endet mit dem nächsten
+            solches Schreiben Satz für Satz – <strong className="text-claimondo-navy">was der Versicherer
+            schreibt → was er meint → das BGH-konforme Gegenargument</strong> – und endet mit dem nächsten
             konkreten Schritt. Bei unverschuldetem Unfall trägt der Gegner die Kosten (§ 249 BGB).
           </p>
         </header>

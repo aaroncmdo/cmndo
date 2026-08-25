@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verschulden-bgb823
-meta_title: § 823 BGB — Verschuldenshaftung nach Unfall
+meta_title: § 823 BGB – Verschuldenshaftung nach Unfall
 type: glossar-spoke
 cluster: H1
 nummer: H1.2
@@ -16,10 +16,10 @@ customer_questions:
   - "schadensersatz wann"
   - "deliktshaftung was bedeutet"
 last_modified: 2026-05-18
-excerpt: § 823 BGB ist die allgemeine Verschuldenshaftung des deutschen Rechts: Wer vorsätzlich oder fahrlässig Körper, Gesundheit oder Eigentum eines anderen verletzt, schuldet Schadensersatz. Im Verkehrsunfall ergänzt sie § 7 StVG, ist aber beweisrechtlich anspruchsvoller — der Geschädigte muss das Verschulden positiv nachweisen.
+excerpt: § 823 BGB ist die allgemeine Verschuldenshaftung des deutschen Rechts: Wer vorsätzlich oder fahrlässig Körper, Gesundheit oder Eigentum eines anderen verletzt, schuldet Schadensersatz. Im Verkehrsunfall ergänzt sie § 7 StVG, ist aber beweisrechtlich anspruchsvoller – der Geschädigte muss das Verschulden positiv nachweisen.
 keyFacts:
-  - § 823 Abs. 1 BGB — Verletzung von Leben, Körper, Gesundheit, Eigentum
-  - § 823 Abs. 2 BGB — Schutzgesetzverletzung (z. B. StVO, StGB §§ 222/229)
+  - § 823 Abs. 1 BGB – Verletzung von Leben, Körper, Gesundheit, Eigentum
+  - § 823 Abs. 2 BGB – Schutzgesetzverletzung (z. B. StVO, StGB §§ 222/229)
   - Beweislast für Verschulden liegt beim Geschädigten (anders als § 7 StVG)
   - Hauptanwendung: Fahrradfahrer/Fußgänger als Schädiger (kein Kfz, kein StVG)
   - § 276 BGB: einfache Fahrlässigkeit reicht für Haftungsauslösung
@@ -29,12 +29,12 @@ related:
   - /haftpflicht/fahrerhaftung-stvg18
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/beweislast
-meta_description: "§823 BGB: die allgemeine Verschuldenshaftung beim Unfall — sie ergänzt §7 StVG, ist aber beweislastig (Sie tragen das Verschulden). Wann sie greift."
+meta_description: "§823 BGB: die allgemeine Verschuldenshaftung beim Unfall – sie ergänzt §7 StVG, ist aber beweislastig (Sie tragen das Verschulden). Wann sie greift."
 ---
 
-# § 823 BGB — Allgemeine Verschuldenshaftung beim Verkehrsunfall
+# § 823 BGB – Allgemeine Verschuldenshaftung beim Verkehrsunfall
 
-> **Kurz erklärt:** § 823 BGB ist die zentrale **Verschuldenshaftung** des deutschen Rechts: Wer **vorsätzlich oder fahrlässig** das Leben, den Körper, die Gesundheit oder eine Sache eines anderen widerrechtlich verletzt, schuldet Schadensersatz. Anders als § 7 StVG verlangt § 823 BGB den **Verschuldens-Nachweis durch den Geschädigten**. Bei Verkehrsunfällen greift § 823 BGB **neben** § 7 StVG und § 18 StVG — praktisch wird sie selten aktiv genutzt, weil § 7 StVG die einfachere Anspruchsgrundlage ist.
+> **Kurz erklärt:** § 823 BGB ist die zentrale **Verschuldenshaftung** des deutschen Rechts: Wer **vorsätzlich oder fahrlässig** das Leben, den Körper, die Gesundheit oder eine Sache eines anderen widerrechtlich verletzt, schuldet Schadensersatz. Anders als § 7 StVG verlangt § 823 BGB den **Verschuldens-Nachweis durch den Geschädigten**. Bei Verkehrsunfällen greift § 823 BGB **neben** § 7 StVG und § 18 StVG – praktisch wird sie selten aktiv genutzt, weil § 7 StVG die einfachere Anspruchsgrundlage ist.
 
 ## Auch bekannt als
 
@@ -44,25 +44,25 @@ meta_description: "§823 BGB: die allgemeine Verschuldenshaftung beim Unfall —
 
 ## In einem Satz erklärt
 
-§ 823 BGB verpflichtet jeden, der einen anderen schuldhaft verletzt, zum Schadensersatz — die zentrale Verschuldenshaftung des deutschen Rechts.
+§ 823 BGB verpflichtet jeden, der einen anderen schuldhaft verletzt, zum Schadensersatz – die zentrale Verschuldenshaftung des deutschen Rechts.
 
 ## In drei Sätzen erklärt
 
-§ 823 Abs. 1 BGB schreibt vor: „Wer vorsätzlich oder fahrlässig das Leben, den Körper, die Gesundheit, die Freiheit, das Eigentum oder ein sonstiges Recht eines anderen widerrechtlich verletzt, ist dem anderen zum Ersatz des daraus entstehenden Schadens verpflichtet." Im Verkehrsunfall ist § 823 BGB **neben** § 7 StVG (Halterhaftung) und § 18 StVG (Fahrerhaftung) die dritte mögliche Anspruchsgrundlage — sie verlangt aber den **Nachweis von Verschulden** durch den Geschädigten und ist deshalb praktisch seltener der erste Hebel. Die wichtigste Funktion: § 823 BGB kann eingreifen, wenn die StVG-Vorschriften nicht greifen (z. B. bei Nicht-Kraftfahrzeugen wie Fahrrad-Fahrern, Fußgängern-Schadenstifter) — sie ist die **Lücken-Füller-Vorschrift** des Haftungs-Systems.
+§ 823 Abs. 1 BGB schreibt vor: „Wer vorsätzlich oder fahrlässig das Leben, den Körper, die Gesundheit, die Freiheit, das Eigentum oder ein sonstiges Recht eines anderen widerrechtlich verletzt, ist dem anderen zum Ersatz des daraus entstehenden Schadens verpflichtet." Im Verkehrsunfall ist § 823 BGB **neben** § 7 StVG (Halterhaftung) und § 18 StVG (Fahrerhaftung) die dritte mögliche Anspruchsgrundlage – sie verlangt aber den **Nachweis von Verschulden** durch den Geschädigten und ist deshalb praktisch seltener der erste Hebel. Die wichtigste Funktion: § 823 BGB kann eingreifen, wenn die StVG-Vorschriften nicht greifen (z. B. bei Nicht-Kraftfahrzeugen wie Fahrrad-Fahrern, Fußgängern-Schadenstifter) – sie ist die **Lücken-Füller-Vorschrift** des Haftungs-Systems.
 
 ## Die fünf Schlüsselzahlen
 
-- **§ 823 Abs. 1 BGB** — Verschuldenshaftung als Grundsatz
-- **§ 823 Abs. 2 BGB** — Schutzgesetz-Verletzung (z. B. StVO-Verstoß)
+- **§ 823 Abs. 1 BGB** – Verschuldenshaftung als Grundsatz
+- **§ 823 Abs. 2 BGB** – Schutzgesetz-Verletzung (z. B. StVO-Verstoß)
 - **Vorsatz oder Fahrlässigkeit** als Verschuldens-Formen
 - **Beweislast beim Geschädigten** (anders als § 18 StVG)
-- **Lebenslange Vorschrift** seit 1900 — Kern des deutschen Schadensrechts
+- **Lebenslange Vorschrift** seit 1900 – Kern des deutschen Schadensrechts
 
 ---
 
 ## Wann § 823 BGB im Verkehrsunfall relevant ist
 
-In der Praxis ist § 823 BGB beim Verkehrsunfall selten die führende Vorschrift — § 7 StVG (Halterhaftung) und § 18 StVG (Fahrerhaftung) sind beweisrechtlich günstiger. § 823 BGB wird hauptsächlich relevant:
+In der Praxis ist § 823 BGB beim Verkehrsunfall selten die führende Vorschrift – § 7 StVG (Halterhaftung) und § 18 StVG (Fahrerhaftung) sind beweisrechtlich günstiger. § 823 BGB wird hauptsächlich relevant:
 
 | Konstellation | Warum § 823 BGB |
 |---|---|
@@ -70,22 +70,22 @@ In der Praxis ist § 823 BGB beim Verkehrsunfall selten die führende Vorschrift
 | **Fußgänger als Schädiger** | Kein Kfz |
 | **Tier-Halter (z. B. Pferd auf Straße)** | § 833 BGB ist Spezialnorm, § 823 BGB Auffangtatbestand |
 | **Schadens-Folgen Dritter (z. B. Schock-Schaden Angehörige)** | Erweiterte Schutz-Logik |
-| **Ergänzung zu StVG-Vorschriften** | Bei besonders schuldhaftem Verhalten — höhere Quote |
+| **Ergänzung zu StVG-Vorschriften** | Bei besonders schuldhaftem Verhalten – höhere Quote |
 
 ---
 
 ## § 823 Abs. 1 vs. § 823 Abs. 2 BGB
 
-### Absatz 1 — Grundnorm
-Verletzung von Leben, Körper, Gesundheit, Freiheit, Eigentum oder einem sonstigen absoluten Recht — schuldhaft (vorsätzlich oder fahrlässig).
+### Absatz 1 – Grundnorm
+Verletzung von Leben, Körper, Gesundheit, Freiheit, Eigentum oder einem sonstigen absoluten Recht – schuldhaft (vorsätzlich oder fahrlässig).
 
-### Absatz 2 — Schutzgesetz-Verletzung
+### Absatz 2 – Schutzgesetz-Verletzung
 Verstoß gegen ein **Schutzgesetz**, das einem anderen schützen soll. Im Verkehr besonders relevant:
 - **Strafgesetzbuch (StGB)** §§ 142 (Fahrerflucht), 222 (fahrlässige Tötung), 229 (fahrlässige Körperverletzung)
-- **Straßenverkehrs-Ordnung (StVO)** — alle Verkehrsregeln (Vorfahrt, Geschwindigkeit, Abstand)
-- **Straßenverkehrs-Zulassungs-Ordnung (StVZO)** — technische Vorschriften
+- **Straßenverkehrs-Ordnung (StVO)** – alle Verkehrsregeln (Vorfahrt, Geschwindigkeit, Abstand)
+- **Straßenverkehrs-Zulassungs-Ordnung (StVZO)** – technische Vorschriften
 
-→ Schutzgesetz-Verletzung beweist häufig den **Schuldgehalt** des § 823 Abs. 1 — beide Absätze laufen meist parallel.
+→ Schutzgesetz-Verletzung beweist häufig den **Schuldgehalt** des § 823 Abs. 1 – beide Absätze laufen meist parallel.
 
 ---
 
@@ -105,15 +105,15 @@ Verstoß gegen ein **Schutzgesetz**, das einem anderen schützen soll. Im Verkeh
 
 ---
 
-## Beweislast — der Hauptunterschied zu § 7/§ 18 StVG
+## Beweislast – der Hauptunterschied zu § 7/§ 18 StVG
 
 | Norm | Beweislast Verschulden |
 |---|---|
-| § 7 StVG | Keine — Gefährdungshaftung |
-| § 18 StVG | Vermutet — Fahrer muss sich entlasten |
+| § 7 StVG | Keine – Gefährdungshaftung |
+| § 18 StVG | Vermutet – Fahrer muss sich entlasten |
 | **§ 823 BGB** | **Geschädigte muss positiv beweisen** |
 
-→ Damit ist § 823 BGB für den Geschädigten **anstrengender** zu beweisen — bei klaren Verkehrs-Konstellationen ist § 7 StVG / § 18 StVG der schnellere Hebel. Der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) hilft in beiden Fällen.
+→ Damit ist § 823 BGB für den Geschädigten **anstrengender** zu beweisen – bei klaren Verkehrs-Konstellationen ist § 7 StVG / § 18 StVG der schnellere Hebel. Der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) hilft in beiden Fällen.
 
 ---
 
@@ -122,11 +122,11 @@ Verstoß gegen ein **Schutzgesetz**, das einem anderen schützen soll. Im Verkeh
 - **Bei Fahrrad-Fahrern als Schädiger:** kein StVG, nur § 823 BGB
 - **Bei groben Verkehrsdelikten:** § 823 Abs. 2 i. V. m. § 222/229 StGB zusätzliche Druckmittel
 - **Bei Schmerzensgeld-Erhöhung** wegen grober Fahrlässigkeit oder Vorsatz (Genugtuungs-Funktion)
-- **Bei Schock-/Trauma-Schäden Dritter** — erweiterte Schutz-Logik
+- **Bei Schock-/Trauma-Schäden Dritter** – erweiterte Schutz-Logik
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Bei Kfz-Verkehrsunfall reicht meist § 7 StVG. § 823 BGB ist Auffangtatbestand bei besonderen Konstellationen oder verschärfter Haftung.
@@ -147,10 +147,10 @@ Die zentrale Verschuldenshaftung des deutschen Rechts. Wer einen anderen vorsät
 Vor allem bei Nicht-Kfz-Schädigern (Fahrradfahrer, Fußgänger), bei besonders schuldhaften Verhalten (Schmerzensgeld-Erhöhung) und bei erweiterten Schadens-Folgen (Schockschaden).
 
 **Was ist der Unterschied zu § 7 StVG?**
-§ 7 StVG ist Gefährdungshaftung — kein Verschuldens-Nachweis nötig. § 823 BGB verlangt positiven Verschuldens-Nachweis durch den Geschädigten.
+§ 7 StVG ist Gefährdungshaftung – kein Verschuldens-Nachweis nötig. § 823 BGB verlangt positiven Verschuldens-Nachweis durch den Geschädigten.
 
 **Was ist § 823 Abs. 2 BGB?**
-Schutzgesetz-Verletzung — wer gegen ein Schutzgesetz verstößt (z. B. StVO, StGB), haftet schadensersatzrechtlich. Im Verkehr besonders relevant in Kombination mit § 823 Abs. 1.
+Schutzgesetz-Verletzung – wer gegen ein Schutzgesetz verstößt (z. B. StVO, StGB), haftet schadensersatzrechtlich. Im Verkehr besonders relevant in Kombination mit § 823 Abs. 1.
 
 **Bei welcher Norm habe ich bessere Karten?**
 Bei klassischem Kfz-Unfall: § 7 StVG (Halter) + § 18 StVG (Fahrer). Bei Sonder-Konstellationen ggf. zusätzlich § 823 BGB.
@@ -159,10 +159,10 @@ Bei klassischem Kfz-Unfall: § 7 StVG (Halter) + § 18 StVG (Fahrer). Bei Sonder
 
 ## Verwandte Begriffe
 
-- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) — Halterhaftung
-- [§ 18 StVG Fahrerhaftung](/haftpflicht/fahrerhaftung-stvg18) — Fahrerhaftung
-- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) — Quotelung
-- [Beweislast](/haftpflicht/beweislast) — Verteilungs-Regeln
+- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) – Halterhaftung
+- [§ 18 StVG Fahrerhaftung](/haftpflicht/fahrerhaftung-stvg18) – Fahrerhaftung
+- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) – Quotelung
+- [Beweislast](/haftpflicht/beweislast) – Verteilungs-Regeln
 
 ---
 
@@ -174,8 +174,8 @@ Bei klassischem Kfz-Unfall: § 7 StVG (Halter) + § 18 StVG (Fahrer). Bei Sonder
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 823 — [gesetze-im-internet.de/bgb/__823.html](https://www.gesetze-im-internet.de/bgb/__823.html)
-- BGB § 276 — Vorsatz und Fahrlässigkeit
+- Bürgerliches Gesetzbuch § 823 – [gesetze-im-internet.de/bgb/__823.html](https://www.gesetze-im-internet.de/bgb/__823.html)
+- BGB § 276 – Vorsatz und Fahrlässigkeit
 - BGH-Rechtsprechung zur Verschuldenshaftung, ständige Rechtsprechung
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 - Palandt/Grüneberg zu § 823 BGB
@@ -224,4 +224,4 @@ Bei klassischem Kfz-Unfall: § 7 StVG (Halter) + § 18 StVG (Fahrer). Bei Sonder
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

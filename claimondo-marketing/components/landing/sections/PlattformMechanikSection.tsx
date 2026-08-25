@@ -26,7 +26,7 @@ export function PlattformMechanikSection() {
             id="plattform-mechanik-heading"
             className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl"
           >
-            Das Uber-Prinzip für Schadensgutachten — so funktioniert es.
+            Das Uber-Prinzip für Schadensgutachten – so funktioniert es.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
             Hinter unseren 32 Tagen steckt eine Plattform-Mechanik, die Gutachter, Anwalt

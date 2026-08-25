@@ -48,7 +48,7 @@ const FAQS = [
   {
     frage: 'Welches Marketing bringt Kfz-Gutachtern die meisten Aufträge?',
     antwort:
-      'Die Kombination aus lokaler Sichtbarkeit (Google Business Profile, Bewertungen) und Plattform-Distribution. Beide bauen eine planbare Auftragsbasis auf, ohne dass laufend Werbebudget nötig ist — anders als bei Anzeigen.',
+      'Die Kombination aus lokaler Sichtbarkeit (Google Business Profile, Bewertungen) und Plattform-Distribution. Beide bauen eine planbare Auftragsbasis auf, ohne dass laufend Werbebudget nötig ist – anders als bei Anzeigen.',
   },
   {
     frage: 'Lohnen sich Google Ads für Sachverständige?',
@@ -58,12 +58,12 @@ const FAQS = [
   {
     frage: 'Wie wichtig sind Online-Bewertungen?',
     antwort:
-      'Sehr wichtig. Bewertungen sind bei lokaler Suche ein zentraler Ranking- und Vertrauensfaktor. Bitten Sie zufriedene Kunden aktiv um eine Bewertung — das ist kostenlos und wirkt direkt auf die Auftragslage.',
+      'Sehr wichtig. Bewertungen sind bei lokaler Suche ein zentraler Ranking- und Vertrauensfaktor. Bitten Sie zufriedene Kunden aktiv um eine Bewertung – das ist kostenlos und wirkt direkt auf die Auftragslage.',
   },
   {
     frage: 'Brauche ich als Gutachter eine eigene Website?',
     antwort:
-      'Ja — sie ist die Vertrauens-Landeseite für jede Marketing-Maßnahme. Sie sollte Leistungen, Qualifikationen und Referenzen klar zeigen. Ohne sie verpufft die Reichweite anderer Kanäle.',
+      'Ja – sie ist die Vertrauens-Landeseite für jede Marketing-Maßnahme. Sie sollte Leistungen, Qualifikationen und Referenzen klar zeigen. Ohne sie verpufft die Reichweite anderer Kanäle.',
   },
   {
     frage: 'Wie ergänzt eine Plattform mein eigenes Marketing?',
@@ -90,7 +90,7 @@ export default function MarketingPage() {
           serviceSchema({
             name: 'Marketing für Kfz-Sachverständige',
             description:
-              'Kundenakquise für Kfz-Sachverständige: lokale SEO, Bewertungen, Online-Präsenz und Plattform-Distribution — was wirklich Aufträge bringt statt Budget zu verbrennen.',
+              'Kundenakquise für Kfz-Sachverständige: lokale SEO, Bewertungen, Online-Präsenz und Plattform-Distribution – was wirklich Aufträge bringt statt Budget zu verbrennen.',
             url: `${GUTACHTER_LANDING_URL}/marketing`,
           }),
           faqPageSchema(FAQS, {

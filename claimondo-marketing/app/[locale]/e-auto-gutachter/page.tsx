@@ -53,17 +53,17 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Warum braucht ein E-Auto einen spezialisierten Gutachter?',
     antwort:
-      'Die Hochvolt-Batterie ist die teuerste und sicherheitsrelevanteste Komponente. Ihre Bewertung sowie die Prüfung von Karosseriestruktur, Sensorik und Assistenzsystemen erfordern Fachkompetenz — ein Standard-Gutachten übersieht diese Werte leicht.',
+      'Die Hochvolt-Batterie ist die teuerste und sicherheitsrelevanteste Komponente. Ihre Bewertung sowie die Prüfung von Karosseriestruktur, Sensorik und Assistenzsystemen erfordern Fachkompetenz – ein Standard-Gutachten übersieht diese Werte leicht.',
   },
   {
     frage: 'Wird die Batterie nach einem Unfall geprüft?',
     antwort:
-      'Ein qualifiziertes E-Auto-Gutachten umfasst die Hochvolt-Diagnose — auch ohne sichtbare Schäden, da Zell- oder Modulschäden verdeckt sein können und die Sicherheit sowie den Restwert betreffen.',
+      'Ein qualifiziertes E-Auto-Gutachten umfasst die Hochvolt-Diagnose – auch ohne sichtbare Schäden, da Zell- oder Modulschäden verdeckt sein können und die Sicherheit sowie den Restwert betreffen.',
   },
   {
     frage: 'Wer zahlt den E-Auto-Gutachter?',
     antwort:
-      'Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) — für Sie 0 €. Sie wählen Ihren eigenen, unabhängigen Sachverständigen frei.',
+      'Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) – für Sie 0 €. Sie wählen Ihren eigenen, unabhängigen Sachverständigen frei.',
   },
   {
     frage: 'Habe ich Anspruch auf Wertminderung beim E-Auto?',
@@ -73,7 +73,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Warum führt ein kleiner Unfall beim E-Auto schneller zum Totalschaden?',
     antwort:
-      'Schon moderate Schäden im Batterie- oder Strukturbereich können hohe Reparaturkosten verursachen. Ein frühes Gutachten klärt, ob Reparatur oder Wiederbeschaffung wirtschaftlich ist — und sichert die korrekte Abrechnung.',
+      'Schon moderate Schäden im Batterie- oder Strukturbereich können hohe Reparaturkosten verursachen. Ein frühes Gutachten klärt, ob Reparatur oder Wiederbeschaffung wirtschaftlich ist – und sichert die korrekte Abrechnung.',
   },
 ]
 

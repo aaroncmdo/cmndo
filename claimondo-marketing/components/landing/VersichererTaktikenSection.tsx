@@ -113,7 +113,7 @@ export async function VersichererTaktikenSection() {
                     <Link
                       href={item.href}
                       className="group mt-3 flex w-fit items-center gap-1 text-xs font-semibold text-claimondo-light-blue transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-light-blue"
-                      aria-label={`${item.trigger} — was BGH-fest gilt`}
+                      aria-label={`${item.trigger} – was BGH-fest gilt`}
                       data-tracking={`card-taktik-${item.trigger.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
                     >
                       {t('versicherer_taktiken.link_cta')}

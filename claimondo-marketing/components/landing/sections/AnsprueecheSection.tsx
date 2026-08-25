@@ -28,7 +28,7 @@ export async function AnsprueecheSection() {
 
   return (
     <>
-      {/* 4 — Was Ihnen zusteht: Vier Gespraeche (premium, nummeriert 1-4) */}
+      {/* 4 – Was Ihnen zusteht: Vier Gespraeche (premium, nummeriert 1-4) */}
       <section className="bg-claimondo-bg py-20 sm:py-28" aria-labelledby="ansprueche-heading">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
@@ -71,7 +71,7 @@ export async function AnsprueecheSection() {
         </div>
       </section>
 
-      {/* 8 — Misstrauens-Trio (verschoben, Doc 35 Fix 4b/c) */}
+      {/* 8 – Misstrauens-Trio (verschoben, Doc 35 Fix 4b/c) */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="sorgen-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">

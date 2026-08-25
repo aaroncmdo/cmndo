@@ -53,22 +53,22 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Brauche ich nach einem Motorradunfall ein eigenes Gutachten?',
     antwort:
-      'Oberhalb der Bagatellgrenze von etwa 750 € lohnt sich ein unabhängiges Gutachten — es dokumentiert auch verdeckte Rahmen- und Sturzschäden und beziffert die Wertminderung (BGH VI ZR 357/03). Bei unverschuldetem Unfall trägt die Kosten der gegnerische Haftpflichtversicherer (§ 249 BGB).',
+      'Oberhalb der Bagatellgrenze von etwa 750 € lohnt sich ein unabhängiges Gutachten – es dokumentiert auch verdeckte Rahmen- und Sturzschäden und beziffert die Wertminderung (BGH VI ZR 357/03). Bei unverschuldetem Unfall trägt die Kosten der gegnerische Haftpflichtversicherer (§ 249 BGB).',
   },
   {
     frage: 'Werden Helm und Schutzkleidung mit ersetzt?',
     antwort:
-      'Ja. Bei einem Sturz beschädigte Schutzausrüstung — Helm, Motorradkombi, Protektoren, Handschuhe und Stiefel — ist eine eigenständige, erstattungsfähige Schadensposition nach § 249 BGB. Bewahren Sie die beschädigten Teile als Nachweis auf.',
+      'Ja. Bei einem Sturz beschädigte Schutzausrüstung – Helm, Motorradkombi, Protektoren, Handschuhe und Stiefel – ist eine eigenständige, erstattungsfähige Schadensposition nach § 249 BGB. Bewahren Sie die beschädigten Teile als Nachweis auf.',
   },
   {
     frage: 'Wer zahlt den Motorrad-Gutachter?',
     antwort:
-      'Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) — für Sie 0 €. Sie wählen Ihren eigenen, unabhängigen Sachverständigen frei.',
+      'Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) – für Sie 0 €. Sie wählen Ihren eigenen, unabhängigen Sachverständigen frei.',
   },
   {
     frage: 'Bekomme ich Nutzungsausfall für mein Motorrad?',
     antwort:
-      'Ein Nutzungsausfall kommt in Betracht, wenn Sie auf das Motorrad angewiesen sind und es nicht nur als reines Freizeit-Zweitfahrzeug nutzen — die Bewertung ist einzelfallabhängig. Alternativ sind die Kosten eines Mietfahrzeugs erstattungsfähig.',
+      'Ein Nutzungsausfall kommt in Betracht, wenn Sie auf das Motorrad angewiesen sind und es nicht nur als reines Freizeit-Zweitfahrzeug nutzen – die Bewertung ist einzelfallabhängig. Alternativ sind die Kosten eines Mietfahrzeugs erstattungsfähig.',
   },
   {
     frage: 'Lohnt sich ein Gutachten auch beim Totalschaden?',

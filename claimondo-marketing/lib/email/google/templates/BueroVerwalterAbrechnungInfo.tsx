@@ -18,7 +18,7 @@ type Props = {
 
 export function subject(p: Props) {
   const label = p.orgTyp === 'akademie' ? 'Akademie' : 'Büro'
-  return `Claimondo Sammelabrechnung — ${p.abrechnungsNr} (${label} ${p.bueroName})`
+  return `Claimondo Sammelabrechnung – ${p.abrechnungsNr} (${label} ${p.bueroName})`
 }
 
 function fmtEuro(n: number): string {
@@ -30,7 +30,7 @@ export function BueroVerwalterAbrechnungInfoEmail(props: Props) {
   const label = isAkademie ? 'Akademie' : 'Büro'
 
   return (
-    <EmailLayout preview={`Sammelabrechnung ${props.abrechnungsNr} — ${props.bueroName}`}>
+    <EmailLayout preview={`Sammelabrechnung ${props.abrechnungsNr} – ${props.bueroName}`}>
       <Heading>Sammelabrechnung {label} {props.bueroName}</Heading>
 
       <Paragraph>

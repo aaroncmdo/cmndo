@@ -20,7 +20,7 @@ export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
     <section className="bg-white border-t border-claimondo-navy/[0.06]">
       <div className="max-w-3xl mx-auto px-4 py-16 space-y-14 text-claimondo-navy">
 
-        {/* Sektion 1 — Prozess */}
+        {/* Sektion 1 – Prozess */}
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-[-.024em] mb-3">
             {t('content.prozess_heading')}
@@ -49,7 +49,7 @@ export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
           </ol>
         </div>
 
-        {/* Sektion 2 — Was Sie verdienen */}
+        {/* Sektion 2 – Was Sie verdienen */}
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-[-.024em] mb-3 flex items-center gap-3">
             <EuroIcon className="w-7 h-7 text-claimondo-ondo" />
@@ -63,7 +63,7 @@ export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
           </p>
         </div>
 
-        {/* Sektion 3 — Onboarding & Voraussetzungen */}
+        {/* Sektion 3 – Onboarding & Voraussetzungen */}
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-[-.024em] mb-3 flex items-center gap-3">
             <ClockIcon className="w-7 h-7 text-claimondo-ondo" />
@@ -107,7 +107,7 @@ export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
           </a>
         </div>
 
-        {/* Sektion 4b — Ratgeber-Crosslinks (B2B-SEO-Topic-Pages) */}
+        {/* Sektion 4b – Ratgeber-Crosslinks (B2B-SEO-Topic-Pages) */}
         <div>
           <h2 className="text-lg font-bold tracking-[-.018em] mb-3">
             {t('content.ratgeber_heading')}
@@ -128,7 +128,7 @@ export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
           </div>
         </div>
 
-        {/* Sektion 5 — FAQ */}
+        {/* Sektion 5 – FAQ */}
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-[-.024em] mb-6">
             {t('content.faq_heading')}
@@ -151,7 +151,7 @@ export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
           </dl>
         </div>
 
-        {/* Cross-Link zum Ratgeber-Spoke — Discoverability fuer /gutachter-partner/leads-generieren */}
+        {/* Cross-Link zum Ratgeber-Spoke – Discoverability fuer /gutachter-partner/leads-generieren */}
         <div>
           <Link
             href="/gutachter-partner/leads-generieren"

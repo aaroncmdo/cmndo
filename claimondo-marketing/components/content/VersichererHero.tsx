@@ -9,7 +9,7 @@ interface Props {
   marktanteilPct: number
   /** BaFin-Beschwerdequote 2024; null = offiziell nicht ausgewiesen. */
   bafinQuote: number | null
-  /** Branchenschnitt fuer den Vergleich (Default 2,2 — BAFIN_BRANCHENSCHNITT_2024). */
+  /** Branchenschnitt fuer den Vergleich (Default 2,2 – BAFIN_BRANCHENSCHNITT_2024). */
   branchenschnitt?: number
   hauptsitz: string
   cta: { href: string; label: string }

@@ -110,7 +110,7 @@ export function FinderSprungPanel({ staedte, ratgeber, labels, termine }: Props)
         ))}
       </div>
 
-      {/* Backdrop nur, wenn offen — rein visuell, trägt keine Links. */}
+      {/* Backdrop nur, wenn offen – rein visuell, trägt keine Links. */}
       <div
         aria-hidden={offen === null}
         onClick={() => setOffen(null)}
