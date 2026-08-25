@@ -15,6 +15,7 @@ import {
 import { SERVICE_REALITY_BULLETS } from '@/lib/brand/service-pitch'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { NaechsterTerminHinweis } from '@/components/gutachter-finden/NaechsterTerminHinweis'
+import { WerkstattAbdeckungHinweis } from '@/components/gutachter-finden/WerkstattAbdeckungHinweis'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -457,6 +458,13 @@ export default async function KfzGutachterStadtPage({
       <section className="bg-claimondo-bg pt-10" aria-label="Terminverfügbarkeit">
         <div className="mx-auto max-w-3xl px-5">
           <NaechsterTerminHinweis stadt={s.name} />
+          {/* Der ZWEITE Weg. Nach dem Gutachten braucht der Kunde eine Werkstatt; bei
+              selbstverschuldetem Schaden ist sie sogar der erste Schritt. Bis 25.08.2026
+              stand davon nichts im HTML — /werkstatt-finden liefert 132 KB ohne eine
+              einzige konkrete Angabe (alles im iframe). Bewusst OHNE Namen, Adressen und
+              Rufnummern: die gibt die oeffentliche API nicht aus, damit der Lead ueber
+              uns laeuft. Rendert `null`, wenn dort keine Partner sitzen. */}
+          <WerkstattAbdeckungHinweis stadt={s.name} />
         </div>
       </section>
 
