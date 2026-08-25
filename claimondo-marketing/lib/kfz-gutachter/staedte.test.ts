@@ -44,7 +44,7 @@ describe('getStadtByName', () => {
   })
 })
 
-describe('STAEDTE — Voraussetzungen fuer die Namensauflösung', () => {
+describe('STAEDTE – Voraussetzungen fuer die Namensauflösung', () => {
   it('hat eindeutige Anzeigenamen', () => {
     // Ohne Eindeutigkeit waere getStadtByName nicht wohldefiniert.
     const doppelt = STAEDTE.map((s) => s.name).filter((n, i, a) => a.indexOf(n) !== i)
@@ -57,10 +57,10 @@ describe('STAEDTE — Voraussetzungen fuer die Namensauflösung', () => {
   })
 })
 
-describe('angrenzendeOrte — welche sind verlinkbar', () => {
+describe('angrenzendeOrte – welche sind verlinkbar', () => {
   const alleOrte = getHubCities().flatMap((h) => h.hyperlocal.angrenzendeOrte)
 
-  it('sind mehr Orte als verlinkbare — der Rest bleibt bewusst Text', () => {
+  it('sind mehr Orte als verlinkbare – der Rest bleibt bewusst Text', () => {
     const verlinkbar = alleOrte.filter((ort) => getStadtByName(ort) !== null)
     expect(alleOrte.length).toBeGreaterThan(verlinkbar.length)
     // 29 -> 37 (Welle 8) -> 48 (Welle 9): die neuen Orte standen alle schon als
@@ -121,7 +121,7 @@ describe('angrenzendeOrte — welche sind verlinkbar', () => {
   })
 })
 
-describe('Stammdaten-Invarianten — gelten fuer JEDE Stadt, auch kuenftige', () => {
+describe('Stammdaten-Invarianten – gelten fuer JEDE Stadt, auch kuenftige', () => {
   // Diese Bloecke pruefen nicht die drei neuen Eintraege, sondern die Regeln,
   // gegen die jeder neue Eintrag verstossen koennte. In P1 stand auf 31 von 84
   // Seiten ein Gericht in einer ANDEREN Stadt — solche Fehler faengt nur eine
@@ -196,7 +196,7 @@ describe('Stammdaten-Invarianten — gelten fuer JEDE Stadt, auch kuenftige', ()
   })
 })
 
-describe('P3-B2 — die drei neuen Orte', () => {
+describe('P3-B2 – die drei neuen Orte', () => {
   // Belegt am 17.08.2026; Quellen im Commit-Body. Der kritische Wert ist die
   // Gerichtskette: Erkelenz und Heinsberg liegen im SELBEN Kreis, gehoeren aber
   // zu VERSCHIEDENEN Landgerichten. Wer das aus der Nachbarschaft ableitet,
@@ -224,7 +224,7 @@ describe('P3-B2 — die drei neuen Orte', () => {
 
 })
 
-describe('P3-B2c — NRW zwischen 40 und 60 Tsd. Einwohnern', () => {
+describe('P3-B2c – NRW zwischen 40 und 60 Tsd. Einwohnern', () => {
   // Belegt am 17.08.2026; Quellen im Commit-Body. Geprueft werden nur die
   // Ketten, die man sich NICHT aus der Nachbarschaft herleiten kann — die
   // uebrigen 29 deckt die LG-Kammer-Invariante oben ab.
@@ -265,7 +265,7 @@ describe('P3-B2c — NRW zwischen 40 und 60 Tsd. Einwohnern', () => {
   })
 })
 
-describe('P3-B3 — Auswahl nach SV-Abdeckung', () => {
+describe('P3-B3 – Auswahl nach SV-Abdeckung', () => {
   // Belegt am 18.08.2026 gegen die echten isochrone_polygon (Point-in-Polygon,
   // nicht Radius). Geprueft werden die Ketten, die sich NICHT aus der
   // Nachbarschaft herleiten lassen — der Rest faellt unter die LG-Kammer-
@@ -314,7 +314,7 @@ describe('P3-B3 — Auswahl nach SV-Abdeckung', () => {
   })
 })
 
-describe('P3-B4 — Vollstaendigkeit NRW ab 40 Tsd.', () => {
+describe('P3-B4 – Vollstaendigkeit NRW ab 40 Tsd.', () => {
   // ⭐ DER TEST, DER GEFEHLT HAT.
   //
   // Bis zum 18.08.2026 entstanden die Wellen aus Einzelrecherchen, und die

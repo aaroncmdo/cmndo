@@ -594,12 +594,12 @@
       "report_damage_direct": "Schaden direkt melden",
       "view_sv_map": "Sachverständigen-Karte ansehen",
       "cs_find_sv_label": "Sachverständigen auf der Karte finden:",
-      "cs_find_sv_tail": "— interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.",
+      "cs_find_sv_tail": "– interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.",
       "cs_ki_label": "Kostenlose KI-Erstbewertung",
       "cs_ki_mid": "in 60 Sekunden:",
-      "cs_ki_tail": "— drei Fotos und eine kurze Beschreibung reichen.",
+      "cs_ki_tail": "– drei Fotos und eine kurze Beschreibung reichen.",
       "cs_report_mid": "mit Rückruf in unter 15 Minuten:",
-      "cs_report_tail": "— ohne Anmeldung, 3 Felder.",
+      "cs_report_tail": "– ohne Anmeldung, 3 Felder.",
       "cs_phone_hours": "(Mo–Fr 08–20, Sa+So 09–18 Uhr)"
     },
     "cluster": {
@@ -874,7 +874,7 @@
     },
     "hero": {
       "eyebrow": "Über Claimondo",
-      "headline": "Vollständige Schadensregulierung —",
+      "headline": "Vollständige Schadensregulierung –",
       "headline_accent": "auf Augenhöhe.",
       "subline": "Wir sind die Plattform die Geschädigten gibt was ihnen zusteht – nicht das was die Versicherung gerade noch durchwinkt."
     },
@@ -899,7 +899,7 @@
       "eyebrow": "Was wir glauben",
       "heading_pre": "In Deutschland kürzen Versicherer-Prüfdienste typischerweise",
       "heading_accent": "30–40 % der Ansprüche",
-      "heading_suf": "— und niemand widerspricht.¹",
+      "heading_suf": "– und niemand widerspricht.¹",
       "body": "Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten – ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung. Der BGH stützt den Geschädigten in mehreren Urteilen – unsere Partnerkanzlei für Verkehrsrecht setzt das für Sie durch.",
       "quelle": "¹ Quelle: BGH-Leitentscheidungen VI ZR 38/22 ff. · VI ZR 65/18 · VI ZR 174/24."
     },
@@ -1528,7 +1528,7 @@
       "eyebrow": "Persönliche Begleitung",
       "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
       "quote": "Sie haben einen festen Ansprechpartner: Wir koordinieren Gutachter, Werkstatt und unsere Partnerkanzlei, behalten jede Frist im Blick und halten Sie auf dem Laufenden – Sie müssen niemandem hinterhertelefonieren.",
-      "quote_attribution": "— Claimondo-Schadenbegleitung",
+      "quote_attribution": "– Claimondo-Schadenbegleitung",
       "cta_ablauf": "So funktioniert der Ablauf",
       "foto_alt": "Persönlicher Claimondo-Berater am Telefon"
     },
@@ -1568,7 +1568,7 @@
       "success_body": "Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück – täglich zwischen 8 und 20 Uhr, außerhalb dieser Zeiten am nächsten Morgen. Bitte halten Sie das Telefon bereit, die Nummer kann unterdrückt sein.",
       "success_no_response": "Sie hören nichts? Rufen Sie uns direkt an:",
       "success_another": "Noch eine Anfrage senden",
-      "error_no_response": "Klappt nicht? Rufen Sie uns direkt an —",
+      "error_no_response": "Klappt nicht? Rufen Sie uns direkt an –",
       "datenschutz_prefix": "Mit dem Absenden akzeptiere ich die",
       "datenschutz_link": "Datenschutzerklärung",
       "error_fallback": "Übermittlung fehlgeschlagen"
@@ -2171,7 +2171,7 @@
     ]
   },
   "faq": {
-    "heading": "Häufige Fragen —",
+    "heading": "Häufige Fragen –",
     "heading_accent": "Antworten in unter 60 Sekunden.",
     "sub": "Antworten zu Kfz-Schaden, Wertminderung, Versicherer-Kürzungen, Quotenvorrecht, Tesla-/E-Auto und mehr – alle mit BGH-Aktenzeichen und §-Verweisen belegt. Suchen Sie nach einem Stichwort oder springen Sie direkt zur passenden Gruppe.",
     "trust_badge": "BGH-belegt · 27 Fachanwalt-Quellen",
@@ -2443,7 +2443,7 @@
   "wie_es_funktioniert": {
     "hero": {
       "badge": "In 32 Tagen zum Geld · Live im Portal",
-      "h1_plain": "Vom Unfall zur Auszahlung —",
+      "h1_plain": "Vom Unfall zur Auszahlung –",
       "h1_accent": "in 5 Schritten.",
       "sub": "Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter kommt in unter 48 Stunden zu Ihrem Fahrzeug, Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.",
       "cta_primary": "Schaden online melden"
@@ -2499,7 +2499,7 @@
     ],
     "portal": {
       "eyebrow": "Das Claimondo-Portal",
-      "heading_pre": "Wie Uber —",
+      "heading_pre": "Wie Uber –",
       "heading_accent": "nur für Ihren Kfz-Schaden.",
       "sub": "Sehen Sie live, was gerade passiert: Gutachter unterwegs, Anwalt aktiv, Geld in Bearbeitung. Kein Anrufen, kein Warten – alle Schritte in einer App, jederzeit transparent.",
       "features": [
@@ -2542,7 +2542,7 @@
       "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
       "foto_alt": "Persönlicher Claimondo-Berater am Telefon",
       "blockquote": "„Sobald wir Ihre Meldung haben, übernehmen wir alles. Sie hören in 15 Minuten von mir, der Gutachter ist am nächsten Tag bei Ihnen, und ich melde mich persönlich bei jedem Meilenstein. Sie müssen mit der gegnerischen Versicherung kein einziges Mal sprechen.\"",
-      "byline": "— Claimondo-Schadenbegleitung"
+      "byline": "– Claimondo-Schadenbegleitung"
     },
     "faq": {
       "eyebrow": "Häufige Fragen zum Ablauf",
@@ -3278,7 +3278,7 @@
   },
   "kfz_gutachter_hub": {
     "hero_eyebrow": "Unabhängige Kfz-Sachverständige",
-    "hero_h1_line1": "Kfz-Gutachter finden —",
+    "hero_h1_line1": "Kfz-Gutachter finden –",
     "hero_h1_line2": "unabhängig & kostenfrei.",
     "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen Sachverständigen-Verzeichnis, bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil – die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
     "hero_cta_karte": "Auf der Karte ansehen",
@@ -3633,7 +3633,7 @@
     ],
     "urteil_intro": "Auf Klage der Wettbewerbszentrale untersagte das Landgericht Bremen einem Anbieter die Werbung für „Online-Kfz-Gutachten“. Das Gericht stützte sich auf drei Kern-Überlegungen:",
     "urteil_zitat": "„Die persönliche Inaugenscheinnahme des beschädigten Fahrzeugs gehört zur ureigensten Aufgabe eines Kfz-Sachverständigen.“",
-    "urteil_zitat_quelle": "— sinngemäße Kernaussage des LG Bremen",
+    "urteil_zitat_quelle": "– sinngemäße Kernaussage des LG Bremen",
     "urteil_punkte": [
       {
         "titel": "Persönliche Besichtigung ist nicht ersetzbar.",

@@ -65,12 +65,35 @@ function istBelegbareQuelle(quelle: unknown): quelle is string {
 }
 
 const alsArray = (wert: unknown): unknown[] => (Array.isArray(wert) ? wert : [])
+/**
+ * Deutscher Gedankenstrich. Im Deutschen ist das der HALBGEVIERTSTRICH mit
+ * Leerzeichen (Duden, DIN 5008: "Wort – Wort"); der Geviertstrich "—" ist
+ * englische Typografie und zugleich ein bekannter Marker fuer maschinell
+ * erzeugten Text.
+ *
+ * Die Normalisierung sitzt bewusst HIER, beim Lesen, und nicht im Generator:
+ * gemessen am 25.08.2026 tragen 532 der 538 Zeilen in `stadt_lokalinhalte`
+ * Geviertstriche. Ein einmaliges DB-Update haette den Bestand geheilt, aber
+ * nicht den naechsten Generator-Lauf — und es gibt mehrere Generator-Skripte
+ * (baue-charge-*.mjs). An dieser Stelle wirkt es fuer beides, ohne prod-Daten
+ * anzufassen.
+ *
+ * Nur die Form " — " mit Leerzeichen ringsum: ein Geviertstrich OHNE
+ * Leerzeichen waere ein Streckenstrich ("Koeln—Bonn") und bleibt stehen.
+ */
+const deutscherStrich = (s: string): string =>
+  s.trim() === '—'
+    ? s // Tabellen-Platzhalter fuer "nicht zutreffend", kein Gedankenstrich
+    : s.split(' — ').join(' – ').replace(/\s—$/, ' –').replace(/^—\s/, '– ')
+
 const alsText = (wert: unknown): string | undefined => {
-  const s = typeof wert === 'string' ? wert.trim() : ''
+  const s = typeof wert === 'string' ? deutscherStrich(wert.trim()) : ''
   return s ? s : undefined
 }
 const alsTextliste = (wert: unknown): string[] =>
-  alsArray(wert).filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+  alsArray(wert)
+    .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+    .map(deutscherStrich)
 
 /**
  * DB-Zeile -> Marketing-Form. Pur, damit sie ohne DB testbar ist.
@@ -105,7 +128,9 @@ export function mapLokalinhalt(zeile: unknown): Lokalinhalt | null {
     .map((h) => ({
       ort: alsText(h.ort)!,
       beschreibung: alsText(h.beschreibung)!,
-      quelle: h.quelle as string,
+      // ueber alsText, damit auch die Quellenzeile den deutschen
+      // Gedankenstrich bekommt (sie lief als einzige direkt durch)
+      quelle: alsText(h.quelle) ?? (h.quelle as string),
       ...(h.einzelfall === true ? { einzelfall: true as const } : {}),
     }))
 

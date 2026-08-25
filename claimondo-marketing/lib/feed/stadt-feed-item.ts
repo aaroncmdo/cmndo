@@ -14,14 +14,14 @@ export const STADT_PAGES_LASTMOD = new Date('2026-05-24')
 export function stadtToFeedItem(s: Stadt): FeedItem {
   const link = `${SITE_URL}/kfz-gutachter/${s.slug}`
   return {
-    title: `Kfz-Gutachter ${s.name} — Sachverständige & Schadensregulierung`,
+    title: `Kfz-Gutachter ${s.name} – Sachverständige & Schadensregulierung`,
     link,
     guid: link,
     pubDate: STADT_PAGES_LASTMOD,
     assetType: 'Stadt',
     categories: ['Lokale Sachverständigen-Gebiete', 'Stadt'],
     author: DEFAULT_AUTHOR,
-    excerpt: `Unabhängige Kfz-Gutachter in ${s.name} (${s.bundesland}). Sachverständiger mit Termin vor Ort, zuständiges ${s.lokal.landgericht}, BVSK-Honorarspanne ${s.bvskHonorarSpanne}. Schadensregulierung nach BGH-Linie inkl. Wertminderung, Mietwagen und Anwaltskosten — für unverschuldet Geschädigte kostenfrei nach § 249 BGB.`,
+    excerpt: `Unabhängige Kfz-Gutachter in ${s.name} (${s.bundesland}). Sachverständiger mit Termin vor Ort, zuständiges ${s.lokal.landgericht}, BVSK-Honorarspanne ${s.bvskHonorarSpanne}. Schadensregulierung nach BGH-Linie inkl. Wertminderung, Mietwagen und Anwaltskosten – für unverschuldet Geschädigte kostenfrei nach § 249 BGB.`,
     keyFacts: [
       `Landgericht: ${s.lokal.landgericht}`,
       `BVSK-Honorarspanne: ${s.bvskHonorarSpanne}`,

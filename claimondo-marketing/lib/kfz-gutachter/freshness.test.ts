@@ -77,7 +77,7 @@ describe('stadtLastModifiedISO', () => {
     expect(stadtLastModifiedISO('gibt-es-nicht')).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
-  it('kennt JEDE Stadt — sonst hinkt die generierte Map hinterher', () => {
+  it('kennt JEDE Stadt – sonst hinkt die generierte Map hinterher', () => {
     // Die Map wird von scripts/generate-stadt-anlagedatum.mjs erzeugt, nicht
     // gepflegt. Wer Staedte hinzufuegt und das Skript vergisst, faellt fuer die
     // neuen wieder auf den Default 2026-05-24 zurueck — also genau auf ein

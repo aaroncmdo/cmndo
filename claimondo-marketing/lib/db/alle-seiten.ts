@@ -60,6 +60,6 @@ export async function alleSeiten<T>(
 
   return {
     ok: false,
-    error: `Obergrenze von ${obergrenze} Zeilen erreicht — Abfrage liefert unerwartet weiter volle Seiten.`,
+    error: `Obergrenze von ${obergrenze} Zeilen erreicht – Abfrage liefert unerwartet weiter volle Seiten.`,
   }
 }

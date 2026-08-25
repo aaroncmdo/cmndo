@@ -11,7 +11,7 @@ export async function GET() {
   assertFeedFrontmatterValid()
   const rss = renderRssFeed(
     {
-      title: 'Claimondo — Wissens-Katalog Kfz-Schadensregulierung',
+      title: 'Claimondo – Wissens-Katalog Kfz-Schadensregulierung',
       description:
         'Vollständiges Wissens-Inventar von Claimondo: alle Cornerstones, Glossar-Spokes, Versicherer-Brief-Decoder, Sachverständigen-Verbände, Versicherer-Profile und Stadt-Seiten zur Kfz-Haftpflicht-Schadensregulierung.',
       selfPath: '/feed/katalog.xml',

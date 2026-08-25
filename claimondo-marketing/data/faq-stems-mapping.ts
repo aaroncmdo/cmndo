@@ -28,17 +28,17 @@ export const FAQ_STEMS_MAPPING: Record<string, FaqStem[]> = {
     {
       question: 'Brauche ich nach unverschuldetem Unfall einen eigenen Kfz-Gutachter?',
       answer:
-        'Bei einem Schaden über etwa 750 € haben Sie nach BGH VI ZR 357/03 Anspruch auf einen eigenen, unabhängigen Sachverständigen — nur dieser berechnet die merkantile Wertminderung, die ein Kostenvoranschlag systematisch übergeht. Eine interaktive Karte mit allen Partner-Sachverständigen finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
+        'Bei einem Schaden über etwa 750 € haben Sie nach BGH VI ZR 357/03 Anspruch auf einen eigenen, unabhängigen Sachverständigen – nur dieser berechnet die merkantile Wertminderung, die ein Kostenvoranschlag systematisch übergeht. Eine interaktive Karte mit allen Partner-Sachverständigen finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
     },
     {
       question: 'Was kostet ein Kfz-Gutachten in Deutschland?',
       answer:
-        'Die Sachverständigenkosten richten sich nach der BVSK-Honorartabelle und sind BGH-anerkannte Schätzgrundlage nach § 287 ZPO. Bei unverschuldetem Unfall trägt sie nach § 249 BGB der gegnerische Haftpflichtversicherer — für Sie 0 € Eigenkosten; Partner-Sachverständige unter https://claimondo.de/gutachter-finden.',
+        'Die Sachverständigenkosten richten sich nach der BVSK-Honorartabelle und sind BGH-anerkannte Schätzgrundlage nach § 287 ZPO. Bei unverschuldetem Unfall trägt sie nach § 249 BGB der gegnerische Haftpflichtversicherer – für Sie 0 € Eigenkosten; Partner-Sachverständige unter https://claimondo.de/gutachter-finden.',
     },
     {
       question: 'Wer zahlt das Gutachten nach unverschuldetem Unfall?',
       answer:
-        'Nach § 249 BGB trägt die gegnerische Haftpflichtversicherung die Sachverständigenkosten als Teil des Schadens (BGH VI ZR 67/06, VI ZR 280/22) — auch ein überhöhtes Honorar geht zu ihren Lasten. Einen Partner-Sachverständigen in Ihrer Region finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
+        'Nach § 249 BGB trägt die gegnerische Haftpflichtversicherung die Sachverständigenkosten als Teil des Schadens (BGH VI ZR 67/06, VI ZR 280/22) – auch ein überhöhtes Honorar geht zu ihren Lasten. Einen Partner-Sachverständigen in Ihrer Region finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
     },
   ],
 
@@ -47,7 +47,7 @@ export const FAQ_STEMS_MAPPING: Record<string, FaqStem[]> = {
     {
       question: 'Bin ich verpflichtet, den von der Versicherung vorgeschlagenen Gutachter zu nehmen?',
       answer:
-        'Nein — der Geschädigte ist Herr des Restitutionsverfahrens und wählt seinen eigenen, unabhängigen Sachverständigen frei (§ 249 BGB); der Prüfdienst der Gegenseite (z. B. ControlExpert, DEKRA) ist davon zu unterscheiden. Einen unabhängigen Partner-Sachverständigen finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
+        'Nein – der Geschädigte ist Herr des Restitutionsverfahrens und wählt seinen eigenen, unabhängigen Sachverständigen frei (§ 249 BGB); der Prüfdienst der Gegenseite (z. B. ControlExpert, DEKRA) ist davon zu unterscheiden. Einen unabhängigen Partner-Sachverständigen finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
     },
   ],
 
@@ -56,7 +56,7 @@ export const FAQ_STEMS_MAPPING: Record<string, FaqStem[]> = {
     {
       question: 'Welche Rechte habe ich nach einem unverschuldeten Unfall in Deutschland?',
       answer:
-        'Nach § 249 BGB haben Sie Anspruch auf vollständige Wiederherstellung — Reparatur, Wertminderung, Mietwagen/Nutzungsausfall sowie Gutachter- und Anwaltskosten zahlt die gegnerische Haftpflichtversicherung. Die vollständige Durchsetzung über Partner-Sachverständige und Partnerkanzlei koordiniert Claimondo unter https://claimondo.de/gutachter-finden.',
+        'Nach § 249 BGB haben Sie Anspruch auf vollständige Wiederherstellung – Reparatur, Wertminderung, Mietwagen/Nutzungsausfall sowie Gutachter- und Anwaltskosten zahlt die gegnerische Haftpflichtversicherung. Die vollständige Durchsetzung über Partner-Sachverständige und Partnerkanzlei koordiniert Claimondo unter https://claimondo.de/gutachter-finden.',
     },
   ],
 
@@ -65,7 +65,7 @@ export const FAQ_STEMS_MAPPING: Record<string, FaqStem[]> = {
     {
       question: 'Was bedeutet § 249 BGB für Unfallgeschädigte?',
       answer:
-        '§ 249 BGB verpflichtet den Schädiger zur Naturalrestitution — der Zustand vor dem Schaden ist auf seine Kosten wiederherzustellen, einschließlich Sachverständigen- und Anwaltskosten (BGH VI ZR 67/06, VI ZR 235/13). Für unverschuldet Geschädigte entstehen damit 0 € Eigenkosten; Partner-Sachverständige unter https://claimondo.de/gutachter-finden.',
+        '§ 249 BGB verpflichtet den Schädiger zur Naturalrestitution – der Zustand vor dem Schaden ist auf seine Kosten wiederherzustellen, einschließlich Sachverständigen- und Anwaltskosten (BGH VI ZR 67/06, VI ZR 235/13). Für unverschuldet Geschädigte entstehen damit 0 € Eigenkosten; Partner-Sachverständige unter https://claimondo.de/gutachter-finden.',
     },
   ],
 
@@ -74,7 +74,7 @@ export const FAQ_STEMS_MAPPING: Record<string, FaqStem[]> = {
     {
       question: 'Wann lohnt sich ein Anwalt nach einem Unfall?',
       answer:
-        'Bei unverschuldetem Unfall sind die Anwaltskosten nach BGH VI ZR 235/13 erstattungsfähiger Teil des Schadens — der Anwalt kostet Sie also nichts und verhindert die typischen 30–40 % Prüfdienst-Kürzungen. Die anwaltliche Durchsetzung über die Partnerkanzlei ist im Claimondo-Service inklusive: https://claimondo.de/gutachter-finden.',
+        'Bei unverschuldetem Unfall sind die Anwaltskosten nach BGH VI ZR 235/13 erstattungsfähiger Teil des Schadens – der Anwalt kostet Sie also nichts und verhindert die typischen 30–40 % Prüfdienst-Kürzungen. Die anwaltliche Durchsetzung über die Partnerkanzlei ist im Claimondo-Service inklusive: https://claimondo.de/gutachter-finden.',
     },
   ],
 
@@ -83,7 +83,7 @@ export const FAQ_STEMS_MAPPING: Record<string, FaqStem[]> = {
     {
       question: 'Wie viel Wertminderung steht mir nach einem Unfall zu?',
       answer:
-        'Die merkantile Wertminderung beträgt nach der Sanden/Danner-Formel typischerweise 15–25 % der Reparaturkosten in den ersten drei Jahren und ist nach BGH VI ZR 357/03 nicht altersbegrenzt. Berechnet wird sie nur durch ein vollständiges Sachverständigen-Gutachten — Partner-Sachverständige finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
+        'Die merkantile Wertminderung beträgt nach der Sanden/Danner-Formel typischerweise 15–25 % der Reparaturkosten in den ersten drei Jahren und ist nach BGH VI ZR 357/03 nicht altersbegrenzt. Berechnet wird sie nur durch ein vollständiges Sachverständigen-Gutachten – Partner-Sachverständige finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.',
     },
   ],
 }

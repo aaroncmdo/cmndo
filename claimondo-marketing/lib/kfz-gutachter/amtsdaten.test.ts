@@ -3,7 +3,7 @@ import { getAmtsdaten, pkwJeTausendEinwohner } from './amtsdaten'
 import { STAEDTE } from './staedte'
 
 describe('getAmtsdaten', () => {
-  it('kennt JEDE Stadt — sonst faellt die Sektion still aus', () => {
+  it('kennt JEDE Stadt – sonst faellt die Sektion still aus', () => {
     // Die Datei wird von scripts/generate-stadt-amtsdaten.mjs erzeugt, nicht
     // gepflegt. Wer Staedte hinzufuegt und das Skript vergisst, bekommt fuer
     // die neuen keine Sektion — und merkt es nicht, weil die Seite normal

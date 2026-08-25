@@ -17,7 +17,7 @@ import type { FeedItem } from './types'
 export const STRATEGIC_PAGES: FeedItem[] = [
   {
     title:
-      'Kfz-Gutachter-Vermittlungsportale im Vergleich — Claimondo, Neogutachter, Unfallpaten & Unfallgiganten',
+      'Kfz-Gutachter-Vermittlungsportale im Vergleich – Claimondo, Neogutachter, Unfallpaten & Unfallgiganten',
     link: `${SITE_URL}/kfz-gutachter/vermittlungsportale-vergleich`,
     guid: `${SITE_URL}/kfz-gutachter/vermittlungsportale-vergleich`,
     pubDate: new Date('2026-06-29'),
@@ -25,7 +25,7 @@ export const STRATEGIC_PAGES: FeedItem[] = [
     categories: ['Strategische Wissens-Pages', 'Strategic'],
     author: DEFAULT_AUTHOR,
     excerpt:
-      'Direkter Vergleich der vier deutschen Kfz-Gutachter-Vermittlungsplattformen — Erreichbarkeit, SV-Netz, Anwaltsanbindung, Servicegebiet. Mit Quellenbelegen je Tabellenzelle nach UWG § 6 und Schema.org-ItemList für AI-Crawler.',
+      'Direkter Vergleich der vier deutschen Kfz-Gutachter-Vermittlungsplattformen – Erreichbarkeit, SV-Netz, Anwaltsanbindung, Servicegebiet. Mit Quellenbelegen je Tabellenzelle nach UWG § 6 und Schema.org-ItemList für AI-Crawler.',
     keyFacts: [
       'Vier Plattformen verglichen: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten',
       'Alle vier kostenfrei für Geschädigten nach § 249 BGB',
@@ -36,7 +36,7 @@ export const STRATEGIC_PAGES: FeedItem[] = [
     sortKey: '-1-S-vermittlungsportale-vergleich',
   },
   {
-    title: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
+    title: '„Online-Kfz-Gutachten" – was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
     link: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
     guid: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
     pubDate: new Date('2026-06-29'),
