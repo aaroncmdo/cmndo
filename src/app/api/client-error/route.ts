@@ -11,6 +11,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { istErlaubterBoundary } from '@/lib/observability/boundaries'
 
 export const runtime = 'nodejs'
 
@@ -21,7 +22,9 @@ function cap(value: unknown, max: number): string | null {
   return trimmed.length > max ? trimmed.slice(0, max) : trimmed
 }
 
-const ALLOWED_BOUNDARIES = new Set(['root', 'global', 'login'])
+// Kanalliste liegt in @/lib/observability/boundaries — ein Test prueft dort,
+// dass jeder Melder einen erlaubten Kanal nutzt. Ein hier fehlender Kanal wird
+// still zu 'unknown' und ist danach nicht mehr auswertbar.
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
     if (!body) return new NextResponse(null, { status: 204 })
 
     const boundaryRaw = cap(body.boundary, 32) ?? 'unknown'
-    const boundary = ALLOWED_BOUNDARIES.has(boundaryRaw) ? boundaryRaw : 'unknown'
+    const boundary = istErlaubterBoundary(boundaryRaw) ? boundaryRaw : 'unknown'
 
     // User optional anhaengen — Fehler koennen unauthenticated passieren, und die
     // Erfassung darf daran nicht scheitern.
