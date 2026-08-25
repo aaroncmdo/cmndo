@@ -58,7 +58,7 @@ describe('mapLokalinhalt', () => {
   })
 })
 
-describe('mapLokalinhalt — Quellenzwang gilt AUCH beim Lesen', () => {
+describe('mapLokalinhalt – Quellenzwang gilt AUCH beim Lesen', () => {
   // Das Gate filtert beim Schreiben. Ein direkter DB-Write (Migration, Mensch,
   // kuenftige Action) kaeme daran vorbei. Der Read ist die letzte Instanz vor
   // der Veroeffentlichung — ein Hotspot ohne belegbare Quelle wird hier erneut
@@ -103,7 +103,7 @@ describe('mapLokalinhalt — Quellenzwang gilt AUCH beim Lesen', () => {
   })
 })
 
-describe('mapLokalinhalt — kaputte Daten brechen die Seite nicht', () => {
+describe('mapLokalinhalt – kaputte Daten brechen die Seite nicht', () => {
   it('vertraegt fehlende jsonb-Felder', () => {
     const l = mapLokalinhalt({
       stadt_slug: 'x',

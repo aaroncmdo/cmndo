@@ -53,7 +53,7 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
     urteile: [
       { az: 'BGH VI ZB 22/08', datum: '2008-11-18', gericht: 'BGH', streitthema: 'Fälligkeit erst nach 6-monatiger Weiternutzung (130 %)', ergebnis: 'HUK-Praxis als rechtswidrig verworfen.' },
       { az: 'LG Düsseldorf 20 S 109/18', datum: '2019-02-15', gericht: 'LG Düsseldorf', streitthema: 'ControlExpert-Prüfbericht, Kürzung 1.675,74 €', ergebnis: 'Kürzung verworfen, volle Erstattung.' },
-      { az: 'AG Köln 275 C 179/15', datum: '2016-02-25', gericht: 'AG Köln', streitthema: 'Kürzung des Sachverständigenhonorars', ergebnis: 'Unzulässig — der Klage stattgegeben.' },
+      { az: 'AG Köln 275 C 179/15', datum: '2016-02-25', gericht: 'AG Köln', streitthema: 'Kürzung des Sachverständigenhonorars', ergebnis: 'Unzulässig – der Klage stattgegeben.' },
       { az: 'AG Coburg 15 C 696/17', datum: '2017-07-14', gericht: 'AG Coburg', streitthema: 'Allgemeine Schadensersatzgrundsätze', ergebnis: 'Gericht rügt HUK ausdrücklich, zugunsten der Geschädigten.' },
     ],
     kontakt: {
@@ -86,7 +86,7 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
 
   allianz: {
     urteile: [
-      { az: 'AG Hagen 16 C 371/05', datum: '2006-05-24', gericht: 'AG Hagen', streitthema: 'ControlExpert-Kalkulation', ergebnis: 'Gericht: Kalkulation „völlig losgelöst vom konkreten Unfallschaden" — Kürzung verworfen.' },
+      { az: 'AG Hagen 16 C 371/05', datum: '2006-05-24', gericht: 'AG Hagen', streitthema: 'ControlExpert-Kalkulation', ergebnis: 'Gericht: Kalkulation „völlig losgelöst vom konkreten Unfallschaden" – Kürzung verworfen.' },
       { az: 'LG Frankfurt (Oder) 72 O 10/15', datum: '2016-07-18', gericht: 'LG Frankfurt (Oder)', streitthema: 'Verzögerungstaktik / Nutzungsausfall', ergebnis: 'Verzögerung führt zu erhöhtem Nutzungsausfall zulasten der Allianz.' },
       { az: 'LG Düsseldorf 20 S 109/18', datum: '2019-02-15', gericht: 'LG Düsseldorf', streitthema: 'ControlExpert-Prüfbericht als Kürzungsgrundlage', ergebnis: 'Prüfbericht-gestützte Kürzung verworfen.' },
     ],
@@ -192,7 +192,7 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
         'Telefonische Verzögerung („dauert so lange wie es dauert")',
       ],
       davForsa:
-        'Trotz dokumentierter Einzelfälle (Mandanten-Fragebogen, versicherungsbote.de 2020) liegt die BaFin-Quote der R+V mit 0,77 deutlich unter dem Branchenschnitt — unterdurchschnittliche Beschwerdedichte.',
+        'Trotz dokumentierter Einzelfälle (Mandanten-Fragebogen, versicherungsbote.de 2020) liegt die BaFin-Quote der R+V mit 0,77 deutlich unter dem Branchenschnitt – unterdurchschnittliche Beschwerdedichte.',
     },
   },
 
@@ -262,11 +262,11 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
     sentiment: {
       topBeschwerden: [
         'Kürzungsschreiben mit unzutreffender Bezugnahme auf BGH-Urteile (Kanzlei Schleyer)',
-        '„Passiver Rechtsschutz" — Aufforderung, Schriftwechsel nur mit der LVM zu führen',
+        '„Passiver Rechtsschutz" – Aufforderung, Schriftwechsel nur mit der LVM zu führen',
         'Vorgerichtlich hartleibig, schnelle Zahlung nach Klage',
       ],
       davForsa:
-        'Die BaFin-Quote der LVM ist mit 0,76 die branchenbeste; gleichwohl dokumentiert die Kanzlei Schleyer wiederholt Kürzungsschreiben mit falschen BGH-Zitaten — dokumentierte Einzelfälle bei unterdurchschnittlicher Beschwerdedichte.',
+        'Die BaFin-Quote der LVM ist mit 0,76 die branchenbeste; gleichwohl dokumentiert die Kanzlei Schleyer wiederholt Kürzungsschreiben mit falschen BGH-Zitaten – dokumentierte Einzelfälle bei unterdurchschnittlicher Beschwerdedichte.',
     },
   },
 
@@ -294,7 +294,7 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
         'Reparaturdauer-Korrektur; Zahlung häufig erst nach Klage',
       ],
       davForsa:
-        'Die BaFin-Statistik 2024 weist für die ERGO eine Quote von 4,7 Beschwerden je 100.000 Verträge aus (125 Beschwerden) — der höchste Wert unter den großen Kfz-Versicherern (transparent-beraten.de auf BaFin-Basis).',
+        'Die BaFin-Statistik 2024 weist für die ERGO eine Quote von 4,7 Beschwerden je 100.000 Verträge aus (125 Beschwerden) – der höchste Wert unter den großen Kfz-Versicherern (transparent-beraten.de auf BaFin-Basis).',
     },
   },
 

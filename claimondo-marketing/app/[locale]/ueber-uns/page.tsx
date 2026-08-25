@@ -352,7 +352,7 @@ export default async function UeberUnsPage() {
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <div>
                   <p className="text-sm italic text-claimondo-shield">{msg?.quote}</p>
-                  <p className="mt-1 text-xs font-semibold text-claimondo-ondo">— {msg?.quote_autor}</p>
+                  <p className="mt-1 text-xs font-semibold text-claimondo-ondo">– {msg?.quote_autor}</p>
                 </div>
               </blockquote>
             </article>

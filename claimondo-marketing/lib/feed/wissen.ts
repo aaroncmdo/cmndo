@@ -50,7 +50,7 @@ export async function getWissenData(): Promise<WissenData> {
     {
       key: 'decoder',
       label: 'Versicherer-Brief-Decoder',
-      hint: 'Was die Schreiben der gegnerischen Versicherung wirklich bedeuten — und wie Sie reagieren.',
+      hint: 'Was die Schreiben der gegnerischen Versicherung wirklich bedeuten – und wie Sie reagieren.',
       items: getDecoder().map(assetToFeedItem),
     },
     {
@@ -62,7 +62,7 @@ export async function getWissenData(): Promise<WissenData> {
     {
       key: 'sachverstaendige',
       label: 'Sachverständige & Verbände',
-      hint: 'BVSK, DEKRA, GTÜ und Co. — wer wofür steht und worauf es bei der Wahl ankommt.',
+      hint: 'BVSK, DEKRA, GTÜ und Co. – wer wofür steht und worauf es bei der Wahl ankommt.',
       items: getSachverstaendige().map(assetToFeedItem),
     },
   ].filter((g) => g.items.length > 0)
@@ -78,7 +78,7 @@ export async function getWissenData(): Promise<WissenData> {
           {
             key: 'redaktion',
             label: 'Neu aus der Redaktion',
-            hint: 'Aktuell veröffentlichte Beiträge aus unserer Redaktion — praxisnahe Analysen und Tipps rund um den Kfz-Schaden.',
+            hint: 'Aktuell veröffentlichte Beiträge aus unserer Redaktion – praxisnahe Analysen und Tipps rund um den Kfz-Schaden.',
             items: redaktionItems,
           },
         ]
@@ -95,7 +95,7 @@ export async function getWissenData(): Promise<WissenData> {
     {
       href: '/kfz-gutachter',
       label: 'Kfz-Gutachter in Ihrer Stadt',
-      hint: 'Lokale Sachverständige und Schadenregulierung — bundesweit nach Stadt.',
+      hint: 'Lokale Sachverständige und Schadenregulierung – bundesweit nach Stadt.',
     },
   ]
 

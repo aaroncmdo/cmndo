@@ -538,7 +538,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     svBerichtHinweis:
       attachments.length > 0
         ? `Als Anhang erhalten Sie: ${attachments.map((a) => a.filename).join(', ')}.`
-        : 'Kanzlei-Paket und Gutachten folgen in Kürze — sie finden sie vorab über den Portal-Link.',
+        : 'Kanzlei-Paket und Gutachten folgen in Kürze – sie finden sie vorab über den Portal-Link.',
     uebergabeDatum: fmtDate(fall.kanzlei_uebergabe_am),
     fallId,
     dokumenteLinks,

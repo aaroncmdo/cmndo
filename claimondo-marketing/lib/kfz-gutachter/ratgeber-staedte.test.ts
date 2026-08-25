@@ -75,7 +75,7 @@ describe('staedteFuerRatgeber', () => {
   })
 })
 
-describe('waehleRatgeberStaedte — die geteilte Regel', () => {
+describe('waehleRatgeberStaedte – die geteilte Regel', () => {
   // Die Regel liegt seit 18.08.2026 in ratgeber-auswahl.mjs, weil sie zwei
   // Consumer in zwei Builds hat: diese Seite und scripts/check-stadt-linknetz.
   // Ohne den geteilten Stand muesste das Skript sie nachbauen — und ein

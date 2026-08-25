@@ -51,7 +51,7 @@ describe('CLIENT_NAMESPACES', () => {
 
     expect(
       fehlend,
-      'Diese Namespaces fehlen in i18n/client-namespaces.ts — ohne sie zeigt die UI ' +
+      'Diese Namespaces fehlen in i18n/client-namespaces.ts – ohne sie zeigt die UI ' +
         'zur Laufzeit den rohen Key statt des Textes:\n  ' + fehlend.join('\n  '),
     ).toEqual([])
   })
@@ -76,7 +76,7 @@ describe('CLIENT_NAMESPACES', () => {
     expect(
       ueberfluessig,
       'Diese Namespaces stehen in der Liste, werden aber von keiner Client-Komponente ' +
-        'genutzt — sie kosten auf jeder Seite Bytes:\n  ' + ueberfluessig.join('\n  '),
+        'genutzt – sie kosten auf jeder Seite Bytes:\n  ' + ueberfluessig.join('\n  '),
     ).toEqual([])
   })
 })

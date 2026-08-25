@@ -80,6 +80,45 @@ const SELECT_COLUMNS =
   'id,slug,title,body,excerpt,key_facts,meta_description,meta_title,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author,audience,quelle,tags'
 
 /**
+ * Deutscher Gedankenstrich auf den sichtbaren Textfeldern.
+ *
+ * Im Deutschen ist der Gedankenstrich der HALBGEVIERTSTRICH mit Leerzeichen
+ * (Duden, DIN 5008); der Geviertstrich "—" ist englische Typografie und
+ * zugleich ein bekannter Marker fuer maschinell erzeugten Text. Die Artikel
+ * werden per LLM erzeugt und tragen ihn entsprechend haeufig: gemessen am
+ * 25.08.2026 in 29 von 74 Zeilen.
+ *
+ * Die Normalisierung sitzt beim LESEN, nicht im Generator — so wirkt sie auf
+ * den Bestand UND auf jeden kuenftigen Lauf, ohne prod-Daten anzufassen.
+ * Nur die Form " — " mit Leerzeichen ringsum; ein Streckenstrich ohne
+ * Leerzeichen ("Koeln—Bonn") bleibt stehen.
+ *
+ * Nicht angefasst: slug, cluster, tags, author und die uebrigen technischen
+ * Felder — dort kommt der Strich nicht vor und eine Aenderung waere riskant.
+ */
+const TEXTFELDER = ['title', 'body', 'excerpt', 'meta_description', 'meta_title'] as const
+
+// Auch die Raender: bei zusammengesetzten Ueberschriften steht der Strich am
+// String-Ende ("Wie Uber —" + "nur fuer Ihren Kfz-Schaden"), nicht in der Mitte.
+const strich = (s: string): string =>
+  s.trim() === '—' ? s : s.split(' — ').join(' – ').replace(/\s—$/, ' –').replace(/^—\s/, '– ')
+
+function mitDeutschemStrich<T extends Record<string, unknown> | null>(a: T): T {
+  if (!a) return a
+  const kopie: Record<string, unknown> = { ...a }
+  for (const feld of TEXTFELDER) {
+    const wert = kopie[feld]
+    if (typeof wert === 'string') kopie[feld] = strich(wert)
+  }
+  if (Array.isArray(kopie.key_facts)) {
+    kopie.key_facts = (kopie.key_facts as unknown[]).map((k) =>
+      typeof k === 'string' ? strich(k) : k,
+    )
+  }
+  return kopie as T
+}
+
+/**
  * Einen veroeffentlichten Artikel per Slug laden (anon-Client, RLS-gated).
  * Gibt null zurueck wenn kein Artikel mit status='veroeffentlicht' und dem Slug existiert.
  */
@@ -94,7 +133,7 @@ export async function getPublishedArtikelBySlug(slug: string): Promise<WissenArt
     console.error('[wissen] getPublishedArtikelBySlug error:', error.message)
     return null
   }
-  return data as WissenArtikel | null
+  return mitDeutschemStrich(data as WissenArtikel | null)
 }
 
 /**
@@ -111,7 +150,7 @@ export async function getPublishedArtikel(): Promise<WissenArtikel[]> {
     console.error('[wissen] getPublishedArtikel error:', error.message)
     return []
   }
-  return (data ?? []) as WissenArtikel[]
+  return ((data ?? []) as WissenArtikel[]).map(mitDeutschemStrich)
 }
 
 /**

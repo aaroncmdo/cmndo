@@ -36,7 +36,7 @@ export const SERVICE_PITCH_HEADLINES = {
 // ─── Sub-Headlines ──────────────────────────────────────────────
 
 export const SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO =
-  'Wir koordinieren Gutachter, Anwalt und Werkstatt — und führen die Verhandlung mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.'
+  'Wir koordinieren Gutachter, Anwalt und Werkstatt – und führen die Verhandlung mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.'
 
 export const SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP =
   'Wir disponieren Ihren Gutachter (< 48 h), führen die Versicherungs-Verhandlung und setzen Ihren Anspruch BGH-konform durch. 0 € für Sie.'
@@ -66,12 +66,12 @@ export const SERVICE_REALITY_CARDS_DETAILED: ServiceRealityCard[] = [
   {
     label: 'Ihr Fall. Immer in der Tasche.',
     Icon: Smartphone,
-    body: 'Status checken — beim Kaffee, im Stau, um 3 Uhr morgens. Ein Tab in Ihrem Handy. Alles drin.',
+    body: 'Status checken – beim Kaffee, im Stau, um 3 Uhr morgens. Ein Tab in Ihrem Handy. Alles drin.',
   },
   {
     label: 'Wir melden uns. Sie müssen nicht nachfragen.',
     Icon: Bell,
-    body: 'Push: „Gutachter unterwegs." Push: „Anwalt hat geantwortet." Push: „Geld ist da." Sie checken nicht — wir benachrichtigen.',
+    body: 'Push: „Gutachter unterwegs." Push: „Anwalt hat geantwortet." Push: „Geld ist da." Sie checken nicht – wir benachrichtigen.',
   },
   {
     label: 'Ein Berater. Eine Nummer. Immer dieselbe.',
@@ -91,7 +91,7 @@ export const SERVICE_REALITY_CARDS_DETAILED: ServiceRealityCard[] = [
   {
     label: '32 Tage statt 4 Monate.',
     Icon: Clock,
-    body: 'Branchen-Durchschnitt: 4–6 Monate. Bei uns: 32 Tage. Weil disponiert statt vermittelt — und alles digital.',
+    body: 'Branchen-Durchschnitt: 4–6 Monate. Bei uns: 32 Tage. Weil disponiert statt vermittelt – und alles digital.',
   },
 ]
 
@@ -107,7 +107,7 @@ export const PLATTFORM_MECHANIK_STEPS: PlattformMechanikStep[] = [
   {
     nr: 1,
     titel: 'Disponiert',
-    body: 'Nächster freier Gutachter — nicht der, der in drei Wochen Zeit hat. Wie Uber, aber für Schadensgutachten.',
+    body: 'Nächster freier Gutachter – nicht der, der in drei Wochen Zeit hat. Wie Uber, aber für Schadensgutachten.',
   },
   {
     nr: 2,
@@ -117,7 +117,7 @@ export const PLATTFORM_MECHANIK_STEPS: PlattformMechanikStep[] = [
   {
     nr: 3,
     titel: 'Kürzungs-Alarm',
-    body: 'Wenn die Versicherung kürzen will, schreibt unser Anwalt zurück — bevor Sie „Wartezeit" tippen können.',
+    body: 'Wenn die Versicherung kürzen will, schreibt unser Anwalt zurück – bevor Sie „Wartezeit" tippen können.',
   },
 ]
 
@@ -142,7 +142,7 @@ export const ANSPRUECHE_REFRAMED = [
   },
   {
     titel: 'Merkantile Wertminderung',
-    text: 'Wir setzen die Wertminderung nach Sanden/Danner-Formel durch — auch wenn die Versicherung „angemessen" anbietet. BGH VI ZR 357/03.',
+    text: 'Wir setzen die Wertminderung nach Sanden/Danner-Formel durch – auch wenn die Versicherung „angemessen" anbietet. BGH VI ZR 357/03.',
     href: '/haftpflicht/wertminderung',
   },
   {
@@ -152,7 +152,7 @@ export const ANSPRUECHE_REFRAMED = [
   },
   {
     titel: 'Gutachter- und Anwaltskosten',
-    text: 'Wir holen Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein — §249 BGB. Sie zahlen 0 €.',
+    text: 'Wir holen Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein – §249 BGB. Sie zahlen 0 €.',
     href: '/kosten-kfz-gutachten',
   },
 ] as const
@@ -165,7 +165,7 @@ export const SECTION_HEADLINES = {
   // Stilfrage. Die Seite trägt die Partnerkanzlei-Fassung seit der i18n-Umstellung
   // (i18n/messages/de.json), diese Konstante speist die llms.txt-Feeds — sie hing
   // zurück, sodass der KI-Feed etwas anderes sagte als die Seite.
-  anspruecheReframed: 'Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie.',
+  anspruecheReframed: 'Vier Gespräche – unsere Partnerkanzlei führt sie, nicht Sie.',
   misstrauenReframed:
     'Wenn die Versicherung schreibt „Wir kümmern uns". Was die Übersetzung ist.',
   schadensreportReframed:
@@ -187,19 +187,19 @@ export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
     cluster: 1,
     titel: 'Verantwortungs-Übergabe',
     beschreibung:
-      'Wir führen die komplette Kommunikation mit der gegnerischen Versicherung — schriftlich und telefonisch. Sie reden mit niemandem. 60 % der Geschädigten verlieren Geld in unvorbereiteten Telefonaten mit der gegnerischen Versicherung (anwaltliche Praxis-Erfahrung).',
+      'Wir führen die komplette Kommunikation mit der gegnerischen Versicherung – schriftlich und telefonisch. Sie reden mit niemandem. 60 % der Geschädigten verlieren Geld in unvorbereiteten Telefonaten mit der gegnerischen Versicherung (anwaltliche Praxis-Erfahrung).',
   },
   {
     cluster: 2,
     titel: 'Persönliche Transparenz',
     beschreibung:
-      'Ein persönlicher Ansprechpartner mit Foto, Direktwahl und Sprechzeiten — kein Call-Center-Roulette. Live-Status im Portal, abrufbar mobil („Ihr Fall. Immer in der Tasche."). Multi-Channel: Chat, Anruf, Portal. Push-Benachrichtigung bei jedem Schritt.',
+      'Ein persönlicher Ansprechpartner mit Foto, Direktwahl und Sprechzeiten – kein Call-Center-Roulette. Live-Status im Portal, abrufbar mobil („Ihr Fall. Immer in der Tasche."). Multi-Channel: Chat, Anruf, Portal. Push-Benachrichtigung bei jedem Schritt.',
   },
   {
     cluster: 3,
     titel: 'Integrierte Lieferkette',
     beschreibung:
-      'Eigene direkte Schiene zu allen großen Versicherern. Direkter Draht Gutachter ↔ Partnerkanzlei ↔ Werkstatt. Plattform statt loser Vermittlung — alle Beteiligten in einem Workflow.',
+      'Eigene direkte Schiene zu allen großen Versicherern. Direkter Draht Gutachter ↔ Partnerkanzlei ↔ Werkstatt. Plattform statt loser Vermittlung – alle Beteiligten in einem Workflow.',
   },
   {
     cluster: 4,
@@ -217,7 +217,7 @@ export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
     cluster: 6,
     titel: 'Plattform-Mechanik (Uber-Prinzip)',
     beschreibung:
-      'On-demand-disponiert statt vermittelt — der nächste freie Gutachter, nicht der in drei Wochen. Sachverständige haben den Fall mobile in der Tasche, können sofort zurückpingen. Kein Papierkram für irgendwen — alles digital. Wenn die Versicherung kürzt, alarmiert die Plattform den Anwalt automatisch — Antwort am selben Tag.',
+      'On-demand-disponiert statt vermittelt – der nächste freie Gutachter, nicht der in drei Wochen. Sachverständige haben den Fall mobile in der Tasche, können sofort zurückpingen. Kein Papierkram für irgendwen – alles digital. Wenn die Versicherung kürzt, alarmiert die Plattform den Anwalt automatisch – Antwort am selben Tag.',
   },
 ]
 
@@ -226,4 +226,4 @@ export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
  * Single source of truth — wenn du den Pitch änderst, ändere ihn hier.
  * Konsumenten: `src/app/llms.txt/route.ts`, `src/app/llms-full.txt/route.ts`.
  */
-export const SERVICE_PITCH_BRAND_BLOCK = `Claimondo nimmt Ihnen die Versicherung ab. Wörtlich: Wir führen die komplette Kommunikation mit der gegnerischen Haftpflichtversicherung — Sie reden mit niemandem. Wir koordinieren Gutachter (in unter 48 h vor Ort, on-demand-disponiert wie Uber), Partnerkanzlei für Verkehrsrecht und Werkstatt in einem integrierten digitalen Workflow. Ein persönlicher Ansprechpartner mit Foto und Direktwahl. Live-Status im Portal, „Ihr Fall. Immer in der Tasche." 0 € für unverschuldet Geschädigte (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt. BGH-konform durchgesetzt.`
+export const SERVICE_PITCH_BRAND_BLOCK = `Claimondo nimmt Ihnen die Versicherung ab. Wörtlich: Wir führen die komplette Kommunikation mit der gegnerischen Haftpflichtversicherung – Sie reden mit niemandem. Wir koordinieren Gutachter (in unter 48 h vor Ort, on-demand-disponiert wie Uber), Partnerkanzlei für Verkehrsrecht und Werkstatt in einem integrierten digitalen Workflow. Ein persönlicher Ansprechpartner mit Foto und Direktwahl. Live-Status im Portal, „Ihr Fall. Immer in der Tasche." 0 € für unverschuldet Geschädigte (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt. BGH-konform durchgesetzt.`
