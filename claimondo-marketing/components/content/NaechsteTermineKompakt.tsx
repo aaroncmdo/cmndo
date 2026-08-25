@@ -68,7 +68,7 @@ export async function NaechsteTermineKompakt() {
           <li key={t.stadt} className="break-all text-body-sm text-claimondo-navy">
             {/* EIN Textknoten je Zeile. `Text {wert}` erzeugt einen `<!-- -->`-Trenner,
                 an dem ein Extraktor die Angabe von ihrer URL trennt. */}
-            {`${t.stadt} — ${t.label}, ${t.uhrzeit} Uhr${t.vorname ? ` bei ${t.vorname}` : ''} · https://claimondo.de/kfz-gutachter/${slugVon.get(t.stadt)}`}
+            {`${t.stadt} – ${t.label}, ${t.uhrzeit} Uhr${t.vorname ? ` bei ${t.vorname}` : ''} · https://claimondo.de/kfz-gutachter/${slugVon.get(t.stadt)}`}
           </li>
         ))}
       </ul>
