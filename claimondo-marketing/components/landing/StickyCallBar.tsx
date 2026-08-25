@@ -92,23 +92,25 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
           footerSichtbar ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
-        {/* Gutachter finden – Mobile-Primaer-CTA (Aaron 15.06.: eigener Button unten mittig) */}
-        <Link
-          href={finderHref}
-          data-tracking="finder-sticky"
-          className="flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.32)] transition-all duration-200 hover:bg-claimondo-shield active:scale-[0.97] md:hidden"
-        >
-          <Search className="h-4 w-4" aria-hidden />
-          {tNav('gutachter_finden')}
-        </Link>
+        {/* ZEILE 1 — Anruf als Primaeraktion, daneben WhatsApp.
+            Aaron 25.08.: "mobil soll der Anruf primaer sein". Das dreht die
+            Entscheidung vom 15.06. um, nach der "Gutachter finden" der mobile
+            Primaer-CTA war (eigener navy-Button ueber der Leiste).
+            Messbarer Anlass: bei 390x844 hatten "Gutachter finden" und
+            "Sofort anrufen" am 24.08. EXAKT denselben Kontrast (16,03) und
+            damit dieselbe wahrgenommene Prominenz — mobil gab es also gar
+            keine erkennbare Primaeraktion. Jetzt traegt der Anruf die Leiste
+            (navy, volle Breite, groessere Schrift), der Finder rutscht in
+            Zeile 2 auf Weiss. */}
         <div className="flex items-stretch gap-2">
         <a
           href={`tel:${PHONE_TEL}`}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.30)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_36px_rgba(13,27,62,0.38)] active:scale-[0.97]"
+          data-tracking="call-sticky"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-4 text-base font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.34)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_36px_rgba(13,27,62,0.40)] active:scale-[0.97]"
         >
           <Phone className="h-4 w-4" />
           <span>{t('sticky_call.btn_anrufen')}</span>
-          <span className="hidden font-normal opacity-75 sm:inline">{PHONE_DISPLAY}</span>
+          <span className="font-normal opacity-75">{PHONE_DISPLAY}</span>
         </a>
         {whatsappHref && (
           <a
@@ -125,9 +127,24 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
             <span className="hidden sm:inline">WhatsApp</span>
           </a>
         )}
+        </div>
+        {/* ZEILE 2 — die beiden Nebenwege, sichtbar untergeordnet (Weiss statt Navy).
+            Der Finder bleibt bewusst STEHEN und wird nur zurueckgestuft: ueber
+            `finderHref` laeuft die Makler-Attribution (/start/makler/<id>) und
+            der Ortsbezug der Stadtseiten. Ihn ganz zu entfernen haette beides
+            gekappt. */}
+        <div className="flex items-stretch gap-2">
+        <Link
+          href={finderHref}
+          data-tracking="finder-sticky"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/60 bg-white/85 px-5 py-3 text-sm font-semibold text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white active:scale-[0.97] md:hidden"
+        >
+          <Search className="h-4 w-4" aria-hidden />
+          {tNav('gutachter_finden')}
+        </Link>
         <button
           onClick={() => setOpen(true)}
-          className="rounded-full border border-white/60 bg-white/85 px-5 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white hover:shadow-[0_12px_32px_rgba(13,27,62,0.18)] active:scale-[0.97]"
+          className="flex-1 rounded-full border border-white/60 bg-white/85 px-5 py-3 text-sm font-semibold text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white hover:shadow-[0_12px_32px_rgba(13,27,62,0.18)] active:scale-[0.97]"
         >
           {t('sticky_call.btn_rueckruf')}
         </button>
