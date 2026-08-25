@@ -36,6 +36,9 @@ export default async function GutachterFinderEmbedPage({
     slot?: string
     /** `utm_source` der Einstiegs-URL (z.B. `chatgpt.com`) — reine Attribution. */
     utm_source?: string
+    /** GEO-Deep-Link: Standort des Fahrzeugs, den die KI im Gespraech erfragt hat.
+     *  Nur zusammen mit lat/lng wirksam (die Marketing-Seite geocodet ihn dort). */
+    adresse?: string
   }>
 }) {
   const sp = await searchParams
@@ -86,6 +89,13 @@ export default async function GutachterFinderEmbedPage({
   // (utm_* max 150), damit ein absurd langer Parameter nicht bis zum Insert durchlaeuft.
   const utmSource = typeof sp.utm_source === 'string' ? sp.utm_source.slice(0, 150) : undefined
 
+  // Standort aus dem Deeplink: nur gueltig MIT Koordinaten — der Wizard braucht lat/lng
+  // fuers Matching, ein blosser Textwert waere fuer die Engine wertlos. Laenge gekappt,
+  // der Wert wird nie als Kennung vertraut und nie in eine Query gegeben.
+  const adresseRoh = typeof sp.adresse === 'string' ? sp.adresse.trim().slice(0, 200) : ''
+  const vorauswahlAdresse =
+    adresseRoh && initialCenter ? { adresse: adresseRoh, lat: initialCenter.lat, lng: initialCenter.lng } : null
+
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
@@ -122,6 +132,7 @@ export default async function GutachterFinderEmbedPage({
             vorauswahlSvId={vorauswahlSv}
             vorauswahlSlotStart={vorauswahlSlot}
             utmSource={utmSource}
+            vorauswahlAdresse={vorauswahlAdresse}
           />
         }
       />

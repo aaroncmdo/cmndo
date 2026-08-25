@@ -17,7 +17,7 @@ customer_questions:
 last_modified: 2026-05-18
 excerpt: Wer auf der Fahrbahn wendet, unterliegt nach § 9 Abs. 5 StVO der höchsten Sorgfaltspflicht und muss jede Gefährdung anderer ausschließen. Bei Kollision während des Wendemanövers trägt der Wendende nach Anscheinsbeweis fast immer die volle Schuld (100:0); eine Mitschuld der Gegenseite entsteht nur bei nachweislich erheblicher Geschwindigkeitsüberschreitung.
 keyFacts:
-  - § 9 Abs. 5 StVO — höchste Sorgfaltspflicht beim Wenden
+  - § 9 Abs. 5 StVO – höchste Sorgfaltspflicht beim Wenden
   - Standardquote: 100:0 zu Lasten des Wendenden
   - Mitschuld der Gegenseite: ~20 % nur bei erheblicher Geschwindigkeitsüberschreitung
   - Rückwärts-Wenden gilt rechtlich wie Rückwärtsfahren: 100:0
@@ -26,12 +26,12 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/spurwechsel
   - /haftpflicht/mitverschulden-stvg17
-meta_description: "Wenden auf der Fahrbahn: §9 Abs. 5 StVO verlangt die höchste Sorgfalt — bei Kollision haftet der Wendende fast immer 100:0. Wann die Gegenseite mithaftet."
+meta_description: "Wenden auf der Fahrbahn: §9 Abs. 5 StVO verlangt die höchste Sorgfalt – bei Kollision haftet der Wendende fast immer 100:0. Wann die Gegenseite mithaftet."
 ---
 
-# Wenden auf der Fahrbahn — Haftung bei Kollision
+# Wenden auf der Fahrbahn – Haftung bei Kollision
 
-> **Kurz erklärt:** Wer wendet, trägt nach § 9 Abs. 5 StVO **höchste Sorgfaltspflicht** — er muss sich so verhalten, dass eine Gefährdung anderer Verkehrsteilnehmer ausgeschlossen ist. Bei Kollision während des Wendens trägt der Wendende nach Anscheinsbeweis fast immer die **volle Schuld (100 : 0)**.
+> **Kurz erklärt:** Wer wendet, trägt nach § 9 Abs. 5 StVO **höchste Sorgfaltspflicht** – er muss sich so verhalten, dass eine Gefährdung anderer Verkehrsteilnehmer ausgeschlossen ist. Bei Kollision während des Wendens trägt der Wendende nach Anscheinsbeweis fast immer die **volle Schuld (100 : 0)**.
 
 ## Auch bekannt als
 
@@ -55,13 +55,13 @@ meta_description: "Wenden auf der Fahrbahn: §9 Abs. 5 StVO verlangt die höchst
 ## Häufige Fragen
 
 **Wer ist schuld beim Wende-Unfall?**
-In aller Regel der Wendende — Anscheinsbeweis, Standard 100 : 0.
+In aller Regel der Wendende – Anscheinsbeweis, Standard 100 : 0.
 
 **Was, wenn die Gegenseite zu schnell war?**
 Bei nachweisbar erheblicher Geschwindigkeitsüberschreitung Mit-Quote 20 %.
 
 **Darf ich überhaupt überall wenden?**
-Nicht überall — bei „Wenden verboten"-Schildern und an unübersichtlichen Stellen kann Wenden Ordnungswidrigkeit sein. Bei Kollision dann zusätzliches Verschuldens-Merkmal.
+Nicht überall – bei „Wenden verboten"-Schildern und an unübersichtlichen Stellen kann Wenden Ordnungswidrigkeit sein. Bei Kollision dann zusätzliches Verschuldens-Merkmal.
 
 ---
 
@@ -76,7 +76,7 @@ Nicht überall — bei „Wenden verboten"-Schildern und an unübersichtlichen S
 
 ## Quellen
 
-- StVO § 9 Abs. 5 — [gesetze-im-internet.de/stvo_2013/__9.html](https://www.gesetze-im-internet.de/stvo_2013/__9.html)
+- StVO § 9 Abs. 5 – [gesetze-im-internet.de/stvo_2013/__9.html](https://www.gesetze-im-internet.de/stvo_2013/__9.html)
 - BGH-Rechtsprechung zum Wenden
 
 ---
@@ -119,4 +119,4 @@ Nicht überall — bei „Wenden verboten"-Schildern und an unübersichtlichen S
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

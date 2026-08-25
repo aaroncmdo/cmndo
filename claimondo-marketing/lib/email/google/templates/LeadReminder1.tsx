@@ -15,10 +15,10 @@ export default function LeadReminder1({
 }) {
   const anrede = vorname ? `Hallo ${vorname}` : 'Hallo'
   return (
-    <EmailLayout preview="Ihre Schadenmeldung ist fast fertig — 2 Minuten, und wir kümmern uns.">
+    <EmailLayout preview="Ihre Schadenmeldung ist fast fertig – 2 Minuten, und wir kümmern uns.">
       <Heading>{anrede}, kurze Erinnerung</Heading>
       <Paragraph>
-        Sie haben gerade angefangen, Ihren Schaden zu melden — und sind fast
+        Sie haben gerade angefangen, Ihren Schaden zu melden – und sind fast
         durch. Es fehlen nur noch ein paar Angaben, dann übernehmen wir alles
         Weitere für Sie: Gutachter, Anwalt, Regulierung.
       </Paragraph>
@@ -28,7 +28,7 @@ export default function LeadReminder1({
       <Button href={resumeUrl}>Weitermachen →</Button>
       <Paragraph>
         Der Link ist persönlich für Sie. Ihre bereits eingegebenen Daten sind
-        gespeichert — keine Doppelarbeit.
+        gespeichert – keine Doppelarbeit.
       </Paragraph>
     </EmailLayout>
   )

@@ -138,7 +138,7 @@ export default async function GewinnspielPage() {
   const praemien = kampagne.praemien ?? []
 
   return (
-    <main id="main-content" style={KAMPAGNEN_VARS} className="min-h-screen bg-claimondo-navy text-white">
+    <main id="main-content" tabIndex={-1} style={KAMPAGNEN_VARS} className="min-h-screen bg-claimondo-navy text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript(schemaGraph())}

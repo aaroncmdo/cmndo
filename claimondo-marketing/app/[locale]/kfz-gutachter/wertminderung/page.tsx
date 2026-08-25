@@ -49,7 +49,7 @@ const FAQS_SCHEMA = [
   {
     frage: 'Was ist merkantile Wertminderung?',
     antwort:
-      'Merkantile Wertminderung ist der Wertverlust eines reparierten Unfallfahrzeugs gegenüber einem unfallfreien Vergleichsfahrzeug — auch nach perfekter Reparatur. Käufer zahlen für Unfallwagen weniger, das ist Marktrealität. Der Schadensersatz nach §249 BGB umfasst genau diese Differenz. Ohne Gutachten wird sie nicht berechnet, von der Versicherung also auch nicht gezahlt.',
+      'Merkantile Wertminderung ist der Wertverlust eines reparierten Unfallfahrzeugs gegenüber einem unfallfreien Vergleichsfahrzeug – auch nach perfekter Reparatur. Käufer zahlen für Unfallwagen weniger, das ist Marktrealität. Der Schadensersatz nach §249 BGB umfasst genau diese Differenz. Ohne Gutachten wird sie nicht berechnet, von der Versicherung also auch nicht gezahlt.',
   },
   {
     frage: 'Wie wird Wertminderung konkret berechnet?',
@@ -64,7 +64,7 @@ const FAQS_SCHEMA = [
   {
     frage: 'Warum lehnt die Versicherung Wertminderung ab?',
     antwort:
-      'Standard-Taktik: "Bei Ihrem Fahrzeug nicht mehr berechtigt" oder "im Reparaturpreis enthalten". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen — die Versicherung zahlt einfach nichts. Mit Gutachten und Anwalt holt unsere Partnerkanzlei die Wertminderung in der Regel zurück. Bei Streit klagt sie.',
+      'Standard-Taktik: "Bei Ihrem Fahrzeug nicht mehr berechtigt" oder "im Reparaturpreis enthalten". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen – die Versicherung zahlt einfach nichts. Mit Gutachten und Anwalt holt unsere Partnerkanzlei die Wertminderung in der Regel zurück. Bei Streit klagt sie.',
   },
   {
     frage: 'Wie hoch ist Wertminderung bei Tesla oder anderen E-Autos?',
@@ -97,7 +97,7 @@ export default function WertminderungPage() {
           webApplicationSchema({
             name: 'Wertminderungs-Rechner',
             description:
-              'Interaktiver Rechner für die merkantile Wertminderung nach Unfall — Faustregel nach Fahrzeugalter, mit Vorschaden-Berücksichtigung. Kostenlos.',
+              'Interaktiver Rechner für die merkantile Wertminderung nach Unfall – Faustregel nach Fahrzeugalter, mit Vorschaden-Berücksichtigung. Kostenlos.',
             url: `${SITE_URL}/kfz-gutachter/wertminderung`,
           }),
           faqPageSchema(FAQS_SCHEMA, {

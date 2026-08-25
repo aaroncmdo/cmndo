@@ -236,7 +236,7 @@ function BeanspruchenSchritt({
         Bestätige deine Kontaktdaten, um diesen Eintrag zu übernehmen.
       </p>
 
-      {/* Gewählter Kandidat — read-only */}
+      {/* Gewählter Kandidat – read-only */}
       <div className="mb-5 rounded-2xl border border-claimondo-border bg-claimondo-bg px-4 py-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-shield mb-1">
           Ausgewählter Eintrag
@@ -455,7 +455,7 @@ function NeuSchritt({
             ariaLabel="DAT-Nummer"
           />
           <p className="mt-1.5 text-xs text-claimondo-shield">
-            Deine DAT-Sachverständigennummer — wird zur Identitätsprüfung benötigt.
+            Deine DAT-Sachverständigennummer – wird zur Identitätsprüfung benötigt.
           </p>
         </label>
       </div>
@@ -521,7 +521,7 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
           ) : (
             <>
               Dein Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
-              nicht zugestellt werden — du kannst dein Passwort jederzeit über
+              nicht zugestellt werden – du kannst dein Passwort jederzeit über
               „Passwort vergessen" mit der Adresse{' '}
               <strong className="text-claimondo-navy">{email}</strong> setzen. Nach
               unserer Prüfung (innerhalb von 48 Stunden) schalten wir dein Profil frei.

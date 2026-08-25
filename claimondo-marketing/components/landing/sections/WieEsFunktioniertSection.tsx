@@ -34,7 +34,7 @@ export async function WieEsFunktioniertSection() {
         <div className="absolute inset-0 -z-10">
           <Image
             src="/img/home/sv-vor-ort.webp"
-            alt="Claimondo-Sachverständiger begutachtet den Unfallschaden vor Ort am Fahrzeug — kein Online-Prüfdienst"
+            alt="Claimondo-Sachverständiger begutachtet den Unfallschaden vor Ort am Fahrzeug – kein Online-Prüfdienst"
             fill
             sizes="100vw"
             className="object-cover object-[62%_28%] md:object-center"
@@ -67,13 +67,13 @@ export async function WieEsFunktioniertSection() {
         </div>
       </section>
 
-      {/* 5 — Service-Realität */}
+      {/* 5 – Service-Realität */}
       <ServiceRealitaetSection />
 
-      {/* 7 — Plattform-Mechanik */}
+      {/* 7 – Plattform-Mechanik */}
       <PlattformMechanikSection />
 
-      {/* 11 — Prozess */}
+      {/* 11 – Prozess */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="prozess-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -95,7 +95,7 @@ export async function WieEsFunktioniertSection() {
                 </span>
                 <h3 className="mt-2 text-lg font-bold text-claimondo-navy">{s.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{s.text}</p>
-                {/* Doc 41 §6.2: Pattern B — Pseudo-Link ueber die ganze Card; Schritt-Badge bleibt visueller Anker. */}
+                {/* Doc 41 §6.2: Pattern B – Pseudo-Link ueber die ganze Card; Schritt-Badge bleibt visueller Anker. */}
                 <Link
                   href={s.href}
                   className="absolute inset-0 z-10 rounded-ios-md focus:outline-none"

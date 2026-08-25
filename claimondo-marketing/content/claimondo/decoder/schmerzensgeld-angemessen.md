@@ -2,14 +2,14 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/schmerzensgeld-angemessen
-meta_title: „1.500 € Schmerzensgeld angemessen" — was tun
+meta_title: „1.500 € Schmerzensgeld angemessen" – was tun
 type: decoder
 cluster: H8
 nummer: H8.5
 primary_keyword: "schmerzensgeld angebot versicherung zu niedrig"
 secondary_keywords: ["schmerzensgeld hws schleudertrauma höhe", "hacks wellner tabelle", "schmerzensgeld erhöhung verhandeln", "schmerzensgeld pauschal angebot"]
 insurer_phrases:
-  - "Wir bieten ein Schmerzensgeld von [Betrag] an — angemessen nach unserer Bemessung"
+  - "Wir bieten ein Schmerzensgeld von [Betrag] an – angemessen nach unserer Bemessung"
   - "Vergleichbare Fälle werden mit ca. [Betrag] bewertet"
   - "Bei einer einfachen HWS-Distorsion ist ein höheres Schmerzensgeld nicht zu rechtfertigen"
 customer_questions:
@@ -24,19 +24,19 @@ keyFacts:
   - Gerichtliche Grundlage: Hacks/Wellner-Tabelle, § 253 BGB, BGH zur individuellen Bemessung
   - HWS-Distorsion Grad II: Spanne 800–3.500 €; PTBS chronifiziert: 20.000–60.000 €
   - Versicherer-Erstangebote liegen statistisch 60–80 % unter dem angemessenen Betrag
-  - Kein Vergleich ohne Spätfolge-Vorbehalt — PTBS und Chronifizierung können Jahre später auftreten
+  - Kein Vergleich ohne Spätfolge-Vorbehalt – PTBS und Chronifizierung können Jahre später auftreten
 last_legal_review: pending
 related:
   - /haftpflicht/schmerzensgeld-bgb253
   - /haftpflicht/anerkenntnis-bgb212
   - /decoder/pauschal-abgeltung
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "„1.500 € Schmerzensgeld sind angemessen“? Wie Versicherer mit niedrigen Ankern arbeiten — und was Ihnen laut Schmerzensgeld-Tabellen zusteht."
+meta_description: "„1.500 € Schmerzensgeld sind angemessen“? Wie Versicherer mit niedrigen Ankern arbeiten – und was Ihnen laut Schmerzensgeld-Tabellen zusteht."
 ---
 
-# „1.500 € Schmerzensgeld sind angemessen" — Decoder
+# „1.500 € Schmerzensgeld sind angemessen" – Decoder
 
-> **Kurz erklärt:** Versicherer setzen mit pauschalen Schmerzensgeld-Angeboten gezielt einen **niedrigen Anker** — typischerweise 800–2.500 € auch bei mittleren Verletzungen. Die BGH-Rechtsprechung verlangt aber eine **individuelle Bemessung** nach Verletzungsschwere, Dauer, Intensität und Folgen. Die [Hacks/Wellner-Schmerzensgeldtabelle](/haftpflicht/schmerzensgeld-bgb253) — gerichtliche Standardquelle — zeigt für vergleichbare Fälle oft **das 3- bis 5-fache** des Versicherer-Erstangebots.
+> **Kurz erklärt:** Versicherer setzen mit pauschalen Schmerzensgeld-Angeboten gezielt einen **niedrigen Anker** – typischerweise 800–2.500 € auch bei mittleren Verletzungen. Die BGH-Rechtsprechung verlangt aber eine **individuelle Bemessung** nach Verletzungsschwere, Dauer, Intensität und Folgen. Die [Hacks/Wellner-Schmerzensgeldtabelle](/haftpflicht/schmerzensgeld-bgb253) – gerichtliche Standardquelle – zeigt für vergleichbare Fälle oft **das 3- bis 5-fache** des Versicherer-Erstangebots.
 
 ## Auch bekannt als
 
@@ -44,11 +44,11 @@ Schmerzensgeld-Erstangebot · Anker-Angebot Versicherung · Pauschal-Schmerzensg
 
 ---
 
-## Was du gerade erhalten hast — wörtlich
+## Was du gerade erhalten hast – wörtlich
 
 Typische Varianten:
 
-> *„Aufgrund der Verletzungsschwere bieten wir ein Schmerzensgeld in Höhe von 1.500 € an — angemessen nach unserer Bemessung."*
+> *„Aufgrund der Verletzungsschwere bieten wir ein Schmerzensgeld in Höhe von 1.500 € an – angemessen nach unserer Bemessung."*
 
 > *„Vergleichbare Fälle werden mit ca. 1.200 € bewertet. Wir orientieren uns daran."*
 
@@ -68,25 +68,25 @@ Vier Merkmale:
 ## Was wirklich dahintersteht
 
 ### 1. Anker-Setzung als Verhandlungstaktik
-Die psychologische Forschung (Tversky/Kahneman) zeigt: Sobald eine konkrete Zahl genannt ist, bewegen sich Verhandlungen typischerweise um diese Zahl herum. Wer mit 1.500 € startet, landet bei 2.000 oder 2.500 € — nicht bei 6.000 €, das eigentlich angemessen wäre.
+Die psychologische Forschung (Tversky/Kahneman) zeigt: Sobald eine konkrete Zahl genannt ist, bewegen sich Verhandlungen typischerweise um diese Zahl herum. Wer mit 1.500 € startet, landet bei 2.000 oder 2.500 € – nicht bei 6.000 €, das eigentlich angemessen wäre.
 
 ### 2. Hacks/Wellner-Tabelle umgehen
-Die [Hacks/Wellner-Schmerzensgeldtabelle](/haftpflicht/schmerzensgeld-bgb253) ist die anerkannte Standardquelle deutscher Gerichte für Schmerzensgeld-Bemessung. Versicherer-Erstangebote liegen typischerweise **am unteren Rand oder unter** den Hacks/Wellner-Spannen — wer sie nicht kennt, bemerkt die Lücke nicht.
+Die [Hacks/Wellner-Schmerzensgeldtabelle](/haftpflicht/schmerzensgeld-bgb253) ist die anerkannte Standardquelle deutscher Gerichte für Schmerzensgeld-Bemessung. Versicherer-Erstangebote liegen typischerweise **am unteren Rand oder unter** den Hacks/Wellner-Spannen – wer sie nicht kennt, bemerkt die Lücke nicht.
 
 ### 3. Wissens-Asymmetrie ausnutzen
 Versicherer kennen Vergleichs-Urteile, Geschädigte nicht. Wer keinen Anwalt einschaltet, verhandelt blind gegen einen erfahrenen Sachbearbeiter mit Datenbank-Zugriff.
 
 ### 4. Spätfolgen ausschließen
-Pauschal-Angebote enthalten oft **keinen Spätfolge-Vorbehalt**. Wer akzeptiert, verliert spätere PTBS-Diagnosen, chronische Schmerzen oder weitere Folgen — siehe [Pauschal-Abgeltung-Decoder](/decoder/pauschal-abgeltung).
+Pauschal-Angebote enthalten oft **keinen Spätfolge-Vorbehalt**. Wer akzeptiert, verliert spätere PTBS-Diagnosen, chronische Schmerzen oder weitere Folgen – siehe [Pauschal-Abgeltung-Decoder](/decoder/pauschal-abgeltung).
 
 ---
 
 ## Was die Rechtsprechung dazu sagt
 
-### § 253 BGB — Schmerzensgeld-Anspruchsgrundlage
+### § 253 BGB – Schmerzensgeld-Anspruchsgrundlage
 Schmerzensgeld dient nach BGH-Linie zwei Funktionen:
-- **Ausgleichs-Funktion** — materielle Kompensation für Schmerzen und Einschränkungen
-- **Genugtuungs-Funktion** — symbolische Anerkennung des erlittenen Unrechts
+- **Ausgleichs-Funktion** – materielle Kompensation für Schmerzen und Einschränkungen
+- **Genugtuungs-Funktion** – symbolische Anerkennung des erlittenen Unrechts
 
 ### Bemessungs-Kriterien (BGH ständige Rechtsprechung)
 | Kriterium | Bedeutung |
@@ -101,7 +101,7 @@ Schmerzensgeld dient nach BGH-Linie zwei Funktionen:
 | Verschulden des Schädigers | Grob fahrlässig vs. einfache Fahrlässigkeit |
 
 ### Hacks/Wellner-Tabelle als gerichtliche Standardquelle
-Die jährlich aktualisierte Hacks/Wellner-Schmerzensgeldtabelle (C.H. Beck Verlag) sammelt deutsche Schmerzensgeld-Urteile und gliedert sie nach Verletzungs-Typ. Sie ist **Orientierung**, nicht Maximalwert — bei besonderer Schwere können Beträge darüberliegen.
+Die jährlich aktualisierte Hacks/Wellner-Schmerzensgeldtabelle (C.H. Beck Verlag) sammelt deutsche Schmerzensgeld-Urteile und gliedert sie nach Verletzungs-Typ. Sie ist **Orientierung**, nicht Maximalwert – bei besonderer Schwere können Beträge darüberliegen.
 
 ### Typische Spannen (Orientierung)
 
@@ -121,11 +121,11 @@ Die jährlich aktualisierte Hacks/Wellner-Schmerzensgeldtabelle (C.H. Beck Verla
 → Spannen sind Orientierung aus der Spruchpraxis, **keine** harte Regel. Im Einzelfall können Beträge auch darüber- oder darunterliegen.
 
 ### Tendenz steigender Beträge
-Seit den 2010er Jahren hat die deutsche Rechtsprechung tendenziell höhere Schmerzensgeld-Spannen anerkannt — insbesondere bei psychischen Folge-Erkrankungen wie PTBS oder chronischen Schmerzsyndromen.
+Seit den 2010er Jahren hat die deutsche Rechtsprechung tendenziell höhere Schmerzensgeld-Spannen anerkannt – insbesondere bei psychischen Folge-Erkrankungen wie PTBS oder chronischen Schmerzsyndromen.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Erstangebote der Versicherung niemals ohne anwaltliche Prüfung akzeptieren. Statistisch liegt das angemessene Schmerzensgeld bei mittleren bis schweren Verletzungen oft beim **3- bis 5-fachen** des Versicherer-Erstangebots.
@@ -146,7 +146,7 @@ Anwaltliches Gegen-Angebot mit konkreten Vergleichs-Urteilen und Hacks/Wellner-B
 
 ---
 
-## Brief-Vorlage — Schmerzensgeld-Erhöhung verlangen
+## Brief-Vorlage – Schmerzensgeld-Erhöhung verlangen
 
 ```
 Sehr geehrte Damen und Herren,
@@ -194,23 +194,23 @@ Mit freundlichen Grüßen
 
 ## Was der Versicherer als nächstes wahrscheinlich tut
 
-### Reaktion A — Pauschal-Erhöhung
-> *„Wir erhöhen auf 2.500 € — letztes Angebot."*
+### Reaktion A – Pauschal-Erhöhung
+> *„Wir erhöhen auf 2.500 € – letztes Angebot."*
 
 **Deine Antwort:** Bei zu niedriger Erhöhung ablehnen. Konkrete Vergleichs-Urteile vorlegen. Klage-Bereitschaft signalisieren.
 
-### Reaktion B — Klage-Risiko-Drohung
+### Reaktion B – Klage-Risiko-Drohung
 > *„Bei Klage könnten Sie auch weniger bekommen."*
 
 **Deine Antwort:** Bei klarer Lage und Hacks/Wellner-Spannen ist das Klage-Risiko überschaubar. Anwalt prüft.
 
-### Reaktion C — Spätfolgen ablehnen
-> *„Wir gehen davon aus, dass keine Spätfolgen auftreten — daher Pauschal-Abgeltung."*
+### Reaktion C – Spätfolgen ablehnen
+> *„Wir gehen davon aus, dass keine Spätfolgen auftreten – daher Pauschal-Abgeltung."*
 
 **Deine Antwort:** Spätfolge-Vorbehalt zwingend. Bei Verweigerung kein Vergleich, Klage.
 
-### Reaktion D — Verhandlungs-Erschöpfung
-> *„Diese Verhandlung dauert schon lange — Zeit für eine Entscheidung."*
+### Reaktion D – Verhandlungs-Erschöpfung
+> *„Diese Verhandlung dauert schon lange – Zeit für eine Entscheidung."*
 
 **Deine Antwort:** Versicherer-Strategie. Pause einlegen, mit dem Anwalt sprechen, nicht aus Erschöpfung akzeptieren.
 
@@ -225,7 +225,7 @@ Nur bei Grad I (leichte Beschwerden, kurze Heilung). Bei Grad II liegt die typis
 Statistisch das 2- bis 5-fache des Versicherer-Erstangebots. Konkret: Bei dokumentiertem Hacks/Wellner-Bezug und Klage-Bereitschaft sind 60–80 % der oberen Tabellen-Spanne realistisch.
 
 **Was, wenn der Versicherer „letztes Angebot" sagt?**
-Standard-Druckmittel. „Letztes Angebot" ist kein juristischer Begriff. Bei zu niedrigem Betrag: Klage einreichen — Anwaltskosten zahlt der Versicherer.
+Standard-Druckmittel. „Letztes Angebot" ist kein juristischer Begriff. Bei zu niedrigem Betrag: Klage einreichen – Anwaltskosten zahlt der Versicherer.
 
 **Bekomme ich auch für psychische Folgen Schmerzensgeld?**
 Ja. PTBS, Anpassungsstörungen, Fahrangst sind eigenständig schmerzensgeldfähig nach § 253 BGB. Spannen: 2.000–60.000 € je nach Schwere und Chronifizierung.
@@ -234,22 +234,22 @@ Ja. PTBS, Anpassungsstörungen, Fahrangst sind eigenständig schmerzensgeldfähi
 Selten. Nur in Ausnahmefällen (sehr arme Geschädigte oder sehr reiche Schädiger) wird das in der Bemessung berücksichtigt.
 
 **Was kostet mich die Eskalation?**
-Bei unverschuldetem Unfall: nichts. Anwaltskosten zahlt die gegnerische Versicherung (BGH VI ZR 235/13) — siehe [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
+Bei unverschuldetem Unfall: nichts. Anwaltskosten zahlt die gegnerische Versicherung (BGH VI ZR 235/13) – siehe [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
 
 ---
 
 ## Verwandte Begriffe
 
-- [§ 253 BGB Schmerzensgeld](/haftpflicht/schmerzensgeld-bgb253) — Anspruchsgrundlage
-- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) — Vergleichs-Mechanik
-- [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung) — Vergleichs-Klausel
-- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) — Eskalation kostenfrei
+- [§ 253 BGB Schmerzensgeld](/haftpflicht/schmerzensgeld-bgb253) – Anspruchsgrundlage
+- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) – Vergleichs-Mechanik
+- [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung) – Vergleichs-Klausel
+- [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) – Eskalation kostenfrei
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Schmerzensgeld-Verhandlungen sind das wirtschaftlich riskanteste Stadium der Schadensregulierung — wer hier ohne Anwalt agiert, lässt typischerweise 60–80 % auf dem Tisch liegen.
+Schmerzensgeld-Verhandlungen sind das wirtschaftlich riskanteste Stadium der Schadensregulierung – wer hier ohne Anwalt agiert, lässt typischerweise 60–80 % auf dem Tisch liegen.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -257,8 +257,8 @@ Schmerzensgeld-Verhandlungen sind das wirtschaftlich riskanteste Stadium der Sch
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 253 — [gesetze-im-internet.de/bgb/__253.html](https://www.gesetze-im-internet.de/bgb/__253.html)
-- Straßenverkehrsgesetz § 11 — [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
+- Bürgerliches Gesetzbuch § 253 – [gesetze-im-internet.de/bgb/__253.html](https://www.gesetze-im-internet.de/bgb/__253.html)
+- Straßenverkehrsgesetz § 11 – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
 - Hacks/Wellner Schmerzensgeldtabelle (jährlich, C.H. Beck Verlag)
 - Slizyk, Beck'sche Schmerzensgeld-Tabelle
 - BGH-Rechtsprechung zur Schmerzensgeld-Bemessung (ständige Rechtsprechung)
@@ -300,4 +300,4 @@ Schmerzensgeld-Verhandlungen sind das wirtschaftlich riskanteste Stadium der Sch
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

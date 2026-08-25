@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/glatteis-aquaplaning
-meta_title: Glatteis und Aquaplaning — wer haftet
+meta_title: Glatteis und Aquaplaning – wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.13
@@ -16,10 +16,10 @@ customer_questions:
   - "ist glatteis höhere gewalt"
   - "schleuderunfall versicherung"
 last_modified: 2026-05-18
-excerpt: Glatteis, Schneematsch und Aquaplaning gelten nicht als höhere Gewalt — sie sind vorhersehbare Verkehrsrisiken, denen jeder Fahrer nach § 3 StVO durch angemessene Geschwindigkeit und angepasste Fahrweise begegnen muss. Wer ins Schleudern gerät, trägt typisch die volle Schuld (100 : 0); nur bei nachweisbar unerwartetem Witterungswechsel ist eine Mit-Quote von 50 % möglich.
+excerpt: Glatteis, Schneematsch und Aquaplaning gelten nicht als höhere Gewalt – sie sind vorhersehbare Verkehrsrisiken, denen jeder Fahrer nach § 3 StVO durch angemessene Geschwindigkeit und angepasste Fahrweise begegnen muss. Wer ins Schleudern gerät, trägt typisch die volle Schuld (100 : 0); nur bei nachweisbar unerwartetem Witterungswechsel ist eine Mit-Quote von 50 % möglich.
 keyFacts:
-  - § 3 StVO — Pflicht zur witterungsangepassten Geschwindigkeit
-  - § 7 Abs. 2 StVG — höhere Gewalt greift bei Standard-Winterwetter nicht
+  - § 3 StVO – Pflicht zur witterungsangepassten Geschwindigkeit
+  - § 7 Abs. 2 StVG – höhere Gewalt greift bei Standard-Winterwetter nicht
   - Schleudern bei normaler Glätte: Quote 100 : 0 zu Lasten des Schleudernden
   - Plötzlicher Witterungswechsel (z. B. Brücke): Mit-Quote bis 50 % möglich
 related:
@@ -29,9 +29,9 @@ related:
 meta_description: "Glatteis und Aquaplaning sind keine höhere Gewalt (§7 Abs. 2 StVG): Wer ins Schleudern gerät, haftet nach §3 StVO meist 100:0. Wann es anders liegt."
 ---
 
-# Glatteis und Aquaplaning — wer haftet bei Witterungs-Unfällen
+# Glatteis und Aquaplaning – wer haftet bei Witterungs-Unfällen
 
-> **Kurz erklärt:** Glatteis, Schneematsch und Aquaplaning gelten **nicht** als höhere Gewalt — sie sind **vorhersehbare Verkehrs-Risiken**, denen sich jeder Fahrer durch **angemessene Geschwindigkeit** (§ 3 StVO) und Anpassung der Fahrweise stellen muss. Wer bei Glätte oder Nässe ins Schleudern gerät und in einen Unfall verwickelt wird, trägt typisch die **volle oder überwiegende Schuld** (50 : 50 bis 100 : 0). Die Berufung auf „plötzliche Glätte" gelingt nur bei nachweisbar **unerwarteten** Witterungs-Wechseln.
+> **Kurz erklärt:** Glatteis, Schneematsch und Aquaplaning gelten **nicht** als höhere Gewalt – sie sind **vorhersehbare Verkehrs-Risiken**, denen sich jeder Fahrer durch **angemessene Geschwindigkeit** (§ 3 StVO) und Anpassung der Fahrweise stellen muss. Wer bei Glätte oder Nässe ins Schleudern gerät und in einen Unfall verwickelt wird, trägt typisch die **volle oder überwiegende Schuld** (50 : 50 bis 100 : 0). Die Berufung auf „plötzliche Glätte" gelingt nur bei nachweisbar **unerwarteten** Witterungs-Wechseln.
 
 ## Auch bekannt als
 
@@ -51,18 +51,18 @@ meta_description: "Glatteis und Aquaplaning sind keine höhere Gewalt (§7 Abs. 
 
 § 3 StVO: *„Die Geschwindigkeit ist insbesondere den Straßen-, Verkehrs-, Sicht- und Wetterverhältnissen anzupassen."*
 
-**Konsequenz:** Witterungs-Anpassung ist gesetzliche Pflicht. „Höhere Gewalt" nach § 7 Abs. 2 StVG greift bei normalen Witterungs-Konstellationen **nicht** — der Fahrer hat das Risiko durch entsprechende Geschwindigkeit zu kontrollieren.
+**Konsequenz:** Witterungs-Anpassung ist gesetzliche Pflicht. „Höhere Gewalt" nach § 7 Abs. 2 StVG greift bei normalen Witterungs-Konstellationen **nicht** – der Fahrer hat das Risiko durch entsprechende Geschwindigkeit zu kontrollieren.
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Höhere Gewalt durch plötzliches Glatteis — keine Haftung."*
+> *„Höhere Gewalt durch plötzliches Glatteis – keine Haftung."*
 
-Standard-Verteidigungs-Argument, greift fast nie. Höhere Gewalt sind nur extrem außergewöhnliche Konstellationen — Standard-Winterwetter nicht.
+Standard-Verteidigungs-Argument, greift fast nie. Höhere Gewalt sind nur extrem außergewöhnliche Konstellationen – Standard-Winterwetter nicht.
 
 ## Häufige Fragen
 
 **Wer haftet bei Glatteis-Unfall?**
-Im Regelfall der Schleudernde — angemessene Geschwindigkeit nicht eingehalten. Standard 100 : 0.
+Im Regelfall der Schleudernde – angemessene Geschwindigkeit nicht eingehalten. Standard 100 : 0.
 
 **Was, wenn das Glatteis plötzlich kam (Brücke, Schatten)?**
 Bei nachweisbar unerwartetem Glätte-Wechsel Mit-Quote 50 % möglich.
@@ -71,7 +71,7 @@ Bei nachweisbar unerwartetem Glätte-Wechsel Mit-Quote 50 % möglich.
 Nein. Höhere Gewalt sind nur extrem-außergewöhnliche Konstellationen wie Sturm-Schäden oder Naturkatastrophen.
 
 **Was bei Aquaplaning?**
-Identisch — angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwartetem Wassergrund mit Mit-Quote, sonst 100 : 0.
+Identisch – angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwartetem Wassergrund mit Mit-Quote, sonst 100 : 0.
 
 ---
 
@@ -87,7 +87,7 @@ Identisch — angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwarte
 
 ## Quellen
 
-- StVO § 3 — [gesetze-im-internet.de/stvo_2013/__3.html](https://www.gesetze-im-internet.de/stvo_2013/__3.html)
+- StVO § 3 – [gesetze-im-internet.de/stvo_2013/__3.html](https://www.gesetze-im-internet.de/stvo_2013/__3.html)
 - StVG § 7 Abs. 2 (höhere Gewalt)
 - BGH-Rechtsprechung zur angemessenen Geschwindigkeit
 
@@ -132,4 +132,4 @@ Identisch — angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwarte
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

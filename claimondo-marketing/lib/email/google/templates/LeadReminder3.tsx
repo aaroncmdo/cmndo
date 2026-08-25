@@ -20,7 +20,7 @@ export default function LeadReminder3({
       <Paragraph>
         Ihre Schadenmeldung läuft in den nächsten Tagen ab. Danach können wir
         sie nicht mehr bearbeiten und Sie müssten noch einmal von vorn
-        anfangen — das wollen wir Ihnen ersparen.
+        anfangen – das wollen wir Ihnen ersparen.
       </Paragraph>
       <Paragraph>
         Ein Klick, ein paar letzte Angaben, dann regeln wir alles Weitere:

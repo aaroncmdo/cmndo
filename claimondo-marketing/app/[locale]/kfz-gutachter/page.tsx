@@ -50,12 +50,12 @@ const TOP_FAQ = [
   {
     frage: 'Was kostet ein Kfz-Gutachter nach einem Unfall?',
     antwort:
-      'Bei einem unverschuldeten Unfall mit Schaden über 750 € haben Sie das Recht auf einen unabhängigen Kfz-Sachverständigen — die Kosten trägt die gegnerische Haftpflichtversicherung gemäß §249 BGB. Die Honorare richten sich nach der BVSK-Honorartabelle und liegen je nach Stadt zwischen 600 € und 2.400 €. Sie zahlen 0 €.',
+      'Bei einem unverschuldeten Unfall mit Schaden über 750 € haben Sie das Recht auf einen unabhängigen Kfz-Sachverständigen – die Kosten trägt die gegnerische Haftpflichtversicherung gemäß §249 BGB. Die Honorare richten sich nach der BVSK-Honorartabelle und liegen je nach Stadt zwischen 600 € und 2.400 €. Sie zahlen 0 €.',
   },
   {
     frage: 'Wie läuft eine Kfz-Schadensregulierung mit Claimondo ab?',
     antwort:
-      'In drei Schritten: 1) Schaden online melden mit Fotos (5 Min), 2) Ein zertifizierter Sachverständiger besichtigt das Fahrzeug vor Ort innerhalb von 48 Stunden, 3) Unsere Partnerkanzlei setzt anschließend Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung durch — Sie bleiben außen vor.',
+      'In drei Schritten: 1) Schaden online melden mit Fotos (5 Min), 2) Ein zertifizierter Sachverständiger besichtigt das Fahrzeug vor Ort innerhalb von 48 Stunden, 3) Unsere Partnerkanzlei setzt anschließend Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung durch – Sie bleiben außen vor.',
   },
   {
     frage: 'Kann die Versicherung das Gutachten kürzen?',
@@ -65,7 +65,7 @@ const TOP_FAQ = [
   {
     frage: 'Was ist eine Sicherungsabtretung beim Gutachter?',
     antwort:
-      'Eine Sicherungsabtretung nach §398 BGB überträgt Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars direkt auf den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Haftpflichtversicherung der Gegenseite ab. Sie zahlen nichts und tragen kein Insolvenzrisiko.',
+      'Eine Sicherungsabtretung nach §398 BGB überträgt Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars direkt auf den Sachverständigen. Sie unterzeichnen einmal – der Gutachter rechnet danach direkt mit der Haftpflichtversicherung der Gegenseite ab. Sie zahlen nichts und tragen kein Insolvenzrisiko.',
   },
   {
     frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
@@ -117,7 +117,7 @@ export default function KfzGutachterPillarPage() {
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung Deutschland',
             description:
-              'Vermittlung an unabhängige, zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen Sachverständigen-Verzeichnis, Termin in unter 48 Stunden.',
+              'Vermittlung an unabhängige, zertifizierte Kfz-Sachverständige in ganz Deutschland – kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen Sachverständigen-Verzeichnis, Termin in unter 48 Stunden.',
             url: `${SITE_URL}/kfz-gutachter`,
           }),
           faqPageSchema(TOP_FAQ, {
@@ -143,7 +143,7 @@ export default function KfzGutachterPillarPage() {
         <VerfuegbarkeitStreifen />
       </Suspense>
 
-      {/* Hero — Navy mit Spotlights für Tiefe */}
+      {/* Hero – Navy mit Spotlights für Tiefe */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden
@@ -199,7 +199,7 @@ export default function KfzGutachterPillarPage() {
         </div>
       </section>
 
-      {/* Trust-Strip — Glass */}
+      {/* Trust-Strip – Glass */}
       <section className="border-y border-white/50 bg-white/65 backdrop-blur-md">
         <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-white/40 px-5 sm:grid-cols-4">
           {TRUST_KPIS.map((s) => (
@@ -214,7 +214,7 @@ export default function KfzGutachterPillarPage() {
         </p>
       </section>
 
-      {/* Antwort-Blöcke (Answer Capsules — Princeton GEO) */}
+      {/* Antwort-Blöcke (Answer Capsules – Princeton GEO) */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">

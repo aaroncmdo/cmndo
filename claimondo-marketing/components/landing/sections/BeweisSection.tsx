@@ -20,7 +20,7 @@ export async function BeweisSection() {
 
   return (
     <>
-      {/* D5 — §6 Prüfdienst-Kontrast (Opener/Frame) */}
+      {/* D5 – §6 Prüfdienst-Kontrast (Opener/Frame) */}
       <section
         className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white sm:py-24"
         aria-labelledby="pruefdienst-kontrast-heading"
@@ -50,7 +50,7 @@ export async function BeweisSection() {
           </div>
 
           <div className="mt-12 grid gap-5 md:grid-cols-2">
-            {/* So begutachten WIR — unabhängiger SV vor Ort */}
+            {/* So begutachten WIR – unabhängiger SV vor Ort */}
             <div className="rounded-ios-md border border-emerald-400/25 bg-emerald-400/[0.06] p-7">
               <div className="flex items-center gap-3">
                 <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
@@ -75,7 +75,7 @@ export async function BeweisSection() {
               </ul>
             </div>
 
-            {/* So "prüft" die Versicherung — Online-Prüfdienst am Schreibtisch */}
+            {/* So "prüft" die Versicherung – Online-Prüfdienst am Schreibtisch */}
             <div className="rounded-ios-md border border-red-400/25 bg-red-500/[0.06] p-7">
               <div className="flex items-center gap-3">
                 <span className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-300">
@@ -107,13 +107,13 @@ export async function BeweisSection() {
         </div>
       </section>
 
-      {/* 9 — BGH-Authority */}
+      {/* 9 – BGH-Authority */}
       <BghAuthorityGrid headingId="bgh-heading-premium" />
 
-      {/* 12 — Wertminderung Sanden/Danner-Tabelle */}
+      {/* 12 – Wertminderung Sanden/Danner-Tabelle */}
       <WertminderungSandenDannerSection />
 
-      {/* 17 — Versicherer-Taktiken (detaillierte Kürzungs-Mechanik) */}
+      {/* 17 – Versicherer-Taktiken (detaillierte Kürzungs-Mechanik) */}
       <VersichererTaktikenSection />
     </>
   )

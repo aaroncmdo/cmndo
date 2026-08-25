@@ -70,7 +70,7 @@ export function Tr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>)
   return <tr className={cn(className)} {...props} />
 }
 
-/** Klickbare Zeile (Row-Link-Pattern) — Hover-Tint + Pointer; `onClick` durchreichen. */
+/** Klickbare Zeile (Row-Link-Pattern) – Hover-Tint + Pointer; `onClick` durchreichen. */
 export function ClickableTr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
   return <tr className={cn('cursor-pointer transition-colors hover:bg-claimondo-bg', className)} {...props} />
 }

@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/auslandsunfall
-meta_title: Auslandsunfall — Regulierung Grüne Karte
+meta_title: Auslandsunfall – Regulierung Grüne Karte
 type: glossar-spoke
 cluster: H7
 nummer: H7.3
@@ -15,22 +15,22 @@ customer_questions:
   - "schadensregulierung in italien spanien"
   - "ausländischer fahrer unfall deutschland"
 last_modified: 2026-05-18
-excerpt: Bei Verkehrsunfällen im Ausland (EU, EWR, Schweiz) erfolgt die Schadensregulierung über das Grüne-Karte-System und den deutschen Regulierungsbeauftragten des ausländischen Versicherers — eine Klage im Ausland ist nicht nötig. Anwendbares Recht richtet sich nach der Rom-II-Verordnung (Unfallortprinzip). Bearbeitungszeiten betragen typisch 3–6 Monate.
+excerpt: Bei Verkehrsunfällen im Ausland (EU, EWR, Schweiz) erfolgt die Schadensregulierung über das Grüne-Karte-System und den deutschen Regulierungsbeauftragten des ausländischen Versicherers – eine Klage im Ausland ist nicht nötig. Anwendbares Recht richtet sich nach der Rom-II-Verordnung (Unfallortprinzip). Bearbeitungszeiten betragen typisch 3–6 Monate.
 keyFacts:
-  - Grünes-Karte-System — gilt in EU, EWR und Schweiz
-  - Rom-II-Verordnung — Recht des Unfallorts gilt grundsätzlich
+  - Grünes-Karte-System – gilt in EU, EWR und Schweiz
+  - Rom-II-Verordnung – Recht des Unfallorts gilt grundsätzlich
   - Ausländischer Fahrer in Deutschland: Regulierung über DVS
   - Schmerzensgeld-Spannen variieren stark nach Land (Italien niedriger, Frankreich teils höher)
   - Nicht-EU-Unfall: längere Verfahren, lokale Anwälte oft erforderlich
 related:
   - /haftpflicht/fahrerflucht
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Auslandsunfall (EU/EWR/Schweiz): Regulierung über die Grüne Karte und den deutschen Regulierungsbeauftragten — ohne Klage im Ausland. So gehen Sie vor."
+meta_description: "Auslandsunfall (EU/EWR/Schweiz): Regulierung über die Grüne Karte und den deutschen Regulierungsbeauftragten – ohne Klage im Ausland. So gehen Sie vor."
 ---
 
-# Auslandsunfall — Schadensregulierung über die Grüne Karte
+# Auslandsunfall – Schadensregulierung über die Grüne Karte
 
-> **Kurz erklärt:** Bei Verkehrsunfällen im **Ausland** (EU + Schweiz, Liechtenstein, Norwegen) erfolgt die Schadensregulierung über das **Grüne-Karte-System** und das deutsche **„Büro Grüne Karte"** — du musst nicht im Ausland klagen. Bei Unfall **in Deutschland** mit ausländischem Fahrzeug ist der **Deutsche Verkehrsversicherer e.V. (DVS)** der Eintritts-Punkt für die Regulierung. Verfahren komplex, längere Bearbeitungszeiten (3–6 Monate), spezialisierter Anwalt empfohlen.
+> **Kurz erklärt:** Bei Verkehrsunfällen im **Ausland** (EU + Schweiz, Liechtenstein, Norwegen) erfolgt die Schadensregulierung über das **Grüne-Karte-System** und das deutsche **„Büro Grüne Karte"** – du musst nicht im Ausland klagen. Bei Unfall **in Deutschland** mit ausländischem Fahrzeug ist der **Deutsche Verkehrsversicherer e.V. (DVS)** der Eintritts-Punkt für die Regulierung. Verfahren komplex, längere Bearbeitungszeiten (3–6 Monate), spezialisierter Anwalt empfohlen.
 
 ## Auch bekannt als
 
@@ -42,9 +42,9 @@ Grüne-Karte-System · IB-Verfahren · ZB Grüne Karte · Auslandsschadens-Regul
 - Polizei rufen, Unfall-Protokoll im jeweiligen Land
 - **Europäischer Unfallbericht** (mehrsprachig) ausfüllen
 - Schädiger-Versicherung: über Grüne Karte oder Schadens-Regulierungs-Beauftragten in Deutschland
-- Schadensanzeige bei der deutschen **Regulierungs-Beauftragten** des ausländischen Versicherers — oder beim deutschen Büro Grüne Karte
+- Schadensanzeige bei der deutschen **Regulierungs-Beauftragten** des ausländischen Versicherers – oder beim deutschen Büro Grüne Karte
 
-### 2. Ausländischer Fahrer in Deutschland — Schädiger
+### 2. Ausländischer Fahrer in Deutschland – Schädiger
 - Deutscher Verkehrsversicherer e.V. (DVS) → reguliert wie deutsche Versicherung
 - Verfahren deutlich einfacher als im Ausland selbst
 
@@ -63,7 +63,7 @@ Grüne-Karte-System · IB-Verfahren · ZB Grüne Karte · Auslandsschadens-Regul
 
 **Rom-II-Verordnung** (für EU-Länder): grundsätzlich Recht des **Unfallorts**, mit Möglichkeit der Rechtswahl in einzelnen Konstellationen.
 
-→ Praktisch: Spannen für Schmerzensgeld können stark variieren — Italien hat z. B. tabellarische Spannen weit unter deutschem Niveau, Frankreich teils höher. Anwalts-Strategie: Gerichtsstand in Deutschland sichern, wenn möglich.
+→ Praktisch: Spannen für Schmerzensgeld können stark variieren – Italien hat z. B. tabellarische Spannen weit unter deutschem Niveau, Frankreich teils höher. Anwalts-Strategie: Gerichtsstand in Deutschland sichern, wenn möglich.
 
 ## Häufige Fragen
 
@@ -71,7 +71,7 @@ Grüne-Karte-System · IB-Verfahren · ZB Grüne Karte · Auslandsschadens-Regul
 Internationale Versicherungs-Bestätigung. Mittlerweile nicht mehr zwingend in der EU + EWR + Schweiz mitzuführen (Kennzeichen-Erkennung), aber Verfahrens-Grundlage bleibt.
 
 **Wer reguliert bei Unfall im Ausland?**
-Versicherer des Schädigers — oder dessen deutscher Regulierungs-Beauftragter. Bei Frankreich-Unfall mit französischem Schädiger: der deutsche Beauftragte der französischen Versicherung in Deutschland.
+Versicherer des Schädigers – oder dessen deutscher Regulierungs-Beauftragter. Bei Frankreich-Unfall mit französischem Schädiger: der deutsche Beauftragte der französischen Versicherung in Deutschland.
 
 **Wie hoch ist Schmerzensgeld bei Auslandsunfall?**
 Nach Recht des Unfallorts. Italien typisch niedriger, Frankreich teils höher als Deutschland. Anwalts-Beratung zwingend.
@@ -137,4 +137,4 @@ Längere Verfahren, oft lokale Anwälte erforderlich. Reisende Rechtsschutz-Vers
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

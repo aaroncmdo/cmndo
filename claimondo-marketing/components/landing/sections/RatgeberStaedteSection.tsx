@@ -26,8 +26,8 @@ export function RatgeberStaedteSection({ artikelSlug }: { artikelSlug: string })
           Kfz-Gutachter vor Ort
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
-          Was hier steht, gilt bundesweit. Wie es an Ihrem Ort abläuft — mit
-          zuständigem Amtsgericht und den Honorarspannen der Region — steht auf
+          Was hier steht, gilt bundesweit. Wie es an Ihrem Ort abläuft – mit
+          zuständigem Amtsgericht und den Honorarspannen der Region – steht auf
           der jeweiligen Stadtseite.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">

@@ -50,7 +50,7 @@ function paketLabel(p: Props): string {
 export function SvOnboardingRechnungEmail(props: Props) {
   const url = props.portalUrl ?? `${APP_URL}/gutachter`
   return (
-    <EmailLayout preview={`Anzahlungsrechnung ${props.rechnungs_nr} — Portal freigeschaltet`}>
+    <EmailLayout preview={`Anzahlungsrechnung ${props.rechnungs_nr} – Portal freigeschaltet`}>
       <Heading>Ihre Anzahlung ist eingegangen</Heading>
 
       <Paragraph>{anrede(props)},</Paragraph>

@@ -2,14 +2,14 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/pruefdienstleister
-meta_title: Prüfdienstleister — wie Versicherer kürzen
+meta_title: Prüfdienstleister – wie Versicherer kürzen
 type: glossar-spoke
 cluster: SV
 nummer: SV.8
 primary_keyword: "controlexpert kürzung"
 secondary_keywords: ["versicherung kürzt gutachten", "prüfdienstleister kfz", "carexpert rechnungskürzung"]
 last_modified: 2026-05-23
-excerpt: Prüfdienstleister wie controlExpert (Allianz-Beteiligung) und carexpert prüfen im Versichererauftrag Sachverständigenrechnungen und Reparaturkalkulationen automatisiert und kürzen sie häufig. Nach BGH VI ZR 280/22 trägt das Sachverständigenrisiko der Versicherer, nicht der Geschädigte — pauschale Kürzungen ohne konkrete Begründung sind regelmäßig angreifbar.
+excerpt: Prüfdienstleister wie controlExpert (Allianz-Beteiligung) und carexpert prüfen im Versichererauftrag Sachverständigenrechnungen und Reparaturkalkulationen automatisiert und kürzen sie häufig. Nach BGH VI ZR 280/22 trägt das Sachverständigenrisiko der Versicherer, nicht der Geschädigte – pauschale Kürzungen ohne konkrete Begründung sind regelmäßig angreifbar.
 keyFacts:
   - BGH VI ZR 280/22 (12.03.2024): Sachverständigenrisiko liegt beim Versicherer
   - BGH VI ZR 225/13: beglichene Rechnung hat Indizwirkung für Erforderlichkeit
@@ -22,22 +22,22 @@ related:
   - /sachverstaendige/zkf
   - /sachverstaendige/ihk-bestellung-oebv
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Prüfdienstleister wie controlExpert & carexpert: wie Versicherer damit Gutachten und Reparaturrechnungen kürzen — und wie Sie dagegen vorgehen."
+meta_description: "Prüfdienstleister wie controlExpert & carexpert: wie Versicherer damit Gutachten und Reparaturrechnungen kürzen – und wie Sie dagegen vorgehen."
 ---
 
-# Prüfdienstleister (controlExpert, carexpert & Co.) — wie Versicherer Rechnungen kürzen
+# Prüfdienstleister (controlExpert, carexpert & Co.) – wie Versicherer Rechnungen kürzen
 
-> **Kurz erklärt:** Prüfdienstleister wie controlExpert oder carexpert prüfen im Auftrag von Versicherern Sachverständigen-Rechnungen und Reparaturkalkulationen — und kürzen sie häufig. Wichtig für Sie: Diese Kürzungen müssen Sie nicht akzeptieren. Der Bundesgerichtshof hat das sogenannte Sachverständigenrisiko klar zu Ihren Gunsten entschieden (BGH VI ZR 280/22).
+> **Kurz erklärt:** Prüfdienstleister wie controlExpert oder carexpert prüfen im Auftrag von Versicherern Sachverständigen-Rechnungen und Reparaturkalkulationen – und kürzen sie häufig. Wichtig für Sie: Diese Kürzungen müssen Sie nicht akzeptieren. Der Bundesgerichtshof hat das sogenannte Sachverständigenrisiko klar zu Ihren Gunsten entschieden (BGH VI ZR 280/22).
 
 ---
 
 ## Worum es geht
 
-Bevor ein Versicherer eine Schadenrechnung zahlt, läuft sie bei vielen Gesellschaften zunächst durch einen **Prüfdienstleister**. Der größte ist **controlExpert** (Sitz Langenfeld), an dem die Allianz beteiligt ist; **carexpert** ist ein Zusammenschluss mehrerer Kfz-Versicherer. Diese Dienstleister prüfen Sachverständigen-Honorare und Reparaturpositionen weitgehend automatisiert und erstellen einen **Kürzungsbericht** — mit Positionen, die angeblich „nicht erstattungsfähig" seien.
+Bevor ein Versicherer eine Schadenrechnung zahlt, läuft sie bei vielen Gesellschaften zunächst durch einen **Prüfdienstleister**. Der größte ist **controlExpert** (Sitz Langenfeld), an dem die Allianz beteiligt ist; **carexpert** ist ein Zusammenschluss mehrerer Kfz-Versicherer. Diese Dienstleister prüfen Sachverständigen-Honorare und Reparaturpositionen weitgehend automatisiert und erstellen einen **Kürzungsbericht** – mit Positionen, die angeblich „nicht erstattungsfähig" seien.
 
 Die zugrunde liegenden Prüf-Algorithmen sind nicht öffentlich. Genau deshalb sind pauschale Kürzungen ohne konkrete Begründung rechtlich angreifbar.
 
-## Typische Kürzungen — und was dagegen spricht
+## Typische Kürzungen – und was dagegen spricht
 
 | Gekürzte Position | Was dagegen spricht |
 |---|---|
@@ -54,14 +54,14 @@ Mit **BGH VI ZR 280/22 (12.03.2024)** ist das **Sachverständigenrisiko** geklä
 ## Was Sie bei einer Kürzung tun sollten
 
 1. Fordern Sie das **Kürzungsschreiben** und den zugrunde liegenden **Prüfbericht** an.
-2. Lassen Sie die Kürzung **Position für Position** prüfen — nicht pauschal akzeptieren.
+2. Lassen Sie die Kürzung **Position für Position** prüfen – nicht pauschal akzeptieren.
 3. Schalten Sie früh **anwaltliche Hilfe** ein. Bei unverschuldetem Unfall trägt der gegnerische Versicherer auch die Anwaltskosten (§ 249 BGB).
 
 Claimondo und unsere Partnerkanzlei für Verkehrsrecht prüfen Versicherer-Kürzungen kostenfrei für Sie und setzen Ihre Ansprüche BGH-fundiert durch.
 
 ## Nächster Schritt für Geschädigte
 
-Wenn Ihre Schadenregulierung gekürzt wurde, melden Sie Ihren Fall — Claimondo + unsere Partnerkanzlei für Verkehrsrecht antworten kostenfrei mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt der gegnerische Haftpflichtversicherer die Kosten (§ 249 BGB).
+Wenn Ihre Schadenregulierung gekürzt wurde, melden Sie Ihren Fall – Claimondo + unsere Partnerkanzlei für Verkehrsrecht antworten kostenfrei mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt der gegnerische Haftpflichtversicherer die Kosten (§ 249 BGB).
 
 → **Schaden melden: [claimondo.de/schaden-melden](https://claimondo.de/schaden-melden)**
 → Sachverständigen-Karte ansehen: [claimondo.de/gutachter-finden](https://claimondo.de/gutachter-finden)

@@ -45,17 +45,17 @@ const FAQS_SCHEMA = [
   {
     frage: 'Wie generiere ich als Kfz-Gutachter planbar neue Aufträge?',
     antwort:
-      'Drei Hebel: (1) lokale Sichtbarkeit (Google-Unternehmensprofil, Bewertungen, lokale Landingpages je Einzugsgebiet), (2) bezahlte Suche auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]" — teuer, im Schnitt 8–12 € CPC, (3) Plattform-Distribution: ein Vermittler liefert vorqualifizierte Geschädigten-Anfragen ohne eigenes Marketing-Budget. Der Mix entscheidet — rein organisch ist langsam, rein Ads ist teuer, Plattform-Leads sind planbar.',
+      'Drei Hebel: (1) lokale Sichtbarkeit (Google-Unternehmensprofil, Bewertungen, lokale Landingpages je Einzugsgebiet), (2) bezahlte Suche auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]" – teuer, im Schnitt 8–12 € CPC, (3) Plattform-Distribution: ein Vermittler liefert vorqualifizierte Geschädigten-Anfragen ohne eigenes Marketing-Budget. Der Mix entscheidet – rein organisch ist langsam, rein Ads ist teuer, Plattform-Leads sind planbar.',
   },
   {
     frage: 'Was kostet ein qualifizierter Kfz-Gutachter-Lead?',
     antwort:
-      'Über bezahlte Suche liegen die Kosten pro Anfrage realistisch bei 80–250 €, weil generische Begriffe teuer und die Conversion-Raten niedrig sind. Über eine Plattform mit Geschädigten-Zulauf entfällt das Vorab-Budget — Sie übernehmen einen vorqualifizierten Auftrag aus Ihrem Einzugsgebiet. Claimondo verteilt Anfragen an verifizierte Sachverständige im Netzwerk.',
+      'Über bezahlte Suche liegen die Kosten pro Anfrage realistisch bei 80–250 €, weil generische Begriffe teuer und die Conversion-Raten niedrig sind. Über eine Plattform mit Geschädigten-Zulauf entfällt das Vorab-Budget – Sie übernehmen einen vorqualifizierten Auftrag aus Ihrem Einzugsgebiet. Claimondo verteilt Anfragen an verifizierte Sachverständige im Netzwerk.',
   },
   {
     frage: 'Was unterscheidet einen qualifizierten Lead von einer reinen Adresse?',
     antwort:
-      'Ein qualifizierter SV-Lead ist eine konkrete Schadenanfrage eines Geschädigten mit unverschuldetem Unfall, geklärter Schuldfrage und Schaden über der Bagatellgrenze — also ein Fall, bei dem ein vollständiges Gutachten anfällt und die gegnerische Haftpflicht zahlt (§ 249 BGB). Reine Adress-Listen ohne Schadenkontext konvertieren kaum.',
+      'Ein qualifizierter SV-Lead ist eine konkrete Schadenanfrage eines Geschädigten mit unverschuldetem Unfall, geklärter Schuldfrage und Schaden über der Bagatellgrenze – also ein Fall, bei dem ein vollständiges Gutachten anfällt und die gegnerische Haftpflicht zahlt (§ 249 BGB). Reine Adress-Listen ohne Schadenkontext konvertieren kaum.',
   },
   {
     frage: 'Muss ich für das Claimondo-Partnernetzwerk Marketing-Budget mitbringen?',
@@ -78,7 +78,7 @@ export default function LeadsGenerierenPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           serviceSchema({
-            name: 'Leads für Kfz-Gutachter — Claimondo Partnernetzwerk',
+            name: 'Leads für Kfz-Gutachter – Claimondo Partnernetzwerk',
             description:
               'Vorqualifizierte Geschädigten-Anfragen für verifizierte Kfz-Sachverständige. Zentrales Marketing, planbare Auftragslage, kein eigenes Werbebudget nötig.',
             url: `${SITE_URL}/gutachter-partner/leads-generieren`,

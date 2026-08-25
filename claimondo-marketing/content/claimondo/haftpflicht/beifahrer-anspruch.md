@@ -15,25 +15,25 @@ customer_questions:
   - "beifahrer eigene versicherung haftpflicht"
   - "ich war mitfahrer wer zahlt"
 last_modified: 2026-05-18
-excerpt: Beifahrer und Mitfahrer haben eigenständige, vollwertige Ansprüche nach einem Verkehrsunfall — egal ob das eigene oder das gegnerische Fahrzeug schuldig war. Bei Schuld des eigenen Fahrers zahlt dessen Haftpflichtversicherung. Gurt-Verzicht kann zu Mitverschulden von 20–30 % führen, wenn der Versicherer die Kausalität nachweist.
+excerpt: Beifahrer und Mitfahrer haben eigenständige, vollwertige Ansprüche nach einem Verkehrsunfall – egal ob das eigene oder das gegnerische Fahrzeug schuldig war. Bei Schuld des eigenen Fahrers zahlt dessen Haftpflichtversicherung. Gurt-Verzicht kann zu Mitverschulden von 20–30 % führen, wenn der Versicherer die Kausalität nachweist.
 keyFacts:
-  - § 7 StVG, § 115 VVG — Direktanspruch gegen Haftpflichtversicherer
+  - § 7 StVG, § 115 VVG – Direktanspruch gegen Haftpflichtversicherer
   - Eigener Fahrer schuldhaft: Anspruch gegen dessen Haftpflichtversicherung
   - Gurt-Verzicht mit Verletzungsfolge: Mitverschulden typisch 20–40 %
-  - § 21a StVO — Anschnallpflicht für alle Insassen
-  - Familienkonstellation hindert Anspruch nicht — Klage gegen Versicherung, nicht Person
+  - § 21a StVO – Anschnallpflicht für alle Insassen
+  - Familienkonstellation hindert Anspruch nicht – Klage gegen Versicherung, nicht Person
 last_legal_review: pending
 related:
   - /haftpflicht/geschaedigte-primaer
   - /haftpflicht/schmerzensgeld-bgb253
   - /haftpflicht/mitverschulden-bgb254
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Beifahrer haben nach Unfall eigene volle Ansprüche (§7 StVG, §115 VVG) — egal welcher Fahrer schuld war. Direktanspruch gegen die Haftpflicht."
+meta_description: "Beifahrer haben nach Unfall eigene volle Ansprüche (§7 StVG, §115 VVG) – egal welcher Fahrer schuld war. Direktanspruch gegen die Haftpflicht."
 ---
 
 # Beifahrer-Ansprüche beim Verkehrsunfall
 
-> **Kurz erklärt:** Beifahrer und Mitfahrer haben **eigenständige, vollwertige Ansprüche** bei Verkehrsunfällen — egal, ob ihr Fahrzeug das schuldige oder das nicht-schuldige war. Bei eigenem Fahrzeug schuldhaft: Ansprüche gegen die **eigene Haftpflichtversicherung** des Fahrers. Bei gegnerischem Fahrzeug schuldhaft: gegen dessen Haftpflichtversicherung. Sicherheitsgurt-Pflicht beachten — Verletzung kann zu [Mitverschulden](/haftpflicht/mitverschulden-bgb254) führen (typisch 20–30 %).
+> **Kurz erklärt:** Beifahrer und Mitfahrer haben **eigenständige, vollwertige Ansprüche** bei Verkehrsunfällen – egal, ob ihr Fahrzeug das schuldige oder das nicht-schuldige war. Bei eigenem Fahrzeug schuldhaft: Ansprüche gegen die **eigene Haftpflichtversicherung** des Fahrers. Bei gegnerischem Fahrzeug schuldhaft: gegen dessen Haftpflichtversicherung. Sicherheitsgurt-Pflicht beachten – Verletzung kann zu [Mitverschulden](/haftpflicht/mitverschulden-bgb254) führen (typisch 20–30 %).
 
 ## Auch bekannt als
 
@@ -43,11 +43,11 @@ Mitfahrer-Anspruch · Insassen-Anspruch · Passagier-Ansprüche
 
 ## In einem Satz erklärt
 
-Beifahrer haben volle eigenständige Ansprüche auf Schmerzensgeld, Heilbehandlung und alle weiteren Personenschäden — egal welches Fahrzeug schuldig war.
+Beifahrer haben volle eigenständige Ansprüche auf Schmerzensgeld, Heilbehandlung und alle weiteren Personenschäden – egal welches Fahrzeug schuldig war.
 
 ## In drei Sätzen erklärt
 
-Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschädigte** mit eigenständigen Ansprüchen — ihre Position ist sogar in einer Hinsicht günstiger als die des Fahrers: Sie haben **immer** vollen Anspruch, egal welches Fahrzeug schuldig ist. Bei Schuld des gegnerischen Fahrzeugs: Ansprüche gegen dessen Haftpflichtversicherung (§ 115 VVG); bei Schuld des **eigenen** Fahrzeugs: Ansprüche gegen die Haftpflichtversicherung des **eigenen** Fahrers — die Versicherung des Verwandten oder Bekannten zahlt also. Sicherheitsgurt-Verletzung kann zu [Mitverschulden](/haftpflicht/mitverschulden-bgb254) führen; ansonsten greift die volle Erstattung aller Personenschadens-Positionen.
+Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschädigte** mit eigenständigen Ansprüchen – ihre Position ist sogar in einer Hinsicht günstiger als die des Fahrers: Sie haben **immer** vollen Anspruch, egal welches Fahrzeug schuldig ist. Bei Schuld des gegnerischen Fahrzeugs: Ansprüche gegen dessen Haftpflichtversicherung (§ 115 VVG); bei Schuld des **eigenen** Fahrzeugs: Ansprüche gegen die Haftpflichtversicherung des **eigenen** Fahrers – die Versicherung des Verwandten oder Bekannten zahlt also. Sicherheitsgurt-Verletzung kann zu [Mitverschulden](/haftpflicht/mitverschulden-bgb254) führen; ansonsten greift die volle Erstattung aller Personenschadens-Positionen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -68,18 +68,18 @@ Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschä
 
 ### 2. Unfall durch eigenes Fahrzeug verschuldet
 - Beifahrer hat volle Ansprüche **gegen die eigene Haftpflichtversicherung** des Fahrers
-- Auch wenn der Fahrer ein Familienmitglied oder Freund ist — der Versicherer zahlt unabhängig vom persönlichen Verhältnis
+- Auch wenn der Fahrer ein Familienmitglied oder Freund ist – der Versicherer zahlt unabhängig vom persönlichen Verhältnis
 - Wichtig: **Keine** Verschlechterung der SF-Klasse beim eigenen Fahrer, weil der Mitfahrer-Schaden nicht auf den Haftpflicht-SF-Verlauf wirkt (anders Vollkasko)
 
 ### 3. Beidseitige Schuld
 - Beifahrer hat Ansprüche **gegen beide Haftpflichtversicherungen** (gesamtschuldnerisch)
-- Du kannst wählen, gegen welche du primär forderst — die Versicherer regeln den Innen-Ausgleich (§ 426 BGB)
+- Du kannst wählen, gegen welche du primär forderst – die Versicherer regeln den Innen-Ausgleich (§ 426 BGB)
 
 ---
 
-## Sicherheitsgurt — die Mitverschuldens-Frage
+## Sicherheitsgurt – die Mitverschuldens-Frage
 
-§ 21a StVO schreibt für alle Insassen Anschnallpflicht vor. Wer **bei Verletzungsfolge** nicht angeschnallt war, riskiert eine Mitverschuldens-Quote — wenn der Versicherer beweist, dass die konkrete Verletzung durch den Gurt **verhindert oder verringert** worden wäre.
+§ 21a StVO schreibt für alle Insassen Anschnallpflicht vor. Wer **bei Verletzungsfolge** nicht angeschnallt war, riskiert eine Mitverschuldens-Quote – wenn der Versicherer beweist, dass die konkrete Verletzung durch den Gurt **verhindert oder verringert** worden wäre.
 
 | Situation | Mitverschulden |
 |---|---|
@@ -89,7 +89,7 @@ Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschä
 | Nicht angeschnallt, schwere Kopf-/Gesichts-Verletzung | 20–40 % |
 | Kind ohne Kindersitz bei Verletzungsfolge | 30–50 % (Eltern-Mitverschulden) |
 
-→ Versicherer-Behauptungen pauschal zurückweisen — konkrete Kausalitäts-Begründung verlangen.
+→ Versicherer-Behauptungen pauschal zurückweisen – konkrete Kausalitäts-Begründung verlangen.
 
 ---
 
@@ -97,25 +97,25 @@ Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschä
 
 Identisch mit anderen Primär-Geschädigten (siehe [Geschädigte primär](/haftpflicht/geschaedigte-primaer)):
 
-- **[Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253)** — Höhe nach Hacks/Wellner
-- **[Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten)** — vollständig
-- **[Verdienstausfall](/haftpflicht/verdienstausfall)** — bei Berufstätigen
-- **[Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden)** — bei Haushalts-Beeinträchtigung
-- **Sachschäden** — beschädigte mitgeführte Sachen (Brille, Laptop, Handy)
-- **[Vermehrte Bedürfnisse](/haftpflicht/vermehrte-beduerfnisse)** — bei Dauer-Folgen
-- **[Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden)** — bei dauerhafter Erwerbsminderung
+- **[Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253)** – Höhe nach Hacks/Wellner
+- **[Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten)** – vollständig
+- **[Verdienstausfall](/haftpflicht/verdienstausfall)** – bei Berufstätigen
+- **[Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden)** – bei Haushalts-Beeinträchtigung
+- **Sachschäden** – beschädigte mitgeführte Sachen (Brille, Laptop, Handy)
+- **[Vermehrte Bedürfnisse](/haftpflicht/vermehrte-beduerfnisse)** – bei Dauer-Folgen
+- **[Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden)** – bei dauerhafter Erwerbsminderung
 
 ---
 
 ## Sonderfall: Beifahrer im Auto eines schuldigen Familienmitglieds
 
-Häufiger Praxisfall — Familien-Mitglied fährt schuldhaft, Beifahrer wird verletzt. Wichtige Punkte:
+Häufiger Praxisfall – Familien-Mitglied fährt schuldhaft, Beifahrer wird verletzt. Wichtige Punkte:
 
-- **Die eigene Haftpflichtversicherung** des Fahrer-Verwandten zahlt — kein „Familien-Rabatt", kein „Verzicht"
+- **Die eigene Haftpflichtversicherung** des Fahrer-Verwandten zahlt – kein „Familien-Rabatt", kein „Verzicht"
 - Auch das eigene Kind kann gegen die Eltern-Haftpflicht klagen (sofern älter als 10 Jahre, sonst ohnehin keine Eigen-Schuld)
-- Beifahrer und Fahrer können nach dem Unfall in dauerhaftem Verhältnis stehen — die Versicherung zahlt trotzdem objektiv
+- Beifahrer und Fahrer können nach dem Unfall in dauerhaftem Verhältnis stehen – die Versicherung zahlt trotzdem objektiv
 
-→ Es ist daher kein „Bruder gegen Bruder"-Konflikt — der Anspruch geht juristisch gegen die Versicherungs-Gesellschaft, nicht persönlich gegen das Familien-Mitglied.
+→ Es ist daher kein „Bruder gegen Bruder"-Konflikt – der Anspruch geht juristisch gegen die Versicherungs-Gesellschaft, nicht persönlich gegen das Familien-Mitglied.
 
 ---
 
@@ -125,7 +125,7 @@ Häufiger Praxisfall — Familien-Mitglied fährt schuldhaft, Beifahrer wird ver
 
 Falsch. Beifahrer sind volle primäre Geschädigte mit allen Ansprüchen.
 
-> *„Sie hätten sich anschnallen müssen — vollständige Kürzung."*
+> *„Sie hätten sich anschnallen müssen – vollständige Kürzung."*
 
 Auch bei Nicht-Anschnallen ist die Quote begrenzt (20–40 %), nicht vollständig.
 
@@ -135,15 +135,15 @@ Falsch. Anspruch besteht objektiv gegen die Versicherung, unabhängig vom Verhä
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Beifahrer-Ansprüche sind vollwertig — egal welches Auto schuldig war. Familien-Konstellation hindert nicht.
+Beifahrer-Ansprüche sind vollwertig – egal welches Auto schuldig war. Familien-Konstellation hindert nicht.
 
 ### 🛠 Drei Schritte
 
 **1. Verletzungen ärztlich dokumentieren**
-Innerhalb 24 Stunden — auch bei vermeintlich leichten Beschwerden.
+Innerhalb 24 Stunden – auch bei vermeintlich leichten Beschwerden.
 
 **2. Anspruchs-Adressat ermitteln**
 Bei eigener Schuld des Fahrers: dessen Versicherung. Bei gegnerischer Schuld: deren Versicherung.
@@ -156,10 +156,10 @@ Kostenfrei (BGH VI ZR 235/13). Familien-Konstellation kein Hinderungsgrund.
 ## Häufige Fragen
 
 **Habe ich als Beifahrer Anspruch?**
-Ja, vollwertig. Beifahrer sind primäre Geschädigte mit eigenständigen Ansprüchen — egal welches Fahrzeug schuldig war.
+Ja, vollwertig. Beifahrer sind primäre Geschädigte mit eigenständigen Ansprüchen – egal welches Fahrzeug schuldig war.
 
 **Was, wenn mein eigener Fahrer schuldhaft war?**
-Anspruch gegen die eigene Haftpflichtversicherung des Fahrers. Die Versicherung des Verwandten oder Bekannten zahlt — objektiv, ohne persönliche Konflikte.
+Anspruch gegen die eigene Haftpflichtversicherung des Fahrers. Die Versicherung des Verwandten oder Bekannten zahlt – objektiv, ohne persönliche Konflikte.
 
 **Mindert Gurt-Verzicht meinen Anspruch?**
 Möglich. Bei Verletzungsfolge typisch 20–30 % Mitverschulden, wenn der Versicherer beweist, dass der Gurt die Verletzung verhindert hätte.
@@ -168,22 +168,22 @@ Möglich. Bei Verletzungsfolge typisch 20–30 % Mitverschulden, wenn der Versic
 Nein. Die Klage geht gegen die Haftpflichtversicherung, nicht persönlich gegen das Familienmitglied.
 
 **Was, wenn beide Fahrer schuld sind?**
-Beifahrer hat Ansprüche gegen beide Haftpflichtversicherungen — gesamtschuldnerisch. Wahl, an wen du dich primär wendest.
+Beifahrer hat Ansprüche gegen beide Haftpflichtversicherungen – gesamtschuldnerisch. Wahl, an wen du dich primär wendest.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Geschädigte primär](/haftpflicht/geschaedigte-primaer) — Anspruchsberechtigung allgemein
+- [Geschädigte primär](/haftpflicht/geschaedigte-primaer) – Anspruchsberechtigung allgemein
 - [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253)
-- [Mitverschulden § 254 BGB](/haftpflicht/mitverschulden-bgb254) — Gurt-Quote
+- [Mitverschulden § 254 BGB](/haftpflicht/mitverschulden-bgb254) – Gurt-Quote
 - [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung)
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum eigenen Fahrer unklar ist. Spezialisierte Verkehrsrechts-Kanzleien klären das routiniert — Anwaltskosten zahlt der Versicherer.
+Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum eigenen Fahrer unklar ist. Spezialisierte Verkehrsrechts-Kanzleien klären das routiniert – Anwaltskosten zahlt der Versicherer.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -191,10 +191,10 @@ Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum ei
 
 ## Quellen
 
-- StVG §§ 7, 8 (Insassen-Schutz) — [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
-- BGB § 823, § 254 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- StVG §§ 7, 8 (Insassen-Schutz) – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
+- BGB § 823, § 254 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - StVO § 21a Anschnallpflicht
-- VVG § 115 — Direktanspruch
+- VVG § 115 – Direktanspruch
 - BGH-Rechtsprechung zur Gurt-Quote
 
 ---
@@ -241,4 +241,4 @@ Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum ei
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

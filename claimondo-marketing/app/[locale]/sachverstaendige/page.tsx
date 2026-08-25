@@ -55,11 +55,11 @@ export default function Page() {
             Kfz-Sachverständige &amp; Verbände in Deutschland
           </h1>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            BVSK, DEKRA, GTÜ, KÜS, TÜV, IfS, ZAK, IHK-öbV — die Landschaft der Kfz-Sachverständigen ist
+            BVSK, DEKRA, GTÜ, KÜS, TÜV, IfS, ZAK, IHK-öbV – die Landschaft der Kfz-Sachverständigen ist
             unübersichtlich. Diese Übersicht erklärt die wichtigsten Verbände, Zertifizierungen und
             Prüforganisationen verständlich. Das Wichtigste vorweg: Bei einem unverschuldeten Unfall wählen
             Sie nach <strong className="text-claimondo-navy">§ 249 BGB</strong> Ihren eigenen, unabhängigen
-            Sachverständigen frei — die Kosten trägt der gegnerische Haftpflichtversicherer.
+            Sachverständigen frei – die Kosten trägt der gegnerische Haftpflichtversicherer.
           </p>
         </header>
 

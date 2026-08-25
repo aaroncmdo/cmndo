@@ -107,7 +107,7 @@ export function WarumCardsClient() {
                   : 'border-claimondo-border hover:-translate-y-0.5 hover:border-claimondo-light-blue hover:shadow-claimondo-md'
               }`}
             >
-              {/* Connector-Pfeil zum Drawer — nur Desktop, nur wenn aktiv */}
+              {/* Connector-Pfeil zum Drawer – nur Desktop, nur wenn aktiv */}
               {isActive && (
                 <span
                   aria-hidden

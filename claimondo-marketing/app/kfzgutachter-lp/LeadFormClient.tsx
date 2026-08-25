@@ -63,12 +63,12 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
             className="text-xl font-bold text-claimondo-navy sm:text-2xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Danke{submittedName ? `, ${submittedName}` : ''} — wir melden uns gleich.
+            Danke{submittedName ? `, ${submittedName}` : ''} – wir melden uns gleich.
           </h2>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">
           Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück. Bitte halten Sie das
-          Telefon bereit — die Nummer kann unterdrückt sein.
+          Telefon bereit – die Nummer kann unterdrückt sein.
         </p>
         <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
           Sie hören nichts? Rufen Sie uns direkt an:
@@ -114,7 +114,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
         className="text-xl font-bold leading-tight text-claimondo-navy sm:text-2xl"
         style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
       >
-        Schaden melden — in 30 Sekunden
+        Schaden melden – in 30 Sekunden
       </h2>
       <p className="mt-1 text-sm text-claimondo-shield/80">
         Drei Felder. Unverbindlich. DSGVO-konform.

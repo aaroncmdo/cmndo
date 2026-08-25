@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 // Landing /schaden-melden als Entry-Point.
 
 export const metadata: Metadata = {
-  title: 'Schaden melden — Claimondo',
+  title: 'Schaden melden – Claimondo',
   robots: { index: false, follow: false },
 }
 

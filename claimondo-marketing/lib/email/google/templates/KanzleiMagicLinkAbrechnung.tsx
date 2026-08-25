@@ -19,12 +19,12 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Sammelrechnung Vollmachts-Provisionen ${p.monat} — Claimondo`
+  return `Sammelrechnung Vollmachts-Provisionen ${p.monat} – Claimondo`
 }
 
 export function KanzleiMagicLinkAbrechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Rechnung ${props.rechnungsnummer} — ${props.brutto} — fällig am ${props.faelligAm}`}>
+    <EmailLayout preview={`Rechnung ${props.rechnungsnummer} – ${props.brutto} – fällig am ${props.faelligAm}`}>
       <Heading>Monatsabrechnung {props.monat}</Heading>
 
       <Paragraph>

@@ -20,7 +20,7 @@ export function subject(p: Props) {
 
 export function SvAbrechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Abrechnung ${props.fallNummer} — ${props.gesamtbetrag}`}>
+    <EmailLayout preview={`Abrechnung ${props.fallNummer} – ${props.gesamtbetrag}`}>
       <Heading>Deine Abrechnung für Fall {props.fallNummer}</Heading>
       <Paragraph>
         Hallo {props.svVorname}, hier ist die Abrechnung für deinen Auftrag:

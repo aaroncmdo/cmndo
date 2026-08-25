@@ -88,6 +88,11 @@ export default async function GutachterFindenPage({
     /** ChatGPT haengt an jeden ausgegebenen Link `utm_source=chatgpt.com` an — der Wert
      *  wandert bis auf die Anfrage, damit sichtbar wird, WELCHE KI den Kunden brachte. */
     utm_source?: string
+    /** Standort des Fahrzeugs, den die KI im Gespraech erfragt hat. Wird hier server-seitig
+     *  geocodet und an den Embed durchgereicht — der Kunde muss ihn dann nicht erneut
+     *  eintippen. Bewusst OHNE Name/Telefon/E-Mail: die stuenden sonst in Chatverlaeufen,
+     *  Referrern und unseren Zugriffslogs. */
+    adresse?: string
   }>
 }) {
   const t = await getTranslations('gutachter_finden')
@@ -101,7 +106,9 @@ export default async function GutachterFindenPage({
   if (Number.isFinite(latNum) && Number.isFinite(lngNum)) {
     initialCenter = { lat: latNum, lng: lngNum }
   } else {
-    const query = sp.plz?.trim() || sp.stadt?.trim()
+    // Reihenfolge mit Absicht: die vom Modell erfragte ADRESSE ist praeziser als PLZ oder
+    // Stadt — der Gutachter faehrt zu einer Hausnummer, nicht in ein Zentrum.
+    const query = sp.adresse?.trim() || sp.plz?.trim() || sp.stadt?.trim()
     if (query) {
       const geo = await geocodeAdresse(query)
       if (geo) initialCenter = { lat: geo.lat, lng: geo.lng }
@@ -141,7 +148,7 @@ export default async function GutachterFindenPage({
             '@type': 'ImageObject',
             contentUrl: `${SITE_URL}/api/v1/karte/50670.png`,
             description:
-              'Karte der Claimondo-Partner-Sachverständigen — pro deutscher Postleitzahl alle Partner im 30-km-Radius. Beispiel Köln (50670); jede gültige 5-stellige PLZ unter /api/v1/karte/[PLZ].png.',
+              'Karte der Claimondo-Partner-Sachverständigen – pro deutscher Postleitzahl alle Partner im 30-km-Radius. Beispiel Köln (50670); jede gültige 5-stellige PLZ unter /api/v1/karte/[PLZ].png.',
             width: 1600,
             height: 1200,
             encodingFormat: 'image/png',
@@ -159,7 +166,7 @@ export default async function GutachterFindenPage({
           „so eine Bar passt mir nicht"). Der Crawl-Pfad haengt jetzt am
           FinderSprungPanel darunter. */}
       {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
       <GutachterFindenSection
         height="100dvh"
         initialCenter={initialCenter}
@@ -167,6 +174,7 @@ export default async function GutachterFindenPage({
         svId={sp.sv}
         slot={sp.slot}
         utmSource={sp.utm_source}
+        adresse={sp.adresse}
       />
 
       {/* Crawl-Pfad — loest die Linkleiste ab und verbessert sie in zwei Punkten:

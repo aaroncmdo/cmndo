@@ -58,11 +58,11 @@ export async function generateMetadata(): Promise<Metadata> {
 // DEUTSCH (JSON-LD-Quelle). Sichtbares Rendering liest aus t.raw('sofort').
 const SOFORT: Array<{ name: string; text: string }> = [
   { name: 'Unfallstelle absichern', text: 'Warnblinker an, Warnweste anlegen, Warndreieck in ausreichendem Abstand aufstellen (innerorts ~50 m, Landstraße ~100 m, Autobahn ~150–200 m).' },
-  { name: 'Verletzte versorgen, Notruf 112', text: 'Bei Verletzten zuerst Erste Hilfe und Rettungsdienst (112). Unterlassene Hilfeleistung ist strafbar — Eigenschutz beachten.' },
+  { name: 'Verletzte versorgen, Notruf 112', text: 'Bei Verletzten zuerst Erste Hilfe und Rettungsdienst (112). Unterlassene Hilfeleistung ist strafbar – Eigenschutz beachten.' },
   { name: 'Polizei rufen (110)', text: 'Bei Personenschaden, höherem Sachschaden, Streit über den Hergang, Fahrerflucht, Alkohol-/Drogenverdacht oder Beteiligung von Mietwagen/Ausland. Im Zweifel rufen.' },
   { name: 'Beweise sichern', text: 'Fotos aus mehreren Perspektiven (Übersicht, Endpositionen, Schäden, Kennzeichen, Bremsspuren) und eine Unfallskizze anfertigen.' },
-  { name: 'Daten austauschen', text: 'Name, Anschrift, Kennzeichen, Haftpflichtversicherung und Versicherungsnummer der Gegenseite notieren — aber kein Schuldeingeständnis abgeben.' },
-  { name: 'Zeugen sichern', text: 'Namen und Telefonnummern unbeteiligter Zeugen notieren — sie sind bei strittiger Haftung oft entscheidend.' },
+  { name: 'Daten austauschen', text: 'Name, Anschrift, Kennzeichen, Haftpflichtversicherung und Versicherungsnummer der Gegenseite notieren – aber kein Schuldeingeständnis abgeben.' },
+  { name: 'Zeugen sichern', text: 'Namen und Telefonnummern unbeteiligter Zeugen notieren – sie sind bei strittiger Haftung oft entscheidend.' },
   { name: 'Eigenen Gutachter & Anwalt einschalten', text: 'Vor Reparaturbeginn einen eigenen, unabhängigen Sachverständigen beauftragen (Beweissicherung) und die Ansprüche über eine Verkehrsrechts-Kanzlei durchsetzen lassen.' },
 ]
 
@@ -70,27 +70,27 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Was muss ich nach einem Unfall sofort tun?',
     antwort:
-      'Unfallstelle absichern (Warnblinker, Warnweste, Warndreieck), Verletzte versorgen und ggf. 112 rufen, bei Bedarf die Polizei (110), Beweise sichern (Fotos + Unfallskizze), Daten der Gegenseite notieren — ohne Schuldeingeständnis — und vor der Reparatur einen eigenen Sachverständigen beauftragen.',
+      'Unfallstelle absichern (Warnblinker, Warnweste, Warndreieck), Verletzte versorgen und ggf. 112 rufen, bei Bedarf die Polizei (110), Beweise sichern (Fotos + Unfallskizze), Daten der Gegenseite notieren – ohne Schuldeingeständnis – und vor der Reparatur einen eigenen Sachverständigen beauftragen.',
   },
   {
     frage: 'Wann muss die Polizei zum Unfall kommen?',
     antwort:
-      'Spätestens bei Personenschaden, höherem Sachschaden, Streit über den Hergang, Fahrerflucht, Alkohol-/Drogenverdacht oder Auslands-/Mietwagenbeteiligung. Im Zweifel immer rufen — die polizeiliche Aufnahme sichert Beweise.',
+      'Spätestens bei Personenschaden, höherem Sachschaden, Streit über den Hergang, Fahrerflucht, Alkohol-/Drogenverdacht oder Auslands-/Mietwagenbeteiligung. Im Zweifel immer rufen – die polizeiliche Aufnahme sichert Beweise.',
   },
   {
     frage: 'Darf ich am Unfallort die Schuld eingestehen?',
     antwort:
-      'Nein. Geben Sie kein Schuldeingeständnis ab und unterschreiben Sie keine vorformulierten Erklärungen. Halten Sie nur Beobachtetes fest — die Haftung klärt sich später anhand der Beweislage.',
+      'Nein. Geben Sie kein Schuldeingeständnis ab und unterschreiben Sie keine vorformulierten Erklärungen. Halten Sie nur Beobachtetes fest – die Haftung klärt sich später anhand der Beweislage.',
   },
   {
-    frage: 'Brauche ich einen Anwalt — und was kostet er mich?',
+    frage: 'Brauche ich einen Anwalt – und was kostet er mich?',
     antwort:
-      'Bei unverschuldetem Unfall sind die Kosten der anwaltlichen Vertretung erforderlicher Herstellungsaufwand und werden vom gegnerischen Haftpflichtversicherer getragen (BGH VI ZR 235/13). Für Sie entstehen keine Eigenkosten — wer ohne Anwalt verhandelt, akzeptiert dagegen häufig zu niedrige Angebote.',
+      'Bei unverschuldetem Unfall sind die Kosten der anwaltlichen Vertretung erforderlicher Herstellungsaufwand und werden vom gegnerischen Haftpflichtversicherer getragen (BGH VI ZR 235/13). Für Sie entstehen keine Eigenkosten – wer ohne Anwalt verhandelt, akzeptiert dagegen häufig zu niedrige Angebote.',
   },
   {
     frage: 'Was zahlt die gegnerische Versicherung?',
     antwort:
-      'Bei unverschuldetem Unfall den vollständigen Schaden nach § 249 BGB: Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall oder Mietwagen, Sachverständigen- und Anwaltskosten sowie — bei Personenschaden — Schmerzensgeld. Durchgesetzt über den Direktanspruch (§ 115 VVG).',
+      'Bei unverschuldetem Unfall den vollständigen Schaden nach § 249 BGB: Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall oder Mietwagen, Sachverständigen- und Anwaltskosten sowie – bei Personenschaden – Schmerzensgeld. Durchgesetzt über den Direktanspruch (§ 115 VVG).',
   },
   {
     frage: 'Wie lange habe ich Zeit, meine Ansprüche durchzusetzen?',
@@ -128,7 +128,7 @@ export default function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           articleSchema({
-            headline: 'Unfall — was tun als Geschädigter? Sofortmaßnahmen, Haftung & Rechte',
+            headline: 'Unfall – was tun als Geschädigter? Sofortmaßnahmen, Haftung & Rechte',
             description:
               'Umfassender Leitfaden für unverschuldet Unfallgeschädigte: Sofortmaßnahmen am Unfallort, Haftung nach Unfalltyp, Ansprüche nach § 249 BGB und die typischen Versicherer-Taktiken.',
             datePublished: '2026-05-24',
@@ -136,7 +136,7 @@ export default function Page() {
             citation: ['§ 249 BGB', '§ 115 VVG', '§ 7 StVG', '§ 9 StVO', 'BGH VI ZR 235/13'],
           }),
           howToSchema({
-            name: 'Was tun nach einem unverschuldeten Unfall — Sofortmaßnahmen',
+            name: 'Was tun nach einem unverschuldeten Unfall – Sofortmaßnahmen',
             description: 'Die richtigen Schritte direkt nach einem Verkehrsunfall, um sich und Ihre Ansprüche zu sichern.',
             totalTime: 'PT30M',
             schritte: SOFORT,
@@ -147,7 +147,7 @@ export default function Page() {
           }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
-            { name: 'Unfall — was tun als Geschädigter', url: '/unfall-was-tun-als-geschaedigter' },
+            { name: 'Unfall – was tun als Geschädigter', url: '/unfall-was-tun-als-geschaedigter' },
           ]),
         ])}
       />

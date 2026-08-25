@@ -19,7 +19,7 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 export const metadata: Metadata = {
   title: 'Wissen & Ratgeber zur Kfz-Schadenregulierung',
   description:
-    'Alle Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständigen-Themen rund um den unverschuldeten Kfz-Schaden — verständlich erklärt, mit BGH-Bezug.',
+    'Alle Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständigen-Themen rund um den unverschuldeten Kfz-Schaden – verständlich erklärt, mit BGH-Bezug.',
   alternates: { canonical: '/wissen' },
   openGraph: {
     type: 'website',
@@ -96,7 +96,7 @@ export default async function Page() {
             Wissen & Ratgeber rund um den Kfz-Schaden
           </h1>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Verständlich erklärtes Wissen für unverschuldet Geschädigte — von den großen{' '}
+            Verständlich erklärtes Wissen für unverschuldet Geschädigte – von den großen{' '}
             <strong className="text-claimondo-navy">Ratgebern</strong> über den{' '}
             <strong className="text-claimondo-navy">Versicherer-Brief-Decoder</strong> und die{' '}
             <strong className="text-claimondo-navy">Versicherer-Profile</strong> bis zu den{' '}
@@ -151,7 +151,7 @@ export default async function Page() {
           </div>
         </section>
 
-        <SpokeCtaBand headline="Unverschuldet verunfallt? Wir regeln Ihren Schaden — kostenfrei nach § 249 BGB." />
+        <SpokeCtaBand headline="Unverschuldet verunfallt? Wir regeln Ihren Schaden – kostenfrei nach § 249 BGB." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Wissen & Ratgeber" whatsappHref={WA} />

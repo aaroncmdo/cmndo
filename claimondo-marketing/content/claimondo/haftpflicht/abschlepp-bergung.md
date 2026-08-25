@@ -19,7 +19,7 @@ customer_questions:
 last_modified: 2026-05-18
 excerpt: Abschlepp- und Bergungskosten sind nach § 249 BGB voll erstattbar, wenn das Fahrzeug nach einem Verkehrsunfall fahruntüchtig oder verkehrsunsicher ist. Standskosten in der Werkstatt während der Gutachtenerstellung sind ebenfalls erstattbar. Typische Spannen: 150–400 € für Abschleppen, 200–800 € für Bergung, 15–30 € pro Tag Standkosten.
 keyFacts:
-  - Anspruchsgrundlage: § 249 BGB — volle Naturalrestitution
+  - Anspruchsgrundlage: § 249 BGB – volle Naturalrestitution
   - Abschleppkosten typisch 150–400 €, Bergungskosten 200–800 €
   - Standkosten 15–30 €/Tag solange Gutachten oder Freigabe aussteht
   - Maßstab: ortsüblicher Tarif nach BGH-Linie
@@ -29,7 +29,7 @@ related:
   - /haftpflicht/reparaturkosten
   - /haftpflicht/wiederbeschaffungswert
   - /haftpflicht/eigene-kosten
-meta_description: "Abschlepp- und Bergungskosten nach Unfall sind nach §249 BGB voll erstattbar — auch Standkosten in der Gutachtenphase. So rechnen Sie korrekt ab."
+meta_description: "Abschlepp- und Bergungskosten nach Unfall sind nach §249 BGB voll erstattbar – auch Standkosten in der Gutachtenphase. So rechnen Sie korrekt ab."
 ---
 
 # Abschlepp- und Bergungskosten beim Verkehrsunfall
@@ -44,11 +44,11 @@ Abschleppkosten · Abschlepp-Erstattung · Bergungs-Kosten · Standgeld · Verwa
 
 ## In einem Satz erklärt
 
-Abschlepp- und Bergungskosten sind die direkten Mobilisierungs-Kosten nach Unfall — voll erstattbar, soweit angemessen.
+Abschlepp- und Bergungskosten sind die direkten Mobilisierungs-Kosten nach Unfall – voll erstattbar, soweit angemessen.
 
 ## In drei Sätzen erklärt
 
-Wenn dein Fahrzeug nach Unfall nicht mehr fahrtauglich oder verkehrssicher ist, hast du Anspruch auf Erstattung der **Abschleppkosten** zur nächstgelegenen geeigneten Werkstatt — bei aufwändigeren Konstellationen (Bergung von der Fahrbahn, Einsatz von Spezialgerät, Krananbringung) der höheren **Bergungskosten**. Während dein Fahrzeug auf das Sachverständigen-Gutachten oder die Reparatur-Freigabe wartet, sind außerdem **Standkosten** der Werkstatt erstattbar — typisch 15–30 € pro Tag. Maßgeblich ist der **ortsübliche Tarif** und die Angemessenheit der konkreten Maßnahmen — der gegnerische Haftpflichtversicherer trägt nach § 249 BGB die volle Erstattung.
+Wenn dein Fahrzeug nach Unfall nicht mehr fahrtauglich oder verkehrssicher ist, hast du Anspruch auf Erstattung der **Abschleppkosten** zur nächstgelegenen geeigneten Werkstatt – bei aufwändigeren Konstellationen (Bergung von der Fahrbahn, Einsatz von Spezialgerät, Krananbringung) der höheren **Bergungskosten**. Während dein Fahrzeug auf das Sachverständigen-Gutachten oder die Reparatur-Freigabe wartet, sind außerdem **Standkosten** der Werkstatt erstattbar – typisch 15–30 € pro Tag. Maßgeblich ist der **ortsübliche Tarif** und die Angemessenheit der konkreten Maßnahmen – der gegnerische Haftpflichtversicherer trägt nach § 249 BGB die volle Erstattung.
 
 ## Die fünf Schlüsselzahlen
 
@@ -65,7 +65,7 @@ Wenn dein Fahrzeug nach Unfall nicht mehr fahrtauglich oder verkehrssicher ist, 
 ### Abschleppen
 - Fahrzeug **nicht mehr fahrtüchtig** (technisch defekt nach Unfall)
 - Fahrzeug **nicht mehr verkehrssicher** (auch wenn fahrbar)
-- Abschleppen zur **nächstgelegenen** geeigneten Werkstatt — nicht weiter als nötig
+- Abschleppen zur **nächstgelegenen** geeigneten Werkstatt – nicht weiter als nötig
 
 ### Bergung
 - Unfallort schwer zugänglich (Graben, Wald, Wassergraben)
@@ -83,26 +83,26 @@ Wenn dein Fahrzeug nach Unfall nicht mehr fahrtauglich oder verkehrssicher ist, 
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Abschleppkosten überhöht — wir kürzen auf [niedriger Betrag]."*
+> *„Abschleppkosten überhöht – wir kürzen auf [niedriger Betrag]."*
 
 Ortsüblicher Tarif als Maßstab. Bei extrem hohen Rechnungen (z. B. nächtlicher Notdienst): Beleg + Begründung anführen, Werkstatt-Risiko nach BGH-Linie ggf. ziehbar.
 
-> *„Standkosten nicht erforderlich — Sie hätten schneller entscheiden müssen."*
+> *„Standkosten nicht erforderlich – Sie hätten schneller entscheiden müssen."*
 
-Bei ausstehendem Gutachten oder Versicherer-Klärung sind Standkosten erstattbar — du kannst nicht entscheiden, bevor die Bewertung steht.
+Bei ausstehendem Gutachten oder Versicherer-Klärung sind Standkosten erstattbar – du kannst nicht entscheiden, bevor die Bewertung steht.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Abschlepp-Rechnung sofort an den Versicherer einreichen — Werkstatt-Rechnung enthält oft Standkosten in der Pauschal-Position.
+Abschlepp-Rechnung sofort an den Versicherer einreichen – Werkstatt-Rechnung enthält oft Standkosten in der Pauschal-Position.
 
 ### 🛠 Drei Schritte
 
-**1. Belege archivieren** — Abschlepp-Rechnung, Bergungs-Beleg, Werkstatt-Aufnahme-Bestätigung.
-**2. Versicherer informieren** — möglichst direkt nach Abschleppen.
-**3. Bei Standkosten-Streit:** Sachverständigen-Gutachten als Bezug — solange das nicht da war, sind Standkosten erstattbar.
+**1. Belege archivieren** – Abschlepp-Rechnung, Bergungs-Beleg, Werkstatt-Aufnahme-Bestätigung.
+**2. Versicherer informieren** – möglichst direkt nach Abschleppen.
+**3. Bei Standkosten-Streit:** Sachverständigen-Gutachten als Bezug – solange das nicht da war, sind Standkosten erstattbar.
 
 ---
 
@@ -115,21 +115,21 @@ Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung als Schadensp
 Typisch 150–400 € für Standard-Abschleppen. Bei aufwändiger Bergung 200–800 €. Maßgeblich ist der ortsübliche Tarif.
 
 **Bekomme ich auch Standkosten erstattet?**
-Ja — solange das Fahrzeug auf Gutachten oder Reparatur-Freigabe wartet. Typisch 15–30 €/Tag.
+Ja – solange das Fahrzeug auf Gutachten oder Reparatur-Freigabe wartet. Typisch 15–30 €/Tag.
 
 **Was, wenn ich nachts abgeschleppt werden musste?**
 Notdienst-Aufschläge sind grundsätzlich erstattbar, da die Notlage unfallbedingt ist.
 
 **Muss ich den günstigsten Abschleppdienst wählen?**
-Nein — in der akuten Unfall-Situation gilt die Verhältnismäßigkeit. Schadensminderungs-Pflicht greift erst bei klar erkennbar überhöhten Anbietern.
+Nein – in der akuten Unfall-Situation gilt die Verhältnismäßigkeit. Schadensminderungs-Pflicht greift erst bei klar erkennbar überhöhten Anbietern.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Reparaturkosten](/haftpflicht/reparaturkosten) — anschließende Reparatur
-- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — bei Totalschaden
-- [Eigene Kosten](/haftpflicht/eigene-kosten) — weitere Mobilitäts-Kosten
+- [Reparaturkosten](/haftpflicht/reparaturkosten) – anschließende Reparatur
+- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) – bei Totalschaden
+- [Eigene Kosten](/haftpflicht/eigene-kosten) – weitere Mobilitäts-Kosten
 
 ---
 
@@ -141,7 +141,7 @@ Nein — in der akuten Unfall-Situation gilt die Verhältnismäßigkeit. Schaden
 
 ## Quellen
 
-- BGB § 249 — [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
+- BGB § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH-Rechtsprechung zu Abschlepp- und Bergungskosten
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
@@ -185,4 +185,4 @@ Nein — in der akuten Unfall-Situation gilt die Verhältnismäßigkeit. Schaden
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

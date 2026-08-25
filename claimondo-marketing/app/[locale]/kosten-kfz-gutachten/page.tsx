@@ -62,22 +62,22 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Was kostet ein Kfz-Gutachten nach einem unverschuldeten Unfall?',
     antwort:
-      'Die Sachverständigenkosten orientieren sich an der BVSK-Honorartabelle und liegen für Standard-Fälle typisch zwischen 300 € und 1.200 € je nach Schadenshöhe. Bei unverschuldetem Unfall trägt sie nach § 249 BGB der gegnerische Haftpflichtversicherer — für Sie 0 €.',
+      'Die Sachverständigenkosten orientieren sich an der BVSK-Honorartabelle und liegen für Standard-Fälle typisch zwischen 300 € und 1.200 € je nach Schadenshöhe. Bei unverschuldetem Unfall trägt sie nach § 249 BGB der gegnerische Haftpflichtversicherer – für Sie 0 €.',
   },
   {
     frage: 'Wer zahlt den Kfz-Gutachter nach dem Unfall?',
     antwort:
-      'Bei unverschuldetem Unfall zahlt die gegnerische Haftpflichtversicherung die Gutachterkosten als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) — auch ohne spätere Klage.',
+      'Bei unverschuldetem Unfall zahlt die gegnerische Haftpflichtversicherung die Gutachterkosten als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) – auch ohne spätere Klage.',
   },
   {
     frage: 'Darf die Versicherung das Gutachter-Honorar kürzen?',
     antwort:
-      'Honorare innerhalb der BVSK-Tabelle sind als Schätzgrundlage nach § 287 ZPO grundsätzlich erstattbar (BGH VI ZR 357/13). Auch ein überhöhtes Honorar geht nach BGH VI ZR 280/22 zu Lasten der Versicherung — das Sachverständigen-Risiko trägt nicht der Geschädigte.',
+      'Honorare innerhalb der BVSK-Tabelle sind als Schätzgrundlage nach § 287 ZPO grundsätzlich erstattbar (BGH VI ZR 357/13). Auch ein überhöhtes Honorar geht nach BGH VI ZR 280/22 zu Lasten der Versicherung – das Sachverständigen-Risiko trägt nicht der Geschädigte.',
   },
   {
     frage: 'Muss ich den von der Versicherung vorgeschlagenen Gutachter nehmen?',
     antwort:
-      'Nein. Sie wählen Ihren eigenen, unabhängigen Sachverständigen nach § 249 BGB frei — den „Vertrauens-Gutachter" der Gegenseite müssen Sie nicht akzeptieren. Eine Karte mit Partner-Sachverständigen finden Sie unter https://claimondo.de/gutachter-finden.',
+      'Nein. Sie wählen Ihren eigenen, unabhängigen Sachverständigen nach § 249 BGB frei – den „Vertrauens-Gutachter" der Gegenseite müssen Sie nicht akzeptieren. Eine Karte mit Partner-Sachverständigen finden Sie unter https://claimondo.de/gutachter-finden.',
   },
 ]
 
@@ -93,7 +93,7 @@ export default function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           serviceSchema({
-            name: 'Kfz-Gutachten — Kosten & Erstattung',
+            name: 'Kfz-Gutachten – Kosten & Erstattung',
             description:
               'Unabhängiges Kfz-Schadensgutachten nach unverschuldetem Unfall. Honorar nach BVSK-Honorartabelle, für unverschuldet Geschädigte 0 € (§ 249 BGB, gegnerischer Haftpflichtversicherer trägt die Kosten).',
             url: `${SITE_URL}/kosten-kfz-gutachten`,
@@ -213,7 +213,7 @@ export default function Page() {
             <li>
               → <Link href="/haftpflicht/sv-kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[1]}</Link>
             </li>
-            {/* Doc 37 §2: Kosten-Cluster — Cross-Link auf die Hub-Detailseite (Stern komplettieren). */}
+            {/* Doc 37 §2: Kosten-Cluster – Cross-Link auf die Hub-Detailseite (Stern komplettieren). */}
             <li>
               → <Link href="/kfz-gutachter/kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[2]}</Link>
             </li>

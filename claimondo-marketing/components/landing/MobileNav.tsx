@@ -18,7 +18,7 @@ type Props = {
   ratgeber: Cluster
   gutachter: Cluster
   finder: NavItem
-  /** #18 P4: optionaler zweiter Finder (Werkstatt finden) — dezenter unter dem Primär-CTA. */
+  /** #18 P4: optionaler zweiter Finder (Werkstatt finden) – dezenter unter dem Primär-CTA. */
   finder2?: NavItem
   menuLabel: string
   closeLabel: string
@@ -64,7 +64,7 @@ export function MobileNav({ links, ratgeber, gutachter, finder, finder2, menuLab
             className="absolute inset-0 bg-claimondo-navy/45"
             style={{ animation: 'mnav-fade 180ms ease-out', WebkitBackdropFilter: 'blur(6px)', backdropFilter: 'blur(6px)' }}
           />
-          {/* Panel — slidet von oben unter den Header */}
+          {/* Panel – slidet von oben unter den Header */}
           <nav
             className="absolute inset-x-0 top-0 max-h-[88vh] overflow-y-auto rounded-b-3xl border-b border-white/40 bg-white/95 p-4 shadow-[0_24px_64px_rgba(13,27,62,0.28)]"
             style={{ animation: 'mnav-in 200ms cubic-bezier(0.16,1,0.3,1)', WebkitBackdropFilter: 'saturate(180%) blur(24px)', backdropFilter: 'saturate(180%) blur(24px)' }}
@@ -91,7 +91,7 @@ export function MobileNav({ links, ratgeber, gutachter, finder, finder2, menuLab
               {finder.label}
             </Link>
 
-            {/* Sekundär-CTA: Werkstatt finden (#18 P4) — dezenter Outline-Stil */}
+            {/* Sekundär-CTA: Werkstatt finden (#18 P4) – dezenter Outline-Stil */}
             {finder2 && (
               <Link
                 href={finder2.href}

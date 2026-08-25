@@ -12,12 +12,12 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Vertrag unterzeichnet — ${p.bueroName}`
+  return `Vertrag unterzeichnet – ${p.bueroName}`
 }
 
 export function BueroSubSvEinladungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Vertrag für ${props.bueroName} unterzeichnet — nächster Schritt: Anzahlung`}>
+    <EmailLayout preview={`Vertrag für ${props.bueroName} unterzeichnet – nächster Schritt: Anzahlung`}>
       <Heading>Vielen Dank für deine Unterschrift!</Heading>
 
       <Paragraph>
