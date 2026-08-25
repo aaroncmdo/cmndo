@@ -18,7 +18,7 @@ export function artikelIndexLine(a: WissenArtikel): string {
   const stand = artikelStand(a)
   const standTag = stand ? ` (Stand: ${stand})` : ''
   const facts = a.key_facts.length ? ` · Fakten: ${a.key_facts.join('; ')}` : ''
-  const teaser = a.excerpt ? ` — ${a.excerpt}` : ''
+  const teaser = a.excerpt ? ` – ${a.excerpt}` : ''
   return `- [${a.title}](${BASE}/wissen/${a.slug})${teaser}${standTag}${facts}`
 }
 
