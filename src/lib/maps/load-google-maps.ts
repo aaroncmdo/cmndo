@@ -5,10 +5,34 @@
 // (ensureGoogleMapsScript MIT places) je eigenstaendig + mit inkonsistenten Params luden.
 // EINE Quelle, EINE URL (immer mit libraries=places = Superset), promise-gecacht.
 
+import { reportMapsAuthFehler } from '@/lib/observability/report-boundary-error'
+
 let loadPromise: Promise<void> | null = null
 
 function mapsReady(): boolean {
   return typeof google !== 'undefined' && !!google.maps?.places
+}
+
+/**
+ * Googles einziger Rueckkanal fuer abgelehnte Schluessel.
+ *
+ * ⚠ Die JS-API meldet Schluesselprobleme NICHT ueber das Script-`onerror` —
+ * das Bootstrap laedt mit HTTP 200, auch wenn der Schluessel fuer diese Domain
+ * gesperrt ist. Erst beim ersten echten Aufruf ruft Google `gm_authFailure`.
+ * Ohne diesen Haken bleibt der Ausfall vollstaendig unsichtbar: graue Karte,
+ * keine Adressvorschlaege, saubere Serverlage, kein Log.
+ *
+ * Wird genau einmal gesetzt und ueberschreibt einen fremden Handler nicht.
+ */
+function installiereAuthWaechter(): void {
+  if (typeof window === 'undefined') return
+  const w = window as Window & { gm_authFailure?: () => void }
+  if (w.gm_authFailure) return
+  w.gm_authFailure = () => {
+    reportMapsAuthFehler(
+      `Google Maps abgelehnt auf ${window.location.origin}${window.location.pathname}`,
+    )
+  }
 }
 
 /**
@@ -22,6 +46,10 @@ export function loadGoogleMaps(): Promise<void> {
 
   const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
   if (!key) return Promise.reject(new Error('NEXT_PUBLIC_GOOGLE_MAPS_KEY fehlt'))
+
+  // VOR dem Laden setzen — Google ruft den Haken sonst ins Leere, wenn die
+  // Ablehnung schneller kommt als unser Code.
+  installiereAuthWaechter()
 
   loadPromise = new Promise<void>((resolve, reject) => {
     const waitUntilReady = () => {
