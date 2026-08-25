@@ -25,6 +25,19 @@
 //
 // Der Hook ist rein informativ: er blockt nichts, und bei jedem Fehler endet er still
 // mit Exit 0. Ein kaputtes Radar darf keinen Prompt kosten.
+//
+// ⚠ VERDRAHTET IST DIESER HOOK **USER-GLOBAL**, nicht hier im Repo:
+//     ~/.claude/settings.json  ->  UserPromptSubmit  ->  node "<HOME>/.claude/hooks/skill-radar.mjs"
+//
+// Grund (gemessen 25.08.): Der Repo-Eintrag waere cwd-relativ und damit fast nie wirksam.
+// Die Sessions laufen im Haupt-Checkout, der auf einem Feature-Branch steht (zeitweise
+// 5312 Commits stale) — dort existierte weder die Datei noch der settings-Eintrag. Und
+// Worktree-Sessions haben je nach Branch mal die eine, mal die andere Fassung.
+// Die globale Verdrahtung erreicht JEDE Session, unabhaengig von Verzeichnis und Branch.
+//
+// Diese Datei bleibt im Repo als versionierte QUELLE: wer den Hook aktualisiert, kopiert
+// ihn nach ~/.claude/hooks/. Ein zweiter Eintrag in der Repo-settings.json wuerde den
+// Hinweis DOPPELT ausgeben — deshalb steht er dort bewusst nicht.
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
