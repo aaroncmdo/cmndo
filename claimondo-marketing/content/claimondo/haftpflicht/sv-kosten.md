@@ -187,7 +187,6 @@ Eigener Sachverständiger ist die wichtigste Entscheidung in der Schadensregulie
 - Bürgerliches Gesetzbuch § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH, Urteil vom 23.01.2007, VI ZR 67/06 (SV-Kosten als Schadensposition)
 - BGH-Rechtsprechung zur freien SV-Wahl, ständige Rechtsprechung
-- BVSK Honorartabelle, jeweils aktuelle Fassung – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

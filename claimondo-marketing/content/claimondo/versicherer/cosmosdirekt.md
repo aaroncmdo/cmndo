@@ -42,8 +42,6 @@ Die **Werkstattbindung** über den WerkstattservicePLUS-Tarif betrifft die eigen
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
-- Nutzerberichte Finanztip-Community und motor-talk.de (Bearbeitungsdauer)
 - Konzernzuordnung: cosmosdirekt.de (Cosmos Versicherung AG, Generali Deutschland)
 
 ## Häufige Fragen

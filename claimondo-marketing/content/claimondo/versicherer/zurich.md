@@ -44,7 +44,6 @@ Zur BaFin-Lage: Durch den **Niederlassungswechsel 2024** (von der Zurich Insuran
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
 - procontra-online.de – Niederlassungswechsel Zurich Insurance plc → Zurich Insurance Europe AG (2024)
 - AG Iserlohn, Urteil vom 21.09.2009 – 40 C 159/09 (Mietwagen, Schwacke)
 - AG Frankfurt am Main, Urteil vom 10.05.2012 – 31 C 646/12 (SV-Honorar)

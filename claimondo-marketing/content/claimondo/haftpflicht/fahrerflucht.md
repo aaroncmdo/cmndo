@@ -101,7 +101,6 @@ Ja, vollständig – VOH-Erstattung wie Standard-Haftpflicht.
 
 - PflVG § 12 – Pflichtversicherung
 - StGB § 142 – Unerlaubtes Entfernen
-- verkehrsopferhilfe.de – VOH e.V.
 
 ---
 

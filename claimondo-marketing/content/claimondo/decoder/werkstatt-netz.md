@@ -229,7 +229,6 @@ Werkstattbindung ist eine der häufigsten Versicherer-Strategien und gleichzeiti
 - BGH, Urteil vom 23.02.2010, VI ZR 91/09 (Markenwerkstatt bei älteren Fahrzeugen)
 - BGH, Urteil vom 22.06.2010, VI ZR 302/08 (Original-Ersatzteile)
 - BGH, Urteil vom 14.05.2013, VI ZR 320/12 (Stundensätze Markenwerkstatt)
-- ZDK Zentralverband Deutsches Kraftfahrzeuggewerbe – [kfzgewerbe.de](https://www.kfzgewerbe.de)
 
 ---
 

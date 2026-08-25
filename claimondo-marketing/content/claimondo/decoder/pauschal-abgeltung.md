@@ -238,7 +238,6 @@ Pauschal-Abgeltungs-Klauseln sind die wirtschaftlich riskantesten Dokumente, die
 - BGH-Rechtsprechung zur strikten Auslegung von Abgeltungsklauseln (ständige Rechtsprechung)
 - Palandt/Grüneberg zu § 779 BGB
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 

@@ -180,7 +180,6 @@ Wertminderung ist eine der häufig „vergessenen" Positionen – Versicherer se
 - BGH-Rechtsprechung zur merkantilen Wertminderung, ständige Rechtsprechung
 - Ruhkopf/Sahm, „Die merkantile Wertminderung des Kraftfahrzeuges nach Unfallschäden"
 - Halbgewachs/Höning-Methode
-- BVSK Sachverständigen-Verband – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

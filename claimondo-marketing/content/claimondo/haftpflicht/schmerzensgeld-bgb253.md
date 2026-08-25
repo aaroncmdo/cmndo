@@ -229,7 +229,6 @@ Schmerzensgeld ist die wirtschaftlich riskanteste Position der Schadensregulieru
 - Slizyk, Beck'sche Schmerzensgeld-Tabelle
 - BGH-Rechtsprechung zur Schmerzensgeld-Bemessung, ständige Rechtsprechung
 - BGH, Urteil vom 30.04.1996, VI ZR 55/95 (Genugtuungs-Funktion)
-- AWMF-Leitlinien zu PTBS, chronischem Schmerz
 
 ---
 

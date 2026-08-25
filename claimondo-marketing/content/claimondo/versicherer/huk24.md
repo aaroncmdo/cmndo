@@ -44,12 +44,10 @@ Das **Eskalationsmuster** entspricht der Gruppe: vorgerichtlich bleibt eine voll
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
 - Forsa-Befragung im Auftrag der AG Verkehrsrecht im DAV, Oktober/November 2017 (Stern 49/2017)
 - AG Speyer, Urteil vom 02.10.2015 – 31 C 272/15 (Mietwagen, SV-Kosten)
 - AG Mayen, Urteil vom 16.12.2016 – 2d C 403/16 (Verbringungskosten)
 - AG Grimma, Urteil vom 09.07.2013 – 4 C 154/11
-- Anwalts-Dokumentation: unfall-lexikon.de, kanzlei-schleyer.de
 
 ## Häufige Fragen
 

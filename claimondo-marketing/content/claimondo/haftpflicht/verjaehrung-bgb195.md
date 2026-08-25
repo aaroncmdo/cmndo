@@ -200,7 +200,6 @@ Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Scha
 - Palandt/Grüneberg, BGB-Kommentar
 - MüKoBGB
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 

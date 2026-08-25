@@ -225,7 +225,6 @@ Honorar-Kürzungen sind Massengeschäft – die Differenz zwischen Versicherer-K
 - Bürgerliches Gesetzbuch § 398 – [gesetze-im-internet.de/bgb/__398.html](https://www.gesetze-im-internet.de/bgb/__398.html)
 - BGH, Urteil vom 26.04.2016, VI ZR 50/15 (Sachverständigenkosten / BVSK-Schätzung)
 - BGH, Urteil vom 24.01.2017, VI ZR 76/16 (Nebenkosten / ortsüblich)
-- BVSK Sachverständigen-Verband, Honorarbefragung HB V – [bvsk.de](https://www.bvsk.de)
 
 ---
 
