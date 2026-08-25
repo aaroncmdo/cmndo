@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { WhatsAppIcon } from './WhatsAppIcon'
 import { WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { NaechsteTermineKompakt } from './NaechsteTermineKompakt'
 
 const WA_HREF = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
@@ -16,6 +17,18 @@ export function SpokeCtaBand({ headline }: { headline?: string }) {
   const t = useTranslations('content')
   const headlineText = headline ?? t('cta_band.headline_default')
   return (
+    <>
+    {/* Konkrete freie Termine VOR dem CTA-Band — ausfuehrliche Begruendung in
+        NaechsteTermineKompakt.tsx. Kurz: der nginx-Log vom 25.08.2026 zeigt, dass
+        ChatGPT die Ratgeber-/Wissens-Seiten von SELBST holt und die Stadtseiten nur
+        auf ausdrueckliche Aufforderung — und genau die gelesenen Seiten trugen NULL
+        buchbare Termine. Diese Komponente steht auf 18 Seiten und ist damit der
+        breiteste Hebel, den es dafuer gibt.
+
+        ⚠ VOR das Band, nicht hinein: das Band ist navy mit weisser Schrift, der
+        Termin-Block hell. Ineinander gesetzt beissen sie sich optisch, und der
+        Termin — die konkreteste Aussage der Seite — saehe aus wie ein Fehler. */}
+    <NaechsteTermineKompakt />
     <section className="relative mt-14 overflow-hidden rounded-ios-lg bg-claimondo-navy p-8 text-center text-white sm:p-10">
       <div
         aria-hidden
@@ -42,5 +55,6 @@ export function SpokeCtaBand({ headline }: { headline?: string }) {
         </div>
       </div>
     </section>
+    </>
   )
 }
