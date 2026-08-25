@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { LandingTopbar, type AuthenticatedUser } from './LandingTopbar'
 import { LandingFooter } from './LandingFooter'
 import { StickyCallBar } from './StickyCallBar'
+import { WHATSAPP_HREF } from '@/lib/seo/jsonld'
 import { HeroSection } from './sections/HeroSection'
 import { HomeTrustStripSection } from './sections/HomeTrustStripSection'
 import { AnsprueecheSection } from './sections/AnsprueecheSection'
@@ -66,7 +67,10 @@ export async function LandingPage({ authenticatedUser }: Props) {
         <BottomCtaSection />
         <LandingFooter />
       </main>
-      <StickyCallBar quelle="Hauptseite" />
+      {/* whatsappHref: die Leiste rendert den WhatsApp-Knopf nur, wenn sie ihn
+          bekommt. 23 Content-Seiten uebergeben ihn, die Startseite bisher
+          als einzige nicht — eine Luecke, keine Entscheidung (Aaron 25.08.). */}
+      <StickyCallBar quelle="Hauptseite" whatsappHref={WHATSAPP_HREF} />
     </div>
   )
 }
