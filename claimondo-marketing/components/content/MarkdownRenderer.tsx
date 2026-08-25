@@ -97,9 +97,40 @@ export function MarkdownRenderer({
                 </Link>
               )
             }
+            // Externer Link. Zwei Korrekturen (25.08.2026), beide gemessen:
+            //
+            // 1) rel="nofollow". Von 68 Wissensartikeln tragen 28 einen
+            //    Quellenlink auf eine fremde Redaktion — und alle 28 waren
+            //    FOLLOW. 16 davon zeigen auf dieselbe Domain. Das gibt
+            //    Ranking-Signal einseitig an Publikationen im eigenen
+            //    Wettbewerbsumfeld ab.
+            //    Die Quellenangabe selbst BLEIBT: sie ist nach § 51 UrhG
+            //    Voraussetzung fuer ein zulaessiges Zitat, und "Cite Sources"
+            //    ist laut GEO-Forschung die staerkste Einzelmethode fuer
+            //    Sichtbarkeit in KI-Antworten. Entfernen waere in beide
+            //    Richtungen schaedlich; nofollow loest nur den Abfluss.
+            //
+            // 2) Eigene Subdomains (app./gutachter./werkstatt.claimondo.de)
+            //    sind ausgenommen — `isInternalHref` kennt nur die nackte
+            //    Domain, sonst wuerden wir unsere eigenen Portale abwerten.
+            //
+            // 3) Ist der Ankertext die nackte URL (so stehen die Quellen im
+            //    Artikel-Body), zeigen wir nur den Hostnamen: lesbarer, und
+            //    die Fremdseite bekommt keinen exakten URL-Anker.
+            const eigeneDomain = /^https?:\/\/([a-z0-9-]+\.)*claimondo\.de(\/|$)/i.test(href ?? '')
+            const anker = typeof children === 'string' ? children : null
+            const zeigeHost =
+              anker && /^https?:\/\/\S+$/.test(anker.trim())
+                ? anker.trim().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+                : children
             return (
-              <a href={href} target="_blank" rel="noopener noreferrer" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">
-                {children}
+              <a
+                href={href}
+                target="_blank"
+                rel={eigeneDomain ? 'noopener noreferrer' : 'noopener noreferrer nofollow'}
+                className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline"
+              >
+                {zeigeHost}
               </a>
             )
           },
