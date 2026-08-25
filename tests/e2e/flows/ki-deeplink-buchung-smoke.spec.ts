@@ -87,8 +87,12 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
       { waitUntil: 'domcontentloaded' },
     )
 
+    // `.first()`: der Wizard rendert die Quittung in Panel UND Mobil-Ansicht — zwei
+    // Treffer, und Playwright's strict mode bricht dann ab. Das sah beim ersten gruenen
+    // Lauf aus wie „Quittung fehlt", obwohl sie doppelt da war. Zwei Treffer sind hier
+    // der Normalfall, kein Defekt.
     const frame = page.frameLocator('iframe[src*="embed/gutachter-finder"]')
-    const quittung = frame.getByText(/Ihr Termin .*ist vorgemerkt|Ihr Termin ist vorgemerkt/)
+    const quittung = frame.getByText(/Ihr Termin .*ist vorgemerkt|Ihr Termin ist vorgemerkt/).first()
     await expect(quittung, 'der Wizard muss den mitgebrachten Termin quittieren').toBeVisible({
       timeout: 30_000,
     })
