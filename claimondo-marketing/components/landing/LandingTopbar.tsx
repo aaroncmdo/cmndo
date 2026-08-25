@@ -138,7 +138,7 @@ export function LandingTopbar({ authenticatedUser, finderHref = '/gutachter-find
             <span className="sr-only">Claimondo</span>
           </Link>
 
-          {/* Desktop Nav — feine Pill-Hover + zwei Cluster-Dropdowns (Doc 35 Fix 2) */}
+          {/* Desktop Nav – feine Pill-Hover + zwei Cluster-Dropdowns (Doc 35 Fix 2) */}
           <nav className="hidden items-center gap-0.5 md:flex">
             <Link href="/wie-es-funktioniert" className={PILL}>
               {t('wie_es_funktioniert')}

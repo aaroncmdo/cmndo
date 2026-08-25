@@ -56,7 +56,7 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
 
   return (
     <article className="rounded-ios-md border border-claimondo-border bg-white p-4 transition-shadow hover:shadow-claimondo-sm">
-      {/* Header — Autor + Redaktion-Badge + Datum */}
+      {/* Header – Autor + Redaktion-Badge + Datum */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold text-claimondo-navy">{entry.authorDisplay}</span>
         {entry.rang && <PartnerRangPille tier={entry.rang} />}
@@ -104,7 +104,7 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
       {/* Body-Preview */}
       <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{bodyPreview}</p>
 
-      {/* Footer — Likes + Kommentare + Melden */}
+      {/* Footer – Likes + Kommentare + Melden */}
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <LikeButton
           targetKind={targetKind}
@@ -138,7 +138,7 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
         </button>
 
         {reported ? (
-          <span className="ml-auto text-[0.7rem] text-claimondo-shield/50">Gemeldet — danke.</span>
+          <span className="ml-auto text-[0.7rem] text-claimondo-shield/50">Gemeldet – danke.</span>
         ) : (
           <span className="ml-auto inline-flex flex-col items-end gap-0.5">
             <button

@@ -16,7 +16,7 @@ import { PHONE_DISPLAY, PHONE_E164,
 // über ClearFlowOnMount zurückgesetzt.
 
 export const metadata = {
-  title: 'Selbstverschulden — Claimondo',
+  title: 'Selbstverschulden – Claimondo',
   robots: { index: false, follow: false },
 }
 
@@ -73,7 +73,7 @@ export default async function SelbstverschuldenPage() {
               <p className="mt-1 text-sm text-claimondo-ondo">
                 Auch bei selbst verschuldetem Schaden helfen wir Ihnen weiter: Finden Sie eine
                 passende Werkstatt in Ihrer Nähe und wickeln Sie die Reparatur über Ihre
-                Kaskoversicherung oder als Selbstzahler ab — digital und ohne Papierkram.
+                Kaskoversicherung oder als Selbstzahler ab – digital und ohne Papierkram.
               </p>
               <a
                 href={`${embedOrigin}/embed/werkstatt-finder`}

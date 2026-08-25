@@ -15,7 +15,7 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `SV-Gegenvorschlag: ${p.svName} — ${p.slots.length} alternative Termine`
+  return `SV-Gegenvorschlag: ${p.svName} – ${p.slots.length} alternative Termine`
 }
 
 export function DispatcherGegenvorschlagEmail(props: Props) {
@@ -47,7 +47,7 @@ export function DispatcherGegenvorschlagEmail(props: Props) {
       )}
 
       <Button href={targetUrl}>
-        {props.fallId ? 'Zur Fallakte' : 'Zum Lead'} — Slot wählen
+        {props.fallId ? 'Zur Fallakte' : 'Zum Lead'} – Slot wählen
       </Button>
     </EmailLayout>
   )

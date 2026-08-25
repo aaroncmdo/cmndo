@@ -63,7 +63,7 @@ export default function FaqClient({ groups }: FaqClientProps) {
     <div className="min-h-screen bg-claimondo-bg">
       <LandingTopbar authenticatedUser={null} />
 
-      {/* 1 — Hero (Navy, Premium-Pattern) */}
+      {/* 1 – Hero (Navy, Premium-Pattern) */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="faq-hero">
         <div
           aria-hidden
@@ -118,7 +118,7 @@ export default function FaqClient({ groups }: FaqClientProps) {
         </div>
       </section>
 
-      {/* 2 — Trust-Strip */}
+      {/* 2 – Trust-Strip */}
       {/* AAR-UWG-Fix 14.05.2026: '+33 %' war nicht belegt — ersetzt durch
           NDR/Verbraucherzentrale/BGH-Quotenangabe (30–40 %). */}
       <TrustStripSection
@@ -130,7 +130,7 @@ export default function FaqClient({ groups }: FaqClientProps) {
         methodikNote={t('trust_strip.methodik_note')}
       />
 
-      {/* 3 — Warn-Banner */}
+      {/* 3 – Warn-Banner */}
       <div className="border-b border-amber-200/70 bg-amber-50">
         <div className="mx-auto flex max-w-3xl items-start gap-3 px-4 py-4 sm:px-6">
           <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" aria-hidden />
@@ -141,7 +141,7 @@ export default function FaqClient({ groups }: FaqClientProps) {
         </div>
       </div>
 
-      {/* 4 — Gruppen-Quick-Nav */}
+      {/* 4 – Gruppen-Quick-Nav */}
       {!suche && (
         <section className="bg-claimondo-bg py-10" aria-label="Themen-Übersicht">
           <div className="mx-auto max-w-5xl px-5">
@@ -163,7 +163,7 @@ export default function FaqClient({ groups }: FaqClientProps) {
         </section>
       )}
 
-      {/* 5 — FAQ-Gruppen */}
+      {/* 5 – FAQ-Gruppen */}
       <section className="py-12 sm:py-16" aria-label="Antworten">
         <div className="mx-auto max-w-3xl space-y-6 px-4 sm:px-6">
           {gefilterte.length === 0 && (
@@ -225,7 +225,7 @@ export default function FaqClient({ groups }: FaqClientProps) {
         </div>
       </section>
 
-      {/* 6 — Bottom CTA */}
+      {/* 6 – Bottom CTA */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden

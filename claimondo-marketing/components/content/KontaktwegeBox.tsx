@@ -58,7 +58,7 @@ export function KontaktwegeBox({
     <section className="rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <h2 style={HEAD_FONT} className="text-lg font-extrabold text-claimondo-navy">
-        Schaden melden — Kontaktwege
+        Schaden melden – Kontaktwege
       </h2>
       <dl className="mt-4 space-y-3 text-sm">
         {hotline247 && (

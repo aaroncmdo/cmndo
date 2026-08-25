@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/unterhaltsschaden
-meta_title: Unterhaltsschaden § 844 BGB — Hinterbliebene
+meta_title: Unterhaltsschaden § 844 BGB – Hinterbliebene
 type: glossar-spoke
 cluster: H2
 nummer: H2.5
@@ -16,9 +16,9 @@ customer_questions:
   - "wie hoch unterhaltsschaden witwe"
   - "844 abs 2 bgb erklärung"
 last_modified: 2026-05-18
-excerpt: Nach § 844 Abs. 2 BGB haben Hinterbliebene (Witwen, Kinder) bei tödlichem Verkehrsunfall Anspruch auf Erstattung des entgangenen Unterhalts als lebenslange Geldrente oder kapitalisierten Einmalbetrag — Witwen typisch ~40 % des Familien-Nettoeinkommens, Kinder nach Düsseldorfer Tabelle gestuft bis zur wirtschaftlichen Selbständigkeit.
+excerpt: Nach § 844 Abs. 2 BGB haben Hinterbliebene (Witwen, Kinder) bei tödlichem Verkehrsunfall Anspruch auf Erstattung des entgangenen Unterhalts als lebenslange Geldrente oder kapitalisierten Einmalbetrag – Witwen typisch ~40 % des Familien-Nettoeinkommens, Kinder nach Düsseldorfer Tabelle gestuft bis zur wirtschaftlichen Selbständigkeit.
 keyFacts:
-  - § 844 Abs. 2 BGB — Anspruchsgrundlage Unterhaltsschaden
+  - § 844 Abs. 2 BGB – Anspruchsgrundlage Unterhaltsschaden
   - ~40 % Familien-Netto als typische Ehegatten-Unterhalts-Quote
   - Bezugsdauer Witwe: lebenslang, Wegfall bei Wiederheirat (§ 844 Abs. 2 Satz 2 BGB)
   - Kinder: Düsseldorfer Tabelle, bis 18./21./25. Lj. je nach Ausbildung
@@ -29,12 +29,12 @@ related:
   - /haftpflicht/beerdigungskosten
   - /haftpflicht/erben-rechtsnachfolger
   - /haftpflicht/erwerbsminderungsschaden
-meta_description: "Unterhaltsschaden nach §844 Abs. 2 BGB: Hinterbliebene erhalten den entgangenen Unterhalt als Rente — Witwen rund 40 % des Familien-Nettos. Was zusteht."
+meta_description: "Unterhaltsschaden nach §844 Abs. 2 BGB: Hinterbliebene erhalten den entgangenen Unterhalt als Rente – Witwen rund 40 % des Familien-Nettos. Was zusteht."
 ---
 
-# Unterhaltsschaden nach § 844 Abs. 2 BGB — Rente für Hinterbliebene
+# Unterhaltsschaden nach § 844 Abs. 2 BGB – Rente für Hinterbliebene
 
-> **Kurz erklärt:** Wer durch einen tödlichen Verkehrsunfall seinen Unterhaltsverpflichteten verliert (Ehepartner, Elternteil), hat Anspruch auf Erstattung des **entgangenen Unterhalts** — als laufende Geldrente oder Kapitalisierung. Rechtsgrundlage: § 844 Abs. 2 BGB. Berechnung: hypothetisches Familieneinkommen ohne Unfall minus tatsächliches Familieneinkommen nach Unfall, multipliziert mit der Unterhalts-Quote der hinterbliebenen Person. Bei Witwen/Witwern lebenslang oder bis zur Wiederheirat; bei Kindern bis zur wirtschaftlichen Selbständigkeit.
+> **Kurz erklärt:** Wer durch einen tödlichen Verkehrsunfall seinen Unterhaltsverpflichteten verliert (Ehepartner, Elternteil), hat Anspruch auf Erstattung des **entgangenen Unterhalts** – als laufende Geldrente oder Kapitalisierung. Rechtsgrundlage: § 844 Abs. 2 BGB. Berechnung: hypothetisches Familieneinkommen ohne Unfall minus tatsächliches Familieneinkommen nach Unfall, multipliziert mit der Unterhalts-Quote der hinterbliebenen Person. Bei Witwen/Witwern lebenslang oder bis zur Wiederheirat; bei Kindern bis zur wirtschaftlichen Selbständigkeit.
 
 ## Auch bekannt als
 
@@ -44,11 +44,11 @@ meta_description: "Unterhaltsschaden nach §844 Abs. 2 BGB: Hinterbliebene erhal
 
 ## In einem Satz erklärt
 
-Unterhaltsschaden ist der Ersatz des entgangenen Unterhalts für Hinterbliebene nach tödlichem Verkehrsunfall — als lebenslange Geldrente oder Kapitalbetrag.
+Unterhaltsschaden ist der Ersatz des entgangenen Unterhalts für Hinterbliebene nach tödlichem Verkehrsunfall – als lebenslange Geldrente oder Kapitalbetrag.
 
 ## In drei Sätzen erklärt
 
-Verliert eine geschädigte Person durch tödlichen Verkehrsunfall den unterhaltsverpflichteten Familienangehörigen (Ehepartner, leiblicher Elternteil), entsteht nach § 844 Abs. 2 BGB ein eigenständiger Anspruch auf **Erstattung des entgangenen Unterhalts**. Bezugsgröße ist die hypothetische **Unterhalts-Leistung des Verstorbenen ohne Unfall** — typisch berechnet aus dem prognostizierten Berufseinkommen und der familien-typischen Unterhalts-Quote (Ehepartner: ~40 % vom Familien-Netto; Kinder: gestuft nach Alter und Düsseldorfer Tabelle). Der Anspruch besteht **lebenslang** oder bis zum Wegfall der Unterhalts-Pflicht (Wiederheirat, Volljährigkeit + wirtschaftliche Selbständigkeit der Kinder).
+Verliert eine geschädigte Person durch tödlichen Verkehrsunfall den unterhaltsverpflichteten Familienangehörigen (Ehepartner, leiblicher Elternteil), entsteht nach § 844 Abs. 2 BGB ein eigenständiger Anspruch auf **Erstattung des entgangenen Unterhalts**. Bezugsgröße ist die hypothetische **Unterhalts-Leistung des Verstorbenen ohne Unfall** – typisch berechnet aus dem prognostizierten Berufseinkommen und der familien-typischen Unterhalts-Quote (Ehepartner: ~40 % vom Familien-Netto; Kinder: gestuft nach Alter und Düsseldorfer Tabelle). Der Anspruch besteht **lebenslang** oder bis zum Wegfall der Unterhalts-Pflicht (Wiederheirat, Volljährigkeit + wirtschaftliche Selbständigkeit der Kinder).
 
 ## Die fünf Schlüsselzahlen
 
@@ -67,9 +67,9 @@ Verliert eine geschädigte Person durch tödlichen Verkehrsunfall den unterhalts
 - **Ehepartner / eingetragene Lebenspartner**
 - **Eltern** (nur sehr eingeschränkt, bei Verlust des erwachsenen Kindes mit konkreter Unterhalts-Verpflichtung)
 - **Kinder** des Verstorbenen
-- **Ungeborene Kinder** zum Unfallzeitpunkt — auch nach Geburt erstattbar (Nasciturus-Schutz)
+- **Ungeborene Kinder** zum Unfallzeitpunkt – auch nach Geburt erstattbar (Nasciturus-Schutz)
 
-→ Voraussetzung: der Verstorbene war zum Unfallzeitpunkt **gesetzlich** verpflichtet, dem Hinterbliebenen Unterhalt zu gewähren — oder hätte es voraussichtlich noch sein müssen (junge Eltern, Kinder noch in Ausbildung).
+→ Voraussetzung: der Verstorbene war zum Unfallzeitpunkt **gesetzlich** verpflichtet, dem Hinterbliebenen Unterhalt zu gewähren – oder hätte es voraussichtlich noch sein müssen (junge Eltern, Kinder noch in Ausbildung).
 
 ---
 
@@ -98,7 +98,7 @@ Berechnung nach Düsseldorfer Tabelle, gestuft nach:
 
 ### Witwen-Anspruch
 - **Lebenslang** als Grundsatz
-- **Wegfall bei Wiederheirat** — § 844 Abs. 2 Satz 2 BGB (außer durch Vereinbarung anders geregelt)
+- **Wegfall bei Wiederheirat** – § 844 Abs. 2 Satz 2 BGB (außer durch Vereinbarung anders geregelt)
 - **Anpassung** bei eigenem höheren Einkommen
 
 ### Kinder-Anspruch
@@ -130,25 +130,25 @@ Berechnung nach Düsseldorfer Tabelle, gestuft nach:
 | **Laufende Geldrente** | Anpassung an Lebens-Realität | Versicherer-Insolvenz-Risiko |
 | **Kapitalisierung** | Sofort verfügbar, planbar | Inflations-Risiko, schwerer abänderbar |
 
-In der Praxis oft Kapitalisierung im Vergleich — komplexe aktuarielle Berechnung.
+In der Praxis oft Kapitalisierung im Vergleich – komplexe aktuarielle Berechnung.
 
 ---
 
 ## Verhältnis zu anderen Ansprüchen
 
-- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) — pauschal **zusätzlich** (5.000–15.000 €)
-- [Beerdigungskosten](/haftpflicht/beerdigungskosten) — daneben
-- [Schockschaden rechtlich](/haftpflicht/schockschaden-rechtlich) — bei eigener Erkrankung
-- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) — analog, aber bei eigener Verletzung
+- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) – pauschal **zusätzlich** (5.000–15.000 €)
+- [Beerdigungskosten](/haftpflicht/beerdigungskosten) – daneben
+- [Schockschaden rechtlich](/haftpflicht/schockschaden-rechtlich) – bei eigener Erkrankung
+- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) – analog, aber bei eigener Verletzung
 
 → Bei tödlichem Unfall eines jungen Familienvaters/-mutter können diese Ansprüche zusammen siebenstellig werden.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Unterhaltsschaden ist die **wirtschaftlich größte** Position bei tödlichem Verkehrsunfall — und gleichzeitig die komplexeste. Spezialisierter Verkehrsrechts-/Familienrechts-Anwalt zwingend.
+Unterhaltsschaden ist die **wirtschaftlich größte** Position bei tödlichem Verkehrsunfall – und gleichzeitig die komplexeste. Spezialisierter Verkehrsrechts-/Familienrechts-Anwalt zwingend.
 
 ### 🛠 Drei Schritte
 
@@ -166,13 +166,13 @@ Bei laufender Rente: Anpassungs-Möglichkeit. Bei Kapitalisierung: Spätfolge-Vo
 ## Häufige Fragen
 
 **Wie hoch ist der Unterhaltsschaden für die Witwe?**
-Typisch ~40 % des Familien-Nettoeinkommens des Verstorbenen, abzüglich eigenem Einkommen der Witwe. Berechnung lebenslang oder bis Wiederheirat — Gesamt-Ansprüche schnell sechsstellig.
+Typisch ~40 % des Familien-Nettoeinkommens des Verstorbenen, abzüglich eigenem Einkommen der Witwe. Berechnung lebenslang oder bis Wiederheirat – Gesamt-Ansprüche schnell sechsstellig.
 
 **Bekommen Kinder Unterhalt?**
 Ja, nach Düsseldorfer Tabelle gestuft nach Alter. Bezug bis Volljährigkeit, bei Ausbildung bis ~25.
 
 **Was, wenn die Witwe wieder heiratet?**
-Anspruch fällt grundsätzlich weg (§ 844 Abs. 2 Satz 2 BGB) — außer abweichend vereinbart.
+Anspruch fällt grundsätzlich weg (§ 844 Abs. 2 Satz 2 BGB) – außer abweichend vereinbart.
 
 **Bekomme ich Unterhalt und Hinterbliebenengeld parallel?**
 Ja. Hinterbliebenengeld ist pauschale Anerkennung (5.000–15.000 €), Unterhaltsschaden ist konkreter Einkommens-Ersatz. Beide kumulierbar.
@@ -184,10 +184,10 @@ Anspruch besteht, wenn voraussichtlich Unterhaltsverpflichtung entstanden wäre.
 
 ## Verwandte Begriffe
 
-- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) — pauschal zusätzlich
-- [Beerdigungskosten](/haftpflicht/beerdigungskosten) — daneben
-- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) — Anspruchsweiter-Übergang
-- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) — bei eigener Verletzung
+- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) – pauschal zusätzlich
+- [Beerdigungskosten](/haftpflicht/beerdigungskosten) – daneben
+- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) – Anspruchsweiter-Übergang
+- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) – bei eigener Verletzung
 
 ---
 
@@ -199,7 +199,7 @@ Anspruch besteht, wenn voraussichtlich Unterhaltsverpflichtung entstanden wäre.
 
 ## Quellen
 
-- BGB § 844 Abs. 2 — [gesetze-im-internet.de/bgb/__844.html](https://www.gesetze-im-internet.de/bgb/__844.html)
+- BGB § 844 Abs. 2 – [gesetze-im-internet.de/bgb/__844.html](https://www.gesetze-im-internet.de/bgb/__844.html)
 - Düsseldorfer Tabelle (jeweils aktuelle Fassung)
 - BGH-Rechtsprechung zum Unterhaltsschaden
 - Pardey/Frasch, Schadensersatz bei Personenschäden
@@ -244,4 +244,4 @@ Anspruch besteht, wenn voraussichtlich Unterhaltsverpflichtung entstanden wäre.
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

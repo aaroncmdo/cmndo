@@ -16,10 +16,10 @@ customer_questions:
   - "pflegekosten haftpflicht"
   - "pflegegrad nach autounfall"
 last_modified: 2026-05-18
-excerpt: Pflege-Mehrbedarf nach Verkehrsunfall umfasst die Erstattung aller unfallbedingten Pflege-Mehrkosten nach § 843 BGB — sowohl professionelle Pflegedienste als auch fiktive Vergütung für pflegende Angehörige (10–14 €/Std). Die Pflegekasse leistet nach Pflegegrad und holt sich ihren Anteil per Regress nach § 116 SGB X zurück; bei dauerhafter Pflegebedürftigkeit sind Kapitalisierungen im sechsstelligen Bereich realistisch.
+excerpt: Pflege-Mehrbedarf nach Verkehrsunfall umfasst die Erstattung aller unfallbedingten Pflege-Mehrkosten nach § 843 BGB – sowohl professionelle Pflegedienste als auch fiktive Vergütung für pflegende Angehörige (10–14 €/Std). Die Pflegekasse leistet nach Pflegegrad und holt sich ihren Anteil per Regress nach § 116 SGB X zurück; bei dauerhafter Pflegebedürftigkeit sind Kapitalisierungen im sechsstelligen Bereich realistisch.
 keyFacts:
-  - § 843 BGB — Anspruchsgrundlage Pflege-Mehrbedarf
-  - § 116 SGB X — Pflegekassen-Regress gegen Versicherer
+  - § 843 BGB – Anspruchsgrundlage Pflege-Mehrbedarf
+  - § 116 SGB X – Pflegekassen-Regress gegen Versicherer
   - 10–14 €/Std fiktive Vergütung für pflegende Angehörige (BGH-Linie)
   - Pflegegrad 1–5: Pflegegeld 332–947 €/Mon (häuslich, Stand 2024)
   - 24-Stunden-Pflege vollerstattbar: 2.500–6.000 €/Mon
@@ -34,7 +34,7 @@ meta_description: "Pflege-Mehrbedarf nach §843 BGB: Erstattung von Pflegedienst
 
 # Pflege-Mehrbedarf nach Verkehrsunfall
 
-> **Kurz erklärt:** Wird ein Geschädigter unfallbedingt pflegebedürftig, sind die **Mehrkosten** für die unfall-bedingte Pflege voll erstattbar (§ 843 BGB) — abzüglich der Leistungen der Pflegekasse (Forderungs-Übergang § 116 SGB X). Erstattbar sind sowohl **professionelle Pflegedienste** als auch **fiktive Vergütung für pflegende Angehörige** (10–14 €/Std bei häuslicher Pflege). Bei dauerhafter Pflegebedürftigkeit: Kapitalisierung im sechsstelligen Bereich realistisch.
+> **Kurz erklärt:** Wird ein Geschädigter unfallbedingt pflegebedürftig, sind die **Mehrkosten** für die unfall-bedingte Pflege voll erstattbar (§ 843 BGB) – abzüglich der Leistungen der Pflegekasse (Forderungs-Übergang § 116 SGB X). Erstattbar sind sowohl **professionelle Pflegedienste** als auch **fiktive Vergütung für pflegende Angehörige** (10–14 €/Std bei häuslicher Pflege). Bei dauerhafter Pflegebedürftigkeit: Kapitalisierung im sechsstelligen Bereich realistisch.
 
 ## Auch bekannt als
 
@@ -44,11 +44,11 @@ Pflegekosten · Pflege-Schaden · Angehörigen-Pflege-Erstattung · Häuslicher 
 
 ## In einem Satz erklärt
 
-Pflege-Mehrbedarf ist die Erstattung aller Pflege-Kosten als Folge unfallbedingter Pflegebedürftigkeit — egal ob professionell oder durch Angehörige geleistet.
+Pflege-Mehrbedarf ist die Erstattung aller Pflege-Kosten als Folge unfallbedingter Pflegebedürftigkeit – egal ob professionell oder durch Angehörige geleistet.
 
 ## In drei Sätzen erklärt
 
-Bei unfallbedingter Pflegebedürftigkeit hast du Anspruch auf Erstattung des **gesamten Pflege-Mehrbedarfs** über § 843 BGB — von der täglichen Grundpflege über medizinische Behandlungspflege bis zur 24-Stunden-Assistenz bei Schwerstpflege. Die gesetzliche Pflegekasse zahlt nach festgelegten Pflegegrad-Sätzen und macht anschließend Regress nach § 116 SGB X beim Versicherer; alle Mehrkosten darüber hinaus (Privat-Pflege, hochwertige Assistenz, professionelle Schwerstpflege) sind eigenständig erstattbar. Auch **Angehörigen-Pflege** ist erstattungsfähig — fiktive Vergütung 10–14 €/Std bei häuslicher Pflege nach BGH-Rechtsprechung, auch ohne dass die Angehörigen tatsächlich Geld bekommen.
+Bei unfallbedingter Pflegebedürftigkeit hast du Anspruch auf Erstattung des **gesamten Pflege-Mehrbedarfs** über § 843 BGB – von der täglichen Grundpflege über medizinische Behandlungspflege bis zur 24-Stunden-Assistenz bei Schwerstpflege. Die gesetzliche Pflegekasse zahlt nach festgelegten Pflegegrad-Sätzen und macht anschließend Regress nach § 116 SGB X beim Versicherer; alle Mehrkosten darüber hinaus (Privat-Pflege, hochwertige Assistenz, professionelle Schwerstpflege) sind eigenständig erstattbar. Auch **Angehörigen-Pflege** ist erstattungsfähig – fiktive Vergütung 10–14 €/Std bei häuslicher Pflege nach BGH-Rechtsprechung, auch ohne dass die Angehörigen tatsächlich Geld bekommen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -79,7 +79,7 @@ Bei unfallbedingter Pflegebedürftigkeit hast du Anspruch auf Erstattung des **g
 
 ---
 
-## Angehörigen-Pflege — du musst keine Rechnung haben
+## Angehörigen-Pflege – du musst keine Rechnung haben
 
 Wichtige BGH-Linie: Auch wenn Familienmitglieder die Pflege **unentgeltlich** leisten, ist der pflegerische Mehrbedarf **fiktiv** zu bewerten und vom Versicherer zu erstatten.
 
@@ -88,37 +88,37 @@ Wichtige BGH-Linie: Auch wenn Familienmitglieder die Pflege **unentgeltlich** le
 - 15–20 €/Std bei professioneller Pflege durch Pflegedienst
 - 22–30 €/Std bei spezialisierter Schwerstpflege
 
-→ Die fiktive Vergütung **muss** nicht an die Angehörigen tatsächlich gezahlt werden — der Anspruch besteht zu Lasten des Versicherers.
+→ Die fiktive Vergütung **muss** nicht an die Angehörigen tatsächlich gezahlt werden – der Anspruch besteht zu Lasten des Versicherers.
 
 ---
 
-## Pflegekassen-Anteil — Regress
+## Pflegekassen-Anteil – Regress
 
 Die gesetzliche Pflegekasse zahlt zunächst nach Pflegegrad:
 
 | Pflegegrad | Pflegegeld (häuslich) | Pflegesachleistung (Pflegedienst) |
 |---|---|---|
-| 1 | — | 125 €/Mon (Entlastungsbetrag) |
+| 1 | – | 125 €/Mon (Entlastungsbetrag) |
 | 2 | 332 €/Mon | 760 €/Mon |
 | 3 | 573 €/Mon | 1.432 €/Mon |
 | 4 | 765 €/Mon | 1.778 €/Mon |
 | 5 | 947 €/Mon | 2.200 €/Mon |
 
-(Werte 2024 — werden regelmäßig angepasst.)
+(Werte 2024 – werden regelmäßig angepasst.)
 
-Die Pflegekasse holt sich diese Beträge per § 116 SGB X-Regress beim Versicherer zurück — du forderst **nur die Mehrkosten** darüber hinaus.
+Die Pflegekasse holt sich diese Beträge per § 116 SGB X-Regress beim Versicherer zurück – du forderst **nur die Mehrkosten** darüber hinaus.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Bei dauerhaftem Pflege-Bedarf spezialisierten Anwalt zwingend einschalten — die Bemessung ist komplex, Versicherer-Erstangebote liegen typisch 30–50 % unter dem rechnerisch Berechtigten.
+Bei dauerhaftem Pflege-Bedarf spezialisierten Anwalt zwingend einschalten – die Bemessung ist komplex, Versicherer-Erstangebote liegen typisch 30–50 % unter dem rechnerisch Berechtigten.
 
 ### 🛠 Vier Schritte
 
 **1. Pflegegrad beantragen** (bei Pflegekasse)
-Auch wenn nur vorübergehend — Pflegegrad ist Basis-Dokumentation.
+Auch wenn nur vorübergehend – Pflegegrad ist Basis-Dokumentation.
 
 **2. Pflege-Stunden dokumentieren**
 Tägliches Pflege-Tagebuch: was, wer, wie viele Stunden.
@@ -134,34 +134,34 @@ Bei Verschlechterungs-Risiko zwingend.
 ## Häufige Fragen
 
 **Wer zahlt die Pflege nach Verkehrsunfall?**
-Pflegekasse (nach Pflegegrad) macht Regress beim Versicherer. Alle Mehrkosten darüber hinaus sind direkt vom Versicherer erstattbar — auch fiktive Angehörigen-Pflege.
+Pflegekasse (nach Pflegegrad) macht Regress beim Versicherer. Alle Mehrkosten darüber hinaus sind direkt vom Versicherer erstattbar – auch fiktive Angehörigen-Pflege.
 
 **Bekomme ich Geld für Angehörigen-Pflege?**
 Ja. Fiktive Vergütung 10–14 €/Std bei häuslicher Grundpflege, auch ohne tatsächliche Geld-Zahlung an Angehörige (BGH-Linie).
 
 **Was, wenn ich noch keinen Pflegegrad habe?**
-Pflegegrad-Antrag stellen — auch bei vorübergehender Pflegebedürftigkeit lohnt sich der formelle Bescheid.
+Pflegegrad-Antrag stellen – auch bei vorübergehender Pflegebedürftigkeit lohnt sich der formelle Bescheid.
 
 **Wie hoch ist eine 24-Stunden-Pflege?**
 Je nach Modell 2.500–6.000 €/Mon. Vollerstattbar bei medizinischer Indikation.
 
 **Lohnt sich Klage bei Pflege-Streit?**
-Bei dauerhafter Pflegebedürftigkeit ja — Beträge schnell sechsstellig.
+Bei dauerhafter Pflegebedürftigkeit ja – Beträge schnell sechsstellig.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Vermehrte Bedürfnisse § 843 BGB](/haftpflicht/vermehrte-beduerfnisse) — Oberbegriff
-- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) — medizinische Therapie
-- [Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden) — Hauswirtschaft
-- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) — Einkommens-Verlust
+- [Vermehrte Bedürfnisse § 843 BGB](/haftpflicht/vermehrte-beduerfnisse) – Oberbegriff
+- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) – medizinische Therapie
+- [Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden) – Hauswirtschaft
+- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) – Einkommens-Verlust
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Pflege-Mehrbedarf ist der teuerste Einzel-Posten bei schweren Verletzungen — und der komplexeste in der Berechnung.
+Pflege-Mehrbedarf ist der teuerste Einzel-Posten bei schweren Verletzungen – und der komplexeste in der Berechnung.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -169,9 +169,9 @@ Pflege-Mehrbedarf ist der teuerste Einzel-Posten bei schweren Verletzungen — u
 
 ## Quellen
 
-- BGB § 843 — [gesetze-im-internet.de/bgb/__843.html](https://www.gesetze-im-internet.de/bgb/__843.html)
-- SGB XI (Pflegeversicherungs-Gesetz) — [gesetze-im-internet.de/sgb_11](https://www.gesetze-im-internet.de/sgb_11/)
-- SGB X § 116 — Forderungs-Übergang
+- BGB § 843 – [gesetze-im-internet.de/bgb/__843.html](https://www.gesetze-im-internet.de/bgb/__843.html)
+- SGB XI (Pflegeversicherungs-Gesetz) – [gesetze-im-internet.de/sgb_11](https://www.gesetze-im-internet.de/sgb_11/)
+- SGB X § 116 – Forderungs-Übergang
 - BGH-Rechtsprechung zur fiktiven Angehörigen-Pflege, ständige Rechtsprechung
 
 ---
@@ -216,4 +216,4 @@ Pflege-Mehrbedarf ist der teuerste Einzel-Posten bei schweren Verletzungen — u
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

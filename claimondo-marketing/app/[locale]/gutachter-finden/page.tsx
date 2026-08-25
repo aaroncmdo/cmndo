@@ -148,7 +148,7 @@ export default async function GutachterFindenPage({
             '@type': 'ImageObject',
             contentUrl: `${SITE_URL}/api/v1/karte/50670.png`,
             description:
-              'Karte der Claimondo-Partner-Sachverständigen — pro deutscher Postleitzahl alle Partner im 30-km-Radius. Beispiel Köln (50670); jede gültige 5-stellige PLZ unter /api/v1/karte/[PLZ].png.',
+              'Karte der Claimondo-Partner-Sachverständigen – pro deutscher Postleitzahl alle Partner im 30-km-Radius. Beispiel Köln (50670); jede gültige 5-stellige PLZ unter /api/v1/karte/[PLZ].png.',
             width: 1600,
             height: 1200,
             encodingFormat: 'image/png',

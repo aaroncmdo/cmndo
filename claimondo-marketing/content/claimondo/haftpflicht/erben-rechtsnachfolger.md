@@ -16,12 +16,12 @@ customer_questions:
   - "ansprüche bei tod weiterführen"
   - "gesamtrechtsnachfolge 1922 bgb"
 last_modified: 2026-05-18
-excerpt: Verstirbt ein Geschädigter durch einen Verkehrsunfall, gehen seine bis zum Tod entstandenen Schadensersatzansprüche nach § 1922 BGB im Wege der Gesamtrechtsnachfolge auf die Erben über. Schmerzensgeld ist seit der BGH-Rechtsprechung von 1985 vererbbar — auch bei unmittelbar tödlichem Ausgang. Erben- und Hinterbliebenenansprüche sind rechtlich getrennt und kumulierbar.
+excerpt: Verstirbt ein Geschädigter durch einen Verkehrsunfall, gehen seine bis zum Tod entstandenen Schadensersatzansprüche nach § 1922 BGB im Wege der Gesamtrechtsnachfolge auf die Erben über. Schmerzensgeld ist seit der BGH-Rechtsprechung von 1985 vererbbar – auch bei unmittelbar tödlichem Ausgang. Erben- und Hinterbliebenenansprüche sind rechtlich getrennt und kumulierbar.
 keyFacts:
-  - § 1922 BGB — Gesamtrechtsnachfolge: alle Vermögensansprüche gehen auf Erben über
-  - BGH VI ZR 56/84 (1985) — Schmerzensgeld ist vererbbar
+  - § 1922 BGB – Gesamtrechtsnachfolge: alle Vermögensansprüche gehen auf Erben über
+  - BGH VI ZR 56/84 (1985) – Schmerzensgeld ist vererbbar
   - 3 Jahre Verjährung § 195 BGB läuft beim Erben kontinuierlich weiter
-  - Hinterbliebenenansprüche (§ 844 BGB) laufen parallel — eigenständig
+  - Hinterbliebenenansprüche (§ 844 BGB) laufen parallel – eigenständig
   - Erben brauchen Erbschein für Anspruchsgeltendmachung gegenüber Versicherer
 last_legal_review: pending
 related:
@@ -34,7 +34,7 @@ meta_description: "Erben nach tödlichem Unfall: Ansprüche gehen nach §1922 BG
 
 # Erben und Rechtsnachfolge bei tödlichem Verkehrsunfall
 
-> **Kurz erklärt:** Verstirbt ein Geschädigter durch einen Verkehrsunfall, gehen seine bis dahin entstandenen Schadensersatz-Ansprüche **als Vermögensbestandteil** auf die Erben über (§ 1922 BGB Gesamtrechtsnachfolge). Schmerzensgeld ist seit der BGH-Rechtsprechung 1985 **vererbbar** — auch ein Anspruch, der mit dem Sterben einhergegangen wäre, ist nun den Erben zugänglich. Daneben haben Hinterbliebene **eigene** Ansprüche ([Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld), [Unterhaltsschaden](/haftpflicht/unterhaltsschaden), [Beerdigungskosten](/haftpflicht/beerdigungskosten)).
+> **Kurz erklärt:** Verstirbt ein Geschädigter durch einen Verkehrsunfall, gehen seine bis dahin entstandenen Schadensersatz-Ansprüche **als Vermögensbestandteil** auf die Erben über (§ 1922 BGB Gesamtrechtsnachfolge). Schmerzensgeld ist seit der BGH-Rechtsprechung 1985 **vererbbar** – auch ein Anspruch, der mit dem Sterben einhergegangen wäre, ist nun den Erben zugänglich. Daneben haben Hinterbliebene **eigene** Ansprüche ([Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld), [Unterhaltsschaden](/haftpflicht/unterhaltsschaden), [Beerdigungskosten](/haftpflicht/beerdigungskosten)).
 
 ## Auch bekannt als
 
@@ -44,11 +44,11 @@ meta_description: "Erben nach tödlichem Unfall: Ansprüche gehen nach §1922 BG
 
 ## In einem Satz erklärt
 
-Bei tödlichem Unfall gehen die bis zum Tod entstandenen Schadensersatz-Ansprüche des Verstorbenen als Vermögen auf die Erben über — Schmerzensgeld ist vererbbar.
+Bei tödlichem Unfall gehen die bis zum Tod entstandenen Schadensersatz-Ansprüche des Verstorbenen als Vermögen auf die Erben über – Schmerzensgeld ist vererbbar.
 
 ## In drei Sätzen erklärt
 
-Stirbt ein Verkehrsunfall-Geschädigter, bleiben seine bis zum Tod entstandenen Schadensersatz-Ansprüche **nicht erlöschen**, sondern gehen nach § 1922 BGB im Wege der Gesamtrechtsnachfolge **auf die Erben** über — sie können diese gegenüber dem gegnerischen Haftpflichtversicherer weiter geltend machen. Seit der BGH-Rechtsprechung 1985 ist auch das **Schmerzensgeld vererbbar** — selbst wenn der Geschädigte erst nach dem Unfall und vor der Geltendmachung verstirbt, geht der Anspruch auf die Erben über. Daneben haben Hinterbliebene **eigenständige** Ansprüche (Hinterbliebenengeld, Unterhaltsschaden, Schockschaden, Beerdigungskosten) — Erben-Ansprüche und Hinterbliebenen-Ansprüche sind voneinander **unabhängig** und können parallel laufen.
+Stirbt ein Verkehrsunfall-Geschädigter, bleiben seine bis zum Tod entstandenen Schadensersatz-Ansprüche **nicht erlöschen**, sondern gehen nach § 1922 BGB im Wege der Gesamtrechtsnachfolge **auf die Erben** über – sie können diese gegenüber dem gegnerischen Haftpflichtversicherer weiter geltend machen. Seit der BGH-Rechtsprechung 1985 ist auch das **Schmerzensgeld vererbbar** – selbst wenn der Geschädigte erst nach dem Unfall und vor der Geltendmachung verstirbt, geht der Anspruch auf die Erben über. Daneben haben Hinterbliebene **eigenständige** Ansprüche (Hinterbliebenengeld, Unterhaltsschaden, Schockschaden, Beerdigungskosten) – Erben-Ansprüche und Hinterbliebenen-Ansprüche sind voneinander **unabhängig** und können parallel laufen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -56,22 +56,22 @@ Stirbt ein Verkehrsunfall-Geschädigter, bleiben seine bis zum Tod entstandenen 
 - **1985** BGH-Wende zur Vererbbarkeit Schmerzensgeld
 - **3 Jahre Verjährung** § 195 BGB läuft beim Erben weiter
 - **Erben-Erklärung** für Anspruchs-Geltendmachung erforderlich
-- **Hinterbliebenen-Ansprüche** parallel — eigenständig
+- **Hinterbliebenen-Ansprüche** parallel – eigenständig
 
 ---
 
 ## Was auf die Erben übergeht
 
 ### Vermögensschäden bis zum Tod
-- [Reparaturkosten](/haftpflicht/reparaturkosten) — bereits entstandene
+- [Reparaturkosten](/haftpflicht/reparaturkosten) – bereits entstandene
 - [Sachverständigen-Kosten](/haftpflicht/sv-kosten)
-- [Verdienstausfall](/haftpflicht/verdienstausfall) — bis zum Tod
-- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) — bereits angefallene
+- [Verdienstausfall](/haftpflicht/verdienstausfall) – bis zum Tod
+- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) – bereits angefallene
 
-### Personenschäden — Schmerzensgeld
-- **Bis zum Tod gelitten** — eigenständig vererbbar
-- **Auch bei direktem Tod** durch Unfall (ohne Verzögerung) — BGH erkennt einen „Sekunden-Anspruch" an
-- Höhe nach BGH-Rechtsprechung bei direktem Tod gering (typisch nur einige tausend Euro) — bei Leiden vor Tod höher
+### Personenschäden – Schmerzensgeld
+- **Bis zum Tod gelitten** – eigenständig vererbbar
+- **Auch bei direktem Tod** durch Unfall (ohne Verzögerung) – BGH erkennt einen „Sekunden-Anspruch" an
+- Höhe nach BGH-Rechtsprechung bei direktem Tod gering (typisch nur einige tausend Euro) – bei Leiden vor Tod höher
 
 ### Ansprüche, die NICHT übergehen
 - **Ansprüche aus eigenen Rechtsverhältnissen** der Erben (z. B. eigene Heilbehandlung der Erben)
@@ -104,12 +104,12 @@ Stirbt ein Verkehrsunfall-Geschädigter, bleiben seine bis zum Tod entstandenen 
 - Ehepartner separat (Erbquote 1/4 oder 1/2 nach Güterstand)
 
 ### Testamentarische Erbfolge
-- Bei vorhandenem Testament oder Erbvertrag — Vorrang vor gesetzlicher Erbfolge
+- Bei vorhandenem Testament oder Erbvertrag – Vorrang vor gesetzlicher Erbfolge
 - Pflichtteil bleibt geschützt
 
 ---
 
-## Verjährung — wichtige Falle
+## Verjährung – wichtige Falle
 
 Die [Verjährung](/haftpflicht/verjaehrung-bgb195) läuft **kontinuierlich weiter**:
 
@@ -121,10 +121,10 @@ Die [Verjährung](/haftpflicht/verjaehrung-bgb195) läuft **kontinuierlich weite
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Erben-Ansprüche **und** Hinterbliebenen-Ansprüche prüfen — sie sind unabhängig und kumulierbar.
+Erben-Ansprüche **und** Hinterbliebenen-Ansprüche prüfen – sie sind unabhängig und kumulierbar.
 
 ### 🛠 Drei Schritte
 
@@ -142,28 +142,28 @@ Falls Erbe seit längerem im Raum: Frist-Lauf prüfen.
 ## Häufige Fragen
 
 **Können Erben Schadensersatz aus dem Tod-Unfall bekommen?**
-Ja. Alle bis zum Tod entstandenen Ansprüche gehen nach § 1922 BGB auf die Erben über — inklusive Schmerzensgeld (vererbbar seit BGH 1985).
+Ja. Alle bis zum Tod entstandenen Ansprüche gehen nach § 1922 BGB auf die Erben über – inklusive Schmerzensgeld (vererbbar seit BGH 1985).
 
 **Ist Schmerzensgeld vererbbar?**
-Ja. Seit BGH-Rechtsprechung 1985 ist Schmerzensgeld voll vererbbar — auch bei kurzer Lebens-Spanne nach Unfall.
+Ja. Seit BGH-Rechtsprechung 1985 ist Schmerzensgeld voll vererbbar – auch bei kurzer Lebens-Spanne nach Unfall.
 
 **Was ist der Unterschied zwischen Erben und Hinterbliebenen?**
 Erben übernehmen das Vermögen des Verstorbenen (inkl. Schadensersatz-Ansprüche). Hinterbliebene haben **eigene** Ansprüche (Hinterbliebenengeld, Unterhaltsschaden, Schockschaden, Beerdigungskosten). Beides oft dieselbe Person.
 
 **Was ist Gesamtrechtsnachfolge?**
-Der Eintritt der Erben in die rechtliche Position des Verstorbenen mit allen Vermögensbestandteilen — inklusive Forderungen aus Verkehrsunfall.
+Der Eintritt der Erben in die rechtliche Position des Verstorbenen mit allen Vermögensbestandteilen – inklusive Forderungen aus Verkehrsunfall.
 
 **Wer ist Erbe?**
-Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche Erbfolge — Kinder + Ehepartner zuerst.
+Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche Erbfolge – Kinder + Ehepartner zuerst.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) — eigenständiger Anspruch
-- [Unterhaltsschaden](/haftpflicht/unterhaltsschaden) — Renten-Anspruch Hinterbliebener
+- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) – eigenständiger Anspruch
+- [Unterhaltsschaden](/haftpflicht/unterhaltsschaden) – Renten-Anspruch Hinterbliebener
 - [Beerdigungskosten](/haftpflicht/beerdigungskosten)
-- [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) — vererbbar
+- [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) – vererbbar
 - [Verjährung § 195 BGB](/haftpflicht/verjaehrung-bgb195)
 
 ---
@@ -176,7 +176,7 @@ Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche E
 
 ## Quellen
 
-- BGB §§ 1922, 1924–1936 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- BGB §§ 1922, 1924–1936 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - BGH, Urteil vom 24.05.1985, VI ZR 56/84 (Vererbbarkeit Schmerzensgeld)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
@@ -224,4 +224,4 @@ Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche E
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

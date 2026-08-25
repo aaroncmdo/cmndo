@@ -43,7 +43,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
 
   return (
     <footer className="relative isolate overflow-hidden bg-claimondo-navy py-14 text-white">
-      {/* Atmosphärische Spotlights — gleiche Sprache wie Hero und CTA-Sections */}
+      {/* Atmosphärische Spotlights – gleiche Sprache wie Hero und CTA-Sections */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -214,7 +214,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
           </div>
         </div>
 
-        {/* Doc 37 §8.2: Top-Standorte — Local-SEO-Anker von jeder Seite. */}
+        {/* Doc 37 §8.2: Top-Standorte – Local-SEO-Anker von jeder Seite. */}
         <div className="mt-10 border-t border-white/10 pt-6">
           <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
             Top-Standorte
@@ -246,7 +246,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
             >
               info@claimondo.de
             </a>
-            {/* Company-LinkedIn — tracker-frei (reiner Link, kein platform.linkedin.com-Widget). */}
+            {/* Company-LinkedIn – tracker-frei (reiner Link, kein platform.linkedin.com-Widget). */}
             <a
               href="https://www.linkedin.com/company/claimondo"
               target="_blank"

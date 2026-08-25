@@ -40,7 +40,7 @@ export async function HomeTrustStripSection() {
           {kpiMethodik}
         </p>
 
-        {/* E1 — LIVE Google-Bewertungen (null-safe: rendert nichts ohne echte Daten). */}
+        {/* E1 – LIVE Google-Bewertungen (null-safe: rendert nichts ohne echte Daten). */}
         <GoogleReviews />
 
         {/* LIVE ProvenExpert-Siegel (null-safe, serverseitig geholt — kein

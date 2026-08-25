@@ -17,9 +17,9 @@ customer_questions:
   - "kapitalisierte rente bei dauerschaden"
   - "lebenslange entschädigung autounfall"
 last_modified: 2026-05-18
-excerpt: Bei dauerhafter unfallbedingter Erwerbsminderung gewährt § 843 BGB einen Anspruch auf Geldrente oder kapitalisierten Einmalbetrag — berechnet aus der Differenz zwischen voraussichtlichem Lebenseinkommen und tatsächlichem Einkommen nach Unfall, multipliziert mit dem MdE-Prozentsatz und der verbleibenden Erwerbszeit. Bei jungen Schwerstverletzten erreichen Gesamtansprüche regelmäßig siebenstellige Beträge.
+excerpt: Bei dauerhafter unfallbedingter Erwerbsminderung gewährt § 843 BGB einen Anspruch auf Geldrente oder kapitalisierten Einmalbetrag – berechnet aus der Differenz zwischen voraussichtlichem Lebenseinkommen und tatsächlichem Einkommen nach Unfall, multipliziert mit dem MdE-Prozentsatz und der verbleibenden Erwerbszeit. Bei jungen Schwerstverletzten erreichen Gesamtansprüche regelmäßig siebenstellige Beträge.
 keyFacts:
-  - § 843 BGB — Anspruchsgrundlage für Erwerbsminderungs-Rente
+  - § 843 BGB – Anspruchsgrundlage für Erwerbsminderungs-Rente
   - MdE-Grad bestimmt den Bemessungsfaktor (20 %–100 %)
   - Kapitalisierung oder lebenslange Geldrente möglich
   - Sieben­stellige Gesamtansprüche bei jungen Schwerstverletzten typisch
@@ -33,9 +33,9 @@ related:
 meta_description: "Erwerbsminderungs-Schaden nach §843 BGB: Rente oder Kapital bei dauerhafter unfallbedingter Erwerbsminderung, bemessen am MdE-Grad. Was Ihnen zusteht."
 ---
 
-# Erwerbsminderungs-Schaden nach § 843 BGB — Rente bei Dauer-Folgen
+# Erwerbsminderungs-Schaden nach § 843 BGB – Rente bei Dauer-Folgen
 
-> **Kurz erklärt:** Bei dauerhafter unfallbedingter Erwerbsminderung hast du nach § 843 BGB Anspruch auf eine **Geldrente** für den Verlust deiner Erwerbsfähigkeit — entweder als laufende monatliche Zahlung oder als **kapitalisierter Einmalbetrag**. Berechnung über die Differenz zwischen vorausseh­barem Lebenseinkommen und tatsächlichem Einkommen, multipliziert mit der voraussichtlichen Erwerbszeit. Hochkomplexe Berechnung mit Versicherungs-Mathematik — Gesamt-Ansprüche bei jungen Schwerstverletzten regelmäßig im siebenstelligen Bereich.
+> **Kurz erklärt:** Bei dauerhafter unfallbedingter Erwerbsminderung hast du nach § 843 BGB Anspruch auf eine **Geldrente** für den Verlust deiner Erwerbsfähigkeit – entweder als laufende monatliche Zahlung oder als **kapitalisierter Einmalbetrag**. Berechnung über die Differenz zwischen vorausseh­barem Lebenseinkommen und tatsächlichem Einkommen, multipliziert mit der voraussichtlichen Erwerbszeit. Hochkomplexe Berechnung mit Versicherungs-Mathematik – Gesamt-Ansprüche bei jungen Schwerstverletzten regelmäßig im siebenstelligen Bereich.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ meta_description: "Erwerbsminderungs-Schaden nach §843 BGB: Rente oder Kapital 
 
 ## In einem Satz erklärt
 
-Erwerbsminderungs-Schaden ist die lebenslange oder bis-Renteneintritt-Entschädigung für den unfallbedingten Verlust deiner Erwerbsfähigkeit — Geldrente oder Einmalbetrag nach § 843 BGB.
+Erwerbsminderungs-Schaden ist die lebenslange oder bis-Renteneintritt-Entschädigung für den unfallbedingten Verlust deiner Erwerbsfähigkeit – Geldrente oder Einmalbetrag nach § 843 BGB.
 
 ## In drei Sätzen erklärt
 
-Wenn du nach Verkehrsunfall dauerhaft (oder über mehrere Jahre) nicht mehr in deinem bisherigen Umfang erwerbstätig sein kannst, geht der klassische [Verdienstausfall](/haftpflicht/verdienstausfall) in einen **Erwerbsminderungs-Schaden** über (§ 843 BGB) — gezahlt als laufende Geldrente bis zum Renteneintritts-Alter oder lebenslang, oder als kapitalisierter Einmalbetrag im Vergleich. Die Bemessung basiert auf der **Differenz** zwischen dem voraussichtlichen Lebenseinkommen ohne Unfall und dem tatsächlich erzielten Einkommen nach Unfall — multipliziert mit der **Erwerbsminderung in Prozent** und der voraussichtlichen Restdauer der Erwerbsfähigkeit. Bei jungen Geschädigten mit schwerer Behinderung und langen Restzeiten sind **Gesamt-Ansprüche im siebenstelligen Bereich** keine Seltenheit — spezialisierter Anwalt mit aktuarieller Berechnung zwingend.
+Wenn du nach Verkehrsunfall dauerhaft (oder über mehrere Jahre) nicht mehr in deinem bisherigen Umfang erwerbstätig sein kannst, geht der klassische [Verdienstausfall](/haftpflicht/verdienstausfall) in einen **Erwerbsminderungs-Schaden** über (§ 843 BGB) – gezahlt als laufende Geldrente bis zum Renteneintritts-Alter oder lebenslang, oder als kapitalisierter Einmalbetrag im Vergleich. Die Bemessung basiert auf der **Differenz** zwischen dem voraussichtlichen Lebenseinkommen ohne Unfall und dem tatsächlich erzielten Einkommen nach Unfall – multipliziert mit der **Erwerbsminderung in Prozent** und der voraussichtlichen Restdauer der Erwerbsfähigkeit. Bei jungen Geschädigten mit schwerer Behinderung und langen Restzeiten sind **Gesamt-Ansprüche im siebenstelligen Bereich** keine Seltenheit – spezialisierter Anwalt mit aktuarieller Berechnung zwingend.
 
 ## Die fünf Schlüsselzahlen
 
@@ -123,11 +123,11 @@ Die Minderung der Erwerbsfähigkeit wird im **medizinischen Gutachten** (Versorg
 | 70 % | Schwer-Behinderung |
 | 100 % | Vollständige Erwerbsunfähigkeit |
 
-Anders als bei MdE-Bewertungen für Schwerbehindertenausweis ist hier die **zivilrechtliche** Bewertung maßgeblich — kann abweichen.
+Anders als bei MdE-Bewertungen für Schwerbehindertenausweis ist hier die **zivilrechtliche** Bewertung maßgeblich – kann abweichen.
 
 ---
 
-## Geldrente vs. Kapitalisierung — Strategie
+## Geldrente vs. Kapitalisierung – Strategie
 
 | Form | Vorteil | Nachteil |
 |---|---|---|
@@ -138,7 +138,7 @@ In der Praxis: Bei langfristig schwer einschätzbaren Folgen oft laufende Rente;
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Erwerbsminderungs-Schaden ist **kein DIY**. Spezialisierter Verkehrsrechts-Anwalt mit aktuarieller Berechnung zwingend.
@@ -155,7 +155,7 @@ Karriere-Pfad ohne Unfall mit Hochrechnung. Steuerberater + Anwalt arbeiten zusa
 Sachverständigen-Gutachten zur Kapitalisierung mit Lebenserwartung, Zinsentwicklung, Inflation.
 
 **4. Spätfolge-Vorbehalt bei Vergleich**
-Bei Kapitalisierung: Vorbehalt für Verschlechterungs-Folgen unbedingt einarbeiten lassen — siehe [Decoder Pauschal-Abgeltung](/decoder/pauschal-abgeltung).
+Bei Kapitalisierung: Vorbehalt für Verschlechterungs-Folgen unbedingt einarbeiten lassen – siehe [Decoder Pauschal-Abgeltung](/decoder/pauschal-abgeltung).
 
 ---
 
@@ -163,15 +163,15 @@ Bei Kapitalisierung: Vorbehalt für Verschlechterungs-Folgen unbedingt einarbeit
 
 > *„Erwerbsminderung nicht ausreichend belegt."*
 
-Medizinisches Gutachten + Berufs-Hochrechnung sind die Standard-Beweise. Versicherer-Gutachten sind nicht bindend — Gerichts-SV entscheidet.
+Medizinisches Gutachten + Berufs-Hochrechnung sind die Standard-Beweise. Versicherer-Gutachten sind nicht bindend – Gerichts-SV entscheidet.
 
-> *„MdE zu hoch angesetzt — wir kalkulieren mit weniger."*
+> *„MdE zu hoch angesetzt – wir kalkulieren mit weniger."*
 
 Gegen-Gutachten + Klage. Bei klarer Lage gute Erfolgs-Chancen.
 
 > *„Sie könnten ja noch arbeiten."*
 
-Konkret-Beweise verlangen — welcher Beruf konkret? Welcher Arbeitgeber? Welche Belastbarkeit?
+Konkret-Beweise verlangen – welcher Beruf konkret? Welcher Arbeitgeber? Welche Belastbarkeit?
 
 ---
 
@@ -190,22 +190,22 @@ Versicherungs-Mathematiker oder spezialisierter Sachverständiger. Bei Vergleich
 Bei laufender Geldrente: Anpassung möglich. Bei Kapitalisierung: nur mit ausdrücklichem Spätfolge-Vorbehalt im Vergleich.
 
 **Lohnt sich Geldrente oder Einmalbetrag?**
-Strategische Entscheidung — bei Versicherer-Insolvenz-Risiko: Einmalbetrag. Bei volatiler Lebens-Erwartung: Rente.
+Strategische Entscheidung – bei Versicherer-Insolvenz-Risiko: Einmalbetrag. Bei volatiler Lebens-Erwartung: Rente.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Verdienstausfall](/haftpflicht/verdienstausfall) — vorgeschalteter Posten bei vorübergehender AU
-- [Vermehrte Bedürfnisse](/haftpflicht/vermehrte-beduerfnisse) — daneben anwendbar
-- [Pflege-Mehrbedarf](/haftpflicht/pflege-mehrbedarf) — bei Schwerstpflege
-- [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) — eigenständig daneben
+- [Verdienstausfall](/haftpflicht/verdienstausfall) – vorgeschalteter Posten bei vorübergehender AU
+- [Vermehrte Bedürfnisse](/haftpflicht/vermehrte-beduerfnisse) – daneben anwendbar
+- [Pflege-Mehrbedarf](/haftpflicht/pflege-mehrbedarf) – bei Schwerstpflege
+- [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) – eigenständig daneben
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Erwerbsminderungs-Schaden ist der größte und komplexeste Schadensposten — bei schweren Verletzungen gehen Gesamt-Ansprüche schnell siebenstellig. Spezialisierter Anwalt zwingend.
+Erwerbsminderungs-Schaden ist der größte und komplexeste Schadensposten – bei schweren Verletzungen gehen Gesamt-Ansprüche schnell siebenstellig. Spezialisierter Anwalt zwingend.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -213,8 +213,8 @@ Erwerbsminderungs-Schaden ist der größte und komplexeste Schadensposten — be
 
 ## Quellen
 
-- BGB § 843 — [gesetze-im-internet.de/bgb/__843.html](https://www.gesetze-im-internet.de/bgb/__843.html)
-- BGB § 842 — [gesetze-im-internet.de/bgb/__842.html](https://www.gesetze-im-internet.de/bgb/__842.html)
+- BGB § 843 – [gesetze-im-internet.de/bgb/__843.html](https://www.gesetze-im-internet.de/bgb/__843.html)
+- BGB § 842 – [gesetze-im-internet.de/bgb/__842.html](https://www.gesetze-im-internet.de/bgb/__842.html)
 - BGH-Rechtsprechung zum Erwerbsminderungs-Schaden, ständige Rechtsprechung
 - Pardey/Frasch, Schadensersatz bei Personenschäden
 - Versorgungsmedizinische Grundsätze (VersMedV)
@@ -263,4 +263,4 @@ Erwerbsminderungs-Schaden ist der größte und komplexeste Schadensposten — be
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

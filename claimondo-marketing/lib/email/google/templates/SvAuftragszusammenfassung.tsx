@@ -21,7 +21,7 @@ export function subject(p: Props) {
 
 export function SvAuftragszusammenfassungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Neuer Auftrag ${props.fallNummer} — Termin am ${props.terminDatum}`}>
+    <EmailLayout preview={`Neuer Auftrag ${props.fallNummer} – Termin am ${props.terminDatum}`}>
       <Heading>Neuer Auftrag bestätigt</Heading>
       <Paragraph>
         Hallo {props.svVorname}, der Termin für Fall {props.fallNummer} ist bestätigt. Hier die wichtigsten Daten:

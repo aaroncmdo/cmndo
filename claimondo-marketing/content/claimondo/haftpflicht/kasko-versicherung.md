@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/kasko-versicherung
-meta_title: Kasko oder gegnerische Haftpflicht — wann was
+meta_title: Kasko oder gegnerische Haftpflicht – wann was
 type: glossar-spoke
 cluster: H7
 nummer: H7.9
@@ -16,23 +16,23 @@ customer_questions:
   - "quasi-deckung was bedeutet"
   - "teilkasko vollkasko unterschied"
 last_modified: 2026-05-18
-excerpt: Bei unverschuldetem Unfall sollte immer der Direktanspruch gegen die gegnerische Haftpflicht nach § 115 VVG genutzt werden — die eigene Kasko belastet die Schadenfreiheitsklasse und verursacht über mehrere Jahre typisch 3.000–8.000 Euro Mehrprämie. Bei zögernder Gegenseite kann die eigene Kasko per Quasi-Deckung vorab regulieren und sich den Betrag per Regress zurückholen; die SF-Rückstufung wird dann rückgängig gemacht.
+excerpt: Bei unverschuldetem Unfall sollte immer der Direktanspruch gegen die gegnerische Haftpflicht nach § 115 VVG genutzt werden – die eigene Kasko belastet die Schadenfreiheitsklasse und verursacht über mehrere Jahre typisch 3.000–8.000 Euro Mehrprämie. Bei zögernder Gegenseite kann die eigene Kasko per Quasi-Deckung vorab regulieren und sich den Betrag per Regress zurückholen; die SF-Rückstufung wird dann rückgängig gemacht.
 keyFacts:
-  - § 115 VVG — Direktanspruch gegen gegnerische Haftpflicht, keine SF-Belastung
-  - § 86 VVG — Regressrecht der Kasko bei Quasi-Deckung
+  - § 115 VVG – Direktanspruch gegen gegnerische Haftpflicht, keine SF-Belastung
+  - § 86 VVG – Regressrecht der Kasko bei Quasi-Deckung
   - Vollkasko-Rückstufung: typisch 3–7 SF-Klassen, 3.000–8.000 € Mehrkosten
-  - Teilkasko: Wild, Brand, Diebstahl, Hagel — keine SF-Belastung
+  - Teilkasko: Wild, Brand, Diebstahl, Hagel – keine SF-Belastung
   - Quasi-Deckung: Kasko zahlt vor, holt sich Betrag von Gegner zurück
 related:
   - /haftpflicht/wildunfall
   - /haftpflicht/schwarzfahrt-diebstahl
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Kasko oder Haftpflicht? Bei unverschuldetem Unfall immer der Direktanspruch nach §115 VVG — Kasko kostet 3.000–8.000 € Rückstufung. Wann was sinnvoll ist."
+meta_description: "Kasko oder Haftpflicht? Bei unverschuldetem Unfall immer der Direktanspruch nach §115 VVG – Kasko kostet 3.000–8.000 € Rückstufung. Wann was sinnvoll ist."
 ---
 
-# Kasko-Versicherung vs. gegnerische Haftpflicht — wann was
+# Kasko-Versicherung vs. gegnerische Haftpflicht – wann was
 
-> **Kurz erklärt:** **Eigene Kasko** (Teil- oder Vollkasko) versichert dein eigenes Fahrzeug — sie zahlt unabhängig von der Schuldfrage, **belastet aber deine SF-Klasse** (Rückstufung). **Gegnerische Haftpflicht** zahlt bei unverschuldetem Unfall vollständig, ohne SF-Belastung für dich. Daher: bei klarer Fremd-Schuld immer den **Direktanspruch gegen die gegnerische Haftpflicht** (§ 115 VVG) nutzen — nicht die eigene Kasko. **Quasi-Deckung**: Kasko zahlt vor, holt sich Geld dann von gegnerischem Versicherer zurück (Regress § 86 VVG analog).
+> **Kurz erklärt:** **Eigene Kasko** (Teil- oder Vollkasko) versichert dein eigenes Fahrzeug – sie zahlt unabhängig von der Schuldfrage, **belastet aber deine SF-Klasse** (Rückstufung). **Gegnerische Haftpflicht** zahlt bei unverschuldetem Unfall vollständig, ohne SF-Belastung für dich. Daher: bei klarer Fremd-Schuld immer den **Direktanspruch gegen die gegnerische Haftpflicht** (§ 115 VVG) nutzen – nicht die eigene Kasko. **Quasi-Deckung**: Kasko zahlt vor, holt sich Geld dann von gegnerischem Versicherer zurück (Regress § 86 VVG analog).
 
 ## Auch bekannt als
 
@@ -42,7 +42,7 @@ Eigene Kasko · Vollkasko · Teilkasko · Quasi-Deckung · SF-Klassen-Rückstufu
 
 | Konstellation | Wer zahlt |
 |---|---|
-| **Unverschuldeter Unfall, klare Gegen-Schuld** | Gegnerische Haftpflicht (§ 115 VVG) — voll, keine SF-Belastung |
+| **Unverschuldeter Unfall, klare Gegen-Schuld** | Gegnerische Haftpflicht (§ 115 VVG) – voll, keine SF-Belastung |
 | **Eigener Schuld** | Vollkasko (mit Selbstbeteiligung + Rückstufung) |
 | **Wildunfall** | Teilkasko |
 | **Diebstahl, Brand, Hagel** | Teilkasko |
@@ -65,13 +65,13 @@ Eigene Kasko · Vollkasko · Teilkasko · Quasi-Deckung · SF-Klassen-Rückstufu
 
 ## Wichtig: Quasi-Deckung
 
-Wenn die gegnerische Versicherung verzögert oder ablehnt, kann deine Kasko vorab regulieren (**Quasi-Deckung**) — sie holt sich später per Regress von der Gegen-Seite Geld zurück. Vorteil: schnelle Auszahlung. Nachteil: SF-Rückstufung — die später bei erfolgreicher Regress-Klärung **zurückgenommen** wird (BGH-Rechtsprechung).
+Wenn die gegnerische Versicherung verzögert oder ablehnt, kann deine Kasko vorab regulieren (**Quasi-Deckung**) – sie holt sich später per Regress von der Gegen-Seite Geld zurück. Vorteil: schnelle Auszahlung. Nachteil: SF-Rückstufung – die später bei erfolgreicher Regress-Klärung **zurückgenommen** wird (BGH-Rechtsprechung).
 
 ## SF-Klassen-Rückstufung
 
 Bei Kasko-Inanspruchnahme:
 - Vollkasko-Schaden = SF-Rückstufung (typisch 3–7 Klassen)
-- Mehrjährige Beitrags-Erhöhung — über mehrere Jahre meist 3.000–8.000 € Mehrkosten
+- Mehrjährige Beitrags-Erhöhung – über mehrere Jahre meist 3.000–8.000 € Mehrkosten
 - Bei Quasi-Deckung: nach Regress-Erfolg Rückstufung rückgängig
 
 → **Faustregel**: Bei klarer Gegen-Schuld **nie** die eigene Kasko nutzen. Anwalt einschalten, Direktanspruch gegen Gegen-Versicherung treiben.
@@ -79,16 +79,16 @@ Bei Kasko-Inanspruchnahme:
 ## Häufige Fragen
 
 **Soll ich die eigene Kasko nutzen?**
-Nur bei eigener Schuld oder bei kasko-spezifischen Schäden (Wild, Brand, Diebstahl). Bei klarer Gegen-Schuld: gegnerische Haftpflicht — keine SF-Belastung.
+Nur bei eigener Schuld oder bei kasko-spezifischen Schäden (Wild, Brand, Diebstahl). Bei klarer Gegen-Schuld: gegnerische Haftpflicht – keine SF-Belastung.
 
 **Was ist Quasi-Deckung?**
 Kasko zahlt vor, holt sich später von gegnerischer Versicherung zurück. Schnelle Liquidität, mit Rückstellungs-Risiko bei SF-Klassen.
 
 **Wann wird die SF-Klasse rückgesetzt?**
-Bei erfolgreicher Regress-Klärung mit der Gegen-Versicherung — die Vollkasko stellt deine SF-Klasse wieder her.
+Bei erfolgreicher Regress-Klärung mit der Gegen-Versicherung – die Vollkasko stellt deine SF-Klasse wieder her.
 
 **Lohnt sich Vollkasko bei Neuwagen?**
-Bei Neuwagen ≤ 5 Jahre und ≤ 80.000 km typisch ja. Danach Wirtschaftlichkeits-Rechnung — bei alten Autos oft unrentabel.
+Bei Neuwagen ≤ 5 Jahre und ≤ 80.000 km typisch ja. Danach Wirtschaftlichkeits-Rechnung – bei alten Autos oft unrentabel.
 
 ---
 
@@ -149,4 +149,4 @@ Bei Neuwagen ≤ 5 Jahre und ≤ 80.000 km typisch ja. Danach Wirtschaftlichkeit
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

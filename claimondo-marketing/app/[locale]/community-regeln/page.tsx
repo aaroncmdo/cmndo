@@ -14,14 +14,14 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 export const metadata: Metadata = {
   title: 'Community-Regeln',
   description:
-    'Die Regeln für die Claimondo-Partner-Community: fachlicher Austausch unter Sachverständigen, Maklern und Werkstätten — respektvoll, ohne Rechtsrat und ohne Drittdaten.',
+    'Die Regeln für die Claimondo-Partner-Community: fachlicher Austausch unter Sachverständigen, Maklern und Werkstätten – respektvoll, ohne Rechtsrat und ohne Drittdaten.',
   alternates: { canonical: '/community-regeln' },
   openGraph: {
     type: 'website',
     url: `${SITE_URL}/community-regeln`,
     title: 'Community-Regeln',
     description:
-      'Netiquette für die B2B-Community von Claimondo — was im Partner-Feed erlaubt ist und was nicht.',
+      'Netiquette für die B2B-Community von Claimondo – was im Partner-Feed erlaubt ist und was nicht.',
     locale: 'de_DE',
     siteName: 'Claimondo',
     images: OG_DEFAULT_IMAGES,
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
 const VERBOTEN: { titel: string; text: string }[] = [
   {
     titel: 'Keine Schmähung von Firmen oder Wettbewerbern',
-    text: 'Namentliche Herabsetzungen konkreter Unternehmen, Versicherer, Werkstätten oder einzelner Personen sind nicht gestattet. Sachliche Kritik an Praktiken — ohne Namensnennung — bleibt erlaubt.',
+    text: 'Namentliche Herabsetzungen konkreter Unternehmen, Versicherer, Werkstätten oder einzelner Personen sind nicht gestattet. Sachliche Kritik an Praktiken – ohne Namensnennung – bleibt erlaubt.',
   },
   {
     titel: 'Kein Rechtsrat',
-    text: 'Die Community dient dem allgemeinen fachlichen Austausch, nicht der Einzelfallberatung. Verbindliche rechtliche Handlungsempfehlungen für konkrete Fälle Dritter sind unzulässig — das gilt auch für Anwälte. Für Rechtsrat bitte die offiziellen Kanäle nutzen.',
+    text: 'Die Community dient dem allgemeinen fachlichen Austausch, nicht der Einzelfallberatung. Verbindliche rechtliche Handlungsempfehlungen für konkrete Fälle Dritter sind unzulässig – das gilt auch für Anwälte. Für Rechtsrat bitte die offiziellen Kanäle nutzen.',
   },
   {
     titel: 'Keine personenbezogenen Daten Dritter',
@@ -43,7 +43,7 @@ const VERBOTEN: { titel: string; text: string }[] = [
   },
   {
     titel: 'Keine vertraulichen Fall- oder Vergleichsdaten',
-    text: 'Gutachteninhalte, Schätzwerte, Vergleichsbeträge oder ähnliche Informationen aus konkreten Fällen dürfen nicht veröffentlicht werden — auch nicht anonymisiert, wenn der Fall rekonstruierbar ist.',
+    text: 'Gutachteninhalte, Schätzwerte, Vergleichsbeträge oder ähnliche Informationen aus konkreten Fällen dürfen nicht veröffentlicht werden – auch nicht anonymisiert, wenn der Fall rekonstruierbar ist.',
   },
   {
     titel: 'Keine Werbung, kein Spam',

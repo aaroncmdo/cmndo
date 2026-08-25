@@ -17,7 +17,7 @@ export default function LeadReminder2({
     <EmailLayout preview="Sollen wir Ihren Schadenfall noch bearbeiten?">
       <Heading>{anrede}, sollen wir weitermachen?</Heading>
       <Paragraph>
-        Ihre Schadenmeldung liegt bei uns — aber sie ist noch nicht
+        Ihre Schadenmeldung liegt bei uns – aber sie ist noch nicht
         abgeschlossen. Für Sie gilt: <strong>0 € Kosten</strong>, wir
         beauftragen einen unabhängigen Gutachter und die Regulierung läuft
         über die gegnerische Versicherung.
@@ -28,7 +28,7 @@ export default function LeadReminder2({
       <Button href={resumeUrl}>Jetzt abschließen →</Button>
       <Paragraph>
         Nach dem Klick brauchen Sie nur noch Ihre letzten Angaben zu ergänzen
-        — alles was Sie bereits eingegeben haben, ist gespeichert.
+        – alles was Sie bereits eingegeben haben, ist gespeichert.
       </Paragraph>
     </EmailLayout>
   )

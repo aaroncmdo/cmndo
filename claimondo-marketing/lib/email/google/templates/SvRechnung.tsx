@@ -17,7 +17,7 @@ export function subject(p: Props) {
 
 export function SvRechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Rechnung ${props.rechnungsNr} — ${props.betrag}`}>
+    <EmailLayout preview={`Rechnung ${props.rechnungsNr} – ${props.betrag}`}>
       <Heading>Ihre Rechnung</Heading>
       <Paragraph>
         Hallo {props.svVorname}, anbei Ihre Rechnung für Fall {props.fallNummer} als PDF.

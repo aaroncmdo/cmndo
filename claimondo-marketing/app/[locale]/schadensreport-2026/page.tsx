@@ -122,9 +122,9 @@ const BVSK_HONORARSPANNEN = [
 const NRW_REGIONAL = [
   { stadt: 'Köln', landgericht: 'LG Köln', plz: '50–51', anmerkung: 'Hohe Bevölkerungsdichte, viele Auffahrunfälle in der Innenstadt' },
   { stadt: 'Düsseldorf', landgericht: 'LG Düsseldorf', plz: '40', anmerkung: 'Stark verkehrsfreundlich gegenüber Geschädigten' },
-  { stadt: 'Essen', landgericht: 'LG Essen', plz: '45', anmerkung: 'Industriegebiet — viele Transporter- und LKW-Schäden' },
-  { stadt: 'Dortmund', landgericht: 'LG Dortmund', plz: '44', anmerkung: 'Studentenstädte (TU) — junge Fahrzeughalter, hohe Wertminderungs-Anteile' },
-  { stadt: 'Aachen', landgericht: 'LG Aachen', plz: '52', anmerkung: 'Grenzregion — auslandsversicherte Unfallgegner häufiger' },
+  { stadt: 'Essen', landgericht: 'LG Essen', plz: '45', anmerkung: 'Industriegebiet – viele Transporter- und LKW-Schäden' },
+  { stadt: 'Dortmund', landgericht: 'LG Dortmund', plz: '44', anmerkung: 'Studentenstädte (TU) – junge Fahrzeughalter, hohe Wertminderungs-Anteile' },
+  { stadt: 'Aachen', landgericht: 'LG Aachen', plz: '52', anmerkung: 'Grenzregion – auslandsversicherte Unfallgegner häufiger' },
 ] as const
 
 export default function SchadensreportPage() {
@@ -141,7 +141,7 @@ export default function SchadensreportPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           articleSchema({
-            headline: 'Schadensreport Kfz 2026 — Versicherungs-Kürzungen, BGH-Urteile, BVSK-Honorare',
+            headline: 'Schadensreport Kfz 2026 – Versicherungs-Kürzungen, BGH-Urteile, BVSK-Honorare',
             description:
               'Datenreport zur Kfz-Schadensregulierung in Deutschland 2026. Durchschnittliche Kürzungen, BGH-Rechtsprechung, BVSK-Honorartabelle, regionale Unterschiede NRW.',
             datePublished: datum,
@@ -184,7 +184,7 @@ export default function SchadensreportPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
+      {/* Hero – Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="report-hero">
         <div
           aria-hidden
@@ -297,7 +297,7 @@ export default function SchadensreportPage() {
         </div>
       </section>
 
-      {/* Markt-Block — Original-Daten aus Wettbewerber-Analyse 04/2026 */}
+      {/* Markt-Block – Original-Daten aus Wettbewerber-Analyse 04/2026 */}
       <section id="markt" className="py-12 sm:py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
@@ -450,7 +450,7 @@ export default function SchadensreportPage() {
         </div>
       </section>
 
-      {/* Auswertung Claimondo — Platzhalter bis Operations-Daten erhoben sind */}
+      {/* Auswertung Claimondo – Platzhalter bis Operations-Daten erhoben sind */}
       <section id="auswertung-claimondo" className="py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">

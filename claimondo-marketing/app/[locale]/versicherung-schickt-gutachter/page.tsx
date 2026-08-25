@@ -59,27 +59,27 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?',
     antwort:
-      'Nein. Bei unverschuldetem Unfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen nach § 249 BGB frei. Den von der Versicherung vorgeschlagenen „Vertrauens-Gutachter" müssen Sie nicht akzeptieren — ein bereits angekündigter Besichtigungstermin der Gegenseite bindet Sie nicht.',
+      'Nein. Bei unverschuldetem Unfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen nach § 249 BGB frei. Den von der Versicherung vorgeschlagenen „Vertrauens-Gutachter" müssen Sie nicht akzeptieren – ein bereits angekündigter Besichtigungstermin der Gegenseite bindet Sie nicht.',
   },
   {
     frage: 'Ist der Gutachter der Versicherung neutral?',
     antwort:
-      'Er wird von der Versicherung beauftragt und bezahlt und dient deren Interesse an einer möglichst niedrigen Regulierung. Ein eigenes, unabhängiges Gutachten sichert dagegen Ihre Position — es weist auch die merkantile Wertminderung aus, die in Prüfdienst-Kalkulationen häufig fehlt.',
+      'Er wird von der Versicherung beauftragt und bezahlt und dient deren Interesse an einer möglichst niedrigen Regulierung. Ein eigenes, unabhängiges Gutachten sichert dagegen Ihre Position – es weist auch die merkantile Wertminderung aus, die in Prüfdienst-Kalkulationen häufig fehlt.',
   },
   {
     frage: 'Wer zahlt mein eigenes Gutachten?',
     antwort:
-      'Bei unverschuldetem Unfall trägt die Sachverständigenkosten der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) — für Sie entstehen 0 € Eigenkosten.',
+      'Bei unverschuldetem Unfall trägt die Sachverständigenkosten der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) – für Sie entstehen 0 € Eigenkosten.',
   },
   {
     frage: 'Was, wenn die Versicherung schon einen Termin mit ihrem Gutachter vereinbart hat?',
     antwort:
-      'Sie können jederzeit einen eigenen Sachverständigen beauftragen. Beauftragen Sie ihn am besten vor Reparaturbeginn — das eigene Gutachten dient der Beweissicherung und dokumentiert den Schaden vollständig, bevor Spuren verschwinden.',
+      'Sie können jederzeit einen eigenen Sachverständigen beauftragen. Beauftragen Sie ihn am besten vor Reparaturbeginn – das eigene Gutachten dient der Beweissicherung und dokumentiert den Schaden vollständig, bevor Spuren verschwinden.',
   },
   {
     frage: 'Ab welchem Schaden lohnt sich ein eigenes Gutachten?',
     antwort:
-      'Oberhalb der Bagatellgrenze von etwa 750 € lohnt sich ein unabhängiges Gutachten — nur dieses beziffert die Wertminderung (BGH VI ZR 357/03). Bei kleineren Schäden genügt häufig ein Kostenvoranschlag.',
+      'Oberhalb der Bagatellgrenze von etwa 750 € lohnt sich ein unabhängiges Gutachten – nur dieses beziffert die Wertminderung (BGH VI ZR 357/03). Bei kleineren Schäden genügt häufig ein Kostenvoranschlag.',
   },
 ]
 
@@ -108,7 +108,7 @@ export default function Page() {
           serviceSchema({
             name: 'Freie Wahl des eigenen Kfz-Sachverständigen',
             description:
-              'Nach unverschuldetem Unfall wählen Geschädigte ihren eigenen, unabhängigen Sachverständigen frei (§ 249 BGB) — der „Vertrauens-Gutachter" der gegnerischen Versicherung ist nicht verpflichtend. Die Gutachterkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).',
+              'Nach unverschuldetem Unfall wählen Geschädigte ihren eigenen, unabhängigen Sachverständigen frei (§ 249 BGB) – der „Vertrauens-Gutachter" der gegnerischen Versicherung ist nicht verpflichtend. Die Gutachterkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).',
             url: `${SITE_URL}/versicherung-schickt-gutachter`,
           }),
           faqPageSchema(FAQS, {

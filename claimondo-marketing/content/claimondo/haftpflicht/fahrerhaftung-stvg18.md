@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/fahrerhaftung-stvg18
-meta_title: Fahrerhaftung § 18 StVG — Entlastungsbeweis
+meta_title: Fahrerhaftung § 18 StVG – Entlastungsbeweis
 type: glossar-spoke
 cluster: H1
 nummer: H1.8
@@ -17,12 +17,12 @@ customer_questions:
   - "halter oder fahrer haftung"
   - "fahrerhaftung entlastung"
 last_modified: 2026-05-18
-excerpt: § 18 StVG begründet die persönliche Haftung des Fahrzeugführers mit vermutetem Verschulden — der Fahrer muss aktiv beweisen, dass ihn kein Verschulden trifft (Entlastungsbeweis). Diese Fahrerhaftung greift parallel zur Halterhaftung nach § 7 StVG und gibt Geschädigten damit zwei Anspruchsgrundlagen. Der Entlastungsbeweis gelingt in der gerichtlichen Praxis in weniger als 20 % der Fälle.
+excerpt: § 18 StVG begründet die persönliche Haftung des Fahrzeugführers mit vermutetem Verschulden – der Fahrer muss aktiv beweisen, dass ihn kein Verschulden trifft (Entlastungsbeweis). Diese Fahrerhaftung greift parallel zur Halterhaftung nach § 7 StVG und gibt Geschädigten damit zwei Anspruchsgrundlagen. Der Entlastungsbeweis gelingt in der gerichtlichen Praxis in weniger als 20 % der Fälle.
 keyFacts:
-  - § 18 StVG — Verschuldenshaftung des Fahrers mit Umkehr der Beweislast
-  - § 18 Abs. 1 Satz 2 StVG — Entlastungsbeweis erforderlich
+  - § 18 StVG – Verschuldenshaftung des Fahrers mit Umkehr der Beweislast
+  - § 18 Abs. 1 Satz 2 StVG – Entlastungsbeweis erforderlich
   - Gerichtliche Erfolgsquote des Entlastungsbeweises unter 20 %
-  - § 115 VVG — Direktanspruch gegen Haftpflichtversicherung des Halters
+  - § 115 VVG – Direktanspruch gegen Haftpflichtversicherung des Halters
   - § 7 StVG (Halter) + § 18 StVG (Fahrer) laufen parallel
 last_legal_review: pending
 related:
@@ -30,12 +30,12 @@ related:
   - /haftpflicht/verschulden-bgb823
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/beweislast
-meta_description: "Fahrerhaftung nach §18 StVG: Das Verschulden des Fahrers wird vermutet — er muss sich entlasten (Erfolgsquote unter 20 %). Greift neben der Halterhaftung."
+meta_description: "Fahrerhaftung nach §18 StVG: Das Verschulden des Fahrers wird vermutet – er muss sich entlasten (Erfolgsquote unter 20 %). Greift neben der Halterhaftung."
 ---
 
-# Fahrerhaftung nach § 18 StVG — Verschuldensvermutung und Entlastungsbeweis
+# Fahrerhaftung nach § 18 StVG – Verschuldensvermutung und Entlastungsbeweis
 
-> **Kurz erklärt:** § 18 StVG begründet die **persönliche Haftung des Fahrzeugführers** zusätzlich zur Halterhaftung (§ 7 StVG). Anders als beim Halter wird beim Fahrer **Verschulden vermutet** — er muss aktiv beweisen, dass ihn **kein Verschulden** trifft (Entlastungsbeweis nach § 18 Abs. 1 Satz 2 StVG). Praktisch greift fast immer mindestens eine der Vorschriften zugunsten des Geschädigten — § 7 StVG (Halter) und § 18 StVG (Fahrer) kombiniert ergeben starke Beweis-Lage zu deinen Gunsten.
+> **Kurz erklärt:** § 18 StVG begründet die **persönliche Haftung des Fahrzeugführers** zusätzlich zur Halterhaftung (§ 7 StVG). Anders als beim Halter wird beim Fahrer **Verschulden vermutet** – er muss aktiv beweisen, dass ihn **kein Verschulden** trifft (Entlastungsbeweis nach § 18 Abs. 1 Satz 2 StVG). Praktisch greift fast immer mindestens eine der Vorschriften zugunsten des Geschädigten – § 7 StVG (Halter) und § 18 StVG (Fahrer) kombiniert ergeben starke Beweis-Lage zu deinen Gunsten.
 
 ## Auch bekannt als
 
@@ -45,17 +45,17 @@ meta_description: "Fahrerhaftung nach §18 StVG: Das Verschulden des Fahrers wir
 
 ## In einem Satz erklärt
 
-§ 18 StVG haftet der Fahrer persönlich für Verkehrsunfall-Schäden, sofern er nicht aktiv beweist, dass ihn kein Verschulden trifft — eine vermutete Verschuldenshaftung.
+§ 18 StVG haftet der Fahrer persönlich für Verkehrsunfall-Schäden, sofern er nicht aktiv beweist, dass ihn kein Verschulden trifft – eine vermutete Verschuldenshaftung.
 
 ## In drei Sätzen erklärt
 
-Während § 7 StVG den **Halter** ohne Verschulden in Anspruch nimmt, regelt § 18 StVG die persönliche **Verschuldenshaftung** des Fahrzeugführers — mit dem entscheidenden Unterschied, dass das **Verschulden vermutet** wird. Der Fahrer muss zu seiner Entlastung positiv beweisen, dass er die im Verkehr **erforderliche Sorgfalt** beachtet hat — andernfalls greift seine Haftung gegenüber dem Geschädigten neben der Halterhaftung. Da Halter und Fahrer oft, aber nicht immer identisch sind (Leihwagen, Firmenwagen, Familien-Fahrzeug), gibt diese Doppel-Konstellation dem Geschädigten in praktisch allen Verkehrsunfall-Sachverhalten einen anspruchsstarken Hebel.
+Während § 7 StVG den **Halter** ohne Verschulden in Anspruch nimmt, regelt § 18 StVG die persönliche **Verschuldenshaftung** des Fahrzeugführers – mit dem entscheidenden Unterschied, dass das **Verschulden vermutet** wird. Der Fahrer muss zu seiner Entlastung positiv beweisen, dass er die im Verkehr **erforderliche Sorgfalt** beachtet hat – andernfalls greift seine Haftung gegenüber dem Geschädigten neben der Halterhaftung. Da Halter und Fahrer oft, aber nicht immer identisch sind (Leihwagen, Firmenwagen, Familien-Fahrzeug), gibt diese Doppel-Konstellation dem Geschädigten in praktisch allen Verkehrsunfall-Sachverhalten einen anspruchsstarken Hebel.
 
 ## Die fünf Schlüsselzahlen
 
 - **§ 18 StVG** als Anspruchsgrundlage gegen Fahrer
-- **Verschuldensvermutung** — Beweis-Last umgekehrt
-- **§ 18 Abs. 1 Satz 2** — Entlastungsbeweis erforderlich
+- **Verschuldensvermutung** – Beweis-Last umgekehrt
+- **§ 18 Abs. 1 Satz 2** – Entlastungsbeweis erforderlich
 - **§ 7 StVG (Halter) + § 18 StVG (Fahrer)** parallele Haftung
 - **§ 115 VVG** Direktanspruch ggü. Haftpflichtversicherung
 
@@ -63,16 +63,16 @@ Während § 7 StVG den **Halter** ohne Verschulden in Anspruch nimmt, regelt § 
 
 ## Was § 18 StVG juristisch bedeutet
 
-Die Fahrerhaftung ergänzt die Halterhaftung — beide laufen nebeneinander und ermöglichen dem Geschädigten zwei Anspruchsschuldner (plus die Haftpflichtversicherung als Direktschuldnerin).
+Die Fahrerhaftung ergänzt die Halterhaftung – beide laufen nebeneinander und ermöglichen dem Geschädigten zwei Anspruchsschuldner (plus die Haftpflichtversicherung als Direktschuldnerin).
 
 ### Drei Voraussetzungen
 
-1. **Fahrzeugführer** — Person, die das Fahrzeug zur Unfallzeit gelenkt hat
-2. **„Beim Betrieb"** — funktionaler Zusammenhang mit dem Fahrzeug
+1. **Fahrzeugführer** – Person, die das Fahrzeug zur Unfallzeit gelenkt hat
+2. **„Beim Betrieb"** – funktionaler Zusammenhang mit dem Fahrzeug
 3. **Verletzung von Leben, Körper, Gesundheit, Sache**
 
-### Verschulden — vermutet
-Der **wesentliche Unterschied** zu § 823 BGB: § 823 BGB verlangt den **Verschuldens-Nachweis** durch den Geschädigten. § 18 StVG dreht das um — das Verschulden ist **vermutet**, der Fahrer muss zur Entlastung beweisen, dass er die **im Verkehr erforderliche Sorgfalt** beachtet hat.
+### Verschulden – vermutet
+Der **wesentliche Unterschied** zu § 823 BGB: § 823 BGB verlangt den **Verschuldens-Nachweis** durch den Geschädigten. § 18 StVG dreht das um – das Verschulden ist **vermutet**, der Fahrer muss zur Entlastung beweisen, dass er die **im Verkehr erforderliche Sorgfalt** beachtet hat.
 
 ---
 
@@ -83,12 +83,12 @@ Der Fahrer kann sich nur entlasten, wenn er positiv beweist:
 - Das Unfallereignis war **nicht vermeidbar** trotz aller im Verkehr erforderlichen Sorgfalt
 - ODER: Der Unfall beruht auf einem **unabwendbaren Ereignis**
 
-In der Praxis ist der Entlastungsbeweis **schwer zu führen** — gerichtliche Statistiken zeigen Erfolgsquoten unter 20 %. Versicherer berufen sich trotzdem darauf, vor allem in unklaren Konstellationen.
+In der Praxis ist der Entlastungsbeweis **schwer zu führen** – gerichtliche Statistiken zeigen Erfolgsquoten unter 20 %. Versicherer berufen sich trotzdem darauf, vor allem in unklaren Konstellationen.
 
 ### Was **kein** Entlastungsbeweis ist
-- „Ich habe nichts gesehen" — keine Sorgfalt
-- „Das war schicksalhaft" — zu vage
-- „Der andere hat einen Fehler gemacht" — entlastet nicht automatisch
+- „Ich habe nichts gesehen" – keine Sorgfalt
+- „Das war schicksalhaft" – zu vage
+- „Der andere hat einen Fehler gemacht" – entlastet nicht automatisch
 
 ### Was **als** Entlastungsbeweis greifen kann
 - Technischer Defekt ohne erkennbare Wartungs-Lücke
@@ -99,19 +99,19 @@ In der Praxis ist der Entlastungsbeweis **schwer zu führen** — gerichtliche S
 
 ---
 
-## Halter und Fahrer — wer haftet wie
+## Halter und Fahrer – wer haftet wie
 
 ### Identische Person
-Wenn Halter und Fahrer identisch sind (häufigster Fall), greifen § 7 StVG **und** § 18 StVG gleichzeitig zu deinen Gunsten — du hast doppelte Anspruchsgrundlage.
+Wenn Halter und Fahrer identisch sind (häufigster Fall), greifen § 7 StVG **und** § 18 StVG gleichzeitig zu deinen Gunsten – du hast doppelte Anspruchsgrundlage.
 
 ### Verschiedene Personen
 Bei getrennten Personen (Leihwagen, Familienfahrzeug, Mietwagen) haftet:
 - Der **Halter** verschuldensunabhängig nach § 7 StVG
 - Der **Fahrer** unter vermutetem Verschulden nach § 18 StVG
-- Beide gesamtschuldnerisch (§ 421 BGB) — du kannst von jedem den vollen Betrag fordern
+- Beide gesamtschuldnerisch (§ 421 BGB) – du kannst von jedem den vollen Betrag fordern
 
 ### Praktische Konsequenz
-Du wendest dich am einfachsten direkt an die **Haftpflichtversicherung des Halters** (§ 115 VVG) — die deckt sowohl Halter- als auch Fahrer-Haftung ab.
+Du wendest dich am einfachsten direkt an die **Haftpflichtversicherung des Halters** (§ 115 VVG) – die deckt sowohl Halter- als auch Fahrer-Haftung ab.
 
 ---
 
@@ -124,14 +124,14 @@ Du wendest dich am einfachsten direkt an die **Haftpflichtversicherung des Halte
 | **§ 823 BGB** | Allgemeines Delikt | Ja, vom Geschädigten zu beweisen |
 | **§ 17 StVG** | Mithaftung zwischen Fahrzeugen | Quote nach Verursachung |
 
-In der Praxis greifen die ersten beiden Vorschriften regelmäßig parallel — das ist das System der **doppelten Haftungs-Grundlage** zugunsten des Geschädigten.
+In der Praxis greifen die ersten beiden Vorschriften regelmäßig parallel – das ist das System der **doppelten Haftungs-Grundlage** zugunsten des Geschädigten.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Du musst **kein Fahrer-Verschulden beweisen**. § 18 StVG kehrt die Beweislast um — der Fahrer muss sich entlasten.
+Du musst **kein Fahrer-Verschulden beweisen**. § 18 StVG kehrt die Beweislast um – der Fahrer muss sich entlasten.
 
 ### 🛠 Drei Schritte
 
@@ -142,14 +142,14 @@ Polizeibericht enthält beide Personalien. Bei Versicherer-Korrespondenz beide n
 § 115 VVG. Die Haftpflicht des Halters deckt auch Fahrer-Schäden ab.
 
 **3. Bei Berufung auf Entlastungsbeweis: Anwalt**
-Versicherer-Argument „kein Verschulden des Fahrers" ist meist nicht haltbar — Anwalt klärt.
+Versicherer-Argument „kein Verschulden des Fahrers" ist meist nicht haltbar – Anwalt klärt.
 
 ---
 
 ## Häufige Fragen
 
 **Haftet der Fahrer für den Unfall?**
-Ja — nach § 18 StVG. Das Verschulden wird vermutet, der Fahrer muss zur Entlastung positiv beweisen, dass er die erforderliche Sorgfalt beachtet hat.
+Ja – nach § 18 StVG. Das Verschulden wird vermutet, der Fahrer muss zur Entlastung positiv beweisen, dass er die erforderliche Sorgfalt beachtet hat.
 
 **Was ist der Unterschied zwischen Halter und Fahrer?**
 Halter = wer das Fahrzeug auf eigene Rechnung betreibt (zahlt Versicherung, Steuer). Fahrer = wer es zur Unfallzeit lenkt. Oft identisch, oft nicht. Halter haftet ohne Verschulden (§ 7 StVG), Fahrer mit vermutetem Verschulden (§ 18 StVG).
@@ -158,7 +158,7 @@ Halter = wer das Fahrzeug auf eigene Rechnung betreibt (zahlt Versicherung, Steu
 Halter haftet nach § 7 StVG. Fahrer zusätzlich nach § 18 StVG. Beide gesamtschuldnerisch.
 
 **Kann sich der Fahrer entlasten?**
-Theoretisch ja durch Entlastungsbeweis nach § 18 Abs. 1 Satz 2 StVG. Praktisch sehr selten erfolgreich — gerichtliche Erfolgsquote unter 20 %.
+Theoretisch ja durch Entlastungsbeweis nach § 18 Abs. 1 Satz 2 StVG. Praktisch sehr selten erfolgreich – gerichtliche Erfolgsquote unter 20 %.
 
 **Muss ich beide verklagen?**
 Nein. § 115 VVG erlaubt Direktanspruch gegen die Haftpflichtversicherung des Halters, die alle Haftungen abdeckt.
@@ -167,10 +167,10 @@ Nein. § 115 VVG erlaubt Direktanspruch gegen die Haftpflichtversicherung des Ha
 
 ## Verwandte Begriffe
 
-- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) — Halterhaftung
-- [§ 823 BGB Verschulden](/haftpflicht/verschulden-bgb823) — Verschuldenshaftung
-- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) — bei Unfällen zwischen Fahrzeugen
-- [Beweislast](/haftpflicht/beweislast) — Verteilung der Pflichten
+- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) – Halterhaftung
+- [§ 823 BGB Verschulden](/haftpflicht/verschulden-bgb823) – Verschuldenshaftung
+- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) – bei Unfällen zwischen Fahrzeugen
+- [Beweislast](/haftpflicht/beweislast) – Verteilung der Pflichten
 
 ---
 
@@ -182,7 +182,7 @@ Nein. § 115 VVG erlaubt Direktanspruch gegen die Haftpflichtversicherung des Ha
 
 ## Quellen
 
-- Straßenverkehrsgesetz § 18 — [gesetze-im-internet.de/stvg/__18.html](https://www.gesetze-im-internet.de/stvg/__18.html)
+- Straßenverkehrsgesetz § 18 – [gesetze-im-internet.de/stvg/__18.html](https://www.gesetze-im-internet.de/stvg/__18.html)
 - BGH-Rechtsprechung zum Entlastungsbeweis nach § 18 StVG
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 - Greger/Zwickel, Haftungsrecht des Straßenverkehrs
@@ -231,4 +231,4 @@ Nein. § 115 VVG erlaubt Direktanspruch gegen die Haftpflichtversicherung des Ha
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

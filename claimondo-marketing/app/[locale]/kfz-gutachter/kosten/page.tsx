@@ -52,22 +52,22 @@ const FAQS_SCHEMA = [
   {
     frage: 'Wer zahlt den Gutachter bei einem Unfall?',
     antwort:
-      'Bei unverschuldetem Unfall mit Schaden über 750 €: die gegnerische Haftpflichtversicherung zu 100 % gemäß §249 BGB. Sie zahlen 0 €. Die Abrechnung läuft direkt zwischen Gutachter und Versicherung über eine Sicherungsabtretung. Bei Selbstverschulden zahlt Ihre Vollkasko (mit Selbstbeteiligung) — ohne Vollkasko Sie selbst.',
+      'Bei unverschuldetem Unfall mit Schaden über 750 €: die gegnerische Haftpflichtversicherung zu 100 % gemäß §249 BGB. Sie zahlen 0 €. Die Abrechnung läuft direkt zwischen Gutachter und Versicherung über eine Sicherungsabtretung. Bei Selbstverschulden zahlt Ihre Vollkasko (mit Selbstbeteiligung) – ohne Vollkasko Sie selbst.',
   },
   {
     frage: 'Was ist die Bagatell-Grenze von 750 €?',
     antwort:
-      'Bei Schäden unter 750 € sieht die Rechtsprechung in der Regel keinen Anspruch auf einen Sachverständigen — ein Kostenvoranschlag der Werkstatt reicht. Genaue Grenze ist vom OLG abhängig (Schwankung 700–1.000 €). Wir empfehlen: bei optisch geringen Schäden die Werkstatt prüfen lassen — oft sind verdeckte Schäden teurer als gedacht und rechtfertigen ein vollständiges Gutachten.',
+      'Bei Schäden unter 750 € sieht die Rechtsprechung in der Regel keinen Anspruch auf einen Sachverständigen – ein Kostenvoranschlag der Werkstatt reicht. Genaue Grenze ist vom OLG abhängig (Schwankung 700–1.000 €). Wir empfehlen: bei optisch geringen Schäden die Werkstatt prüfen lassen – oft sind verdeckte Schäden teurer als gedacht und rechtfertigen ein vollständiges Gutachten.',
   },
   {
     frage: 'Was ist eine Sicherungsabtretung?',
     antwort:
-      'Bei der Sicherungsabtretung nach §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. BGH-Rechtsprechung: Versicherer dürfen die Abtretung nicht einseitig zurückweisen.',
+      'Bei der Sicherungsabtretung nach §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal – der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. BGH-Rechtsprechung: Versicherer dürfen die Abtretung nicht einseitig zurückweisen.',
   },
   {
     frage: 'Was passiert wenn die Versicherung das Gutachterhonorar kürzt?',
     antwort:
-      'Häufige Versicherer-Taktik: Honorar-Kürzung mit Hinweis auf "ortsüblich". Der BGH hat dem in mehreren Urteilen widersprochen (VI ZR 50/15, VI ZR 76/16): die BVSK-Tabelle ist als Schätzungs-Grundlage zulässig. Unsere Partnerkanzlei holt gekürzte Honorare standardmäßig zurück — bei Erfolg trägt die Versicherung die Anwaltskosten.',
+      'Häufige Versicherer-Taktik: Honorar-Kürzung mit Hinweis auf "ortsüblich". Der BGH hat dem in mehreren Urteilen widersprochen (VI ZR 50/15, VI ZR 76/16): die BVSK-Tabelle ist als Schätzungs-Grundlage zulässig. Unsere Partnerkanzlei holt gekürzte Honorare standardmäßig zurück – bei Erfolg trägt die Versicherung die Anwaltskosten.',
   },
 ]
 

@@ -36,7 +36,7 @@ export function subject(p: Props) {
 export function KanzleiAuftragszusammenfassungEmail(props: Props) {
   const dokumente = props.dokumenteLinks ?? []
   return (
-    <EmailLayout preview={`Neuer Fall ${props.fallNummer} — ${props.kundeName}`}>
+    <EmailLayout preview={`Neuer Fall ${props.fallNummer} – ${props.kundeName}`}>
       <Heading>Neuer Fall zur Bearbeitung: {props.fallNummer}</Heading>
       <Paragraph>
         Ein neuer Fall wurde nach erfolgreicher Qualitätsprüfung an Ihre Kanzlei
@@ -75,7 +75,7 @@ export function KanzleiAuftragszusammenfassungEmail(props: Props) {
                   {d.label}
                 </a>
                 {d.meta ? (
-                  <span style={{ color: '#6b7280', fontSize: 12 }}> — {d.meta}</span>
+                  <span style={{ color: '#6b7280', fontSize: 12 }}> – {d.meta}</span>
                 ) : null}
               </li>
             ))}

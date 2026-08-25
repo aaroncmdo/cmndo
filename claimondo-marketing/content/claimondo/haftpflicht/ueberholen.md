@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/ueberholen
-meta_title: Überholen-Unfall — wer haftet
+meta_title: Überholen-Unfall – wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.11
@@ -16,9 +16,9 @@ customer_questions:
   - "überholer schert zu früh ein"
   - "überholverbot überfahren unfall"
 last_modified: 2026-05-18
-excerpt: Beim Überholen gilt § 5 StVO mit erhöhter Sorgfaltspflicht — nur bei klarer Sicht, ausreichendem Seitenabstand und ohne Behinderung des Gegenverkehrs erlaubt. Wer beim Überholen einen Unfall verursacht, trägt nach dem Anscheinsbeweis typisch 100 : 0 der Schuld; eine Mit-Quote des Überholten kommt nur bei nachgewiesenem plötzlichem Beschleunigen (30 %) oder eigenem Verstoß (z. B. Linksabbiegen ohne Blinker) in Betracht.
+excerpt: Beim Überholen gilt § 5 StVO mit erhöhter Sorgfaltspflicht – nur bei klarer Sicht, ausreichendem Seitenabstand und ohne Behinderung des Gegenverkehrs erlaubt. Wer beim Überholen einen Unfall verursacht, trägt nach dem Anscheinsbeweis typisch 100 : 0 der Schuld; eine Mit-Quote des Überholten kommt nur bei nachgewiesenem plötzlichem Beschleunigen (30 %) oder eigenem Verstoß (z. B. Linksabbiegen ohne Blinker) in Betracht.
 keyFacts:
-  - § 5 StVO — erhöhte Sorgfaltspflicht beim Überholen
+  - § 5 StVO – erhöhte Sorgfaltspflicht beim Überholen
   - Standard-Quote: 100 : 0 zu Lasten des Überholers
   - Überholverbot missachtet: volle Haftung des Überholers
   - Mit-Quote Überholter nur bei plötzlichem Beschleunigen: ca. 30 %
@@ -27,12 +27,12 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/spurwechsel
   - /haftpflicht/linksabbieger
-meta_description: "Überhol-Unfall: §5 StVO verlangt klare Sicht und Seitenabstand — wer dabei kollidiert, haftet nach Anscheinsbeweis meist 100:0. Wann sie anders liegt."
+meta_description: "Überhol-Unfall: §5 StVO verlangt klare Sicht und Seitenabstand – wer dabei kollidiert, haftet nach Anscheinsbeweis meist 100:0. Wann sie anders liegt."
 ---
 
-# Überholen-Unfall — wer haftet beim Überhol-Vorgang
+# Überholen-Unfall – wer haftet beim Überhol-Vorgang
 
-> **Kurz erklärt:** Beim Überholen gilt § 5 StVO mit **erhöhter Sorgfaltspflicht** — Überholen nur bei klarer Sicht, ohne Behinderung des Gegenverkehrs und mit ausreichendem Seitenabstand. Wer beim Überholen einen Unfall verursacht, trägt typisch **80 : 20 bis 100 : 0** Schuld. Eine erhebliche Mitverantwortung des Überholten greift nur bei nachweisbaren eigenen Verstößen (plötzliches Beschleunigen, Linksabbieger ohne Blinker).
+> **Kurz erklärt:** Beim Überholen gilt § 5 StVO mit **erhöhter Sorgfaltspflicht** – Überholen nur bei klarer Sicht, ohne Behinderung des Gegenverkehrs und mit ausreichendem Seitenabstand. Wer beim Überholen einen Unfall verursacht, trägt typisch **80 : 20 bis 100 : 0** Schuld. Eine erhebliche Mitverantwortung des Überholten greift nur bei nachweisbaren eigenen Verstößen (plötzliches Beschleunigen, Linksabbieger ohne Blinker).
 
 ## Auch bekannt als
 
@@ -62,7 +62,7 @@ meta_description: "Überhol-Unfall: §5 StVO verlangt klare Sicht und Seitenabst
 ## Häufige Fragen
 
 **Wer ist schuld beim Überhol-Unfall?**
-In aller Regel der Überholer — Anscheinsbeweis, Standard 100 : 0.
+In aller Regel der Überholer – Anscheinsbeweis, Standard 100 : 0.
 
 **Was, wenn der Überholte plötzlich beschleunigt?**
 Mit-Quote möglich (30 %), wenn das Beschleunigen nachgewiesen wird.
@@ -84,7 +84,7 @@ Verstoß gegen Überholverbot = Verschulden, volle Haftung des Überholers.
 
 ## Quellen
 
-- StVO § 5 — [gesetze-im-internet.de/stvo_2013/__5.html](https://www.gesetze-im-internet.de/stvo_2013/__5.html)
+- StVO § 5 – [gesetze-im-internet.de/stvo_2013/__5.html](https://www.gesetze-im-internet.de/stvo_2013/__5.html)
 - BGH-Rechtsprechung zum Überholen
 
 ---
@@ -127,4 +127,4 @@ Verstoß gegen Überholverbot = Verschulden, volle Haftung des Überholers.
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

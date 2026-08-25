@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/ifs-leitsaetze
-meta_title: IfS-Leitsätze — Standard für Kfz-Gutachten
+meta_title: IfS-Leitsätze – Standard für Kfz-Gutachten
 type: glossar-spoke
 cluster: SV
 nummer: SV.5
@@ -13,8 +13,8 @@ excerpt: Das Institut für Sachverständigenwesen (IfS) in Köln ist die zentral
 keyFacts:
   - IfS-Leitsätze 2018 (4. Aufl.): Pflichtbestandteile, Wertminderungsmethodik, Vor-/Altschäden
   - IfS-Zertifizierung nach DIN EN ISO/IEC 17024: 5 Jahre gültig, dann Erneuerung
-  - BGH VI ZR 67/06: subjektbezogene Schadensbetrachtung — JVEG auf private SVs nicht übertragbar
-  - BGH VI ZR 357/13: § 287 ZPO — freie Schätzgrundlage für Sachverständigenkosten
+  - BGH VI ZR 67/06: subjektbezogene Schadensbetrachtung – JVEG auf private SVs nicht übertragbar
+  - BGH VI ZR 357/13: § 287 ZPO – freie Schätzgrundlage für Sachverständigenkosten
   - BGH VI ZR 280/22: Sachverständigenrisiko trägt der Versicherer, nicht der Geschädigte
 last_legal_review: pending
 related:
@@ -22,18 +22,18 @@ related:
   - /sachverstaendige/bvsk
   - /sachverstaendige/ihk-bestellung-oebv
   - /sachverstaendige/dekra
-meta_description: "IfS-Leitsätze: der Qualitätsstandard für Kfz-Gutachten. Was sie regeln — und warum sie für die Durchsetzbarkeit Ihres Gutachtens zählen."
+meta_description: "IfS-Leitsätze: der Qualitätsstandard für Kfz-Gutachten. Was sie regeln – und warum sie für die Durchsetzbarkeit Ihres Gutachtens zählen."
 ---
 
-# IfS und die IfS-Leitsätze — der Standard für Kfz-Gutachten
+# IfS und die IfS-Leitsätze – der Standard für Kfz-Gutachten
 
-> **Kurz erklärt:** Das Institut für Sachverständigenwesen (IfS) in Köln ist eine der zentralen Zertifizierungs- und Standard-Institutionen für Sachverständige in Deutschland. Seine „IfS-Leitsätze 2018 — Kraftfahrzeugschäden und -bewertung" gelten als das maßgebliche Standardwerk für Kfz-Gutachten und werden von Großprüforganisationen, freien Sachverständigen und Gerichten gleichermaßen herangezogen.
+> **Kurz erklärt:** Das Institut für Sachverständigenwesen (IfS) in Köln ist eine der zentralen Zertifizierungs- und Standard-Institutionen für Sachverständige in Deutschland. Seine „IfS-Leitsätze 2018 – Kraftfahrzeugschäden und -bewertung" gelten als das maßgebliche Standardwerk für Kfz-Gutachten und werden von Großprüforganisationen, freien Sachverständigen und Gerichten gleichermaßen herangezogen.
 
 ---
 
 ## Worum es geht
 
-Das **IfS (Institut für Sachverständigenwesen e.V.)** mit Sitz in Köln ist eine der führenden Institutionen für die Zertifizierung von Kfz-Sachverständigen und Herausgeber der maßgeblichen Branchen-Leitsätze. Eine IfS-Zertifizierung erfolgt nach **DIN EN ISO/IEC 17024** und ist ein starkes Qualitäts-Signal — vom Bundesverband BVSK gleichwertig zur ZAK-Zertifizierung anerkannt.
+Das **IfS (Institut für Sachverständigenwesen e.V.)** mit Sitz in Köln ist eine der führenden Institutionen für die Zertifizierung von Kfz-Sachverständigen und Herausgeber der maßgeblichen Branchen-Leitsätze. Eine IfS-Zertifizierung erfolgt nach **DIN EN ISO/IEC 17024** und ist ein starkes Qualitäts-Signal – vom Bundesverband BVSK gleichwertig zur ZAK-Zertifizierung anerkannt.
 
 ## Die IfS-Leitsätze 2018
 
@@ -57,7 +57,7 @@ Eine IfS-Zertifizierung setzt eine einschlägige Berufsqualifikation (Ingenieur,
 
 ## Nächster Schritt für Geschädigte
 
-Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.
+Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region – mit freien Terminen in unter 48 Stunden – finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.
 
 → **Sachverständigen finden: [claimondo.de/gutachter-finden](https://claimondo.de/gutachter-finden)**
 → Telefonisch: **0221 25906530** (Rückruf in unter 15 Minuten)
@@ -70,5 +70,5 @@ Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — m
 
 ## Verwandte Verbände
 
-- [ZAK — Zentralverband](/sachverstaendige/zak)
-- [ZKF — Karosserie- und Fahrzeugtechnik](/sachverstaendige/zkf)
+- [ZAK – Zentralverband](/sachverstaendige/zak)
+- [ZKF – Karosserie- und Fahrzeugtechnik](/sachverstaendige/zkf)

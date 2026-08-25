@@ -57,12 +57,12 @@ const FAQ_SCHEMA = [
   {
     frage: 'Ist die Vermittlung wirklich kostenlos?',
     antwort:
-      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle hier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
+      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB – vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle hier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
   },
   {
     frage: 'Darf ich den Gutachter trotz Vorschlag der Versicherung selbst wählen?',
     antwort:
-      'Ja. Als unverschuldet Geschädigter haben Sie nach §249 BGB das freie Wahlrecht des Sachverständigen. Sie müssen den Gutachter der gegnerischen Versicherung nicht akzeptieren — eine Vermittlungsplattform stellt Ihnen einen unabhängigen Kfz-Gutachter Ihrer Wahl zur Seite.',
+      'Ja. Als unverschuldet Geschädigter haben Sie nach §249 BGB das freie Wahlrecht des Sachverständigen. Sie müssen den Gutachter der gegnerischen Versicherung nicht akzeptieren – eine Vermittlungsplattform stellt Ihnen einen unabhängigen Kfz-Gutachter Ihrer Wahl zur Seite.',
   },
   {
     frage: 'Was passiert, wenn die gegnerische Versicherung das Gutachten kürzt?',
@@ -77,12 +77,12 @@ const FAQ_SCHEMA = [
   {
     frage: 'Brauche ich zusätzlich einen Anwalt?',
     antwort:
-      'Nicht zwingend, aber dringend empfohlen — auch die Anwaltskosten trägt bei Fremdverschulden die gegnerische Versicherung. Alle verglichenen Plattformen binden Rechtsbeistand an. Bei Claimondo ist eine feste Partnerkanzlei in den Ablauf integriert, sodass Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt durchgesetzt werden.',
+      'Nicht zwingend, aber dringend empfohlen – auch die Anwaltskosten trägt bei Fremdverschulden die gegnerische Versicherung. Alle verglichenen Plattformen binden Rechtsbeistand an. Bei Claimondo ist eine feste Partnerkanzlei in den Ablauf integriert, sodass Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt durchgesetzt werden.',
   },
   {
     frage: 'Wie unterscheidet sich Claimondo konkret von Neogutachter?',
     antwort:
-      'Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der verglichenen Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
+      'Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung – und ist als einzige der verglichenen Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
   },
 ]
 
@@ -116,7 +116,7 @@ export default async function VermittlungsportaleVergleichPage() {
             headline:
               'Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten & Unfallhelden',
             description:
-              'Objektiver Direktvergleich der führenden deutschen Kfz-Gutachter-Vermittlungsplattformen — Erreichbarkeit, Kosten, Leistungsumfang, rechtliche Sicherheit.',
+              'Objektiver Direktvergleich der führenden deutschen Kfz-Gutachter-Vermittlungsplattformen – Erreichbarkeit, Kosten, Leistungsumfang, rechtliche Sicherheit.',
             datePublished: '2026-05-25',
             dateModified: '2026-08-04',
             url: `${SITE_URL}${PAGE_PATH}`,
@@ -207,7 +207,7 @@ export default async function VermittlungsportaleVergleichPage() {
         </div>
       </section>
 
-      {/* Direktvergleich — Tabelle */}
+      {/* Direktvergleich – Tabelle */}
       <section className="bg-white py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="text-center">
@@ -249,7 +249,7 @@ export default async function VermittlungsportaleVergleichPage() {
                       </Th>
                       <Td className="bg-claimondo-bg/60 align-top font-medium">
                         {rowIdx === SV_NETZ_ROW_INDEX
-                          ? `Live aus unserem Netz: ${svNetz} Sachverständige (bundesweit, Schwerpunkt NRW) — identisch zur Karte unter /gutachter-finden`
+                          ? `Live aus unserem Netz: ${svNetz} Sachverständige (bundesweit, Schwerpunkt NRW) – identisch zur Karte unter /gutachter-finden`
                           : row.claimondo}
                       </Td>
                       <Td className="align-top text-claimondo-shield">{row.neo}</Td>

@@ -88,7 +88,7 @@ export default async function VorteilePage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* 1 — Hero (kein Lead-Form, dual-CTA) */}
+      {/* 1 – Hero (kein Lead-Form, dual-CTA) */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="vorteile-hero">
         <div
           aria-hidden
@@ -135,10 +135,10 @@ export default async function VorteilePage() {
         </div>
       </section>
 
-      {/* 2 — Trust-Strip */}
+      {/* 2 – Trust-Strip */}
       <TrustStripSection kpis={kpis} methodikNote={t('kpi_methodik')} />
 
-      {/* 3 — Die 6 Vorteile (Cards mit Bullets) */}
+      {/* 3 – Die 6 Vorteile (Cards mit Bullets) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="vorteile-grid">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -185,19 +185,19 @@ export default async function VorteilePage() {
         </div>
       </section>
 
-      {/* 4 — Versicherer-Taktiken */}
+      {/* 4 – Versicherer-Taktiken */}
       <VersichererTaktikenSection />
 
-      {/* 5 — Wertminderung-Sanden/Danner */}
+      {/* 5 – Wertminderung-Sanden/Danner */}
       <WertminderungSandenDannerSection />
 
-      {/* 6 — Sieben Fehler vermeiden */}
+      {/* 6 – Sieben Fehler vermeiden */}
       <SiebenFehlerSection />
 
-      {/* 7 — Tesla / E-Auto */}
+      {/* 7 – Tesla / E-Auto */}
       <TeslaEAutoSection />
 
-      {/* 8 — FAQ */}
+      {/* 8 – FAQ */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="vorteile-faq">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
@@ -222,7 +222,7 @@ export default async function VorteilePage() {
         </div>
       </section>
 
-      {/* 9 — Bottom CTA */}
+      {/* 9 – Bottom CTA */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden

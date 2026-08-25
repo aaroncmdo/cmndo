@@ -14,7 +14,7 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `SV-Ablehnung: ${p.svName} — ${p.terminDatum}`
+  return `SV-Ablehnung: ${p.svName} – ${p.terminDatum}`
 }
 
 export function DispatcherTerminAbgelehntEmail(props: Props) {
@@ -29,7 +29,7 @@ export function DispatcherTerminAbgelehntEmail(props: Props) {
       <Heading>Sachverständiger hat Termin abgelehnt</Heading>
       <Paragraph>
         <strong>{props.svName}</strong> hat den reservierten Termin abgelehnt.
-        Bitte einen anderen SV finden — der Kunde wartet.
+        Bitte einen anderen SV finden – der Kunde wartet.
       </Paragraph>
 
       <InfoTable rows={[

@@ -19,9 +19,9 @@ type Props = {
 
 export function subject(p: Props) {
   if (p.istVorreservierung) {
-    return `Neuer Auftrag (Vorreservierung) — ${p.terminDatum} ${p.terminUhrzeit}`
+    return `Neuer Auftrag (Vorreservierung) – ${p.terminDatum} ${p.terminUhrzeit}`
   }
-  return `Neuer Auftrag — ${p.terminDatum} ${p.terminUhrzeit}`
+  return `Neuer Auftrag – ${p.terminDatum} ${p.terminUhrzeit}`
 }
 
 export function SvTerminBestaetigungEmail(props: Props) {
@@ -31,7 +31,7 @@ export function SvTerminBestaetigungEmail(props: Props) {
       <Paragraph>
         Hallo {props.svVorname},{' '}
         {props.istVorreservierung
-          ? 'der Dispatcher hat einen Termin für dich vorreserviert. Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben — sobald er das tut, wird der Termin automatisch bestätigt.'
+          ? 'der Dispatcher hat einen Termin für dich vorreserviert. Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben – sobald er das tut, wird der Termin automatisch bestätigt.'
           : 'der folgende Termin wurde automatisch bestätigt. Du musst nichts tun. Falls du nicht kannst: bitte innerhalb von 24 Stunden im Portal ablehnen oder einen Gegenvorschlag machen.'}
       </Paragraph>
 
@@ -58,7 +58,7 @@ export function SvTerminBestaetigungEmail(props: Props) {
       {props.ablehnenUrl && (
         <Paragraph>
           Wenn du diesen Termin verschieben oder ablehnen möchtest:{' '}
-          <a href={props.ablehnenUrl}>Hier öffnen — kein Login nötig</a>
+          <a href={props.ablehnenUrl}>Hier öffnen – kein Login nötig</a>
         </Paragraph>
       )}
     </EmailLayout>

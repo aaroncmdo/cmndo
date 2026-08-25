@@ -48,9 +48,9 @@ export async function HeroSection() {
     {
       '@context': 'https://schema.org',
       '@type': 'HowTo',
-      name: 'Kfz-Schaden vollständig regulieren — vom Unfall bis zur Auszahlung',
+      name: 'Kfz-Schaden vollständig regulieren – vom Unfall bis zur Auszahlung',
       description:
-        'In fünf Schritten vom unverschuldeten Unfall zur vollständigen Auszahlung — durchschnittlich 32 Tage, ohne Eigenanteil bei unverschuldetem Unfall.',
+        'In fünf Schritten vom unverschuldeten Unfall zur vollständigen Auszahlung – durchschnittlich 32 Tage, ohne Eigenanteil bei unverschuldetem Unfall.',
       totalTime: 'P32D',
       step: prozessSteps.map((s) => ({
         '@type': 'HowToStep',
@@ -66,7 +66,7 @@ export async function HeroSection() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={SCHEMA_BLOCK} />
 
-      {/* Hero — ein cinematisches Band (Foto + Scrim + Text + Lead-Form) */}
+      {/* Hero – ein cinematisches Band (Foto + Scrim + Text + Lead-Form) */}
       <section
         className="relative isolate flex min-h-[42rem] items-end overflow-hidden bg-claimondo-navy text-white md:min-h-[min(90vh,52rem)]"
         aria-labelledby="hero-heading"
@@ -75,7 +75,7 @@ export async function HeroSection() {
         <div className="absolute inset-0 -z-10">
           <Image
             src="/img/home/hero-paar.webp"
-            alt="Paar nach unverschuldetem Unfall zeigt die Claimondo-App mit Schutzschild — im Hintergrund das beschädigte Fahrzeug"
+            alt="Paar nach unverschuldetem Unfall zeigt die Claimondo-App mit Schutzschild – im Hintergrund das beschädigte Fahrzeug"
             fill
             priority
             sizes="100vw"
@@ -94,7 +94,7 @@ export async function HeroSection() {
         </div>
 
         <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-y-10 px-5 pb-14 pt-28 md:grid-cols-[1.08fr_0.92fr] md:gap-x-12 md:pb-20 lg:px-8">
-          {/* LEFT — Copy + CTAs */}
+          {/* LEFT – Copy + CTAs */}
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
               <span className="relative flex h-2 w-2" aria-hidden>
@@ -173,7 +173,7 @@ export async function HeroSection() {
             <p className="mt-5 text-xs text-white/60">{t('hero.trust_footer')}</p>
           </div>
 
-          {/* RIGHT — Lead-Form Glaspanel */}
+          {/* RIGHT – Lead-Form Glaspanel */}
           <div className="w-full md:max-w-sm md:justify-self-end">
             <HomeLeadFormClient />
           </div>

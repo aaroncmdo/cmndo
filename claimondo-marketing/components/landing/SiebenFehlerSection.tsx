@@ -85,14 +85,14 @@ export async function SiebenFehlerSection() {
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
                   <span className="font-semibold text-emerald-700">{t('sieben_fehler.besser_label')}</span> {f.besser}
                 </p>
-                {/* Doc 41 §5.3: Pattern B — Pseudo-Link ueber die ganze Card (keine verschachtelten Interactives). */}
+                {/* Doc 41 §5.3: Pattern B – Pseudo-Link ueber die ganze Card (keine verschachtelten Interactives). */}
                 <span className="mt-auto pt-4 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
                   {t('sieben_fehler.card_cta')}
                 </span>
                 <Link
                   href={f.href}
                   className="absolute inset-0 z-10 rounded-ios-md focus:outline-none"
-                  aria-label={`Fehler ${f.nummer}: ${f.titel} — Lösung im Detail`}
+                  aria-label={`Fehler ${f.nummer}: ${f.titel} – Lösung im Detail`}
                   data-tracking={`card-fehler-${f.nummer}`}
                 >
                   <span className="sr-only">Mehr erfahren</span>

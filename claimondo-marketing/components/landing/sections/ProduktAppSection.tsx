@@ -18,7 +18,7 @@ export async function ProduktAppSection() {
 
   return (
     <>
-      {/* D6 — App-Shield-Band "Alles live verfolgen" */}
+      {/* D6 – App-Shield-Band "Alles live verfolgen" */}
       <section
         className="relative isolate flex min-h-[26rem] items-end overflow-hidden bg-claimondo-navy text-white md:min-h-[32rem]"
         aria-labelledby="produkt-app-heading"
@@ -26,7 +26,7 @@ export async function ProduktAppSection() {
         <div className="absolute inset-0 -z-10">
           <Image
             src="/img/home/kundin-app.webp"
-            alt="Kundin hält die Claimondo-App mit dem Schild-Logo — den Fall live verfolgen"
+            alt="Kundin hält die Claimondo-App mit dem Schild-Logo – den Fall live verfolgen"
             fill
             sizes="100vw"
             className="object-cover object-[28%_center]"
@@ -58,7 +58,7 @@ export async function ProduktAppSection() {
         </div>
       </section>
 
-      {/* E3 — echter Portal-Screenshot (statt CSS-Mock) */}
+      {/* E3 – echter Portal-Screenshot (statt CSS-Mock) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-label="Echtzeit-Fallakte im Claimondo-Kundenportal">
         <div className="mx-auto max-w-5xl px-5">
           {/* Desktop: Browser-Frame */}
@@ -74,7 +74,7 @@ export async function ProduktAppSection() {
             </div>
             <Image
               src="/img/home/portal-fallakte.webp"
-              alt="Echtzeit-Fallakte im Claimondo-Kundenportal — Phasen, Mein Geld, Betreuer und Chat live verfolgen"
+              alt="Echtzeit-Fallakte im Claimondo-Kundenportal – Phasen, Mein Geld, Betreuer und Chat live verfolgen"
               width={1600}
               height={1265}
               className="h-auto w-full"
@@ -84,7 +84,7 @@ export async function ProduktAppSection() {
           <div className="mx-auto max-w-[20rem] overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md md:hidden">
             <Image
               src="/img/home/portal-fallakte-mobile.webp"
-              alt="Echtzeit-Fallakte im Claimondo-Kundenportal (mobil) — Phasen, Mein Geld, Betreuer und Chat"
+              alt="Echtzeit-Fallakte im Claimondo-Kundenportal (mobil) – Phasen, Mein Geld, Betreuer und Chat"
               width={600}
               height={2617}
               className="h-auto w-full"

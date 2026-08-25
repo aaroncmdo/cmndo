@@ -15,7 +15,7 @@ const REGISTRIEREN_URL = `${process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app
 export const metadata: Metadata = {
   // 65 Zeichen mit dem " | Claimondo", das das Layout anhaengt — Google zeigt
   // rund 60. openGraph.title unten behaelt die ausfuehrliche Fassung.
-  title: 'Makler Partner werden — Kfz-Schäden vermitteln',
+  title: 'Makler Partner werden – Kfz-Schäden vermitteln',
   description:
     'Als Versicherungsmakler Ihren Kunden bei Kfz-Unfallschäden helfen. Claimondo übernimmt Gutachter-Koordination und Regulierung. Kostenlose Kooperation.',
   keywords: [
@@ -36,13 +36,13 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: `${MAKLER_LANDING_URL}/`,
-    title: 'Makler Partner werden — Kfz-Schäden professionell abwickeln',
+    title: 'Makler Partner werden – Kfz-Schäden professionell abwickeln',
     description: 'Kooperation ohne Kosten. Ihre Kunden bekommen Top-Service, Sie stärken die Kundenbindung.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Makler-Partnerschaft' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Makler Partner werden — Claimondo',
+    title: 'Makler Partner werden – Claimondo',
     description: 'Kfz-Schadensabwicklung für Ihre Kunden. Ohne Aufwand, ohne Kosten.',
     images: ['/og-default.png'],
   },
@@ -52,7 +52,7 @@ const VORTEILE = [
   {
     icon: TrendingUp,
     title: 'Mehr Kundenbindung',
-    text: 'Sie begleiten Ihre Kunden durch den gesamten Schadensfall. Vom Gutachten bis zur Auszahlung — als verlässlicher Partner an ihrer Seite.',
+    text: 'Sie begleiten Ihre Kunden durch den gesamten Schadensfall. Vom Gutachten bis zur Auszahlung – als verlässlicher Partner an ihrer Seite.',
   },
   {
     icon: Euro,
@@ -62,7 +62,7 @@ const VORTEILE = [
   {
     icon: Users,
     title: 'Persönlicher Ansprechpartner',
-    text: 'Kein Ticketsystem, kein Callcenter. Sie erreichen direkt das Claimondo-Team — für Sie und für Ihre Kunden.',
+    text: 'Kein Ticketsystem, kein Callcenter. Sie erreichen direkt das Claimondo-Team – für Sie und für Ihre Kunden.',
   },
   {
     icon: Shield,
@@ -75,7 +75,7 @@ const ABLAUF = [
   {
     nr: '01',
     title: 'Kunde meldet Schaden bei Ihnen',
-    text: 'Ihr Kunde hat einen Unfall. Er wendet sich an Sie — wie gewohnt. Sie reichen den Fall an Claimondo weiter: per Telefon, WhatsApp oder Online-Formular.',
+    text: 'Ihr Kunde hat einen Unfall. Er wendet sich an Sie – wie gewohnt. Sie reichen den Fall an Claimondo weiter: per Telefon, WhatsApp oder Online-Formular.',
   },
   {
     nr: '02',
@@ -85,7 +85,7 @@ const ABLAUF = [
   {
     nr: '03',
     title: 'Ihr Kunde bekommt sein Geld',
-    text: 'Voller Schadensersatz — inklusive Wertminderung, Nutzungsausfall und UPE-Aufschlägen. Sie sehen den Status jederzeit in Ihrem Partner-Portal.',
+    text: 'Voller Schadensersatz – inklusive Wertminderung, Nutzungsausfall und UPE-Aufschlägen. Sie sehen den Status jederzeit in Ihrem Partner-Portal.',
   },
 ]
 
@@ -106,7 +106,7 @@ export default function MaklerPartnerWerdenPage() {
           serviceSchema({
             name: 'Claimondo Makler-Partnerschaft',
             description:
-              'Versicherungsmakler kooperieren mit Claimondo, um ihren Kunden bei Kfz-Unfallschäden eine vollständige Schadensabwicklung zu bieten — inklusive Gutachter, Regulierung und Durchsetzung aller Ansprüche.',
+              'Versicherungsmakler kooperieren mit Claimondo, um ihren Kunden bei Kfz-Unfallschäden eine vollständige Schadensabwicklung zu bieten – inklusive Gutachter, Regulierung und Durchsetzung aller Ansprüche.',
             url: `${MAKLER_LANDING_URL}/`,
           }),
           breadcrumbsSchema([
@@ -141,7 +141,7 @@ export default function MaklerPartnerWerdenPage() {
             Mehr Service für Ihre Kunden. Ohne Mehraufwand.
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            Als Claimondo-Maklerpartner bieten Sie Ihren Kunden bei Kfz-Unfallschäden eine vollständige Schadensabwicklung — wir koordinieren Gutachter und Regulierung, Sie stärken die Kundenbindung.
+            Als Claimondo-Maklerpartner bieten Sie Ihren Kunden bei Kfz-Unfallschäden eine vollständige Schadensabwicklung – wir koordinieren Gutachter und Regulierung, Sie stärken die Kundenbindung.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
@@ -170,7 +170,7 @@ export default function MaklerPartnerWerdenPage() {
             ihren Kunden bei Kfz-Unfallschäden echten Mehrwert zu bieten: Claimondo koordiniert
             den unabhängigen Sachverständigen, holt das Gutachten ein und übernimmt die gesamte
             Regulierung mit der gegnerischen Haftpflichtversicherung. Der Makler bleibt
-            Ansprechpartner des Kunden — ohne eigenen Aufwand. Die Kooperation ist kostenlos,
+            Ansprechpartner des Kunden – ohne eigenen Aufwand. Die Kooperation ist kostenlos,
             da Claimondo direkt mit der Versicherung abrechnet. Kontakt per E-Mail oder Telefon.
           </AnswerCapsule>
         </div>
@@ -287,7 +287,7 @@ export default function MaklerPartnerWerdenPage() {
               {[
                 'Zugelassener Versicherungsvermittler (§34d GewO)',
                 'Bereitschaft, Schadenfälle aktiv an Claimondo zu vermitteln',
-                'Direkte Kommunikation mit Ihren Kunden — wir koordinieren den Rest',
+                'Direkte Kommunikation mit Ihren Kunden – wir koordinieren den Rest',
                 'Einverständnis des Kunden zur Datenweitergabe (DSGVO-konform)',
               ].map((p) => (
                 <li key={p} className="flex items-start gap-3">

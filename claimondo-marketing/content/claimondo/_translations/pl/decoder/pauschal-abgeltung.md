@@ -9,7 +9,7 @@ primary_keyword: "abgeltungsklausel versicherung autounfall"
 secondary_keywords: ["alle ansprüche abgegolten unfall", "spätfolgen nach vergleich", "erledigungsvergleich versicherung", "schlussfreischreibung haftpflicht"]
 insurer_phrases:
   - "Mit dieser Zahlung sind alle Ansprüche abgegolten"
-  - "Erledigungsvergleich — sämtliche Ansprüche, auch zukünftige, vollständig erledigt"
+  - "Erledigungsvergleich – sämtliche Ansprüche, auch zukünftige, vollständig erledigt"
   - "Schlussfreischreibung gegen Vorlage Erledigungs-Erklärung"
 customer_questions:
   - "alle ansprüche abgegolten was bedeutet"
@@ -17,7 +17,7 @@ customer_questions:
   - "kann ich nach vergleich noch klagen"
   - "spätfolgen nach unfall ausgeschlossen"
 last_modified: 2026-05-18
-excerpt: Die Pauschal-Abgeltungsklausel „Mit dieser Zahlung sind alle Ansprüche abgegolten" ist ein bindender Vergleich nach § 779 BGB, der sämtliche zukünftigen Ansprüche erlöschen lässt — einschließlich späterer PTBS-Diagnosen, chronischer Schmerzen und Berufsunfähigkeit. Diese Decoder-Seite zeigt, warum ohne ausdrücklichen Spätfolge-Vorbehalt kein Vergleich unterschrieben werden sollte.
+excerpt: Die Pauschal-Abgeltungsklausel „Mit dieser Zahlung sind alle Ansprüche abgegolten" ist ein bindender Vergleich nach § 779 BGB, der sämtliche zukünftigen Ansprüche erlöschen lässt – einschließlich späterer PTBS-Diagnosen, chronischer Schmerzen und Berufsunfähigkeit. Diese Decoder-Seite zeigt, warum ohne ausdrücklichen Spätfolge-Vorbehalt kein Vergleich unterschrieben werden sollte.
 keyFacts:
   - Kürzungs-Standardsatz: „Mit dieser Zahlung sind alle Ansprüche abgegolten"
   - Rechtliche Wirkung: bindender Vergleich § 779 BGB, auch für unbekannte Spätfolgen
@@ -30,12 +30,12 @@ related:
   - /haftpflicht/verjaehrung-bgb195
   - /decoder/schmerzensgeld-angemessen
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "„Tą płatnością wszystko uregulowane"? Dlaczego klauzula zaspokojenia (§779 BGB) jest groźna — proszę nie podpisywać, zanim Pan(i) to przeczyta."
+meta_description: "„Tą płatnością wszystko uregulowane"? Dlaczego klauzula zaspokojenia (§779 BGB) jest groźna – proszę nie podpisywać, zanim Pan(i) to przeczyta."
 ---
 
-# „Tą płatnością wszystkie roszczenia są zaspokojone" — Dekoder
+# „Tą płatnością wszystkie roszczenia są zaspokojone" – Dekoder
 
-> **W skrócie:** Ryczałtowa klauzula zaspokojenia to ekonomicznie najgroźniejsze sformułowanie ubezpieczyciela — jest to wiążąca ugoda zgodnie z § 779 BGB ze skutkiem pełnego zaspokojenia. Kto podpisze, traci **wszystkie przyszłe roszczenia**: przewlekłe bóle, później zdiagnozowane PTSD (zespół stresu pourazowego, PTBS), utratę zarobków. Uchylenie się od skutków oświadczenia po zawarciu umowy udaje się tylko w skrajnych przypadkach wyjątkowych. Bez wyraźnego **zastrzeżenia co do następstw późnych (Spätfolge-Vorbehalt)** nie podpisywać żadnej ugody — w ogóle.
+> **W skrócie:** Ryczałtowa klauzula zaspokojenia to ekonomicznie najgroźniejsze sformułowanie ubezpieczyciela – jest to wiążąca ugoda zgodnie z § 779 BGB ze skutkiem pełnego zaspokojenia. Kto podpisze, traci **wszystkie przyszłe roszczenia**: przewlekłe bóle, później zdiagnozowane PTSD (zespół stresu pourazowego, PTBS), utratę zarobków. Uchylenie się od skutków oświadczenia po zawarciu umowy udaje się tylko w skrajnych przypadkach wyjątkowych. Bez wyraźnego **zastrzeżenia co do następstw późnych (Spätfolge-Vorbehalt)** nie podpisywać żadnej ugody – w ogóle.
 
 ## Znane również jako
 
@@ -43,7 +43,7 @@ Klauzula zaspokojenia (Abgeltungsklausel) · ugoda kończąca sprawę (Erledigun
 
 ---
 
-## Co właśnie Pan(i) otrzymał(a) — dosłownie
+## Co właśnie Pan(i) otrzymał(a) – dosłownie
 
 Typowe warianty:
 
@@ -59,8 +59,8 @@ Klauzule te mają cztery zdradzieckie znaczniki:
 
 - **„Wszystkie roszczenia"** / **„wszelkie"** / **„także przyszłe"**
 - **„Ostatecznie"** / **„definitywnie"** / **„załatwienie"**
-- **„Znane i nieznane"** — wyraźnie uwzględnione także nieznane następstwa późne
-- **„Zrzeczenie końcowe"** / **„oświadczenie o załatwieniu sprawy"** — umowny mechanizm (nośnik)
+- **„Znane i nieznane"** – wyraźnie uwzględnione także nieznane następstwa późne
+- **„Zrzeczenie końcowe"** / **„oświadczenie o załatwieniu sprawy"** – umowny mechanizm (nośnik)
 
 Każdy z tych czterech znaczników należy rozumieć jako prawny sygnał ostrzegawczy.
 
@@ -69,48 +69,48 @@ Każdy z tych czterech znaczników należy rozumieć jako prawny sygnał ostrzeg
 ## Co naprawdę za tym stoi
 
 ### 1. Zakończenie ryzyka ubezpieczyciela
-Następstwa późne to największe nieprzewidywalne ryzyko regulacji szkód. PTSD, które ujawnia się dopiero po 6 miesiącach; przewlekły zespół bólowy po 2 latach; niezdolność do pracy po 5 latach — wszystko możliwe, wszystko kosztowne. Ryczałtowe zaspokojenie kończy to ryzyko **w całości** na korzyść ubezpieczyciela.
+Następstwa późne to największe nieprzewidywalne ryzyko regulacji szkód. PTSD, które ujawnia się dopiero po 6 miesiącach; przewlekły zespół bólowy po 2 latach; niezdolność do pracy po 5 latach – wszystko możliwe, wszystko kosztowne. Ryczałtowe zaspokojenie kończy to ryzyko **w całości** na korzyść ubezpieczyciela.
 
 ### 2. Pułapka ugody zgodnie z § 779 BGB
-Gdy tylko podpisze Pan(i) ryczałtową klauzulę zaspokojenia, jest to wiążąca ugoda. Z prawnego punktu widzenia **nie może Pan(i) już dochodzić niczego więcej** — także wtedy, gdy następstwa medyczne ujawnią się dopiero po latach.
+Gdy tylko podpisze Pan(i) ryczałtową klauzulę zaspokojenia, jest to wiążąca ugoda. Z prawnego punktu widzenia **nie może Pan(i) już dochodzić niczego więcej** – także wtedy, gdy następstwa medyczne ujawnią się dopiero po latach.
 
 ### 3. Niska kotwica ryczałtowa
-Oferowana kwota leży zazwyczaj **przy dolnej granicy** tego, co rachunkowo należne — ubezpieczyciel wkalkulowuje następstwa późne, nie wyceniając ich.
+Oferowana kwota leży zazwyczaj **przy dolnej granicy** tego, co rachunkowo należne – ubezpieczyciel wkalkulowuje następstwa późne, nie wyceniając ich.
 
 ### 4. Uchylenie praktycznie niemożliwe
-§ 119 BGB (błąd), § 123 BGB (podstęp), § 138 BGB (sprzeczność z dobrymi obyczajami) — teoretycznie zaskarżalne, w praktyce niemal nigdy skuteczne. Kto raz podpisze, przegrał.
+§ 119 BGB (błąd), § 123 BGB (podstęp), § 138 BGB (sprzeczność z dobrymi obyczajami) – teoretycznie zaskarżalne, w praktyce niemal nigdy skuteczne. Kto raz podpisze, przegrał.
 
 ---
 
 ## Co mówi na ten temat orzecznictwo
 
-### § 779 BGB — Wiążąca ugoda
-Ugoda to umowa, która kończy spór lub niepewność poprzez wzajemne ustępstwa. Gdy tylko obie strony wyrażą zgodę, treść jest **wiążąca** — niezależnie od tego, co odkryje Pan(i) później.
+### § 779 BGB – Wiążąca ugoda
+Ugoda to umowa, która kończy spór lub niepewność poprzez wzajemne ustępstwa. Gdy tylko obie strony wyrażą zgodę, treść jest **wiążąca** – niezależnie od tego, co odkryje Pan(i) później.
 
 ### Ścisła wykładnia klauzul zaspokojenia
-BGH dokonuje wykładni klauzul zaspokojenia **ściśle według brzmienia**. „Wszystkie roszczenia" oznacza dosłownie wszystkie — znane jak i nieznane, obecne jak i przyszłe. Dorozumiane zastrzeżenie co do następstw późnych **nie istnieje**.
+BGH dokonuje wykładni klauzul zaspokojenia **ściśle według brzmienia**. „Wszystkie roszczenia" oznacza dosłownie wszystkie – znane jak i nieznane, obecne jak i przyszłe. Dorozumiane zastrzeżenie co do następstw późnych **nie istnieje**.
 
-### Możliwości uchylenia się — teoretycznie
-- **§ 119 BGB Błąd** — Nie podpisał(a)by Pan(i), gdyby znał(a) Pan(i) prawdziwy stan rzeczy. Wysokie wymogi dowodowe.
-- **§ 123 BGB Podstępne wprowadzenie w błąd** — Ubezpieczyciel czynnie Pana/Panią oszukał. Niemal niemożliwe do wykazania.
-- **§ 138 BGB Sprzeczność z dobrymi obyczajami** — Kwota ryczałtowa jest drastycznie poniżej należnej. Działa rzadko, ponieważ „ustępstwo" w ugodzie jest prawnie oczekiwane.
+### Możliwości uchylenia się – teoretycznie
+- **§ 119 BGB Błąd** – Nie podpisał(a)by Pan(i), gdyby znał(a) Pan(i) prawdziwy stan rzeczy. Wysokie wymogi dowodowe.
+- **§ 123 BGB Podstępne wprowadzenie w błąd** – Ubezpieczyciel czynnie Pana/Panią oszukał. Niemal niemożliwe do wykazania.
+- **§ 138 BGB Sprzeczność z dobrymi obyczajami** – Kwota ryczałtowa jest drastycznie poniżej należnej. Działa rzadko, ponieważ „ustępstwo" w ugodzie jest prawnie oczekiwane.
 
 → W praktyce: uchylenie się jest niemal bezwartościowe jako siatka bezpieczeństwa. Profilaktyka jest wszystkim.
 
-### Zastrzeżenie co do następstw późnych — jedyne rozwiązanie
-Jedyną prawną możliwością ochrony następstw późnych jest **wyraźna klauzula zastrzeżenia** w tekście ugody. Bez niej następstwa późne są załatwione — z nią pozostają zdatne do dochodzenia.
+### Zastrzeżenie co do następstw późnych – jedyne rozwiązanie
+Jedyną prawną możliwością ochrony następstw późnych jest **wyraźna klauzula zastrzeżenia** w tekście ugody. Bez niej następstwa późne są załatwione – z nią pozostają zdatne do dochodzenia.
 
 ---
 
-## Co Pan(i) teraz robi — konkretnie
+## Co Pan(i) teraz robi – konkretnie
 
 ### 💡 Najważniejsza zasada
-Nigdy — pod żadnym pozorem — nie podpisywać klauzuli zaspokojenia bez wyraźnego zastrzeżenia co do następstw późnych. Także wtedy, gdy kwota akurat brzmi atrakcyjnie. To, co widzi Pan(i) dziś, to nie wszystko, co nadejdzie.
+Nigdy – pod żadnym pozorem – nie podpisywać klauzuli zaspokojenia bez wyraźnego zastrzeżenia co do następstw późnych. Także wtedy, gdy kwota akurat brzmi atrakcyjnie. To, co widzi Pan(i) dziś, to nie wszystko, co nadejdzie.
 
 ### 🛠 Pięć kroków przed każdym podpisem
 
 **1. Rozłożyć klauzulę na części**
-Szukać sygnałów ostrzegawczych: „wszystkie roszczenia", „ostatecznie", „także przyszłe", „załatwienie". Gdy tylko któryś się pojawi — stop.
+Szukać sygnałów ostrzegawczych: „wszystkie roszczenia", „ostatecznie", „także przyszłe", „załatwienie". Gdy tylko któryś się pojawi – stop.
 
 **2. Włączyć prawnika**
 Przed każdym podpisem, bez wyjątku. Koszty zastępstwa prawnego pokrywa ubezpieczyciel (zob. [Zwrot kosztów zastępstwa prawnego](/haftpflicht/anwaltskosten-erstattung)).
@@ -122,11 +122,11 @@ Przedłożyć własne sformułowanie klauzuli (zob. wzór poniżej). Nalegać na
 Przed ugodą: rozpoznanie ICD, przebieg leczenia, rokowanie co do wyleczenia, ograniczenia funkcjonalne. Dopiero gdy medycznie wszystko jest udokumentowane, ugoda ma sens.
 
 **5. W razie odmowy: brak ugody**
-Jeśli ubezpieczyciel odrzuca zastrzeżenie — pozew. Przy jednoznacznej sytuacji dobre szanse, a koszty zastępstwa prawnego pokrywa ubezpieczyciel.
+Jeśli ubezpieczyciel odrzuca zastrzeżenie – pozew. Przy jednoznacznej sytuacji dobre szanse, a koszty zastępstwa prawnego pokrywa ubezpieczyciel.
 
 ---
 
-## Wzór pisma — wprowadzenie zastrzeżenia co do następstw późnych
+## Wzór pisma – wprowadzenie zastrzeżenia co do następstw późnych
 
 ```
 Szanowni Państwo,
@@ -169,23 +169,23 @@ Z poważaniem
 
 ## Co ubezpieczyciel prawdopodobnie zrobi w następnej kolejności
 
-### Reakcja A — Całkowita odmowa zastrzeżenia
-> *„Nie akceptujemy żadnego zastrzeżenia co do następstw późnych — albo pełne załatwienie sprawy, albo brak kwoty ryczałtowej."*
+### Reakcja A – Całkowita odmowa zastrzeżenia
+> *„Nie akceptujemy żadnego zastrzeżenia co do następstw późnych – albo pełne załatwienie sprawy, albo brak kwoty ryczałtowej."*
 
 **Pana/Pani odpowiedź:** Nie akceptować. Przy jednoznacznej sytuacji odpowiedzialności wnieść pozew. Zrzeczenie się następstw późnych zagraża egzystencji ekonomicznej.
 
-### Reakcja B — Zaoferowanie wąskiego zastrzeżenia
+### Reakcja B – Zaoferowanie wąskiego zastrzeżenia
 > *„Akceptujemy zastrzeżenie tylko dla następstw późnych stwierdzonych lekarsko, nie dla pogorszeń."*
 
-**Pana/Pani odpowiedź:** Sprawdzić konkretne brzmienie. Włączyć prawnika. Przy zbyt wąskim zastrzeżeniu: odrzucić — większość rzeczywistych następstw późnych to pogorszenia istniejących stanów.
+**Pana/Pani odpowiedź:** Sprawdzić konkretne brzmienie. Włączyć prawnika. Przy zbyt wąskim zastrzeżeniu: odrzucić – większość rzeczywistych następstw późnych to pogorszenia istniejących stanów.
 
-### Reakcja C — Naciskanie wyższą kwotą ryczałtową
-> *„Wyższą kwotę możemy zaoferować tylko przy pełnym załatwieniu — w przeciwnym razie niżej."*
+### Reakcja C – Naciskanie wyższą kwotą ryczałtową
+> *„Wyższą kwotę możemy zaoferować tylko przy pełnym załatwieniu – w przeciwnym razie niżej."*
 
 **Pana/Pani odpowiedź:** Presja przez ograniczanie dostępności. Wyliczyć z prawnikiem, jaka wartość odpowiada ryzyku następstw późnych. Często niższa kwota z zastrzeżeniem opłaca się bardziej niż wyższa bez niego.
 
-### Reakcja D — Wyznaczenie terminu na ugodę
-> *„Ta oferta obowiązuje tylko do [Datum] — później obniżamy."*
+### Reakcja D – Wyznaczenie terminu na ugodę
+> *„Ta oferta obowiązuje tylko do [Datum] – później obniżamy."*
 
 **Pana/Pani odpowiedź:** Sztuczny termin. Odrzucić presję. Przy jednoznacznej odpowiedzialności Pana/Pani pozycja nie pogarsza się z upływem czasu.
 
@@ -194,7 +194,7 @@ Z poważaniem
 ## Często zadawane pytania
 
 **Co oznacza „tą płatnością wszystkie roszczenia są zaspokojone"?**
-Oznacza to, że wraz z Pana/Pani podpisem **wszystkie obecne i przyszłe roszczenia** z tego zdarzenia szkodowego wygasają — także nieznane następstwa późne, takie jak przewlekłe bóle, później zdiagnozowane PTSD czy niezdolność do pracy.
+Oznacza to, że wraz z Pana/Pani podpisem **wszystkie obecne i przyszłe roszczenia** z tego zdarzenia szkodowego wygasają – także nieznane następstwa późne, takie jak przewlekłe bóle, później zdiagnozowane PTSD czy niezdolność do pracy.
 
 **Czy mogę cofnąć ugodę kończącą sprawę?**
 Tylko w skrajnych przypadkach wyjątkowych (uchylenie się z powodu sprzeczności z dobrymi obyczajami, podstępnego wprowadzenia w błąd lub błędu). W praktyce niemal nigdy skuteczne. Profilaktyka to jedyna niezawodna strategia.
@@ -203,28 +203,28 @@ Tylko w skrajnych przypadkach wyjątkowych (uchylenie się z powodu sprzecznośc
 Tylko z wyraźnym zastrzeżeniem co do następstw późnych w tekście ugody. Bez zastrzeżenia: wszystkie następstwa późne załatwione.
 
 **Co, jeśli już podpisałem(am)?**
-Natychmiast włączyć wyspecjalizowanego prawnika. W nielicznych przypadkach uchylenie się jest możliwe — ale czas jest krytyczny. Terminy na uchylenie się muszą być przestrzegane.
+Natychmiast włączyć wyspecjalizowanego prawnika. W nielicznych przypadkach uchylenie się jest możliwe – ale czas jest krytyczny. Terminy na uchylenie się muszą być przestrzegane.
 
 **Jak sformułować zastrzeżenie co do następstw późnych?**
 Standardowa klauzula (zob. wzór pisma powyżej): „Nieprzewidywalne następstwa późne … pozostają wyraźnie WYŁĄCZONE." Prawnik sprawdza konkretne sformułowanie w indywidualnym przypadku.
 
 **Co, jeśli ubezpieczyciel nie akceptuje żadnego zastrzeżenia?**
-Wtedy brak ugody. Wnieść pozew — przy jednoznacznej sytuacji odpowiedzialności dobre szanse. Koszty zastępstwa prawnego ponosi ubezpieczyciel.
+Wtedy brak ugody. Wnieść pozew – przy jednoznacznej sytuacji odpowiedzialności dobre szanse. Koszty zastępstwa prawnego ponosi ubezpieczyciel.
 
 ---
 
 ## Pojęcia powiązane
 
-- [§ 212 BGB Uznanie](/haftpflicht/anerkenntnis-bgb212) — Różnica wobec ugody
-- [§ 195 BGB Przedawnienie](/haftpflicht/verjaehrung-bgb195) — Aspekt czasowy
-- [Dekoder „Zadośćuczynienie adekwatne"](/decoder/schmerzensgeld-angemessen) — Powiązana strategia
-- [Zwrot kosztów zastępstwa prawnego](/haftpflicht/anwaltskosten-erstattung) — Bezpłatne skorzystanie z prawnika
+- [§ 212 BGB Uznanie](/haftpflicht/anerkenntnis-bgb212) – Różnica wobec ugody
+- [§ 195 BGB Przedawnienie](/haftpflicht/verjaehrung-bgb195) – Aspekt czasowy
+- [Dekoder „Zadośćuczynienie adekwatne"](/decoder/schmerzensgeld-angemessen) – Powiązana strategia
+- [Zwrot kosztów zastępstwa prawnego](/haftpflicht/anwaltskosten-erstattung) – Bezpłatne skorzystanie z prawnika
 
 ---
 
 ## Gdy nie wie Pan(i), co dalej
 
-Ryczałtowe klauzule zaspokojenia to ekonomicznie najbardziej ryzykowne dokumenty, jakie może Pan(i) kiedykolwiek podpisać. Wyspecjalizowane kancelarie prawa drogowego negocjują zastrzeżenie co do następstw późnych rutynowo — koszty zastępstwa prawnego pokrywa ubezpieczyciel.
+Ryczałtowe klauzule zaspokojenia to ekonomicznie najbardziej ryzykowne dokumenty, jakie może Pan(i) kiedykolwiek podpisać. Wyspecjalizowane kancelarie prawa drogowego negocjują zastrzeżenie co do następstw późnych rutynowo – koszty zastępstwa prawnego pokrywa ubezpieczyciel.
 
 → [Rozpocznij bezpłatną analizę roszczeń](https://claimondo.de/check)
 
@@ -232,11 +232,11 @@ Ryczałtowe klauzule zaspokojenia to ekonomicznie najbardziej ryzykowne dokument
 
 ## Źródła
 
-- Bürgerliches Gesetzbuch §§ 119, 123, 138, 779 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- Bürgerliches Gesetzbuch §§ 119, 123, 138, 779 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - Orzecznictwo BGH dotyczące ścisłej wykładni klauzul zaspokojenia (ugruntowane orzecznictwo)
 - Palandt/Grüneberg zu § 779 BGB
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht — [verkehrsrecht.de](https://www.verkehrsrecht.de)
+- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 
@@ -276,4 +276,4 @@ Ryczałtowe klauzule zaspokojenia to ekonomicznie najbardziej ryzykowne dokument
 
 > **Rechtlicher Hinweis (Informacja prawna):** Niniejszy artykuł stanowi redakcyjne objaśnienie i nie zastępuje porady prawnej w indywidualnym przypadku.
 
-*Letzte fachliche Überprüfung: pending — końcowa weryfikacja merytoryczna przez naszą kancelarię partnerską jest jeszcze w toku.*
+*Letzte fachliche Überprüfung: pending – końcowa weryfikacja merytoryczna przez naszą kancelarię partnerską jest jeszcze w toku.*

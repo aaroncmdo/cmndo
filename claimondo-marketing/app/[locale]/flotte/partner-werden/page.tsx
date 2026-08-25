@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   // 72 Zeichen mit dem " | Claimondo", das das Layout anhaengt — Google zeigt
   // rund 60. "Fuhrpark" bleibt als Keyword drin, gekuerzt wird der Nachsatz.
   // openGraph.title unten behaelt die ausfuehrliche Fassung, dort ist mehr Platz.
-  title: 'Flottenpartner werden — Fuhrpark-Schäden regeln',
+  title: 'Flottenpartner werden – Fuhrpark-Schäden regeln',
   // 204 Zeichen — Google zeigt rund 160. Gekuerzt wird der Nachsatz, die
   // Leistungsaufzaehlung bleibt.
   description:
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: `${FLOTTE_LANDING_URL}/`,
-    title: 'Flottenpartner werden — Schadenmanagement für Ihren Fuhrpark',
+    title: 'Flottenpartner werden – Schadenmanagement für Ihren Fuhrpark',
     description: 'Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden, Regulierung über die gegnerische Haftpflicht.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Flotten-Partnerschaft' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Flottenpartner werden — Claimondo',
+    title: 'Flottenpartner werden – Claimondo',
     description: 'Schadenmanagement für Firmen-Flotten. Kostenlos registrieren, Schäden ohne Aufwand abwickeln.',
     images: ['/og-default.png'],
   },
@@ -55,22 +55,22 @@ const VORTEILE = [
   {
     icon: LayoutDashboard,
     title: 'Alle Fahrzeuge und Schäden an einem Ort',
-    text: 'Im Flotten-Portal verwalten Sie Ihren Fuhrpark zentral: jedes Fahrzeug, jeder Schaden, jeder Status auf einen Blick — statt E-Mail-Pingpong zwischen Fahrern, Werkstatt und Versicherung.',
+    text: 'Im Flotten-Portal verwalten Sie Ihren Fuhrpark zentral: jedes Fahrzeug, jeder Schaden, jeder Status auf einen Blick – statt E-Mail-Pingpong zwischen Fahrern, Werkstatt und Versicherung.',
   },
   {
     icon: QrCode,
     title: 'Schadenmeldung direkt am Fahrzeug',
-    text: 'Jedes Fahrzeug erhält eine Claimondo-Netzwerkkarte. Ihre Fahrer melden einen Schaden direkt vor Ort — ohne Umweg über die Zentrale landet der Fall sofort im Portal und in der Abwicklung.',
+    text: 'Jedes Fahrzeug erhält eine Claimondo-Netzwerkkarte. Ihre Fahrer melden einen Schaden direkt vor Ort – ohne Umweg über die Zentrale landet der Fall sofort im Portal und in der Abwicklung.',
   },
   {
     icon: Shield,
     title: 'Rechtssichere Haftpflicht-Abwicklung',
-    text: 'Bei unverschuldeten Unfällen koordiniert Claimondo das unabhängige Gutachten und reguliert mit der gegnerischen Haftpflichtversicherung nach §249 BGB — die Kosten trägt die Gegenseite.',
+    text: 'Bei unverschuldeten Unfällen koordiniert Claimondo das unabhängige Gutachten und reguliert mit der gegnerischen Haftpflichtversicherung nach §249 BGB – die Kosten trägt die Gegenseite.',
   },
   {
     icon: Handshake,
-    title: 'Kostenlos — mit persönlichem Ansprechpartner',
-    text: 'Registrierung und Flotten-Portal sind kostenlos. Kein Ticketsystem, kein Callcenter: Sie erreichen direkt das Claimondo-Team — für Ihren Fuhrpark und Ihre Fahrer.',
+    title: 'Kostenlos – mit persönlichem Ansprechpartner',
+    text: 'Registrierung und Flotten-Portal sind kostenlos. Kein Ticketsystem, kein Callcenter: Sie erreichen direkt das Claimondo-Team – für Ihren Fuhrpark und Ihre Fahrer.',
   },
 ]
 
@@ -78,7 +78,7 @@ const ABLAUF = [
   {
     nr: '01',
     title: 'Kostenlos als Flotte registrieren',
-    text: 'Firma und Ansprechpartner eintragen — in zwei Minuten erledigt. Sie erhalten sofort Zugang zum Flotten-Portal, kostenlos und unverbindlich.',
+    text: 'Firma und Ansprechpartner eintragen – in zwei Minuten erledigt. Sie erhalten sofort Zugang zum Flotten-Portal, kostenlos und unverbindlich.',
   },
   {
     nr: '02',
@@ -87,7 +87,7 @@ const ABLAUF = [
   },
   {
     nr: '03',
-    title: 'Schaden melden — Claimondo wickelt ab',
+    title: 'Schaden melden – Claimondo wickelt ab',
     text: 'Im Schadenfall koordiniert Claimondo den unabhängigen Gutachter, die Reparatur im Partner-Netzwerk und die Regulierung mit der gegnerischen Haftpflichtversicherung. Sie verfolgen alles live im Portal.',
   },
 ]
@@ -143,7 +143,7 @@ export default function FlottePartnerWerdenPage() {
             Schadenmanagement für Ihre Flotte. Ohne Aufwand.
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            Jeder Unfall im Fuhrpark kostet Zeit: Fahrer, Werkstatt, Gutachter, Versicherung. Als Claimondo-Flottenpartner verwalten Sie Fahrzeuge und Schäden zentral im Portal — und Claimondo übernimmt Gutachten und Regulierung über die gegnerische Haftpflicht.
+            Jeder Unfall im Fuhrpark kostet Zeit: Fahrer, Werkstatt, Gutachter, Versicherung. Als Claimondo-Flottenpartner verwalten Sie Fahrzeuge und Schäden zentral im Portal – und Claimondo übernimmt Gutachten und Regulierung über die gegnerische Haftpflicht.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
@@ -290,7 +290,7 @@ export default function FlottePartnerWerdenPage() {
                 'Handwerks- und Servicebetriebe mit Firmenwagen',
                 'Pflege-, Liefer- und Logistikflotten im täglichen Einsatz',
                 'Taxi-, Mietwagen- und Poolfahrzeug-Flotten',
-                'Fuhrparks jeder Größe — geleast oder gekauft',
+                'Fuhrparks jeder Größe – geleast oder gekauft',
               ].map((p) => (
                 <li key={p} className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-xl bg-claimondo-ondo/10">

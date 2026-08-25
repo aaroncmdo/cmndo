@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/betriebsgefahr-stvg7
-meta_title: Betriebsgefahr § 7 StVG — Halterhaftung
+meta_title: Betriebsgefahr § 7 StVG – Halterhaftung
 type: glossar-spoke
 cluster: H1
 nummer: H1.1
@@ -17,25 +17,25 @@ customer_questions:
   - "stvg 7 erklärung einfach"
   - "wer haftet wenn niemand schuld ist"
 last_modified: 2026-05-18
-excerpt: Die Betriebsgefahr nach § 7 StVG ist die verschuldensunabhängige Gefährdungshaftung des Kfz-Halters: Wer ein Fahrzeug hält, haftet für alle Schäden, die beim Betrieb entstehen — ohne eigenes Verschulden. Der Geschädigte hat nach § 115 VVG einen Direktanspruch gegen den Haftpflichtversicherer. Befreiung gelingt nur bei höherer Gewalt (§ 7 Abs. 2 StVG) — praktisch sehr selten.
+excerpt: Die Betriebsgefahr nach § 7 StVG ist die verschuldensunabhängige Gefährdungshaftung des Kfz-Halters: Wer ein Fahrzeug hält, haftet für alle Schäden, die beim Betrieb entstehen – ohne eigenes Verschulden. Der Geschädigte hat nach § 115 VVG einen Direktanspruch gegen den Haftpflichtversicherer. Befreiung gelingt nur bei höherer Gewalt (§ 7 Abs. 2 StVG) – praktisch sehr selten.
 keyFacts:
-  - § 7 StVG — verschuldensunabhängige Gefährdungshaftung des Kfz-Halters
-  - § 115 VVG — Direktanspruch des Geschädigten gegen den Versicherer
+  - § 7 StVG – verschuldensunabhängige Gefährdungshaftung des Kfz-Halters
+  - § 115 VVG – Direktanspruch des Geschädigten gegen den Versicherer
   - Befreiung nur bei höherer Gewalt § 7 Abs. 2 StVG (Naturkatastrophe, Sturzbäume)
   - Glatteis, Reifenplatzer, Ölspur: keine höhere Gewalt
-  - § 18 StVG — Fahrerhaftung mit Verschuldensvermutung läuft parallel
+  - § 18 StVG – Fahrerhaftung mit Verschuldensvermutung läuft parallel
 last_legal_review: pending
 related:
   - /haftpflicht/fahrerhaftung-stvg18
   - /haftpflicht/verschulden-bgb823
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/beweislast
-meta_description: "Betriebsgefahr nach §7 StVG: Der Kfz-Halter haftet ohne eigenes Verschulden — Direktanspruch gegen den Versicherer nach §115 VVG. So nutzen Sie sie."
+meta_description: "Betriebsgefahr nach §7 StVG: Der Kfz-Halter haftet ohne eigenes Verschulden – Direktanspruch gegen den Versicherer nach §115 VVG. So nutzen Sie sie."
 ---
 
-# Betriebsgefahr nach § 7 StVG — Halterhaftung ohne Verschulden
+# Betriebsgefahr nach § 7 StVG – Halterhaftung ohne Verschulden
 
-> **Kurz erklärt:** § 7 StVG ist die zentrale **Gefährdungshaftung** des Kfz-Halters: Wer ein Auto hält, haftet für Schäden, die beim Betrieb des Fahrzeugs entstehen — **auch ohne eigenes Verschulden**. Allein das Betriebsrisiko (motorisiertes Fahrzeug im Verkehr) reicht. Die Haftpflichtversicherung tritt nach § 115 VVG direkt für den Halter ein. Ausnahme nur bei **höherer Gewalt** (§ 7 Abs. 2 StVG) — praktisch sehr selten erfolgreich (Wildunfall, Tier, vollständig unabwendbares Ereignis).
+> **Kurz erklärt:** § 7 StVG ist die zentrale **Gefährdungshaftung** des Kfz-Halters: Wer ein Auto hält, haftet für Schäden, die beim Betrieb des Fahrzeugs entstehen – **auch ohne eigenes Verschulden**. Allein das Betriebsrisiko (motorisiertes Fahrzeug im Verkehr) reicht. Die Haftpflichtversicherung tritt nach § 115 VVG direkt für den Halter ein. Ausnahme nur bei **höherer Gewalt** (§ 7 Abs. 2 StVG) – praktisch sehr selten erfolgreich (Wildunfall, Tier, vollständig unabwendbares Ereignis).
 
 ## Auch bekannt als
 
@@ -45,19 +45,19 @@ Halterhaftung · Gefährdungshaftung Kfz · § 7 StVG Haftung · Betriebs-Risiko
 
 ## In einem Satz erklärt
 
-§ 7 StVG ist die verschuldensunabhängige Haftung des Kfz-Halters für alle Schäden, die durch den Betrieb seines Fahrzeugs entstehen — ohne dass er etwas „falsch" gemacht haben muss.
+§ 7 StVG ist die verschuldensunabhängige Haftung des Kfz-Halters für alle Schäden, die durch den Betrieb seines Fahrzeugs entstehen – ohne dass er etwas „falsch" gemacht haben muss.
 
 ## In drei Sätzen erklärt
 
-Die Betriebsgefahr nach § 7 StVG ist die **Kernvorschrift** des deutschen Kfz-Haftungs-Systems — sie verpflichtet jeden Halter eines Kraftfahrzeugs zur Schadensersatz-Leistung, sobald bei der Nutzung seines Fahrzeugs eine Person verletzt, getötet oder eine Sache beschädigt wird. **Anders als § 823 BGB** verlangt § 7 StVG **kein Verschulden** des Halters — die bloße Inbetriebnahme des potentiell gefährlichen Fahrzeugs (Gefährdungshaftung) genügt; die Haftpflichtversicherung tritt dafür nach § 115 VVG direkt ein. Befreiungs-Möglichkeiten sind eng: **höhere Gewalt** (§ 7 Abs. 2 StVG — Sturz eines Baumes, Tier-Sprung, vis maior) und der **unabwendbare Ereignis-Einwand** (selten erfolgreich) — praktisch greift § 7 StVG in fast allen Verkehrsunfall-Konstellationen.
+Die Betriebsgefahr nach § 7 StVG ist die **Kernvorschrift** des deutschen Kfz-Haftungs-Systems – sie verpflichtet jeden Halter eines Kraftfahrzeugs zur Schadensersatz-Leistung, sobald bei der Nutzung seines Fahrzeugs eine Person verletzt, getötet oder eine Sache beschädigt wird. **Anders als § 823 BGB** verlangt § 7 StVG **kein Verschulden** des Halters – die bloße Inbetriebnahme des potentiell gefährlichen Fahrzeugs (Gefährdungshaftung) genügt; die Haftpflichtversicherung tritt dafür nach § 115 VVG direkt ein. Befreiungs-Möglichkeiten sind eng: **höhere Gewalt** (§ 7 Abs. 2 StVG – Sturz eines Baumes, Tier-Sprung, vis maior) und der **unabwendbare Ereignis-Einwand** (selten erfolgreich) – praktisch greift § 7 StVG in fast allen Verkehrsunfall-Konstellationen.
 
 ## Die fünf Schlüsselzahlen
 
-- **§ 7 StVG** — die Anker-Vorschrift der deutschen Kfz-Haftung
-- **§ 115 VVG** — Direktanspruch gegen Haftpflichtversicherung
-- **Verschuldensunabhängig** — kein Nachweis von „Schuld" nötig
+- **§ 7 StVG** – die Anker-Vorschrift der deutschen Kfz-Haftung
+- **§ 115 VVG** – Direktanspruch gegen Haftpflichtversicherung
+- **Verschuldensunabhängig** – kein Nachweis von „Schuld" nötig
 - **Höhere Gewalt** als einzige nennenswerte Ausnahme (§ 7 Abs. 2)
-- **§ 18 StVG** — parallel: Fahrerhaftung mit Verschuldensvermutung
+- **§ 18 StVG** – parallel: Fahrerhaftung mit Verschuldensvermutung
 
 ---
 
@@ -67,28 +67,28 @@ Das Kfz im Straßenverkehr ist nach deutscher Rechtsdogmatik eine **erlaubte, ab
 
 ### Drei Voraussetzungen
 1. **Kraftfahrzeug** im Sinne des StVG (Pkw, Lkw, Motorrad, E-Roller mit > 6 km/h)
-2. **„Beim Betrieb"** — der Schaden steht im **funktionalen Zusammenhang** mit der Bewegung oder dem Stand des Fahrzeugs (auch im Stillstand bei laufendem Motor, beim Ein-/Ausparken, beim Türöffnen)
+2. **„Beim Betrieb"** – der Schaden steht im **funktionalen Zusammenhang** mit der Bewegung oder dem Stand des Fahrzeugs (auch im Stillstand bei laufendem Motor, beim Ein-/Ausparken, beim Türöffnen)
 3. **Verletzung von Leben, Körper, Gesundheit oder Sache**
 
-→ Allein das Halten und Betreiben des Fahrzeugs **ohne** eigenes Verschulden reicht für die Haftung — das ist der Kern der Gefährdungshaftung.
+→ Allein das Halten und Betreiben des Fahrzeugs **ohne** eigenes Verschulden reicht für die Haftung – das ist der Kern der Gefährdungshaftung.
 
 ---
 
-## Halter vs. Fahrer — wer haftet wann
+## Halter vs. Fahrer – wer haftet wann
 
 | Rolle | Haftungs-Grundlage | Verschulden erforderlich? |
 |---|---|---|
-| **Halter** | § 7 StVG | Nein — Gefährdungshaftung |
+| **Halter** | § 7 StVG | Nein – Gefährdungshaftung |
 | **Fahrer** | § 18 StVG | Ja, aber **vermutet** (siehe [Fahrerhaftung](/haftpflicht/fahrerhaftung-stvg18)) |
 | **Eigentümer als Halter** | § 7 StVG | Nein |
 
-Der **Halter** ist die Person, die das Fahrzeug **auf eigene Rechnung in Betrieb nimmt**, die Verfügungsmacht hat und die Kosten trägt — nicht zwingend der Eigentümer (z. B. Leasing-Nehmer als Halter).
+Der **Halter** ist die Person, die das Fahrzeug **auf eigene Rechnung in Betrieb nimmt**, die Verfügungsmacht hat und die Kosten trägt – nicht zwingend der Eigentümer (z. B. Leasing-Nehmer als Halter).
 
 ---
 
-## Höhere Gewalt — die schmale Ausnahme
+## Höhere Gewalt – die schmale Ausnahme
 
-§ 7 Abs. 2 StVG erlaubt eine Befreiung von der Halterhaftung nur bei **höherer Gewalt** — definiert als ein „von außen kommendes, außergewöhnliches und nicht abwendbares" Ereignis.
+§ 7 Abs. 2 StVG erlaubt eine Befreiung von der Halterhaftung nur bei **höherer Gewalt** – definiert als ein „von außen kommendes, außergewöhnliches und nicht abwendbares" Ereignis.
 
 ### Praktische Beispiele
 - **Naturkatastrophe** (Erdbeben, Sturmflut, Blitzschlag direkt aufs Auto)
@@ -98,13 +98,13 @@ Der **Halter** ist die Person, die das Fahrzeug **auf eigene Rechnung in Betrieb
 ### Was **keine** höhere Gewalt ist
 - Glatteis (gehört zum üblichen Verkehrs-Risiko)
 - Ölspur (Halter eines anderen Fahrzeugs haftet ggf., aber Betriebsgefahr besteht weiter)
-- Plötzlicher Defekt am eigenen Fahrzeug (Reifenplatzer, Bremsausfall — eher unabwendbares Ereignis-Argument)
+- Plötzlicher Defekt am eigenen Fahrzeug (Reifenplatzer, Bremsausfall – eher unabwendbares Ereignis-Argument)
 
 ---
 
 ## Beziehung zum Direktanspruch
 
-§ 7 StVG begründet die **Haftung des Halters** — der Geschädigte hat aber nach **§ 115 VVG** einen **eigenen Direktanspruch** gegen den **Haftpflichtversicherer** des Halters. Praktische Bedeutung: Du musst nicht erst den Halter verklagen, sondern kannst direkt mit dem Versicherer kommunizieren.
+§ 7 StVG begründet die **Haftung des Halters** – der Geschädigte hat aber nach **§ 115 VVG** einen **eigenen Direktanspruch** gegen den **Haftpflichtversicherer** des Halters. Praktische Bedeutung: Du musst nicht erst den Halter verklagen, sondern kannst direkt mit dem Versicherer kommunizieren.
 
 → Siehe auch [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) für die kostenlose Eskalations-Möglichkeit.
 
@@ -120,7 +120,7 @@ Bei § 7 StVG ist die Beweis-Lage für dich als Geschädigte sehr günstig:
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Du musst **kein Verschulden** des gegnerischen Halters beweisen. Es reicht, dass sein Fahrzeug am Unfall „beim Betrieb" beteiligt war.
@@ -131,42 +131,42 @@ Du musst **kein Verschulden** des gegnerischen Halters beweisen. Es reicht, dass
 Zulassungsbescheinigung / Halter-Auskunft beim Kraftfahrt-Bundesamt. Im Polizeibericht steht der Halter meist drin.
 
 **2. Direktanspruch gegen Versicherer geltend machen**
-§ 115 VVG — du kommunizierst direkt mit der Haftpflichtversicherung des Halters.
+§ 115 VVG – du kommunizierst direkt mit der Haftpflichtversicherung des Halters.
 
 **3. Bei Versicherer-Berufung auf höhere Gewalt: Anwalt**
-Höhere-Gewalt-Argument ist selten erfolgreich — bei Versicherer-Berufung Anwalt einschalten.
+Höhere-Gewalt-Argument ist selten erfolgreich – bei Versicherer-Berufung Anwalt einschalten.
 
 ---
 
 ## Häufige Fragen
 
 **Was ist Betriebsgefahr?**
-Das Risiko, das vom Betrieb eines Kraftfahrzeugs ausgeht. § 7 StVG verpflichtet den Halter zur Schadensersatz-Leistung für alle Schäden, die durch den Betrieb seines Fahrzeugs entstehen — auch ohne eigenes Verschulden.
+Das Risiko, das vom Betrieb eines Kraftfahrzeugs ausgeht. § 7 StVG verpflichtet den Halter zur Schadensersatz-Leistung für alle Schäden, die durch den Betrieb seines Fahrzeugs entstehen – auch ohne eigenes Verschulden.
 
 **Haftet der Halter ohne Verschulden?**
-Ja. § 7 StVG ist Gefährdungshaftung — die bloße Inbetriebnahme des potentiell gefährlichen Fahrzeugs reicht. Befreiung nur bei höherer Gewalt (§ 7 Abs. 2 StVG).
+Ja. § 7 StVG ist Gefährdungshaftung – die bloße Inbetriebnahme des potentiell gefährlichen Fahrzeugs reicht. Befreiung nur bei höherer Gewalt (§ 7 Abs. 2 StVG).
 
 **Was ist der Unterschied zu § 823 BGB?**
-§ 823 BGB verlangt **Verschulden** des Schädigers, § 7 StVG nicht. Beide können nebeneinander greifen — § 7 StVG ist meist die einfacher beweisbare Grundlage.
+§ 823 BGB verlangt **Verschulden** des Schädigers, § 7 StVG nicht. Beide können nebeneinander greifen – § 7 StVG ist meist die einfacher beweisbare Grundlage.
 
 **Was zählt als „höhere Gewalt"?**
 Sehr selten und eng definiert: Naturkatastrophe, plötzlich umstürzender Baum durch Sturm. Glatteis, Ölspur oder Reifenplatzer fallen typischerweise **nicht** darunter.
 
 **Wer ist der Halter eines Leasing-Fahrzeugs?**
-Der Leasingnehmer — nicht die Leasinggesellschaft. Wer das Fahrzeug auf eigene Rechnung in Betrieb nimmt und die Kosten trägt.
+Der Leasingnehmer – nicht die Leasinggesellschaft. Wer das Fahrzeug auf eigene Rechnung in Betrieb nimmt und die Kosten trägt.
 
 **Kann ich direkt mit der Versicherung kommunizieren?**
-Ja. § 115 VVG gibt dir den Direktanspruch — du musst nicht den Halter verklagen.
+Ja. § 115 VVG gibt dir den Direktanspruch – du musst nicht den Halter verklagen.
 
 ---
 
 ## Verwandte Begriffe
 
-- [§ 18 StVG Fahrerhaftung](/haftpflicht/fahrerhaftung-stvg18) — parallele Vorschrift
-- [§ 823 BGB Verschulden](/haftpflicht/verschulden-bgb823) — Verschuldenshaftung
-- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) — bei Unfällen zwischen Fahrzeugen
-- [Beweislast](/haftpflicht/beweislast) — Verteilung der Beweis-Pflichten
-- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) — Beweis-Erleichterung
+- [§ 18 StVG Fahrerhaftung](/haftpflicht/fahrerhaftung-stvg18) – parallele Vorschrift
+- [§ 823 BGB Verschulden](/haftpflicht/verschulden-bgb823) – Verschuldenshaftung
+- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) – bei Unfällen zwischen Fahrzeugen
+- [Beweislast](/haftpflicht/beweislast) – Verteilung der Beweis-Pflichten
+- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) – Beweis-Erleichterung
 
 ---
 
@@ -178,8 +178,8 @@ Ja. § 115 VVG gibt dir den Direktanspruch — du musst nicht den Halter verklag
 
 ## Quellen
 
-- Straßenverkehrsgesetz § 7 — [gesetze-im-internet.de/stvg/__7.html](https://www.gesetze-im-internet.de/stvg/__7.html)
-- Versicherungsvertragsgesetz § 115 — Direktanspruch
+- Straßenverkehrsgesetz § 7 – [gesetze-im-internet.de/stvg/__7.html](https://www.gesetze-im-internet.de/stvg/__7.html)
+- Versicherungsvertragsgesetz § 115 – Direktanspruch
 - BGH-Rechtsprechung zu „Betrieb des Kraftfahrzeugs"
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 - Greger/Zwickel, Haftungsrecht des Straßenverkehrs
@@ -228,4 +228,4 @@ Ja. § 115 VVG gibt dir den Direktanspruch — du musst nicht den Halter verklag
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

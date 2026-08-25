@@ -44,7 +44,7 @@ export function Footer({ onDark = false }: { onDark?: boolean }) {
       <Text style={{ margin: 0, fontSize: 11, lineHeight: '18px', color: c }}>
         Claimondo GmbH &middot; <Link href={`${APP_URL}/impressum`} style={{ color: c, textDecoration: 'underline' }}>Impressum</Link> &middot; <Link href={`${APP_URL}/datenschutz`} style={{ color: c, textDecoration: 'underline' }}>Datenschutz</Link>
       </Text>
-      <Text style={{ margin: '6px 0 0', fontSize: 11, color: c }}>Vollständige Schadensregulierung — auf Augenhöhe</Text>
+      <Text style={{ margin: '6px 0 0', fontSize: 11, color: c }}>Vollständige Schadensregulierung – auf Augenhöhe</Text>
     </div>
   )
 }

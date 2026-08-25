@@ -38,7 +38,7 @@ export default function NutzungsausfallRechnerClient() {
           <select value={klasse} onChange={(e) => setKlasse(e.target.value)} className={inputCls}>
             {NA_KLASSEN.map((k) => (
               <option key={k.klasse} value={k.klasse}>
-                {`${k.klasse} · ${k.bezeichnung} — ${k.beispiele}`}
+                {`${k.klasse} · ${k.bezeichnung} – ${k.beispiele}`}
               </option>
             ))}
           </select>

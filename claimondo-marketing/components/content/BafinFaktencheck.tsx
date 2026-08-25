@@ -89,7 +89,7 @@ export function BafinFaktencheck({
       </a>
       <p className="mt-2 text-xs leading-relaxed text-claimondo-shield/60">
         Die BaFin-Statistik erfasst alle abschließend bearbeiteten Kfz-Beschwerden (Vertrag, Kasko,
-        Haftpflicht) — kein isolierter Drittschaden-Indikator, aber die einzige offizielle Quelle.
+        Haftpflicht) – kein isolierter Drittschaden-Indikator, aber die einzige offizielle Quelle.
       </p>
     </section>
   )

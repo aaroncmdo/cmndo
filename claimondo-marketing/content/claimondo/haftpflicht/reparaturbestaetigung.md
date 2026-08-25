@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/reparaturbestaetigung
-meta_title: Reparaturbestätigung — wann du sie brauchst
+meta_title: Reparaturbestätigung – wann du sie brauchst
 type: glossar-spoke
 cluster: H3
 nummer: H3.19
@@ -19,7 +19,7 @@ customer_questions:
   - "was kostet eine reparaturbestätigung"
   - "reicht ein foto der reparatur"
 last_modified: 2026-08-21
-excerpt: Die Reparaturbestätigung ist die kurze Nachbesichtigung durch den Sachverständigen — er prüft, ob der im Gutachten kalkulierte Schaden tatsächlich und fachgerecht behoben wurde. Gebraucht wird sie überall dort, wo ein Anspruch am tatsächlichen Reparaturzustand hängt, aber keine Werkstattrechnung existiert: bei Eigenreparatur, bei Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen mit Weiterbenutzung.
+excerpt: Die Reparaturbestätigung ist die kurze Nachbesichtigung durch den Sachverständigen – er prüft, ob der im Gutachten kalkulierte Schaden tatsächlich und fachgerecht behoben wurde. Gebraucht wird sie überall dort, wo ein Anspruch am tatsächlichen Reparaturzustand hängt, aber keine Werkstattrechnung existiert: bei Eigenreparatur, bei Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen mit Weiterbenutzung.
 keyFacts:
   - Kurze Nachbesichtigung durch den Sachverständigen, kein zweites Vollgutachten
   - Nötig, wenn ein Anspruch an der tatsächlichen Reparatur hängt, aber keine Rechnung existiert
@@ -33,12 +33,12 @@ related:
   - /haftpflicht/sv-kosten
   - /haftpflicht/wiederbeschaffungswert
   - /decoder/reparatur-unwirtschaftlich
-meta_description: "Reparaturbestätigung nach Unfall: Wann der Nachweis nötig ist — bei Eigenreparatur, Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen."
+meta_description: "Reparaturbestätigung nach Unfall: Wann der Nachweis nötig ist – bei Eigenreparatur, Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen."
 ---
 
-# Reparaturbestätigung — der Nachweis, wenn es keine Rechnung gibt
+# Reparaturbestätigung – der Nachweis, wenn es keine Rechnung gibt
 
-> **Kurz erklärt:** Die Reparaturbestätigung ist eine kurze Nachbesichtigung durch den Sachverständigen: Er prüft, ob der im Gutachten kalkulierte Schaden **tatsächlich und fachgerecht** behoben wurde. Du brauchst sie immer dann, wenn ein Anspruch am realen Reparaturzustand hängt, es aber **keine Werkstattrechnung** gibt — bei Eigenreparatur, bei Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen.
+> **Kurz erklärt:** Die Reparaturbestätigung ist eine kurze Nachbesichtigung durch den Sachverständigen: Er prüft, ob der im Gutachten kalkulierte Schaden **tatsächlich und fachgerecht** behoben wurde. Du brauchst sie immer dann, wenn ein Anspruch am realen Reparaturzustand hängt, es aber **keine Werkstattrechnung** gibt – bei Eigenreparatur, bei Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen.
 
 ## Auch bekannt als
 
@@ -46,11 +46,11 @@ Reparaturbescheinigung · Reparaturnachweis · Nachbesichtigung · Reparaturabna
 
 ## In einem Satz erklärt
 
-Sie belegt gegenüber der Versicherung, dass der Schaden wirklich behoben wurde — dort, wo eine Rechnung diesen Beweis nicht liefern kann.
+Sie belegt gegenüber der Versicherung, dass der Schaden wirklich behoben wurde – dort, wo eine Rechnung diesen Beweis nicht liefern kann.
 
 ## In drei Sätzen erklärt
 
-Bei der **fiktiven Abrechnung** bekommst du den kalkulierten Betrag ausgezahlt, ohne reparieren zu müssen — die Versicherung weiß dann aber nicht, ob dein Fahrzeug noch beschädigt ist. Genau daran hängen mehrere Ansprüche: Nutzungsausfall setzt einen Ausfall voraus, und die 130-Prozent-Regel verlangt eine sachgerechte Reparatur plus Weiterbenutzung. Die Reparaturbestätigung schließt diese Beweislücke, ohne dass du den vollen Weg über eine Werkstattrechnung gehen musst.
+Bei der **fiktiven Abrechnung** bekommst du den kalkulierten Betrag ausgezahlt, ohne reparieren zu müssen – die Versicherung weiß dann aber nicht, ob dein Fahrzeug noch beschädigt ist. Genau daran hängen mehrere Ansprüche: Nutzungsausfall setzt einen Ausfall voraus, und die 130-Prozent-Regel verlangt eine sachgerechte Reparatur plus Weiterbenutzung. Die Reparaturbestätigung schließt diese Beweislücke, ohne dass du den vollen Weg über eine Werkstattrechnung gehen musst.
 
 ## Die fünf Schlüsselzahlen
 
@@ -58,7 +58,7 @@ Bei der **fiktiven Abrechnung** bekommst du den kalkulierten Betrag ausgezahlt, 
 |---|---|
 | **Was es ist** | kurze Nachbesichtigung, kein zweites Vollgutachten |
 | **Wer sie ausstellt** | der Sachverständige, der den Schaden kennt |
-| **Rechtsgrundlage der Kosten** | § 249 Abs. 2 BGB — Kosten der Rechtsverfolgung |
+| **Rechtsgrundlage der Kosten** | § 249 Abs. 2 BGB – Kosten der Rechtsverfolgung |
 | **Typische Auslöser** | Eigenreparatur · Nutzungsausfall · 130-Prozent-Fall |
 | **Was sie nicht ist** | kein Ersatz für ein Gutachten, keine TÜV-Abnahme |
 
@@ -66,17 +66,17 @@ Bei der **fiktiven Abrechnung** bekommst du den kalkulierten Betrag ausgezahlt, 
 
 ### Eigenreparatur oder Reparatur in freier Werkstatt ohne Vollrechnung
 
-Hast du selbst repariert oder in einer Werkstatt, die keine vollständige Rechnung über den kalkulierten Umfang stellt, fehlt der Versicherung jeder Beleg. Die Bestätigung ersetzt ihn — sie sagt nicht, was es gekostet hat, sondern **dass der Schaden weg ist**.
+Hast du selbst repariert oder in einer Werkstatt, die keine vollständige Rechnung über den kalkulierten Umfang stellt, fehlt der Versicherung jeder Beleg. Die Bestätigung ersetzt ihn – sie sagt nicht, was es gekostet hat, sondern **dass der Schaden weg ist**.
 
 ### Nutzungsausfall trotz fiktiver Abrechnung
 
-Hier ist eine Unterscheidung wichtig, die in Kürzungsschreiben gern verwischt wird: Dass du dein Auto **genutzt** hättest, musst du **nicht** beweisen — bei privat genutzten Fahrzeugen gilt die Eigennutzungs-Vermutung, und der Versicherer müsste eine Nicht-Nutzung belegen (siehe [Nutzungsausfall](/haftpflicht/nutzungsausfall)). Worum es hier geht, ist etwas anderes: die **Dauer** des Ausfalls.
+Hier ist eine Unterscheidung wichtig, die in Kürzungsschreiben gern verwischt wird: Dass du dein Auto **genutzt** hättest, musst du **nicht** beweisen – bei privat genutzten Fahrzeugen gilt die Eigennutzungs-Vermutung, und der Versicherer müsste eine Nicht-Nutzung belegen (siehe [Nutzungsausfall](/haftpflicht/nutzungsausfall)). Worum es hier geht, ist etwas anderes: die **Dauer** des Ausfalls.
 
-Rechnest du fiktiv ab, sieht die Versicherung keinen Reparaturzeitraum und bestreitet regelmäßig, wie lange das Fahrzeug überhaupt ausgefallen ist. Die Bestätigung belegt genau das — nicht deinen Nutzungswillen.
+Rechnest du fiktiv ab, sieht die Versicherung keinen Reparaturzeitraum und bestreitet regelmäßig, wie lange das Fahrzeug überhaupt ausgefallen ist. Die Bestätigung belegt genau das – nicht deinen Nutzungswillen.
 
 ### 130-Prozent-Fälle
 
-Liegen die Reparaturkosten über dem Wiederbeschaffungswert, aber innerhalb der 130-Prozent-Grenze, ist die Erstattung an zwei Bedingungen geknüpft: **sachgerechte Reparatur** und **Weiterbenutzung**. Beides muss belegt werden — die Bestätigung ist dafür der übliche Weg. Grundlagen unter [Reparaturkosten](/haftpflicht/reparaturkosten) und [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert).
+Liegen die Reparaturkosten über dem Wiederbeschaffungswert, aber innerhalb der 130-Prozent-Grenze, ist die Erstattung an zwei Bedingungen geknüpft: **sachgerechte Reparatur** und **Weiterbenutzung**. Beides muss belegt werden – die Bestätigung ist dafür der übliche Weg. Grundlagen unter [Reparaturkosten](/haftpflicht/reparaturkosten) und [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert).
 
 ### Wann du sie *nicht* brauchst
 
@@ -84,9 +84,9 @@ Liegen die Reparaturkosten über dem Wiederbeschaffungswert, aber innerhalb der 
 - Du rechnest fiktiv ab und machst **keine** Ansprüche geltend, die an der Reparatur hängen
 - Der Schaden war ein reiner Sachschaden ohne Nutzungsausfall und ohne 130-Prozent-Konstellation
 
-## Was geprüft wird — und was nicht
+## Was geprüft wird – und was nicht
 
-Der Sachverständige vergleicht den Ist-Zustand mit **seiner eigenen Kalkulation**. Er sieht nach, ob die kalkulierten Positionen umgesetzt wurden und ob die Ausführung fachgerecht ist — ob also der Wagen wieder verkehrssicher und der Schaden vollständig behoben ist.
+Der Sachverständige vergleicht den Ist-Zustand mit **seiner eigenen Kalkulation**. Er sieht nach, ob die kalkulierten Positionen umgesetzt wurden und ob die Ausführung fachgerecht ist – ob also der Wagen wieder verkehrssicher und der Schaden vollständig behoben ist.
 
 | Wird beurteilt | Wird nicht beurteilt |
 |---|---|
@@ -100,11 +100,11 @@ Der Sachverständige vergleicht den Ist-Zustand mit **seiner eigenen Kalkulation
 
 Sinnvollerweise **derselbe Sachverständige**, der das Gutachten erstellt hat: Er kennt den Schadenumfang und kann Ist und Soll unmittelbar vergleichen. Ein fremder Gutachter müsste sich erst in den Vorschaden einarbeiten.
 
-Wichtig ist die Unabhängigkeit — eine Bestätigung der reparierenden Werkstatt über die eigene Arbeit hat gegenüber der Versicherung deutlich weniger Gewicht.
+Wichtig ist die Unabhängigkeit – eine Bestätigung der reparierenden Werkstatt über die eigene Arbeit hat gegenüber der Versicherung deutlich weniger Gewicht.
 
 ## Wer die Kosten trägt
 
-Die Bestätigung ist Teil der Rechtsverfolgung: Sie entsteht, weil du deinen Anspruch belegen musst. Damit ist sie dem Grunde nach vom Schädiger zu erstatten — nach derselben Systematik wie die Kosten des Gutachtens selbst, ausführlich unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
+Die Bestätigung ist Teil der Rechtsverfolgung: Sie entsteht, weil du deinen Anspruch belegen musst. Damit ist sie dem Grunde nach vom Schädiger zu erstatten – nach derselben Systematik wie die Kosten des Gutachtens selbst, ausführlich unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
 
 Typische Kürzungsversuche:
 
@@ -112,18 +112,18 @@ Typische Kürzungsversuche:
 |---|---|
 | „Kosten nicht erstattungsfähig" | Sie sind durch die Beweisanforderung der Versicherung selbst veranlasst |
 | „Nachbesichtigung nicht erforderlich" | Ohne sie verweigert dieselbe Versicherung den Nutzungsausfall |
-| „Reparaturweg nicht nachgewiesen" | Genau das leistet die Bestätigung — sie ist die Antwort, nicht das Problem |
+| „Reparaturweg nicht nachgewiesen" | Genau das leistet die Bestätigung – sie ist die Antwort, nicht das Problem |
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
-1. **Vor der Reparatur klären**, ob du Ansprüche geltend machst, die an ihr hängen — Nutzungsausfall oder 130 Prozent. Dann Termin zur Nachbesichtigung einplanen.
+1. **Vor der Reparatur klären**, ob du Ansprüche geltend machst, die an ihr hängen – Nutzungsausfall oder 130 Prozent. Dann Termin zur Nachbesichtigung einplanen.
 2. **Nicht wegwerfen:** Ersatzteil-Belege, Fotos vom Reparaturverlauf, Werkstattnotizen. Sie helfen dem Sachverständigen, auch wenn sie ihn nicht ersetzen.
 3. **Denselben Sachverständigen beauftragen**, der das Gutachten erstellt hat.
-4. **Bestätigung mit der Anspruchsaufstellung einreichen**, nicht nachgereicht auf Nachfrage — das verkürzt die Regulierung.
+4. **Bestätigung mit der Anspruchsaufstellung einreichen**, nicht nachgereicht auf Nachfrage – das verkürzt die Regulierung.
 
 ### 💡 Die wichtigste Regel
 
-Die Reparaturbestätigung ist **kein zusätzlicher Aufwand, den du dir aufhalsen lässt** — sie ist die Antwort auf eine Beweisforderung, die die Versicherung selbst stellt. Wer sie hat, nimmt dem häufigsten Kürzungsargument bei fiktiver Abrechnung die Grundlage.
+Die Reparaturbestätigung ist **kein zusätzlicher Aufwand, den du dir aufhalsen lässt** – sie ist die Antwort auf eine Beweisforderung, die die Versicherung selbst stellt. Wer sie hat, nimmt dem häufigsten Kürzungsargument bei fiktiver Abrechnung die Grundlage.
 
 ```json
 {
@@ -157,4 +157,4 @@ Die Reparaturbestätigung ist **kein zusätzlicher Aufwand, den du dir aufhalsen
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

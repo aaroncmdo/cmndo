@@ -11,7 +11,7 @@ last_modified: 2026-05-18
 excerpt: Versicherer behaupten pauschal ein Mitverschulden von 20–30 % und kürzen die Schadenserstattung ohne konkrete Tatsachen oder Kausalitätsbegründung. Diese Decoder-Seite zeigt, dass die Beweislast nach § 254 BGB vollständig beim Versicherer liegt und pauschale Quoten ohne substanziierte Grundlage nach ständiger BGH-Rechtsprechung zurückgewiesen werden müssen.
 keyFacts:
   - Kürzungs-Standardsatz: „Wir sehen ein Mitverschulden von 30 % zu Ihren Lasten"
-  - Beweislast liegt beim Versicherer — § 254 BGB, ständige BGH-Rechtsprechung
+  - Beweislast liegt beim Versicherer – § 254 BGB, ständige BGH-Rechtsprechung
   - Pauschale 30 %-Quote spart dem Versicherer bei 10.000 € Forderung 3.000 € pro Fall
   - Anscheinsbeweis bei Auffahrunfall oder Vorfahrtsverletzung greift zugunsten des Geschädigten
   - 60–80 % aller Pauschal-Quoten lassen sich kippen oder deutlich reduzieren
@@ -22,16 +22,16 @@ related:
   - /haftpflicht/beweislast
   - /haftpflicht/mitverschulden-stvg17
   - /decoder/wir-pruefen-sachverhalt
-meta_description: "„30% przyczynienia się"? Dlaczego ryczałtowe kwoty bez konkretnego dowodu są niedopuszczalne — tak zabezpieczy Pan(i) pełne odszkodowanie (§249 BGB)."
+meta_description: "„30% przyczynienia się"? Dlaczego ryczałtowe kwoty bez konkretnego dowodu są niedopuszczalne – tak zabezpieczy Pan(i) pełne odszkodowanie (§249 BGB)."
 ---
 
-# „Widzimy przyczynienie się poszkodowanego na poziomie 30%" — Dekoder
+# „Widzimy przyczynienie się poszkodowanego na poziomie 30%" – Dekoder
 
 > **W skrócie:** Ryczałtowe doliczenie kwoty (udziału) przyczynienia się poszkodowanego (Mitverschulden) bez konkretnych faktów i bez konkretnego uzasadnienia związku przyczynowego to jedna z najczęstszych strategii obniżania odszkodowania stosowanych przez niemieckich ubezpieczycieli OC pojazdów. Przy roszczeniu na 10.000 € ubezpieczyciel oszczędza przy kwocie 30% aż 3.000 € na każdym przypadku. Ciężar dowodu spoczywa jednak w całości na ubezpieczycielu, a nie na Panu/Pani. Ryczałtowe twierdzenia o kwotach przyczynienia należy zgodnie z orzecznictwem BGH odrzucać.
 
 ---
 
-## Co właśnie Pan(i) otrzymał(a) — dosłownie
+## Co właśnie Pan(i) otrzymał(a) – dosłownie
 
 Typowe warianty tego samego pisma:
 
@@ -45,9 +45,9 @@ Typowe warianty tego samego pisma:
 
 Trzy cechy, które towarzyszą temu niemal zawsze:
 
-- **Brak konkretnych faktów** — to, co dokładnie miał(a) Pan(i) zrobić źle, pozostaje niewyjaśnione.
-- **Brak uzasadnienia związku przyczynowego** — brakuje powiązania między zarzucanym zachowaniem a konkretną szkodą.
-- **Ryczałtowa kwota** — 20, 25, 30, 50% — liczby wzięte z sufitu, a nie ze stanu faktycznego.
+- **Brak konkretnych faktów** – to, co dokładnie miał(a) Pan(i) zrobić źle, pozostaje niewyjaśnione.
+- **Brak uzasadnienia związku przyczynowego** – brakuje powiązania między zarzucanym zachowaniem a konkretną szkodą.
+- **Ryczałtowa kwota** – 20, 25, 30, 50% – liczby wzięte z sufitu, a nie ze stanu faktycznego.
 
 ---
 
@@ -59,11 +59,11 @@ Ubezpieczyciele wiedzą: nawet jeśli tylko 30–40% poszkodowanych zaakceptuje 
 
 ### 2. Inscenizacja odwrócenia ciężaru dowodu
 
-Ubezpieczyciele formułują pisma tak, jakby to **Pan(i)** musiał(a) udowodnić brak własnej winy. Z prawnego punktu widzenia jest dokładnie odwrotnie: dla przyczynienia się poszkodowanego pełny ciężar dowodu ponosi ubezpieczyciel — konkretne fakty plus konkretny związek przyczynowy ze szkodą. Kto tego nie wie, daje się na to nabrać.
+Ubezpieczyciele formułują pisma tak, jakby to **Pan(i)** musiał(a) udowodnić brak własnej winy. Z prawnego punktu widzenia jest dokładnie odwrotnie: dla przyczynienia się poszkodowanego pełny ciężar dowodu ponosi ubezpieczyciel – konkretne fakty plus konkretny związek przyczynowy ze szkodą. Kto tego nie wie, daje się na to nabrać.
 
 ### 3. Ustawienie kotwicy negocjacyjnej
 
-Gdy tylko liczba „30%" pojawi się w przestrzeni, dalsza dyskusja kręci się wokół tej liczby. Poszkodowani zazwyczaj targują się w dół — na przykład do 15%. W rzeczywistości w wielu przypadkach kwota powinna wynosić **0%**, ponieważ działa dowód prima facie (Anscheinsbeweis) albo brakuje konkretnych faktów.
+Gdy tylko liczba „30%" pojawi się w przestrzeni, dalsza dyskusja kręci się wokół tej liczby. Poszkodowani zazwyczaj targują się w dół – na przykład do 15%. W rzeczywistości w wielu przypadkach kwota powinna wynosić **0%**, ponieważ działa dowód prima facie (Anscheinsbeweis) albo brakuje konkretnych faktów.
 
 ### 4. Wykorzystanie zmęczenia negocjacjami
 
@@ -73,11 +73,11 @@ Kto po 8 tygodniach korespondencji z ubezpieczycielem jest wyczerpany, chętniej
 
 ## Co mówi na ten temat orzecznictwo
 
-### § 254 BGB — Przyczynienie się poszkodowanego
+### § 254 BGB – Przyczynienie się poszkodowanego
 
 > *„Jeżeli przy powstaniu szkody współdziałała wina poszkodowanego, obowiązek naprawienia szkody oraz zakres należnego odszkodowania zależą od okoliczności, w szczególności od tego, w jakim stopniu szkoda została spowodowana przeważnie przez jedną lub drugą stronę."*
 
-Ciężar dowodu co do faktów, z których wynika przyczynienie się poszkodowanego, ponosi **ten, kto powołuje się na przyczynienie** — czyli ubezpieczyciel. Ten rozkład ciężaru dowodu to ugruntowane orzecznictwo BGH.
+Ciężar dowodu co do faktów, z których wynika przyczynienie się poszkodowanego, ponosi **ten, kto powołuje się na przyczynienie** – czyli ubezpieczyciel. Ten rozkład ciężaru dowodu to ugruntowane orzecznictwo BGH.
 
 ### Dowód prima facie (Anscheinsbeweis) (zob. [Anscheinsbeweis](/haftpflicht/anscheinsbeweis))
 
@@ -87,15 +87,15 @@ W jednoznacznych konstelacjach dowód prima facie (Anscheinsbeweis) działa **na
 - **Naruszenie pierwszeństwa przejazdu:** dowód prima facie przemawia przeciwko naruszającemu pierwszeństwo.
 - **Przejazd na czerwonym świetle:** dowód prima facie działa przeciwko sprawcy przejazdu na czerwonym.
 
-Dowód prima facie ubezpieczyciel może obalić wyłącznie **konkretnymi faktami** — nie ryczałtowymi twierdzeniami.
+Dowód prima facie ubezpieczyciel może obalić wyłącznie **konkretnymi faktami** – nie ryczałtowymi twierdzeniami.
 
-### § 17 StVG — Współsprawstwo (współprzyczynienie) między pojazdami
+### § 17 StVG – Współsprawstwo (współprzyczynienie) między pojazdami
 
-Przy wypadkach między pojazdami dodatkowo odwołuje się do [§ 17 StVG](/haftpflicht/mitverschulden-stvg17) — także tutaj liczy się wyłącznie konkretny rozkład przyczynienia, a nie ryczałtowe przypisanie.
+Przy wypadkach między pojazdami dodatkowo odwołuje się do [§ 17 StVG](/haftpflicht/mitverschulden-stvg17) – także tutaj liczy się wyłącznie konkretny rozkład przyczynienia, a nie ryczałtowe przypisanie.
 
 ---
 
-## Co Pan(i) teraz robi — konkretnie
+## Co Pan(i) teraz robi – konkretnie
 
 ### 💡 Najważniejsza zasada
 Odrzucić ryczałtową kwotę. Zażądać konkretnych faktów. Nigdy nie negocjować w dół, zanim kwota w ogóle nie zostanie prawnie uzasadniona.
@@ -113,7 +113,7 @@ Zażądać raportu policyjnego, zabezpieczyć zeznania świadków, zdjęcia z mi
 
 ---
 
-## Wzór pisma — odrzucenie ryczałtowej kwoty
+## Wzór pisma – odrzucenie ryczałtowej kwoty
 
 ```
 Szanowni Państwo,
@@ -155,22 +155,22 @@ Z poważaniem
 
 ## Co ubezpieczyciel prawdopodobnie zrobi w następnej kolejności
 
-### Reakcja A — Minimalne dodatkowe uzasadnienie
+### Reakcja A – Minimalne dodatkowe uzasadnienie
 > *„Z uwagi na Pana/Pani nadmierną prędkość widzimy przyczynienie się poszkodowanego na poziomie 30%."*
 
 **Pana/Pani odpowiedź:** Konkretna prędkość? Konkretne fakty dotyczące warunków pogodowych? Kto i jak to ustalił? Środki dowodowe? Przy niejasnym uzasadnieniu nadal odrzucać.
 
-### Reakcja B — Kwota „polubownego zakończenia sporu"
+### Reakcja B – Kwota „polubownego zakończenia sporu"
 > *„Obniżamy do 20% w celu polubownego zakończenia sporu."*
 
 **Pana/Pani odpowiedź:** Obniżenie kwoty nie zastępuje dowodu. Jeśli nie podano konkretnych faktów, pozostaje Pan(i) przy 0%.
 
-### Reakcja C — Odwrócenie groźby procesu
+### Reakcja C – Odwrócenie groźby procesu
 > *„Jeśli Pan(i) nie zaakceptuje, skierujemy Pana/Panią na drogę sądową."*
 
-**Pana/Pani odpowiedź:** Droga sądowa to Pana/Pani prawo — a przy jednoznacznej konstelacji Pana/Pani najlepsza karta. Koszty zastępstwa prawnego ponosi ubezpieczyciel.
+**Pana/Pani odpowiedź:** Droga sądowa to Pana/Pani prawo – a przy jednoznacznej konstelacji Pana/Pani najlepsza karta. Koszty zastępstwa prawnego ponosi ubezpieczyciel.
 
-### Reakcja D — Biegły ubezpieczyciela jako „dowód"
+### Reakcja D – Biegły ubezpieczyciela jako „dowód"
 > *„Nasz rzeczoznawca potwierdza przyczynienie się poszkodowanego."*
 
 **Pana/Pani odpowiedź:** Rzeczoznawca ubezpieczyciela nie jest neutralny. Ma Pan(i) prawo do [niezależnego rzeczoznawcy według własnego wyboru](/haftpflicht/sv-kosten). W razie sporu między opiniami w przypadku procesu rozstrzyga biegły sądowy.
@@ -183,16 +183,16 @@ Z poważaniem
 ADAC oraz Niemieckie Stowarzyszenie Adwokatów (Deutscher Anwaltverein) publikują katalogi kwot z typowymi kwotami przyczynienia się poszkodowanego w standardowych konstelacjach. Są to jednak **pomoce orientacyjne** dla sądów, a nie wiążące reguły i **nie przesądzają** o ciężarze dowodu.
 
 **Czy w ogóle muszę negocjować z ubezpieczycielem?**
-Obowiązku negocjowania w ścisłym sensie nie ma. Może Pan(i) wnieść pozew bezpośrednio — przy jednoznacznych stanach faktycznych jest to często szybsze niż wielomiesięczna korespondencja.
+Obowiązku negocjowania w ścisłym sensie nie ma. Może Pan(i) wnieść pozew bezpośrednio – przy jednoznacznych stanach faktycznych jest to często szybsze niż wielomiesięczna korespondencja.
 
 **Co, jeśli policja zaznaczyła „obustronną winę"?**
-Adnotacje policyjne to poszlaki, ale nie wiążące przypisanie winy. W prawie cywilnym liczy się wynik samodzielnego postępowania dowodowego — ustalenia policyjne można podważyć.
+Adnotacje policyjne to poszlaki, ale nie wiążące przypisanie winy. W prawie cywilnym liczy się wynik samodzielnego postępowania dowodowego – ustalenia policyjne można podważyć.
 
 **Czy proces o przyczynienie się poszkodowanego opłaca się przy niskich kwotach?**
 Przy roszczeniach poniżej 750 € postępowanie upominawcze (Mahnverfahren) jest często tańsze niż proces. Od 750 € opłaca się analiza prawnika. Proszę nie zapominać: w razie sukcesu wszystkie koszty ponosi ubezpieczyciel.
 
-**Byłem(am) rzeczywiście częściowo winny(a) — co wtedy?**
-Jeśli przyczynienie się poszkodowanego rzeczywiście zachodzi (np. niezapięte pasy, bezspornie zbyt szybka jazda), kwota zostanie uznana. Ale: także tutaj ubezpieczyciel musi **konkretnie uzasadnić**, w jakiej wysokości — ryczałtowe liczby również wtedy można podważać.
+**Byłem(am) rzeczywiście częściowo winny(a) – co wtedy?**
+Jeśli przyczynienie się poszkodowanego rzeczywiście zachodzi (np. niezapięte pasy, bezspornie zbyt szybka jazda), kwota zostanie uznana. Ale: także tutaj ubezpieczyciel musi **konkretnie uzasadnić**, w jakiej wysokości – ryczałtowe liczby również wtedy można podważać.
 
 ---
 
@@ -206,8 +206,8 @@ Spory o przyczynienie się poszkodowanego należą do najbardziej dochodowych dy
 
 ## Źródła
 
-- Bürgerliches Gesetzbuch § 254 — [gesetze-im-internet.de/bgb/__254.html](https://www.gesetze-im-internet.de/bgb/__254.html)
-- Straßenverkehrsgesetz §§ 7, 17, 18 — [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
+- Bürgerliches Gesetzbuch § 254 – [gesetze-im-internet.de/bgb/__254.html](https://www.gesetze-im-internet.de/bgb/__254.html)
+- Straßenverkehrsgesetz §§ 7, 17, 18 – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
 - Orzecznictwo BGH dotyczące ciężaru dowodu przy przyczynieniu się poszkodowanego, ugruntowane orzecznictwo
 - BGH, wyrok z dnia 18.07.2017, VI ZR 235/13 (koszty zastępstwa prawnego jako szkoda wynikająca ze zwłoki)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
@@ -265,4 +265,4 @@ Spory o przyczynienie się poszkodowanego należą do najbardziej dochodowych dy
 
 > **Rechtlicher Hinweis (Informacja prawna):** Niniejszy artykuł stanowi redakcyjne objaśnienie i nie zastępuje porady prawnej w indywidualnym przypadku. W razie wątpliwości: skorzystać z pomocy wyspecjalizowanych prawników prawa drogowego.
 
-*Letzte fachliche Überprüfung: pending — końcowa weryfikacja merytoryczna przez naszą kancelarię partnerską jest jeszcze w toku.*
+*Letzte fachliche Überprüfung: pending – końcowa weryfikacja merytoryczna przez naszą kancelarię partnerską jest jeszcze w toku.*

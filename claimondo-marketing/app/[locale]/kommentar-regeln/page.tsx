@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/kommentar-regeln`,
     title: 'Kommentar-Regeln',
     description:
-      'Wie wir Kommentare unter den Wissens-Artikeln moderieren — und was beim Kommentieren bitte zu beachten ist.',
+      'Wie wir Kommentare unter den Wissens-Artikeln moderieren – und was beim Kommentieren bitte zu beachten ist.',
     locale: 'de_DE',
     siteName: 'Claimondo',
     images: OG_DEFAULT_IMAGES,
@@ -35,7 +35,7 @@ const VERBOTEN: { titel: string; text: string }[] = [
   },
   {
     titel: 'Keine Daten über andere Personen',
-    text: 'Keine Klarnamen, Kennzeichen oder Adressen Dritter — und keine namentlichen Vorwürfe gegen Werkstätten, Sachverständige, Versicherer oder einzelne Mitarbeitende.',
+    text: 'Keine Klarnamen, Kennzeichen oder Adressen Dritter – und keine namentlichen Vorwürfe gegen Werkstätten, Sachverständige, Versicherer oder einzelne Mitarbeitende.',
   },
   {
     titel: 'Kein Rechtsrat',
@@ -85,7 +85,7 @@ export default function Page() {
             Erwünscht
           </h2>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-claimondo-shield">
-            Sachliche Fragen, eigene Erfahrungen, hilfreiche Hinweise — und ein freundlicher Ton
+            Sachliche Fragen, eigene Erfahrungen, hilfreiche Hinweise – und ein freundlicher Ton
             gegenüber anderen.
           </p>
         </section>
@@ -127,7 +127,7 @@ export default function Page() {
           </h2>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-claimondo-shield">
             Wir prüfen jeden Kommentar vor der Veröffentlichung. Veröffentlichte Kommentare kannst du
-            über die Funktion „Melden" kennzeichnen — wir sehen sie uns an und entfernen
+            über die Funktion „Melden" kennzeichnen – wir sehen sie uns an und entfernen
             Regelverstöße. Konten, die wiederholt gegen diese Regeln verstoßen, können gesperrt
             werden.
           </p>

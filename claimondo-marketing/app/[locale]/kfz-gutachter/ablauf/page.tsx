@@ -61,7 +61,7 @@ const SCHRITTE = [
     titel: 'Gutachten + Anwalt',
     dauer: 'Termin <48 h, Bericht 48 h später',
     icon: FileSignature,
-    text: 'Kfz-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung.',
+    text: 'Kfz-Sachverständiger besichtigt das Fahrzeug – bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung.',
   },
   {
     nr: '04',
@@ -81,12 +81,12 @@ const FAQS = [
   {
     frage: 'Was ist der erste Schritt nach einem Unfall?',
     antwort:
-      'Sicherheit zuerst: Warndreieck, Warnblinker, ggf. Polizei. Dann Beweise sichern: Fotos vom Schaden, Position, Kennzeichen, Verkehrslage. Daten der Gegenseite aufschreiben (Name, Adresse, Versicherung, Kennzeichen, Fahrer). NICHT der gegnerischen Versicherung am Telefon "ja" sagen — das ist die Schadensteuerung-Falle. Stattdessen: bei Claimondo melden.',
+      'Sicherheit zuerst: Warndreieck, Warnblinker, ggf. Polizei. Dann Beweise sichern: Fotos vom Schaden, Position, Kennzeichen, Verkehrslage. Daten der Gegenseite aufschreiben (Name, Adresse, Versicherung, Kennzeichen, Fahrer). NICHT der gegnerischen Versicherung am Telefon "ja" sagen – das ist die Schadensteuerung-Falle. Stattdessen: bei Claimondo melden.',
   },
   {
     frage: 'Wie wird der Gutachter-Termin organisiert?',
     antwort:
-      'Wir koordinieren das. Sie geben Standort und Erreichbarkeit an, wir matchen mit dem nächstgelegenen freien Sachverständigen. Termin in unter 48 h. Der SV kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Falls das Fahrzeug nicht fahrbereit ist, organisieren wir Abschleppung (auch von der Versicherung erstattet).',
+      'Wir koordinieren das. Sie geben Standort und Erreichbarkeit an, wir matchen mit dem nächstgelegenen freien Sachverständigen. Termin in unter 48 h. Der SV kommt zu Ihnen – Wohnort, Arbeitsplatz oder Werkstatt. Falls das Fahrzeug nicht fahrbereit ist, organisieren wir Abschleppung (auch von der Versicherung erstattet).',
   },
   {
     frage: 'Was passiert wenn die Versicherung das Gutachten kürzt?',
@@ -96,7 +96,7 @@ const FAQS = [
   {
     frage: 'Wann bekomme ich einen Mietwagen oder Nutzungsausfall?',
     antwort:
-      'Mietwagen ab dem ersten Tag der Reparatur — gleichwertige Klasse oder klassentiefer mit Eigenanteil-Erstattung. Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (23–175 €/Tag je nach Fahrzeugklasse). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation.',
+      'Mietwagen ab dem ersten Tag der Reparatur – gleichwertige Klasse oder klassentiefer mit Eigenanteil-Erstattung. Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (23–175 €/Tag je nach Fahrzeugklasse). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation.',
   },
 ]
 
@@ -123,7 +123,7 @@ export default function AblaufPage() {
           }),
           howToSchema({
             name: 'Kfz-Schaden in 4 Schritten regulieren',
-            description: 'Vom Unfall bis zur Auszahlung — der vollständige Ablauf.',
+            description: 'Vom Unfall bis zur Auszahlung – der vollständige Ablauf.',
             totalTime: 'P56D',
             estimatedCost: { currency: 'EUR', value: '0' },
             schritte: SCHRITTE.map((s) => ({

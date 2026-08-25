@@ -34,7 +34,7 @@ export async function ArticleComments({ articleSlug }: { articleSlug: string }) 
 
       <ul className="mt-6 space-y-3.5">
         {comments.length === 0 && (
-          <li className="text-sm text-claimondo-shield">Noch keine Kommentare — schreib den ersten.</li>
+          <li className="text-sm text-claimondo-shield">Noch keine Kommentare – schreib den ersten.</li>
         )}
         {comments.map((c) => (
           <li key={c.id} className="rounded-ios-md border border-claimondo-border bg-white p-4">
@@ -47,7 +47,7 @@ export async function ArticleComments({ articleSlug }: { articleSlug: string }) 
         ))}
       </ul>
       <p className="mt-4 text-[0.75rem] text-claimondo-shield/70">
-        Kommentare geben die Meinung der Verfasser:innen wieder, nicht die von Claimondo. Sie werden vor Veröffentlichung geprüft — es gelten unsere{' '}
+        Kommentare geben die Meinung der Verfasser:innen wieder, nicht die von Claimondo. Sie werden vor Veröffentlichung geprüft – es gelten unsere{' '}
         <a href="/kommentar-regeln" className="underline hover:text-claimondo-shield">Kommentar-Regeln</a>.
       </p>
     </section>

@@ -7,7 +7,7 @@ import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_COUNTRY, PHONE_DISPLAY } from '@
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
   description:
-    'Datenschutzerklärung der Claimondo GmbH gemäß Art. 13 und 14 DSGVO — Verarbeitung personenbezogener Daten bei Lead-Anfrage, Schadenabwicklung und Webseitenbesuch.',
+    'Datenschutzerklärung der Claimondo GmbH gemäß Art. 13 und 14 DSGVO – Verarbeitung personenbezogener Daten bei Lead-Anfrage, Schadenabwicklung und Webseitenbesuch.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
   alternates: { canonical: '/datenschutz' },
@@ -373,23 +373,23 @@ export default function DatenschutzPage() {
             <p>Ihre Daten werden im Rahmen der Schadenabwicklung an folgende Empfänger weitergegeben:</p>
             <ul className="mt-2 ml-1 space-y-1">
               <li>
-                a) Kfz-Sachverständiger — zur Begutachtung des Fahrzeugschadens (Name, Kontaktdaten,
+                a) Kfz-Sachverständiger – zur Begutachtung des Fahrzeugschadens (Name, Kontaktdaten,
                 Fahrzeugdaten, Termindetails);
               </li>
               <li>
-                b) Partnerkanzlei LexDrive UG / RA Kevin Genter — zur außergerichtlichen und ggf.
+                b) Partnerkanzlei LexDrive UG / RA Kevin Genter – zur außergerichtlichen und ggf.
                 gerichtlichen Durchsetzung Ihres Schadensersatzanspruchs (vollständige Falldaten);
               </li>
               <li>
-                c) DAT Deutsche Automobil Treuhand GmbH — zur KI-Schadenvorabkalkulation
+                c) DAT Deutsche Automobil Treuhand GmbH – zur KI-Schadenvorabkalkulation
                 (ausschließlich Fahrzeug- und Schadenparameter);
               </li>
               <li>
-                d) DSR24 / KfzVS — nur bei Inanspruchnahme von Honorar-Factoring durch den
+                d) DSR24 / KfzVS – nur bei Inanspruchnahme von Honorar-Factoring durch den
                 Sachverständigen;
               </li>
               <li>
-                e) Gegnerische Kfz-Haftpflichtversicherung — über die Partnerkanzlei im Rahmen der
+                e) Gegnerische Kfz-Haftpflichtversicherung – über die Partnerkanzlei im Rahmen der
                 Schadensregulierung.
               </li>
             </ul>
@@ -499,7 +499,7 @@ export default function DatenschutzPage() {
             <p>
               Auf Karten-Ansichten (z. B. Gutachter-/Kanzlei-Finder) binden wir den Kartendienst der
               Mapbox Inc., 740 15th Street NW, Washington, D.C., USA ein. Beim Laden einer Karte
-              werden Daten — insbesondere Ihre IP-Adresse — an Mapbox in die USA übertragen.
+              werden Daten – insbesondere Ihre IP-Adresse – an Mapbox in die USA übertragen.
               Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (funktionsfähige Kartendarstellung); auf
               Marketing-Seiten erfolgt die Einbindung erst nach Ihrer Einwilligung über das
               Consent-Banner. Die Übermittlung in die USA erfolgt auf Basis von
@@ -509,7 +509,7 @@ export default function DatenschutzPage() {
             <p>
               In bestimmten Karten-Ansichten (3D-Gelände im Gutachter-Finder und im Feldmodus)
               nutzen wir Cesium Ion (Cesium GmbH / Cesium Inc., USA). Beim Laden der 3D-Kacheln
-              werden Daten — insbesondere Ihre IP-Adresse — an Cesium in die USA übertragen.
+              werden Daten – insbesondere Ihre IP-Adresse – an Cesium in die USA übertragen.
               Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO bzw. Ihre Einwilligung über das
               Consent-Banner; die Übermittlung in die USA erfolgt auf Basis von
               Standardvertragsklauseln (SCCs).
@@ -522,7 +522,7 @@ export default function DatenschutzPage() {
               Landingpages angezeigt.
             </p>
             <p className="mt-2">
-              Beim Laden des Siegels werden Daten an den Anbieter übertragen — insbesondere Ihre{' '}
+              Beim Laden des Siegels werden Daten an den Anbieter übertragen – insbesondere Ihre{' '}
               <strong>IP-Adresse</strong> sowie technische Browserdaten (etwa Browsertyp und
               aufgerufene Adresse). Zusätzlich legt das Siegel einen Eintrag im{' '}
               <strong>Session-Speicher</strong> Ihres Browsers ab (
@@ -533,11 +533,11 @@ export default function DatenschutzPage() {
               schließen. <strong>Cookies setzt das Siegel nicht.</strong>
             </p>
             <p className="mt-2">
-              Rechtsgrundlage ist <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> — unser berechtigtes
+              Rechtsgrundlage ist <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> – unser berechtigtes
               Interesse daran, unabhängig geprüfte Kundenbewertungen nachvollziehbar auszuweisen.
               Das Siegel wird deshalb <strong>ohne vorherige Einwilligung geladen</strong> und ist
               nicht Teil der Cookie-Einstellungen. Sie haben das Recht, dieser Verarbeitung nach{' '}
-              <strong>Art. 21 DSGVO</strong> zu widersprechen — formlos an{' '}
+              <strong>Art. 21 DSGVO</strong> zu widersprechen – formlos an{' '}
               <a href="mailto:datenschutz@claimondo.de" className={linkCls}>
                 datenschutz@claimondo.de
               </a>
@@ -809,7 +809,7 @@ export default function DatenschutzPage() {
               Die Aufzeichnung von Telefongesprächen ohne Einwilligung der Gesprächspartner ist nach
               § 201 StGB (Verletzung der Vertraulichkeit des Wortes) strafbar. Aus diesem Grund holen
               wir Ihre Einwilligung zwingend vor jeder Aufzeichnung ein. Lehnen Sie ab, wird das
-              Gespräch ohne Aufzeichnung geführt — ohne Nachteile für Sie.
+              Gespräch ohne Aufzeichnung geführt – ohne Nachteile für Sie.
             </p>
           </section>
 

@@ -51,7 +51,7 @@ export function EmailLayout({
       <Body style={{ backgroundColor: '#f4f5f7', margin: 0, padding: 0 }}>
         {preview && <Text style={{ display: 'none' }}>{preview}</Text>}
         <Container style={{ maxWidth: 580, margin: '0 auto', padding: '32px 16px' }}>
-          {/* Header — SV-Logo + Firmenname wenn gebrandet, sonst Claimondo-Wortmarke */}
+          {/* Header – SV-Logo + Firmenname wenn gebrandet, sonst Claimondo-Wortmarke */}
           <Section style={{ backgroundColor: headerColor(brand), borderRadius: '16px 16px 0 0', padding: '24px 32px' }}>
             {brand?.logoUrl ? (
               <Img
@@ -72,7 +72,7 @@ export function EmailLayout({
             {children}
           </Section>
 
-          {/* Footer — "Powered by Claimondo" bleibt auch im gebrandeten Fall (Brand-Trust) */}
+          {/* Footer – "Powered by Claimondo" bleibt auch im gebrandeten Fall (Brand-Trust) */}
           <Section style={{ backgroundColor: '#f9fafb', borderRadius: '0 0 16px 16px', padding: '20px 32px', borderLeft: '1px solid #e5e7eb', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
             {brand && (
               <Text style={{ color: '#9ca3af', fontSize: 11, margin: '0 0 4px', textAlign: 'center' as const }}>

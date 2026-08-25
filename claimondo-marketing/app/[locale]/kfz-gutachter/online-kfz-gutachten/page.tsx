@@ -49,12 +49,12 @@ const FAQ_SCHEMA = [
   {
     frage: 'Ist ein „Online-Kfz-Gutachten" mit Foto-Upload überhaupt verboten?',
     antwort:
-      'Nicht jedes digitale Element ist verboten — aber ein vollständiges Gutachten allein auf Basis hochgeladener Fotos ohne persönliche Fahrzeug-Besichtigung hat das LG Bremen am 16.01.2026 (Az. 9 O 1720/24) als irreführende Werbung untersagt. Entscheidend ist die persönliche Inaugenscheinnahme durch den Sachverständigen. Ein Foto-Vor-Check zur ersten Schadenseinschätzung bleibt zulässig, ein darauf gestütztes Gutachten nicht.',
+      'Nicht jedes digitale Element ist verboten – aber ein vollständiges Gutachten allein auf Basis hochgeladener Fotos ohne persönliche Fahrzeug-Besichtigung hat das LG Bremen am 16.01.2026 (Az. 9 O 1720/24) als irreführende Werbung untersagt. Entscheidend ist die persönliche Inaugenscheinnahme durch den Sachverständigen. Ein Foto-Vor-Check zur ersten Schadenseinschätzung bleibt zulässig, ein darauf gestütztes Gutachten nicht.',
   },
   {
     frage: 'Akzeptieren Versicherungen Gutachten ohne Vor-Ort-Termin?',
     antwort:
-      'In der Regel nicht zuverlässig. Versicherer erkennen Sachverständigen-Gutachten an, wenn sie auf einer persönlichen Begutachtung beruhen. Ein Kfz-Gutachten ohne Besichtigung riskiert, von der gegnerischen Versicherung als nicht belastbar zurückgewiesen zu werden — mit entsprechendem Risiko für Ihre Schadensregulierung.',
+      'In der Regel nicht zuverlässig. Versicherer erkennen Sachverständigen-Gutachten an, wenn sie auf einer persönlichen Begutachtung beruhen. Ein Kfz-Gutachten ohne Besichtigung riskiert, von der gegnerischen Versicherung als nicht belastbar zurückgewiesen zu werden – mit entsprechendem Risiko für Ihre Schadensregulierung.',
   },
   {
     frage: 'Was passiert mit meinem Schadensanspruch, wenn ich ein unzulässiges Online-Gutachten nutze?',
@@ -64,7 +64,7 @@ const FAQ_SCHEMA = [
   {
     frage: 'Wie unterscheidet sich ein „digitales Gutachten" von einem „Online-Gutachten"?',
     antwort:
-      'Ein digitales Gutachten meint einen digitalen Workflow — Online-Auftrag, Foto-Upload, digitale Kommunikation — bei dem der Sachverständige das Fahrzeug trotzdem persönlich vor Ort besichtigt. Ein „Online-Gutachten" im untersagten Sinn meint die Erstellung allein aus eingereichten Fotos ohne Besichtigung. Das erste ist zulässig und Standard, das zweite hat das LG Bremen beanstandet.',
+      'Ein digitales Gutachten meint einen digitalen Workflow – Online-Auftrag, Foto-Upload, digitale Kommunikation – bei dem der Sachverständige das Fahrzeug trotzdem persönlich vor Ort besichtigt. Ein „Online-Gutachten" im untersagten Sinn meint die Erstellung allein aus eingereichten Fotos ohne Besichtigung. Das erste ist zulässig und Standard, das zweite hat das LG Bremen beanstandet.',
   },
   {
     frage: 'Ist das LG-Bremen-Urteil rechtskräftig?',

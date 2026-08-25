@@ -20,7 +20,7 @@ export function subject(p: Props) {
 
 export function KanzleiAbrechnungRechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Kanzlei-Rechnung ${props.rechnungsNr} — ${props.gesamtbetrag}`}>
+    <EmailLayout preview={`Kanzlei-Rechnung ${props.rechnungsNr} – ${props.gesamtbetrag}`}>
       <Heading>Abrechnung + Rechnung für Fall {props.fallNummer}</Heading>
       <Paragraph>
         Anbei die Abrechnung und Rechnung für den abgeschlossenen Fall als PDF.

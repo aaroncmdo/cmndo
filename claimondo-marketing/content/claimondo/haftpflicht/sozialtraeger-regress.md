@@ -16,10 +16,10 @@ customer_questions:
   - "berufsgenossenschaft schadensersatz"
   - "geht mein anspruch auf krankenkasse über"
 last_modified: 2026-05-18
-excerpt: Beim Sozialträger-Regress nach § 116 SGB X geht der Schadensersatz-Anspruch des Unfallgeschädigten kraft Gesetzes automatisch auf gesetzliche Kranken-, Pflege-, Renten- und Unfallversicherungen über, soweit diese unfallbedingt geleistet haben — der Geschädigte muss nichts zurückzahlen, der Regress läuft direkt zwischen den Versicherungsträgern ab. Bei Mitverschulden gilt das Quotenvorrecht des Geschädigten vor dem Sozialträger.
+excerpt: Beim Sozialträger-Regress nach § 116 SGB X geht der Schadensersatz-Anspruch des Unfallgeschädigten kraft Gesetzes automatisch auf gesetzliche Kranken-, Pflege-, Renten- und Unfallversicherungen über, soweit diese unfallbedingt geleistet haben – der Geschädigte muss nichts zurückzahlen, der Regress läuft direkt zwischen den Versicherungsträgern ab. Bei Mitverschulden gilt das Quotenvorrecht des Geschädigten vor dem Sozialträger.
 keyFacts:
-  - § 116 SGB X — automatischer Forderungs-Übergang kraft Gesetzes
-  - § 6 EFZG — Arbeitgeber-Regress für 6-Wochen-Lohnfortzahlung
+  - § 116 SGB X – automatischer Forderungs-Übergang kraft Gesetzes
+  - § 6 EFZG – Arbeitgeber-Regress für 6-Wochen-Lohnfortzahlung
   - Quotenvorrecht Geschädigter vor Sozialträger (§ 116 Abs. 1 S. 3 SGB X)
   - Schmerzensgeld bleibt immer beim Geschädigten, geht nicht über
   - Berufsgenossenschaft nimmt Regress bei Wegeunfällen
@@ -29,12 +29,12 @@ related:
   - /haftpflicht/verdienstausfall
   - /haftpflicht/erben-rechtsnachfolger
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Sozialträger-Regress (§116 SGB X): Krankenkasse & Co. übernehmen Ihren Anspruch, soweit sie leisten — Ihr Quotenvorrecht geht vor. Was bei Ihnen bleibt."
+meta_description: "Sozialträger-Regress (§116 SGB X): Krankenkasse & Co. übernehmen Ihren Anspruch, soweit sie leisten – Ihr Quotenvorrecht geht vor. Was bei Ihnen bleibt."
 ---
 
-# Sozialträger-Regress nach § 116 SGB X — wenn die Krankenkasse mitkassiert
+# Sozialträger-Regress nach § 116 SGB X – wenn die Krankenkasse mitkassiert
 
-> **Kurz erklärt:** Wenn deine **gesetzliche Krankenkasse, Berufsgenossenschaft oder Rentenversicherung** unfallbedingt Leistungen erbringt (Krankengeld, Heilbehandlung, Erwerbsminderungs-Rente), geht dein Schadensersatz-Anspruch insoweit **auf den Sozialträger über** (Forderungs-Übergang nach § 116 SGB X). Du behältst nur den Anspruch für **eigene** Aufwendungen (Zuzahlungen, Privatleistungen, Differenz zum Krankengeld, Schmerzensgeld). Das ist **keine Belastung** für dich — der Vorgang läuft automatisch zwischen den Versicherungen ab.
+> **Kurz erklärt:** Wenn deine **gesetzliche Krankenkasse, Berufsgenossenschaft oder Rentenversicherung** unfallbedingt Leistungen erbringt (Krankengeld, Heilbehandlung, Erwerbsminderungs-Rente), geht dein Schadensersatz-Anspruch insoweit **auf den Sozialträger über** (Forderungs-Übergang nach § 116 SGB X). Du behältst nur den Anspruch für **eigene** Aufwendungen (Zuzahlungen, Privatleistungen, Differenz zum Krankengeld, Schmerzensgeld). Das ist **keine Belastung** für dich – der Vorgang läuft automatisch zwischen den Versicherungen ab.
 
 ## Auch bekannt als
 
@@ -48,14 +48,14 @@ Sozialträger-Regress ist der automatische Forderungs-Übergang deines Schadense
 
 ## In drei Sätzen erklärt
 
-§ 116 SGB X regelt einen **automatischen, kraft Gesetzes** stattfindenden Forderungs-Übergang: Sobald deine gesetzliche Krankenkasse, Berufsgenossenschaft, Rentenversicherung, Pflegekasse oder Sozialhilfe-Träger unfallbedingt Leistungen erbringt, geht dein Schadensersatz-Anspruch gegen den gegnerischen Haftpflichtversicherer **insoweit auf den Sozialträger über** — der Sozialträger nimmt direkt Regress beim Versicherer und holt sich seine Kosten zurück. Du behältst nur die Ansprüche für **deine eigenen Aufwendungen** (Zuzahlungen, Privatleistungen, Verdienstdifferenz zum Krankengeld, Schmerzensgeld, Wertminderung) — diese reichst du direkt beim Versicherer ein. Das ist **keine Belastung** für dich — du musst der Krankenkasse nichts zurückzahlen, der Regress läuft zwischen den Versicherungs-Trägern ab.
+§ 116 SGB X regelt einen **automatischen, kraft Gesetzes** stattfindenden Forderungs-Übergang: Sobald deine gesetzliche Krankenkasse, Berufsgenossenschaft, Rentenversicherung, Pflegekasse oder Sozialhilfe-Träger unfallbedingt Leistungen erbringt, geht dein Schadensersatz-Anspruch gegen den gegnerischen Haftpflichtversicherer **insoweit auf den Sozialträger über** – der Sozialträger nimmt direkt Regress beim Versicherer und holt sich seine Kosten zurück. Du behältst nur die Ansprüche für **deine eigenen Aufwendungen** (Zuzahlungen, Privatleistungen, Verdienstdifferenz zum Krankengeld, Schmerzensgeld, Wertminderung) – diese reichst du direkt beim Versicherer ein. Das ist **keine Belastung** für dich – du musst der Krankenkasse nichts zurückzahlen, der Regress läuft zwischen den Versicherungs-Trägern ab.
 
 ## Die fünf Schlüsselzahlen
 
 - **§ 116 SGB X** als Anspruchsgrundlage Sozialträger
 - **§ 6 EFZG** Arbeitgeber-Regress (Lohnfortzahlung)
 - **§ 86 VVG analog** Krankenkassen-/Vollkasko-Regress
-- **0 €** für dich — kein eigener Aufwand
+- **0 €** für dich – kein eigener Aufwand
 - **Quotenvorrecht** Geschädigte vor Sozialträger bei Quotelung
 
 ---
@@ -75,7 +75,7 @@ Sozialträger-Regress ist der automatische Forderungs-Übergang deines Schadense
 
 ---
 
-## Was bei dir bleibt — was du direkt vom Versicherer holst
+## Was bei dir bleibt – was du direkt vom Versicherer holst
 
 | Schadensposition | Wo? |
 |---|---|
@@ -91,7 +91,7 @@ Sozialträger-Regress ist der automatische Forderungs-Übergang deines Schadense
 | **Sachverständigen-Kosten** | Du direkt |
 | **Anwaltskosten** | Du direkt |
 
-→ Du musst **nicht** den Krankenkassen-Anteil selbst einklagen — Krankenkasse macht das eigenständig.
+→ Du musst **nicht** den Krankenkassen-Anteil selbst einklagen – Krankenkasse macht das eigenständig.
 
 ---
 
@@ -99,13 +99,13 @@ Sozialträger-Regress ist der automatische Forderungs-Übergang deines Schadense
 
 Bei [Mitverschulden / Quotelung](/haftpflicht/mitverschulden-stvg17) entsteht eine wichtige Frage: Wenn der Versicherer nur 70 % der Schäden zahlt, wer bekommt welchen Anteil?
 
-§ 116 Abs. 1 Satz 3 SGB X sieht das **Quotenvorrecht des Geschädigten** vor: Bei begrenzter Erstattung erhält der Geschädigte vorrangig seinen Anteil — der Sozialträger kommt nachrangig zum Zug.
+§ 116 Abs. 1 Satz 3 SGB X sieht das **Quotenvorrecht des Geschädigten** vor: Bei begrenzter Erstattung erhält der Geschädigte vorrangig seinen Anteil – der Sozialträger kommt nachrangig zum Zug.
 
 → Praktisch: Bei 70/30-Quote zahlt der Versicherer 70 % der Gesamt-Forderung; davon erhält erst der Geschädigte seine konkreten Aufwendungen, dann der Sozialträger.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Du musst **nichts** an die Krankenkasse zurückzahlen. Der Regress läuft automatisch zwischen Versicherungs-Trägern.
@@ -113,20 +113,20 @@ Du musst **nichts** an die Krankenkasse zurückzahlen. Der Regress läuft automa
 ### 🛠 Drei Schritte
 
 **1. Krankenkasse über Unfall informieren**
-Schadens-Anzeige bei eigener Krankenkasse — sie macht eigenen Regress.
+Schadens-Anzeige bei eigener Krankenkasse – sie macht eigenen Regress.
 
 **2. Eigene Aufwendungen direkt beim gegnerischen Versicherer**
 Zuzahlungen, Privatleistungen, Verdienst-Differenz, Schmerzensgeld separat einreichen.
 
 **3. Quotenvorrecht im Hinterkopf**
-Bei Mitverschulden: du gehst vor Sozialträger — Anwalt einschalten.
+Bei Mitverschulden: du gehst vor Sozialträger – Anwalt einschalten.
 
 ---
 
 ## Häufige Fragen
 
 **Muss ich der Krankenkasse Geld zurückzahlen?**
-Nein. Die Krankenkasse holt sich direkt vom gegnerischen Versicherer ihre Kosten zurück — du bist nicht beteiligt.
+Nein. Die Krankenkasse holt sich direkt vom gegnerischen Versicherer ihre Kosten zurück – du bist nicht beteiligt.
 
 **Was ist Forderungs-Übergang nach § 116 SGB X?**
 Ein automatischer Anspruchs-Übergang: Sobald die Krankenkasse unfallbedingt geleistet hat, geht dein Anspruch gegen den Versicherer **insoweit** auf die Kasse über.
@@ -141,15 +141,15 @@ Bei Mitverschulden / Quotelung: Der Geschädigte erhält seinen Anteil **vorrang
 Ja, bei Wegeunfällen oder Dienst-Unfällen. Der Mechanismus ist identisch zur Krankenkasse.
 
 **Was ist mit der Lohnfortzahlung des Arbeitgebers?**
-Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über — du hast für diese Zeit keinen eigenen Verdienstausfall-Anspruch.
+Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über – du hast für diese Zeit keinen eigenen Verdienstausfall-Anspruch.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) — direkter Anteil bei dir
-- [Verdienstausfall](/haftpflicht/verdienstausfall) — Differenz zum Krankengeld
-- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) — Anspruchsweiter-Übergang bei Tod
+- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) – direkter Anteil bei dir
+- [Verdienstausfall](/haftpflicht/verdienstausfall) – Differenz zum Krankengeld
+- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) – Anspruchsweiter-Übergang bei Tod
 - [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung)
 
 ---
@@ -162,9 +162,9 @@ Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über — du hast
 
 ## Quellen
 
-- SGB X § 116 — [gesetze-im-internet.de/sgb_10/__116.html](https://www.gesetze-im-internet.de/sgb_10/__116.html)
-- EFZG § 6 — [gesetze-im-internet.de/entgfg/__6.html](https://www.gesetze-im-internet.de/entgfg/__6.html)
-- VVG § 86 — analog Vollkasko / Sozialträger
+- SGB X § 116 – [gesetze-im-internet.de/sgb_10/__116.html](https://www.gesetze-im-internet.de/sgb_10/__116.html)
+- EFZG § 6 – [gesetze-im-internet.de/entgfg/__6.html](https://www.gesetze-im-internet.de/entgfg/__6.html)
+- VVG § 86 – analog Vollkasko / Sozialträger
 - BGH-Rechtsprechung zum Forderungs-Übergang und Quotenvorrecht
 
 ---
@@ -211,4 +211,4 @@ Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über — du hast
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*
