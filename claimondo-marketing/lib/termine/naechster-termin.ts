@@ -15,8 +15,11 @@ import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 
 /** Was die Stadtseite anzeigt. `null` = nichts anzeigen (kein Termin, API stumm). */
 export type NaechsterTermin = {
-  /** „Montag, 25.08." — Berlin-Zeit, nicht UTC. */
+  /** „Montag, 25.08." — Berlin-Zeit, nicht UTC. Kurzform fuer den Staedte-Streifen. */
   label: string
+  /** „11:00" — Berlin-Zeit. Eigenes Feld, weil der Streifen die Kurzform braucht,
+   *  die Stadtseite aber die vollstaendige Terminangabe zeigen muss. */
+  uhrzeit: string
   /** Deeplink MIT `sv` + `slot`: oeffnet den Finder mit Gutachter UND Termin vorgewaehlt. */
   buchungsUrl: string
   /**
@@ -107,8 +110,23 @@ export async function ladeNaechstenTermin(stadt: string): Promise<NaechsterTermi
       month: '2-digit',
       timeZone: 'Europe/Berlin',
     })
+    // ⚠ Die UHRZEIT fehlte — und damit die halbe Terminangabe.
+    //
+    // Die Seite nannte nur „Dienstag, 25.08.". Ein Termin ohne Uhrzeit ist keiner: der
+    // Kunde weiss nicht, ob er sich den Vormittag freihalten muss, und ein Modell kann
+    // sie nicht nennen. Genau das war am 25.08.2026 in ChatGPTs Antwort zu sehen — es
+    // gab „Dienstag, 25.08.2026" aus, weil mehr nicht dastand.
+    //
+    // Bewusst ein EIGENES Feld statt `label` zu verlaengern: der Uebersichts-Streifen
+    // listet bis zu 12 Staedte nebeneinander und braucht die Kurzform.
+    const uhrzeit = new Date(fruehester.zeit).toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Berlin',
+    })
     return {
       label,
+      uhrzeit,
       buchungsUrl: fruehester.url,
       vorname: fruehester.g.vorname ?? null,
       bewertungSchnitt: fruehester.g.bewertung_schnitt ?? null,
