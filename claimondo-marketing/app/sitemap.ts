@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL, WERKSTATT_LANDING_URL, FLOTTE_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE, isHubCity } from '@/lib/kfz-gutachter/staedte'
 import { stadtLastModified } from '@/lib/kfz-gutachter/freshness'
+import { ladeEinsatzStaedte } from '@/lib/termine/naechster-termin'
 import { ladeLokalinhaltStaende } from '@/lib/kfz-gutachter/lokalinhalt'
 import { getRouteLastUpdated } from '@/lib/seo/freshness'
 import {
@@ -33,6 +34,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // hartkodierten Default aus freshness.ts (19.08.2026 gemessen) — auch die,
   // die am selben Tag frischen Inhalt bekommen hatten.
   const lokalStaende = await ladeLokalinhaltStaende()
+  // Welche Staedte tragen aktuell einen Termin? Faellt die Abfrage aus, ist das Set leer
+  // und jede Stadt bekommt ihr bisheriges lastmod — eine Sitemap darf nie an einer
+  // Zusatzinformation haengen.
+  const einsatzStaedte = new Set(await ladeEinsatzStaedte().catch(() => []))
   const now = new Date()
   const wissenArtikel = await getPublishedArtikel()
 
@@ -43,6 +48,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 1.0,
       alternates: { languages: langAlternates('/') },
+    },
+    // llms.txt ueber die Sitemap auffindbar machen.
+    //
+    // Gemessen 24./25.08.2026 im nginx-Log: die KI-Crawler holen `sitemap.xml` 26x am Tag,
+    // `llms.txt` genau EINMAL. Unsere sorgfaeltig gepflegte Anleitung — welche Seite den
+    // Termin traegt, wie der Deeplink aufgebaut ist, was NICHT in die URL gehoert —
+    // erreicht damit fast niemanden. Der Standard sieht keinen Verweis aus robots.txt vor,
+    // und Next's `robots.ts`-Konvention laesst ohnehin keine freien Direktiven zu; die
+    // Sitemap ist der Weg, der ohne Umbau funktioniert.
+    //
+    // `daily`, weil die Datei die Staedte mit aktuellen Terminen nennt.
+    {
+      url: `${SITE_URL}/llms.txt`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
     },
     {
       url: `${SITE_URL}/gutachter-finden`,
@@ -215,11 +236,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // bleiben unveraendert bei 0.85/monthly ohne Alternates.
     ...STAEDTE.map((s) => {
       const isHub = isHubCity(s.slug)
+      // Staedte MIT Partner-SV tragen seit dem 24.08.2026 einen tagesaktuellen
+      // Termin im HTML („Naechster freier Vor-Ort-Termin: Dienstag, 25.08."). Ihr
+      // Inhalt aendert sich damit TAEGLICH — `lastmod` auf den Content-Stand zu
+      // setzen waere schlicht falsch und gibt zugleich das schwaechste
+      // Recrawl-Signal an genau die Seiten, die am haeufigsten neu gelesen werden
+      // sollten. Deshalb: heute, und `daily` statt weekly/monthly.
+      //
+      // ⚠ Bewusst NUR fuer Staedte mit Partner (aktuell 9 von 173). Alle 173 auf
+      // „heute" zu setzen waere unwahr — die uebrigen aendern sich wirklich nicht —
+      // und ein pauschales Tagesdatum entwertet das Signal fuer die, bei denen es
+      // stimmt.
+      const hatTermine = einsatzStaedte.has(s.name)
       return {
         url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-        lastModified: stadtLastModified(s.slug, lokalStaende.get(s.slug)),
-        changeFrequency: isHub ? ('weekly' as const) : ('monthly' as const),
-        priority: isHub ? 0.9 : 0.85,
+        lastModified: hatTermine ? new Date() : stadtLastModified(s.slug, lokalStaende.get(s.slug)),
+        changeFrequency: hatTermine ? ('daily' as const) : isHub ? ('weekly' as const) : ('monthly' as const),
+        priority: hatTermine ? 0.95 : isHub ? 0.9 : 0.85,
         ...(isHub ? { alternates: { languages: langAlternates(`/kfz-gutachter/${s.slug}`) } } : {}),
       }
     }),
