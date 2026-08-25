@@ -118,6 +118,7 @@ export function FinderWizard({
   vorauswahlSvId = null,
   vorauswahlSlotStart = null,
   utmSource = null,
+  vorauswahlAdresse = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -146,6 +147,15 @@ export function FinderWizard({
   /** `utm_source` der Einstiegs-URL — ChatGPT haengt `chatgpt.com` selbst an. Wird bis
    *  auf die Anfrage durchgereicht, damit sichtbar wird, WELCHE KI den Kunden schickte. */
   utmSource?: string | null
+  /**
+   * GEO-Deep-Link (`?adresse=…&lat=…&lng=…`): der Standort des Fahrzeugs, den die KI im
+   * Gespraech bereits erfragt hat.
+   *
+   * Ist er gesetzt, ueberspringt der Wizard den Ort-Schritt und geht direkt ins Matching —
+   * der Kunde hat die Frage im Chat schon beantwortet und soll sie nicht zweimal hoeren.
+   * Ohne Adresse aendert sich nichts: Schritt 1 bleibt wie bisher.
+   */
+  vorauswahlAdresse?: { adresse: string; lat: number; lng: number } | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -239,6 +249,36 @@ export function FinderWizard({
       versucheSlotVorauswahl(res)
     })
   }
+
+  /**
+   * Ort aus dem Deeplink uebernehmen — derselbe Downstream-Pfad wie `ortMitWerkstatt`.
+   *
+   * Einmal-Sperre wie bei der Slot-Vorauswahl: laeuft der Effekt bei jedem Render, wuerde
+   * er einen Nutzer, der bewusst „Zurueck" geht, sofort wieder nach vorn werfen.
+   */
+  const adressVorauswahlVerbrauchtRef = useRef(false)
+  useEffect(() => {
+    if (adressVorauswahlVerbrauchtRef.current) return
+    const a = vorauswahlAdresse
+    if (!a || !Number.isFinite(a.lat) || !Number.isFinite(a.lng) || !a.adresse) return
+    adressVorauswahlVerbrauchtRef.current = true
+    const o = { adresse: a.adresse, lat: a.lat, lng: a.lng }
+    setOrt(o)
+    track('gf_ort_gewaehlt', { quelle: 'deeplink' })
+    dispatchOrt(o.lat, o.lng)
+    setPhase('termin')
+    setMatchLoading(true)
+    const req = ++matchReqRef.current
+    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: null, forceFallback, ownerProfilId }).then((res) => {
+      if (matchReqRef.current !== req) return
+      setMatching(res)
+      setMatchLoading(false)
+      if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
+      else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+      versucheSlotVorauswahl(res)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vorauswahlAdresse])
 
   // Step 1 → 2: Ort gewählt → Karte informieren + token-loses Matching laden.
   function ortGewaehlt(p: PlaceResult) {

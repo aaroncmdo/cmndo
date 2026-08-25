@@ -65,7 +65,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Welche Ansprüche habe ich nach einem unverschuldeten Unfall?',
     antwort:
-      'Sie haben Anspruch auf vollständige Wiederherstellung nach § 249 BGB: Reparatur oder Wiederbeschaffung, merkantile Wertminderung, Nutzungsausfall oder Mietwagen, ein unabhängiges Sachverständigen-Gutachten, anwaltliche Vertretung und — bei Personenschaden — Schmerzensgeld nach § 253 Abs. 2 BGB. Alle Positionen trägt der gegnerische Haftpflichtversicherer.',
+      'Sie haben Anspruch auf vollständige Wiederherstellung nach § 249 BGB: Reparatur oder Wiederbeschaffung, merkantile Wertminderung, Nutzungsausfall oder Mietwagen, ein unabhängiges Sachverständigen-Gutachten, anwaltliche Vertretung und – bei Personenschaden – Schmerzensgeld nach § 253 Abs. 2 BGB. Alle Positionen trägt der gegnerische Haftpflichtversicherer.',
   },
   {
     frage: 'Muss ich mein Auto in eine bestimmte Werkstatt bringen?',
@@ -80,7 +80,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Bekomme ich auch ohne Mietwagen eine Entschädigung?',
     antwort:
-      'Ja. Verzichten Sie auf einen Mietwagen, steht Ihnen für die Dauer des Fahrzeugausfalls eine Nutzungsausfallentschädigung zu — gestaffelt nach Fahrzeugklasse pro Tag.',
+      'Ja. Verzichten Sie auf einen Mietwagen, steht Ihnen für die Dauer des Fahrzeugausfalls eine Nutzungsausfallentschädigung zu – gestaffelt nach Fahrzeugklasse pro Tag.',
   },
   {
     frage: 'Wie lange habe ich Zeit, meine Ansprüche geltend zu machen?',
@@ -113,7 +113,7 @@ export default function Page() {
           serviceSchema({
             name: 'Rechte nach unverschuldetem Unfall durchsetzen',
             description:
-              'Vollständige Wiederherstellung nach § 249 BGB nach unverschuldetem Verkehrsunfall: Gutachten, Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall, Mietwagen, anwaltliche Vertretung und Schmerzensgeld — alle Kosten trägt die gegnerische Haftpflichtversicherung, für Geschädigte 0 €.',
+              'Vollständige Wiederherstellung nach § 249 BGB nach unverschuldetem Verkehrsunfall: Gutachten, Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall, Mietwagen, anwaltliche Vertretung und Schmerzensgeld – alle Kosten trägt die gegnerische Haftpflichtversicherung, für Geschädigte 0 €.',
             url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
           }),
           faqPageSchema(FAQS, {

@@ -213,10 +213,10 @@ export default function GutachterPartnerClient() {
       {/* SV-Claim-Flow + Karte */}
       <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        {/* Linke Seite — SV-Claim-Flow (Karte<->Claim bidirektional verdrahtet) */}
+        {/* Linke Seite – SV-Claim-Flow (Karte<->Claim bidirektional verdrahtet) */}
         <SvClaimClient initialQuery={aktivePlz} onPlzChange={handleClaimPlz} />
 
-        {/* Rechte Seite — Karte */}
+        {/* Rechte Seite – Karte */}
         <div className="lg:sticky lg:top-6 space-y-3">
           <div className="bg-white rounded-3xl shadow-claimondo-md overflow-hidden">
             <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">

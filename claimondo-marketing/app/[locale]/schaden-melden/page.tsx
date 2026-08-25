@@ -53,7 +53,7 @@ export default async function SchadenMeldenPage({
     <div className="min-h-screen bg-claimondo-bg">
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — gleiche Sprache wie /check: Gradient-Ambient + Trust-Badge */}
+      {/* Hero – gleiche Sprache wie /check: Gradient-Ambient + Trust-Badge */}
       <section className="relative isolate overflow-hidden py-12 text-center sm:py-16">
         <div
           aria-hidden

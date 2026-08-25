@@ -13,7 +13,7 @@ type Props = {
 }
 
 export function subject(p: Props) {
-  return `Claimondo Monatsabrechnung ${p.monat} — ${p.abrechnungsNr}`
+  return `Claimondo Monatsabrechnung ${p.monat} – ${p.abrechnungsNr}`
 }
 
 function fmtEuro(n: number): string {
@@ -22,7 +22,7 @@ function fmtEuro(n: number): string {
 
 export function SvMonatsabrechnungVersandEmail(props: Props) {
   return (
-    <EmailLayout preview={`Monatsabrechnung ${props.monat} — ${props.abrechnungsNr}`}>
+    <EmailLayout preview={`Monatsabrechnung ${props.monat} – ${props.abrechnungsNr}`}>
       <Heading>Monatsabrechnung {props.monat}</Heading>
 
       <Paragraph>

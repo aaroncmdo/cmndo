@@ -2,7 +2,7 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export default function SAVolltextPage() {
   return (
-    <main id="main-content" className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
       {/* Ambient-Gradient */}
       <div
         aria-hidden
@@ -23,7 +23,7 @@ export default function SAVolltextPage() {
           <h2 className="text-lg font-semibold text-claimondo-navy">1. Abtretungserklärung</h2>
           <p>
             Hiermit trete ich sämtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden
-            Schadensersatzansprüche — insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten —
+            Schadensersatzansprüche – insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten —
             erfüllungshalber an die <strong>Claimondo GmbH</strong> ab.
           </p>
           <p>

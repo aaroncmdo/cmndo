@@ -55,17 +55,17 @@ const FAQS = [
   {
     frage: 'Wie schnell bekomme ich einen Termin?',
     antwort:
-      'In der Regel innerhalb von 48 Stunden. Der Sachverständige kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Der schriftliche Bericht folgt meist 1–2 Tage nach der Besichtigung.',
+      'In der Regel innerhalb von 48 Stunden. Der Sachverständige kommt zu Ihnen – Wohnort, Arbeitsplatz oder Werkstatt. Der schriftliche Bericht folgt meist 1–2 Tage nach der Besichtigung.',
   },
   {
     frage: 'Bekomme ich das Gutachten auch digital?',
     antwort:
-      'Ja. Sie erhalten den vollständigen Gutachtenbericht digital als PDF — auf Wunsch zusätzlich postalisch. Die Partnerkanzlei nutzt das Gutachten direkt für die Forderung gegenüber der gegnerischen Versicherung.',
+      'Ja. Sie erhalten den vollständigen Gutachtenbericht digital als PDF – auf Wunsch zusätzlich postalisch. Die Partnerkanzlei nutzt das Gutachten direkt für die Forderung gegenüber der gegnerischen Versicherung.',
   },
   {
     frage: 'Lohnt sich ein Gutachten bei kleinem Schaden?',
     antwort:
-      'Bei optisch kleinen Schäden über etwa 750 € meist ja — verdeckte Folgeschäden (Steuergeräte, Längsträger) bleiben sonst unentdeckt. Unter der Bagatellgrenze von ~750 € genügt in der Regel ein Kostenvoranschlag der Werkstatt.',
+      'Bei optisch kleinen Schäden über etwa 750 € meist ja – verdeckte Folgeschäden (Steuergeräte, Längsträger) bleiben sonst unentdeckt. Unter der Bagatellgrenze von ~750 € genügt in der Regel ein Kostenvoranschlag der Werkstatt.',
   },
 ]
 

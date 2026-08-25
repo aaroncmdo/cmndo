@@ -170,7 +170,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               <a href="/community-regeln" className="underline hover:text-claimondo-shield">
                 Community-Regeln
               </a>{' '}
-              — keine sensiblen Daten oder fremde personenbezogene Informationen.
+              – keine sensiblen Daten oder fremde personenbezogene Informationen.
             </p>
           </>
         )}

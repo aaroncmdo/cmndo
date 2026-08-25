@@ -26,7 +26,7 @@ export function subject(p: Props): string {
     case 'mahnung_21d':
       return `Mahnung 2: Abrechnung ${p.abrechnungs_nr} weiterhin offen`
     case 'mahnung_28d':
-      return `Letzte Mahnung: Abrechnung ${p.abrechnungs_nr} — Inkasso droht`
+      return `Letzte Mahnung: Abrechnung ${p.abrechnungs_nr} – Inkasso droht`
   }
 }
 

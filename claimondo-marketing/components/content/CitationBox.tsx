@@ -17,7 +17,7 @@ export function CitationBox({ sentences }: { sentences: BrandFakt[] }) {
   return (
     <section className="citation-box mt-8 rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-bg p-5 sm:p-6">
       <h2 style={HEAD_FONT} className="text-[0.8125rem] font-bold uppercase tracking-[0.04em] text-claimondo-ondo">
-        Auf einen Blick — gesicherte Fakten
+        Auf einen Blick – gesicherte Fakten
       </h2>
       <ul className="mt-3 flex flex-col gap-3.5">
         {sentences.map((f) => (

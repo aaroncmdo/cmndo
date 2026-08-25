@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/generali
-meta_title: Generali Schadensregulierung — Werkstattwahl
+meta_title: Generali Schadensregulierung – Werkstattwahl
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D8
@@ -18,7 +18,7 @@ keyFacts:
   - "Rechnungsprüfung über ClaimsControlling und Carexpert"
   - "Eskalationsmuster: Regulierung teils erst nach Klagezustellung"
   - "BaFin-Kfz-Quote 2024 nicht separat ausgewiesen (unter der Top-9-Schwelle)"
-meta_description: "Generali Schadensregulierung: Werkstattsteuerung über das Partnernetz, ClaimsControlling/Carexpert-Prüfung, Zahlung oft erst nach Klage. Ihre Rechte — mit Quellen."
+meta_description: "Generali Schadensregulierung: Werkstattsteuerung über das Partnernetz, ClaimsControlling/Carexpert-Prüfung, Zahlung oft erst nach Klage. Ihre Rechte – mit Quellen."
 ---
 
 # Generali: Schadensregulierung, Werkstattsteuerung und Ihre Rechte
@@ -27,11 +27,11 @@ meta_description: "Generali Schadensregulierung: Werkstattsteuerung über das Pa
 
 ## Wie die Generali Schäden Dritter reguliert
 
-Prägend ist die **Werkstattsteuerung über das Generali-Partnernetz**. Das Erstanschreiben enthält häufig einen „kostenlosen Hol- und Bringservice" als Lockmittel, der den Geschädigten in eine Partnerwerkstatt lenkt — dort wird zu reduzierten Konditionen kalkuliert, und Positionen wie Wertminderung oder Beilackierung geraten leichter unter die Räder. Ihre **freie Werkstattwahl** bleibt davon unberührt.
+Prägend ist die **Werkstattsteuerung über das Generali-Partnernetz**. Das Erstanschreiben enthält häufig einen „kostenlosen Hol- und Bringservice" als Lockmittel, der den Geschädigten in eine Partnerwerkstatt lenkt – dort wird zu reduzierten Konditionen kalkuliert, und Positionen wie Wertminderung oder Beilackierung geraten leichter unter die Räder. Ihre **freie Werkstattwahl** bleibt davon unberührt.
 
 Zur Rechnungsprüfung kommen **ClaimsControlling und Carexpert** zum Einsatz. Bei fiktiver Abrechnung sind UPE-Aufschläge und Verbringungskosten Standard-Kürzpositionen. In der Kasuistik (captain-huk.de) reguliert die Generali nach Klagezustellung gegen den Versicherungsnehmer häufig zügig; das AG Koblenz (161 C 611/13, 29.07.2013) und das AG Aachen (120 C 168/14, 31.07.2014, AachenMünchener/Generali) verurteilten zur Zahlung restlicher Sachverständigenkosten.
 
-Zur Konzern-Einordnung: Die **CosmosDirekt** ist die Direkttochter der Generali. Die häufig damit verwechselte **DA Direkt gehört dagegen zur Zurich-Gruppe**, nicht zur Generali — ein verbreiteter Irrtum, der für die Frage des gemeinsamen Schadenapparats relevant ist.
+Zur Konzern-Einordnung: Die **CosmosDirekt** ist die Direkttochter der Generali. Die häufig damit verwechselte **DA Direkt gehört dagegen zur Zurich-Gruppe**, nicht zur Generali – ein verbreiteter Irrtum, der für die Frage des gemeinsamen Schadenapparats relevant ist.
 
 ## So setzen Sie Ihre Ansprüche gegen die Generali durch
 
@@ -42,18 +42,18 @@ Zur Konzern-Einordnung: Die **CosmosDirekt** ist die Direkttochter der Generali.
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) — [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
-- AG Koblenz, Urteil vom 29.07.2013 — 161 C 611/13
-- AG Aachen, Urteil vom 31.07.2014 — 120 C 168/14 (AachenMünchener/Generali)
+- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
+- AG Koblenz, Urteil vom 29.07.2013 – 161 C 611/13
+- AG Aachen, Urteil vom 31.07.2014 – 120 C 168/14 (AachenMünchener/Generali)
 - Anwalts-Dokumentation: captain-huk.de; Kfz-Schaden-Manager 12/2016 (Werkstattsteuerungs-Anteile)
 
 ## Häufige Fragen
 
 **Muss ich mein Auto in die Generali-Partnerwerkstatt bringen?**
-Nein. Die freie Werkstattwahl ist Ihr Recht. Der „Hol- und Bringservice" ist ein Angebot, keine Pflicht — die gegnerische Haftpflicht trägt die ortsüblichen Reparaturkosten Ihrer Werkstatt.
+Nein. Die freie Werkstattwahl ist Ihr Recht. Der „Hol- und Bringservice" ist ein Angebot, keine Pflicht – die gegnerische Haftpflicht trägt die ortsüblichen Reparaturkosten Ihrer Werkstatt.
 
 **Gehört DA Direkt zur Generali?**
-Nein — das ist ein verbreiteter Irrtum. CosmosDirekt ist die Generali-Direkttochter; DA Direkt gehört zur Zurich-Gruppe.
+Nein – das ist ein verbreiteter Irrtum. CosmosDirekt ist die Generali-Direkttochter; DA Direkt gehört zur Zurich-Gruppe.
 
 **Warum zahlt die Generali teils erst nach Klage?**
-In den dokumentierten Fällen erfolgt die vollständige Regulierung häufig erst nach Klagezustellung. Eigenes Gutachten plus anwaltlicher Druck verkürzt diesen Weg — die Kosten trägt bei klarer Haftung die Generali.
+In den dokumentierten Fällen erfolgt die vollständige Regulierung häufig erst nach Klagezustellung. Eigenes Gutachten plus anwaltlicher Druck verkürzt diesen Weg – die Kosten trägt bei klarer Haftung die Generali.

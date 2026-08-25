@@ -58,12 +58,12 @@ const FAQS = [
   {
     frage: 'Verliere ich meine Unabhängigkeit?',
     antwort:
-      'Nein. Sie behalten Ihr eigenes Briefing, Ihre Honorarhoheit und Ihre Abrechnung. Claimondo übernimmt lediglich Akquise, Erstkontakt und Koordination — die gutachterliche Arbeit bleibt vollständig bei Ihnen.',
+      'Nein. Sie behalten Ihr eigenes Briefing, Ihre Honorarhoheit und Ihre Abrechnung. Claimondo übernimmt lediglich Akquise, Erstkontakt und Koordination – die gutachterliche Arbeit bleibt vollständig bei Ihnen.',
   },
   {
     frage: 'Wie funktioniert die regionale Freischaltung?',
     antwort:
-      'Sie werden für Ihr Postleitzahl-Gebiet freigeschaltet und erhalten Schadenfälle aus dieser Region zugeteilt. Annahme und Kapazität steuern Sie selbst — bei Auslastung pausieren Sie die Zuteilung.',
+      'Sie werden für Ihr Postleitzahl-Gebiet freigeschaltet und erhalten Schadenfälle aus dieser Region zugeteilt. Annahme und Kapazität steuern Sie selbst – bei Auslastung pausieren Sie die Zuteilung.',
   },
   {
     frage: 'Für wen lohnt sich das Modell?',
@@ -90,7 +90,7 @@ export default function NeukundengewinnungPage() {
           serviceSchema({
             name: 'Neukundengewinnung für Kfz-Sachverständige',
             description:
-              'Planbare Auslastung für freie Kfz-Sachverständige ohne CPL-Risiko: regionale Freischaltung statt Cost-per-Lead — qualifizierte Schadenfälle direkt zugeteilt.',
+              'Planbare Auslastung für freie Kfz-Sachverständige ohne CPL-Risiko: regionale Freischaltung statt Cost-per-Lead – qualifizierte Schadenfälle direkt zugeteilt.',
             url: `${GUTACHTER_LANDING_URL}/neukundengewinnung`,
           }),
           faqPageSchema(FAQS, {

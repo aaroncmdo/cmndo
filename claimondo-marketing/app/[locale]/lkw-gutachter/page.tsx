@@ -53,27 +53,27 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Wie wird der Ausfall eines LKW entschädigt?',
     antwort:
-      'Bei gewerblich genutzten Fahrzeugen tritt an die Stelle der pauschalen Nutzungsausfall-Tabelle der konkrete Ausfallschaden: Vorhaltekosten, entgangener Gewinn oder die Kosten eines Mietfahrzeugs. Diese liegen in der Regel deutlich über den Pkw-Pauschalen — dokumentieren Sie den Ausfall sorgfältig.',
+      'Bei gewerblich genutzten Fahrzeugen tritt an die Stelle der pauschalen Nutzungsausfall-Tabelle der konkrete Ausfallschaden: Vorhaltekosten, entgangener Gewinn oder die Kosten eines Mietfahrzeugs. Diese liegen in der Regel deutlich über den Pkw-Pauschalen – dokumentieren Sie den Ausfall sorgfältig.',
   },
   {
     frage: 'Wer zahlt den LKW-Gutachter?',
     antwort:
-      'Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) — für Sie 0 €. Sie wählen Ihren eigenen, unabhängigen Sachverständigen frei.',
+      'Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer als eigenständige Schadensposition (§ 249 BGB, BGH VI ZR 67/06) – für Sie 0 €. Sie wählen Ihren eigenen, unabhängigen Sachverständigen frei.',
   },
   {
     frage: 'Warum ein spezialisierter Nutzfahrzeug-Gutachter?',
     antwort:
-      'Aufbauten wie Ladekran, Kühlung oder Ladebordwand, Sonderausstattung und die gewerbliche Bewertung erfordern Fachkompetenz. Ein spezialisierter Sachverständiger erfasst diese Werte vollständig — ein Standard-Pkw-Gutachten übersieht sie oft.',
+      'Aufbauten wie Ladekran, Kühlung oder Ladebordwand, Sonderausstattung und die gewerbliche Bewertung erfordern Fachkompetenz. Ein spezialisierter Sachverständiger erfasst diese Werte vollständig – ein Standard-Pkw-Gutachten übersieht sie oft.',
   },
   {
     frage: 'Gilt das auch für Transporter und Sprinter?',
     antwort:
-      'Ja. Die Grundsätze gelten für gewerblich genutzte Fahrzeuge generell — vom Transporter über den Sprinter bis zur Sattelzugmaschine.',
+      'Ja. Die Grundsätze gelten für gewerblich genutzte Fahrzeuge generell – vom Transporter über den Sprinter bis zur Sattelzugmaschine.',
   },
   {
     frage: 'Was tun bei langer Standzeit oder Lieferverzug?',
     antwort:
-      'Der unfallbedingte Ausfall — Standkosten, Frachtausfall, entgangener Gewinn — ist als Folgeschaden erstattungsfähig. Bewahren Sie Aufträge, Tourenpläne und Belege als Nachweis auf.',
+      'Der unfallbedingte Ausfall – Standkosten, Frachtausfall, entgangener Gewinn – ist als Folgeschaden erstattungsfähig. Bewahren Sie Aufträge, Tourenpläne und Belege als Nachweis auf.',
   },
 ]
 

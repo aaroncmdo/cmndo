@@ -121,7 +121,7 @@ export default async function LinkVersendetPage({
       {/* Drei Blöcke */}
       <section className="pb-16">
         <div className="mx-auto max-w-2xl space-y-5 px-4 sm:px-6">
-          {/* 1 — Ansprechpartner */}
+          {/* 1 – Ansprechpartner */}
           <SheetCard size="full" padding="md" animateIn={false}>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-claimondo-ondo">
               Ihr persönlicher Ansprechpartner
@@ -148,7 +148,7 @@ export default async function LinkVersendetPage({
             </div>
           </SheetCard>
 
-          {/* 2 — Self-Service */}
+          {/* 2 – Self-Service */}
           <SheetCard size="full" padding="md" animateIn={false}>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-claimondo-ondo">
               Schaden direkt selbst bearbeiten
@@ -179,7 +179,7 @@ export default async function LinkVersendetPage({
             ) : null}
           </SheetCard>
 
-          {/* 3 — Rückruf */}
+          {/* 3 – Rückruf */}
           <RueckrufBuchenCard leadId={lead ?? null} />
         </div>
       </section>

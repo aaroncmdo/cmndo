@@ -239,7 +239,7 @@ export default function GooglePlaceAutocomplete({
       {/* Der sichtbare Fehlerfall: genau das, was am 24.08. gefehlt hat. */}
       {!istFirmenSuche && ohneTreffer && !sucht && (
         <p className="text-caption text-claimondo-ondo mt-1">
-          Keine Adresse gefunden. Sie können sie trotzdem eintippen — wir ordnen den Ort beim Absenden zu.
+          Keine Adresse gefunden. Sie können sie trotzdem eintippen – wir ordnen den Ort beim Absenden zu.
         </p>
       )}
     </div>

@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/nutzungsausfall-nicht
-meta_title: „Nutzungsausfall nicht erstattbar" — was tun
+meta_title: „Nutzungsausfall nicht erstattbar" – was tun
 type: decoder
 cluster: H8
 nummer: H8.10
@@ -23,7 +23,7 @@ keyFacts:
   - Kürzungs-Standardsatz: „Nutzungsausfall nicht ausreichend nachgewiesen"
   - BGH-Eigennutzungs-Vermutung: eidesstattliche Versicherung reicht, kein Fahrtenbuch nötig
   - Sanden-Danner-Tabelle gerichtsfest: 27–175 €/Tag je nach Fahrzeugklasse
-  - Zweitwagen schließt Anspruch nicht aus — konkrete Familien-Konstellation entscheidet
+  - Zweitwagen schließt Anspruch nicht aus – konkrete Familien-Konstellation entscheidet
   - Nutzungsausfall und Mietwagenkosten schließen sich gegenseitig aus
 last_legal_review: pending
 related:
@@ -31,12 +31,12 @@ related:
   - /haftpflicht/mietwagen
   - /decoder/mietwagen-zu-hoch
   - /haftpflicht/beweislast
-meta_description: "„Nutzungsausfall nicht erstattbar“? Die 3 Standard-Argumente der Versicherer entkräftet — so bekommen Sie Ihre Entschädigung pro Ausfalltag."
+meta_description: "„Nutzungsausfall nicht erstattbar“? Die 3 Standard-Argumente der Versicherer entkräftet – so bekommen Sie Ihre Entschädigung pro Ausfalltag."
 ---
 
-# „Den Nutzungsausfall können wir nicht erstatten" — Decoder
+# „Den Nutzungsausfall können wir nicht erstatten" – Decoder
 
-> **Kurz erklärt:** Versicherer verweigern Nutzungsausfall mit drei Standard-Argumenten: „nicht nachgewiesen", „Sie hatten einen Zweitwagen", „Sanden-Danner-Tabelle nicht anwendbar". Nach BGH-Linie greift bei privaten Fahrzeugen die **Eigennutzungs-Vermutung** — du musst konkrete Fahrten **nicht** nachweisen. Die Sanden-Danner-Tabelle ist gerichtsfest etabliert: typische Tagessätze 27–175 € je nach Fahrzeug-Klasse, multipliziert mit der Reparatur-Dauer.
+> **Kurz erklärt:** Versicherer verweigern Nutzungsausfall mit drei Standard-Argumenten: „nicht nachgewiesen", „Sie hatten einen Zweitwagen", „Sanden-Danner-Tabelle nicht anwendbar". Nach BGH-Linie greift bei privaten Fahrzeugen die **Eigennutzungs-Vermutung** – du musst konkrete Fahrten **nicht** nachweisen. Die Sanden-Danner-Tabelle ist gerichtsfest etabliert: typische Tagessätze 27–175 € je nach Fahrzeug-Klasse, multipliziert mit der Reparatur-Dauer.
 
 ## Auch bekannt als
 
@@ -44,47 +44,47 @@ Nutzungsausfall-Entschädigung · Nutzungsausfallentschädigung · NAE · Pausch
 
 ---
 
-## Was du gerade erhalten hast — wörtlich
+## Was du gerade erhalten hast – wörtlich
 
 Typische Varianten:
 
-> *„Sie haben den Nutzungsausfall nicht ausreichend nachgewiesen — wir können diese Position nicht erstatten."*
+> *„Sie haben den Nutzungsausfall nicht ausreichend nachgewiesen – wir können diese Position nicht erstatten."*
 
 > *„Da Sie einen Zweitwagen besitzen, ist ein Nutzungsausfall nicht entstanden."*
 
-> *„Die Sanden-Danner-Pauschal-Tabelle ist hier nicht anwendbar — Sie müssen konkrete Nutzungskosten nachweisen."*
+> *„Die Sanden-Danner-Pauschal-Tabelle ist hier nicht anwendbar – Sie müssen konkrete Nutzungskosten nachweisen."*
 
-> *„Sie waren im fraglichen Zeitraum im Urlaub / krank / im Ausland — keine Nutzung möglich."*
+> *„Sie waren im fraglichen Zeitraum im Urlaub / krank / im Ausland – keine Nutzung möglich."*
 
 Vier wiederkehrende Argumentationen:
 
-- **„Nicht nachgewiesen"** — als ob du Nutzungs-Beleg liefern müsstest
-- **„Zweitwagen-Argument"** — oft konstruiert, ohne konkrete Familien-Konstellation zu prüfen
-- **„Sanden-Danner nicht anwendbar"** — die anerkannte Pauschal-Tabelle abgelehnt
-- **„Keine Nutzung möglich"** — bei Urlaub, Krankheit oder Auslandsaufenthalt
+- **„Nicht nachgewiesen"** – als ob du Nutzungs-Beleg liefern müsstest
+- **„Zweitwagen-Argument"** – oft konstruiert, ohne konkrete Familien-Konstellation zu prüfen
+- **„Sanden-Danner nicht anwendbar"** – die anerkannte Pauschal-Tabelle abgelehnt
+- **„Keine Nutzung möglich"** – bei Urlaub, Krankheit oder Auslandsaufenthalt
 
 ---
 
 ## Was wirklich dahintersteht
 
 ### 1. Schadens-Position eliminieren
-Nutzungsausfall beträgt typischerweise 30–100 €/Tag. Bei 14 Tagen Reparatur sind das **420–1.400 € pro Fall** — eine erhebliche Position, die der Versicherer durch Verweigerung komplett spart.
+Nutzungsausfall beträgt typischerweise 30–100 €/Tag. Bei 14 Tagen Reparatur sind das **420–1.400 € pro Fall** – eine erhebliche Position, die der Versicherer durch Verweigerung komplett spart.
 
 ### 2. Beweislast-Umkehr inszenieren
-Versicherer formulieren so, als müsstest **du** die Nutzung beweisen. Tatsächlich ist es genau umgekehrt: Bei privaten Fahrzeugen wird die Nutzung **vermutet** (BGH-Linie). Der Versicherer müsste die Nicht-Nutzung beweisen — kann er das nicht, ist der Anspruch begründet.
+Versicherer formulieren so, als müsstest **du** die Nutzung beweisen. Tatsächlich ist es genau umgekehrt: Bei privaten Fahrzeugen wird die Nutzung **vermutet** (BGH-Linie). Der Versicherer müsste die Nicht-Nutzung beweisen – kann er das nicht, ist der Anspruch begründet.
 
 ### 3. Zweitwagen-Argument konstruieren
-Wenn in der Familie zwei Fahrzeuge zugelassen sind, behauptet der Versicherer pauschal „Sie hatten ein anderes Auto". Tatsächlich entscheidet die **konkrete Nutzungs-Konstellation**: Bei zwei berufstätigen Personen wird jedes Fahrzeug von einer Person genutzt — der Ausfall bleibt.
+Wenn in der Familie zwei Fahrzeuge zugelassen sind, behauptet der Versicherer pauschal „Sie hatten ein anderes Auto". Tatsächlich entscheidet die **konkrete Nutzungs-Konstellation**: Bei zwei berufstätigen Personen wird jedes Fahrzeug von einer Person genutzt – der Ausfall bleibt.
 
 ### 4. Sanden-Danner ablehnen
-Die Sanden-Danner-Tabelle vereinfacht die Bemessung erheblich — pauschale Tagessätze pro Fahrzeug-Klasse statt aufwendiger Einzelfall-Bewertung. Versicherer fordern stattdessen „konkreten Nachweis", der praktisch nicht zu liefern ist (Tankkarten, Routenpläne, Fahrtenbücher).
+Die Sanden-Danner-Tabelle vereinfacht die Bemessung erheblich – pauschale Tagessätze pro Fahrzeug-Klasse statt aufwendiger Einzelfall-Bewertung. Versicherer fordern stattdessen „konkreten Nachweis", der praktisch nicht zu liefern ist (Tankkarten, Routenpläne, Fahrtenbücher).
 
 ---
 
 ## Was die Rechtsprechung dazu sagt
 
 ### Eigennutzungs-Vermutung
-Der BGH hat in ständiger Rechtsprechung klargestellt: Bei privat genutzten Fahrzeugen wird die **Nutzungsabsicht und tatsächliche Nutzung vermutet**. Geschädigte müssen keine konkreten Fahrten oder Strecken nachweisen — eine **eidesstattliche Versicherung** über die typische Nutzung reicht.
+Der BGH hat in ständiger Rechtsprechung klargestellt: Bei privat genutzten Fahrzeugen wird die **Nutzungsabsicht und tatsächliche Nutzung vermutet**. Geschädigte müssen keine konkreten Fahrten oder Strecken nachweisen – eine **eidesstattliche Versicherung** über die typische Nutzung reicht.
 
 ### Sanden-Danner-Tabelle als Pauschal-Grundlage
 Die Sanden-Danner-Tabelle ist gerichtlich anerkannte Schätzungsgrundlage. Sie ordnet Fahrzeug-Klassen pauschale Tagessätze zu:
@@ -97,7 +97,7 @@ Die Sanden-Danner-Tabelle ist gerichtlich anerkannte Schätzungsgrundlage. Sie o
 | Obere Mittelklasse / Klasse D | 65–95 €/Tag |
 | Oberklasse / Klasse E+ | 95–175 €/Tag |
 
-→ Werte sind Orientierung nach Sanden-Danner — exakte Sätze ergeben sich aus der jeweils aktuellen Tabelle.
+→ Werte sind Orientierung nach Sanden-Danner – exakte Sätze ergeben sich aus der jeweils aktuellen Tabelle.
 
 ### Berechnung Standard
 
@@ -107,7 +107,7 @@ Nutzungsausfall = Tagessatz × Reparatur-Dauer in Tagen
 
 Beispiel: Mittelklasse-Fahrzeug, 14 Tage Reparatur → 55 € × 14 = **770 € Nutzungsausfall**.
 
-### Zweitwagen-Frage — BGH-Linie
+### Zweitwagen-Frage – BGH-Linie
 Ein Zweitwagen schließt den Nutzungsausfall **nicht** automatisch aus. Maßgeblich ist die konkrete Familien-Konstellation:
 
 - **Zwei berufstätige Personen mit je einem Fahrzeug** → Ausfall bleibt, weil Zweitwagen anderweitig genutzt wird
@@ -119,10 +119,10 @@ Maßgeblich ist die **tatsächliche** Reparatur-Dauer (Werkstatt-Auftrag, Ersatz
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Du beweist nichts — du erklärst nur die Nutzungs-Konstellation. Die Eigennutzungs-Vermutung schützt dich.
+Du beweist nichts – du erklärst nur die Nutzungs-Konstellation. Die Eigennutzungs-Vermutung schützt dich.
 
 ### 🛠 Vier Schritte
 
@@ -140,7 +140,7 @@ Eidesstattliche Versicherung als Beweis-Niveau ausreichend. Bei Streit über 300
 
 ---
 
-## Brief-Vorlage — Nutzungsausfall durchsetzen
+## Brief-Vorlage – Nutzungsausfall durchsetzen
 
 ```
 Sehr geehrte Damen und Herren,
@@ -184,23 +184,23 @@ Mit freundlichen Grüßen
 
 ## Was der Versicherer als nächstes wahrscheinlich tut
 
-### Reaktion A — Tagessatz reduzieren
-> *„Der Tagessatz ist zu hoch — wir bieten 30 €/Tag statt 65 €."*
+### Reaktion A – Tagessatz reduzieren
+> *„Der Tagessatz ist zu hoch – wir bieten 30 €/Tag statt 65 €."*
 
 **Deine Antwort:** Sanden-Danner-Tabelle als Bezug. Fahrzeug-Klasse konkret bestimmen. Bei Streit Anwalt.
 
-### Reaktion B — Reparatur-Dauer kürzen
-> *„Die Reparatur hätte in 7 Tagen erfolgen können — wir erstatten nur diese Dauer."*
+### Reaktion B – Reparatur-Dauer kürzen
+> *„Die Reparatur hätte in 7 Tagen erfolgen können – wir erstatten nur diese Dauer."*
 
 **Deine Antwort:** Werkstatt-Auftrag und Reparatur-Bericht beifügen. Ersatzteil-Wartezeiten dokumentieren. BGH-Linie zur tatsächlichen Dauer.
 
-### Reaktion C — Eidesstattliche Versicherung ablehnen
-> *„Eine eidesstattliche Versicherung reicht uns nicht — wir brauchen Tankkarten und Routen."*
+### Reaktion C – Eidesstattliche Versicherung ablehnen
+> *„Eine eidesstattliche Versicherung reicht uns nicht – wir brauchen Tankkarten und Routen."*
 
 **Deine Antwort:** BGH-Linie zur Eigennutzungs-Vermutung. Eidesstattliche Versicherung ist ausreichendes Beweis-Niveau. Bei Streit Klage.
 
-### Reaktion D — Zweitwagen-Konstruktion
-> *„In Ihrer Familie ist ein Zweitwagen vorhanden — kein Anspruch."*
+### Reaktion D – Zweitwagen-Konstruktion
+> *„In Ihrer Familie ist ein Zweitwagen vorhanden – kein Anspruch."*
 
 **Deine Antwort:** Konkrete Familien-Konstellation darlegen. Wer nutzt welches Fahrzeug wofür. BGH-Linie zur Mehrwagen-Familie.
 
@@ -221,19 +221,19 @@ Möglich. Maßgeblich ist die konkrete Familien-Konstellation. Wenn der Zweitwag
 Für die tatsächliche Reparatur-Dauer (Werkstatt-Auftrag, Ersatzteil-Wartezeiten). Bei Totalschaden typisch 14 Tage Wiederbeschaffungs-Dauer.
 
 **Was, wenn ich gleichzeitig einen Mietwagen genutzt habe?**
-Dann gibt's **keinen** Nutzungsausfall — Mietwagen-Kosten und Nutzungsausfall schließen sich aus (Schadensminderungs-Pflicht). Du entscheidest, welche Position du geltend machst.
+Dann gibt's **keinen** Nutzungsausfall – Mietwagen-Kosten und Nutzungsausfall schließen sich aus (Schadensminderungs-Pflicht). Du entscheidest, welche Position du geltend machst.
 
 **Lohnt sich Klage bei verweigerten 500 €?**
-Wirtschaftlich ja, Anwaltskosten zahlt der Versicherer. BGH-Linie zur Eigennutzungs-Vermutung ist klar etabliert — gute Klage-Chancen.
+Wirtschaftlich ja, Anwaltskosten zahlt der Versicherer. BGH-Linie zur Eigennutzungs-Vermutung ist klar etabliert – gute Klage-Chancen.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Nutzungsausfall (Detail)](/haftpflicht/nutzungsausfall) — Vollständige Berechnungslogik
-- [Mietwagen-Erstattung](/haftpflicht/mietwagen) — Alternative
-- [Decoder „Mietwagen-Tagessatz zu hoch"](/decoder/mietwagen-zu-hoch) — verwandte Strategie
-- [Beweislast](/haftpflicht/beweislast) — Grundsystem
+- [Nutzungsausfall (Detail)](/haftpflicht/nutzungsausfall) – Vollständige Berechnungslogik
+- [Mietwagen-Erstattung](/haftpflicht/mietwagen) – Alternative
+- [Decoder „Mietwagen-Tagessatz zu hoch"](/decoder/mietwagen-zu-hoch) – verwandte Strategie
+- [Beweislast](/haftpflicht/beweislast) – Grundsystem
 
 ---
 
@@ -247,7 +247,7 @@ Nutzungsausfall-Verweigerungen lassen sich bei sauberer Argumentation in 80–90
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 249 — [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
+- Bürgerliches Gesetzbuch § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH, ständige Rechtsprechung zum Nutzungsausfall und zur Eigennutzungs-Vermutung
 - BGH, Großer Senat, Beschluss vom 09.07.1986, GSZ 1/86 (Grundsatz Nutzungsausfall)
 - Sanden/Danner/Küppersbusch, „Nutzungsausfallentschädigung" Tabellen
@@ -290,4 +290,4 @@ Nutzungsausfall-Verweigerungen lassen sich bei sauberer Argumentation in 80–90
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   // rund 60. Der Zusatz "über Claimondo" nannte die Marke ausserdem ein zweites
   // Mal (dieselbe Doppelung wie in #5352). openGraph.title unten behaelt die
   // ausfuehrliche Fassung, dort ist mehr Platz.
-  title: 'Werkstatt Partner werden — Reparaturaufträge',
+  title: 'Werkstatt Partner werden – Reparaturaufträge',
   // 202 Zeichen — Google zeigt rund 160, der Rest wird abgeschnitten. Die
   // Provisions-Aussage bleibt vollstaendig ("nur auf tatsaechlich vermittelte"),
   // weil sie ohne ihre Einschraenkung eine andere Zusage waere.
@@ -41,13 +41,13 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: `${WERKSTATT_LANDING_URL}/`,
-    title: 'Werkstatt Partner werden — Reparaturaufträge über den Finder',
+    title: 'Werkstatt Partner werden – Reparaturaufträge über den Finder',
     description: 'Kostenlos gelistet, Aufträge über den Werkstatt-Finder, Provision nur auf Erfolg.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Werkstatt-Partnerschaft' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Werkstatt Partner werden — Claimondo',
+    title: 'Werkstatt Partner werden – Claimondo',
     description: 'Reparaturaufträge über den Werkstatt-Finder. Kostenlos gelistet, Provision nur auf Erfolg.',
     images: ['/og-default.png'],
   },
@@ -61,18 +61,18 @@ const VORTEILE = [
   },
   {
     icon: Euro,
-    title: 'Kostenlos gelistet — Provision nur auf Erfolg',
-    text: 'Die Aufnahme ins Netzwerk und der Eintrag im Finder sind kostenlos. Eine Provision fällt ausschließlich auf tatsächlich über Claimondo vermittelte Aufträge an — keine Grundgebühr, kein Risiko.',
+    title: 'Kostenlos gelistet – Provision nur auf Erfolg',
+    text: 'Die Aufnahme ins Netzwerk und der Eintrag im Finder sind kostenlos. Eine Provision fällt ausschließlich auf tatsächlich über Claimondo vermittelte Aufträge an – keine Grundgebühr, kein Risiko.',
   },
   {
     icon: Shield,
     title: 'Rechtssichere Haftpflicht-Abwicklung',
-    text: 'Claimondo koordiniert das unabhängige Gutachten und regelt mit der gegnerischen Haftpflichtversicherung nach §249 BGB. Ihr Kunde ist abgesichert — Sie konzentrieren sich auf die Reparatur.',
+    text: 'Claimondo koordiniert das unabhängige Gutachten und regelt mit der gegnerischen Haftpflichtversicherung nach §249 BGB. Ihr Kunde ist abgesichert – Sie konzentrieren sich auf die Reparatur.',
   },
   {
     icon: Handshake,
     title: 'Persönlicher Ansprechpartner',
-    text: 'Kein Ticketsystem, kein Callcenter. Sie erreichen direkt das Claimondo-Team — für Ihren Betrieb und für Ihre Kunden.',
+    text: 'Kein Ticketsystem, kein Callcenter. Sie erreichen direkt das Claimondo-Team – für Ihren Betrieb und für Ihre Kunden.',
   },
 ]
 
@@ -80,7 +80,7 @@ const ABLAUF = [
   {
     nr: '01',
     title: 'Kostenlos als Partner-Werkstatt eintragen',
-    text: 'Sie melden Ihren Betrieb bei Claimondo an — kostenlos und unverbindlich. Ihre Werkstatt erscheint im Werkstatt-Finder. Auf Wunsch senden wir Ihnen einen Claimondo-Aufsteller fürs Schaufenster.',
+    text: 'Sie melden Ihren Betrieb bei Claimondo an – kostenlos und unverbindlich. Ihre Werkstatt erscheint im Werkstatt-Finder. Auf Wunsch senden wir Ihnen einen Claimondo-Aufsteller fürs Schaufenster.',
   },
   {
     nr: '02',
@@ -90,7 +90,7 @@ const ABLAUF = [
   {
     nr: '03',
     title: 'Sie reparieren, wir regulieren',
-    text: 'Sie führen die Reparatur fachgerecht aus. Claimondo setzt alle Ansprüche gegen die gegnerische Versicherung durch — die Provision fällt nur auf den vermittelten Auftrag an.',
+    text: 'Sie führen die Reparatur fachgerecht aus. Claimondo setzt alle Ansprüche gegen die gegnerische Versicherung durch – die Provision fällt nur auf den vermittelten Auftrag an.',
   },
 ]
 
@@ -145,7 +145,7 @@ export default function WerkstattPartnerWerdenPage() {
             Mehr Reparaturaufträge. Ohne eigene Akquise.
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            Als Claimondo-Partnerwerkstatt erhalten Sie Reparaturaufträge von unverschuldet geschädigten Autofahrern — vermittelt über den Werkstatt-Finder, kostenlos gelistet, mit rechtssicherer Abwicklung über die gegnerische Haftpflicht.
+            Als Claimondo-Partnerwerkstatt erhalten Sie Reparaturaufträge von unverschuldet geschädigten Autofahrern – vermittelt über den Werkstatt-Finder, kostenlos gelistet, mit rechtssicherer Abwicklung über die gegnerische Haftpflicht.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
@@ -174,7 +174,7 @@ export default function WerkstattPartnerWerdenPage() {
             Reparaturaufträge: Unverschuldet geschädigte Autofahrer werden über den
             Werkstatt-Finder an Partnerbetriebe in ihrer Nähe vermittelt. Claimondo koordiniert
             das unabhängige Gutachten und die Regulierung mit der gegnerischen
-            Haftpflichtversicherung. Die Aufnahme ins Netzwerk ist kostenlos — eine Provision
+            Haftpflichtversicherung. Die Aufnahme ins Netzwerk ist kostenlos – eine Provision
             fällt ausschließlich auf tatsächlich vermittelte Aufträge an. Kontakt per E-Mail
             oder Telefon.
           </AnswerCapsule>

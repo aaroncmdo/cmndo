@@ -72,7 +72,7 @@ export default async function WieEsFunktioniertPage() {
           {
             '@context': 'https://schema.org',
             '@type': 'HowTo',
-            name: 'Kfz-Schaden vollständig regulieren — vom Unfall bis zur Auszahlung',
+            name: 'Kfz-Schaden vollständig regulieren – vom Unfall bis zur Auszahlung',
             description:
               'In fünf Schritten vom unverschuldeten Unfall zur vollständigen Auszahlung. Durchschnittlich 32 Tage, ohne Eigenanteil.',
             totalTime: 'P32D',
@@ -96,7 +96,7 @@ export default async function WieEsFunktioniertPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* 1 — Hero */}
+      {/* 1 – Hero */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="wef-hero">
         <div
           aria-hidden
@@ -140,10 +140,10 @@ export default async function WieEsFunktioniertPage() {
         </div>
       </section>
 
-      {/* 2 — Trust-Strip (Zeit-KPIs) */}
+      {/* 2 – Trust-Strip (Zeit-KPIs) */}
       <TrustStripSection kpis={kpis} ariaLabel="Zeit-Kennzahlen" />
 
-      {/* 3 — Die 5 Schritte (ausführlich, alternierend) */}
+      {/* 3 – Die 5 Schritte (ausführlich, alternierend) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="wef-schritte">
         <div className="mx-auto max-w-5xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -174,10 +174,10 @@ export default async function WieEsFunktioniertPage() {
         </div>
       </section>
 
-      {/* 4 — Portal-Mockup */}
+      {/* 4 – Portal-Mockup */}
       <PortalMockupSection />
 
-      {/* 5 — Berater-Quote */}
+      {/* 5 – Berater-Quote */}
       <section className="bg-claimondo-navy py-16 text-white sm:py-20" aria-labelledby="wef-berater">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-[0.9fr_1.1fr]">
           <div className="relative aspect-[4/5] overflow-hidden rounded-ios-lg border border-white/10 shadow-claimondo-lg">
@@ -225,13 +225,13 @@ export default async function WieEsFunktioniertPage() {
         </div>
       </section>
 
-      {/* 6 — Sieben Fehler */}
+      {/* 6 – Sieben Fehler */}
       <SiebenFehlerSection />
 
-      {/* 7 — Gründer */}
+      {/* 7 – Gründer */}
       <FounderSection />
 
-      {/* 8 — FAQ */}
+      {/* 8 – FAQ */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="wef-faq">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
@@ -256,7 +256,7 @@ export default async function WieEsFunktioniertPage() {
         </div>
       </section>
 
-      {/* 9 — Bottom CTA */}
+      {/* 9 – Bottom CTA */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden

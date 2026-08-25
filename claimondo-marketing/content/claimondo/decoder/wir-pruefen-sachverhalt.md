@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/wir-pruefen-sachverhalt
-meta_title: „Wir prüfen den Sachverhalt" — was das heißt
+meta_title: „Wir prüfen den Sachverhalt" – was das heißt
 type: decoder
 cluster: H8
 nummer: H8.1
@@ -11,11 +11,11 @@ secondary_keywords: ["versicherung antwortet nicht", "versicherer schweigt", "ve
 last_modified: 2026-05-18
 excerpt: Der Versicherer-Brief „Wir prüfen den Sachverhalt" ohne konkrete Frist ist ein juristisches Stillhalte-Manöver, das Zeit gewinnt und Verhandlungs-Erschöpfung erzeugt. Diese Decoder-Seite erklärt, wie nach 4 Wochen Verzug nach § 286 BGB eintritt und Verzugszinsen sowie vollständige Anwaltskosten als eigenständige Verzugsschäden geltend gemacht werden können.
 keyFacts:
-  - Kürzungs-Standardsatz: „Wir prüfen den Sachverhalt — bitte um Geduld"
+  - Kürzungs-Standardsatz: „Wir prüfen den Sachverhalt – bitte um Geduld"
   - Verzug nach § 286 BGB: bei klarer Haftungslage nach 4 Wochen, bei Personenschäden 6–8 Wochen
   - Verzugszinsen: 5 Prozentpunkte über Basiszinssatz (§ 288 BGB) ab Verzugseintritt
   - Anwaltskosten als vollständiger Verzugsschaden erstattbar (BGH VI ZR 235/13)
-  - Verjährungsfrist § 195 BGB läuft weiter — Frist setzen verhindert stillen Ablauf
+  - Verjährungsfrist § 195 BGB läuft weiter – Frist setzen verhindert stillen Ablauf
 last_legal_review: pending
 related:
   - /decoder/mitverschulden-30-prozent
@@ -23,22 +23,22 @@ related:
   - /haftpflicht/verzug-bgb286
   - /haftpflicht/verzugszinsen-bgb288
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "„Wir prüfen den Sachverhalt“? Was dieser Versicherer-Brief wirklich bedeutet — und wie Sie Verzögerungstaktik kontern (§286 BGB)."
+meta_description: "„Wir prüfen den Sachverhalt“? Was dieser Versicherer-Brief wirklich bedeutet – und wie Sie Verzögerungstaktik kontern (§286 BGB)."
 ---
 
-# „Wir prüfen den Sachverhalt" — was dieser Versicherer-Brief wirklich bedeutet
+# „Wir prüfen den Sachverhalt" – was dieser Versicherer-Brief wirklich bedeutet
 
-> **Kurz erklärt:** „Wir prüfen den Sachverhalt — bitte um Geduld" ist der häufigste Eröffnungsbrief von Kfz-Haftpflichtversicherern nach einer Schadensmeldung. Ohne konkrete Frist, ohne konkrete Liste fehlender Unterlagen. Die Funktion: Zeit gewinnen, ohne sich rechtlich zu binden. Reagierst du nicht aktiv, verschiebt sich die Verhandlungsmacht messbar zu deinen Ungunsten. Die richtige Antwort: Frist setzen und Verzug erzwingen.
+> **Kurz erklärt:** „Wir prüfen den Sachverhalt – bitte um Geduld" ist der häufigste Eröffnungsbrief von Kfz-Haftpflichtversicherern nach einer Schadensmeldung. Ohne konkrete Frist, ohne konkrete Liste fehlender Unterlagen. Die Funktion: Zeit gewinnen, ohne sich rechtlich zu binden. Reagierst du nicht aktiv, verschiebt sich die Verhandlungsmacht messbar zu deinen Ungunsten. Die richtige Antwort: Frist setzen und Verzug erzwingen.
 
 ---
 
-## Was du gerade erhalten hast — wörtlich
+## Was du gerade erhalten hast – wörtlich
 
 Typische Varianten desselben Briefes:
 
 > *„Wir bestätigen den Eingang Ihrer Schadensmeldung. Wir prüfen den Sachverhalt und werden uns nach Abschluss der Prüfung mit Ihnen in Verbindung setzen."*
 
-> *„Bitte um Geduld — wir benötigen noch Zeit zur Prüfung der Haftungslage."*
+> *„Bitte um Geduld – wir benötigen noch Zeit zur Prüfung der Haftungslage."*
 
 > *„Die Schadensmeldung liegt uns vor. Eine Stellungnahme erfolgt zu gegebener Zeit."*
 
@@ -49,7 +49,7 @@ Vier Merkmale, die in allen Varianten vorkommen:
 - **Keine konkrete Frist** („zu gegebener Zeit" statt „bis zum 15.06.")
 - **Keine konkrete Unterlagen-Liste**, was geprüft wird
 - **Höflich, scheinbar konstruktiv, vage**
-- **Kein Anerkenntnis und keine Ablehnung** — die Haftungslage bleibt offen
+- **Kein Anerkenntnis und keine Ablehnung** – die Haftungslage bleibt offen
 
 Wenn dein Schreiben so aussieht, hast du nicht „die normale Bearbeitungszeit". Du hast ein juristisches Stillhalte-Manöver in der Post.
 
@@ -59,15 +59,15 @@ Wenn dein Schreiben so aussieht, hast du nicht „die normale Bearbeitungszeit".
 
 ### 1. Zeit gewinnen ohne rechtliche Bindung
 
-Solange der Versicherer nicht anerkennt **und** nicht ablehnt, läuft die [Verjährungsfrist nach § 195 BGB](/haftpflicht/verjaehrung-bgb195) weiter — gegen dich. Jeder Tag, den du wartest, ist ein Tag, den der Versicherer aus deinem 3-Jahres-Fenster herausnimmt.
+Solange der Versicherer nicht anerkennt **und** nicht ablehnt, läuft die [Verjährungsfrist nach § 195 BGB](/haftpflicht/verjaehrung-bgb195) weiter – gegen dich. Jeder Tag, den du wartest, ist ein Tag, den der Versicherer aus deinem 3-Jahres-Fenster herausnimmt.
 
 ### 2. Anerkenntnis vermeiden
 
-Ein Anerkenntnis nach § 212 BGB würde die Verjährung neu starten — drei volle Jahre ab Anerkenntnis. Genau das will der Versicherer **nicht**. Die Formulierung „Wir prüfen" ist juristisch wertlos für dich, aber teuer, wenn du sie ernst nimmst.
+Ein Anerkenntnis nach § 212 BGB würde die Verjährung neu starten – drei volle Jahre ab Anerkenntnis. Genau das will der Versicherer **nicht**. Die Formulierung „Wir prüfen" ist juristisch wertlos für dich, aber teuer, wenn du sie ernst nimmst.
 
 ### 3. Verhandlungs-Erschöpfung erzeugen
 
-Verkehrsunfall-Geschädigte sind in den ersten Wochen aktiv und kämpferisch. Nach 6–8 Wochen Schweigen tritt nachweisbar Verhandlungs-Erschöpfung ein — die Bereitschaft, schlechte Vergleichsangebote anzunehmen, steigt um geschätzte 30–40 %. Versicherer wissen das. Sie planen damit.
+Verkehrsunfall-Geschädigte sind in den ersten Wochen aktiv und kämpferisch. Nach 6–8 Wochen Schweigen tritt nachweisbar Verhandlungs-Erschöpfung ein – die Bereitschaft, schlechte Vergleichsangebote anzunehmen, steigt um geschätzte 30–40 %. Versicherer wissen das. Sie planen damit.
 
 ### 4. Compliance-Test
 
@@ -77,48 +77,48 @@ Wer nach 6 Wochen wütend mahnt, wird ernst genommen. Wer nach 6 Wochen passiv w
 
 ## Was die Rechtsprechung dazu sagt
 
-### § 14 VVG — Fälligkeit „nach Beendigung der Erhebungen"
+### § 14 VVG – Fälligkeit „nach Beendigung der Erhebungen"
 
-Die Leistung des Versicherers ist nach Abschluss der zur Prüfung notwendigen Erhebungen fällig. Pauschal-Prüfen ohne konkretisierten Bedarf zählt nicht als „Erhebung" — der BGH verlangt **konkretisierte** Prüfung mit benennbarem Aufklärungsbedarf.
+Die Leistung des Versicherers ist nach Abschluss der zur Prüfung notwendigen Erhebungen fällig. Pauschal-Prüfen ohne konkretisierten Bedarf zählt nicht als „Erhebung" – der BGH verlangt **konkretisierte** Prüfung mit benennbarem Aufklärungsbedarf.
 
 ### BGH-Linie zur „angemessenen Prüfungszeit"
 
-Der BGH gewährt Haftpflichtversicherern eine **angemessene Prüfungszeit** — bei klarer Haftungslage typischerweise **4 Wochen**, bei komplexen Personenschäden **6–8 Wochen**, bei reinen Sachschäden mit Gutachten-Vorlage oft auch **kürzer**.
+Der BGH gewährt Haftpflichtversicherern eine **angemessene Prüfungszeit** – bei klarer Haftungslage typischerweise **4 Wochen**, bei komplexen Personenschäden **6–8 Wochen**, bei reinen Sachschäden mit Gutachten-Vorlage oft auch **kürzer**.
 
-Nach Ablauf dieser Frist tritt Verzug ein — automatisch und ohne Mahnung, sobald die zur Prüfung erforderlichen Unterlagen vollständig vorlagen.
+Nach Ablauf dieser Frist tritt Verzug ein – automatisch und ohne Mahnung, sobald die zur Prüfung erforderlichen Unterlagen vollständig vorlagen.
 
-### § 286 BGB — Verzug
+### § 286 BGB – Verzug
 
 Mit Verzugs-Eintritt entstehen drei eigenständige Folgen, die alle dem Versicherer zur Last fallen:
 
-- **Verzugszinsen** in Höhe von **5 Prozentpunkten über dem Basiszinssatz** (§ 288 BGB) auf die berechtigte Forderung — ab Verzugs-Eintritt, nicht ab Mahnung.
+- **Verzugszinsen** in Höhe von **5 Prozentpunkten über dem Basiszinssatz** (§ 288 BGB) auf die berechtigte Forderung – ab Verzugs-Eintritt, nicht ab Mahnung.
 - **Anwaltskosten** als eigenständiger Verzugsschaden, **vollständig erstattbar**, auch wenn du den Anwalt erst nach Verzugs-Eintritt beauftragst (BGH VI ZR 235/13).
 - **Mahnkosten und Klagekosten** als weitere Verzugsschäden.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Nicht warten. Frist setzen. Das ist nicht aggressiv — es ist die rechtlich korrekte Reaktion.
+Nicht warten. Frist setzen. Das ist nicht aggressiv – es ist die rechtlich korrekte Reaktion.
 
 ### 🛠 Drei-Stufen-Plan
 
-**Stufe 1 — Frist-Setzungsschreiben (heute oder spätestens diese Woche)**
+**Stufe 1 – Frist-Setzungsschreiben (heute oder spätestens diese Woche)**
 
-Innerhalb von 7 Tagen nach Eingang des „Wir prüfen"-Briefs antwortest du schriftlich (per Einschreiben oder Fax mit Sendebericht — niemals nur per E-Mail) und setzt eine konkrete Frist.
+Innerhalb von 7 Tagen nach Eingang des „Wir prüfen"-Briefs antwortest du schriftlich (per Einschreiben oder Fax mit Sendebericht – niemals nur per E-Mail) und setzt eine konkrete Frist.
 
-**Stufe 2 — Konkrete Nachfrage (parallel)**
+**Stufe 2 – Konkrete Nachfrage (parallel)**
 
 Frage konkret, was geprüft wird. Das zwingt den Versicherer, entweder zu konkretisieren oder zuzugeben, dass nichts mehr fehlt. Beides nützt dir.
 
-**Stufe 3 — Mahnung mit Klage-Androhung (nach Frist-Ablauf)**
+**Stufe 3 – Mahnung mit Klage-Androhung (nach Frist-Ablauf)**
 
-Lief die 4-Wochen-Frist ab? Mahnung mit 14-Tage-Nachfrist, dann Anwalt, dann Mahnbescheid oder Klage. Die Kosten dieser Eskalation trägt **vollständig der Versicherer** — sobald Verzug eingetreten ist.
+Lief die 4-Wochen-Frist ab? Mahnung mit 14-Tage-Nachfrist, dann Anwalt, dann Mahnbescheid oder Klage. Die Kosten dieser Eskalation trägt **vollständig der Versicherer** – sobald Verzug eingetreten ist.
 
 ---
 
-## Brief-Vorlage — Frist-Setzung
+## Brief-Vorlage – Frist-Setzung
 
 > Diese Vorlage ist juristisch belastbar und auf den BGH-Stand 2026 zugeschnitten. Kopieren, Lücken füllen, Einschreiben senden.
 
@@ -172,25 +172,25 @@ Mit freundlichen Grüßen
 
 Der Versicherer hat nach deiner Frist-Setzung vier Standard-Reaktionen. Erkenne sie, dann hast du den nächsten Zug bereits geplant.
 
-### Reaktion A — Pauschale Unterlagen-Anforderung
+### Reaktion A – Pauschale Unterlagen-Anforderung
 > *„Bitte reichen Sie folgende Unterlagen ein: …"*
 
 **Was dahintersteht:** Verzögerung durch Bürokratie. Oft werden Unterlagen angefordert, die du bereits eingereicht hast.
 **Deine Antwort:** Verweise schriftlich auf die bereits eingereichten Dokumente mit Datumsangabe. Nur tatsächlich neue Unterlagen nachreichen.
 
-### Reaktion B — Verlängerungs-Antrag
+### Reaktion B – Verlängerungs-Antrag
 > *„Aufgrund der Komplexität bitten wir um weitere 4 Wochen."*
 
 **Was dahintersteht:** Versuch, die Frist zurückzusetzen.
 **Deine Antwort:** Konkrete Begründung verlangen. Bei klarer Haftung: maximal 2 Wochen gewähren, schriftlich.
 
-### Reaktion C — Teilanerkenntnis dem Grunde nach
+### Reaktion C – Teilanerkenntnis dem Grunde nach
 > *„Eine Haftung dem Grunde nach kann anerkannt werden. Die Höhe ist weiter zu prüfen."*
 
-**Was dahintersteht:** Erfolg — und zwar ein juristisch wertvoller.
+**Was dahintersteht:** Erfolg – und zwar ein juristisch wertvoller.
 **Deine Antwort:** Schriftliches Anerkenntnis bestätigen lassen und in deinen Unterlagen mit Datum verbuchen. Die [Verjährungsfrist beginnt nach § 212 BGB neu](/haftpflicht/anerkenntnis-bgb212). Druck auf Höhe-Anerkennung aufrechterhalten.
 
-### Reaktion D — Plötzliche Ablehnung
+### Reaktion D – Plötzliche Ablehnung
 > *„Nach abschließender Prüfung sehen wir keine Eintrittspflicht."*
 
 **Was dahintersteht:** Versicherer kalkuliert, dass du nicht klagst.
@@ -204,16 +204,16 @@ Der Versicherer hat nach deiner Frist-Setzung vier Standard-Reaktionen. Erkenne 
 Bei klarer Haftungslage und vollständigen Unterlagen: **4 Wochen**. Bei komplexen Personenschäden mit Spätfolgen: **6–8 Wochen**. Eine pauschale „Prüfungszeit" ohne konkretisierten Aufklärungsbedarf hat der BGH wiederholt zurückgewiesen.
 
 **Muss ich eine Frist setzen, damit Verzug eintritt?**
-Nein. Sobald alle zur Prüfung notwendigen Unterlagen vollständig vorlagen, tritt Verzug nach Ablauf der angemessenen Prüfungszeit automatisch ein. Eine Mahnung ist nach BGH-Rechtsprechung **nicht** zwingend erforderlich. Trotzdem ist eine schriftliche Fristsetzung praktisch sinnvoll — sie macht den Verzugs-Zeitpunkt beweisbar.
+Nein. Sobald alle zur Prüfung notwendigen Unterlagen vollständig vorlagen, tritt Verzug nach Ablauf der angemessenen Prüfungszeit automatisch ein. Eine Mahnung ist nach BGH-Rechtsprechung **nicht** zwingend erforderlich. Trotzdem ist eine schriftliche Fristsetzung praktisch sinnvoll – sie macht den Verzugs-Zeitpunkt beweisbar.
 
 **Was kostet mich die Eskalation?**
 Bei unverschuldetem Unfall: **nichts**. Anwaltskosten und Verzugszinsen sind eigenständige Verzugsschäden und in voller Höhe vom Versicherer zu tragen (BGH VI ZR 235/13).
 
 **Was, wenn der Versicherer behauptet, er bräuchte noch ein Gutachten?**
-Frage konkret: Welches Gutachten, wer beauftragt es, wann ist es fertig? Wenn der Versicherer auf eigene Kosten ein Gutachten einholt, ist das **seine** Frist — du bist nicht verpflichtet zu warten, wenn dein eigenes Gutachten bereits vorliegt.
+Frage konkret: Welches Gutachten, wer beauftragt es, wann ist es fertig? Wenn der Versicherer auf eigene Kosten ein Gutachten einholt, ist das **seine** Frist – du bist nicht verpflichtet zu warten, wenn dein eigenes Gutachten bereits vorliegt.
 
 **Kann ich auch ohne Anwalt eskalieren?**
-Ja, für die erste Frist-Setzung reicht das Brief-Skript oben. Spätestens bei Reaktion D (Ablehnung) oder bei Personenschäden ist ein spezialisierter Anwalt zwingend — und kostet dich nichts.
+Ja, für die erste Frist-Setzung reicht das Brief-Skript oben. Spätestens bei Reaktion D (Ablehnung) oder bei Personenschäden ist ein spezialisierter Anwalt zwingend – und kostet dich nichts.
 
 **Was, wenn der Versicherer überhaupt nicht antwortet?**
 Nach Frist-Ablauf: schriftliche Mahnung mit 14-Tage-Frist. Bei weiterem Schweigen: Mahnbescheid (~50 € Gerichtskosten, später erstattet) oder direkt Klage. Schweigen ist nach Verzugs-Eintritt rechtlich identisch mit Ablehnung.
@@ -224,14 +224,14 @@ Nach Frist-Ablauf: schriftliche Mahnung mit 14-Tage-Frist. Bei weiterem Schweige
 
 - **Telefonisch verhandeln**, ohne anschließendes Bestätigungsschreiben. Mündliche Zusagen sind in der Praxis wertlos.
 - **„Aus Kulanz" Unterlagen pauschal nachreichen**, ohne zu prüfen, ob sie bereits vorliegen.
-- **Vergleichsangebote unter Druck akzeptieren** — gerade Erstangebote liegen typischerweise **40–60 % unter** der berechtigten Forderung.
+- **Vergleichsangebote unter Druck akzeptieren** – gerade Erstangebote liegen typischerweise **40–60 % unter** der berechtigten Forderung.
 - **Die Verjährung verstreichen lassen**. Drei Jahre klingen lang, sind aber im Stillhalte-Spiel des Versicherers sehr schnell vorbei.
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht — Reparaturkosten, Wertminderung, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Wir vermitteln dir spezialisierte Verkehrsrechts-Anwälte, die deine Forderung **ohne Kostenrisiko für dich** durchsetzen.
+Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht – Reparaturkosten, Wertminderung, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Wir vermitteln dir spezialisierte Verkehrsrechts-Anwälte, die deine Forderung **ohne Kostenrisiko für dich** durchsetzen.
 
 → [Kostenfreie Anspruchs-Prüfung](https://claimondo.de/check)
 
@@ -239,12 +239,12 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
 
 ## Quellen
 
-- Versicherungsvertragsgesetz § 14 (Fälligkeit der Geldleistung) — Bundesministerium der Justiz, [gesetze-im-internet.de/vvg](https://www.gesetze-im-internet.de/vvg_2008/__14.html)
-- Bürgerliches Gesetzbuch §§ 286, 288, 195, 212 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- Versicherungsvertragsgesetz § 14 (Fälligkeit der Geldleistung) – Bundesministerium der Justiz, [gesetze-im-internet.de/vvg](https://www.gesetze-im-internet.de/vvg_2008/__14.html)
+- Bürgerliches Gesetzbuch §§ 286, 288, 195, 212 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - BGH, Urteil vom 18.07.2017, Aktenzeichen VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Hentschel/König/Dauer, Straßenverkehrsrecht, jeweils aktuelle Auflage
 - Burmann/Heß/Hühnermann/Jahnke, Straßenverkehrsrecht-Kommentar
-- ARGE Verkehrsrecht im Deutschen Anwaltverein — [verkehrsrecht.de](https://www.verkehrsrecht.de)
+- ARGE Verkehrsrecht im Deutschen Anwaltverein – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 
@@ -328,4 +328,4 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Die zitierte BGH-Rechtsprechung ist allgemein und greift im konkreten Fall nur, wenn die Sachverhalts-Voraussetzungen erfüllt sind. Im Zweifel: spezialisierte Anwälte einschalten.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

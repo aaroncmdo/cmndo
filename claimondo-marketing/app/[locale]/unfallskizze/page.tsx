@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const SCHRITTE_SCHEMA: Array<{ name: string; text: string }> = [
   { name: 'Straßenverlauf skizzieren', text: 'Zeichnen Sie Fahrbahnen, Kreuzung oder Einmündung, Spuren und Fahrbahnmarkierungen grob maßstäblich auf.' },
   { name: 'Fahrzeuge vor dem Unfall einzeichnen', text: 'Setzen Sie beide Fahrzeuge (als A und B beschriftet) in ihre Ausgangsposition vor der Kollision.' },
-  { name: 'Fahrtrichtungen mit Pfeilen markieren', text: 'Ein Pfeil pro Fahrzeug zeigt die Fahrtrichtung — so wird der Bewegungsablauf nachvollziehbar.' },
+  { name: 'Fahrtrichtungen mit Pfeilen markieren', text: 'Ein Pfeil pro Fahrzeug zeigt die Fahrtrichtung – so wird der Bewegungsablauf nachvollziehbar.' },
   { name: 'Kollisionspunkt mit X markieren', text: 'Markieren Sie den Aufprallpunkt deutlich mit einem X; ergänzen Sie die Endpositionen nach dem Unfall.' },
   { name: 'Umfeld festhalten', text: 'Verkehrszeichen, Ampeln, Vorfahrtsituation, Norden, Straßennamen und ungefähre Abstände eintragen.' },
   { name: 'Rahmendaten notieren', text: 'Datum, Uhrzeit, Licht- und Wetterverhältnisse sowie Zeugen mit Kontaktdaten vermerken.' },
@@ -70,7 +70,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Ist eine Unfallskizze Pflicht?',
     antwort:
-      'Gesetzlich vorgeschrieben ist sie nicht, aber dringend zu empfehlen. Bei strittiger Haftung kann die Skizze über die volle Erstattung entscheiden — sie ergänzt den Unfallbericht und die Fotodokumentation.',
+      'Gesetzlich vorgeschrieben ist sie nicht, aber dringend zu empfehlen. Bei strittiger Haftung kann die Skizze über die volle Erstattung entscheiden – sie ergänzt den Unfallbericht und die Fotodokumentation.',
   },
   {
     frage: 'Was muss in eine Unfallskizze hinein?',
@@ -85,7 +85,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Darf ich am Unfallort die Schuld eingestehen?',
     antwort:
-      'Nein. Halten Sie ausschließlich Beobachtetes fest und geben Sie kein Schuldeingeständnis ab — auch nicht auf der Skizze. Die Haftung wird später anhand aller Beweise geklärt.',
+      'Nein. Halten Sie ausschließlich Beobachtetes fest und geben Sie kein Schuldeingeständnis ab – auch nicht auf der Skizze. Die Haftung wird später anhand aller Beweise geklärt.',
   },
 ]
 

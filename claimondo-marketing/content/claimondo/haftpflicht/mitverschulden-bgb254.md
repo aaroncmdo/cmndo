@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/mitverschulden-bgb254
-meta_title: Mitverschulden § 254 BGB — wie viel es kürzt
+meta_title: Mitverschulden § 254 BGB – wie viel es kürzt
 type: glossar-spoke
 cluster: H1
 nummer: H1.4
@@ -18,12 +18,12 @@ customer_questions:
   - "mitverschulden ohne anschnallen"
   - "muss ich mitverschulden hinnehmen"
 last_modified: 2026-05-18
-excerpt: § 254 BGB kürzt den Schadensersatz anteilig, wenn der Geschädigte durch eigenes Verhalten zur Entstehung oder Verschlimmerung des Schadens beigetragen hat — klassisch: kein Sicherheitsgurt (20–30 %), überhöhte Geschwindigkeit oder Helmverzicht. Die Beweislast für Mitverschulden und Kausalität liegt vollständig beim Versicherer; pauschale Quoten ohne Tatsachenbegründung sind rechtlich unwirksam und lassen sich in 60–80 % der Fälle kippen oder reduzieren.
+excerpt: § 254 BGB kürzt den Schadensersatz anteilig, wenn der Geschädigte durch eigenes Verhalten zur Entstehung oder Verschlimmerung des Schadens beigetragen hat – klassisch: kein Sicherheitsgurt (20–30 %), überhöhte Geschwindigkeit oder Helmverzicht. Die Beweislast für Mitverschulden und Kausalität liegt vollständig beim Versicherer; pauschale Quoten ohne Tatsachenbegründung sind rechtlich unwirksam und lassen sich in 60–80 % der Fälle kippen oder reduzieren.
 keyFacts:
-  - § 254 Abs. 1 BGB — Mitwirkung an der Schadensentstehung
-  - § 254 Abs. 2 BGB — Verletzung der Schadensminderungspflicht
+  - § 254 Abs. 1 BGB – Mitwirkung an der Schadensentstehung
+  - § 254 Abs. 2 BGB – Verletzung der Schadensminderungspflicht
   - Gurt-Quote 20–30 % nur bei bewiesenem Kausalzusammenhang
-  - § 828 Abs. 2 BGB — Kinder unter 10 Jahren: kein Mitverschulden im Straßenverkehr
+  - § 828 Abs. 2 BGB – Kinder unter 10 Jahren: kein Mitverschulden im Straßenverkehr
   - 100 % Beweislast für Verstoß + Kausalität liegt beim Versicherer
 last_legal_review: pending
 related:
@@ -31,12 +31,12 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/beweislast
   - /decoder/mitverschulden-30-prozent
-meta_description: "Mitverschulden nach §254 BGB kürzt den Schadensersatz nur bei bewiesenem Kausalbeitrag — Gurt-Quote 20–30 %. Wie viel es kürzt und wie Sie sich wehren."
+meta_description: "Mitverschulden nach §254 BGB kürzt den Schadensersatz nur bei bewiesenem Kausalbeitrag – Gurt-Quote 20–30 %. Wie viel es kürzt und wie Sie sich wehren."
 ---
 
-# Mitverschulden nach § 254 BGB — was es ist und wie viel es wirklich kürzt
+# Mitverschulden nach § 254 BGB – was es ist und wie viel es wirklich kürzt
 
-> **Kurz erklärt:** § 254 BGB regelt, dass der Schadensersatz gekürzt wird, wenn der Geschädigte an der Entstehung oder Verschlimmerung des Schadens **mitschuldig** ist. Klassische Fälle: kein angelegter Sicherheitsgurt, überhöhte Geschwindigkeit, unangepasstes Fahrverhalten. Die **Beweislast für das Mitverschulden trägt immer der Versicherer** — pauschale Quoten ohne konkrete Tatsachen-Begründung sind rechtlich unwirksam. Quoten reichen typischerweise von 0 bis 100 %, häufig liegen sie zwischen 20 und 50 %.
+> **Kurz erklärt:** § 254 BGB regelt, dass der Schadensersatz gekürzt wird, wenn der Geschädigte an der Entstehung oder Verschlimmerung des Schadens **mitschuldig** ist. Klassische Fälle: kein angelegter Sicherheitsgurt, überhöhte Geschwindigkeit, unangepasstes Fahrverhalten. Die **Beweislast für das Mitverschulden trägt immer der Versicherer** – pauschale Quoten ohne konkrete Tatsachen-Begründung sind rechtlich unwirksam. Quoten reichen typischerweise von 0 bis 100 %, häufig liegen sie zwischen 20 und 50 %.
 
 ## Auch bekannt als
 
@@ -46,16 +46,16 @@ Mitverantwortung · Mit-Verursachung · Mit-Verschulden · Geschädigten-Verschu
 
 ## In einem Satz erklärt
 
-Mitverschulden nach § 254 BGB ist der Anteil eigener Mitverursachung am Schaden, der die Erstattungspflicht des Schädigers entsprechend mindert — beweispflichtig ist immer der Versicherer.
+Mitverschulden nach § 254 BGB ist der Anteil eigener Mitverursachung am Schaden, der die Erstattungspflicht des Schädigers entsprechend mindert – beweispflichtig ist immer der Versicherer.
 
 ## In drei Sätzen erklärt
 
-§ 254 BGB legt fest, dass die Ersatzpflicht und der Umfang des Ersatzes von den **Verursachungs-Anteilen** beider Beteiligten abhängen — der Schaden wird quotenmäßig aufgeteilt. Klassische Mitverschuldens-Konstellationen beim Verkehrsunfall sind das Nichtanlegen des Sicherheitsgurts, überhöhte Geschwindigkeit oder unangepasstes Fahrverhalten; die Quote wird im Einzelfall festgestellt und reicht von 0 % bis 100 %. **Die Beweislast für sämtliche Tatsachen und die Kausalität liegt vollständig beim Versicherer** — pauschale Behauptungen ohne konkrete Tatsachen sind unwirksam und nach BGH-Linie zurückzuweisen.
+§ 254 BGB legt fest, dass die Ersatzpflicht und der Umfang des Ersatzes von den **Verursachungs-Anteilen** beider Beteiligten abhängen – der Schaden wird quotenmäßig aufgeteilt. Klassische Mitverschuldens-Konstellationen beim Verkehrsunfall sind das Nichtanlegen des Sicherheitsgurts, überhöhte Geschwindigkeit oder unangepasstes Fahrverhalten; die Quote wird im Einzelfall festgestellt und reicht von 0 % bis 100 %. **Die Beweislast für sämtliche Tatsachen und die Kausalität liegt vollständig beim Versicherer** – pauschale Behauptungen ohne konkrete Tatsachen sind unwirksam und nach BGH-Linie zurückzuweisen.
 
 ## Die fünf Schlüsselzahlen
 
-- **§ 254 Abs. 1 BGB** — Mitwirkung am Schaden
-- **§ 254 Abs. 2 BGB** — Verletzung der Schadensminderungspflicht
+- **§ 254 Abs. 1 BGB** – Mitwirkung am Schaden
+- **§ 254 Abs. 2 BGB** – Verletzung der Schadensminderungspflicht
 - **20–30 %** typische Gurt-Quote bei Nichtanschnallen mit Verletzungsfolge
 - **0 %** Mitverschulden bei Anscheinsbeweis-Konstellationen (Auffahrunfall, Vorfahrt)
 - **100 %** Beweislast beim Versicherer
@@ -65,14 +65,14 @@ Mitverschulden nach § 254 BGB ist der Anteil eigener Mitverursachung am Schaden
 ## Was § 254 BGB rechtlich bedeutet
 
 > *„Hat bei der Entstehung des Schadens ein Verschulden des Beschädigten mitgewirkt, so hängt die Verpflichtung zum Ersatze sowie der Umfang des zu leistenden Ersatzes von den Umständen, insbesondere davon ab, inwieweit der Schaden vorwiegend von dem einen oder dem anderen Teile verursacht worden ist."*
-> — § 254 Abs. 1 BGB
+> – § 254 Abs. 1 BGB
 
 Diese Vorschrift greift in zwei Varianten:
 
-### Variante 1 — Mitwirkung an der Schadensentstehung (Abs. 1)
-Beispiel: Du fährst mit überhöhter Geschwindigkeit auf einer Ortsstraße, ein anderer Fahrer übersieht dich beim Linksabbiegen. Hauptverschulden liegt beim Linksabbieger — aber wenn Beweise vorliegen, dass ein einhaltendes Tempo den Unfall verhindert hätte, kann eine Mitverschuldensquote (z. B. 20 %) anerkannt werden.
+### Variante 1 – Mitwirkung an der Schadensentstehung (Abs. 1)
+Beispiel: Du fährst mit überhöhter Geschwindigkeit auf einer Ortsstraße, ein anderer Fahrer übersieht dich beim Linksabbiegen. Hauptverschulden liegt beim Linksabbieger – aber wenn Beweise vorliegen, dass ein einhaltendes Tempo den Unfall verhindert hätte, kann eine Mitverschuldensquote (z. B. 20 %) anerkannt werden.
 
-### Variante 2 — Verletzung der Schadensminderungspflicht (Abs. 2)
+### Variante 2 – Verletzung der Schadensminderungspflicht (Abs. 2)
 Beispiel: Nach dem Unfall verzichtest du auf eine medizinisch indizierte Behandlung, dadurch verschlimmert sich der Schaden. Der Versicherer haftet dann nicht für die Verschlimmerung.
 
 In beiden Varianten ist die Rechtsfolge dieselbe: **anteilige Kürzung** der Erstattung entsprechend der festgestellten Quote.
@@ -87,15 +87,15 @@ In beiden Varianten ist die Rechtsfolge dieselbe: **anteilige Kürzung** der Ers
 | Helmverzicht (Motorrad/E-Bike) | **20–40 %** | bei nachweisbar gurt-ähnlicher Schutzwirkung |
 | Unangemessene Geschwindigkeit | 0–30 % | abhängig von Konkretheit der Tempo-Tatsachen und Kausalitäts-Beweis |
 | Unaufmerksames Fahrverhalten | 0–50 % | je nach Konstellation, oft strittig |
-| Kinder unter 10 Jahren | **0 %** | § 828 Abs. 2 BGB — keine Deliktsfähigkeit im Straßenverkehr |
+| Kinder unter 10 Jahren | **0 %** | § 828 Abs. 2 BGB – keine Deliktsfähigkeit im Straßenverkehr |
 | Anscheinsbeweis-Konstellation (z. B. Auffahrunfall) | **0 %** zugunsten des Auffahrenden | bis konkrete Erschütterung des Anscheinsbeweises gelingt |
 | Vorfahrtsverletzung | **80–100 %** Schädiger-Quote | Anscheinsbeweis gegen Vorfahrtsverletzer |
 
-**Wichtig:** Diese Werte sind **Orientierungswerte** aus Rechtsprechung und ADAC/DAV-Quotenkatalog — keine bindenden Regeln. Im Einzelfall entscheidet die konkrete Beweislage.
+**Wichtig:** Diese Werte sind **Orientierungswerte** aus Rechtsprechung und ADAC/DAV-Quotenkatalog – keine bindenden Regeln. Im Einzelfall entscheidet die konkrete Beweislage.
 
 ---
 
-## Wer beweisen muss — und was
+## Wer beweisen muss – und was
 
 ### Beweislast für Mitverschulden: Versicherer
 Der Versicherer, der sich auf § 254 BGB beruft, muss **alle Tatsachen** beweisen, die das Mitverschulden begründen. Das umfasst:
@@ -104,7 +104,7 @@ Der Versicherer, der sich auf § 254 BGB beruft, muss **alle Tatsachen** beweise
 2. **Tatsachen-Beweis** für den Verstoß (Polizeibericht, Zeugen, Sachverständigen-Befund)
 3. **Kausalität** zwischen Verstoß und konkretem Schaden (hätte einhaltendes Tempo den Unfall oder die Verletzung verhindert?)
 
-Fehlt nur **einer** dieser drei Punkte, ist die Mitverschuldensquote nicht begründet — und unsere [Decoder-Strategie](/decoder/mitverschulden-30-prozent) setzt genau hier an.
+Fehlt nur **einer** dieser drei Punkte, ist die Mitverschuldensquote nicht begründet – und unsere [Decoder-Strategie](/decoder/mitverschulden-30-prozent) setzt genau hier an.
 
 ### Beweislast für deine Schuldfreiheit: keine
 Du musst **nicht** deine Schuldfreiheit beweisen. Das ist eine häufige Versicherer-Trick-Formulierung. Anlässlich klarer Anscheinsbeweis-Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) ist die Beweislage sogar zu deinen Gunsten verlagert (siehe [Anscheinsbeweis](/haftpflicht/anscheinsbeweis)).
@@ -128,7 +128,7 @@ Differenz: **4.140 €** Versicherer-Ersparnis. Bei Millionen-Schadensfällen pr
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Keine Pauschal-Quote ohne konkrete Tatsachen akzeptieren. Schon eine vorschnell akzeptierte 30 %-Quote ist **rechtskräftig** und kostet dich Tausende.
@@ -136,13 +136,13 @@ Keine Pauschal-Quote ohne konkrete Tatsachen akzeptieren. Schon eine vorschnell 
 ### 🛠 Drei Punkte
 
 **1. Pauschal-Quote schriftlich zurückweisen**
-Konkrete Tatsachen, konkrete Kausalität, konkrete Beweismittel verlangen — siehe [Decoder Mitverschulden 30 %](/decoder/mitverschulden-30-prozent).
+Konkrete Tatsachen, konkrete Kausalität, konkrete Beweismittel verlangen – siehe [Decoder Mitverschulden 30 %](/decoder/mitverschulden-30-prozent).
 
 **2. Eigene Beweise sichern**
 Polizeibericht anfordern, Zeugen-Kontakte sichern, Lichtbilder und Skizzen vom Unfallort, ggf. Dashcam-Auswertung. Vor dem Streit über Quoten ist die Beweissicherung wichtiger als die juristische Argumentation.
 
 **3. Anscheinsbeweis-Logik prüfen**
-Bei klaren Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) spielt der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) **für dich** — Versicherer muss konkret erschüttern, du musst gar nichts beweisen.
+Bei klaren Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) spielt der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) **für dich** – Versicherer muss konkret erschüttern, du musst gar nichts beweisen.
 
 ---
 
@@ -154,7 +154,7 @@ Welches konkrete Verhalten? Welche Tatsachen? Welche Beweismittel? Welche konkre
 
 > *„Sie hätten den Sicherheitsgurt anlegen müssen."*
 
-Stimmt grundsätzlich — ABER: Konkrete Mehrverletzung muss kausal belegt sein. Bei leichten Auffahrunfällen ist der Kausalbeleg oft nicht zu führen.
+Stimmt grundsätzlich – ABER: Konkrete Mehrverletzung muss kausal belegt sein. Bei leichten Auffahrunfällen ist der Kausalbeleg oft nicht zu führen.
 
 > *„Wir gehen von einer überhöhten Geschwindigkeit aus."*
 
@@ -165,16 +165,16 @@ Stimmt grundsätzlich — ABER: Konkrete Mehrverletzung muss kausal belegt sein.
 ## Häufige Fragen
 
 **Wann liegt Mitverschulden vor?**
-Wenn der Geschädigte einen eigenen Verkehrsverstoß begangen hat, der **kausal** zur Entstehung oder Verschlimmerung des Schadens beigetragen hat. Beides — Verstoß und Kausalität — muss vom Versicherer **konkret bewiesen** werden.
+Wenn der Geschädigte einen eigenen Verkehrsverstoß begangen hat, der **kausal** zur Entstehung oder Verschlimmerung des Schadens beigetragen hat. Beides – Verstoß und Kausalität – muss vom Versicherer **konkret bewiesen** werden.
 
 **Wie wird die Mitverschuldensquote berechnet?**
-Es gibt keine arithmetische Formel. Gerichte und Versicherer orientieren sich an Quotenkatalogen (ADAC, DAV) und am Einzelfall — gewichten Schwere der Verstöße und Kausalitätsbeiträge.
+Es gibt keine arithmetische Formel. Gerichte und Versicherer orientieren sich an Quotenkatalogen (ADAC, DAV) und am Einzelfall – gewichten Schwere der Verstöße und Kausalitätsbeiträge.
 
 **Bin ich mitschuldig, wenn ich nicht angeschnallt war?**
-Bei Verletzungsfolge typischerweise 20–30 %, **wenn** der Versicherer beweisen kann, dass die konkrete Verletzung durch den Gurt verhindert oder verringert worden wäre. Bei Sachschäden allein keine Quote — Gurt schützt Personen, nicht das Auto.
+Bei Verletzungsfolge typischerweise 20–30 %, **wenn** der Versicherer beweisen kann, dass die konkrete Verletzung durch den Gurt verhindert oder verringert worden wäre. Bei Sachschäden allein keine Quote – Gurt schützt Personen, nicht das Auto.
 
 **Was ist mit Kindern als Geschädigte?**
-Kinder unter 10 Jahren sind im Straßenverkehr nach § 828 Abs. 2 BGB **nicht deliktsfähig** — Mitverschulden scheidet aus. Bei Kindern zwischen 10 und 18 Jahren kommt es auf die Einsichtsfähigkeit an.
+Kinder unter 10 Jahren sind im Straßenverkehr nach § 828 Abs. 2 BGB **nicht deliktsfähig** – Mitverschulden scheidet aus. Bei Kindern zwischen 10 und 18 Jahren kommt es auf die Einsichtsfähigkeit an.
 
 **Kann ich gegen eine festgestellte Quote vorgehen?**
 Im außergerichtlichen Verfahren: ja, durch Widerspruch mit konkreten Beweis-Anforderungen. Im Klage-Verfahren: ja, durch Beweisanträge. Im rechtskräftigen Urteil: nein.
@@ -186,10 +186,10 @@ Beim klassischen Auffahrunfall greift der Anscheinsbeweis: **100 %** Schuld des 
 
 ## Verwandte Begriffe
 
-- [§ 17 StVG Mitverursachung](/haftpflicht/mitverschulden-stvg17) — Spezialfall zwischen Fahrzeugen
-- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) — Beweislast-Vorteil bei Standard-Konstellationen
-- [Beweislast](/haftpflicht/beweislast) — Wer muss was beweisen
-- [Decoder Mitverschulden 30 %](/decoder/mitverschulden-30-prozent) — So antwortest du auf Pauschal-Quoten
+- [§ 17 StVG Mitverursachung](/haftpflicht/mitverschulden-stvg17) – Spezialfall zwischen Fahrzeugen
+- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) – Beweislast-Vorteil bei Standard-Konstellationen
+- [Beweislast](/haftpflicht/beweislast) – Wer muss was beweisen
+- [Decoder Mitverschulden 30 %](/decoder/mitverschulden-30-prozent) – So antwortest du auf Pauschal-Quoten
 
 ---
 
@@ -203,10 +203,10 @@ Mitverschuldens-Streitigkeiten sind ein Kerngeschäft spezialisierter Verkehrsre
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 254 — [gesetze-im-internet.de/bgb/__254.html](https://www.gesetze-im-internet.de/bgb/__254.html)
-- Bürgerliches Gesetzbuch § 828 — Deliktsfähigkeit von Kindern
-- Straßenverkehrsgesetz §§ 7, 17, 18 — [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
-- Straßenverkehrs-Ordnung § 21a — Anschnallpflicht
+- Bürgerliches Gesetzbuch § 254 – [gesetze-im-internet.de/bgb/__254.html](https://www.gesetze-im-internet.de/bgb/__254.html)
+- Bürgerliches Gesetzbuch § 828 – Deliktsfähigkeit von Kindern
+- Straßenverkehrsgesetz §§ 7, 17, 18 – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
+- Straßenverkehrs-Ordnung § 21a – Anschnallpflicht
 - BGH-Rechtsprechung zur Beweislast Mitverschulden (ständige Rechtsprechung)
 - ADAC Quotenkatalog
 - Hentschel/König/Dauer, Straßenverkehrsrecht
@@ -259,4 +259,4 @@ Mitverschuldens-Streitigkeiten sind ein Kerngeschäft spezialisierter Verkehrsre
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

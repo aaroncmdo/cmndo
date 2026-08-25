@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/vorfahrt-schilder
-meta_title: Vorfahrt-Schilder missachtet — wer haftet
+meta_title: Vorfahrt-Schilder missachtet – wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.3
@@ -30,9 +30,9 @@ related:
 meta_description: "Vorfahrt-Schild missachtet: Stopp (Z 206) oder Vorfahrt achten (Z 205) = 100:0 nach Anscheinsbeweis. Auf der Vorfahrtsstraße sind Sie umfassend geschützt."
 ---
 
-# Vorfahrt-Schilder missachtet — Haftung bei Stopp, „Vorfahrt achten" und Vorfahrtsstraße
+# Vorfahrt-Schilder missachtet – Haftung bei Stopp, „Vorfahrt achten" und Vorfahrtsstraße
 
-> **Kurz erklärt:** Wer ein **Stopp-Schild (Z 206)** oder **Vorfahrt-achten-Schild (Z 205)** missachtet und in einen Unfall verwickelt wird, trägt nach Anscheinsbeweis die **volle Schuld (100 : 0)**. Bei der Vorfahrtsstraße (Z 306) bist du als bevorrechtigter Fahrer auf einer Straße mit Vorfahrt geschützt — Quote bei Vorfahrt-Verletzungen der Gegenseite ebenfalls typisch 100 : 0.
+> **Kurz erklärt:** Wer ein **Stopp-Schild (Z 206)** oder **Vorfahrt-achten-Schild (Z 205)** missachtet und in einen Unfall verwickelt wird, trägt nach Anscheinsbeweis die **volle Schuld (100 : 0)**. Bei der Vorfahrtsstraße (Z 306) bist du als bevorrechtigter Fahrer auf einer Straße mit Vorfahrt geschützt – Quote bei Vorfahrt-Verletzungen der Gegenseite ebenfalls typisch 100 : 0.
 
 ## Auch bekannt als
 
@@ -42,7 +42,7 @@ meta_description: "Vorfahrt-Schild missachtet: Stopp (Z 206) oder Vorfahrt achte
 
 ## In einem Satz erklärt
 
-Wer Stopp- oder Vorfahrt-achten-Schild missachtet und kollidiert, trägt die volle Schuld — Standard-Quote 100 : 0.
+Wer Stopp- oder Vorfahrt-achten-Schild missachtet und kollidiert, trägt die volle Schuld – Standard-Quote 100 : 0.
 
 ## Quote nach Szenario
 
@@ -56,15 +56,15 @@ Wer Stopp- oder Vorfahrt-achten-Schild missachtet und kollidiert, trägt die vol
 
 ## Schilder-Übersicht
 
-- **Z 206 Stopp** — vollständiger Halt vor Linie zwingend
-- **Z 205 Vorfahrt achten** — Anhalten nur wenn nötig, Vorfahrt klar zu beachten
-- **Z 306 Vorfahrtsstraße** — du hast Vorfahrt auf gelb umrandeter Straße
-- **Z 301 Vorfahrt** — Einzel-Kreuzung mit Vorfahrt-Schild
+- **Z 206 Stopp** – vollständiger Halt vor Linie zwingend
+- **Z 205 Vorfahrt achten** – Anhalten nur wenn nötig, Vorfahrt klar zu beachten
+- **Z 306 Vorfahrtsstraße** – du hast Vorfahrt auf gelb umrandeter Straße
+- **Z 301 Vorfahrt** – Einzel-Kreuzung mit Vorfahrt-Schild
 
 ## Häufige Fragen
 
 **Wer haftet bei Stopp-Schild-Missachtung?**
-In aller Regel der Schild-Missachter — Anscheinsbeweis, 100 : 0.
+In aller Regel der Schild-Missachter – Anscheinsbeweis, 100 : 0.
 
 **Habe ich als bevorrechtigter Fahrer Mit-Quote?**
 Nur bei nachweisbar erheblich überhöhter Geschwindigkeit (20–30 %). Bei Normal-Geschwindigkeit voll geschützt.
@@ -86,7 +86,7 @@ Bei objektiv nicht erkennbarem Schild ggf. Erschütterung des Anscheinsbeweises.
 
 ## Quellen
 
-- StVO §§ 8, 41 — [gesetze-im-internet.de/stvo_2013](https://www.gesetze-im-internet.de/stvo_2013/)
+- StVO §§ 8, 41 – [gesetze-im-internet.de/stvo_2013](https://www.gesetze-im-internet.de/stvo_2013/)
 - BGH-Rechtsprechung zur Vorfahrtsverletzung
 
 ---
@@ -129,4 +129,4 @@ Bei objektiv nicht erkennbarem Schild ggf. Erschütterung des Anscheinsbeweises.
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

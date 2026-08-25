@@ -9,7 +9,7 @@ type Props = {
 }
 
 export function subject(_p: Props) {
-  return 'Reklamation abgelehnt — Frist überschritten'
+  return 'Reklamation abgelehnt – Frist überschritten'
 }
 
 export function ReklamationFristAbgelaufenEmail(props: Props) {

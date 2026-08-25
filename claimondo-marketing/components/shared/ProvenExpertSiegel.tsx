@@ -29,7 +29,7 @@ export async function ProvenExpertSiegel() {
       target="_blank"
       rel="noopener noreferrer"
       className="mx-auto mt-10 flex w-fit items-center gap-3 rounded-ios-lg border border-claimondo-border/60 bg-white px-4 py-3 transition-colors hover:border-claimondo-ondo/40"
-      aria-label={`ProvenExpert: ${note} von 5 Sternen aus ${data.reviewCount} Bewertungen — Profil öffnen`}
+      aria-label={`ProvenExpert: ${note} von 5 Sternen aus ${data.reviewCount} Bewertungen – Profil öffnen`}
     >
       <span className="inline-flex items-center gap-0.5" aria-hidden>
         {Array.from({ length: 5 }).map((_, i) => (

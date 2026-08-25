@@ -65,7 +65,7 @@ export function AbrechnungManuellVersendetEmail(props: Props) {
   }
 
   return (
-    <EmailLayout preview={`Abrechnung ${props.abrechnungsNr} — ${fmtEuro(props.betragBrutto)}`}>
+    <EmailLayout preview={`Abrechnung ${props.abrechnungsNr} – ${fmtEuro(props.betragBrutto)}`}>
       <Heading>Abrechnung {props.abrechnungsNr}</Heading>
 
       <Paragraph>

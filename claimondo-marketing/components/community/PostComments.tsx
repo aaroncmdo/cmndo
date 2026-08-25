@@ -174,7 +174,7 @@ function CommentItem({
             </button>
           )}
           {reported ? (
-            <span className="text-[0.7rem] text-claimondo-shield/50">Gemeldet — danke.</span>
+            <span className="text-[0.7rem] text-claimondo-shield/50">Gemeldet – danke.</span>
           ) : (
             <button
               type="button"
@@ -213,7 +213,7 @@ function CommentItem({
         )}
       </div>
 
-      {/* Replies — 1 Ebene */}
+      {/* Replies – 1 Ebene */}
       {replies.length > 0 && (
         <ul className="ml-6 space-y-1.5">
           {replies.map((r) => (
@@ -296,7 +296,7 @@ export function PostComments({
 
   return (
     <div className="mt-3 border-t border-claimondo-border/50 pt-3">
-      {/* Comment form — Magic-Link for non-logged-in */}
+      {/* Comment form – Magic-Link for non-logged-in */}
       {!isLoggedIn ? (
         <MagicLinkGate startStage="email" onAuthenticated={() => router.refresh()} />
       ) : !hasUsername ? (
@@ -323,7 +323,7 @@ export function PostComments({
 
       {/* Thread */}
       {top.length === 0 ? (
-        <p className="text-xs text-claimondo-shield/60">Noch keine Kommentare — schreib den ersten.</p>
+        <p className="text-xs text-claimondo-shield/60">Noch keine Kommentare – schreib den ersten.</p>
       ) : (
         <ul className="space-y-2">
           {top.map((c) => (

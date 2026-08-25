@@ -5,7 +5,7 @@
 import { useTranslations } from 'next-intl'
 
 type Props = {
-  /** Die direkte Antwort — 40–75 Wörter, mit Statistik/§/Urteil wenn möglich */
+  /** Die direkte Antwort – 40–75 Wörter, mit Statistik/§/Urteil wenn möglich */
   children: React.ReactNode
   /** Optional: kurzes Source-Tag rechts oben (z.B. "§249 BGB") */
   quelle?: string

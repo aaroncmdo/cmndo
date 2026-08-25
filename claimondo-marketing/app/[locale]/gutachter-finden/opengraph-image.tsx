@@ -3,7 +3,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Kfz-Gutachter finden in Ihrer Nähe — sofort & zertifiziert | Claimondo'
+export const alt = 'Kfz-Gutachter finden in Ihrer Nähe – sofort & zertifiziert | Claimondo'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -35,7 +35,7 @@ export default function OgImage() {
           }}
         />
 
-        {/* Radar-Motiv rechts — konzentrische Kreise */}
+        {/* Radar-Motiv rechts – konzentrische Kreise */}
         <div
           style={{
             position: 'absolute',
@@ -205,7 +205,7 @@ export default function OgImage() {
             </span>
           </div>
 
-          {/* Haupttitel — zweizeilig für Gewicht */}
+          {/* Haupttitel – zweizeilig für Gewicht */}
           <div
             style={{
               fontSize: 62,

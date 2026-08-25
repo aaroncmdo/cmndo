@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verjaehrung-bgb195
-meta_title: Verjährung nach § 195 BGB — Unfall-Ansprüche
+meta_title: Verjährung nach § 195 BGB – Unfall-Ansprüche
 type: glossar-spoke
 cluster: H4
 nummer: H4.4
@@ -17,7 +17,7 @@ customer_questions:
   - "kann ich nach 2 jahren noch klagen"
   - "verjährung spätschäden unfall"
 last_modified: 2026-05-18
-excerpt: Schadensersatzansprüche aus Verkehrsunfällen verjähren nach § 195 BGB in 3 Jahren, beginnend am 31. Dezember des Kenntnisjahres — nicht am Unfalltag. Bei Personenschäden gilt eine 30-jährige Höchstfrist (§ 199 Abs. 2 BGB). Aktive Verhandlungen hemmen die Frist (§ 203 BGB), ein Anerkenntnis des Versicherers startet sie neu (§ 212 BGB).
+excerpt: Schadensersatzansprüche aus Verkehrsunfällen verjähren nach § 195 BGB in 3 Jahren, beginnend am 31. Dezember des Kenntnisjahres – nicht am Unfalltag. Bei Personenschäden gilt eine 30-jährige Höchstfrist (§ 199 Abs. 2 BGB). Aktive Verhandlungen hemmen die Frist (§ 203 BGB), ein Anerkenntnis des Versicherers startet sie neu (§ 212 BGB).
 keyFacts:
   - § 195 BGB: 3 Jahre Regelverjährung ab 31.12. des Kenntnisjahres
   - § 199 Abs. 2 BGB: 30 Jahre Höchstfrist bei Personenschäden
@@ -33,7 +33,7 @@ meta_description: "Verjährung von Unfall-Ansprüchen: 3 Jahre nach §195 BGB ab
 
 # Verjährung von Verkehrsunfall-Ansprüchen nach § 195 BGB
 
-> **Kurz erklärt:** Schadensersatz-Ansprüche aus einem Verkehrsunfall verjähren nach § 195 BGB grundsätzlich in **3 Jahren** — beginnend mit dem **Ende des Jahres**, in dem der Anspruch entstanden ist und du von Schaden und Schädiger Kenntnis hattest (§ 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen gilt eine **30-Jahre-Höchstfrist**, bei verdeckten Sachschäden 10 Jahre. Verzögert die Versicherung absichtlich, läuft die Frist gegen dich — aber Verhandlungen, Anerkenntnis und Klage können die Verjährung hemmen oder neu starten.
+> **Kurz erklärt:** Schadensersatz-Ansprüche aus einem Verkehrsunfall verjähren nach § 195 BGB grundsätzlich in **3 Jahren** – beginnend mit dem **Ende des Jahres**, in dem der Anspruch entstanden ist und du von Schaden und Schädiger Kenntnis hattest (§ 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen gilt eine **30-Jahre-Höchstfrist**, bei verdeckten Sachschäden 10 Jahre. Verzögert die Versicherung absichtlich, läuft die Frist gegen dich – aber Verhandlungen, Anerkenntnis und Klage können die Verjährung hemmen oder neu starten.
 
 ## Auch bekannt als
 
@@ -47,7 +47,7 @@ Verjährung nach § 195 BGB bedeutet: Ohne aktive Geltendmachung verlierst du na
 
 ## In drei Sätzen erklärt
 
-Die regelmäßige Verjährungsfrist von **3 Jahren** läuft nach § 199 Abs. 1 BGB ab dem **Ende des Jahres**, in dem du Schaden und Schädiger erkannt hast — nicht ab dem Unfalltag. Bei Personenschäden mit nicht erkennbaren Spätfolgen schützt § 199 Abs. 2 BGB durch eine **30-Jahres-Höchstfrist**, bei verdeckten Sachschäden gilt § 199 Abs. 3 BGB mit **10 Jahren**. Verjährung lässt sich durch Verhandlungen hemmen und durch ein [Anerkenntnis des Versicherers](/haftpflicht/anerkenntnis-bgb212) komplett neu starten — sie ist also kein passiver Countdown, sondern ein aktiv steuerbares Risiko.
+Die regelmäßige Verjährungsfrist von **3 Jahren** läuft nach § 199 Abs. 1 BGB ab dem **Ende des Jahres**, in dem du Schaden und Schädiger erkannt hast – nicht ab dem Unfalltag. Bei Personenschäden mit nicht erkennbaren Spätfolgen schützt § 199 Abs. 2 BGB durch eine **30-Jahres-Höchstfrist**, bei verdeckten Sachschäden gilt § 199 Abs. 3 BGB mit **10 Jahren**. Verjährung lässt sich durch Verhandlungen hemmen und durch ein [Anerkenntnis des Versicherers](/haftpflicht/anerkenntnis-bgb212) komplett neu starten – sie ist also kein passiver Countdown, sondern ein aktiv steuerbares Risiko.
 
 ## Die fünf Schlüsselzahlen
 
@@ -84,46 +84,46 @@ Drei Schritte:
 
 Während die 3-Jahres-Regelfrist von **Kenntnis** abhängt, gelten zwei absolute Maximal-Fristen, die unabhängig davon laufen:
 
-### 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) — Personenschäden
+### 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) – Personenschäden
 Bei Verletzung von Leben, Körper, Gesundheit oder Freiheit ist der Anspruch **maximal 30 Jahre** nach dem Schadens-Ereignis durchsetzbar. Wichtigster Anwendungsfall: schwere Schädelhirntraumata mit Spätfolgen (Demenz, chronische Schmerz-Syndrome), die sich teils erst Jahrzehnte später manifestieren.
 
-### 10-Jahre-Höchstfrist (§ 199 Abs. 3 BGB) — sonstige Schäden
+### 10-Jahre-Höchstfrist (§ 199 Abs. 3 BGB) – sonstige Schäden
 Bei Sach- und Vermögensschäden gilt 10 Jahre ab Anspruchs-Entstehung. Wichtig: Bei spät erkannten verdeckten Sachschäden (Karosserie-Folgeschaden, Strukturschaden) endet die Frist spätestens 10 Jahre nach Unfall.
 
 ---
 
 ## Was passiert, wenn der Anspruch verjährt ist
 
-Verjährung wirkt nach § 214 BGB als **Einrede des Schuldners** — der Anspruch bleibt formal bestehen, aber der Versicherer kann die Erfüllung dauerhaft verweigern. Praktisch heißt das:
+Verjährung wirkt nach § 214 BGB als **Einrede des Schuldners** – der Anspruch bleibt formal bestehen, aber der Versicherer kann die Erfüllung dauerhaft verweigern. Praktisch heißt das:
 
 - Versicherer beruft sich auf Verjährungs-Einrede in der Klage
 - Gericht weist die Klage ab
-- Vollständiger Verlust der Forderung — auch wenn sie der Sache nach berechtigt gewesen wäre
+- Vollständiger Verlust der Forderung – auch wenn sie der Sache nach berechtigt gewesen wäre
 
-Die Verjährung ist nicht **gerichtlich von Amts wegen** zu beachten — der Versicherer muss sie aktiv geltend machen. Praktisch tut er das aber **immer**, wenn die Möglichkeit besteht.
+Die Verjährung ist nicht **gerichtlich von Amts wegen** zu beachten – der Versicherer muss sie aktiv geltend machen. Praktisch tut er das aber **immer**, wenn die Möglichkeit besteht.
 
 ---
 
 ## Wie sich Verjährung hemmen oder neu starten lässt
 
 ### Hemmung durch Verhandlungen (§ 203 BGB)
-Solange du mit dem Versicherer in Verhandlungen stehst, ist die Verjährung **gehemmt** — die Zeit läuft nicht. Nach Verhandlungs-Abbruch hast du noch mindestens 3 weitere Monate zur Klage-Erhebung. Praktisch bedeutet das: Aktive Korrespondenz mit dem Versicherer schützt vor Verjährung — Schweigen nicht.
+Solange du mit dem Versicherer in Verhandlungen stehst, ist die Verjährung **gehemmt** – die Zeit läuft nicht. Nach Verhandlungs-Abbruch hast du noch mindestens 3 weitere Monate zur Klage-Erhebung. Praktisch bedeutet das: Aktive Korrespondenz mit dem Versicherer schützt vor Verjährung – Schweigen nicht.
 
 ### Hemmung bei Minderjährigen (§ 207 BGB)
 Bei minderjährigen Geschädigten ist die Verjährung bis zum 21. Lebensjahr gehemmt. Praktisch wichtig bei verletzten Kindern als Beifahrer.
 
 ### Neubeginn durch Anerkenntnis (§ 212 BGB)
-Erkennt der Versicherer den Anspruch (auch nur teilweise) an, beginnt die Verjährung **vollständig neu** — 3 Jahre ab Anerkenntnis. Detail: [Anerkenntnis nach § 212 BGB](/haftpflicht/anerkenntnis-bgb212).
+Erkennt der Versicherer den Anspruch (auch nur teilweise) an, beginnt die Verjährung **vollständig neu** – 3 Jahre ab Anerkenntnis. Detail: [Anerkenntnis nach § 212 BGB](/haftpflicht/anerkenntnis-bgb212).
 
 ### Unterbrechung durch Klage oder Mahnbescheid
 Klage-Erhebung und Mahnbescheid unterbrechen die Verjährung dauerhaft. Nach rechtskräftigem Urteil gilt sogar eine 30-Jahre-Frist (§ 197 BGB).
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Verjährung läuft, ob du daran denkst oder nicht. Versicherer warten teilweise gezielt — wer Verjährung ungenutzt verstreichen lässt, verliert die Forderung vollständig.
+Verjährung läuft, ob du daran denkst oder nicht. Versicherer warten teilweise gezielt – wer Verjährung ungenutzt verstreichen lässt, verliert die Forderung vollständig.
 
 ### 🛠 Vier Schritte zur Verjährungs-Sicherheit
 
@@ -137,7 +137,7 @@ Wenn nach 24 Monaten noch keine vollständige Regulierung vorliegt, Anwalt prüf
 Ein Online-Mahnbescheid kostet typischerweise 36–80 € (abhängig vom Streitwert) und unterbricht die Verjährung dauerhaft.
 
 **4. Bei Spätfolgen Anwalt für Spätfolge-Vorbehalt einschalten**
-Wenn du ein Vergleichsangebot erhältst, kann ein Spätfolge-Vorbehalt im Vergleich vereinbart werden — damit bleiben spätere unbekannte Folgen anspruchsfähig.
+Wenn du ein Vergleichsangebot erhältst, kann ein Spätfolge-Vorbehalt im Vergleich vereinbart werden – damit bleiben spätere unbekannte Folgen anspruchsfähig.
 
 ---
 
@@ -166,13 +166,13 @@ Regulär 3 Jahre ab Ende des Jahres, in dem du Kenntnis von Schaden und Schädig
 Nein. Sie beginnt am **31. Dezember** des Jahres, in dem der Anspruch entstanden und dir bekannt war. Ein Unfall am 15. März und einer am 15. Dezember haben dieselbe Verjährungs-Endposition.
 
 **Was, wenn ich Spätfolgen erst nach Jahren bemerke?**
-Bei Personenschäden bist du durch die 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) geschützt. Die 3-Jahres-Regelfrist beginnt erst mit konkreter Kenntnis der Spätfolge — Vorbehalts-Vereinbarungen im Vergleich sind sinnvoll.
+Bei Personenschäden bist du durch die 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) geschützt. Die 3-Jahres-Regelfrist beginnt erst mit konkreter Kenntnis der Spätfolge – Vorbehalts-Vereinbarungen im Vergleich sind sinnvoll.
 
 **Hemmt eine Schadensmeldung die Verjährung?**
-Die bloße Meldung nicht. Aber **aktive Verhandlungen** mit dem Versicherer hemmen die Verjährung nach § 203 BGB — solange ihr ein „Gespräch" führt, läuft die Zeit nicht.
+Die bloße Meldung nicht. Aber **aktive Verhandlungen** mit dem Versicherer hemmen die Verjährung nach § 203 BGB – solange ihr ein „Gespräch" führt, läuft die Zeit nicht.
 
 **Was bringt ein Mahnbescheid kurz vor Verjährung?**
-Ein Mahnbescheid unterbricht die Verjährung dauerhaft. Praktisch der schnellste und günstigste Weg, kurz vor Frist-Ablauf die Frist zu wahren — Online-Mahnverfahren der Bundesländer.
+Ein Mahnbescheid unterbricht die Verjährung dauerhaft. Praktisch der schnellste und günstigste Weg, kurz vor Frist-Ablauf die Frist zu wahren – Online-Mahnverfahren der Bundesländer.
 
 **Wie lange habe ich nach Verhandlungs-Abbruch noch?**
 Mindestens 3 Monate (§ 203 Satz 2 BGB), oft länger, abhängig von der Dauer der Hemmung. In dieser Zeit unbedingt Klage oder Mahnbescheid einreichen.
@@ -181,14 +181,14 @@ Mindestens 3 Monate (§ 203 Satz 2 BGB), oft länger, abhängig von der Dauer de
 
 ## Verwandte Begriffe
 
-- [§ 286 BGB Verzug](/haftpflicht/verzug-bgb286) — Druckmittel innerhalb der Frist
-- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) — Neustart der Verjährung
+- [§ 286 BGB Verzug](/haftpflicht/verzug-bgb286) – Druckmittel innerhalb der Frist
+- [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) – Neustart der Verjährung
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Schadensregulierung — wer einmal verjährt, hat alles verloren. Spezialisierte Verkehrsrechts-Kanzleien prüfen kostenfrei (bei unverschuldetem Unfall trägt der Versicherer alle Anwaltskosten), wo deine Frist konkret läuft.
+Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Schadensregulierung – wer einmal verjährt, hat alles verloren. Spezialisierte Verkehrsrechts-Kanzleien prüfen kostenfrei (bei unverschuldetem Unfall trägt der Versicherer alle Anwaltskosten), wo deine Frist konkret läuft.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -196,11 +196,11 @@ Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Scha
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch §§ 195, 197, 199, 203, 207, 212, 214 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- Bürgerliches Gesetzbuch §§ 195, 197, 199, 203, 207, 212, 214 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - Palandt/Grüneberg, BGB-Kommentar
 - MüKoBGB
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht — [verkehrsrecht.de](https://www.verkehrsrecht.de)
+- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 
@@ -250,4 +250,4 @@ Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Scha
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

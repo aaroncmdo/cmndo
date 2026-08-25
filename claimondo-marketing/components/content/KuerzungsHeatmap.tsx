@@ -13,7 +13,7 @@ export interface KuerzungEntry {
 }
 
 interface Props {
-  /** Slug — aktuell nur fuer Stabilitaet/künftige Analytik, nicht gerendert. */
+  /** Slug – aktuell nur fuer Stabilitaet/künftige Analytik, nicht gerendert. */
   versichererSlug: string
   kuerzungen: KuerzungEntry[]
 }
@@ -36,7 +36,7 @@ export function KuerzungsHeatmap({ kuerzungen }: Props) {
         Kürzungspraxis im Überblick
       </h2>
       <p className="mt-2 max-w-[65ch] text-[0.9375rem] leading-relaxed text-claimondo-shield">
-        Häufigkeit typischer Kürzungspositionen in der Drittschaden-Regulierung — eingestuft
+        Häufigkeit typischer Kürzungspositionen in der Drittschaden-Regulierung – eingestuft
         anhand dokumentierter Gerichtsurteile, Anwalts-Kasuistik und Prüfdienst-Praxis.
       </p>
       <ul className="mt-5 divide-y divide-claimondo-border overflow-hidden rounded-ios-md border border-claimondo-border bg-white">

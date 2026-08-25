@@ -17,9 +17,9 @@ customer_questions:
   - "sanden danner klasse"
   - "muss ich nutzungsausfall beweisen"
 last_modified: 2026-05-18
-excerpt: Nutzungsausfall-Entschädigung (NAE) ist der pauschale Geldanspruch nach unverschuldetem Unfall, wenn kein Mietwagen angemietet wird — Tagessätze nach Sanden-Danner-Tabelle zwischen 27 € (Kleinwagen) und 175 € (Oberklasse), Rechtsgrundlage § 249 BGB, Grundsatz BGH GSZ 1/86; Eigennutzungs-Vermutung schützt vor Versicherer-Einwand „nicht nachgewiesen".
+excerpt: Nutzungsausfall-Entschädigung (NAE) ist der pauschale Geldanspruch nach unverschuldetem Unfall, wenn kein Mietwagen angemietet wird – Tagessätze nach Sanden-Danner-Tabelle zwischen 27 € (Kleinwagen) und 175 € (Oberklasse), Rechtsgrundlage § 249 BGB, Grundsatz BGH GSZ 1/86; Eigennutzungs-Vermutung schützt vor Versicherer-Einwand „nicht nachgewiesen".
 keyFacts:
-  - BGH GSZ 1/86 — Grundsatz-Entscheidung Nutzungsausfall
+  - BGH GSZ 1/86 – Grundsatz-Entscheidung Nutzungsausfall
   - 27–175 €/Tag je Fahrzeug-Klasse (Sanden-Danner-Tabelle)
   - § 249 BGB als Rechtsgrundlage
   - Eigennutzungs-Vermutung: kein Fahrtnachweis nötig
@@ -33,9 +33,9 @@ related:
 meta_description: "Nutzungsausfall ohne Mietwagen: 27–175 €/Tag nach Sanden-Danner-Tabelle, Grundlage §249 BGB (BGH GSZ 1/86). So berechnen und beweisen Sie ihn."
 ---
 
-# Nutzungsausfall-Entschädigung beim Verkehrsunfall — Berechnung, Spannen, Beweis
+# Nutzungsausfall-Entschädigung beim Verkehrsunfall – Berechnung, Spannen, Beweis
 
-> **Kurz erklärt:** Wenn dein Fahrzeug nach unverschuldetem Unfall in Reparatur oder Wiederbeschaffung steht und du **keinen Mietwagen** anmietest, hast du Anspruch auf **pauschalierte Nutzungsausfall-Entschädigung** (NAE) — gerichtlich anerkannt seit BGH GSZ 1/86. Tagessätze nach der **Sanden-Danner-Tabelle** zwischen **27 €** (Kleinwagen) und **175 € pro Tag** (Oberklasse). Beweis: keine konkreten Fahrten nötig — Eigennutzungs-Vermutung bei Privatfahrzeugen.
+> **Kurz erklärt:** Wenn dein Fahrzeug nach unverschuldetem Unfall in Reparatur oder Wiederbeschaffung steht und du **keinen Mietwagen** anmietest, hast du Anspruch auf **pauschalierte Nutzungsausfall-Entschädigung** (NAE) – gerichtlich anerkannt seit BGH GSZ 1/86. Tagessätze nach der **Sanden-Danner-Tabelle** zwischen **27 €** (Kleinwagen) und **175 € pro Tag** (Oberklasse). Beweis: keine konkreten Fahrten nötig – Eigennutzungs-Vermutung bei Privatfahrzeugen.
 
 ## Auch bekannt als
 
@@ -45,18 +45,18 @@ NAE · Nutzungsausfallentschädigung · Pauschale Mobilitäts-Entschädigung · 
 
 ## In einem Satz erklärt
 
-Nutzungsausfall ist die pauschalierte Geldentschädigung dafür, dass dein Fahrzeug unfall-bedingt nicht genutzt werden konnte — Höhe nach Sanden-Danner-Tabelle und Reparatur-Dauer.
+Nutzungsausfall ist die pauschalierte Geldentschädigung dafür, dass dein Fahrzeug unfall-bedingt nicht genutzt werden konnte – Höhe nach Sanden-Danner-Tabelle und Reparatur-Dauer.
 
 ## In drei Sätzen erklärt
 
-Statt eines Mietwagens kannst du pauschalierte Nutzungsausfall-Entschädigung beanspruchen (BGH GSZ 1/86) — sie deckt den Wertverlust ab, der dir durch die Vorenthaltung deines Fahrzeugs entstanden ist, **ohne** dass du konkrete Fahrten oder tatsächliche Mehrkosten nachweisen musst. Maßgeblich sind die **Sanden-Danner-Tabellen** mit Tagessätzen je Fahrzeug-Klasse — typisch 27 € (Kleinwagen) bis 175 € (Oberklasse), multipliziert mit der **tatsächlichen Ausfall-Dauer**. Bei privat genutzten Fahrzeugen greift die **Eigennutzungs-Vermutung**: Der Versicherer muss eine Nicht-Nutzung beweisen, nicht du die Nutzung.
+Statt eines Mietwagens kannst du pauschalierte Nutzungsausfall-Entschädigung beanspruchen (BGH GSZ 1/86) – sie deckt den Wertverlust ab, der dir durch die Vorenthaltung deines Fahrzeugs entstanden ist, **ohne** dass du konkrete Fahrten oder tatsächliche Mehrkosten nachweisen musst. Maßgeblich sind die **Sanden-Danner-Tabellen** mit Tagessätzen je Fahrzeug-Klasse – typisch 27 € (Kleinwagen) bis 175 € (Oberklasse), multipliziert mit der **tatsächlichen Ausfall-Dauer**. Bei privat genutzten Fahrzeugen greift die **Eigennutzungs-Vermutung**: Der Versicherer muss eine Nicht-Nutzung beweisen, nicht du die Nutzung.
 
 ## Die fünf Schlüsselzahlen
 
 - **BGH GSZ 1/86** als Grundsatz-Entscheidung
 - **27–175 €/Tag** nach Fahrzeug-Klasse (Sanden-Danner-Spanne)
 - **14 Tage** typische Standard-Dauer bei Totalschaden
-- **Eigennutzungs-Vermutung** — kein Nutzungs-Nachweis erforderlich
+- **Eigennutzungs-Vermutung** – kein Nutzungs-Nachweis erforderlich
 - **§ 249 BGB** als Rechtsgrundlage
 
 ---
@@ -69,21 +69,21 @@ Drei Bedingungen müssen vorliegen:
 2. **Keine Anmietung** eines Mietwagens (Alternative: [Mietwagen-Erstattung](/haftpflicht/mietwagen))
 3. **Nutzungs-Möglichkeit** dem Grunde nach (du hattest das Fahrzeug zur Nutzung beabsichtigt)
 
-→ Mietwagen UND Nutzungsausfall **schließen sich aus** — du wählst eine Option.
+→ Mietwagen UND Nutzungsausfall **schließen sich aus** – du wählst eine Option.
 
 ---
 
-## Sanden-Danner-Tabelle — Tagessätze nach Fahrzeug-Klasse
+## Sanden-Danner-Tabelle – Tagessätze nach Fahrzeug-Klasse
 
 Die Sanden-Danner-Tabelle (Sanden/Danner/Küppersbusch) ist gerichtlich anerkannte pauschale Schätzungsgrundlage:
 
 | Fahrzeug-Klasse | Beispiele | Tagessatz (orientiert) |
 |---|---|---|
-| Klasse A — Kleinwagen | VW Polo, Renault Twingo | 27–32 €/Tag |
-| Klasse B — Kompaktklasse | VW Golf, Opel Astra | 35–45 €/Tag |
-| Klasse C — Mittelklasse | VW Passat, Audi A4 | 45–65 €/Tag |
-| Klasse D — Obere Mittelklasse | BMW 5er, Mercedes E-Klasse | 65–95 €/Tag |
-| Klasse E+ — Oberklasse | BMW 7er, Mercedes S-Klasse, Audi A8 | 95–175 €/Tag |
+| Klasse A – Kleinwagen | VW Polo, Renault Twingo | 27–32 €/Tag |
+| Klasse B – Kompaktklasse | VW Golf, Opel Astra | 35–45 €/Tag |
+| Klasse C – Mittelklasse | VW Passat, Audi A4 | 45–65 €/Tag |
+| Klasse D – Obere Mittelklasse | BMW 5er, Mercedes E-Klasse | 65–95 €/Tag |
+| Klasse E+ – Oberklasse | BMW 7er, Mercedes S-Klasse, Audi A8 | 95–175 €/Tag |
 | SUV / Premium-SUV | je nach Modell | analog C–E |
 
 → Werte sind Orientierung. Exakte Sätze nach jeweils aktueller Sanden-Danner-Tabelle. Bei Sonderfahrzeugen (Oldtimer, Premium-Limousine, Wohnmobil) gibt es ergänzende Spezial-Werte.
@@ -96,7 +96,7 @@ Die Sanden-Danner-Tabelle (Sanden/Danner/Küppersbusch) ist gerichtlich anerkann
 Nutzungsausfall = Tagessatz × Reparatur-/Wiederbeschaffungs-Dauer
 ```
 
-**Direkt ausrechnen:** [Nutzungsausfall-Rechner](/kfz-gutachter/nutzungsausfall) — Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive der üblichen Alters-Rückstufung.
+**Direkt ausrechnen:** [Nutzungsausfall-Rechner](/kfz-gutachter/nutzungsausfall) – Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive der üblichen Alters-Rückstufung.
 
 ### Beispiel
 
@@ -118,31 +118,31 @@ Nutzungsausfall = Tagessatz × Reparatur-/Wiederbeschaffungs-Dauer
 
 ---
 
-## Eigennutzungs-Vermutung — du beweist nichts
+## Eigennutzungs-Vermutung – du beweist nichts
 
 Der BGH stellt in ständiger Rechtsprechung klar: Bei privat genutzten Fahrzeugen wird die **Nutzungsabsicht und tatsächliche Nutzung vermutet**. Konkret:
 
 - **Du musst keine Fahrten nachweisen** (keine Tankquittungen, kein Fahrtenbuch)
 - **Eine eidesstattliche Versicherung** über die typische Nutzung reicht
-- **Der Versicherer muss eine Nicht-Nutzung beweisen** (z. B. längerer Auslands-Aufenthalt) — schwierig in der Praxis
+- **Der Versicherer muss eine Nicht-Nutzung beweisen** (z. B. längerer Auslands-Aufenthalt) – schwierig in der Praxis
 
-→ Diese Vermutung schützt dich vor Versicherer-Argumenten wie „nicht nachgewiesen" — siehe [Decoder „Nutzungsausfall nicht erstattbar"](/decoder/nutzungsausfall-nicht).
+→ Diese Vermutung schützt dich vor Versicherer-Argumenten wie „nicht nachgewiesen" – siehe [Decoder „Nutzungsausfall nicht erstattbar"](/decoder/nutzungsausfall-nicht).
 
 ---
 
-## Zweitwagen — was gilt
+## Zweitwagen – was gilt
 
-Ein vorhandener Zweitwagen kann den Nutzungsausfall reduzieren oder ausschließen — abhängig von der **konkreten Familien-Konstellation**:
+Ein vorhandener Zweitwagen kann den Nutzungsausfall reduzieren oder ausschließen – abhängig von der **konkreten Familien-Konstellation**:
 
 | Konstellation | Auswirkung auf NAE |
 |---|---|
-| Zwei berufstätige Personen, je 1 Fahrzeug | Anspruch bleibt — Zweitwagen wird anderweitig genutzt |
+| Zwei berufstätige Personen, je 1 Fahrzeug | Anspruch bleibt – Zweitwagen wird anderweitig genutzt |
 | Eine Person, zwei Fahrzeuge | Reduktion oder Ausschluss möglich |
-| Familien-Zweitwagen für gelegentlich | Anspruch bleibt — Hauptfahrzeug nicht ersetzt |
+| Familien-Zweitwagen für gelegentlich | Anspruch bleibt – Hauptfahrzeug nicht ersetzt |
 
 ---
 
-## Mietwagen oder Nutzungsausfall — Entscheidung
+## Mietwagen oder Nutzungsausfall – Entscheidung
 
 | | Mietwagen | Nutzungsausfall |
 |---|---|---|
@@ -156,10 +156,10 @@ Ein vorhandener Zweitwagen kann den Nutzungsausfall reduzieren oder ausschließe
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Nutzungsausfall ist eigenständige Position. Wenn du keinen Mietwagen nimmst, **immer** Nutzungsausfall beantragen — nicht „vergessen". Der Versicherer wartet ab, ob du danach fragst.
+Nutzungsausfall ist eigenständige Position. Wenn du keinen Mietwagen nimmst, **immer** Nutzungsausfall beantragen – nicht „vergessen". Der Versicherer wartet ab, ob du danach fragst.
 
 ### 🛠 Drei Schritte
 
@@ -180,16 +180,16 @@ Im Anspruchsschreiben Nutzungsausfall separat aufführen. Konkrete Bezifferung (
 Je nach Fahrzeug-Klasse 27–175 € pro Tag nach Sanden-Danner-Tabelle. Mittelklasse-Fahrzeug typisch 45–65 €/Tag.
 
 **Wer berechnet die Klasse meines Fahrzeugs?**
-Der Sachverständige im Gutachten — oder du nach Modell-Vergleich mit der Sanden-Danner-Tabelle. BVSK-SV ordnet die Klasse routinemäßig ein.
+Der Sachverständige im Gutachten – oder du nach Modell-Vergleich mit der Sanden-Danner-Tabelle. BVSK-SV ordnet die Klasse routinemäßig ein.
 
 **Muss ich Nutzungsausfall beantragen oder kommt das automatisch?**
-Aktiv beantragen. Versicherer regulieren oft nur die explizit gestellten Positionen — Nutzungsausfall „vergessen" zu nennen ist eine häufige Lücke.
+Aktiv beantragen. Versicherer regulieren oft nur die explizit gestellten Positionen – Nutzungsausfall „vergessen" zu nennen ist eine häufige Lücke.
 
 **Wie lange wird Nutzungsausfall gezahlt?**
 Für die tatsächliche Reparatur- oder Wiederbeschaffungs-Dauer. Bei Totalschaden 14 Tage als BGH-Standard.
 
 **Kann ich Mietwagen UND Nutzungsausfall bekommen?**
-Nein — beide schließen sich aus. Du wählst eine Position.
+Nein – beide schließen sich aus. Du wählst eine Position.
 
 **Was, wenn ich im Ausfall-Zeitraum Urlaub hatte?**
 Kann den Anspruch reduzieren, wenn der Versicherer den Auslands-Aufenthalt beweisen kann. Eine eigene Urlaubs-Erwähnung bei der Schadensanzeige sollte vermieden werden.
@@ -198,10 +198,10 @@ Kann den Anspruch reduzieren, wenn der Versicherer den Auslands-Aufenthalt bewei
 
 ## Verwandte Begriffe
 
-- [Mietwagen-Erstattung](/haftpflicht/mietwagen) — Alternative zur NAE
-- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — Wiederbeschaffungs-Dauer-Basis
-- [Reparaturkosten](/haftpflicht/reparaturkosten) — Reparatur-Dauer-Basis
-- [Decoder „Nutzungsausfall nicht erstattbar"](/decoder/nutzungsausfall-nicht) — Antwort auf Verweigerung
+- [Mietwagen-Erstattung](/haftpflicht/mietwagen) – Alternative zur NAE
+- [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) – Wiederbeschaffungs-Dauer-Basis
+- [Reparaturkosten](/haftpflicht/reparaturkosten) – Reparatur-Dauer-Basis
+- [Decoder „Nutzungsausfall nicht erstattbar"](/decoder/nutzungsausfall-nicht) – Antwort auf Verweigerung
 
 ---
 
@@ -215,7 +215,7 @@ Nutzungsausfall ist eine der häufig „vergessenen" Positionen. Bei Mittelklass
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch § 249 — [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
+- Bürgerliches Gesetzbuch § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH, Großer Senat, Beschluss vom 09.07.1986, GSZ 1/86 (Nutzungsausfall-Grundsatz)
 - BGH-Rechtsprechung zur Eigennutzungs-Vermutung
 - Sanden/Danner/Küppersbusch, „Nutzungsausfallentschädigung" Tabellen
@@ -264,4 +264,4 @@ Nutzungsausfall ist eine der häufig „vergessenen" Positionen. Bei Mittelklass
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

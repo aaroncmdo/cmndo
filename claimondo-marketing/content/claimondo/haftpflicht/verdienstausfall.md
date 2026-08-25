@@ -17,9 +17,9 @@ customer_questions:
   - "selbständig krankgeschrieben unfall"
   - "wieviel verdienstausfall pro tag"
 last_modified: 2026-05-18
-excerpt: Verdienstausfall nach § 252 BGB ersetzt das Nettoeinkommen, das durch unfallbedingte Arbeitsunfähigkeit entfällt — bei Arbeitnehmern die Differenz zwischen Nettolohn und Krankengeld (ab Woche 7), bei Selbständigen den entgangenen Gewinn. Lohnfortzahlung in den ersten 6 Wochen geht per § 6 EFZG auf den Arbeitgeber über.
+excerpt: Verdienstausfall nach § 252 BGB ersetzt das Nettoeinkommen, das durch unfallbedingte Arbeitsunfähigkeit entfällt – bei Arbeitnehmern die Differenz zwischen Nettolohn und Krankengeld (ab Woche 7), bei Selbständigen den entgangenen Gewinn. Lohnfortzahlung in den ersten 6 Wochen geht per § 6 EFZG auf den Arbeitgeber über.
 keyFacts:
-  - § 252 BGB — entgangener Gewinn als Anspruchsgrundlage
+  - § 252 BGB – entgangener Gewinn als Anspruchsgrundlage
   - § 6 EFZG: Forderungsübergang auf Arbeitgeber in ersten 6 Wochen
   - § 116 SGB X: Forderungsübergang auf Krankenkasse ab Woche 7
   - § 287 ZPO: erleichtertes Beweismaß für Selbständige
@@ -33,9 +33,9 @@ related:
 meta_description: "Verdienstausfall nach §252 BGB: Ersatz des unfallbedingt entgangenen Nettoeinkommens, bei Selbständigen des Gewinns. So berechnen und beweisen Sie ihn."
 ---
 
-# Verdienstausfall nach Verkehrsunfall — Berechnung, Beweis, Sonderfälle
+# Verdienstausfall nach Verkehrsunfall – Berechnung, Beweis, Sonderfälle
 
-> **Kurz erklärt:** Verdienstausfall ist die Erstattung des durch unfallbedingte Arbeitsunfähigkeit ausgefallenen Einkommens — bei Arbeitnehmern in der Regel **Netto-Verdienst minus Krankengeld**, bei Selbständigen der **entgangene Gewinn**. Rechtsgrundlage: § 252 BGB i. V. m. § 249 BGB. Voll erstattbar vom gegnerischen Haftpflichtversicherer; bei längerer Erwerbsminderung kommt zusätzlich eine **Erwerbsminderungs-Rente** nach § 843 BGB in Betracht. Bei Bezug von Lohnfortzahlung erfolgt Forderungs-Übergang nach § 6 EFZG / § 116 SGB X.
+> **Kurz erklärt:** Verdienstausfall ist die Erstattung des durch unfallbedingte Arbeitsunfähigkeit ausgefallenen Einkommens – bei Arbeitnehmern in der Regel **Netto-Verdienst minus Krankengeld**, bei Selbständigen der **entgangene Gewinn**. Rechtsgrundlage: § 252 BGB i. V. m. § 249 BGB. Voll erstattbar vom gegnerischen Haftpflichtversicherer; bei längerer Erwerbsminderung kommt zusätzlich eine **Erwerbsminderungs-Rente** nach § 843 BGB in Betracht. Bei Bezug von Lohnfortzahlung erfolgt Forderungs-Übergang nach § 6 EFZG / § 116 SGB X.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ Lohnausfall · Einkommensausfall · Erwerbsschaden · Entgangener Gewinn
 
 ## In einem Satz erklärt
 
-Verdienstausfall ist die Erstattung des Nettoeinkommens, das du durch unfallbedingte Arbeitsunfähigkeit nicht verdienen konntest — abzüglich erhaltener Lohnersatzleistungen.
+Verdienstausfall ist die Erstattung des Nettoeinkommens, das du durch unfallbedingte Arbeitsunfähigkeit nicht verdienen konntest – abzüglich erhaltener Lohnersatzleistungen.
 
 ## In drei Sätzen erklärt
 
-Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch auf den **Differenz-Schaden** zwischen dem, was du ohne Unfall verdient hättest, und dem, was du tatsächlich bekommen hast (Lohnfortzahlung, Krankengeld). Bei Arbeitnehmern wird das **Netto-Einkommen** angesetzt — die Bruttogröße ist nur für die interne Berechnung relevant; Steuer- und Sozialversicherungs-Vorteile werden saldiert. Bei Selbständigen ist der **entgangene Gewinn** nach § 252 BGB die Bezugsgröße — Berechnung über Vorjahres-Gewinne, Branchenwerte, sachverständige Schätzung; bei Geringfügig-Beschäftigten und Hausfrauen/-männern greifen besondere Bemessungsregeln.
+Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch auf den **Differenz-Schaden** zwischen dem, was du ohne Unfall verdient hättest, und dem, was du tatsächlich bekommen hast (Lohnfortzahlung, Krankengeld). Bei Arbeitnehmern wird das **Netto-Einkommen** angesetzt – die Bruttogröße ist nur für die interne Berechnung relevant; Steuer- und Sozialversicherungs-Vorteile werden saldiert. Bei Selbständigen ist der **entgangene Gewinn** nach § 252 BGB die Bezugsgröße – Berechnung über Vorjahres-Gewinne, Branchenwerte, sachverständige Schätzung; bei Geringfügig-Beschäftigten und Hausfrauen/-männern greifen besondere Bemessungsregeln.
 
 ## Die fünf Schlüsselzahlen
 
@@ -61,16 +61,16 @@ Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch au
 
 ---
 
-## Wer hat Anspruch — und was wird erstattet
+## Wer hat Anspruch – und was wird erstattet
 
 ### Arbeitnehmer
 
-**Phase 1 — die ersten 6 Wochen:**
-- **Lohnfortzahlung** durch Arbeitgeber (§ 3 EFZG) — du bekommst dein volles Nettoentgelt
+**Phase 1 – die ersten 6 Wochen:**
+- **Lohnfortzahlung** durch Arbeitgeber (§ 3 EFZG) – du bekommst dein volles Nettoentgelt
 - Direkt-Anspruch gegen den Versicherer geht in dieser Phase nach **§ 6 EFZG** auf den Arbeitgeber über
 - Du hast keinen eigenen Erstattungs-Anspruch für diesen Zeitraum
 
-**Phase 2 — ab Woche 7 (Krankengeld):**
+**Phase 2 – ab Woche 7 (Krankengeld):**
 - **Krankengeld** durch Krankenkasse (~70 % des Brutto-, max. 90 % des Nettoentgelts)
 - **Differenz** zwischen Krankengeld und tatsächlichem Nettoverdienst ist deine **eigene Forderung** gegen den Versicherer
 - Der Krankenkassen-Anteil geht nach **§ 116 SGB X** auf die Krankenkasse über (Regress)
@@ -92,7 +92,7 @@ Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch au
 
 ---
 
-## Wie berechnet wird — Praxis-Schema
+## Wie berechnet wird – Praxis-Schema
 
 ### Arbeitnehmer Differenz-Methode
 
@@ -132,11 +132,11 @@ Entgangener Gewinn = Durchschnitt Vorjahres-Gewinne / Tage
 | Hausfrau/-mann | [Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden)-Schema |
 | Beamte | Bezügeabrechnung, Krankenakte |
 
-§ 287 ZPO erlaubt **erleichtertes Beweismaß** — bei Selbständigen muss kein millimeter-genaues Buchhaltungs-Detail vorliegen.
+§ 287 ZPO erlaubt **erleichtertes Beweismaß** – bei Selbständigen muss kein millimeter-genaues Buchhaltungs-Detail vorliegen.
 
 ---
 
-## Erwerbsminderungs-Rente bei Dauerschäden — § 843 BGB
+## Erwerbsminderungs-Rente bei Dauerschäden – § 843 BGB
 
 Wenn die Arbeitsunfähigkeit dauerhaft besteht (z. B. nach Polytrauma, chronischer PTBS, schwerem SHT), wird nicht mehr Verdienstausfall pauschal erstattet, sondern eine **Geldrente** nach § 843 BGB:
 
@@ -149,10 +149,10 @@ Wenn die Arbeitsunfähigkeit dauerhaft besteht (z. B. nach Polytrauma, chronisch
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Sammle alle Einkommens-Belege ab Tag 1. Auch wenn du noch arbeitsunfähig bist — die Dokumentations-Pflicht beginnt sofort.
+Sammle alle Einkommens-Belege ab Tag 1. Auch wenn du noch arbeitsunfähig bist – die Dokumentations-Pflicht beginnt sofort.
 
 ### 🛠 Vier Schritte
 
@@ -163,7 +163,7 @@ Originale AU-Bescheinigungen vom Hausarzt + ggf. Facharzt.
 Beim Arbeitgeber für die letzten 12 Monate vor Unfall (Brutto, Netto, Lohnfortzahlungs-Zeitraum).
 
 **3. Krankenkassen-Bescheid sichern**
-Krankengeld-Bezug schriftlich. Krankenkasse macht später eigenen Regress geltend — du kannst nur die Differenz fordern.
+Krankengeld-Bezug schriftlich. Krankenkasse macht später eigenen Regress geltend – du kannst nur die Differenz fordern.
 
 **4. Bei Selbständigen: Sachverständige Schätzung**
 Steuerberater oder Sachverständigen-Gutachten zum entgangenen Gewinn. Anwalts-Koordination empfehlenswert.
@@ -172,11 +172,11 @@ Steuerberater oder Sachverständigen-Gutachten zum entgangenen Gewinn. Anwalts-K
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Die Lohnfortzahlung deckt das ab — kein Anspruch."*
+> *„Die Lohnfortzahlung deckt das ab – kein Anspruch."*
 
 Stimmt nur für die ersten 6 Wochen. Ab Woche 7 (Krankengeld) entsteht die Differenz-Forderung für dich.
 
-> *„Verdienstausfall nicht ausreichend belegt — Sie hätten weiter arbeiten können."*
+> *„Verdienstausfall nicht ausreichend belegt – Sie hätten weiter arbeiten können."*
 
 Ärztliche AU-Bescheinigung ist Grundlage. Versicherer-Behauptungen zur Arbeitsfähigkeit müssen substantiiert werden.
 
@@ -189,19 +189,19 @@ Falsch. § 287 ZPO erlaubt erleichtertes Beweismaß. Steuerbescheide + BWA + Auf
 ## Häufige Fragen
 
 **Wer zahlt den Lohnausfall nach Unfall?**
-In den ersten 6 Wochen der Arbeitgeber per Lohnfortzahlung — die Forderung geht nach § 6 EFZG auf den Arbeitgeber über. Ab Woche 7 zahlst du die Differenz zwischen Krankengeld und Nettoverdienst direkt vom Versicherer.
+In den ersten 6 Wochen der Arbeitgeber per Lohnfortzahlung – die Forderung geht nach § 6 EFZG auf den Arbeitgeber über. Ab Woche 7 zahlst du die Differenz zwischen Krankengeld und Nettoverdienst direkt vom Versicherer.
 
 **Wie wird Verdienstausfall berechnet?**
-Netto vor Unfall minus erhaltene Lohnersatzleistungen (Lohnfortzahlung, Krankengeld) — multipliziert mit Krankschreibungs-Dauer. Bei Selbständigen entgangener Gewinn nach § 252 BGB.
+Netto vor Unfall minus erhaltene Lohnersatzleistungen (Lohnfortzahlung, Krankengeld) – multipliziert mit Krankschreibungs-Dauer. Bei Selbständigen entgangener Gewinn nach § 252 BGB.
 
 **Bekomme ich Verdienstausfall bei Selbständigkeit?**
-Ja. Bezugsgröße ist der entgangene Gewinn — berechnet aus Vorjahres-Daten, Branchen-Vergleich, ggf. Sachverständigen-Schätzung. § 287 ZPO erleichtert die Beweisführung.
+Ja. Bezugsgröße ist der entgangene Gewinn – berechnet aus Vorjahres-Daten, Branchen-Vergleich, ggf. Sachverständigen-Schätzung. § 287 ZPO erleichtert die Beweisführung.
 
 **Wie hoch ist das Krankengeld?**
 Etwa 70 % vom Brutto, maximal 90 % vom Nettoentgelt. Die Differenz zum Netto ist deine Forderung gegen den Versicherer.
 
 **Was, wenn ich dauerhaft erwerbsgemindert bin?**
-Dann greift § 843 BGB — Erwerbsminderungs-Rente bis Renteneintritt oder lebenslang. Hochkomplexe Berechnung, spezialisierten Anwalt einschalten.
+Dann greift § 843 BGB – Erwerbsminderungs-Rente bis Renteneintritt oder lebenslang. Hochkomplexe Berechnung, spezialisierten Anwalt einschalten.
 
 **Bekomme ich auch Verdienstausfall für Überstunden / Boni?**
 Ja, wenn nachweisbar (Lohnabrechnungen der Vorjahre). Auch Sonderzahlungen und 13. Monatsgehalt sind anrechenbar.
@@ -210,10 +210,10 @@ Ja, wenn nachweisbar (Lohnabrechnungen der Vorjahre). Auch Sonderzahlungen und 1
 
 ## Verwandte Begriffe
 
-- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) — Folge-Kosten
-- [Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden) — bei Hausfrauen/-männern
-- [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) — eigenständig daneben
-- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) — bei Dauer-Folgen
+- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) – Folge-Kosten
+- [Haushaltsführungsschaden](/haftpflicht/haushaltsfuehrungsschaden) – bei Hausfrauen/-männern
+- [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) – eigenständig daneben
+- [Erwerbsminderungs-Schaden](/haftpflicht/erwerbsminderungsschaden) – bei Dauer-Folgen
 
 ---
 
@@ -227,12 +227,12 @@ Verdienstausfall-Berechnung wird oft zu niedrig angesetzt. Selbständige verlier
 
 ## Quellen
 
-- Bürgerliches Gesetzbuch §§ 249, 252, 842, 843 — [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
-- Entgeltfortzahlungsgesetz § 6 — [gesetze-im-internet.de/entgfg](https://www.gesetze-im-internet.de/entgfg/)
-- SGB X § 116 (Forderungs-Übergang) — [gesetze-im-internet.de/sgb_10](https://www.gesetze-im-internet.de/sgb_10/)
-- ZPO § 287 — erleichtertes Beweismaß
+- Bürgerliches Gesetzbuch §§ 249, 252, 842, 843 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
+- Entgeltfortzahlungsgesetz § 6 – [gesetze-im-internet.de/entgfg](https://www.gesetze-im-internet.de/entgfg/)
+- SGB X § 116 (Forderungs-Übergang) – [gesetze-im-internet.de/sgb_10](https://www.gesetze-im-internet.de/sgb_10/)
+- ZPO § 287 – erleichtertes Beweismaß
 - BGH-Rechtsprechung zum entgangenen Gewinn bei Selbständigen
-- Pardey/Frasch, Verdienstausfallschaden — Praxis-Handbuch
+- Pardey/Frasch, Verdienstausfallschaden – Praxis-Handbuch
 
 ---
 
@@ -280,4 +280,4 @@ Verdienstausfall-Berechnung wird oft zu niedrig angesetzt. Selbständige verlier
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

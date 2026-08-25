@@ -85,14 +85,14 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
 
   return (
     <>
-      {/* Sticky Bar — Floating-Pill mit Glass-Backdrop */}
+      {/* Sticky Bar – Floating-Pill mit Glass-Backdrop */}
       <div
         aria-hidden={footerSichtbar}
         className={`fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 transition-opacity duration-200 sm:left-auto sm:right-6 sm:translate-x-0 ${
           footerSichtbar ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
-        {/* Gutachter finden — Mobile-Primaer-CTA (Aaron 15.06.: eigener Button unten mittig) */}
+        {/* Gutachter finden – Mobile-Primaer-CTA (Aaron 15.06.: eigener Button unten mittig) */}
         <Link
           href={finderHref}
           data-tracking="finder-sticky"
@@ -134,7 +134,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
         </div>
       </div>
 
-      {/* Modal — Glass-Backdrop + glassy Sheet */}
+      {/* Modal – Glass-Backdrop + glassy Sheet */}
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-md sm:items-center"

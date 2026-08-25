@@ -79,7 +79,7 @@ export default function Page() {
           <p className="mt-5 max-w-[65ch] text-[1.0625rem] leading-relaxed text-claimondo-shield">
             Wie regulieren die großen deutschen Kfz-Haftpflichtversicherer Schäden Dritter? Diese
             Hubs ordnen die BaFin-Beschwerdequoten 2024, die dokumentierte Kürzungspraxis und die
-            wegweisende Rechtsprechung ein — und zeigen, welche Rechte Ihnen als unverschuldet
+            wegweisende Rechtsprechung ein – und zeigen, welche Rechte Ihnen als unverschuldet
             Geschädigtem zustehen.
           </p>
         </header>

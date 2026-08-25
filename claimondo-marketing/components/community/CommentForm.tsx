@@ -43,7 +43,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
       {stage === 'username' && (
         <>
           <p className="text-[0.8125rem] text-claimondo-shield">
-            Du bist angemeldet — wähle jetzt einmalig einen öffentlichen Nutzernamen für deine Kommentare.
+            Du bist angemeldet – wähle jetzt einmalig einen öffentlichen Nutzernamen für deine Kommentare.
           </p>
           <input name="username" required placeholder="Nutzername (3–24 Zeichen)" className={input} />
           <label className="flex items-start gap-2 text-[0.75rem] text-claimondo-shield">
@@ -63,7 +63,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
           <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/70">
             Bitte beachte die{' '}
             <a href="/kommentar-regeln" className="underline hover:text-claimondo-shield">Kommentar-Regeln</a>{' '}
-            — keine sensiblen oder fremden personenbezogenen Daten.
+            – keine sensiblen oder fremden personenbezogenen Daten.
           </p>
         </>
       )}

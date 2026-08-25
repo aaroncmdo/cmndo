@@ -15,7 +15,7 @@ customer_questions:
   - "grabstein versicherung erstattung"
   - "trauerfeier kosten haftpflicht"
 last_modified: 2026-05-18
-excerpt: Beerdigungskosten sind nach § 844 Abs. 1 BGB bei tödlichem Verkehrsunfall vollständig vom gegnerischen Haftpflichtversicherer zu erstatten. Erstattbar sind alle standesgemäßen Aufwendungen für Bestattung, Trauerfeier, Grabstelle, Grabstein und Überführung. Anspruchsberechtigt ist, wer die Kosten tatsächlich getragen hat — typisch Erben oder Ehepartner.
+excerpt: Beerdigungskosten sind nach § 844 Abs. 1 BGB bei tödlichem Verkehrsunfall vollständig vom gegnerischen Haftpflichtversicherer zu erstatten. Erstattbar sind alle standesgemäßen Aufwendungen für Bestattung, Trauerfeier, Grabstelle, Grabstein und Überführung. Anspruchsberechtigt ist, wer die Kosten tatsächlich getragen hat – typisch Erben oder Ehepartner.
 keyFacts:
   - Anspruchsgrundlage: § 844 Abs. 1 BGB
   - Standard-Bestattung 5.000–15.000 €, aufwändige Konstellationen bis 25.000 €+
@@ -28,12 +28,12 @@ related:
   - /haftpflicht/unterhaltsschaden
   - /haftpflicht/erben-rechtsnachfolger
   - /haftpflicht/schmerzensgeld-bgb253
-meta_description: "Beerdigungskosten nach tödlichem Unfall: nach §844 Abs. 1 BGB voll erstattbar im standesgemäßen Umfang — Bestattung, Grabstein, Trauerfeier. Was zusteht."
+meta_description: "Beerdigungskosten nach tödlichem Unfall: nach §844 Abs. 1 BGB voll erstattbar im standesgemäßen Umfang – Bestattung, Grabstein, Trauerfeier. Was zusteht."
 ---
 
 # Beerdigungskosten nach § 844 Abs. 1 BGB
 
-> **Kurz erklärt:** Beerdigungskosten sind nach § 844 Abs. 1 BGB voll erstattbar vom gegnerischen Haftpflichtversicherer bei tödlichem Verkehrsunfall — umfasst Bestattung, Trauerfeier, Grabstelle, Grabstein und einen **standesgemäßen Umfang** der Aufwendungen. Anspruchsberechtigt: derjenige, der die Beerdigungskosten **tatsächlich getragen** hat (meist Erben oder Ehepartner). Typische Spannen: 5.000–15.000 € (Bestattung Standard) bis 25.000 € + (besondere Grabsteine, größere Trauerfeier).
+> **Kurz erklärt:** Beerdigungskosten sind nach § 844 Abs. 1 BGB voll erstattbar vom gegnerischen Haftpflichtversicherer bei tödlichem Verkehrsunfall – umfasst Bestattung, Trauerfeier, Grabstelle, Grabstein und einen **standesgemäßen Umfang** der Aufwendungen. Anspruchsberechtigt: derjenige, der die Beerdigungskosten **tatsächlich getragen** hat (meist Erben oder Ehepartner). Typische Spannen: 5.000–15.000 € (Bestattung Standard) bis 25.000 € + (besondere Grabsteine, größere Trauerfeier).
 
 ## Auch bekannt als
 
@@ -47,7 +47,7 @@ Beerdigungskosten sind die Erstattung aller standesgemäßen Beerdigungs- und Tr
 
 ## In drei Sätzen erklärt
 
-§ 844 Abs. 1 BGB verpflichtet den gegnerischen Haftpflichtversicherer bei tödlichem Verkehrsunfall zur Erstattung der **Beerdigungskosten** — umfasst alle **standesgemäßen Aufwendungen** für die Bestattung, Trauerfeier, Grabstelle, Grabstein und gegebenenfalls Überführung. Anspruchsberechtigt ist die Person, die die Kosten **tatsächlich getragen** hat — typischerweise die Erben oder der überlebende Ehepartner. Typische Spannen reichen von **5.000–15.000 €** (Standard-Bestattung) bis über **25.000 €** bei besonderen Konstellationen (aufwändige Grabstein-Gestaltung, große Trauerfeier, Familien-Gruft) — maßgeblich ist der **gesellschaftlich übliche Umfang** für die Stand-, Vermögens- und Familien-Konstellation des Verstorbenen.
+§ 844 Abs. 1 BGB verpflichtet den gegnerischen Haftpflichtversicherer bei tödlichem Verkehrsunfall zur Erstattung der **Beerdigungskosten** – umfasst alle **standesgemäßen Aufwendungen** für die Bestattung, Trauerfeier, Grabstelle, Grabstein und gegebenenfalls Überführung. Anspruchsberechtigt ist die Person, die die Kosten **tatsächlich getragen** hat – typischerweise die Erben oder der überlebende Ehepartner. Typische Spannen reichen von **5.000–15.000 €** (Standard-Bestattung) bis über **25.000 €** bei besonderen Konstellationen (aufwändige Grabstein-Gestaltung, große Trauerfeier, Familien-Gruft) – maßgeblich ist der **gesellschaftlich übliche Umfang** für die Stand-, Vermögens- und Familien-Konstellation des Verstorbenen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -70,10 +70,10 @@ Beerdigungskosten sind die Erstattung aller standesgemäßen Beerdigungs- und Tr
 - Trauer-Druckerei (Karten, Anzeigen)
 
 ### Grab und Grabpflege
-- **Grabstelle** — Kauf, Verlängerung
-- **Grabstein** — Kauf, Beschriftung, Aufstellung
+- **Grabstelle** – Kauf, Verlängerung
+- **Grabstein** – Kauf, Beschriftung, Aufstellung
 - **Bepflanzung** und Grabschmuck (Erstausstattung)
-- **Laufende Grabpflege** für eine **angemessene Zeit** (typisch 25 Jahre Ruhefrist) — teilweise strittig
+- **Laufende Grabpflege** für eine **angemessene Zeit** (typisch 25 Jahre Ruhefrist) – teilweise strittig
 
 ### Sonstige Aufwendungen
 - Trauerkleidung in **angemessenem Umfang**
@@ -82,7 +82,7 @@ Beerdigungskosten sind die Erstattung aller standesgemäßen Beerdigungs- und Tr
 
 ---
 
-## „Standesgemäßer Umfang" — die Grenz-Frage
+## „Standesgemäßer Umfang" – die Grenz-Frage
 
 Die BGH-Linie spricht von „standesgemäßer" Erstattung. Maßstab ist:
 
@@ -109,9 +109,9 @@ Anspruchs-berechtigt ist die Person, die die Beerdigungs-Kosten **tatsächlich g
 
 ## Was die Versicherung typischerweise behauptet
 
-> *„Beerdigungskosten nicht voll erstattbar — wir erstatten nur Standard-Pauschale 5.000 €."*
+> *„Beerdigungskosten nicht voll erstattbar – wir erstatten nur Standard-Pauschale 5.000 €."*
 
-Pauschal-Argumente nicht akzeptieren. Konkrete Rechnungen vorlegen — Versicherer muss begründen, warum „nicht standesgemäß".
+Pauschal-Argumente nicht akzeptieren. Konkrete Rechnungen vorlegen – Versicherer muss begründen, warum „nicht standesgemäß".
 
 > *„Grabpflege für 25 Jahre überzogen."*
 
@@ -123,7 +123,7 @@ Im angemessenen Umfang erstattbar. Standesgemäßheit prüfen.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
 Alle Belege archivieren. Pauschal-Kürzungen mit konkreten Rechnungen widerlegen.
@@ -144,7 +144,7 @@ Bei pauschalen Kürzungen lohnt sich Eskalation.
 ## Häufige Fragen
 
 **Wer zahlt die Beerdigung nach Autounfall?**
-Bei unverschuldetem tödlichem Unfall die gegnerische Haftpflichtversicherung — als eigenständige Schadensposition nach § 844 Abs. 1 BGB. Voraussetzung: Du hast die Kosten getragen.
+Bei unverschuldetem tödlichem Unfall die gegnerische Haftpflichtversicherung – als eigenständige Schadensposition nach § 844 Abs. 1 BGB. Voraussetzung: Du hast die Kosten getragen.
 
 **Wie hoch sind erstattbare Beerdigungskosten?**
 Standard-Bestattung 5.000–15.000 €. Bei besonderen Konstellationen (aufwändige Grabstein-Gestaltung, große Trauerfeier) bis 25.000 €+.
@@ -153,7 +153,7 @@ Standard-Bestattung 5.000–15.000 €. Bei besonderen Konstellationen (aufwänd
 Ja, im standesgemäßen Umfang. Versicherer-Kürzungen mit „überzogen" sind oft nicht haltbar.
 
 **Bekomme ich auch die Bewirtungs-Kosten der Trauerfeier?**
-Im angemessenen Umfang — orientiert an Familien-Größe und Tradition. Pauschal-Ablehnungen widersprechen.
+Im angemessenen Umfang – orientiert an Familien-Größe und Tradition. Pauschal-Ablehnungen widersprechen.
 
 **Wer kann den Anspruch geltend machen?**
 Diejenige Person, die die Beerdigungs-Kosten **tatsächlich getragen** hat. Meist Erben oder überlebender Ehepartner.
@@ -162,9 +162,9 @@ Diejenige Person, die die Beerdigungs-Kosten **tatsächlich getragen** hat. Meis
 
 ## Verwandte Begriffe
 
-- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) — pauschal zusätzlich
-- [Unterhaltsschaden](/haftpflicht/unterhaltsschaden) — Renten-Anspruch
-- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) — Anspruchsweiter-Übergang
+- [Hinterbliebenengeld](/haftpflicht/hinterbliebenengeld) – pauschal zusätzlich
+- [Unterhaltsschaden](/haftpflicht/unterhaltsschaden) – Renten-Anspruch
+- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) – Anspruchsweiter-Übergang
 
 ---
 
@@ -176,7 +176,7 @@ Diejenige Person, die die Beerdigungs-Kosten **tatsächlich getragen** hat. Meis
 
 ## Quellen
 
-- BGB § 844 Abs. 1 — [gesetze-im-internet.de/bgb/__844.html](https://www.gesetze-im-internet.de/bgb/__844.html)
+- BGB § 844 Abs. 1 – [gesetze-im-internet.de/bgb/__844.html](https://www.gesetze-im-internet.de/bgb/__844.html)
 - BGH-Rechtsprechung zur Erstattung von Beerdigungskosten
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
@@ -220,4 +220,4 @@ Diejenige Person, die die Beerdigungs-Kosten **tatsächlich getragen** hat. Meis
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

@@ -73,10 +73,10 @@ export default function Page() {
 
         <header className="max-w-3xl">
           <h1 style={HEAD_FONT} className="text-3xl font-bold text-claimondo-navy">
-            Kfz-Haftpflichtschaden — Glossar &amp; Anspruchs-Lexikon
+            Kfz-Haftpflichtschaden – Glossar &amp; Anspruchs-Lexikon
           </h1>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            {total} Begriffe rund um den unverschuldeten Kfz-Haftpflichtschaden — von den{' '}
+            {total} Begriffe rund um den unverschuldeten Kfz-Haftpflichtschaden – von den{' '}
             <strong className="text-claimondo-navy">Haftungs-Grundlagen</strong> über die einzelnen{' '}
             <strong className="text-claimondo-navy">Schadenspositionen</strong> und{' '}
             <strong className="text-claimondo-navy">Fristen</strong> bis zu den typischen{' '}

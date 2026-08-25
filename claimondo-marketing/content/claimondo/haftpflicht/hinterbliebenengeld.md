@@ -15,9 +15,9 @@ customer_questions:
   - "geld nach tod angehörige unfall"
   - "hinterbliebenengeld eingetragener lebenspartner"
 last_modified: 2026-05-18
-excerpt: Hinterbliebenengeld nach § 844 Abs. 3 BGB ist eine pauschale Geldentschädigung für nahe Angehörige bei tödlichem Verkehrsunfall — eingeführt 2017, ohne Nachweis einer eigenen medizinischen Erkrankung. Die gerichtliche Spanne liegt typisch bei 5.000–15.000 Euro pro Angehörigem; bei besonders engen Beziehungen oder dramatischen Umständen auch höher. Der Anspruch ist kumulierbar mit dem Schockschaden nach § 823 BGB.
+excerpt: Hinterbliebenengeld nach § 844 Abs. 3 BGB ist eine pauschale Geldentschädigung für nahe Angehörige bei tödlichem Verkehrsunfall – eingeführt 2017, ohne Nachweis einer eigenen medizinischen Erkrankung. Die gerichtliche Spanne liegt typisch bei 5.000–15.000 Euro pro Angehörigem; bei besonders engen Beziehungen oder dramatischen Umständen auch höher. Der Anspruch ist kumulierbar mit dem Schockschaden nach § 823 BGB.
 keyFacts:
-  - § 844 Abs. 3 BGB — Eingeführt 2017, keine Diagnose erforderlich
+  - § 844 Abs. 3 BGB – Eingeführt 2017, keine Diagnose erforderlich
   - 5.000–15.000 € typische Spanne pro nahem Angehörigen
   - Bis 25.000 € bei besonders dramatischen Umständen (Miterleben)
   - Kumulierbar mit Schockschaden nach § 823 BGB
@@ -28,12 +28,12 @@ related:
   - /haftpflicht/unterhaltsschaden
   - /haftpflicht/beerdigungskosten
   - /haftpflicht/erben-rechtsnachfolger
-meta_description: "Hinterbliebenengeld nach §844 Abs. 3 BGB: pauschale Entschädigung für nahe Angehörige bei tödlichem Unfall — typisch 5.000–15.000 €, ohne Diagnose."
+meta_description: "Hinterbliebenengeld nach §844 Abs. 3 BGB: pauschale Entschädigung für nahe Angehörige bei tödlichem Unfall – typisch 5.000–15.000 €, ohne Diagnose."
 ---
 
 # Hinterbliebenengeld nach § 844 Abs. 3 BGB
 
-> **Kurz erklärt:** Hinterbliebenengeld ist eine **pauschale Entschädigung** für den seelischen Verlust eines nahen Angehörigen bei tödlichem Verkehrsunfall — eingeführt 2017 mit § 844 Abs. 3 BGB. Es ist **unabhängig** von medizinischen Erkrankungs-Folgen und wird zusätzlich zum [Schockschaden](/haftpflicht/schockschaden-rechtlich) gewährt. Typische gerichtliche Spannen: **5.000–15.000 € pro nahem Angehörigen**, bei besonders enger Beziehung oder besonders dramatischen Umständen auch höher.
+> **Kurz erklärt:** Hinterbliebenengeld ist eine **pauschale Entschädigung** für den seelischen Verlust eines nahen Angehörigen bei tödlichem Verkehrsunfall – eingeführt 2017 mit § 844 Abs. 3 BGB. Es ist **unabhängig** von medizinischen Erkrankungs-Folgen und wird zusätzlich zum [Schockschaden](/haftpflicht/schockschaden-rechtlich) gewährt. Typische gerichtliche Spannen: **5.000–15.000 € pro nahem Angehörigen**, bei besonders enger Beziehung oder besonders dramatischen Umständen auch höher.
 
 ## Auch bekannt als
 
@@ -43,18 +43,18 @@ meta_description: "Hinterbliebenengeld nach §844 Abs. 3 BGB: pauschale Entschä
 
 ## In einem Satz erklärt
 
-Hinterbliebenengeld ist eine pauschale Geldentschädigung naher Angehöriger für den seelischen Verlust eines Familienmitglieds bei tödlichem Unfall — unabhängig von eigener medizinischer Erkrankung.
+Hinterbliebenengeld ist eine pauschale Geldentschädigung naher Angehöriger für den seelischen Verlust eines Familienmitglieds bei tödlichem Unfall – unabhängig von eigener medizinischer Erkrankung.
 
 ## In drei Sätzen erklärt
 
-Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 Abs. 3 BGB geschaffen — er gewährt nahen Angehörigen bei tödlichen Verkehrsunfällen eine pauschale Entschädigung für ihr seelisches Leid, **ohne dass eine eigene Erkrankung mit Krankheitswert nachgewiesen werden muss**. Damit füllt der Gesetzgeber die Lücke zwischen normalem Trauern (kein juristischer Anspruch) und Schockschaden (eigene psychische Erkrankung erforderlich) — die Anerkennung des Verlustes ist auch ohne ärztliche Diagnose möglich. Gerichtliche Spannen haben sich auf **5.000–15.000 € pro nahem Angehörigen** eingependelt; bei besonders enger Beziehung (z. B. junge Eltern eines getöteten Kindes) auch höher.
+Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 Abs. 3 BGB geschaffen – er gewährt nahen Angehörigen bei tödlichen Verkehrsunfällen eine pauschale Entschädigung für ihr seelisches Leid, **ohne dass eine eigene Erkrankung mit Krankheitswert nachgewiesen werden muss**. Damit füllt der Gesetzgeber die Lücke zwischen normalem Trauern (kein juristischer Anspruch) und Schockschaden (eigene psychische Erkrankung erforderlich) – die Anerkennung des Verlustes ist auch ohne ärztliche Diagnose möglich. Gerichtliche Spannen haben sich auf **5.000–15.000 € pro nahem Angehörigen** eingependelt; bei besonders enger Beziehung (z. B. junge Eltern eines getöteten Kindes) auch höher.
 
 ## Die fünf Schlüsselzahlen
 
 - **§ 844 Abs. 3 BGB** als Anspruchsgrundlage
 - **2017** Einführung des Hinterbliebenengeldes
 - **5.000–15.000 €** typische Gerichts-Spanne pro Angehörigem
-- **Pauschal** — keine medizinische Diagnose erforderlich
+- **Pauschal** – keine medizinische Diagnose erforderlich
 - **Parallel zum [Schockschaden](/haftpflicht/schockschaden-rechtlich)** geltend zu machen
 
 ---
@@ -66,11 +66,11 @@ Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 A
 - **Eltern und Kinder**
 - **In Einzelfällen erweitert** auf andere nahe Angehörige durch Gerichts-Wertung (Geschwister, Verlobte, langjährige Lebensgefährten)
 
-→ Nicht jeder Verwandte ist automatisch Hinterbliebener im Sinne des Gesetzes — entscheidend ist die **enge persönliche Beziehung**.
+→ Nicht jeder Verwandte ist automatisch Hinterbliebener im Sinne des Gesetzes – entscheidend ist die **enge persönliche Beziehung**.
 
 ---
 
-## Höhe — die gerichtliche Spruchpraxis
+## Höhe – die gerichtliche Spruchpraxis
 
 | Konstellation | Spanne |
 |---|---|
@@ -83,7 +83,7 @@ Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 A
 
 ---
 
-## Hinterbliebenengeld vs. Schockschaden — Unterschiede und Parallelität
+## Hinterbliebenengeld vs. Schockschaden – Unterschiede und Parallelität
 
 | Aspekt | Hinterbliebenengeld | Schockschaden |
 |---|---|---|
@@ -93,14 +93,14 @@ Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 A
 | **Höhe** | Pauschal 5.000–15.000 € | Individuell 3.000–50.000 €+ |
 | **Beweis** | Verwandtschaft + Tod | + Diagnose + Kausalität |
 
-→ Beide Ansprüche sind **kumulierbar** — ein Hinterbliebener mit eigener PTBS kann sowohl Hinterbliebenengeld (~10.000 €) als auch Schockschaden (~15.000–25.000 €) geltend machen.
+→ Beide Ansprüche sind **kumulierbar** – ein Hinterbliebener mit eigener PTBS kann sowohl Hinterbliebenengeld (~10.000 €) als auch Schockschaden (~15.000–25.000 €) geltend machen.
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Hinterbliebenengeld ist pauschal — Anspruch besteht **automatisch** bei naher Angehörigen-Beziehung und tödlichem Verkehrsunfall. Keine Diagnose erforderlich.
+Hinterbliebenengeld ist pauschal – Anspruch besteht **automatisch** bei naher Angehörigen-Beziehung und tödlichem Verkehrsunfall. Keine Diagnose erforderlich.
 
 ### 🛠 Drei Schritte
 
@@ -108,10 +108,10 @@ Hinterbliebenengeld ist pauschal — Anspruch besteht **automatisch** bei naher 
 Standesamts-Urkunden, Familienbuch.
 
 **2. Anspruch geltend machen**
-Schriftlich beim Versicherer — auch wenn parallel andere Ansprüche laufen.
+Schriftlich beim Versicherer – auch wenn parallel andere Ansprüche laufen.
 
 **3. Schockschaden parallel prüfen**
-Bei eigener psychischer Erkrankung zusätzlich Schockschaden — beide Ansprüche kumulierbar.
+Bei eigener psychischer Erkrankung zusätzlich Schockschaden – beide Ansprüche kumulierbar.
 
 ---
 
@@ -121,10 +121,10 @@ Bei eigener psychischer Erkrankung zusätzlich Schockschaden — beide Ansprüch
 Pauschale Gerichts-Spanne 5.000–15.000 € pro nahem Angehörigen. Bei besonderer Konstellation (Tod eines Kindes, junge Familie) auch höher.
 
 **Was ist der Unterschied zum Schockschaden?**
-Hinterbliebenengeld ist pauschal ohne medizinische Diagnose. Schockschaden setzt eine eigene psychische Erkrankung mit Krankheitswert voraus — und ist individuell höher zu bemessen.
+Hinterbliebenengeld ist pauschal ohne medizinische Diagnose. Schockschaden setzt eine eigene psychische Erkrankung mit Krankheitswert voraus – und ist individuell höher zu bemessen.
 
 **Bekomme ich beide Ansprüche?**
-Ja, sie sind kumulierbar — Hinterbliebenengeld pauschal + Schockschaden individuell.
+Ja, sie sind kumulierbar – Hinterbliebenengeld pauschal + Schockschaden individuell.
 
 **Wer hat Anspruch?**
 Ehepartner, eingetragene Lebenspartner, Eltern, Kinder. In Einzelfällen erweitert auf Geschwister, Verlobte, langjährige Lebensgefährten.
@@ -133,16 +133,16 @@ Ehepartner, eingetragene Lebenspartner, Eltern, Kinder. In Einzelfällen erweite
 Familien-rechtliche und faktische Nähe der Beziehung. Eheliche oder elterliche Beziehung ist Standard, andere Konstellationen im Einzelfall.
 
 **Was, wenn der Tod erst später eintritt?**
-Hinterbliebenengeld besteht nur bei tödlichem Verlauf. Bei schwerer dauerhafter Beeinträchtigung des Angehörigen ohne Tod nicht — aber Schockschaden kann greifen.
+Hinterbliebenengeld besteht nur bei tödlichem Verlauf. Bei schwerer dauerhafter Beeinträchtigung des Angehörigen ohne Tod nicht – aber Schockschaden kann greifen.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Schockschaden rechtlich](/haftpflicht/schockschaden-rechtlich) — daneben anwendbar
-- [Unterhaltsschaden](/haftpflicht/unterhaltsschaden) — bei Wegfall des Versorgers
-- [Beerdigungskosten](/haftpflicht/beerdigungskosten) — daneben erstattbar
-- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) — Anspruchsweiter-Übergang
+- [Schockschaden rechtlich](/haftpflicht/schockschaden-rechtlich) – daneben anwendbar
+- [Unterhaltsschaden](/haftpflicht/unterhaltsschaden) – bei Wegfall des Versorgers
+- [Beerdigungskosten](/haftpflicht/beerdigungskosten) – daneben erstattbar
+- [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) – Anspruchsweiter-Übergang
 
 ---
 
@@ -154,7 +154,7 @@ Hinterbliebenengeld besteht nur bei tödlichem Verlauf. Bei schwerer dauerhafter
 
 ## Quellen
 
-- BGB § 844 Abs. 3 — [gesetze-im-internet.de/bgb/__844.html](https://www.gesetze-im-internet.de/bgb/__844.html)
+- BGB § 844 Abs. 3 – [gesetze-im-internet.de/bgb/__844.html](https://www.gesetze-im-internet.de/bgb/__844.html)
 - Gesetz zur Einführung eines Hinterbliebenengeldes (2017)
 - BGH-Rechtsprechung zur Höhe des Hinterbliebenengeldes
 - Hacks/Wellner Schmerzensgeldtabelle
@@ -200,4 +200,4 @@ Hinterbliebenengeld besteht nur bei tödlichem Verlauf. Bei schwerer dauerhafter
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

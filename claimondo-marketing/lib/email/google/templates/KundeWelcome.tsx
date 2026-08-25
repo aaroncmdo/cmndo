@@ -79,7 +79,7 @@ export function KundeWelcomeEmail(props: Props) {
       </Hero>
 
       <Card>
-        {/* Was passiert jetzt — Reassurance (bisheriger p2-Text) */}
+        {/* Was passiert jetzt – Reassurance (bisheriger p2-Text) */}
         <Paragraph>{s.p2}</Paragraph>
 
         {/* Fall-Überblick + Status-Pill */}
@@ -110,7 +110,7 @@ export function KundeWelcomeEmail(props: Props) {
           </>
         ) : null}
 
-        {/* AAR-127: Login-Info hat Vorrang — Magic-Link UND Zugangsdaten als Fallback */}
+        {/* AAR-127: Login-Info hat Vorrang – Magic-Link UND Zugangsdaten als Fallback */}
         {props.loginInfo ? (
           <>
             <Paragraph>{s.loginIntro}</Paragraph>

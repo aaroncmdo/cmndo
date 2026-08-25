@@ -3,7 +3,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Claimondo — Vollständige Schadensregulierung auf Augenhöhe'
+export const alt = 'Claimondo – Vollständige Schadensregulierung auf Augenhöhe'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -22,7 +22,7 @@ export default function OgImage() {
           position: 'relative',
         }}
       >
-        {/* Hintergrundraster — technische Zeichnung */}
+        {/* Hintergrundraster – technische Zeichnung */}
         <div
           style={{
             position: 'absolute',
@@ -62,7 +62,7 @@ export default function OgImage() {
           }}
         />
 
-        {/* Rechte geometrische Figur — Schild/Shield-Motiv */}
+        {/* Rechte geometrische Figur – Schild/Shield-Motiv */}
         <div
           style={{
             position: 'absolute',
@@ -276,7 +276,7 @@ export default function OgImage() {
               display: 'flex',
             }}
           >
-            Vollständige Schadensregulierung — auf Augenhöhe
+            Vollständige Schadensregulierung – auf Augenhöhe
           </div>
 
           {/* Feature-Chips */}

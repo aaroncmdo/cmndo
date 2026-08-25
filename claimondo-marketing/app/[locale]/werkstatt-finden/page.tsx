@@ -86,7 +86,7 @@ export default async function WerkstattFindenPage({
           serviceSchema({
             name: 'Kfz-Werkstatt-Vermittlung über interaktive Karte',
             description:
-              'Passende Kfz-Werkstatt in der Nähe finden: interaktive Karte mit geprüften Partner-Werkstätten, gerankt nach Marke, Schadensbild und Entfernung zum Fahrzeugstandort. Anfrage in wenigen Minuten — Karosserie, Lack, Smart Repair, Mechanik und Glas.',
+              'Passende Kfz-Werkstatt in der Nähe finden: interaktive Karte mit geprüften Partner-Werkstätten, gerankt nach Marke, Schadensbild und Entfernung zum Fahrzeugstandort. Anfrage in wenigen Minuten – Karosserie, Lack, Smart Repair, Mechanik und Glas.',
             url: `${SITE_URL}/werkstatt-finden`,
           }),
           breadcrumbsSchema([
@@ -100,7 +100,7 @@ export default async function WerkstattFindenPage({
       {/* Vollbild-Finder (Karte + 4-Schritt-Wizard). initialCenter aus ?stadt/?plz/?lat&lng.
           Embed-only: bewusst KEIN Content darunter (sauberer Mobile-Scroll). */}
       {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
       <WerkstattFindenSection
         height="100dvh"
         initialCenter={initialCenter}

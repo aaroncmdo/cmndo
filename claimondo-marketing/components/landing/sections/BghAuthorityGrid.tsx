@@ -11,7 +11,7 @@ const BGH_URTEILE = [
   { az: 'BGH VI ZR 65/18',     titel: 'UPE-Aufschläge',        text: 'UPE-Aufschläge auch bei fiktiver Abrechnung erstattungsfähig.', href: '/haftpflicht/reparaturkosten' },
   { az: 'BGH VI ZR 174/24',    titel: 'Beilackierung 2025',    text: 'Beilackierungskosten sind erstattungsfähiger Teil des Schadens.', href: '/decoder/reparatur-unwirtschaftlich' },
   { az: 'BGH VI ZR 53/09',     titel: 'Markenwerkstatt-Sätze', text: 'Unter 3 Jahren oder Scheckheft → Stundenverrechnung Markenwerkstatt.', href: '/unverschuldeter-unfall-rechte' },
-  { az: 'BGH VI ZR 119/04',    titel: 'Restwert regional',     text: 'Restwertbörsen überregional irrelevant — regionaler Markt zählt.', href: '/haftpflicht/wiederbeschaffungswert' },
+  { az: 'BGH VI ZR 119/04',    titel: 'Restwert regional',     text: 'Restwertbörsen überregional irrelevant – regionaler Markt zählt.', href: '/haftpflicht/wiederbeschaffungswert' },
   { az: 'BGH VI ZR 357/03',    titel: 'Wertminderung',         text: 'Merkantile Wertminderung auch bei älteren Fahrzeugen.', href: '/haftpflicht/wertminderung' },
   { az: 'BGH VI ZR 67/91',     titel: '130%-Regel',            text: 'Reparatur bis 130 % des Wiederbeschaffungswertes zulässig.', href: null },
   { az: 'BGH VI ZR 280/22',    titel: 'SV-Honorar-Risiko',     text: 'Auch überhöhte SV-Honorare gehen zu Lasten der Versicherung.', href: '/haftpflicht/sv-kosten' },
@@ -42,7 +42,7 @@ export function BghAuthorityGrid({
             {headline}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Höchstrichterliche Rechtsprechung von 1992 bis 2025 — Werkstattrisiko, UPE,
+            Höchstrichterliche Rechtsprechung von 1992 bis 2025 – Werkstattrisiko, UPE,
             Beilackierung, Wertminderung und 130%-Regel sind seit Jahren BGH-fest.
             {subline ?? ' Versicherer kürzen trotzdem. Wir holen es zurück.'}
           </p>
@@ -65,7 +65,7 @@ export function BghAuthorityGrid({
                 // `doc40-cards-clickable` erwartet `a[aria-label*="BGH VI ZR"]` und war
                 // damit von Anfang an rot — gemerkt hat es niemand, weil die Suite
                 // stumm war (falsche Domain #5441, davor Timeout=cancelled #5422).
-                aria-label={`${u.az} — ${u.titel}`}
+                aria-label={`${u.az} – ${u.titel}`}
                 className="group block rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
                 data-tracking={`card-bgh-${u.az.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
               >
@@ -93,7 +93,7 @@ export function BghAuthorityGrid({
           )}
         </div>
         <p className="mt-10 text-center text-xs text-claimondo-shield/70">
-          Quelle: juris.bundesgerichtshof.de — Volltexte über Aktenzeichen abrufbar
+          Quelle: juris.bundesgerichtshof.de – Volltexte über Aktenzeichen abrufbar
         </p>
       </div>
     </section>

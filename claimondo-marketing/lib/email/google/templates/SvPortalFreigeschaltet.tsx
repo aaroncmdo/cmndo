@@ -10,7 +10,7 @@ type Props = {
 }
 
 export function subject(_p: Props) {
-  return 'Willkommen bei Claimondo — deine Vertragsunterlagen'
+  return 'Willkommen bei Claimondo – deine Vertragsunterlagen'
 }
 
 export function SvPortalFreigeschaltetEmail(props: Props) {

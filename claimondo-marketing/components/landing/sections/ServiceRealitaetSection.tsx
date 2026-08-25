@@ -31,7 +31,7 @@ export function ServiceRealitaetSection({ finderHref = '/gutachter-finden' }: { 
             Ihr Fall. Immer in der Tasche.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Persönliche Begleitung, live verfolgbar, ohne Papierkram — so fühlt sich
+            Persönliche Begleitung, live verfolgbar, ohne Papierkram – so fühlt sich
             Schadensregulierung mit Claimondo an.
           </p>
         </div>

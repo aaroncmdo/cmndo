@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/auffahrunfall
-meta_title: Auffahrunfall — wer haftet, welche Quote
+meta_title: Auffahrunfall – wer haftet, welche Quote
 type: glossar-spoke
 cluster: H6
 nummer: H6.1
@@ -16,11 +16,11 @@ customer_questions:
   - "auffahrunfall ohne grund gebremst"
   - "habe ich auf jemand drauf was passiert"
 last_modified: 2026-05-18
-excerpt: Beim Auffahrunfall greift der Anscheinsbeweis gegen den Auffahrenden — er hat den Sicherheitsabstand nach § 4 StVO nicht eingehalten oder war unaufmerksam. Die Standardquote liegt bei 100 : 0 zu Lasten des Auffahrenden. Bremsen des Vordermanns begründet kein Mitverschulden; Versicherer-Mitverschuldensbehauptungen sind in 95 % der Fälle nicht haltbar.
+excerpt: Beim Auffahrunfall greift der Anscheinsbeweis gegen den Auffahrenden – er hat den Sicherheitsabstand nach § 4 StVO nicht eingehalten oder war unaufmerksam. Die Standardquote liegt bei 100 : 0 zu Lasten des Auffahrenden. Bremsen des Vordermanns begründet kein Mitverschulden; Versicherer-Mitverschuldensbehauptungen sind in 95 % der Fälle nicht haltbar.
 keyFacts:
   - Standard-Haftungsquote 100 : 0 zu Lasten des Auffahrenden
-  - § 4 StVO — Sicherheitsabstand-Pflicht als normativer Anker
-  - BGH VI ZR 177/10 — Anscheinsbeweis beim Auffahrunfall bestätigt
+  - § 4 StVO – Sicherheitsabstand-Pflicht als normativer Anker
+  - BGH VI ZR 177/10 – Anscheinsbeweis beim Auffahrunfall bestätigt
   - HWS-Distorsion Grad I/II: Schmerzensgeld 800–3.500 €, Grad III bis 25.000 €
   - Erschütterung nur bei nachgewiesener Schikane-Bremsung (selten erfolgreich)
 last_legal_review: pending
@@ -33,9 +33,9 @@ related:
 meta_description: "Auffahrunfall: Der Anscheinsbeweis spricht gegen den Auffahrenden, Standardquote 100:0 (§4 StVO). Wann die Quote kippt und Sie voll durchsetzen."
 ---
 
-# Auffahrunfall — wer haftet und wie hoch ist die Quote?
+# Auffahrunfall – wer haftet und wie hoch ist die Quote?
 
-> **Kurz erklärt:** Beim klassischen Auffahrunfall spricht der **Anscheinsbeweis** für eine **100 %-Haftung des Auffahrenden** — er hat den notwendigen Sicherheitsabstand nicht eingehalten (§ 4 StVO) oder war unaufmerksam. Der Vordermann trägt **0 % Mitverschulden** — selbst wenn er gebremst hat (außer bei nachweisbar grundlosem, plötzlichem Vollbremsen aus reiner Schikane). Versicherer-Versuche, eine Mit-Quote durchzudrücken, sind in 95 % der Fälle nicht haltbar.
+> **Kurz erklärt:** Beim klassischen Auffahrunfall spricht der **Anscheinsbeweis** für eine **100 %-Haftung des Auffahrenden** – er hat den notwendigen Sicherheitsabstand nicht eingehalten (§ 4 StVO) oder war unaufmerksam. Der Vordermann trägt **0 % Mitverschulden** – selbst wenn er gebremst hat (außer bei nachweisbar grundlosem, plötzlichem Vollbremsen aus reiner Schikane). Versicherer-Versuche, eine Mit-Quote durchzudrücken, sind in 95 % der Fälle nicht haltbar.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ Auffahrunfall · Heckaufprall · Auffahrkollision · Hinten-Aufgefahren-Konstell
 
 ## In einem Satz erklärt
 
-Beim Auffahrunfall greift der Anscheinsbeweis gegen den Auffahrenden — er hatte zu geringen Abstand oder war unaufmerksam.
+Beim Auffahrunfall greift der Anscheinsbeweis gegen den Auffahrenden – er hatte zu geringen Abstand oder war unaufmerksam.
 
 ## In drei Sätzen erklärt
 
-Der Auffahrunfall ist die klarste Anscheinsbeweis-Konstellation des deutschen Verkehrsrechts — wer hinten auffährt, hat in 95 % der Fälle die **volle Schuld**, weil er den Sicherheitsabstand nach § 4 StVO nicht eingehalten oder die Aufmerksamkeit verloren hat. Der Vordermann muss **nichts beweisen** — der Anscheinsbeweis schließt sein Mitverschulden grundsätzlich aus, selbst wenn er gebremst hat (Bremsen ist im Straßenverkehr erlaubt und vorausschauend zu erwarten). Eine Erschütterung des Anscheinsbeweises gelingt dem Auffahrenden nur in seltenen Sonderfällen: **plötzliches und grundloses Vollbremsen** des Vordermanns aus reiner Schikane oder ohne nachvollziehbaren Grund, technische Defekte mit Fremdverursachung, oder andere atypische Konstellationen.
+Der Auffahrunfall ist die klarste Anscheinsbeweis-Konstellation des deutschen Verkehrsrechts – wer hinten auffährt, hat in 95 % der Fälle die **volle Schuld**, weil er den Sicherheitsabstand nach § 4 StVO nicht eingehalten oder die Aufmerksamkeit verloren hat. Der Vordermann muss **nichts beweisen** – der Anscheinsbeweis schließt sein Mitverschulden grundsätzlich aus, selbst wenn er gebremst hat (Bremsen ist im Straßenverkehr erlaubt und vorausschauend zu erwarten). Eine Erschütterung des Anscheinsbeweises gelingt dem Auffahrenden nur in seltenen Sonderfällen: **plötzliches und grundloses Vollbremsen** des Vordermanns aus reiner Schikane oder ohne nachvollziehbaren Grund, technische Defekte mit Fremdverursachung, oder andere atypische Konstellationen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -63,11 +63,11 @@ Der Auffahrunfall ist die klarste Anscheinsbeweis-Konstellation des deutschen Ve
 
 ## Was passiert juristisch beim Auffahrunfall
 
-Der Auffahrunfall steht klassisch unter dem **Anscheinsbeweis** — das Gericht schließt **erfahrungsgesetzlich** auf das Verschulden des Auffahrenden, ohne dass der Vordermann einen Verschuldens-Nachweis führen muss. Begründung: Wer den notwendigen Sicherheitsabstand (Faustregel: **halber Tacho-Wert** in Metern bei Pkw außerorts) einhält und aufmerksam fährt, kann auf jede Brems-Aktion des Vordermanns reagieren.
+Der Auffahrunfall steht klassisch unter dem **Anscheinsbeweis** – das Gericht schließt **erfahrungsgesetzlich** auf das Verschulden des Auffahrenden, ohne dass der Vordermann einen Verschuldens-Nachweis führen muss. Begründung: Wer den notwendigen Sicherheitsabstand (Faustregel: **halber Tacho-Wert** in Metern bei Pkw außerorts) einhält und aufmerksam fährt, kann auf jede Brems-Aktion des Vordermanns reagieren.
 
 ### Drei rechtliche Anker
-1. **§ 4 StVO** — Pflicht zum ausreichenden Abstand
-2. **§ 1 StVO** — allgemeine Sorgfaltspflicht
+1. **§ 4 StVO** – Pflicht zum ausreichenden Abstand
+2. **§ 1 StVO** – allgemeine Sorgfaltspflicht
 3. **Anscheinsbeweis** zugunsten Vordermann
 
 → Maßgeblich: nicht das Bremsen des Vordermanns, sondern das **Reagieren-Können** des Auffahrenden.
@@ -100,7 +100,7 @@ Standard-Argument. Nicht akzeptieren: Bremsen ist im Straßenverkehr **immer erl
 
 Die Wahrnehmung des Auffahrenden ist keine Erschütterungs-Tatsache. Es müssen objektive Beweise vorliegen.
 
-> *„Es war möglicherweise ein technischer Defekt — daher unabwendbares Ereignis."*
+> *„Es war möglicherweise ein technischer Defekt – daher unabwendbares Ereignis."*
 
 Technische Defekte sind grundsätzlich Halter-Risiko nach § 7 StVG. Nur bei externer Fremdverursachung („Sturm" → Baum auf Auto) greift höhere Gewalt.
 
@@ -110,8 +110,8 @@ Technische Defekte sind grundsätzlich Halter-Risiko nach § 7 StVG. Nur bei ext
 
 ## Welche Ansprüche du als Vordermann hast
 
-- [Reparaturkosten](/haftpflicht/reparaturkosten) — voll
-- [Wertminderung](/haftpflicht/wertminderung) — bei jungem Fahrzeug
+- [Reparaturkosten](/haftpflicht/reparaturkosten) – voll
+- [Wertminderung](/haftpflicht/wertminderung) – bei jungem Fahrzeug
 - [Mietwagen](/haftpflicht/mietwagen) / [Nutzungsausfall](/haftpflicht/nutzungsausfall)
 - [Sachverständigen-Kosten](/haftpflicht/sv-kosten)
 - Bei HWS-Distorsion: [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253) (Spannen 800–10.000 € je nach Grad)
@@ -120,10 +120,10 @@ Technische Defekte sind grundsätzlich Halter-Risiko nach § 7 StVG. Nur bei ext
 
 ---
 
-## Was du jetzt machst — konkret
+## Was du jetzt machst – konkret
 
 ### 💡 Die wichtigste Regel
-Anscheinsbeweis ausnutzen. Du musst **nichts** zur Schuld beweisen — der Versicherer muss erschüttern.
+Anscheinsbeweis ausnutzen. Du musst **nichts** zur Schuld beweisen – der Versicherer muss erschüttern.
 
 ### 🛠 Drei Schritte
 
@@ -134,20 +134,20 @@ Polizeibericht, Zeugen-Adressen, Fotos von Endposition, Bremsspuren.
 Anscheinsbeweis-Argument schriftlich vorbringen, BGH-Linie zitieren.
 
 **3. Bei Verletzungs-Verdacht: Notaufnahme**
-Auch bei vermeintlich leichten HWS-Symptomen — Spätfolgen häufig.
+Auch bei vermeintlich leichten HWS-Symptomen – Spätfolgen häufig.
 
 ---
 
 ## Häufige Fragen
 
 **Wer ist schuld bei einem Auffahrunfall?**
-In aller Regel der Auffahrende — Anscheinsbeweis greift, weil er Abstand oder Aufmerksamkeit nicht beachtet hat. Standard-Quote 100 : 0.
+In aller Regel der Auffahrende – Anscheinsbeweis greift, weil er Abstand oder Aufmerksamkeit nicht beachtet hat. Standard-Quote 100 : 0.
 
 **Was, wenn der Vordermann gebremst hat?**
-Bremsen ist im Verkehr erlaubt und vorhersehbar. Es entlastet den Auffahrenden nicht — er muss reagieren können.
+Bremsen ist im Verkehr erlaubt und vorhersehbar. Es entlastet den Auffahrenden nicht – er muss reagieren können.
 
 **Was, wenn der Vordermann grundlos gebremst hat?**
-Nur bei nachgewiesener Schikane-Bremsung. Hohe Beweis-Anforderungen — in der Praxis selten erfolgreich.
+Nur bei nachgewiesener Schikane-Bremsung. Hohe Beweis-Anforderungen – in der Praxis selten erfolgreich.
 
 **Bekomme ich Schmerzensgeld bei HWS-Distorsion?**
 Ja. Spannen je nach Grad: 800–3.500 € (Grad I/II), bis 25.000 € (Grad III, chronifiziert). Siehe [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253).
@@ -159,16 +159,16 @@ Bei sachlich begründetem Bremsen (Hindernis, Stau, Rotlicht): voll geschützt. 
 
 ## Verwandte Begriffe
 
-- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) — Grundprinzip
-- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) — bei Erschütterung
-- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) — Halterhaftung
-- [Decoder „Mitverschulden 30 %"](/decoder/mitverschulden-30-prozent) — typische Versicherer-Strategie
+- [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) – Grundprinzip
+- [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17) – bei Erschütterung
+- [§ 7 StVG Betriebsgefahr](/haftpflicht/betriebsgefahr-stvg7) – Halterhaftung
+- [Decoder „Mitverschulden 30 %"](/decoder/mitverschulden-30-prozent) – typische Versicherer-Strategie
 
 ---
 
 ## Wenn du nicht weiter weißt
 
-Auffahrunfälle sind eine der einfachsten Konstellationen — Anwalts-Erfolgsquote oft >90 %.
+Auffahrunfälle sind eine der einfachsten Konstellationen – Anwalts-Erfolgsquote oft >90 %.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -176,7 +176,7 @@ Auffahrunfälle sind eine der einfachsten Konstellationen — Anwalts-Erfolgsquo
 
 ## Quellen
 
-- StVO §§ 1, 4 — [gesetze-im-internet.de/stvo_2013](https://www.gesetze-im-internet.de/stvo_2013/)
+- StVO §§ 1, 4 – [gesetze-im-internet.de/stvo_2013](https://www.gesetze-im-internet.de/stvo_2013/)
 - BGH, ständige Rechtsprechung zum Anscheinsbeweis bei Auffahrunfall
 - BGH, Urteil vom 13.12.2011, VI ZR 177/10
 - Hentschel/König/Dauer, Straßenverkehrsrecht
@@ -224,4 +224,4 @@ Auffahrunfälle sind eine der einfachsten Konstellationen — Anwalts-Erfolgsquo
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

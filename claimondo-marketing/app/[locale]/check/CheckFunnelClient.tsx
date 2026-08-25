@@ -205,7 +205,7 @@ export function CheckFunnelClient() {
         </div>
       ) : (
         <div>
-          {/* Ergebnis — antwort-adaptiv (result-model) */}
+          {/* Ergebnis – antwort-adaptiv (result-model) */}
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-claimondo-ondo" aria-hidden />
             <h2 className="text-xl font-bold text-claimondo-navy sm:text-2xl">{t(result.headingKey)}</h2>
@@ -217,7 +217,7 @@ export function CheckFunnelClient() {
               <li key={pos} className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" aria-hidden />
                 <span className="text-sm leading-relaxed text-claimondo-shield">
-                  <strong className="text-claimondo-navy">{t(`ent_${pos}_t`)}</strong> — {t(`ent_${pos}_d`)}
+                  <strong className="text-claimondo-navy">{t(`ent_${pos}_t`)}</strong> – {t(`ent_${pos}_d`)}
                 </span>
               </li>
             ))}

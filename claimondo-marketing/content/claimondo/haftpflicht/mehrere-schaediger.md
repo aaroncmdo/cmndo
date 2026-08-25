@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/mehrere-schaediger
-meta_title: Kettenunfall — Gesamtschuldner nach § 421 BGB
+meta_title: Kettenunfall – Gesamtschuldner nach § 421 BGB
 type: glossar-spoke
 cluster: H7
 nummer: H7.7
@@ -15,22 +15,22 @@ customer_questions:
   - "421 bgb gesamtschuldner erklärung"
   - "massenkollision schadensersatz"
 last_modified: 2026-05-18
-excerpt: Sind bei einem Kettenunfall oder einer Massenkarambolage mehrere Fahrzeughalter beteiligt, haften sie nach § 421 BGB als Gesamtschuldner — jeder Geschädigte kann von jedem Schädiger den vollen Schadensbetrag fordern. Die interne Aufteilung zwischen den Schädigern erfolgt nach § 426 BGB im Innenausgleich und ist nicht Sache des Geschädigten.
+excerpt: Sind bei einem Kettenunfall oder einer Massenkarambolage mehrere Fahrzeughalter beteiligt, haften sie nach § 421 BGB als Gesamtschuldner – jeder Geschädigte kann von jedem Schädiger den vollen Schadensbetrag fordern. Die interne Aufteilung zwischen den Schädigern erfolgt nach § 426 BGB im Innenausgleich und ist nicht Sache des Geschädigten.
 keyFacts:
-  - § 421 BGB — Gesamtschuldnerschaft: jeder Schädiger haftet auf das Volle
-  - § 426 BGB — Innenausgleich zwischen den Schädigern
-  - § 17 StVG — Quotelung nach Verursachungsbeiträgen im Innenausgleich
+  - § 421 BGB – Gesamtschuldnerschaft: jeder Schädiger haftet auf das Volle
+  - § 426 BGB – Innenausgleich zwischen den Schädigern
+  - § 17 StVG – Quotelung nach Verursachungsbeiträgen im Innenausgleich
   - Geschädigter wählt, gegen welchen Schädiger er primär fordert
 related:
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/anscheinsbeweis
-meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtschuldner (§421 BGB) — Sie fordern den vollen Schaden von jedem. Innenausgleich ist deren Sache."
+meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtschuldner (§421 BGB) – Sie fordern den vollen Schaden von jedem. Innenausgleich ist deren Sache."
 ---
 
-# Mehrere Schädiger / Kettenunfall — Gesamtschuldnerschaft nach § 421 BGB
+# Mehrere Schädiger / Kettenunfall – Gesamtschuldnerschaft nach § 421 BGB
 
-> **Kurz erklärt:** Sind mehrere Fahrzeuge beteiligt (Kettenunfall, Massen­kollision) und haben mehrere Halter zum Schaden beigetragen, haften sie nach § 421 BGB als **Gesamtschuldner** — jeder Geschädigte kann von **jedem** der Schädiger den **vollen** Schadensbetrag fordern. Die Quotelung zwischen den Schädigern erfolgt im **Innen-Ausgleich** (§ 426 BGB) — das ist nicht dein Problem. Du wählst, gegen welchen du primär forderst — typisch den am ehesten zahlungsfähigen / klar identifizierbaren.
+> **Kurz erklärt:** Sind mehrere Fahrzeuge beteiligt (Kettenunfall, Massen­kollision) und haben mehrere Halter zum Schaden beigetragen, haften sie nach § 421 BGB als **Gesamtschuldner** – jeder Geschädigte kann von **jedem** der Schädiger den **vollen** Schadensbetrag fordern. Die Quotelung zwischen den Schädigern erfolgt im **Innen-Ausgleich** (§ 426 BGB) – das ist nicht dein Problem. Du wählst, gegen welchen du primär forderst – typisch den am ehesten zahlungsfähigen / klar identifizierbaren.
 
 ## Auch bekannt als
 
@@ -54,7 +54,7 @@ meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtsc
 
 ### Massen-Karambolage
 - Mehrere unabhängige Auffahr-/Kollisions-Vorgänge
-- Quotelung sehr komplex — anwaltliche Begleitung zwingend
+- Quotelung sehr komplex – anwaltliche Begleitung zwingend
 - Versicherer regeln untereinander
 
 ### Mehrere Schädiger unterschiedlicher Konstellation
@@ -77,7 +77,7 @@ Alle beteiligten Schädiger als Gesamtschuldner (§ 421 BGB). Du forderst von ei
 Mehrere Schuldner haften gemeinsam, jeder einzelne auf das Volle. Geschädigter wählt, gegen wen er fordert.
 
 **Was ist der Innen-Ausgleich?**
-Die Verteilung zwischen den Schuldnern nach § 426 BGB — abhängig von Verursachungsbeiträgen.
+Die Verteilung zwischen den Schuldnern nach § 426 BGB – abhängig von Verursachungsbeiträgen.
 
 **Lohnt sich Klage gegen alle?**
 Selten. Standard: gegen einen Schädiger (typisch zahlungsfähig + klar identifiziert), dieser holt sich Anteile zurück.
@@ -141,4 +141,4 @@ Selten. Standard: gegen einen Schädiger (typisch zahlungsfähig + klar identifi
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
+*Letzte fachliche Überprüfung: pending – Schluss-Review durch unsere Partnerkanzlei steht aus.*

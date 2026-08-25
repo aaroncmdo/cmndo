@@ -55,7 +55,7 @@ const FAQS_SCHEMA = [
   {
     frage: 'Wann bekomme ich überhaupt Nutzungsausfall?',
     antwort:
-      'Drei Voraussetzungen müssen zusammenkommen: Sie sind unverschuldet geschädigt, das Fahrzeug war während der Reparatur- oder Wiederbeschaffungsdauer nicht nutzbar, und Sie hätten es in dieser Zeit auch tatsächlich genutzt (Nutzungswille und Nutzungsmöglichkeit). Wer stattdessen einen Mietwagen nimmt, bekommt keinen Nutzungsausfall — beides zusammen geht nicht.',
+      'Drei Voraussetzungen müssen zusammenkommen: Sie sind unverschuldet geschädigt, das Fahrzeug war während der Reparatur- oder Wiederbeschaffungsdauer nicht nutzbar, und Sie hätten es in dieser Zeit auch tatsächlich genutzt (Nutzungswille und Nutzungsmöglichkeit). Wer stattdessen einen Mietwagen nimmt, bekommt keinen Nutzungsausfall – beides zusammen geht nicht.',
   },
   {
     frage: 'Für wie viele Tage wird Nutzungsausfall gezahlt?',
@@ -65,10 +65,10 @@ const FAQS_SCHEMA = [
   {
     frage: 'Wird der Tagessatz bei einem älteren Auto gekürzt?',
     antwort:
-      'In der Praxis ja: Ab etwa fünf Jahren wird üblicherweise eine Fahrzeugklasse zurückgestuft, ab etwa zehn Jahren zwei Klassen. Aus einem Mittelklasse-Fahrzeug (Klasse E) wird dann rechnerisch Klasse D beziehungsweise C. Ein pauschaler Ausschluss allein wegen des Alters ist damit aber nicht verbunden — der Anspruch bleibt bestehen.',
+      'In der Praxis ja: Ab etwa fünf Jahren wird üblicherweise eine Fahrzeugklasse zurückgestuft, ab etwa zehn Jahren zwei Klassen. Aus einem Mittelklasse-Fahrzeug (Klasse E) wird dann rechnerisch Klasse D beziehungsweise C. Ein pauschaler Ausschluss allein wegen des Alters ist damit aber nicht verbunden – der Anspruch bleibt bestehen.',
   },
   {
-    frage: 'Mietwagen oder Nutzungsausfall — was lohnt sich mehr?',
+    frage: 'Mietwagen oder Nutzungsausfall – was lohnt sich mehr?',
     antwort:
       'Wer während der Ausfallzeit wirklich ein Fahrzeug braucht, nimmt den Mietwagen; wer die Zeit überbrücken kann, fährt mit der Nutzungsausfallentschädigung meist finanziell besser, weil sie ohne Gegenleistung ausgezahlt wird. Rechtlich sind es Alternativen: Es gibt entweder Mietwagenkosten oder Nutzungsausfall, nie beides für denselben Zeitraum.',
   },
@@ -86,13 +86,13 @@ export default function NutzungsausfallPage() {
           serviceSchema({
             name: 'Nutzungsausfall-Ermittlung nach Unfall',
             description:
-              'Ermittlung und Durchsetzung der Nutzungsausfallentschädigung nach Verkehrsunfall — Fahrzeugklasse, Ausfalldauer und Tagessatz aus dem Sachverständigen-Gutachten.',
+              'Ermittlung und Durchsetzung der Nutzungsausfallentschädigung nach Verkehrsunfall – Fahrzeugklasse, Ausfalldauer und Tagessatz aus dem Sachverständigen-Gutachten.',
             url: `${SITE_URL}/kfz-gutachter/nutzungsausfall`,
           }),
           webApplicationSchema({
             name: 'Nutzungsausfall-Rechner',
             description:
-              'Interaktiver Rechner für die Nutzungsausfallentschädigung nach Unfall — Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive Alters-Rückstufung. Kostenlos.',
+              'Interaktiver Rechner für die Nutzungsausfallentschädigung nach Unfall – Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive Alters-Rückstufung. Kostenlos.',
             url: `${SITE_URL}/kfz-gutachter/nutzungsausfall`,
           }),
           faqPageSchema(FAQS_SCHEMA, {
@@ -191,7 +191,7 @@ export default function NutzungsausfallPage() {
         </div>
       </section>
 
-      {/* Cross-Links — entkanibalisiert den Nutzungsausfall-Cluster (rechtlich-tiefer Spoke) */}
+      {/* Cross-Links – entkanibalisiert den Nutzungsausfall-Cluster (rechtlich-tiefer Spoke) */}
       <section className="bg-claimondo-bg py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <h2 className="text-lg font-bold text-claimondo-navy">{t('crosslinks_h2')}</h2>

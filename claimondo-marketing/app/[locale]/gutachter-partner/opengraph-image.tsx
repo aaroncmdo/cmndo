@@ -3,7 +3,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Als Kfz-Sachverständiger Claimondo-Partner werden — kostenlos starten'
+export const alt = 'Als Kfz-Sachverständiger Claimondo-Partner werden – kostenlos starten'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -233,7 +233,7 @@ export default function OgImage() {
             <div style={{ flex: 1, height: 1, background: 'rgba(69,115,162,0.2)', display: 'flex' }} />
           </div>
 
-          {/* Vorteile — kompakt */}
+          {/* Vorteile – kompakt */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 36 }}>
             {[
               'Direktvermittlung ohne Eigenakquise',
