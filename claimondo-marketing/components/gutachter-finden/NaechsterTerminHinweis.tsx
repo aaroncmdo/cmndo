@@ -83,8 +83,23 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
           weil es die einzige war, die es als TEXT gesehen hatte.
           `ReserveAction`-JSON-LD hilft dagegen nicht: <script>-Bloecke fallen beim
           Text-Strippen ebenfalls weg. Nur was im Fliesstext steht, kommt an. */}
-      <p className="mt-4 break-all text-body-xs text-claimondo-shield/60">
-        Direktlink zu diesem Termin: {termin.buchungsUrl}
+      {/* ⚠ EIN Textknoten, kein `Satz: {wert}`.
+          React setzt zwischen statischem Text und interpoliertem Wert einen
+          `<!-- -->`-Trenner. Im ausgelieferten HTML stand deshalb woertlich:
+
+            Direktlink zu diesem Termin: <!-- -->https://claimondo.de/gutachter-finden?…
+
+          Ein Text-Extraktor, der an Kommentargrenzen trennt, reisst damit den Satz
+          von seiner URL los — die URL steht dann kontextlos da und wird nicht mehr
+          als „der Buchungslink" erkannt. Gefunden am 25.08.2026, als mein eigener
+          Pruef-Regex (`Direktlink[^<]{0,200}`) genau an diesem `<!--` abbrach und
+          eine LEERE URL meldete. Das Template-Literal erzeugt einen einzigen Knoten.
+
+          Deckkraft: vorher `/60` — die blasseste Zeile der ganzen Seite. Fuer eine
+          Angabe, die die zentrale Antwort auf „wo buche ich" ist, das falsche Signal;
+          Extraktoren, die nach Prominenz gewichten, werfen so etwas als erstes weg. */}
+      <p className="mt-4 break-all text-body-xs text-claimondo-shield">
+        {`Direktlink zu diesem Termin (enthält Gutachter und Uhrzeit): ${termin.buchungsUrl}`}
       </p>
       <a
         href={termin.buchungsUrl}
