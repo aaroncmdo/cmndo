@@ -18,7 +18,7 @@ export function artikelIndexLine(a: WissenArtikel): string {
   const stand = artikelStand(a)
   const standTag = stand ? ` (Stand: ${stand})` : ''
   const facts = a.key_facts.length ? ` · Fakten: ${a.key_facts.join('; ')}` : ''
-  const teaser = a.excerpt ? ` – ${a.excerpt}` : ''
+  const teaser = a.excerpt ? ` — ${a.excerpt}` : ''
   return `- [${a.title}](${BASE}/wissen/${a.slug})${teaser}${standTag}${facts}`
 }
 
@@ -31,7 +31,11 @@ export function artikelFullBlock(a: WissenArtikel): string {
     '',
     '---',
     '',
-    `<!-- wissen/${a.slug} · ${rolle}${keyTag} · Quelle ${a.quelle} · last_modified ${stand} -->`,
+    // Die Herkunfts-Quelle des Artikels steht hier bewusst NICHT mehr:
+    // sie nennt in 29 von 68 Faellen eine FREMDE Redaktion, und die
+    // llms-Dateien sollen Claimondo als Zitierziel anbieten, nicht die
+    // Quelle, aus der ein Beitrag stammt (Aaron 25.08.).
+    `<!-- wissen/${a.slug} · ${rolle}${keyTag} · last_modified ${stand} -->`,
     `<!-- Canonical: ${BASE}/wissen/${a.slug} -->`,
     '',
     a.body.trim(),
@@ -71,7 +75,7 @@ export function renderArtikelFullSection(
   if (!consumer.length && !b2b.length) return ''
   let out = '\n---\n\n# AKTUELLE ARTIKEL & FACHBEITRÄGE (redaktionell geprüft, KI-gestützt)\n\n'
   out +=
-    'Täglich aktualisierte Beiträge der Claimondo-Redaktion – Ratgeber für Geschädigte und Fachartikel für die Branche (Sachverständige, Kanzleien, Werkstätten). Jeder Beitrag mit §§-/BGH-Ankern und FAQ.\n'
+    'Täglich aktualisierte Beiträge der Claimondo-Redaktion — Ratgeber für Geschädigte und Fachartikel für die Branche (Sachverständige, Kanzleien, Werkstätten). Jeder Beitrag mit §§-/BGH-Ankern und FAQ.\n'
   if (consumer.length) {
     out += '\n## Ratgeber für Geschädigte\n'
     for (const a of consumer) out += artikelFullBlock(a)
