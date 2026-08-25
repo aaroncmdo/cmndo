@@ -173,7 +173,7 @@ export default function Page() {
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
             {t('bvsk_p')}
-            <a href="https://www.bvsk.de/" target="_blank" rel="noopener noreferrer" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{t('bvsk_link_label')}</a>
+            <a href="https://www.bvsk.de/" target="_blank" rel="noopener noreferrer nofollow" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{t('bvsk_link_label')}</a>
             {t('bvsk_p_suffix')}
           </p>
           <div className="mt-4 overflow-hidden rounded-ios-md border border-claimondo-border">
