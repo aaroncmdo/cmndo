@@ -49,8 +49,11 @@ export async function WerkstattAbdeckungHinweis({ stadt }: { stadt: string }) {
         Schaden zahlt die gegnerische Haftpflicht; bei selbstverschuldetem Schaden ist die
         Werkstatt der erste Schritt — mit Vollkasko reguliert Ihre eigene Versicherung.
       </p>
+      {/* EIN Textknoten — sonst setzt React einen `<!-- -->`-Trenner zwischen Satz und
+          URL und ein Extraktor kann beides auseinanderreissen. Siehe die ausfuehrliche
+          Begruendung in NaechsterTerminHinweis.tsx. */}
       <p className="mt-3 break-all text-body-xs text-claimondo-shield/60">
-        Werkstatt-Finder: {w.finderUrl}
+        {`Werkstatt-Finder: ${w.finderUrl}`}
       </p>
       <a
         href={w.finderUrl}
