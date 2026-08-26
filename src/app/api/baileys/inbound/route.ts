@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { matchInboundToFall } from '@/lib/inbound/match-fall'
 import { processInboundText } from '@/lib/inbound/process-inbound-text'
@@ -22,8 +23,12 @@ export const dynamic = 'force-dynamic'
  * Medien-Intents: Task C — bytes-neutral via processInboundMedia.
  */
 export async function POST(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Vorher der Direktvergleich gegen `process.env.CRON_SECRET`: fehlt die Variable,
+  // ergibt das "Bearer undefined" — genau dieser Header kaeme dann durch.
+  // `assertCronAuth` ist fail-closed. Beide Aufrufer (services/baileys/src/index.js
+  // und die Route-Tests) schicken `Authorization: Bearer <secret>`, die Semantik
+  // bleibt also unveraendert.
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

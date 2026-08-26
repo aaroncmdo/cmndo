@@ -34,6 +34,7 @@
     "check:rls-policies": "node scripts/check-rls-policies.mjs",
     "check:server-actions": "node scripts/check-server-actions.mjs",
     "check:silent-writes": "node scripts/check-silent-writes.mjs",
+    "check:cron-auth": "node scripts/check-cron-auth.mjs",
     "check:stadt-linknetz": "node scripts/check-stadt-linknetz.mjs",
     "lokalinhalt:qualitaet": "npx tsx scripts/lokalinhalt-qualitaet.mts",
     "check:status-registry": "node scripts/check-status-registry.mjs",

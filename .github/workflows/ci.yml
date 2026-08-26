@@ -146,6 +146,15 @@ jobs:
       - name: Stille-Write-Ratchet
         run: npm run check:silent-writes -- --ratchet
 
+      # Cron-Auth-Gate: `authHeader !== `Bearer ${process.env.CRON_SECRET}`` sieht wie ein
+      # Gate aus, ist aber keins — fehlt die Variable, ergibt der Ausdruck "Bearer undefined",
+      # und genau dieser Header kommt durch. Richtig ist `assertCronAuth` (fail-closed).
+      # Der Helper existierte und wurde von 77 Routen genutzt; 8 blieben zurueck (23.08.),
+      # darunter `notifications/process` mit `?? ''` — dort ist der Vergleichswert ohne
+      # Secret der LEERE String, ein Header ohne Wert authentifiziert. Baseline 0.
+      - name: Cron-Auth-Gate
+        run: npm run check:cron-auth -- --ratchet
+
       # stop_reason-Drift-Bremse: blockt NEUE erzwungene Tool-Aufrufe (tool_choice),
       # die `stop_reason` nicht pruefen. Reisst eine Antwort das Token-Limit, liefert
       # die Anthropic-API einen HALBEN tool_use-Block — kein Fehler, keine Exception.

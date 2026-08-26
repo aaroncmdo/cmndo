@@ -3,11 +3,21 @@ import { test, expect } from '@playwright/test'
 // Doc 45 Task 2: Hauptseite-Hero auf Service-Pitch-Constants.
 // Laeuft lokal gegen den Playwright-webServer (npm run dev) und in CI gegen Prod.
 
-test('Hauptseite-Hero zeigt Service-Pitch-Cluster-1-Headline', async ({ page }) => {
+// Doc 45 setzte hier die Cluster-1-Headline „Sie reden mit niemandem. Wir mit allen."
+// Das Home-Premium-Rework (#2199, 01.06.) hat den Hauptseiten-Hero ersetzt; die
+// Cluster-1-Headline lebt weiter auf /kfzgutachter-lp (siehe service-pitch-konsistenz).
+//
+// Der Test prüft deshalb nicht mehr den alten Wortlaut, sondern die ABSICHT dahinter:
+// der Hero muss die Kernbotschaft tragen, dass die Kanzlei verhandelt und nicht der
+// Kunde. Nach dem Rework steht sie in der Sub-Headline statt in der H1.
+test('Hauptseite-Hero trägt Headline + Service-Pitch-Kernbotschaft', async ({ page }) => {
   await page.goto('/')
   const h1 = page.locator('#hero-heading')
-  await expect(h1).toContainText('Sie reden mit niemandem')
-  await expect(h1).toContainText('Wir mit allen')
+  await expect(h1).toContainText('Unverschuldet im Unfall?')
+  await expect(h1).toContainText("Wir haben's im Griff.")
+  await expect(
+    page.getByText(/Partnerkanzlei verhandelt mit der gegnerischen Versicherung/).first(),
+  ).toBeVisible()
 })
 
 test('Hauptseite-Hero zeigt 5 Service-Realität-Bullets', async ({ page }) => {
