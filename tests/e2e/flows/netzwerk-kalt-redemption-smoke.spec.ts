@@ -131,7 +131,22 @@ test('Redemption SV: Registrierung mit ?einladung -> eingeloest + Auto-Kante', a
   await page.goto(`${APP}/sv/registrieren?einladung=${tokenSv}`, { waitUntil: 'domcontentloaded' })
 
   // Suche-Schritt -> "Neu eintragen"
-  await page.getByRole('button', { name: /Neu eintragen/i }).click({ timeout: 20_000 })
+  //
+  // ⚠ Klick UND Zustandswechsel muessen EINE wiederholbare Einheit sein. Grund (Trace des
+  // nightly 25.08., Artefakt `playwright-traces-rest`, `53f4287b…`): die Seite wurde
+  // geladen, danach gab es **null POSTs und null Supabase-Requests** — der Klick landete
+  // auf dem SSR-Button, bevor React hydriert hatte, und verpuffte folgenlos.
+  // `setSchritt('neu')` lief nie, Schritt 3 erschien nie, und der Test starb 180 s spaeter
+  // beim Warten auf „Vorname *". `waitUntil: 'domcontentloaded'` wartet eben auf das DOM,
+  // nicht auf Interaktivitaet — und Playwrights Actionability-Check kennt Hydration nicht.
+  //
+  // `toPass` klickt erneut, falls der erste Klick ins Leere ging. Ein verpuffter Klick
+  // loest nichts aus, erzeugt also auch keine Nebenwirkung; erst der Klick, der ankommt,
+  // wechselt den Schritt. Dieselbe Klasse traf netzwerk-p5-abo-smoke (J8-2).
+  await expect(async () => {
+    await page.getByRole('button', { name: /Neu eintragen/i }).click({ timeout: 5_000 })
+    await expect(page.getByLabel(/Vorname \*/).first()).toBeVisible({ timeout: 3_000 })
+  }).toPass({ timeout: 60_000 })
 
   // Neu-Formular (paket-Default basic -> keine Firmendaten-Pflicht)
   await fillByLabel(page, /Vorname \*/, 'Smoke')
