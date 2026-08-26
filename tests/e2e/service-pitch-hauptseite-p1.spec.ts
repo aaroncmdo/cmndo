@@ -26,9 +26,13 @@ test('Task 12 — Schadensreport-Teaser Speed-Vergleich-Headline (genau einer, D
   await expect(page.locator('#schadensreport-teaser')).toHaveCount(1)
 })
 
+// ⚠ HALBGEDANKENSTRICH (–, U+2013), nicht Geviertstrich (— U+2014) — zweiter Fall
+// derselben Klasse wie in service-pitch-hauptseite-ansprueche.spec.ts. Der Wortlaut
+// stimmte, nur das Zeichen nicht; der Test war dadurch rot, ohne dass an der Seite
+// etwas fehlte. Quelle ist de.json, nicht die Typografie-Gewohnheit beim Tippen.
 test('Task 13 — Bottom-CTA zeigt Service-Pitch-Wording', async ({ page }) => {
   await page.goto('/')
   await expect(
-    page.getByText('Schicken Sie uns Ihren Fall — wir reden mit der Versicherung.'),
+    page.getByText('Schicken Sie uns Ihren Fall – wir reden mit der Versicherung.'),
   ).toBeVisible()
 })

@@ -28,9 +28,13 @@ test('Task 17 — FAQ erste Q ist „Wer redet mit der Versicherung?"', async ({
   )
 })
 
+// ⚠ HALBGEDANKENSTRICH (–, U+2013), nicht Geviertstrich (— U+2014) — dritter Test
+// derselben Klasse (siehe service-pitch-hauptseite-ansprueche / -p1). Dieser hier war im
+// nightly vom 25.08. noch GRUEN und kippte erst mit R404 (25.08. 09:09), das den Strich
+// in kfzgutachter-lp/page.tsx:631 auf U+2013 setzte. Ohne diesen Fix waere er im
+// naechsten nightly rot gewesen — die Klasse wandert also weiter, wenn man sie nicht
+// beim Angleichen mitprueft. Quelle ist der Seiten-Code, nicht die Tipp-Gewohnheit.
 test('Task 18 — Bottom-CTA Service-Pitch', async ({ page }) => {
   await page.goto('/kfzgutachter-lp')
-  await expect(
-    page.getByText('Wir reden mit der Versicherung — Sie atmen'),
-  ).toBeVisible()
+  await expect(page.getByText('Wir reden mit der Versicherung – Sie atmen')).toBeVisible()
 })
