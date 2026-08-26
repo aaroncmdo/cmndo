@@ -19,6 +19,13 @@
 import { test, expect } from '@playwright/test'
 
 test('KI-Executor: Button auf KI-faehiger Task erzeugt Plan/Confirm', async ({ page }) => {
+  // ⚠ Der Default von 30 s reicht fuer diesen Test NICHT: UI-Login (~10 s) + Navigation
+  // + Redirect /admin/tasks -> /admin/aufgaben/alle + Klick + bis zu 20 s Warten auf das
+  // Plan-Modal summieren sich darueber hinaus. Gemessen 26.08.: der Lauf starb mit
+  // „locator.click: Test timeout of 30000ms exceeded" — also im GESAMT-Timeout, nicht am
+  // Button. Ein Waechter, der aus Zeitmangel rot wird, ist so wertlos wie ein stiller.
+  test.setTimeout(90_000)
+
   // --- Login (App nutzt @supabase/ssr Cookie; hier UI-Login) ---
   await page.goto('/login')
   // ⚠ NICHT getByLabel(/passwort/i): das trifft ZWEI Elemente — das Eingabefeld UND den
@@ -32,10 +39,21 @@ test('KI-Executor: Button auf KI-faehiger Task erzeugt Plan/Confirm', async ({ p
   await page.getByRole('button', { name: /anmelden|einloggen|login/i }).click()
   await page.waitForURL(/\/(admin|dispatch|faelle)/, { timeout: 20000 }).catch(() => {})
 
-  await page.goto('/admin/tasks')
+  await page.goto('/admin/tasks') // 308 -> /admin/aufgaben/alle
+
+  // ⚠ 26.08.: Der Login-`waitForURL` schluckt sein Timeout (`.catch`). Schlaegt die
+  // Anmeldung fehl, landet der Test auf /login — dort gibt es naturgemaess 0
+  // „Per KI erledigen"-Buttons, und der Skip unten erklaerte einen AUTH-Fehler zum
+  // „keine KI-faehige Task". Deshalb hier eine harte Zusicherung, BEVOR gezaehlt wird:
+  // nur so unterscheidet der Skip weiter unten echten Datenmangel von „gar nicht drin".
+  await expect(page, 'Login fehlgeschlagen — nicht auf der Admin-Aufgabenliste gelandet').toHaveURL(
+    /\/admin\/aufgaben/,
+    { timeout: 20000 },
+  )
 
   const kiButton = page.getByRole('button', { name: /Per KI erledigen/i }).first()
-  // Kein KI-faehiger Task sichtbar ODER Kill-Switch aus -> skip statt Fehlschlag.
+  // Erst JETZT ist ein Zaehlerstand von 0 aussagekraeftig: eingeloggt, richtige Seite,
+  // trotzdem kein Button -> Kill-Switch aus oder keine KI-faehige Task im Board.
   if ((await kiButton.count()) === 0) {
     test.skip(true, 'Kein "Per KI erledigen"-Button sichtbar (Kill-Switch aus oder keine KI-faehige Task im Board)')
     return
@@ -46,7 +64,17 @@ test('KI-Executor: Button auf KI-faehiger Task erzeugt Plan/Confirm', async ({ p
   // Entweder Confirm-Modal (consequential) oder direkte Erledigung/Refresh (reiner Safe-Plan).
   const confirmHeading = page.getByRole('heading', { name: /KI-Plan bestätigen/i })
   const fehler = page.getByText(/deaktiviert|nicht KI-ausfuehrbar/i)
-  await expect(confirmHeading.or(fehler)).toBeVisible({ timeout: 20000 })
+  // ⚠ Wenn hier NICHTS erscheint, ist der haeufigste Grund NICHT der Selektor (der wurde
+  // am 21.08. schon einmal korrigiert), sondern eine tote Anthropic-API: ohne Guthaben
+  // entsteht kein Plan, also kein Modal, also Timeout. Gegenprobe in einer Zeile:
+  //   curl https://api.anthropic.com/v1/messages -H "x-api-key: $ANTHROPIC_API_KEY" \
+  //     -H "anthropic-version: 2023-06-01" -H "content-type: application/json" \
+  //     -d '{"model":"claude-haiku-4-5","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}'
+  // HTTP 400 „credit balance is too low" -> Guthaben aufladen, nicht am Test schrauben.
+  await expect(
+    confirmHeading.or(fehler),
+    'Kein KI-Plan/Confirm-Modal nach Klick. Zuerst das Anthropic-Guthaben pruefen (Probe-Call im Kommentar oben) — ohne API entsteht kein Plan.',
+  ).toBeVisible({ timeout: 20000 })
 
   // Falls das Confirm-Modal offen ist: NICHT bestaetigen (kein echter Send) — abbrechen.
   if (await confirmHeading.isVisible().catch(() => false)) {
