@@ -62,12 +62,26 @@ export function bereinigeAuswahl(
 
 /**
  * Voreinstellung je Weg — alles, was in diesem Modus messbar ist.
+ *
  * gsc bleibt bewusst draussen: es verlangt eine ausdrueckliche Freigabe des
  * Sachverstaendigen und ist damit opt-in (Design-Spec §3.6).
+ *
+ * ⚠ `messbar` ist die Menge der Module, fuer die es WIRKLICH eine Messfunktion
+ * gibt. Ohne diesen Filter landet `ads` (10 Punkte) in jeder Vorauswahl: sein
+ * `braucht: 'browser'` liefert nie einen Sperrgrund — die Messung stoesst ein
+ * Mensch an —, aber eine Messfunktion existiert nicht. Der Nutzer waehlt es
+ * also, es liefert eine Fehlstelle, und die 10 Punkte fehlen im Nenner. An
+ * echten Checks nachgewiesen (25.08.2026): `ads` stand in JEDER Modulliste und
+ * hat nie einen Wert geliefert.
+ *
+ * Ohne `messbar` bleibt das alte Verhalten — dann filtert nur die Sperrlogik.
  */
-export function vorauswahl(ctx: Kontext): ModulId[] {
+export function vorauswahl(ctx: Kontext, messbar?: ReadonlySet<ModulId>): ModulId[] {
   return MODULE
     .filter((m) => sperrgrund(m, ctx) === null)
     .filter((m) => m.id !== 'gsc')
+    // Module ohne Punktwertung (markt, nische, volumen, gebiet, ortsseiten)
+    // sind Textbausteine und brauchen keine Messfunktion.
+    .filter((m) => !messbar || m.punkte === 0 || messbar.has(m.id))
     .map((m) => m.id)
 }

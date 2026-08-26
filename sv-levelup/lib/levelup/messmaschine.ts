@@ -3,7 +3,7 @@ import type { Db } from '../anreicherung/schreiben'
 import type { PlacesAdapter } from '../places'
 import { ladeCheck, type Check } from './check'
 import type { Befund, Fehlstelle, MessRegistry, Messkontext } from './modul-vertrag'
-import type { ModulId } from './registry'
+import { modulNachId, type ModulId } from './registry'
 import { berechneScore } from './score'
 import { pruefeBefunde } from './validator'
 import { ordneCheckZu } from './zuordnung'
@@ -121,7 +121,17 @@ export async function messeCheck(db: Db, token: string, opts: MessOpts): Promise
   // Am 19.08. im Durchlauf gemessen: 54 von 76 tatsaechlich erhobenen Punkten
   // ergaben gegen die Schaetzung (116) einen Wert von 47 % statt 71 %.
   const punkteErhebbar = Object.values(befunde).reduce((s, m) => s + m.maxPunkte, 0)
-  const { score, keinScore } = berechneScore(istPunkte, punkteErhebbar)
+
+  // ⚠ Die GEWAEHLTE Summe wird hier neu aus der Registry gebildet, statt
+  // `check.punkte_erhebbar` zu lesen: dieselbe Spalte wird gleich unten mit dem
+  // gemessenen Wert ueberschrieben, und bei einem zweiten Lauf staende dort
+  // nicht mehr die Wahl des Nutzers, sondern das Ergebnis des ersten Laufs.
+  // `module_gewaehlt` bleibt unveraendert und ist damit die verlaessliche Quelle.
+  const punkteGewaehlt = check.module_gewaehlt.reduce(
+    (s, id) => s + (modulNachId(id)?.punkte ?? 0),
+    0,
+  )
+  const { score, keinScore } = berechneScore(istPunkte, punkteErhebbar, punkteGewaehlt)
 
   const { data: zeilen, error } = await db
     .from('levelup_checks')

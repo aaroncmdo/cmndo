@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { bereinigeAuswahl, sperrgrund, vorauswahl, type Kontext } from '../sperrlogik'
-import { modulNachId } from '../registry'
+import { modulNachId, type ModulId } from '../registry'
 
 const voll: Kontext = {
   modus: 'bestand', hatUrl: true, hatPlacesZugang: true,
@@ -66,5 +66,43 @@ describe('Sperrlogik', () => {
   it('nimmt gebiet nur im Aufbau-Modus in die Vorauswahl', () => {
     expect(vorauswahl({ ...voll, modus: 'aufbau', hatUrl: false })).toContain('gebiet')
     expect(vorauswahl(voll)).not.toContain('gebiet')
+  })
+})
+
+/**
+ * ⚠ DER BEFUND VOM 25.08.2026: `ads` stand in JEDER Modulliste echter Checks
+ * und hat nie einen Wert geliefert. Sein `braucht: 'browser'` gibt nie einen
+ * Sperrgrund zurueck — die Messung stoesst ein Mensch an —, aber eine
+ * Messfunktion existiert nicht. Ergebnis: 10 Punkte, die der Nutzer waehlt und
+ * die dann als Fehlstelle aus dem Nenner fallen.
+ */
+describe('Vorauswahl kennt nur messbare Module', () => {
+  const MESSBAR = new Set<ModulId>(['gbp', 'web', 'seo', 'ux', 'ki', 'wett', 'verz', 'zuweiser', 'nach'])
+
+  it('laesst ads weg, solange es keine Messfunktion gibt', () => {
+    expect(vorauswahl(voll)).toContain('ads')                    // ohne Filter: drin
+    expect(vorauswahl(voll, MESSBAR)).not.toContain('ads')
+  })
+
+  it('behaelt die Module, die wirklich messen', () => {
+    const v = vorauswahl(voll, MESSBAR)
+    for (const id of ['gbp', 'web', 'seo', 'ux', 'ki', 'wett', 'verz', 'zuweiser', 'nach']) {
+      expect(v).toContain(id)
+    }
+  })
+
+  it('behaelt Textbausteine ohne Punktwertung', () => {
+    // markt/nische/volumen/ortsseiten tragen 0 Punkte und brauchen keine
+    // Messfunktion — sie duerfen nicht mit ads zusammen herausfallen.
+    const v = vorauswahl(voll, MESSBAR)
+    expect(v).toContain('markt')
+    expect(v).toContain('nische')
+  })
+
+  it('sperrt weiterhin, was gesperrt gehoert', () => {
+    const ohneUrl = vorauswahl({ ...voll, hatUrl: false }, MESSBAR)
+    expect(ohneUrl).not.toContain('web')
+    expect(ohneUrl).not.toContain('ki')
+    expect(ohneUrl).not.toContain('gsc')
   })
 })

@@ -28,6 +28,7 @@ import { DeadPinSlotStep } from './DeadPinSlotStep'
 import { WunschterminPicker } from './WunschterminPicker'
 import { resolveWerkstattOrt } from './werkstatt-ort'
 import { TeilnahmeHinweis } from '@/components/gewinnspiel/TeilnahmeHinweis'
+import { SCHADEN_OPTIONEN } from '../_lib/schadenarten'
 import type {
   DeadPinOeffentlich,
   OeffentlichesSvProfil,
@@ -43,7 +44,7 @@ type Auswahl =
 
 // clamp-freundliche Werte (issueCanonical.clampSchadentyp matcht via Substring:
 // auffahr/park/spur/vorfahr → sonst sonstiges).
-const SCHADEN_OPTIONEN = ['Auffahrunfall', 'Parkschaden', 'Spurwechsel', 'Vorfahrtsverletzung', 'Sonstiger Schaden']
+
 
 function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -120,6 +121,7 @@ export function FinderWizard({
   utmSource = null,
   vorauswahlAdresse = null,
   vorauswahlSvName = null,
+  vorauswahlSchadenart = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -166,6 +168,14 @@ export function FinderWizard({
    * Hinweis, dass seine Wahl ueberhaupt angekommen ist (Aaron 25.08.2026).
    */
   vorauswahlSvName?: string | null
+  /**
+   * Schadenart aus dem Chat (`?schadenart=`), bereits gegen SCHADEN_OPTIONEN validiert.
+   *
+   * Ist sie gesetzt UND greift die Slot-Vorauswahl, ueberspringt der Wizard auch den
+   * Schaden-Schritt und landet direkt bei den Kontaktdaten — jede seiner vier Fragen ist
+   * dann im Chat schon beantwortet. Der Kunde kann jederzeit zurueck.
+   */
+  vorauswahlSchadenart?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -345,6 +355,9 @@ export function FinderWizard({
     if (!slot) return
     slotVorauswahlVerbrauchtRef.current = true
     waehleSvSlot(sv, slot)
+    // Erst hier — nach den drei Bedingungen oben — ist gesichert, dass ein echter Termin
+    // ausgewaehlt ist. Nur dann darf der Schaden-Schritt entfallen.
+    versucheSchadenartVorauswahl()
   }
 
   function waehleSvSlot(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
@@ -352,6 +365,25 @@ export function FinderWizard({
     setSelectedSvId(sv.svId)
     track('gf_termin_gewaehlt', { gutachter: 'partner' })
     setPhase('schaden')
+  }
+
+  /**
+   * Deep-Link-Abkuerzung, zweite Stufe: auch den Schaden-Schritt ueberspringen.
+   *
+   * Aaron 25.08.2026: „der kunde direkt im letzten schritt des forms landet und nur noch
+   * name adresse und telefonnummer eingeben muss". Hat die KI Ort, Gutachter, Termin UND
+   * Schadenart mitgegeben, sind alle vier Wizard-Fragen im Chat schon beantwortet — sie
+   * erneut zu stellen ist keine Sorgfalt, sondern Doppelarbeit.
+   *
+   * ⚠ NUR wenn die Slot-Vorauswahl vorher wirklich gegriffen hat. Sonst landet jemand
+   * bei den Kontaktdaten, ohne dass ein Termin ausgewaehlt waere — er wuerde eine blosse
+   * ANFRAGE absenden und glauben, er habe einen Termin gebucht. Deshalb sitzt der Sprung
+   * IN `versucheSlotVorauswahl` (also hinter dessen drei Bedingungen) und nicht daneben.
+   */
+  function versucheSchadenartVorauswahl() {
+    if (!vorauswahlSchadenart) return
+    setSchadentyp(vorauswahlSchadenart)
+    setPhase('kontakt')
   }
   function waehleDeadPinSlot(dp: DeadPinOeffentlich, slot: SlotVorschlag) {
     setAuswahl({ kind: 'deadpin', dp, slot })
@@ -580,14 +612,24 @@ export function FinderWizard({
           {/* Wunschtermin (optional) — immer oben im Ort-Schritt, VOR der Werkstatt-/Orts-Frage
               (Aaron 12.06. „oben angeben"). Muss AUCH im Werkstatt-„Ja"-Pfad eingebbar sein, sonst
               ginge er verloren — ortMitWerkstatt reicht wunschterminLokal an die Engine (Aaron 23.06.).
-              Beeinflusst das Slot-Ranking in Schritt 2; leer = naechste freie Termine. */}
-          <div>
-            <h3 className="text-body font-bold text-claimondo-navy">Ihr Wunschtermin</h3>
-            <p className="mt-0.5 mb-2 text-[0.8125rem] text-claimondo-shield/80">
-              Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
-            </p>
-            <WunschterminPicker value={wunschterminLokal} onChange={setWunschterminLokal} />
-          </div>
+              Beeinflusst das Slot-Ranking in Schritt 2; leer = naechste freie Termine.
+
+              ⚠ NICHT wenn ein Termin aus dem Deeplink vorgemerkt ist. Aaron am 25.08.2026 nach
+              dem ersten Live-Test: „fuer den kunden ist es natuerlich etwas verwirrend dass noch
+              der wunschtermin dort steht." Zu Recht — direkt ueber diesem Block steht dann
+              „Ihr Termin bei Gaith ist vorgemerkt, Dienstag 15:40 Uhr", und darunter fragt die
+              Seite nach einem Wunschtag. Das liest sich, als sei die Vormerkung nicht angekommen.
+              Der Kunde aendert seinen Termin weiterhin — nur im Termin-Schritt, wo die echten
+              freien Slots stehen, statt hier in einem Feld, das nur das Ranking beeinflusst. */}
+          {!vorauswahlSlotStart && (
+            <div>
+              <h3 className="text-body font-bold text-claimondo-navy">Ihr Wunschtermin</h3>
+              <p className="mt-0.5 mb-2 text-[0.8125rem] text-claimondo-shield/80">
+                Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
+              </p>
+              <WunschterminPicker value={wunschterminLokal} onChange={setWunschterminLokal} />
+            </div>
+          )}
           {/* AAR-956 Task 10: Werkstatt-Frage — nur wenn werkstattId+werkstattGeo gesetzt UND
               noch keine Antwort gewählt. „Ja" → werkstattGeo als Besichtigungsort + direkt Matching.
               „Nein" → setzt werkstattAntwort='nein', zeigt danach die normale Orts-Eingabe.
@@ -759,6 +801,61 @@ export function FinderWizard({
 
       {phase === 'kontakt' && (
         <form onSubmit={kontaktAbsenden} className="flex flex-col gap-3">
+          {/* Was der Kunde gerade bucht — schwarz auf weiss, bevor er seine Daten eintippt.
+              Kommt er ueber einen Deeplink, hat er die Schritte 1–3 nie GESEHEN: Ort,
+              Termin und Schadenart standen im Chat. Ohne diese Zusammenfassung waere der
+              letzte Schritt ein Formular ohne erkennbaren Bezug — er gibt seine Telefon-
+              nummer ein, ohne dass die Seite ihm sagt, wofuer.
+              Aaron 25.08.2026: „die informationen termin vorgemerkt und der gutachter kommt
+              zu ihnen [sollen] trotzdem dort stehen … oder der kunde eben dann nochmal den
+              termin aendern kann." Beides steht hier: die Fakten und der Weg zurueck. */}
+          {auswahl?.kind === 'partner' && (
+            <div className="flex flex-col gap-2 rounded-ios-md bg-claimondo-bg px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-body-sm font-bold text-claimondo-navy">
+                    {auswahl.sv.vorname
+                      ? `Ihr Termin bei ${auswahl.sv.vorname}`
+                      : 'Ihr Termin'}
+                  </p>
+                  <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield">
+                    {new Date(auswahl.slot.start).toLocaleString('de-DE', {
+                      weekday: 'long',
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      timeZone: 'Europe/Berlin',
+                    })}
+                    {' Uhr'}
+                  </p>
+                </div>
+                {/* Dauerhaft sichtbar, nicht erst im Fehlerfall: wer einen Termin aus einem
+                    Chat mitbringt, muss ihn ohne Umweg wechseln koennen. */}
+                <button
+                  type="button"
+                  onClick={zurueckZuTermin}
+                  className="flex-shrink-0 text-[0.8125rem] font-semibold text-claimondo-ondo underline-offset-2 hover:underline"
+                >
+                  Termin ändern
+                </button>
+              </div>
+              {ort?.adresse ? (
+                <p className="text-[0.8125rem] text-claimondo-shield">
+                  {`Der Gutachter kommt zu Ihnen: ${ort.adresse}`}
+                </p>
+              ) : (
+                <p className="text-[0.8125rem] text-claimondo-shield">
+                  Der Gutachter kommt zu Ihnen — Sie müssen nirgendwo hinfahren.
+                </p>
+              )}
+              {schadentyp ? (
+                <p className="text-[0.8125rem] text-claimondo-shield">
+                  {`Schadenart: ${schadentyp}`}
+                </p>
+              ) : null}
+            </div>
+          )}
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Ihre Kontaktdaten</h3>
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
