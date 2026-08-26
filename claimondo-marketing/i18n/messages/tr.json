@@ -1017,7 +1017,7 @@
     },
     "koordination": {
       "eyebrow": "Nasıl çalışır",
-      "sub": "Tek bir muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder — kimseyle pazarlık yapmanız gerekmez. Hasarınız bir masa başı çevrimiçi kontrol tarafından değil, bağımsız bir eksper tarafından yerinde incelenir.",
+      "sub": "Karşı tarafın sigortasıyla siz değil, ortak hukuk büromuz görüşür. Aracınızı masa başındaki bir çevrimiçi ekspertiz değil, yerinde bağımsız bir bilirkişi inceler.",
       "heading_plain": "Siz kimseyle konuşmazsınız.",
       "heading_accent": "Biz herkesle konuşuruz."
     },
@@ -1375,12 +1375,12 @@
     "team_band": {
       "eyebrow": "Sizinle kim ilgileniyor",
       "heading": "Dosyanızın arkasında bir ekip.",
-      "sub": "İlk aramadan ödemeye kadar gerçek insanlar yanınızda — tek bir sabit muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder. Bekleme sırası yok, değişen dosya sorumlusu yok."
+      "sub": "Bilirkişi, servis, trafik hukuku bürosu ve size özel danışman: dosyanız üzerinde çalışan dört uzman. Hiçbirini kendiniz aramak zorunda değilsiniz."
     },
     "berater": {
       "eyebrow": "Kişisel rehberlik",
       "heading": "Tek danışman. Tek numara. Tüm süreç.",
-      "quote": "Tek bir sabit muhatabınız var: eksperi, servisi ve ortak hukuk büromuzu koordine eder, her süreyi takip eder ve sizi bilgilendiririz — kimsenin peşinden telefon etmenize gerek kalmaz.",
+      "quote": "İlk aramadan ödemeye kadar aynı numara. Bekleme sırası yok, değişen dosya sorumlusu yok, dosyanızı ikinci kez anlatacağınız kimse yok.",
       "quote_attribution": "— Claimondo hasar desteği",
       "cta_ablauf": "Süreç nasıl işliyor",
       "foto_alt": "Telefonda kişisel Claimondo danışmanı"

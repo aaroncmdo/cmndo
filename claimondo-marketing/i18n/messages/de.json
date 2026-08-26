@@ -1164,7 +1164,7 @@
     },
     "koordination": {
       "eyebrow": "Wie es funktioniert",
-      "sub": "Ein Ansprechpartner koordiniert Gutachter, Werkstatt und unsere Partnerkanzlei – Sie müssen mit niemandem verhandeln. Ihr Schaden wird vor Ort von einem unabhängigen Sachverständigen begutachtet, nicht von einem Online-Prüfdienst am Schreibtisch.",
+      "sub": "Mit der gegnerischen Versicherung verhandelt unsere Partnerkanzlei, nicht Sie. Ihr Fahrzeug begutachtet ein unabhängiger Sachverständiger vor Ort – kein Online-Prüfdienst am Schreibtisch.",
       "heading_plain": "Sie reden mit niemandem.",
       "heading_accent": "Wir mit allen."
     },
@@ -1522,12 +1522,12 @@
     "team_band": {
       "eyebrow": "Wer sich um Sie kümmert",
       "heading": "Ein Team hinter Ihrem Fall.",
-      "sub": "Vom ersten Anruf bis zur Auszahlung sind echte Menschen für Sie da – ein fester Ansprechpartner koordiniert Gutachter, Werkstatt und unsere Partnerkanzlei. Keine Warteschleife, kein wechselnder Sachbearbeiter."
+      "sub": "Sachverständiger, Werkstatt, Verkehrsrechtskanzlei und Ihr Berater – vier Fachleute, die an Ihrem Fall arbeiten. Sie müssen keinen davon selbst suchen."
     },
     "berater": {
       "eyebrow": "Persönliche Begleitung",
       "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
-      "quote": "Sie haben einen festen Ansprechpartner: Wir koordinieren Gutachter, Werkstatt und unsere Partnerkanzlei, behalten jede Frist im Blick und halten Sie auf dem Laufenden – Sie müssen niemandem hinterhertelefonieren.",
+      "quote": "Dieselbe Nummer vom ersten Anruf bis zur Auszahlung. Keine Warteschleife, kein wechselnder Sachbearbeiter, niemand, dem Sie Ihren Fall zweimal erklären müssen.",
       "quote_attribution": "– Claimondo-Schadenbegleitung",
       "cta_ablauf": "So funktioniert der Ablauf",
       "foto_alt": "Persönlicher Claimondo-Berater am Telefon"
