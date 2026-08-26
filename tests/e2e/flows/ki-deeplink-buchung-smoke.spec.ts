@@ -43,6 +43,19 @@ async function holeNaechstenTermin(): Promise<{ svId: string; slot: string } | n
   }
 }
 
+// ⚠ HOEHE EXPLIZIT, nicht der Projekt-Default.
+//
+// `devices['Desktop Chrome']` ist 1280×720. Die Quittung sitzt im Wizard-Panel unter
+// Ueberschrift und Fortschrittsbalken und liegt bei 720 px Hoehe unterhalb des sichtbaren
+// Bereichs. `toBeVisible()` prueft SICHTBARKEIT, nicht „im DOM" — der Test wurde damit rot,
+// obwohl die Quittung auf prod nachweislich stand (am 26.08. genau so gemessen: Text da,
+// Zusicherung rot). Ein Waechter, der am Fensterausschnitt scheitert, meldet Produktfehler,
+// die keine sind — und wird nach dem zweiten Mal ignoriert.
+//
+// Dieselbe Klasse hat im Embed-Wizard schon einmal einen Button „unklickbar" gemacht: bei
+// 1280×720 traf `elementFromPoint` das Overlay, bei 1920×1080 nicht.
+test.use({ viewport: { width: 1280, height: 1000 } })
+
 test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
   test('Stadtseite nennt Termin mit Uhrzeit und die URL als sichtbaren Text', async ({ page }) => {
     const res = await page.goto(`${MARKETING}/kfz-gutachter/${SLUG}`, { waitUntil: 'domcontentloaded' })
@@ -87,27 +100,42 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
       { waitUntil: 'domcontentloaded' },
     )
 
-    // `.first()`: der Wizard rendert die Quittung in Panel UND Mobil-Ansicht — zwei
-    // Treffer, und Playwright's strict mode bricht dann ab. Das sah beim ersten gruenen
-    // Lauf aus wie „Quittung fehlt", obwohl sie doppelt da war. Zwei Treffer sind hier
-    // der Normalfall, kein Defekt.
+    // ⚠ Ueber `innerText` pruefen, NICHT ueber `getByText`.
+    //
+    // Am 26.08.2026 meldete `getByText(/Ihr Termin .*ist vorgemerkt/).toBeVisible()`
+    // „element(s) not found" — und der Fehler-Screenshot desselben Laufs zeigte die
+    // Quittung gross und mittig im Bild. Der Text steht also da; nur der Locator griff
+    // nicht (Regex ueber einen Knoten, dessen Textinhalt Playwright anders zerlegt als
+    // erwartet). Ein Waechter, der einen sichtbaren Text nicht findet, meldet
+    // Produktfehler, die keine sind — und verliert damit seinen Wert.
+    //
+    // `innerText` des iframe-Body ist die Methode, die im Handtest zuverlaessig
+    // funktioniert hat. Sie misst dasselbe, was auch ein LLM-Extraktor sieht.
     const frame = page.frameLocator('iframe[src*="embed/gutachter-finder"]')
-    const quittung = frame.getByText(/Ihr Termin .*ist vorgemerkt|Ihr Termin ist vorgemerkt/).first()
-    await expect(quittung, 'der Wizard muss den mitgebrachten Termin quittieren').toBeVisible({
-      timeout: 30_000,
-    })
+    await expect
+      .poll(
+        async () =>
+          (await frame.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' '),
+        { timeout: 30_000, message: 'der Wizard muss den mitgebrachten Termin quittieren' },
+      )
+      .toMatch(/ist vorgemerkt/i)
 
-    // Die Quittung muss die BERLINER Uhrzeit nennen. Der Slot kommt als UTC — eine Anzeige
-    // ohne timeZone laege zwei Stunden daneben und saehe trotzdem plausibel aus.
+    const text = (await frame.locator('body').innerText()).replace(/\s+/g, ' ')
+
+    // Der Gutachtername gehoert in die Quittung — „Ihr Termin ist vorgemerkt" ohne Person
+    // ist schwaecher als mit, und der Name stand in der KI-Antwort, aus der der Kunde kommt.
+    expect(text, 'die Quittung soll den Gutachter nennen').toMatch(/Ihr Termin bei \w+/)
+
+    // Die BERLINER Uhrzeit, nicht die UTC-Zahl aus der URL. Der Slot kommt als `…Z`;
+    // eine Anzeige ohne timeZone laege zwei Stunden daneben und saehe trotzdem plausibel aus.
     const erwartet = new Date(t!.slot).toLocaleTimeString('de-DE', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: 'Europe/Berlin',
     })
-    await expect(
-      frame.getByText(new RegExp(erwartet.replace(':', ':') + '\\s*Uhr')),
-      `Quittung muss ${erwartet} Uhr (Berlin) zeigen, nicht die UTC-Zahl`,
-    ).toBeVisible({ timeout: 15_000 })
+    expect(text, `Quittung muss ${erwartet} Uhr (Berlin) zeigen, nicht die UTC-Zahl`).toContain(
+      `${erwartet} Uhr`,
+    )
   })
 
   test('Deeplink MIT Adresse springt bis zur Schadenart durch', async ({ page }) => {
