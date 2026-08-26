@@ -469,3 +469,30 @@ drei Namen.
 ⭐ Sichtbar wurden sie ueberhaupt erst, weil `cron-call.sh` seit dem 18.08. den HTTP-Code
 protokolliert. Vorher verschluckte `curl -sf … >/dev/null 2>&1` jeden Fehlschlag — ein Cron,
 der seit Monaten ins Leere lief, sah aus wie einer, der laeuft.
+
+## 2026-08-26 — die drei Integritaets-Waechter sind aktiviert
+
+```cron
+0  3 * * *  /usr/local/bin/cron-call.sh /api/cron/money-integrity-check
+30 3 * * *  /usr/local/bin/cron-call.sh /api/cron/termine-integrity-check
+0  * * * *  /usr/local/bin/cron-call.sh /api/cron/repair-workstate-check
+```
+
+Sie existierten seit Monaten im Code und liefen nie (siehe Inventur oben). **Erst nach
+PR #5534** eingetragen — der gab ihnen einen Task-Empfaenger. Vorher antworteten sie
+**HTTP 200 auch mit Findings**: `cron-call.sh` haette „ok" geloggt und der Fund waere eine
+ungelesene JSON-Zeile geblieben.
+
+**Regel-4-Nachweis vor dem Eintrag** (26.08., gegen prod):
+
+| Schritt | Ergebnis |
+|---|---|
+| Route deployed? | Antwort enthaelt das neue Feld `task_angelegt` ✓ |
+| Fund → Task? | `repair-workstate-finding` in `tasks`, 17:53, `status=offen`, `prioritaet=dringend` ✓ |
+| Dublettenschutz? | zweiter Aufruf: `task_angelegt=false` bei weiterhin `findings=1` ✓ |
+
+⭐ Der Dedup liess sich **ohne eigenen Test** beweisen: Der zweite Aufruf derselben Messreihe
+ist der Beweis. Wer nur einmal aufruft, sieht ihn nie.
+
+Sicherung vorher: `/root/crontab-backup-2026-08-26.txt`. Verifiziert: aktive
+`cron-call.sh`-Zeilen **76 → 79**.
