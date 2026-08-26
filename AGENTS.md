@@ -83,6 +83,22 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 
 **Alles per UI:** Der Smoke fährt den operativen Weg durch die **echte Benutzeroberfläche** — echte Logins, echte Klicks, über **alle** beteiligten Rollen (z. B. Werkstatt UND Kunde), nicht per DB-Seed abgekürzt. DB-Seed ist **nur** für den realistischen **Ausgangszustand** erlaubt, den ein vorgelagerter (evtl. fremder/instabiler) Schritt erzeugt hätte. **Jeder Zustandsübergang, der zum getesteten Soll gehört, ist ein echter UI-Klick** — ein geseedeter Zwischenzustand verdeckt genau den Schritt, den der Smoke beweisen soll.
 
+**Immer Playwright, immer mit echter Eingabe.** (Aaron 26.08.2026 — nicht verhandelbar.)
+
+* **Jeder** Regel-4-Nachweis läuft über **Playwright gegen prod**. `curl`, ein Statuscode, ein Grep im HTML oder ein DB-Read sind **kein** Nachweis. Sie dürfen einen Playwright-Lauf *ergänzen* (z. B. als DB-Gegenprobe, dass ein Klick wirklich geschrieben hat), ihn aber **nie ersetzen**.
+* **Der Weg wird getippt und geklickt, nicht aufgerufen.** Eine Seite laden und den Text lesen beweist, dass sie rendert — nicht, dass sie funktioniert. Zum Nachweis gehören echte Eingaben: Felder ausfüllen, Optionen wählen, absenden, den Folgezustand sehen. Ein Nachweis ohne eine einzige Eingabe ist kein Regel-4-Nachweis.
+* **Gemessen wird am Verhalten, nicht am Markup.** `innerText` statt HTML-Quelltext, `document.activeElement` statt „das Sprungziel existiert", der **DB-Wert** statt der Anzeige nach dem Klick. `HTTP 200` beweist nicht, dass der Wert ankam.
+
+**Fünf Messfallen, die alle real aufgetreten sind** (25./26.08., je ein Fehlbefund, der ohne Gegenprobe rausgegangen wäre):
+
+1. **Falscher Frame.** Der Finder läuft im `iframe` (`app.claimondo.de/embed/…`) innerhalb der Marketing-Seite. Wer das äussere Dokument misst, sieht „0 Eingabefelder" und meldet ein totes Feature. → `page.frames().find(f => f.url().includes('embed/…'))`.
+2. **Zu früh gemessen.** Nach 4 s: 34 Zeichen und „kaputt". Nach `waitForLoadState('networkidle')` + einigen Sekunden: 796 Zeichen und 29 Elemente. **„Leer" und „noch nicht fertig" sehen identisch aus** — die Textlänge über die Zeit beobachten, statt einmal zu raten.
+3. **Erfundene Testdaten.** Ein ausgedachter `slot` fällt korrekt auf die Terminauswahl zurück — das sieht aus wie ein gebrochener Deeplink. Echte Werte aus der laufenden Oberfläche holen (den Link von der Stadtseite lesen), nicht konstruieren.
+4. **Falsche Schicht.** `innerText` fügt Textknoten zusammen und blendet Kommentare aus; im ausgelieferten HTML stand `Direktlink: <!-- -->https://…`. Wer für ein LLM-Thema `innerText` misst, misst am Browser vorbei. Erst die Frage klären, dann die Schicht wählen.
+5. **Blindes Instrument.** Eine Null ist erst ein Befund, wenn dasselbe Werkzeug einen Fehler auch **zeigen würde**. Positivkontrolle mitfahren: Fix zur Laufzeit entfernen (`el.removeAttribute('tabindex')`) und prüfen, dass der Detektor jetzt rot meldet.
+
+**Wenn ein Flow per Playwright nicht fahrbar ist** (Gerät nötig, echte Kunden-Comms, kein Testkonto): das im Marker/PR **ausdrücklich als nicht nachgewiesen** ausweisen und begründen — nicht durch einen `curl`-Ersatz kaschieren. „Verdrahtet" ist eine andere Aussage als „gelaufen"; beide sind zulässig, aber sie dürfen nicht verwechselt werden.
+
 **Sicherheit — kein Kollateralschaden auf Prod:**
 
 * Immer **Test-Konten** nutzen (`telefon = NULL`) → es gehen **keine** echten SMS/WhatsApp/Emails an reale Kunden raus.
