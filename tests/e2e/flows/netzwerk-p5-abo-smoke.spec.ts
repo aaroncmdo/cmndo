@@ -99,15 +99,31 @@ test('J8-2: Free -> CTA mit Config-Preis -> embedded Checkout mountet (Abbruch v
   await expect(page.getByText('29,99')).toBeVisible({ timeout: 20_000 })
   const cta = page.getByRole('button', { name: 'Netzwerkpartner werden' })
   await expect(cta).toBeVisible()
-  await cta.click()
 
   // Embedded Stripe-Checkout mountet — DANN SOFORT SCHLUSS (keine Zahlung).
   // NUR name^=embedded-checkout: der hidden __privateStripeMetricsController-iframe
   // (js.stripe.com) laedt IMMER mit Stripe.js; im breiten Selektor blieb first()
   // dauerhaft an ihm haengen (Regel-4-Diagnose-Falle 03.08., s. #4954).
-  await expect(page.locator('iframe[name^="embedded-checkout"]').first()).toBeVisible({
-    timeout: 45_000,
-  })
+  //
+  // ⚠ Klick UND Mount gehoeren in EINE wiederholbare Einheit. Grund (Traces des nightly
+  // 25.08.): im ersten Lauf gab es nach dem Klick **keinen einzigen POST** — die
+  // Server-Action lief nie, der Klick traf den SSR-Button vor der React-Hydration und
+  // verpuffte. Passend dazu zeigte der DOM-Snapshot die CTA-Karte unveraendert, ohne
+  // Fehlertext und mit nicht-disabled Button: `fehler` UND `clientSecret` beide null,
+  // was nur geht, wenn `starteCheckout()` gar nicht gelaufen ist.
+  // `waitUntil: 'domcontentloaded'` wartet auf das DOM, nicht auf Interaktivitaet.
+  //
+  // Der `isVisible`-Guard ist hier PFLICHT: kommt der Klick an, ersetzt der Checkout-Zweig
+  // die CTA-Karte und der Button verschwindet — ein blindes Nachklicken wuerde dann am
+  // fehlenden Button scheitern statt auf den Mount zu warten. Ein verpuffter Klick loest
+  // nichts aus, erzeugt also KEINE zusaetzliche Stripe-Session; nur der ankommende Klick
+  // erzeugt genau eine (Session ohne Zahlung, verfaellt nach 24 h).
+  await expect(async () => {
+    if (await cta.isVisible().catch(() => false)) await cta.click({ timeout: 5_000 })
+    await expect(page.locator('iframe[name^="embedded-checkout"]').first()).toBeVisible({
+      timeout: 15_000,
+    })
+  }).toPass({ timeout: 75_000, intervals: [2_000, 5_000, 10_000] })
   await ctx.close()
 
   // Checkout-Session allein erzeugt KEINE Abo-Row (Webhook-getrieben).
