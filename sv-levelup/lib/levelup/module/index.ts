@@ -1,4 +1,5 @@
 import type { MessRegistry } from '../modul-vertrag'
+import type { ModulId } from '../registry'
 import { messeGbp } from './gbp'
 import { messeKi } from './ki'
 import { messeNach } from './nach'
@@ -47,3 +48,15 @@ export function baueModulRegistry(firmenname: string | null): MessRegistry {
     zuweiser: messeZuweiser,
   }
 }
+
+/**
+ * Die Module, fuer die es wirklich eine Messfunktion gibt.
+ *
+ * ⚠ Wird von `vorauswahl()` gebraucht, damit kein Modul vorausgewaehlt wird,
+ * das nichts liefern kann. Aus der Registry selbst abgeleitet statt von Hand
+ * gepflegt — eine zweite Liste waere zum Auseinanderlaufen verurteilt. Der
+ * Firmenname beeinflusst nur das Verhalten einzelner Module, nie die Menge.
+ */
+export const MESSBARE_MODULE: ReadonlySet<ModulId> = new Set(
+  Object.keys(baueModulRegistry(null)) as ModulId[],
+)
