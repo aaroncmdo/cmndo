@@ -137,7 +137,15 @@ describe('messeCheck', () => {
   })
 
   it('zaehlt nicht erhobene Kriterien nicht in den Nenner', async () => {
-    state.check = check({ punkte_erhebbar: 100, module_gewaehlt: ['web'] })
+    // ⚠ `module_gewaehlt` muss zur Registry passen: seit dem 25.08. prueft
+    // `berechneScore` den GEWAEHLTEN Umfang gegen die Teilbefund-Schwelle.
+    // gbp 22 + web 12 + seo 12 + ux 12 + wett 18 + verz 12 = 88 > 80.
+    // Gemessen wird trotzdem nur `web` — der Rest wird zur Fehlstelle, genau
+    // darum geht es hier.
+    state.check = check({
+      punkte_erhebbar: 88,
+      module_gewaehlt: ['gbp', 'web', 'seo', 'ux', 'wett', 'verz'],
+    })
     // Ein Modul, das die Haelfte seiner Kriterien nicht erheben konnte.
     const halb: Messfunktion = async (k) => ({
       befunde: [
@@ -185,7 +193,11 @@ describe('messeCheck', () => {
    * NICHT — deshalb hier ein Lauf mit genug Gewicht.
    */
   it('rechnet den Score, wenn genug erhebbar war', async () => {
-    state.check = check({ punkte_erhebbar: 100, module_gewaehlt: ['web'] })
+    // Modulliste ueber der Schwelle (88), gemessen wird nur `web`.
+    state.check = check({
+      punkte_erhebbar: 88,
+      module_gewaehlt: ['gbp', 'web', 'seo', 'ux', 'wett', 'verz'],
+    })
     const schweresModul: Messfunktion = async (k) => ({
       befunde: [befund('a', 'A', true, 50, 100, 'https://x.de', k.jetzt())],
       fehlstellen: [],
@@ -195,6 +207,31 @@ describe('messeCheck', () => {
     const letzte = state.updates[state.updates.length - 1]
     expect(letzte.kein_score).toBe(false)
     expect(letzte.score).toBe(50)                 // round(50/100*100)
+  })
+
+  /**
+   * ⚠ DER FALL, DER DIE AENDERUNG VOM 25.08. AUSGELOEST HAT.
+   *
+   * An echten Checks gemessen: drei Laeufe mit identischer Modulliste hatten
+   * 116, 74 und 57 erhebbare Punkte, je nachdem wie viele Module unterwegs
+   * scheiterten. Nur der erste bekam einen Score — bestraft wurde der Nutzer
+   * fuer Fehlstellen, auf die er keinen Einfluss hat.
+   */
+  it('gibt einen Score, obwohl mehrere Module nichts geliefert haben', async () => {
+    state.check = check({
+      punkte_erhebbar: 88,
+      module_gewaehlt: ['gbp', 'web', 'seo', 'ux', 'wett', 'verz'],
+    })
+    // Nur `web` misst; fuenf Module haben keine Messfunktion -> Fehlstellen.
+    const nurWeb: Messfunktion = async (k) => ({
+      befunde: [befund('a', 'A', true, 6, 12, 'https://x.de', k.jetzt())],
+      fehlstellen: [],
+    })
+    const r = await messeCheck(db, 'T1', { ...opts(), registry: { web: nurWeb } })
+
+    // 12 von 88 gewaehlten Punkten messbar = 14 % -> zu duenn fuer einen Wert.
+    expect(r.ok && r.punkteErhebbar).toBe(12)
+    expect(r.ok && r.keinScore).toBe(true)
   })
 
   /**
