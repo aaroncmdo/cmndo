@@ -18,8 +18,9 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 export const metadata: Metadata = {
   title: 'Wissen & Ratgeber zur Kfz-Schadenregulierung',
+  // 168 -> 146 Zeichen: Google kappt die Description bei rund 158.
   description:
-    'Alle Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständigen-Themen rund um den unverschuldeten Kfz-Schaden – verständlich erklärt, mit BGH-Bezug.',
+    'Alle Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständigen-Themen rund um den unverschuldeten Kfz-Schaden – mit BGH-Bezug.',
   alternates: { canonical: '/wissen' },
   openGraph: {
     type: 'website',
