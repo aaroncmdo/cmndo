@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { MapPin } from 'lucide-react'
 import { staedteFuerRatgeber } from '@/lib/kfz-gutachter/ratgeber-staedte'
+import { NaechsteTermineKompakt } from '@/components/content/NaechsteTermineKompakt'
 
 // Stadt-Querverweise am Fuss der Ratgeber-Seiten (P3-A4).
 //
@@ -46,6 +47,15 @@ export function RatgeberStaedteSection({ artikelSlug }: { artikelSlug: string })
           >
             Alle Städte
           </Link>
+        </div>
+        {/* Konkrete Termine unter die Stadt-Verweise.
+            Die Section nennt bisher Staedte, in denen wir arbeiten — die naechste Frage
+            eines Ratsuchenden ist WANN. Die neun Ratgeber-Seiten, die diese Komponente
+            tragen, hatten darauf keine Antwort; `/kfz-gutachter/vermittlungsportale-vergleich`
+            wurde am 26.08.2026 nachweislich von einem KI-Crawler gelesen und trug null
+            buchbare Termine. Begruendung ausfuehrlich in NaechsteTermineKompakt.tsx. */}
+        <div className="mx-auto mt-8 max-w-2xl">
+          <NaechsteTermineKompakt />
         </div>
       </div>
     </section>

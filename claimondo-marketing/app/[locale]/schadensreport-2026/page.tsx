@@ -9,6 +9,7 @@ import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { NaechsteTermineKompakt } from '@/components/content/NaechsteTermineKompakt'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
@@ -595,6 +596,13 @@ export default function SchadensreportPage() {
           </div>
         </div>
       </section>
+
+      {/* Die meistgelesene Inhaltsseite im KI-Crawler-Log (26.08.2026: 7 Abrufe in
+          24 h) — und sie trug keinen einzigen buchbaren Termin. Wer den Report liest,
+          hat gerade einen Schaden; die naechste Frage ist, wann jemand kommt. */}
+      <div className="mx-auto max-w-3xl px-5 pb-10">
+        <NaechsteTermineKompakt />
+      </div>
 
       <ReviewerByline datum={datum} />
 
