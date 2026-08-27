@@ -1011,7 +1011,7 @@
     },
     "koordination": {
       "eyebrow": "Jak to działa",
-      "sub": "Jeden opiekun koordynuje rzeczoznawcę, warsztat i naszą kancelarię partnerską — nie musisz z nikim negocjować. Twoja szkoda jest oceniana na miejscu przez niezależnego rzeczoznawcę, a nie przez zdalną kontrolę zza biurka.",
+      "sub": "Z ubezpieczycielem sprawcy negocjuje nasza kancelaria partnerska, nie Ty. Twój pojazd ogląda na miejscu niezależny rzeczoznawca, a nie serwis online zza biurka.",
       "heading_plain": "Nie rozmawiają Państwo z nikim.",
       "heading_accent": "My — z wszystkimi."
     },
@@ -1369,12 +1369,12 @@
     "team_band": {
       "eyebrow": "Kto się Tobą zajmuje",
       "heading": "Zespół za Twoją sprawą.",
-      "sub": "Od pierwszego telefonu po wypłatę są przy Tobie prawdziwi ludzie — jeden stały opiekun koordynuje rzeczoznawcę, warsztat i naszą kancelarię partnerską. Bez kolejki na infolinii, bez zmieniającego się opiekuna."
+      "sub": "Rzeczoznawca, warsztat, kancelaria prawa drogowego i Twój doradca – czterech specjalistów pracujących nad Twoją sprawą. Żadnego z nich nie musisz szukać sam."
     },
     "berater": {
       "eyebrow": "Osobiste wsparcie",
       "heading": "Jeden doradca. Jeden numer. Cała droga.",
-      "quote": "Masz jednego stałego opiekuna: koordynujemy rzeczoznawcę, warsztat i naszą kancelarię partnerską, pilnujemy każdego terminu i informujemy Cię na bieżąco — nie musisz nikogo ścigać telefonami.",
+      "quote": "Ten sam numer od pierwszego telefonu do wypłaty. Bez kolejki, bez zmieniających się opiekunów, bez tłumaczenia sprawy po raz drugi.",
       "quote_attribution": "— Wsparcie szkodowe Claimondo",
       "cta_ablauf": "Jak przebiega proces",
       "foto_alt": "Osobisty doradca Claimondo przez telefon"
