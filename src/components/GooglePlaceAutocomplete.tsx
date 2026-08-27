@@ -78,7 +78,27 @@ export default function GooglePlaceAutocomplete({
   onSelectRef.current = onSelect
   // Unterdrueckt die naechste Suche, wenn der Wert aus einer Auswahl stammt —
   // sonst oeffnet sich die Liste direkt wieder mit dem gerade gewaehlten Treffer.
-  const ausAuswahl = useRef(false)
+  // ⚠ INITIAL true, wenn ein `defaultValue` da ist — sonst oeffnet sich die Vorschlagsliste
+  // beim ersten Rendern von selbst.
+  //
+  // Warum `false` nicht reicht: `value` startet bereits AUF `defaultValue`
+  // (`useState(defaultValue ?? '')`). Der Sync-Effekt unten prueft `defaultValue !== value`
+  // — beim Mount sind beide gleich, er setzt die Sperre also NIE. Der Such-Effekt sieht
+  // danach einen dreistelligen Wert, sucht, und klappt die Liste auf.
+  //
+  // Gemessen am 27.08.2026 im FlowLink (Schritt 1, „Bitte pruefen und korrigieren Sie Ihre
+  // Daten"): die Liste stand offen ueber Unfalltyp, Beteiligtenzahl UND der DSGVO-
+  // Pflicht-Checkbox — sichtbar war nur deren unterer Rand. Wer die Checkbox nicht sieht,
+  // klickt „Weiter" und bekommt einen Validierungsfehler fuer etwas, das er nie gesehen hat.
+  // Dazu vier von fuenf Vorschlaegen aus fremden Orten (Wiesen statt Bremerhaven), weil die
+  // Suche mit dem vollstaendigen Adress-String lief.
+  //
+  // Betrifft ALLE 27 Consumer mit `defaultValue` (Admin-Formulare, SV-/Werkstatt-
+  // Registrierung, Kunde-Schadenmeldung, Makler-Drawer, …) — ueberall dieselbe Mechanik.
+  //
+  // Die Sperre gilt nur fuer den ERSTEN Durchlauf: der Such-Effekt setzt sie sofort zurueck,
+  // die normale Suche ab dem ersten Tastendruck bleibt unveraendert.
+  const ausAuswahl = useRef(Boolean(defaultValue))
   const abbruch = useRef<AbortController | null>(null)
 
   useEffect(() => {
