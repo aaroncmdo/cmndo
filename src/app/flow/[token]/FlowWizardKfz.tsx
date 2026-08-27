@@ -323,7 +323,20 @@ export default function FlowWizardKfz({
   // oder via Place-Picker aendern. editStandortPlace ist gesetzt sobald eine
   // Dropdown-Auswahl getroffen wurde (liefert neue Koordinaten); reiner Freitext
   // laesst es null (dann nur Adress-Text, Makler-Koordinaten bleiben).
-  const standortPrefill = [lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')
+  // Die PLZ nur anhaengen, wenn sie nicht ohnehin in der Adresse steht.
+  //
+  // Gemessen am 27.08.2026: im Feld stand „Wiesenstraße, 27570 Bremerhaven, Deutschland,
+  // 27570" — die Adresse aus dem Geocoder traegt die PLZ bereits, das blosse Anhaengen
+  // verdoppelt sie. Der Kunde soll seine Daten hier BESTAETIGEN; ein sichtbar falscher
+  // Wert kostet genau das Vertrauen, das der Schritt herstellen soll. Zusaetzlich lief die
+  // Adresssuche mit dem verdoppelten String und lieferte dadurch fremde Orte.
+  const standortPrefill = (() => {
+    const adresse = lead.fahrzeug_standort_adresse?.trim() ?? ''
+    const plz = lead.fahrzeug_standort_plz?.trim() ?? ''
+    if (!plz) return adresse
+    if (!adresse) return plz
+    return adresse.includes(plz) ? adresse : `${adresse}, ${plz}`
+  })()
   const [editStandortText, setEditStandortText] = useState(standortPrefill)
   const [editStandortPlace, setEditStandortPlace] = useState<PlaceResult | null>(null)
 
