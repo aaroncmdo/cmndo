@@ -549,6 +549,37 @@ CI fährt `npm run check:silent-writes -- --ratchet`. **Die Baseline ist 0** —
 
 **0 False-Positives by design:** Gescannt wird **nur die Statement-Form** — eine Zeile, die (nach Whitespace) mit `await` beginnt. `const { error } = await …`, `return await …`, Reads und Ketten mit mehreren `.from()` (Zuordnung uneindeutig) werden per Konstruktion nie geflaggt. Pure Logik: `scripts/lib/silent-write-scan.mjs` (unit-getestet, 13 Fälle, davon 7 Negativ-Fälle). Bewusst fire-and-forget → `// silent-write-skip: <grund>` am File-Anfang.
 
+# Client-Timezone-Gate (Ratchet)
+
+**Eine `'use client'`-Component, die ein Datum formatiert, MUSS `timeZone` setzen.** Sie wird server-seitig vorgerendert **und** im Browser hydriert — ohne feste Zone nimmt jede Seite die dort geltende:
+
+```
+prod-Node (pm2 id 862):  TZ=Europe/Berlin  ->  "Mi., 05.08., 10:00"
+CI-Browser (GH-Runner):  UTC               ->  "Mi., 05.08., 08:00"
+```
+
+Zwei verschiedene Texte an derselben Stelle = **React-Hydration-Fehler #418**. Genau das färbte den nightly vom **06.08. bis 27.08.** rot (`EmbedBKlaerungCard.tsx:70`, PR #5670). Bewiesen per DOM-Snapshot-Diff aus dem CI-Trace des Laufs `32807670143`.
+
+⚠ **Es ist nicht nur ein Hydration-Thema.** Ohne feste Zone hängt die Anzeige an der Browser-Zeitzone: ein SV im Ausland sieht schlicht **falsche Termine**.
+
+**Fix:** `new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', … })` — Vorbild `dispatch/dashboard/page.tsx:195-196`.
+
+## ⭐⭐ Warum ein statischer Check und nicht ein Test
+
+**Lokal ist die Klasse unsichtbar.** Ein Entwickler-Browser steht in `Europe/Berlin` und rendert damit *dasselbe wie der Server* — der Fehler kann dort gar nicht auftreten. Vier gezielte prod-Läufe galten deshalb als Gegenbeweis und waren in Wahrheit blind. Reproduzieren lässt er sich nur mit `test.use({ timezoneId: 'UTC' })` (so verdrahtet in `onboarding-pflichtdok.spec.ts`).
+
+Zweiter Messfehler derselben Suche, als Warnung: die Server-Zeitzone wurde mit `pm2 env 0` geprüft — **ID 0 ist `claimondo-baileys`**, die App ist **862**. Beim Messen von Prozess-Eigenschaften immer den *Namen* auflösen, nie eine geratene ID.
+
+CI fährt `npm run check:client-timezone -- --ratchet`. Lokal (ohne Flag) `--warn` (exit 0, listet alles). Pure Logik: `scripts/lib/client-timezone-scan.mjs`.
+
+**Zwei Schweregrade**, beide in derselben Baseline (`scripts/client-timezone-baseline.json`):
+* **`uhrzeit`** (`hour`/`minute`/`second`/`timeStyle`) — weicht **immer** ab, sobald die Zonen differieren. **Baseline 0**: alle 22 Bestandsfälle sind mit #5670 gefixt.
+* **`datum`** (`day`/`month`/`year`/`weekday`/`dateStyle`) — kippt nur an Tagesgrenzen. **28 grandfathered**, per Boy-Scout abzubauen.
+
+**0 False-Positives by design:** gescannt werden nur `.tsx` unter `src/app` + `src/components` mit `'use client'`, und nur Aufrufe **mit Options-Objekt**. Ein `toLocaleDateString('de-DE')` ohne Optionen ist die kurze Datumsform und wird nie geflaggt. Kommentare werden gestrippt (sonst flaggt jede Erklärung ihr eigenes File). Positivkontrolle gefahren: Probe-Datei rein → exit 1, raus → exit 0.
+
+Bewusst Browser-lokale Zeit (z. B. „Ihre Ortszeit") → `// client-timezone-skip: <grund>` am File-Anfang.
+
 # stop_reason-Gate (Ratchet)
 
 **Ein erzwungener Tool-Aufruf an die Anthropic-API (`tool_choice`) muss `stop_reason` prüfen.** Reißt die Antwort das Token-Limit, liefert die API einen **unvollständigen `tool_use`-Block** — kein Fehler, keine Exception. Wer ihn danach mit Fallbacks ausliest, macht daraus stillschweigend leere Werte:
