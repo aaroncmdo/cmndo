@@ -572,9 +572,13 @@ Zweiter Messfehler derselben Suche, als Warnung: die Server-Zeitzone wurde mit `
 
 CI fährt `npm run check:client-timezone -- --ratchet`. Lokal (ohne Flag) `--warn` (exit 0, listet alles). Pure Logik: `scripts/lib/client-timezone-scan.mjs`.
 
-**Zwei Schweregrade**, beide in derselben Baseline (`scripts/client-timezone-baseline.json`):
-* **`uhrzeit`** (`hour`/`minute`/`second`/`timeStyle`) — weicht **immer** ab, sobald die Zonen differieren. **Baseline 0**: alle 22 Bestandsfälle sind mit #5670 gefixt.
-* **`datum`** (`day`/`month`/`year`/`weekday`/`dateStyle`) — kippt nur an Tagesgrenzen. **28 grandfathered**, per Boy-Scout abzubauen.
+**Die Baseline ist 0** (`scripts/client-timezone-baseline.json`) — der gesamte Bestand von **50 Stellen** wurde mit #5670 abgeräumt: 22 mit Uhrzeit, 28 mit reinem Datum. Das ist damit **keine Drift-Bremse mehr, sondern eine harte Regel: jede neue Stelle ohne `timeZone` blockt sofort.**
+
+Der Scanner unterscheidet weiter zwei Schweregrade, weil die Fehlermeldung sie verschieden gewichtet:
+* **`uhrzeit`** (`hour`/`minute`/`second`/`timeStyle`) — weicht **immer** ab, sobald die Zonen differieren.
+* **`datum`** (`day`/`month`/`year`/`weekday`/`dateStyle`) — kippt nur an Tagesgrenzen.
+
+⚠ **Die Baseline nicht wieder aufblähen.** `--update-baseline` war für den Abbau da. Echter Browser-lokaler Fall → Skip-Marker (s. u.); alles andere bekommt die Zone.
 
 **0 False-Positives by design:** gescannt werden nur `.tsx` unter `src/app` + `src/components` mit `'use client'`, und nur Aufrufe **mit Options-Objekt**. Ein `toLocaleDateString('de-DE')` ohne Optionen ist die kurze Datumsform und wird nie geflaggt. Kommentare werden gestrippt (sonst flaggt jede Erklärung ihr eigenes File). Positivkontrolle gefahren: Probe-Datei rein → exit 1, raus → exit 0.
 

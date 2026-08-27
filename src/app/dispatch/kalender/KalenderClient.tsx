@@ -79,7 +79,7 @@ function formatHHMM(d: Date): string {
   })
 }
 function fmtDateLabel(d: Date): string {
-  return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
 }
 function isoDate(d: Date): string {
   const y = d.getFullYear()
@@ -388,7 +388,7 @@ export default function KalenderClient({
             >
               {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin → React #418 */}
               <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
-                {d.toLocaleDateString('de-DE', { weekday: 'short' })}
+                {d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })}
               </p>
               {/* 14.05.26: suppressHydrationWarning auch hier — d.getDate()/
                   getMonth() sind TZ-abhängig (Node UTC vs. Browser

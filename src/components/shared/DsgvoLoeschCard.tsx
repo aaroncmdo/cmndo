@@ -77,6 +77,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
             <p className="mt-1 text-xs leading-relaxed text-warning-strong">
               {t('eingereichtAm', {
                 datum: new Date(auftrag.eingereicht_am).toLocaleDateString('de-DE', {
+                  timeZone: 'Europe/Berlin',
                   day: '2-digit',
                   month: 'long',
                   year: 'numeric',
