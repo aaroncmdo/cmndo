@@ -111,7 +111,7 @@ export default async function PipelineHealthPage() {
             <>
               Letzter Lauf:{' '}
               <span className="font-semibold text-claimondo-navy">{relativZeit(maxRunAt)}</span>
-              {' '}({new Date(maxRunAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
+              {' '}({new Date(maxRunAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })})
             </>
           ) : (
             'Noch kein Lauf registriert.'

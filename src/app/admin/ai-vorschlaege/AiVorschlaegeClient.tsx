@@ -103,6 +103,7 @@ export function AiVorschlaegeClient({
           {/* Datum */}
           <p className="text-caption text-claimondo-ondo/70">
             {new Date(v.erstellt_am).toLocaleString('de-DE', {
+              timeZone: 'Europe/Berlin',
               dateStyle: 'short',
               timeStyle: 'short',
             })}
