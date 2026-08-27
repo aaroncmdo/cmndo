@@ -10,7 +10,7 @@ import { groupSpokesByCluster, clusterLabel } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
+import { localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25 Gap 3): Index-Hub fuer das Kfz-Haftpflichtschaden-Glossar.
 // Bisher waren die 57 Spokes nur unter /haftpflicht/[slug] erreichbar — /haftpflicht
@@ -39,7 +39,23 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('haftpflicht.title'),
     description: t('haftpflicht.description'),
-    alternates: await localeAlternates('/haftpflicht'),
+    // Festes de-Canonical statt localeAlternates: der Hub ist de-only. Titel
+    // und Description kommen zwar aus i18n, der Glossar-BODY aber nicht — auf
+    // /tr/haftpflicht steht woertlich derselbe deutsche Text wie auf
+    // /haftpflicht (H1 und erster Absatz zeichengleich nachgemessen). Fuer die
+    // Suchmaschine ist das eine deutsche Seite; localeAlternates machte daraus
+    // fuenf Sprachversionen, von denen sich jede selbst zum Original erklaerte
+    // — also fuenf URLs mit identischem Inhalt und ohne verbindendes hreflang
+    // (gemessen: genau 1 hreflang-Tag, nicht 7).
+    //
+    // Damit steht der Hub jetzt so da wie seine EIGENEN 61 Unterseiten
+    // (haftpflicht/[slug]: `{ canonical: a.url }`) und wie die
+    // Schwester-Hubs /versicherer und /wissen. Er war der einzige Ausreisser
+    // seiner Familie.
+    //
+    // Wenn der Body spaeter uebersetzt wird, ist localeAlternates('/haftpflicht')
+    // wieder das richtige Mittel — dann gibt es echte Sprachvarianten.
+    alternates: { canonical: '/haftpflicht' },
     openGraph: {
       type: 'website',
       ...(await localeOpenGraph(`/haftpflicht`)),
