@@ -66,8 +66,21 @@ export default function EmbedBKlaerungCard({ items }: { items: KlaerungItem[] })
       </div>
       <ul className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
         {items.map((it) => {
+          // ⚠ `timeZone` ist PFLICHT, nicht Kosmetik: Diese Karte ist eine Client-Component,
+          // wird also server-seitig vorgerendert UND im Browser hydriert. Ohne feste Zone
+          // nimmt jede Seite ihre eigene — der Node-Prozess auf prod laeuft mit
+          // `TZ=Europe/Berlin` (pm2 id 862), ein Browser in UTC rendert zwei Stunden
+          // frueher. Genau das war der React-#418-Hydration-Fehler, der den nightly seit
+          // dem 06.08. rot faerbte: Server „Mi., 05.08., 10:00" gegen Client
+          // „Mi., 05.08., 08:00" (Trace des Laufs 32807670143, DOM-Snapshot-Diff).
+          //
+          // ⭐ Warum es lange unentdeckt blieb: ein Entwickler-Browser in Europe/Berlin
+          // rendert dasselbe wie der Server — lokal ist der Fehler UNSICHTBAR. Reproduzieren
+          // laesst er sich mit `test.use({ timezoneId: 'UTC' })`.
+          // Vorbild derselben Seite: dispatch/dashboard/page.tsx:195-196.
           const datum = it.startZeit
             ? new Date(it.startZeit).toLocaleString('de-DE', {
+                timeZone: 'Europe/Berlin',
                 weekday: 'short',
                 day: '2-digit',
                 month: '2-digit',

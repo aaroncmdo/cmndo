@@ -69,7 +69,7 @@ function Kennzahl({ label, wert }: { label: string; wert: string }) {
 
 function terminDatum(iso: string | null): string {
   return iso
-    ? new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : '—'
 }
 const REP_TERMIN_LABEL: Record<string, string> = {

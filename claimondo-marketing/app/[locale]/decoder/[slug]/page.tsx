@@ -8,6 +8,7 @@ import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
+import { NaechsteTermineKompakt } from '@/components/content/NaechsteTermineKompakt'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
 import { ArticleComments } from '@/components/community/ArticleComments'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
@@ -104,6 +105,11 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
           <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
           <ConversionAnchorBlock variant="decoder" />
+          {/* Konkrete Termine — ein Decoder erklaert einen Versicherer-Brief, und der
+              naechste Schritt ist fast immer ein eigenes Gutachten. Am 26.08.2026 im
+              Zugriffslog: KI-Crawler lesen /decoder/* regelmaessig, die Seiten trugen
+              aber keinen buchbaren Termin. Begruendung in NaechsteTermineKompakt.tsx. */}
+          <NaechsteTermineKompakt />
           <RelatedAssets current={a} />
           <ArticleComments articleSlug={`decoder/${slug}`} />
         </article>

@@ -21,6 +21,7 @@ function StatusBadge({ status }: { status: string }) {
 function formatDatum(iso: string | null, opts?: Intl.DateTimeFormatOptions) {
   if (!iso) return '—'
   return new Date(iso).toLocaleString('de-DE', opts ?? {
+    timeZone: 'Europe/Berlin',
     day: '2-digit', month: '2-digit', year: '2-digit',
     hour: '2-digit', minute: '2-digit',
   })

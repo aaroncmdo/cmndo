@@ -70,7 +70,7 @@ export default function VertriebLiveOpsListe({
           {rows.map((sv) => {
             const t = terminBySv.get(sv.id)
             const nextTime = t?.next
-              ? new Date(t.next).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+              ? new Date(t.next).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
               : null
             const unterwegs = sv.car.mode !== 'none'
             return (

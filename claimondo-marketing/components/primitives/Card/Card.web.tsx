@@ -2,8 +2,8 @@
 
 // AAR-769 Phase 2: Web-Implementierung von <Card>.
 // Solid weiß als Default; glass='light' = backdrop-blur Schwebe-Card;
-// glass='dark' = opake Navy-Card. accentColor erzeugt 4px Border-Left
-// und kantet die linke Seite (rechts gerundet).
+// glass='dark' = opake Navy-Card. accentColor faerbt den GANZEN Rahmen und
+// legt einen 6-%-Tint derselben Farbe unter die Card (siehe unten).
 
 import { useState } from 'react'
 import { tokens } from '@/lib/design-tokens'
@@ -31,7 +31,7 @@ export function Card({
   const baseStyle: React.CSSProperties = {
     boxSizing: 'border-box',
     padding: tokens.spacing[p],
-    borderRadius: accent ? `0 ${radiusValue}px ${radiusValue}px 0` : radiusValue,
+    borderRadius: radiusValue,
     boxShadow: tokens.shadow[shadow],
     textAlign: 'left',
     width: '100%',
@@ -64,8 +64,16 @@ export function Card({
     }
   }
 
+  // Akzent = ganzer Rahmen + leiser Flaechen-Tint, NICHT ein 4px-Streifen links.
+  // Ein farbiger `border-left: 4px` auf einer Card ist ein Side-Stripe — eines der
+  // verbotenen Muster der Design-Gesetze; die dort genannte Alternative ist genau
+  // "full border + background tint". Praktisch ist sie hier auch die bessere:
+  // der einzige Consumer (gutachter-partner, Bestaetigungs-Card) hat zentrierten
+  // Inhalt, an dem eine linke Kante nichts ausrichtet, und der Radius bleibt jetzt
+  // rundum gleich (vorher war links auf 0 gekantet, damit der Streifen buendig sass).
   if (accent) {
-    baseStyle.borderLeft = `4px solid ${accent}`
+    baseStyle.border = `1px solid ${accent}`
+    baseStyle.backgroundColor = `color-mix(in srgb, ${accent} 6%, ${baseStyle.backgroundColor})`
   }
 
   if (onPress) {

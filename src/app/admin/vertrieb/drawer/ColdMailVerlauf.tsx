@@ -9,6 +9,7 @@ const LABEL_CLS = 'text-caption uppercase tracking-wide text-claimondo-ondo/60'
 
 function datum(iso: string): string {
   return new Date(iso).toLocaleDateString('de-DE', {
+    timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
