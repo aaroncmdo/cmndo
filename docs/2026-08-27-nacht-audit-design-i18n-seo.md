@@ -4,8 +4,8 @@ Drei Durchgänge über die Marketing-Seiten und die kundenseitigen App-Bereiche.
 Alles am **gerenderten Output** gemessen, nicht am Quellcode — die Gründe dafür
 stehen unten unter „Was das Instrument falsch gemacht hat".
 
-Ergebnis: **5 PRs** (#5669, #5672, #5673, #5675, #5676) und **4 Befunde, die
-eine Entscheidung von Aaron brauchen**.
+Ergebnis: **4 PRs** (#5669, #5672, #5673, #5676), **ein zurückgezogener** (#5675 —
+Zählfehler, siehe unten) und **4 Befunde, die eine Entscheidung von Aaron brauchen**.
 
 ---
 
@@ -128,18 +128,12 @@ Heuristik taugt für den groben Vergleich, nicht für Feinbefunde.
 
 ---
 
-## Teil 4 — SEO (PR #5675, #5676)
+## Teil 4 — SEO (PR #5676)
 
 20 Seitentypen, am ausgelieferten HTML mit Googlebot-User-Agent.
 
 ### Behoben
 
-* **`/haftpflicht` war der einzige Ausreißer seiner eigenen Familie.** Der Hub
-  zog sein Canonical aus `localeAlternates()` und erklärte damit jede
-  Sprachversion zum eigenen Original — bei **identischem deutschen Inhalt** (H1
-  und erster Absatz zeichengleich nachgemessen) und mit genau **1** hreflang-Tag
-  statt 7. Seine eigenen 61 Unterseiten machen es richtig. Jetzt festes
-  de-Canonical wie bei `/versicherer`, `/wissen` und `haftpflicht/[slug]`.
 * **`/decoder` und `/sachverstaendige` ohne `BreadcrumbList`/`ItemList`.** Beide
   haben eine sichtbare Brotkrumen-Navigation ohne maschinenlesbare Entsprechung.
 * **Vier Descriptions über 158 Zeichen** gekürzt (de 178, pl 185, ru 177, tr 161
@@ -156,11 +150,23 @@ Heuristik taugt für den groben Vergleich, nicht für Feinbefunde.
 
 Der Metadata-Merge-Ratchet wirkt sichtbar.
 
-Ebenfalls geprüft und als **beabsichtigt** bestätigt: `/wissen`,
-`/wissen/[slug]` (68 Artikel), `/versicherer`, `/versicherer/[slug]`,
-`/sachverstaendige/[slug]` sind de-only mit festem de-Canonical und bewusst ohne
-hreflang — der Datei-Header von `wissen/page.tsx` hält das fest. `/ratgeber` hat
-ein bewusstes Cross-Canonical auf `/unfall-was-tun-als-geschaedigter`.
+### Zwei Kanonisierungs-Muster, beide in sich stimmig
+
+Der Durchgang hat hier zunächst einen Befund gemeldet, der **keiner war** —
+PR #5675 wurde deshalb zurückgezogen. Die tatsächliche Lage:
+
+| Muster | Seiten | Auszeichnung |
+|---|---|---|
+| **de-only** | `/wissen`, `/wissen/[slug]` (68), `/versicherer`, `/versicherer/[slug]`, `/sachverstaendige/[slug]` | festes de-Canonical, bewusst **kein** hreflang; `/tr/…` zeigt auf die de-Version |
+| **mehrsprachig ausgeliefert** | `/haftpflicht`, `/decoder` | **7** hreflang, je Sprache eigenes Canonical, dazu `MdxLanguageBanner` als Hinweis auf den noch deutschen Body |
+
+Beide Muster sind korrekt; es gab keinen Ausreißer. Der Datei-Header von
+`wissen/page.tsx` hält das erste fest. `/ratgeber` hat zusätzlich ein bewusstes
+Cross-Canonical auf `/unfall-was-tun-als-geschaedigter` (Ranking bündeln).
+
+Der einzige verbleibende Punkt ist **inhaltlich, nicht technisch**: der Body von
+`/haftpflicht` und `/decoder` ist noch nicht übersetzt. Das ist bekannt und wird
+durch den Banner abgedeckt.
 
 ---
 
@@ -239,6 +245,15 @@ diesem Durchgang jede Zahl eine Positivkontrolle hat.
    hreflang statt 7.
 4. **Falscher Helper-Name.** Ein Code-Grep suchte `buildLanguageAlternates`, der
    echte Helper heißt `localeAlternates` — Ergebnis: 59 „Verletzer" statt 1.
+5. **`grep -c` zählt Zeilen, nicht Treffer.** Auf `/haftpflicht` stehen alle
+   sieben `<link rel="alternate" hrefLang=…>` im ausgelieferten HTML in *einer*
+   Zeile — `grep -c` meldete deshalb **1**, während dieselbe Seite mit
+   `grep -o … | wc -l` korrekt **7** liefert. Aus dieser einen falschen Zahl
+   entstand ein kompletter Befund samt PR (#5675), der die Seite auf de-only
+   zurückgestuft und die hreflang-Verbindung ihrer fünf Sprachversionen gekappt
+   hätte. Aufgefallen erst beim Quervergleich mit `/decoder`, das mit demselben
+   Helper 7 lieferte — **der Widerspruch zwischen zwei eigenen Messungen war
+   der Beweis, nicht eine externe Quelle.** PR zurückgezogen.
 
 Dazu zwei Beinahe-Fehler anderer Art: der Sticky-Bar-„Fix" und der
 hreflang-„Fix" wären beide gegen eine **dokumentierte, bereits getroffene
@@ -254,12 +269,13 @@ schrieb ihr Backup nach `C:\tmp`, während Git-Bash unter `/tmp` suchte — die
 
 ## Offen: Regel 4
 
-Alle fünf PRs brauchen nach dem Deploy einen Prod-Smoke:
+Alle vier PRs brauchen nach dem Deploy einen Prod-Smoke:
 
 | PR | Nachweis |
 |---|---|
 | #5669 | `/gutachter-partner` bis Schritt 4 durchspielen — Bestätigungs-Card mit Rahmen ringsum statt Streifen links |
 | #5672 | WhatsApp-Button antippen, Footer-Links auf 390×844 treffen, `/versicherer` mobil auf `scrollWidth == 390` |
 | #5673 | `/pl/check` im Ergebnis-Schritt: Text statt `check.foto_check.heading` |
-| #5675 | `/tr/haftpflicht` → Canonical muss auf `https://claimondo.de/haftpflicht` zeigen |
 | #5676 | `/decoder` muss `BreadcrumbList` und `ItemList` liefern |
+
+(#5675 ist zurückgezogen und braucht keinen.)
