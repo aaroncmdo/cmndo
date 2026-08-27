@@ -43,8 +43,37 @@ export default function Page() {
     (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }),
   )
 
+  // Die Brotkrumen unten stehen sichtbar da, hatten aber keine maschinen-
+  // lesbare Entsprechung: die Seite lieferte nur das Basis-Set aus dem Layout
+  // (Organization/LegalService/WebSite) und weder BreadcrumbList noch ItemList.
+  // Damit war fuer einen Crawler weder die Einordnung im Baum noch der Umfang
+  // des Hubs erkennbar. Muster wie /versicherer.
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Start', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Decoder', item: `${SITE_URL}/decoder` },
+    ],
+  }
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Versicherer-Brief-Decoder',
+    itemListElement: decoder.map((d, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: d.title,
+      url: `${SITE_URL}${d.url}`,
+    })),
+  }
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumb, itemList]) }}
+      />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">
         <MdxLanguageBanner />

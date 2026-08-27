@@ -48,7 +48,10 @@ export function SpokeCtaBand({ headline }: { headline?: string }) {
             {t('cta_band.report_online')}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </a>
-          <a href={WA_HREF} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-bold text-white transition hover:opacity-90" style={{ backgroundColor: '#25D366' }}>
+          {/* Dunkle Schrift auf dem WhatsApp-Gruen: weiss darauf sind 1,98:1
+              (Soll 4,5:1 bei 16px), Navy sind 8,29:1. Die Flaechenfarbe traegt
+              die Wiedererkennung und bleibt. */}
+          <a href={WA_HREF} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 font-bold text-claimondo-navy transition hover:opacity-90" style={{ backgroundColor: '#25D366' }}>
             <WhatsAppIcon className="h-5 w-5" />
             WhatsApp
           </a>
