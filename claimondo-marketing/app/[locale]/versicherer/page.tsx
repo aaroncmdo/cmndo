@@ -70,9 +70,15 @@ export default function Page() {
             <span className="h-1.5 w-1.5 rounded-full bg-claimondo-light-blue" aria-hidden />
             Versicherer-Hubs
           </div>
+          {/* hyphens-auto gegen den Komposita-Ueberlauf: "Kfz-Haftpflicht-
+              versicherer" ist bei 36px breiter als die 342px, die auf einem
+              390er-Viewport nach px-6 uebrig bleiben — gemessen lief das
+              Dokument dort 418px breit, also 28px seitlicher Scroll auf der
+              ganzen Seite. Der Browser braucht dafuer lang="de" (setzt das
+              Root-Layout). */}
           <h1
             style={HEAD_FONT}
-            className="max-w-3xl text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-claimondo-navy md:text-5xl"
+            className="max-w-3xl text-balance hyphens-auto text-4xl font-extrabold leading-[1.08] tracking-tight text-claimondo-navy md:text-5xl"
           >
             Kfz-Haftpflichtversicherer im Vergleich
           </h1>

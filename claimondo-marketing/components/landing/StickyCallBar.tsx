@@ -112,13 +112,20 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
           <span>{t('sticky_call.btn_anrufen')}</span>
           <span className="font-normal opacity-75">{PHONE_DISPLAY}</span>
         </a>
+        {/* Dunkle Schrift auf dem WhatsApp-Gruen, nicht weisse: weiss auf
+            #25D366 ergibt 1,98:1 und verfehlt die 4,5:1 fuer normalen Text
+            deutlich (am gerenderten Output gemessen, 14 von 32 Messungen).
+            Navy darauf sind 8,29:1. Die Kanalfarbe bleibt unangetastet —
+            WhatsApp setzt in den eigenen Chat-Bubbles ebenfalls dunkle Schrift
+            auf helles Gruen; die Wiedererkennung haengt an der Flaeche, nicht
+            an der Schriftfarbe. */}
         {whatsappHref && (
           <a
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp"
-            className="flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(37,211,102,0.34)] transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
+            className="flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(37,211,102,0.34)] transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
             style={{ backgroundColor: '#25D366' }}
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
