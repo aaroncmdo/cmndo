@@ -76,6 +76,7 @@ function fmtWunsch(lokal: string): string {
   if (Number.isNaN(d.getTime())) return ''
   return (
     d.toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
       weekday: 'short',
       day: '2-digit',
       month: '2-digit',
@@ -934,6 +935,7 @@ export function FinderWizard({
                   ? `${gebucht.svVorname} kommt am`
                   : `Ihr Kfz-Gutachter${gebucht.ortLabel ? ` in ${gebucht.ortLabel}` : ''} kommt am`}{' '}
                 {new Date(gebucht.startIso).toLocaleString('de-DE', {
+                  timeZone: 'Europe/Berlin',
                   weekday: 'long',
                   day: '2-digit',
                   month: 'long',
@@ -946,6 +948,7 @@ export function FinderWizard({
               <>
                 Sie haben{' '}
                 {new Date(gebucht.startIso).toLocaleString('de-DE', {
+                  timeZone: 'Europe/Berlin',
                   weekday: 'long',
                   day: '2-digit',
                   month: 'long',

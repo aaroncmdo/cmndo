@@ -21,6 +21,7 @@ function Zeile({ label, value }: { label: string; value: React.ReactNode }) {
 function formatDatum(iso: string | null, opts?: Intl.DateTimeFormatOptions) {
   if (!iso) return null
   return new Date(iso).toLocaleString('de-DE', opts ?? {
+    timeZone: 'Europe/Berlin',
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
@@ -269,7 +270,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
               </a>
             )}
             <p className="mt-3 text-[10px] text-warning">
-              Wunschtermin: <strong>{anfrage.wunschtermin ? new Date(anfrage.wunschtermin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</strong>
+              Wunschtermin: <strong>{anfrage.wunschtermin ? new Date(anfrage.wunschtermin).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</strong>
             </p>
           </section>
         )}

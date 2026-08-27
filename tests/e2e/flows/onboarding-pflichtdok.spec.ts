@@ -135,6 +135,24 @@ const ROLLEN: Array<{ name: string; email: string; pass: string; pfad: string; m
   { name: 'Kanzlei', email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Claimondo2026!', pfad: '/kanzlei', marker: /fälle|mandat|kanzlei/i },
 ]
 
+// ⚠ Browser-Zeitzone FEST auf UTC — das ist kein Detail, sondern die Bedingung, unter der
+// diese Portal-Pruefung ueberhaupt etwas sieht.
+//
+// Der prod-Node laeuft mit `TZ=Europe/Berlin` (pm2 id 862), GitHub-Runner laufen in UTC.
+// Jede Client-Component, die ein Datum ohne `timeZone` formatiert, rendert dadurch
+// server-seitig zwei Stunden anders als im CI-Browser → React-#418-Hydration-Fehler.
+// Genau das faerbte den nightly seit dem 06.08. rot (EmbedBKlaerungCard: Server
+// „Mi., 05.08., 10:00" gegen Client „08:00").
+//
+// ⭐⭐ Warum es so lange dauerte: Ein Entwickler-Browser steht in Europe/Berlin und rendert
+// damit dasselbe wie der Server — der Fehler ist lokal UNSICHTBAR. Vier gezielte
+// prod-Laeufe waren gruen und galten als Gegenbeweis; in Wahrheit war die Messung blind.
+// Mit fester UTC-Zone reproduziert JEDER Lauf die CI-Bedingung, auch lokal.
+//
+// Der Test prueft nur URL + uncaught Errors, keine Zeitangaben — die feste Zone kann hier
+// also nichts anderes kaputtmachen.
+test.use({ timezoneId: 'UTC' })
+
 for (const rolle of ROLLEN) {
   test(`Rolle ${rolle.name}: Login + Portal ${rolle.pfad} erreichbar + fehlerfrei`, async ({ page }) => {
     test.setTimeout(120_000)
