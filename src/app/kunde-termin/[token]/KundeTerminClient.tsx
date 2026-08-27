@@ -27,6 +27,7 @@ export default function KundeTerminClient({
 
   function fmt(d: Date) {
     return d.toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
       weekday: 'long',
       day: '2-digit',
       month: '2-digit',

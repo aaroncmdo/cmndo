@@ -18,7 +18,7 @@ import {
 import { gruppiereNachrichtenNachTag } from '@/lib/chat/thread-chat-format'
 
 function zeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 }
 
 export function ClaimThreadChat({

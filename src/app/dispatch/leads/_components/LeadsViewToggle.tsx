@@ -472,7 +472,7 @@ function ListView({
                       ist server-seitig UTC, client-seitig Europe/Berlin → #418-Mismatch.
                       Der angezeigte Wert ist korrekt, nur das HTML-Attribut weicht ab. */}
                   <Td className="!text-claimondo-ondo/70 text-xs" suppressHydrationWarning>
-                    {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </Td>
                   <Td>
                     <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">

@@ -618,6 +618,7 @@ function RestoreBanner({
 }) {
   const t = useTranslations('onboarding_wizard')
   const zeit = new Date(savedAt).toLocaleTimeString('de-DE', {
+    timeZone: 'Europe/Berlin',
     hour: '2-digit',
     minute: '2-digit',
   })
