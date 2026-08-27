@@ -38,8 +38,35 @@ export default function Page() {
     (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }),
   )
 
+  // Wie beim Decoder-Hub: die Brotkrumen unten sind sichtbar, hatten aber keine
+  // maschinenlesbare Entsprechung — die Seite lieferte nur das Layout-Basis-Set
+  // (Organization/LegalService/WebSite). Muster wie /versicherer.
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Start', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Sachverständige', item: `${SITE_URL}/sachverstaendige` },
+    ],
+  }
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Sachverständige, Verbände & Prüfdienste',
+    itemListElement: spokes.map((s, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: s.title,
+      url: `${SITE_URL}${s.url}`,
+    })),
+  }
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([breadcrumb, itemList]) }}
+      />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">

@@ -22,8 +22,12 @@ export async function WissensRatgeberSection() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
-              Wissen & Ratgeber
+            {/* Ondo statt Light-Blue: dieses Eyebrow steht als einziges auf dem
+                HELLEN Grund (bg-claimondo-bg). Light-Blue ergibt dort 2,51:1,
+                Ondo 4,76:1. Auf den Navy-Sektionen bleibt Light-Blue richtig
+                (6,23:1) — deshalb hier gezielt eine Stelle statt global. */}
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+              Wissen &amp; Ratgeber
             </span>
             <h2
               style={HEAD_FONT}

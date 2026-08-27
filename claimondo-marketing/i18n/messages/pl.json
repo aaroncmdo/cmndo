@@ -105,7 +105,13 @@
     "restart": "Zacznij od nowa",
     "alternativ_text": "Wolisz porozmawiać bezpośrednio? Jesteśmy do dyspozycji.",
     "alternativ_cta": "Zgłoś szkodę online",
-    "trust_heading": "Na czym możesz polegać"
+    "trust_heading": "Na czym możesz polegać",
+    "foto_check": {
+      "heading": "Ile konkretnie warta jest Twoja szkoda?",
+      "text": "Prześlij zdjęcie szkody, a w niecałą minutę otrzymasz konkretną, niezobowiązującą wycenę swoich roszczeń — bezpłatnie.",
+      "button": "Sprawdź szkodę na podstawie zdjęcia"
+    },
+    "lead_heading_alt": "Wolisz rozmowę? Zamów oddzwonienie"
   },
   "not_found": {
     "heading": "Ta strona (już) nie istnieje.",
@@ -4095,7 +4101,7 @@
     },
     "werkstatt_finden": {
       "title": "Znajdź warsztat samochodowy w pobliżu — mapa, dopasowany warsztat i termin",
-      "description": "Interaktywna mapa sprawdzonych warsztatów partnerskich — ranking według marki, rodzaju szkody i odległości. Zapytanie w kilka minut: blacharstwo, lakier, smart repair, mechanika, szyby.",
+      "description": "Interaktywna mapa sprawdzonych warsztatów partnerskich: według marki, rodzaju szkody i odległości. Zapytanie w kilka minut – bezpłatnie.",
       "og_title": "Znajdź warsztat — mapa sprawdzonych warsztatów partnerskich",
       "og_description": "Dopasowany warsztat w pobliżu: według marki, szkody i odległości. Zapytanie w kilka minut.",
       "twitter_title": "Znajdź warsztat — mapa sprawdzonych warsztatów partnerskich",

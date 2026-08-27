@@ -71,7 +71,13 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('product.heading')}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm text-white/70">
+            {/* Tippziele: die Links waren mobil 133x20px — unter jeder Schwelle
+                (WCAG 2.5.8 will 24px, iOS 44pt, Android 48dp). Statt jeden der
+                24 Links einzeln anzufassen, gibt die Liste ihren <a> das
+                Polster: 20px Text + 12px = 32px hohe Flaeche. Der Zeilenabstand
+                sinkt gegenlaeufig von 8px auf 2px, damit der Footer dabei nur
+                um 6px pro Zeile waechst statt um 12px. */}
+            <ul className="mt-3 space-y-0.5 text-sm text-white/70 [&_a]:inline-block [&_a]:py-1.5">
               <li>
                 <Link href={finderHref} className="transition-colors hover:text-white">
                   Gutachter finden
@@ -152,7 +158,13 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('partner.heading')}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm text-white/70">
+            {/* Tippziele: die Links waren mobil 133x20px — unter jeder Schwelle
+                (WCAG 2.5.8 will 24px, iOS 44pt, Android 48dp). Statt jeden der
+                24 Links einzeln anzufassen, gibt die Liste ihren <a> das
+                Polster: 20px Text + 12px = 32px hohe Flaeche. Der Zeilenabstand
+                sinkt gegenlaeufig von 8px auf 2px, damit der Footer dabei nur
+                um 6px pro Zeile waechst statt um 12px. */}
+            <ul className="mt-3 space-y-0.5 text-sm text-white/70 [&_a]:inline-block [&_a]:py-1.5">
               <li>
                 <Link href="https://gutachter.claimondo.de" className="transition-colors hover:text-white">
                   Gutachter werden
@@ -186,7 +198,13 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('legal.heading')}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm text-white/70">
+            {/* Tippziele: die Links waren mobil 133x20px — unter jeder Schwelle
+                (WCAG 2.5.8 will 24px, iOS 44pt, Android 48dp). Statt jeden der
+                24 Links einzeln anzufassen, gibt die Liste ihren <a> das
+                Polster: 20px Text + 12px = 32px hohe Flaeche. Der Zeilenabstand
+                sinkt gegenlaeufig von 8px auf 2px, damit der Footer dabei nur
+                um 6px pro Zeile waechst statt um 12px. */}
+            <ul className="mt-3 space-y-0.5 text-sm text-white/70 [&_a]:inline-block [&_a]:py-1.5">
               <li>
                 <Link href="/impressum" className="transition-colors hover:text-white">
                   Impressum
@@ -208,7 +226,9 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
                 </Link>
               </li>
               <li>
-                <ConsentSettingsLink className="transition-colors hover:text-white" />
+                {/* Eigenes Polster: der [&_a]-Selektor der Liste greift nur auf
+                    <a>, dieser Eintrag ist ein <button>. */}
+                <ConsentSettingsLink className="inline-block py-1.5 transition-colors hover:text-white" />
               </li>
             </ul>
           </div>
@@ -242,7 +262,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
             </a>
             <a
               href="mailto:info@claimondo.de"
-              className="rounded-full px-2 py-1 transition-colors hover:bg-white/5 hover:text-white"
+              className="rounded-full px-2.5 py-2 transition-colors hover:bg-white/5 hover:text-white"
             >
               info@claimondo.de
             </a>
@@ -252,7 +272,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Claimondo auf LinkedIn"
-              className="rounded-full p-1.5 transition-colors hover:bg-white/5 hover:text-white"
+              className="rounded-full p-2.5 transition-colors hover:bg-white/5 hover:text-white"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
                 <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 11-.01-4.13 2.06 2.06 0 01.01 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
@@ -266,7 +286,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
               href="https://www.provenexpert.com/de-de/claimondo/"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full px-2 py-1 transition-colors hover:bg-white/5 hover:text-white"
+              className="rounded-full px-2.5 py-2 transition-colors hover:bg-white/5 hover:text-white"
             >
               Bewertungen
             </a>
