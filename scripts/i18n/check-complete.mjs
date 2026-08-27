@@ -22,9 +22,17 @@ function flatKeys(obj, prefix = '') {
   return keys
 }
 
-// Marketing hat einen EIGENEN i18n-Baum (eigener Top-Level-Build) — der Duplikat-Guard
-// unten prueft beide. Der Completeness-Check bleibt bewusst App-only (Marketing pflegt
-// seine Locales unabhaengig).
+// Marketing hat einen EIGENEN i18n-Baum (eigener Top-Level-Build). Duplikat-Guard
+// UND Completeness pruefen jetzt beide — jeder Baum gegen sein EIGENES de.json.
+//
+// Bis 27.08.2026 lief die Completeness bewusst nur ueber die App, mit der
+// Begruendung "Marketing pflegt seine Locales unabhaengig". Unabhaengig gepflegt
+// heisst aber nicht ungeprueft: in der Luecke liefen 4 Keys auf, die auf
+// /ar/check, /pl/check und /ru/check live den rohen Key-Pfad rendern
+// (check.foto_check.heading/.text/.button + check.lead_heading_alt — eine
+// komplette CTA-Karte und eine Formular-Ueberschrift). next-intl hat hier
+// keinen Fallback: i18n/request.ts laedt genau eine Locale-Datei, ohne Merge
+// mit de. Getrennte Baeume, getrennte Quellen — aber beide in sich vollstaendig.
 const MARKETING_DIR = path.resolve(__dirname, '../../claimondo-marketing/i18n/messages')
 
 /**
@@ -87,22 +95,24 @@ if (failed) {
 }
 console.log('[i18n] Duplikat-Guard: alle Locales (app + marketing) duplikatfrei.')
 
-const load = (loc) => JSON.parse(fs.readFileSync(path.join(DIR, `${loc}.json`), 'utf8'))
-const sourceKeys = new Set(flatKeys(load(SOURCE)))
+for (const [label, dir] of [['app', DIR], ['marketing', MARKETING_DIR]]) {
+  const load = (loc) => JSON.parse(fs.readFileSync(path.join(dir, `${loc}.json`), 'utf8'))
+  const sourceKeys = new Set(flatKeys(load(SOURCE)))
 
-for (const loc of TARGETS) {
-  const locKeys = new Set(flatKeys(load(loc)))
-  const missing = [...sourceKeys].filter((k) => !locKeys.has(k))
-  const extra = [...locKeys].filter((k) => !sourceKeys.has(k))
-  if (missing.length || extra.length) {
-    failed = true
-    console.error(`[i18n] ${loc}: ${missing.length} fehlend, ${extra.length} ueberzaehlig`)
-    if (missing.length)
-      console.error(`  fehlend: ${missing.slice(0, 20).join(', ')}${missing.length > 20 ? ' …' : ''}`)
-    if (extra.length)
-      console.error(`  extra:   ${extra.slice(0, 20).join(', ')}${extra.length > 20 ? ' …' : ''}`)
-  } else {
-    console.log(`[i18n] ${loc}: OK (${locKeys.size} Keys)`)
+  for (const loc of TARGETS) {
+    const locKeys = new Set(flatKeys(load(loc)))
+    const missing = [...sourceKeys].filter((k) => !locKeys.has(k))
+    const extra = [...locKeys].filter((k) => !sourceKeys.has(k))
+    if (missing.length || extra.length) {
+      failed = true
+      console.error(`[i18n] ${label}/${loc}: ${missing.length} fehlend, ${extra.length} ueberzaehlig`)
+      if (missing.length)
+        console.error(`  fehlend: ${missing.slice(0, 20).join(', ')}${missing.length > 20 ? ' …' : ''}`)
+      if (extra.length)
+        console.error(`  extra:   ${extra.slice(0, 20).join(', ')}${extra.length > 20 ? ' …' : ''}`)
+    } else {
+      console.log(`[i18n] ${label}/${loc}: OK (${locKeys.size} Keys)`)
+    }
   }
 }
 

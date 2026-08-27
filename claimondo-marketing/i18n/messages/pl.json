@@ -105,7 +105,13 @@
     "restart": "Zacznij od nowa",
     "alternativ_text": "Wolisz porozmawiać bezpośrednio? Jesteśmy do dyspozycji.",
     "alternativ_cta": "Zgłoś szkodę online",
-    "trust_heading": "Na czym możesz polegać"
+    "trust_heading": "Na czym możesz polegać",
+    "foto_check": {
+      "heading": "Ile konkretnie warta jest Twoja szkoda?",
+      "text": "Prześlij zdjęcie szkody, a w niecałą minutę otrzymasz konkretną, niezobowiązującą wycenę swoich roszczeń — bezpłatnie.",
+      "button": "Sprawdź szkodę na podstawie zdjęcia"
+    },
+    "lead_heading_alt": "Wolisz rozmowę? Zamów oddzwonienie"
   },
   "not_found": {
     "heading": "Ta strona (już) nie istnieje.",
