@@ -204,7 +204,7 @@ export default function SvFallakteView({
       <div className="flex-1 overflow-y-auto">
         {staleSince != null && (
           <div className="text-body-xs text-warning-strong bg-warning-soft px-3 py-1.5 rounded-ios-md">
-            Offline — Stand {new Date(staleSince).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+            Offline — Stand {new Date(staleSince).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
         {loadError ? (

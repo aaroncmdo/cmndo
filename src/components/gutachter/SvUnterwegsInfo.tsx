@@ -18,7 +18,7 @@ export function SvUnterwegsInfo({
 
   const name = svVorname ?? 'Sie sind'
   const ankunft = tracking.etaAnkunftzeit
-    ? tracking.etaAnkunftzeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    ? tracking.etaAnkunftzeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     : null
 
   return (
