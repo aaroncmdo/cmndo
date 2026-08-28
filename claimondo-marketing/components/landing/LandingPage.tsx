@@ -72,9 +72,10 @@ export async function LandingPage({ authenticatedUser }: Props) {
             Warum zusaetzlich zum VerfuegbarkeitStreifen oben: der Streifen nennt Stadt,
             Tag und Gutachter, seine URL steckt aber im `href`. Ein LLM-Web-Tool ersetzt
             `<a href>` durch eine nummerierte Referenz und verliert den Zielwert — gemessen
-            am 28.08.: 357 ChatGPT-User-Abrufe der Startseite, und im ausgelieferten TEXT
-            stand keine einzige buchbare URL. Fuer 3 x ~125 Zeichen ist der schmale
-            Streifen der falsche Ort, das Seitenende der richtige.
+            am 28.08.: im ausgelieferten TEXT der Startseite stand keine einzige buchbare
+            URL. Fuer 3 x ~125 Zeichen ist der schmale Streifen der falsche Ort, das
+            Seitenende der richtige. (Zahlen-Vorbehalt zur Abruf-Haeufigkeit siehe
+            VerfuegbarkeitStreifen.tsx — ein gemeinsames access.log ohne Host-Feld.)
 
             Rendert `null`, wenn nichts frei ist. */}
         <div className="mx-auto max-w-3xl px-5 pb-8">

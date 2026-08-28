@@ -20,11 +20,21 @@ import { ladeUebersichtsTermine } from '@/lib/termine/naechster-termin'
 //
 // ⭐ 28.08.2026 — NACHGEMESSEN, und der Streifen erfüllte seinen eigenen Zweck nicht.
 //
-// Der Log über alle rotierten access.logs zeigt inzwischen 19.158 KI-Zugriffe, davon
-// 5.486 mit `ChatGPT-User` — dem Agent, mit dem ChatGPT eine Seite holt, WÄHREND ein
-// Nutzer fragt. Die Startseite ist mit 357 Abrufen sein häufigstes Ziel. Trotzdem meldete
-// die Messung des ausgelieferten TEXTES: keine Uhrzeit, keine buchbare URL. 464 KB HTML
-// ohne eine einzige buchbare Tatsache.
+// Der Log zeigt 3.110 erfolgreiche Inhaltsabrufe durch `ChatGPT-User` — den Agent, mit
+// dem ChatGPT eine Seite holt, WÄHREND ein Nutzer fragt. Ganz oben die Fachseiten:
+// /decoder/kfz-gutachter-kosten-tabelle (97), /haftpflicht/wertminderung (78),
+// /schadensreport-2026 (75). Die Startseite steht mit 355 an der Spitze.
+//
+// ⚠ ZAHLEN-VORBEHALT (nachgeprüft am 28.08.): dieser nginx bedient ~13 Vhosts
+// (claimondo.de, autounfall.io, gutachter-koeln.com, kfz-unfallgutachter-*.de …) und
+// schreibt sie in EIN access.log OHNE Host-Feld. Die 355 sind deshalb NICHT eindeutig
+// claimondo.de zuzuordnen — `/` existiert auf jedem dieser Hosts (alle antworten 200).
+// Die Fachseiten-Zahlen dagegen sind belastbar: /haftpflicht/wertminderung und
+// /decoder/* liefern auf allen Cluster-Domains 404, existieren also nur hier.
+//
+// Der Mangel selbst hängt an keiner dieser Zahlen: die Startseite lieferte 464 KB HTML
+// ohne eine einzige buchbare Tatsache — keine Uhrzeit, keine buchbare URL. Das ist
+// unabhängig davon wahr, wie oft sie abgerufen wird.
 //
 // Drei Ursachen, alle in dieser Datei:
 //   1. Die URL stand nur im `href`. Ein LLM-Web-Tool ersetzt `<a href>` durch eine
