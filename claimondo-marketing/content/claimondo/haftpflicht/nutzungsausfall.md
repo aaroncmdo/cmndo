@@ -2,11 +2,11 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/nutzungsausfall
-meta_title: Nutzungsausfall-Entschädigung berechnen
+meta_title: "Nutzungsausfallentschädigung: Höhe & Tabelle"
 type: glossar-spoke
 cluster: H3
 nummer: H3.6
-primary_keyword: "nutzungsausfall berechnen"
+primary_keyword: "nutzungsausfallentschädigung"
 secondary_keywords: ["nutzungsausfallentschädigung autounfall", "sanden danner tabelle", "eigennutzungsvermutung bgh", "nutzungsausfall pro tag"]
 insurer_phrases:
   - "Nutzungsausfall nicht nachgewiesen"
@@ -33,7 +33,7 @@ related:
 meta_description: "Nutzungsausfall ohne Mietwagen: 27–175 €/Tag nach Sanden-Danner-Tabelle, Grundlage §249 BGB (BGH GSZ 1/86). So berechnen und beweisen Sie ihn."
 ---
 
-# Nutzungsausfall-Entschädigung beim Verkehrsunfall – Berechnung, Spannen, Beweis
+# Nutzungsausfallentschädigung: Höhe, Anspruch und Tabelle nach dem Unfall
 
 > **Kurz erklärt:** Wenn dein Fahrzeug nach unverschuldetem Unfall in Reparatur oder Wiederbeschaffung steht und du **keinen Mietwagen** anmietest, hast du Anspruch auf **pauschalierte Nutzungsausfall-Entschädigung** (NAE) – gerichtlich anerkannt seit BGH GSZ 1/86. Tagessätze nach der **Sanden-Danner-Tabelle** zwischen **27 €** (Kleinwagen) und **175 € pro Tag** (Oberklasse). Beweis: keine konkreten Fahrten nötig – Eigennutzungs-Vermutung bei Privatfahrzeugen.
 
@@ -238,7 +238,7 @@ Nutzungsausfall ist eine der häufig „vergessenen" Positionen. Bei Mittelklass
     },
     {
       "@type": "Article",
-      "headline": "Nutzungsausfall-Entschädigung beim Verkehrsunfall — Berechnung, Spannen, Beweis",
+      "headline": "Nutzungsausfallentschädigung: Höhe, Anspruch und Tabelle nach dem Unfall",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
