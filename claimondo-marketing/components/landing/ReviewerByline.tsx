@@ -26,7 +26,30 @@ function formatDatum(iso: string): string {
   return `${d}.${m}.${y}`
 }
 
-export function ReviewerByline({ datum }: { datum: string }) {
+/**
+ * @param datum   ISO-Datum („2026-08-24") — der Stand, den die Seite ausweist.
+ * @param rolle   `geprueft` (Default) = „Fachlich geprüft von …". Nur setzen, wenn der
+ *                Inhalt tatsaechlich einzeln geprueft wurde.
+ *                `verantwortlich` = „Redaktionell verantwortlich: …" — die schwaechere,
+ *                aber immer zutreffende Aussage.
+ *
+ * ⚠ WARUM ES DIESE UNTERSCHEIDUNG GIBT (28.08.2026): Die 175 veroeffentlichten
+ * Stadt-Lokalinhalte sind AUSNAHMSLOS `ai_generated = true` und `reviewed_am IS NULL`
+ * — kein einziger wurde formal geprueft. „Fachlich geprüft von <Person>" waere dort eine
+ * Falschaussage ueber einen namentlich genannten Menschen, und zwar auf ~175 oeffentlichen
+ * Seiten. Die Verantwortlichkeits-Variante ist dagegen wahr (der Geschaeftsfuehrer
+ * verantwortet die Seite) und liefert dasselbe, was AI-Systeme fuer E-E-A-T lesen:
+ * eine benannte Person mit `Person`-Schema und externer Identitaet (LinkedIn `sameAs`).
+ *
+ * Sobald ein Lokalinhalt `reviewed_am` traegt, darf die Seite auf `geprueft` wechseln.
+ */
+export function ReviewerByline({
+  datum,
+  rolle = 'geprueft',
+}: {
+  datum: string
+  rolle?: 'geprueft' | 'verantwortlich'
+}) {
   return (
     <>
       <script
@@ -45,7 +68,8 @@ export function ReviewerByline({ datum }: { datum: string }) {
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 px-4 py-5 text-center text-xs text-claimondo-shield sm:flex-row sm:justify-center sm:gap-3 sm:px-6 sm:text-sm">
           <Shield className="h-4 w-4 flex-shrink-0 text-claimondo-ondo" aria-hidden />
           <span>
-            Fachlich geprüft von <strong className="font-semibold text-claimondo-navy">{REVIEWER.name}</strong>, {REVIEWER.jobTitle.split(', ')[0]} · Stand {formatDatum(datum)}
+            {rolle === 'geprueft' ? 'Fachlich geprüft von ' : 'Redaktionell verantwortlich: '}
+            <strong className="font-semibold text-claimondo-navy">{REVIEWER.name}</strong>, {REVIEWER.jobTitle.split(', ')[0]} · Stand {formatDatum(datum)}
           </span>
         </div>
       </aside>
