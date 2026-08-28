@@ -195,7 +195,7 @@ export default function KalenderConnectPanel({
             )}
             {caldav.lastSyncAt && (
               <p className="text-[11px] text-claimondo-ondo/70">
-                Letzter Check: {new Date(caldav.lastSyncAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
+                Letzter Check: {new Date(caldav.lastSyncAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })}
               </p>
             )}
             {caldav.lastError && (
