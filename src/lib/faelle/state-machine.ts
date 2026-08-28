@@ -117,6 +117,14 @@ export async function transitionFallStatus(
     betrag?: number
     grund?: string
     user_id?: string
+    /**
+     * Frist-Anker fuer den Uebergang nach 'anschlussschreiben' (ISO-Timestamp).
+     * Aaron-Entscheid 28.08.2026: die VS-Frist laeuft **ab Versand** des
+     * Schreibens, nicht ab dem Klick in unserer Oberflaeche. Ohne diesen Wert
+     * faellt das Feld auf `now` zurueck — das ist nur fuer Alt-Aufrufer richtig,
+     * die keinen Versandzeitpunkt kennen.
+     */
+    anschlussschreiben_am?: string
   },
 ): Promise<void> {
   const db = createAdminClient()
@@ -201,7 +209,11 @@ export async function transitionFallStatus(
     update.kanzlei_uebergeben_am = now
   }
   if (newStatus === 'anschlussschreiben') {
-    update.anschlussschreiben_am = now
+    // Frist-Anker: `vs-timer` rechnet die VS-Frist aus diesem Feld. Ein zu spaeter
+    // Anker verschenkt Frist — deshalb der Versandzeitpunkt, wenn der Caller ihn
+    // kennt (Aaron-Entscheid 28.08.). `now` bleibt der Fallback fuer Aufrufer
+    // ohne Versanddatum.
+    update.anschlussschreiben_am = metadata?.anschlussschreiben_am ?? now
   }
   // CMM-44 SP-J Bucket A: zahlung_eingegangen_am/zahlung_betrag liegen nicht mehr
   // auf faelle, sondern auf claim_payments (Reroute s.u. nach dem faelle/claims-
