@@ -12,7 +12,7 @@ function relativOderDatum(iso: string): string {
   if (diffMin < 1) return 'gerade eben'
   if (diffMin < 60) return `vor ${diffMin} Min.`
   if (diffMin < 1440) return `vor ${Math.round(diffMin / 60)} Std.`
-  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export function PartnerAktivitaetsFeed({

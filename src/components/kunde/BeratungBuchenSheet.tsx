@@ -264,7 +264,7 @@ export default function BeratungBuchenSheet({
                             }`}
                           >
                             <span className="text-xs text-claimondo-ondo uppercase">
-                              {date.toLocaleDateString('de-DE', { weekday: 'short' })}
+                              {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })}
                             </span>
                             <span className="text-sm font-semibold text-claimondo-navy">
                               {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}

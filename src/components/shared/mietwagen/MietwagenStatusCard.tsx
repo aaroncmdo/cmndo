@@ -25,6 +25,7 @@ function fmtDate(iso: string | null | undefined): string | null {
   if (!iso) return null
   try {
     return new Date(iso).toLocaleDateString('de-DE', {
+      timeZone: 'Europe/Berlin',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',

@@ -566,7 +566,7 @@ function KanbanView({
                         <DispatcherAvatar lead={lead} size="xs" />
                         {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
                         <span className="text-[9px] text-claimondo-ondo/70" suppressHydrationWarning>
-                          {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                          {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
                         </span>
                       </span>
                     </div>
