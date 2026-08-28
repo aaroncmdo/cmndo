@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { RatgeberStaedteSection } from '@/components/landing/sections/RatgeberStaedteSection'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -264,6 +265,8 @@ export default function AblaufPage() {
 
       <RatgeberStaedteSection artikelSlug="ablauf" />
 
+
+      <ReviewerByline datum="2026-08-25" rolle="verantwortlich" />
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter Ablauf" />
