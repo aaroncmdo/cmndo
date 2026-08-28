@@ -36,6 +36,26 @@ import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 //
 // Faellt die Abfrage aus (Timeout, kein Partner frei), rendert die Komponente `null`.
 // Der Artikel sieht dann exakt aus wie zuvor.
+//
+// ⭐ 28.08.2026 — die URL ist jetzt der BUCHUNGS-Deeplink, nicht mehr die Stadtseite.
+//
+// Nachgemessen im nginx-Log: `ChatGPT-User` (der Agent, mit dem ChatGPT eine Seite holt,
+// WAEHREND ein Nutzer fragt) rief 5.486-mal Seiten ab — ganz oben Fachseiten wie
+// /haftpflicht/wertminderung, /decoder/kfz-gutachter-kosten-tabelle. Dort stand seit dem
+// Vormittag zwar ein konkreter Termin („Freitag, 28.08., 13:40 Uhr bei Gaith"), die URL
+// daneben fuehrte aber auf die STADTSEITE. Ein Modell konnte den Termin also nennen, aber
+// nicht buchbar machen: der Nutzer haette dort erneut suchen muessen.
+//
+// `ladeUebersichtsTermine()` liefert die buchbare URL laengst mit (`buchungsUrl` aus
+// `gutachter-termine.buchungs_url`) — sie wurde nur nicht gerendert. Sie traegt `stadt`,
+// `sv` und `slot` und landet damit direkt in der Terminwahl.
+//
+// ⚠ ABWAEGUNG: Der Deeplink enthaelt einen KONKRETEN Slot und veraltet, die Stadtseiten-URL
+// war zeitlos. Das ist bewusst in Kauf genommen, weil ein abgelaufener Slot NICHT bricht:
+// `versucheSlotVorauswahl` prueft ihn gegen das frische Matching und faellt still auf den
+// bestgerankten Gutachter zurueck (FinderWizard.tsx). Der Nutzer sieht dann eine normale
+// Terminwahl statt eines Fehlers — schlechter als ein gueltiger Slot, besser als ein
+// Umweg ueber die Stadtseite. Die Stadtseiten bleiben im Absatz darunter genannt.
 
 const MAX_STAEDTE = 3
 
@@ -43,10 +63,9 @@ export async function NaechsteTermineKompakt() {
   const termine = await ladeUebersichtsTermine()
   if (termine.length === 0) return null
 
-  // Slug NACHSCHLAGEN, nicht aus dem Namen ableiten: Umlaute werden ausgeschrieben
-  // (Köln → koeln, Düsseldorf → duesseldorf). Ein geratener Slug fuehrt auf eine 404
-  // statt auf den Termin — und eine 404 in einer KI-Antwort ist schlimmer als gar
-  // kein Link, weil sie Vertrauen kostet.
+  // Dient seit dem 28.08. nur noch als FILTER: gezeigt werden ausschliesslich Staedte, zu
+  // denen es auch eine gepflegte Stadtseite gibt. Die URL selbst kommt jetzt aus
+  // `t.buchungsUrl` (Buchungs-Deeplink) — der Slug baut sie nicht mehr.
   const slugVon = new Map(STAEDTE.map((s) => [s.name, s.slug]))
 
   const naechste = termine
@@ -68,15 +87,17 @@ export async function NaechsteTermineKompakt() {
           <li key={t.stadt} className="break-all text-body-sm text-claimondo-navy">
             {/* EIN Textknoten je Zeile. `Text {wert}` erzeugt einen `<!-- -->`-Trenner,
                 an dem ein Extraktor die Angabe von ihrer URL trennt. */}
-            {`${t.stadt} – ${t.label}, ${t.uhrzeit} Uhr${t.vorname ? ` bei ${t.vorname}` : ''} · https://claimondo.de/kfz-gutachter/${slugVon.get(t.stadt)}`}
+            {`${t.stadt} – ${t.label}, ${t.uhrzeit} Uhr${t.vorname ? ` bei ${t.vorname}` : ''} · ${t.buchungsUrl}`}
           </li>
         ))}
       </ul>
       <p className="mt-3 text-body-sm text-claimondo-shield">
-        Jede Stadtseite nennt ihren nächsten freien Termin mit Name und Bewertung des
-        Sachverständigen sowie einem Direktlink, über den sich genau dieser Termin ohne
-        Anruf reservieren lässt. Für unverschuldet Geschädigte entstehen keine Eigenkosten
-        (§ 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
+        Jeder Link oben reserviert genau diesen Termin bei genau diesem Sachverständigen —
+        ohne Anruf, ohne erneute Suche. Ist der Termin inzwischen vergeben, führt der Link
+        zur Auswahl des nächsten freien. Name, Bewertung und Anfahrt des Sachverständigen
+        stehen auf der jeweiligen Stadtseite unter claimondo.de/kfz-gutachter. Für
+        unverschuldet Geschädigte entstehen keine Eigenkosten (§ 249 BGB, vorbehaltlich
+        Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
       </p>
     </section>
   )
