@@ -42,12 +42,38 @@ export type VorbefuellungsDokument = {
   pflichtdokument_id: string | null
 }
 
+/**
+ * Ein Pflicht-Slot ist die ZWEITE Quelle, aus der ein Dokument-Nachweis kommen kann.
+ *
+ * ⭐⭐ Prod-Messung 28.08.: Beide Quellen sind noetig, weil sie sich NICHT decken.
+ * `convert-lead-to-fall` zieht nur `unfallfotos` nach `fall_dokumente` nach; alles
+ * andere spiegelt `syncLeadDokumenteAnPflicht` ausschliesslich in `pflichtdokumente`.
+ * Wer vor der Fall-Anlage hochlaedt (real: 1–4 Minuten davor), landet deshalb nur dort:
+ *
+ *   CLM-2026-03507  fahrzeugschein   Slot 'hochgeladen' + URL   →  0 Zeilen in fall_dokumente
+ *   CLM-2026-03507  polizeibericht   Slot 'hochgeladen' + URL   →  0
+ *   CLM-2026-05265  fahrzeugschein   Slot 'hochgeladen' + URL   →  0
+ *   (dieselben Faelle mit schadensfotos/sachschaden_* liegen dagegen in BEIDEN)
+ *
+ * Wer nur `fall_dokumente` liest, fragt diese Kunden erneut — obwohl ihr Slot
+ * „hochgeladen" sagt und eine URL traegt.
+ */
+export type VorbefuellungsPflichtSlot = {
+  dokument_typ: string | null
+  status: string | null
+}
+
+/** Slot-Zustaende, die einen vorhandenen Upload belegen. */
+const SLOT_STATUS_ERLEDIGT = new Set(['hochgeladen', 'geprueft'])
+
 export type VorbefuellungsQuellen = {
   fall: Record<string, unknown> | null
   claim: Record<string, unknown> | null
   lead: Record<string, unknown> | null
   vehicle: Record<string, unknown> | null
   dokumente: ReadonlyArray<VorbefuellungsDokument>
+  /** Optional — fehlt sie, verhaelt sich die Funktion wie zuvor. */
+  pflichtSlots?: ReadonlyArray<VorbefuellungsPflichtSlot>
 }
 
 /**
@@ -91,6 +117,13 @@ export function baueVorbefuellung(q: VorbefuellungsQuellen): Record<string, unkn
   for (const d of q.dokumente) {
     if (d.pflichtdokument_id) prefilled[`doc_${d.pflichtdokument_id}`] = true
     if (d.dokument_typ) prefilled[`doc_typ_${d.dokument_typ}`] = true
+  }
+
+  // Zweite Nachweis-Quelle: ein erledigter Pflicht-Slot (s. Kommentar am Typ oben).
+  for (const s of q.pflichtSlots ?? []) {
+    if (s.dokument_typ && s.status && SLOT_STATUS_ERLEDIGT.has(s.status)) {
+      prefilled[`doc_typ_${s.dokument_typ}`] = true
+    }
   }
 
   // Upload-Felder aus den vorhandenen Dokumenten ableiten (s. Kommentar oben).
