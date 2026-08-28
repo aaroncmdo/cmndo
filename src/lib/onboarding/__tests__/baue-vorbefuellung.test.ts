@@ -111,6 +111,49 @@ describe('Upload-Felder aus vorhandenen Dokumenten', () => {
   })
 })
 
+describe('Pflicht-Slots als zweite Nachweis-Quelle', () => {
+  // Prod 28.08.: CLM-2026-03507 + CLM-2026-05265 tragen fahrzeugschein/polizeibericht
+  // als Slot 'hochgeladen' MIT URL — und 0 Zeilen in fall_dokumente. Wer nur
+  // fall_dokumente liest, fragt diese Kunden erneut.
+
+  it('ein hochgeladener Slot befuellt sein Upload-Feld', () => {
+    const p = baueVorbefuellung(mit({ pflichtSlots: [{ dokument_typ: 'fahrzeugschein', status: 'hochgeladen' }] }))
+    expect(p.doc_typ_fahrzeugschein).toBe(true)
+    expect(p.fahrzeugschein_foto).toBe(true)
+  })
+
+  it('„geprueft" zaehlt ebenso', () => {
+    const p = baueVorbefuellung(mit({ pflichtSlots: [{ dokument_typ: 'fahrzeugschein', status: 'geprueft' }] }))
+    expect(p.fahrzeugschein_foto).toBe(true)
+  })
+
+  it('„ausstehend" zaehlt NICHT — sonst gilt jede Anforderung als erfuellt', () => {
+    const p = baueVorbefuellung(mit({ pflichtSlots: [{ dokument_typ: 'fahrzeugschein', status: 'ausstehend' }] }))
+    expect(p.fahrzeugschein_foto).toBeUndefined()
+    expect(p.doc_typ_fahrzeugschein).toBeUndefined()
+  })
+
+  it('„abgelehnt" und „nachgereicht_angefordert" ebenso wenig', () => {
+    for (const status of ['abgelehnt', 'nachgereicht_angefordert']) {
+      const p = baueVorbefuellung(mit({ pflichtSlots: [{ dokument_typ: 'fahrzeugschein', status }] }))
+      expect(p.fahrzeugschein_foto, status).toBeUndefined()
+    }
+  })
+
+  it('ohne pflichtSlots verhaelt sich alles wie zuvor', () => {
+    expect(baueVorbefuellung(mit({})).doc_typ_fahrzeugschein).toBeUndefined()
+  })
+
+  it('beide Quellen zusammen sind kein Widerspruch', () => {
+    const p = baueVorbefuellung(mit({
+      dokumente: [{ dokument_typ: 'fahrzeugschein', pflichtdokument_id: 'pd-9' }],
+      pflichtSlots: [{ dokument_typ: 'fahrzeugschein', status: 'hochgeladen' }],
+    }))
+    expect(p['doc_pd-9']).toBe(true)
+    expect(p.fahrzeugschein_foto).toBe(true)
+  })
+})
+
 describe('flachKopie', () => {
   it('filtert null, undefined und leeren String', () => {
     expect(flachKopie({ a: null, b: undefined, c: '', d: 0, e: false, f: 'x' }))

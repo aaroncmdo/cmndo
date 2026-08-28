@@ -633,11 +633,34 @@ export async function uploadPflichtdokument(
   // Ownership-Check (CMM-63 SP-C: zentraler Helper, claim_parties-SSoT)
   const admin = createAdminClient()
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
-  if (!ownership.ok) {
+  // AAR-862: claim-zentrierte Storage-Pfade
+  let claimId: string | null = ownership.ok ? (ownership.claimId as string) : null
+
+  // Zweiter Zugangsweg: interne Rollen. Die Fallakte bietet diesen Upload
+  // ausdruecklich fuer Admin/KB an (DokumenteTab: "Smart-Filter Slots mit Status
+  // + Download (+ Upload für Admin/KB)") und ruft dieselbe Action — mit dem
+  // reinen Kunden-Check scheiterte er dort ausnahmslos mit "Fall nicht
+  // zugeordnet", gemessen 28.08. auf prod an CLM-2026-03122. Operativ heisst
+  // das: schickt ein Kunde seine Unterlagen per Mail oder WhatsApp, kann der
+  // Betreuer sie nicht in die Akte legen.
+  // resolveClaimId laeuft ueber den RLS-Client — der Claim-Zugriff wird damit
+  // implizit geprueft, es wird kein Recht erweitert.
+  if (!claimId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('rolle')
+      .eq('id', user.id)
+      .maybeSingle()
+    const rolle = (profile?.rolle as string | null) ?? null
+    if (rolle === 'admin' || rolle === 'kundenbetreuer') {
+      const { resolveClaimId } = await import('@/lib/claims/get-claim-for-role')
+      claimId = await resolveClaimId(supabase, fallId)
+    }
+  }
+
+  if (!claimId) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
-  // AAR-862: claim-zentrierte Storage-Pfade
-  const claimId = ownership.claimId as string
 
   // AAR-862: Slot-Typ vorab laden, damit der Pfad das richtige pflicht/<slot>-Segment bekommt
   const { data: pdPre } = await admin
@@ -707,8 +730,22 @@ export async function uploadPflichtdokument(
     // Läuft asynchron, blockiert den Upload-Response nicht. Ergebnis landet auf
     // leads.bkat_unfallart und wird in Phase 4 (Stammdaten) im BkatAnalysePanel
     // angezeigt — der Dispatcher braucht die Klassifikation für die Datenanfrage.
-    if (slotTyp === 'polizeibericht' && ownership.leadId) {
-      const leadId = ownership.leadId
+    // Die leadId kommt beim Kunden-Upload aus dem Ownership-Helper. Laedt ein
+    // Admin/KB den Bericht in die Akte, gibt es kein Kunden-Ownership — dann
+    // ueber den Claim aufloesen, damit die BKat-Analyse in beiden Wegen laeuft
+    // (sonst haette derselbe Polizeibericht je nach Hochladendem ein anderes
+    // Ergebnis). Lazy: nur fuer Polizeiberichte, nicht bei jedem Upload.
+    let leadIdFuerBkat: string | null = ownership.ok ? (ownership.leadId ?? null) : null
+    if (slotTyp === 'polizeibericht' && !leadIdFuerBkat) {
+      const { data: claimLead } = await admin
+        .from('claims')
+        .select('lead_id')
+        .eq('id', claimId)
+        .maybeSingle()
+      leadIdFuerBkat = (claimLead?.lead_id as string | null) ?? null
+    }
+    if (slotTyp === 'polizeibericht' && leadIdFuerBkat) {
+      const leadId = leadIdFuerBkat
       import('@/lib/bkat/auto-trigger').then(({ triggerAutoBkatOcr }) =>
         triggerAutoBkatOcr(admin, leadId, publicUrl).catch((err) =>
           console.warn('[uploadPflichtdokument] triggerAutoBkatOcr:', err instanceof Error ? err.message : err),

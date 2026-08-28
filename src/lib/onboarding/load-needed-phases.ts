@@ -22,7 +22,11 @@ import { localizePhase, localizeFeld } from './localize'
 import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, ConditionalOn } from '@/components/onboarding/types'
 import { filterFelderByAudience } from './filter-felder-by-audience'
 import { sollPhaseGeskipptWerden, resolveHergangFromLead } from './phasen-skip'
-import { baueVorbefuellung, type VorbefuellungsDokument } from './baue-vorbefuellung'
+import {
+  baueVorbefuellung,
+  type VorbefuellungsDokument,
+  type VorbefuellungsPflichtSlot,
+} from './baue-vorbefuellung'
 
 export type LoadedWizardState = {
   phases: OnboardingPhase[]
@@ -65,7 +69,7 @@ export async function ladeNoetigePhasen(
   const claimRow = Array.isArray(claimsEmbed) ? claimsEmbed[0] : claimsEmbed
   const lead_id = (claimRow as { lead_id?: string | null } | null)?.lead_id ?? null
 
-  const [claimRes, leadRes, docsRes] = await Promise.all([
+  const [claimRes, leadRes, docsRes, slotRes] = await Promise.all([
     claim_id
       ? supabase.from('claims').select('*').eq('id', claim_id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -74,6 +78,10 @@ export async function ladeNoetigePhasen(
       : Promise.resolve({ data: null }),
     // fall_dokumente (nicht fall_documents); Slot-Bezug = pflichtdokument_id, Typ = dokument_typ.
     supabase.from('fall_dokumente').select('dokument_typ, pflichtdokument_id').eq('fall_id', fallId),
+    // Zweite Nachweis-Quelle: die Pflicht-Slots. Wer VOR der Fall-Anlage hochlaedt, landet
+    // nur dort — `convert-lead-to-fall` zieht ausser unfallfotos nichts nach fall_dokumente
+    // nach. Begruendung + prod-Messung im Header von ./baue-vorbefuellung.
+    supabase.from('pflichtdokumente').select('dokument_typ, status').eq('fall_id', fallId),
   ])
 
   // Vehicle ueber claim_vehicle_involvements + vehicles
@@ -106,6 +114,7 @@ export async function ladeNoetigePhasen(
     lead: (leadRes.data ?? null) as Record<string, unknown> | null,
     vehicle,
     dokumente: (docsRes.data ?? []) as VorbefuellungsDokument[],
+    pflichtSlots: (slotRes.data ?? []) as VorbefuellungsPflichtSlot[],
   })
 
   // Bug3-dedupe-Edge (Prod-Smoke 28.07.): Claims, deren convertLeadToClaim-Bridge
