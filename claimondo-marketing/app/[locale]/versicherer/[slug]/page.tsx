@@ -29,6 +29,7 @@ import { BAFIN_BRANCHENSCHNITT_2024, getKonzernSiblings } from '@/data/versicher
 import { getKuerzungen } from '@/data/decoder-versicherer-cross'
 import { getVersichererDetail } from '@/data/versicherer-detail'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -297,6 +298,11 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <AuthorBox author="Kevin Genter" ueberMichUrl="/ueber-uns" />
         </div>
       </main>
+      {/* Autorenschaft + Stand — sichtbar, nicht nur im Schema. Datum aus
+          `a.lastModified` (MDX-Frontmatter), also eine echte Quelle. `verantwortlich`,
+          weil kein Feld eine fachliche Einzelpruefung belegt — Begruendung in
+          ReviewerByline.tsx. */}
+      <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
       <LandingFooter />
       <StickyCallBar quelle={`Versicherer-Hub: ${slug}`} whatsappHref={WHATSAPP_HREF} />
     </div>
