@@ -13,16 +13,24 @@ import { FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-consta
 
 // LinkedIn-Hrefs + Foto: kein übersetzbarer UI-String → lokal.
 // Namen kommen aus brand-constants (kanonisch).
-// Reihenfolge entspricht home.founder.founders[0/1] in de.json.
+//
+// ⚠ Diese Reihenfolge ist INDEX-GEKOPPELT an home.founder.founders[0/1] in
+// allen sechs Locale-Dateien (siehe .map((meta, i) => …) unten). Wer hier
+// tauscht, MUSS dort mittauschen — sonst bekommt der eine die Biografie des
+// anderen, ohne dass Build oder tsc etwas merken.
+//
+// Aaron zuerst, weil er auf team-founders.png LINKS steht (Aaron-Entscheid
+// 28.08.2026). Vorher lief die Textreihenfolge gegen die Bildreihenfolge:
+// links im Bild stand Aaron, links im Text Nicolas.
 const FOUNDERS_META = [
-  {
-    name: FOUNDER_NICOLAS_NAME,
-    linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
-    foto: '/brand/team-founders.png',
-  },
   {
     name: FOUNDER_AARON_NAME,
     linkedin: 'https://www.linkedin.com/in/aaronsprafke/',
+    foto: '/brand/team-founders.png',
+  },
+  {
+    name: FOUNDER_NICOLAS_NAME,
+    linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
     foto: '/brand/team-founders.png',
   },
 ]

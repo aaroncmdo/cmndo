@@ -692,20 +692,20 @@
     "founders": {
       "items": [
         {
-          "rolle": "Geschäftsführer, CEO i współzałożyciel",
-          "foto_label": "z prawej strony zdjęcia",
-          "bio_kurz": "Nicolas odpowiada za strategiczny kierunek Claimondo, zarządzanie siecią partnerów i relacje z inwestorami.",
-          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z Kfz-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
-          "quote": "„Nie chodzi o to, kim jestem, lecz o to, co robię. Z tego się jest rozliczanym.\"",
-          "quote_autor": "Bruce Wayne"
-        },
-        {
           "rolle": "Geschäftsführer, COO i współzałożyciel",
           "foto_label": "z lewej strony zdjęcia",
           "bio_kurz": "Aaron buduje platformę Claimondo i odpowiada za operacje — od fotograficznej rejestracji szkody po wypłatę odszkodowania.",
           "bio_lang": "Aaron wywodzi się ze sprzedaży i account managementu w nextright oraz AdvoScale, gdzie zobaczył, ile pieniędzy w każdej teczce szkodowej ginie między obietnicą a wypłatą. W Claimondo zbudował kompletną platformę techniczną: rejestrację szkód wspomaganą przez AI, GPS Self-Dispatch do najbliższego wolnego rzeczoznawcy, OCR dokumentu ZB1 z wizualizacją Imagin, cyfrowe podpisywanie Schutzbrief — i dba o to, by dyspozytor, rzeczoznawcy, adwokaci i klient widzieli te same dane w czasie rzeczywistym.",
           "quote": "„Jakość oznacza robienie czegoś właściwie, gdy nikt nie patrzy.\"",
           "quote_autor": "Henry Ford"
+        },
+        {
+          "rolle": "Geschäftsführer, CEO i współzałożyciel",
+          "foto_label": "z prawej strony zdjęcia",
+          "bio_kurz": "Nicolas odpowiada za strategiczny kierunek Claimondo, zarządzanie siecią partnerów i relacje z inwestorami.",
+          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z Kfz-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
+          "quote": "„Nie chodzi o to, kim jestem, lecz o to, co robię. Z tego się jest rozliczanym.\"",
+          "quote_autor": "Bruce Wayne"
         }
       ]
     },
@@ -1394,14 +1394,14 @@
       "linkedin_aria": "{name} na LinkedIn",
       "founders": [
         {
-          "rolle": "Dyrektor zarządzający, CEO i współzałożyciel",
-          "bio": "Nicolas kieruje Claimondo i jest osobą kontaktową ds. partnerstw z ubezpieczycielami oraz strategicznych współprac z kancelariami. Jego cel: uczynić likwidację szkód w Niemczech transparentną i partnerską — bez standardowych rozmów z ubezpieczycielami, bez logiki cięć.",
-          "quote": "„Nie chodzi o to, kim jestem, lecz co robię. To jest miarą człowieka.\" — Batman"
-        },
-        {
           "rolle": "Dyrektor zarządzający, COO i współzałożyciel",
           "bio": "Aaron odpowiada w Claimondo za operacje, produkt i platformę technologiczną. Dzięki doświadczeniu w sprzedaży i account managemencie w nextright i AdvoScale wie, gdzie leży dźwignia między obietnicą dla klienta a realną wypłatą. Aaron jest interfejsem między rzeczoznawcami, adwokatami a naszym oprogramowaniem.",
           "quote": "„Jakość oznacza robienie rzeczy właściwie, gdy nikt nie patrzy.\" — Henry Ford"
+        },
+        {
+          "rolle": "Dyrektor zarządzający, CEO i współzałożyciel",
+          "bio": "Nicolas kieruje Claimondo i jest osobą kontaktową ds. partnerstw z ubezpieczycielami oraz strategicznych współprac z kancelariami. Jego cel: uczynić likwidację szkód w Niemczech transparentną i partnerską — bez standardowych rozmów z ubezpieczycielami, bez logiki cięć.",
+          "quote": "„Nie chodzi o to, kim jestem, lecz co robię. To jest miarą człowieka.\" — Batman"
         }
       ]
     },
