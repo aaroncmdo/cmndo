@@ -7,7 +7,8 @@
 //
 // Daten-Flow:
 //   1. Foto via <input capture="environment"> oder Galerie
-//   2. base64 → uploadDokumentViaAnfrageToken(token, 'fahrzeugschein', base64)
+//   2. compressImage(file) → uploadDokumentViaAnfrageToken(token, 'fahrzeugschein', base64)
+//      (28.08.: ohne Komprimierung brach die Server-Action bei Handy-Fotos, s. handleFile)
 //   3. OCR + leads-Update läuft serverseitig (H6-Regel, schreibt nur leere Felder)
 //   4. extracted-Payload prefilled Preview-Inputs
 //   5. Kunde editiert/bestätigt → onChange triggert ggf. confirmZb1Korrekturen
@@ -16,6 +17,7 @@ import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { OnboardingFeld } from '../types'
 import { uploadDokumentViaAnfrageToken } from '@/app/upload/dokumente/[token]/actions'
+import { compressImage } from '@/lib/dokumente/compress-image'
 import { confirmZb1Korrekturen, clearZb1Felder } from '@/app/kunde/onboarding-details/zb1-actions'
 
 type Status = 'idle' | 'uploading' | 'preview' | 'error' | 'skipped'
@@ -106,14 +108,33 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
     setStatus('uploading')
     setErrorMsg(null)
 
-    const base64 = await fileToBase64(file)
-    if (!base64) {
+    // ⭐ Prod-Smoke 28.08.: Ein Foto direkt vom Handy (2–5 MB) sprengte die Server-Action.
+    // Gemessen gegen prod: 1 MB → HTTP 500 „Maximum array nesting exceeded" (React
+    // serialisiert den base64-String beim Flight-Transport), 10 KB → laeuft durch.
+    // `bodySizeLimit` (20 MB) ist NICHT die Grenze — die liegt im Serialisierer.
+    const bild = await verkleinereBild(file)
+    if (!bild) {
+      setVersuche(v => v + 1)
       setStatus('error')
       setErrorMsg(t('zb1_foto_lesefehler'))
       return
     }
 
-    const res = await uploadDokumentViaAnfrageToken(token, 'fahrzeugschein', base64, file.type || 'image/jpeg')
+    // ⭐ Ohne dieses try/catch blieb die Oberflaeche bei einem Server-Fehler FUER IMMER
+    // auf „Foto wird ausgewertet …" stehen (3 Min im Smoke beobachtet): die Action wirft,
+    // `handleFile` bricht ab, `status` bleibt 'uploading'. Kein Fehler, kein Retry,
+    // kein Weiterkommen. Dieselbe Klasse wie das leere `.catch()` aus #5695 — ein
+    // Fehlschlag, den der Nutzer nicht sehen kann.
+    let res: Awaited<ReturnType<typeof uploadDokumentViaAnfrageToken>>
+    try {
+      res = await uploadDokumentViaAnfrageToken(token, 'fahrzeugschein', bild.base64, bild.mime)
+    } catch (err) {
+      console.error('[zb1-field] Upload-Action fehlgeschlagen:', err)
+      setVersuche(v => v + 1)
+      setStatus('error')
+      setErrorMsg(t('zb1_ocr_fehler'))
+      return
+    }
     if (!res.success) {
       setVersuche(v => v + 1)
       setStatus('error')
@@ -454,19 +475,21 @@ function readExtractedFromValue(value: unknown): Extracted | null {
   return Object.fromEntries(ZB1_FELDER.map((f) => [f, ex[f] ?? ''])) as Extracted
 }
 
-async function fileToBase64(file: File): Promise<string | null> {
+/**
+ * Nutzt den gemeinsamen Helfer aus `@/lib/dokumente/compress-image` — denselben, den der
+ * Magic-Link-Upload (`MultiSlotUploadClient`) seit dem HEIC-/Grossfoto-Fix (22.07.) verwendet.
+ *
+ * ⭐ Genau darin lag die Inkonsistenz: derselbe Kunde, dasselbe Foto, zwei Wege — der
+ * Magic-Link komprimierte, der Wizard schickte das Rohbild per `FileReader` durch.
+ * Ein eigener Resizer hier waere eine schlechtere Kopie gewesen (kein HEIC, keine
+ * EXIF-Orientierung, kein <img>-Fallback).
+ */
+async function verkleinereBild(file: File): Promise<{ base64: string; mime: string } | null> {
   try {
-    const reader = new FileReader()
-    return await new Promise((resolve, reject) => {
-      reader.onload = () => {
-        const result = reader.result as string
-        const idx = result.indexOf(',')
-        resolve(idx >= 0 ? result.slice(idx + 1) : result)
-      }
-      reader.onerror = () => reject(reader.error)
-      reader.readAsDataURL(file)
-    })
-  } catch {
+    const { base64, contentType } = await compressImage(file)
+    return { base64, mime: contentType }
+  } catch (err) {
+    console.error('[zb1-field] Bild-Komprimierung fehlgeschlagen:', err)
     return null
   }
 }
