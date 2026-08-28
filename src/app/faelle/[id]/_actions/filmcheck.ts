@@ -8,6 +8,7 @@
 // - saveFilmcheck: setzt Mandatsnummer, Status 'kanzlei-uebergeben', Kanzlei-Mail
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { emailFilmcheckBestanden } from '@/lib/email'
@@ -72,7 +73,17 @@ export async function saveFilmcheck(
       .limit(1)
       .maybeSingle()
     if (aktAuftrag) {
-      const { error: auftragErr } = await supabase
+      // Admin-Client: die UPDATE-Policy auf `auftraege` erlaubt nur admin/dispatch,
+      // der Filmcheck ist laut Permission-Matrix aber KB-Arbeit ('dokumente.qc' —
+      // KB ist der Daily-Driver, dispatch darf QC gar nicht). Mit dem RLS-Client traf
+      // dieses UPDATE beim KB 0 Zeilen, und PostgREST meldet dabei KEINEN Fehler:
+      // filmcheck_ok blieb still `false`, waehrend der Status regulaer auf
+      // 'kanzlei-uebergeben' weiterlief. Die Berechtigung ist oben bereits durch
+      // requireQcBerechtigung geprueft; hier wird kein zusaetzliches Recht gewaehrt.
+      // `.select()` erzwingt die Trefferanzahl — ein stiller Nicht-Treffer faellt
+      // dadurch kuenftig auf, statt lautlos zu verschwinden.
+      const admin = createAdminClient()
+      const { data: aktualisiert, error: auftragErr } = await admin
         .from('auftraege')
         .update({
           filmcheck_ok: true,
@@ -80,7 +91,11 @@ export async function saveFilmcheck(
           filmcheck_notizen: notizen || null,
         })
         .eq('id', aktAuftrag.id)
+        .select('id')
       if (auftragErr) return { success: false, error: auftragErr.message }
+      if (!aktualisiert || aktualisiert.length === 0) {
+        return { success: false, error: 'Filmcheck konnte nicht am Auftrag vermerkt werden.' }
+      }
     } else {
       console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — filmcheck_* skip`)
     }
