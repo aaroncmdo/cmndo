@@ -62,9 +62,68 @@ function mapLeadToSlots(lead: LeadDocs): SlotMapping[] {
 }
 
 /**
+ * Zieht den Storage-Pfad aus einer Datei-URL. Pure.
+ *
+ * Alles nach dem Bucket-Namen zählt — der Präfix unterscheidet sich je nachdem, ob die URL
+ * public (`/storage/v1/object/public/fall-dokumente/…`) oder signiert
+ * (`/storage/v1/object/sign/fall-dokumente/…?token=…`) erzeugt wurde. Query-String und
+ * Fragment gehören nicht zum Pfad.
+ */
+export function storagePfadAusUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  const marker = 'fall-dokumente/'
+  const idx = url.indexOf(marker)
+  if (idx === -1) return null
+  const roh = url.slice(idx + marker.length)
+  const pfad = roh.split('?')[0]?.split('#')[0] ?? ''
+  return pfad.length > 0 ? pfad : null
+}
+
+/**
+ * Entscheidet, welche Akten-Zeilen fehlen. Pure — der Write liegt beim Aufrufer.
+ *
+ * ⭐ Zwei Quellen von Doppeleinträgen, beide real:
+ *  1. **Slot-Aliase**: `polizeibericht` + `polizeiliche_unfallmitteilung` (und
+ *     `schadensfotos` + `unfallfotos`) zeigen auf DIESELBE Datei. Ohne Dedup läge sie
+ *     zweimal in der Akte.
+ *  2. **Der unfallfotos-Nachzug in `convert-lead-to-fall` (Schritt 5) läuft VORHER** und legt
+ *     `schadensfotos` bereits an. Deshalb wird gegen die vorhandenen Pfade geprüft, nicht
+ *     blind eingefügt.
+ */
+export function fehlendeAktenZeilen(
+  slots: ReadonlyArray<{ id: string; dokument_typ: string | null; url: string }>,
+  vorhandenePfade: ReadonlySet<string>,
+): Array<{ pflichtdokument_id: string; dokument_typ: string; storage_path: string }> {
+  const out: Array<{ pflichtdokument_id: string; dokument_typ: string; storage_path: string }> = []
+  const gesehen = new Set(vorhandenePfade)
+  for (const s of slots) {
+    if (!s.dokument_typ) continue
+    const pfad = storagePfadAusUrl(s.url)
+    if (!pfad || gesehen.has(pfad)) continue
+    gesehen.add(pfad)
+    out.push({ pflichtdokument_id: s.id, dokument_typ: s.dokument_typ, storage_path: pfad })
+  }
+  return out
+}
+
+/**
  * Setzt pflichtdokumente.status auf 'hochgeladen' für jeden Slot wo der
  * Lead bereits eine URL liefert. Updates nur Rows mit status='ausstehend'
  * (idempotent gegenüber später hochgeladenen oder geprüften Slots).
+ *
+ * ⭐⭐ Legt ZUSÄTZLICH die fehlende `fall_dokumente`-Zeile an. Vorher endete der Weg hier:
+ * der Slot stand auf „hochgeladen" mit URL, in der **Dokumentenliste der Akte** tauchte die
+ * Datei aber nie auf — SV und KB arbeiteten ohne ein Dokument, das längst vorlag.
+ *
+ * Prod-Messung 28.08. (der Anlass): `convert-lead-to-fall` zog nur `unfallfotos` nach
+ * `fall_dokumente` nach; alles andere blieb allein im Slot.
+ *
+ *   CLM-2026-03507  fahrzeugschein   Slot 'hochgeladen' + URL  →  0 Zeilen in fall_dokumente
+ *   CLM-2026-03507  polizeibericht   Slot 'hochgeladen' + URL  →  0
+ *   CLM-2026-05265  fahrzeugschein   Slot 'hochgeladen' + URL  →  0
+ *
+ * Zwischen Upload und Fall-Anlage lagen real 1–4 Minuten — das ist der normale Ablauf,
+ * wenn der Kunde den Magic-Link sofort bedient, kein Randfall.
  */
 export async function syncLeadDokumenteAnPflicht(
   supabase: SupabaseClient,
@@ -85,31 +144,86 @@ export async function syncLeadDokumenteAnPflicht(
   if (!pflichtRows || pflichtRows.length === 0) return
 
   const now = new Date().toISOString()
+  // Alle Slots, die am Ende eine URL tragen — egal ob sie sie schon hatten oder gerade
+  // bekommen. Der Akten-Nachzug unten braucht BEIDE: der gemessene Fehlerfall war genau
+  // der Slot, der bereits auf 'hochgeladen' stand und trotzdem keine Akten-Zeile hatte.
+  const mitUrl: Array<{ id: string; dokument_typ: string | null; url: string }> = []
+
   for (const row of pflichtRows as Array<{
     id: string
     dokument_typ: string | null
     status: string | null
     dokument_url: string | null
   }>) {
-    // Schon hochgeladen/geprueft → nichts tun
-    if (row.status === 'hochgeladen' || row.status === 'geprueft') continue
-    // Schon dokument_url gesetzt (z.B. nachträglich gesetzt) → nichts tun
-    if (row.dokument_url) continue
     const mapping = slotMappings.find((m) => m.slotId === row.dokument_typ)
-    if (!mapping) continue
+    const bereitsErledigt = row.status === 'hochgeladen' || row.status === 'geprueft'
 
-    // Ohne diesen Write gilt der Slot weiter als unbefuellt, obwohl das Dokument
-    // vorliegt — der Vorgang haengt dann an einem Dokument, das laengst da ist.
-    const { error: slotFehler } = await supabase
-      .from('pflichtdokumente')
-      .update({
-        status: 'hochgeladen',
-        dokument_url: mapping.url,
-        hochgeladen_am: now,
-      })
-      .eq('id', row.id)
-    if (slotFehler) {
-      console.error(`[sync-lead-zu-pflicht] Slot ${row.dokument_typ} nicht befuellt (${row.id}):`, slotFehler.message)
+    // Slot-Update nur wenn wirklich offen (idempotent wie bisher).
+    if (!bereitsErledigt && !row.dokument_url && mapping) {
+      // Ohne diesen Write gilt der Slot weiter als unbefuellt, obwohl das Dokument
+      // vorliegt — der Vorgang haengt dann an einem Dokument, das laengst da ist.
+      const { error: slotFehler } = await supabase
+        .from('pflichtdokumente')
+        .update({ status: 'hochgeladen', dokument_url: mapping.url, hochgeladen_am: now })
+        .eq('id', row.id)
+      if (slotFehler) {
+        console.error(`[sync-lead-zu-pflicht] Slot ${row.dokument_typ} nicht befuellt (${row.id}):`, slotFehler.message)
+      }
     }
+
+    const url = row.dokument_url ?? mapping?.url ?? null
+    if (url) mitUrl.push({ id: row.id, dokument_typ: row.dokument_typ, url })
+  }
+
+  await ziehteAkteNach(supabase, fallId, mitUrl)
+}
+
+/**
+ * Legt für jeden belegten Slot die fehlende `fall_dokumente`-Zeile an (s. Kommentar oben).
+ * Non-critical: ein Fehlschlag wird geloggt, bricht den Sync aber nicht ab — der Slot selbst
+ * ist bereits korrekt gesetzt.
+ */
+async function ziehteAkteNach(
+  supabase: SupabaseClient,
+  fallId: string,
+  mitUrl: ReadonlyArray<{ id: string; dokument_typ: string | null; url: string }>,
+): Promise<void> {
+  if (mitUrl.length === 0) return
+
+  const { data: vorhanden, error: leseFehler } = await supabase
+    .from('fall_dokumente')
+    .select('storage_path')
+    .eq('fall_id', fallId)
+  if (leseFehler) {
+    console.error('[sync-lead-zu-pflicht] Akten-Bestand nicht lesbar:', leseFehler.message)
+    return // lieber nichts anlegen als Duplikate riskieren
+  }
+
+  const vorhandenePfade = new Set(
+    ((vorhanden ?? []) as Array<{ storage_path: string | null }>)
+      .map((d) => d.storage_path)
+      .filter((p): p is string => typeof p === 'string' && p.length > 0),
+  )
+
+  const fehlend = fehlendeAktenZeilen(mitUrl, vorhandenePfade)
+  if (fehlend.length === 0) return
+
+  const { error: insertFehler } = await supabase.from('fall_dokumente').insert(
+    fehlend.map((f) => ({
+      fall_id: fallId,
+      pflichtdokument_id: f.pflichtdokument_id,
+      dokument_typ: f.dokument_typ,
+      storage_path: f.storage_path,
+      original_filename: f.storage_path.split('/').pop() ?? f.dokument_typ,
+      uploaded_by_kunde: true,
+      beschreibung: 'Vor der Fall-Anlage hochgeladen',
+      hochgeladen_am: new Date().toISOString(),
+    })),
+  )
+  if (insertFehler) {
+    console.error(
+      `[sync-lead-zu-pflicht] Akten-Nachzug fehlgeschlagen (fall ${fallId}, ${fehlend.length} Zeile(n)):`,
+      insertFehler.message,
+    )
   }
 }
