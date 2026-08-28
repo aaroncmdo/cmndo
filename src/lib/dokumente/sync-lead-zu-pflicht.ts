@@ -62,21 +62,39 @@ function mapLeadToSlots(lead: LeadDocs): SlotMapping[] {
 }
 
 /**
- * Zieht den Storage-Pfad aus einer Datei-URL. Pure.
+ * Zieht den Storage-Pfad aus dem, was in `pflichtdokumente.dokument_url` steht. Pure.
  *
- * Alles nach dem Bucket-Namen zählt — der Präfix unterscheidet sich je nachdem, ob die URL
- * public (`/storage/v1/object/public/fall-dokumente/…`) oder signiert
- * (`/storage/v1/object/sign/fall-dokumente/…?token=…`) erzeugt wurde. Query-String und
+ * ⭐⭐ Das Feld heißt „url", trägt aber **zwei Formen** — auf prod gemessen (28.08., 10 belegte
+ * Slots), und die zweite ist die häufigere:
+ *
+ *   1) volle URL      `https://….supabase.co/storage/v1/object/public/fall-dokumente/claims/…`   3×
+ *   2) nackter Pfad   `leads/bea4fa1d…/zb1_flow_….webp`                                          7×
+ *
+ * Eine erste Fassung suchte nur nach `fall-dokumente/` und lieferte für Form 2 `null` — der
+ * Fix hätte also **die Mehrheit der realen Fälle nicht getroffen**, obwohl er korrekt aussah
+ * und seine Tests grün waren. Aufgefallen ist es erst am Backfill-Vorschaulauf: 1 statt 3
+ * erwarteter Zeilen. **Ein Feldname ist kein Formatvertrag.**
+ *
+ * Signierte URLs (`/object/sign/…?token=…`) sind ebenfalls abgedeckt; Query-String und
  * Fragment gehören nicht zum Pfad.
  */
 export function storagePfadAusUrl(url: string | null | undefined): string | null {
   if (!url) return null
+  const ohneQuery = url.split('?')[0]?.split('#')[0] ?? ''
+  if (ohneQuery.length === 0) return null
+
   const marker = 'fall-dokumente/'
-  const idx = url.indexOf(marker)
-  if (idx === -1) return null
-  const roh = url.slice(idx + marker.length)
-  const pfad = roh.split('?')[0]?.split('#')[0] ?? ''
-  return pfad.length > 0 ? pfad : null
+  const idx = ohneQuery.indexOf(marker)
+  if (idx !== -1) {
+    const pfad = ohneQuery.slice(idx + marker.length)
+    return pfad.length > 0 ? pfad : null
+  }
+
+  // Form 2: bereits ein Storage-Pfad. Alles mit Host ist dagegen eine FREMDE URL
+  // (anderer Bucket/Dienst) — daraus einen Pfad zu raten waere falsch.
+  if (/^[a-z]+:\/\//i.test(ohneQuery)) return null
+  const pfad = ohneQuery.replace(/^\/+/, '')
+  return pfad.includes('/') ? pfad : null
 }
 
 /**

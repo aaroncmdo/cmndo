@@ -31,8 +31,31 @@ describe('storagePfadAusUrl', () => {
     expect(storagePfadAusUrl('…/fall-dokumente/a/b.jpg?x=1#frag')).toBe('a/b.jpg')
   })
 
-  it('liefert null, wenn der Bucket nicht vorkommt', () => {
+  // ⭐⭐ Das Feld heisst „url", traegt aber zwei Formen. Auf prod gemessen (10 belegte Slots):
+  // 3x volle URL, 7x nackter Pfad. Eine erste Fassung kannte nur Form 1 — der Fix haette die
+  // MEHRHEIT der realen Faelle nicht getroffen, bei gruenen Tests. Ein Feldname ist kein
+  // Formatvertrag.
+  it('akzeptiert den nackten Storage-Pfad (Form 2, die haeufigere)', () => {
+    expect(storagePfadAusUrl('leads/bea4fa1d-a803-44c6-91fa-529b1a7dfe98/zb1_flow_1786294077662.webp'))
+      .toBe('leads/bea4fa1d-a803-44c6-91fa-529b1a7dfe98/zb1_flow_1786294077662.webp')
+  })
+
+  it('auch die claims/-Variante', () => {
+    expect(storagePfadAusUrl('claims/3007e987/pflicht/unfallfotos/1786294682191_x.jpeg'))
+      .toBe('claims/3007e987/pflicht/unfallfotos/1786294682191_x.jpeg')
+  })
+
+  it('ein fuehrender Slash wird normalisiert', () => {
+    expect(storagePfadAusUrl('/leads/a/b.jpg')).toBe('leads/a/b.jpg')
+  })
+
+  it('eine FREMDE URL bleibt null — daraus einen Pfad zu raten waere falsch', () => {
     expect(storagePfadAusUrl('https://example.com/irgendwas.jpg')).toBeNull()
+    expect(storagePfadAusUrl('http://cdn.fremd.de/a/b.jpg')).toBeNull()
+  })
+
+  it('ein Einzelwort ohne Verzeichnis ist kein Pfad', () => {
+    expect(storagePfadAusUrl('kaputt.jpg')).toBeNull()
   })
 
   it('liefert null bei leer/null/undefined', () => {
