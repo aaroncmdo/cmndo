@@ -1,0 +1,730 @@
+# Entry-Points der Webseite → Claim-Abschluss (Variante „nur Gutachter")
+
+> ## ⚠ Bilanz zuerst — vier von zehn „Befunden" waren Messfehler
+>
+> Nach Gegenprüfung jedes einzelnen Punkts bleibt:
+>
+> | Nr | Befund | Verdikt |
+> |---|---|---|
+> | **1** | Mini-Wizard speichert die falsche Stadt | **echt — Ursache bewiesen, GEFIXT** (§5.2) |
+> | 2 | Interner Test-Lead wird echtem Gutachter zugewiesen | echt, offen (§5.3) |
+> | 3 | „Auswählen" bei der Werkstattwahl schreibt nichts | ❌ **Messfehler** — Reparatur-Intent fehlte (§5.4) |
+> | 4 | Kundenbetreuer trotz `nur_gutachter` | echt, Produktentscheid (§5.5) |
+> | 5 | Unfallskizze entsteht nicht | unklar — Anthropic-Guthaben prüfen (§5.6) |
+> | 6 | Telefon Pflicht trotz „WhatsApp **oder** E-Mail" | echt, UX (§5.7) |
+> | 7 | „Drei kurze Fragen" → 18 Schritte | echt, UX (§5.8) |
+> | 8 | Finder bestätigt Termin, den es nicht gibt | ❌ **Messfehler** — Guard griff korrekt (§5.11) |
+> | 9 | Absende-Button unter Overlays (Stadtseite) | echt, offen (§5.12) |
+> | 10 | Stadtseiten-Anfrage „sieht niemand" | ❌ **Messfehler** — eigene Dispatch-Ansicht (§5.12) |
+> | — | Ort geht am Lead verloren | ❌ **Messfehler** — landet in `kunde_plz` (§5.17) |
+> | — | Abschluss ohne Termin unerreichbar | ⚠ **halb** — Ursache war der Guard, die fehlende Dispatch-Aktion bleibt (§5.16) |
+>
+> **Was die Fehlbefunde gemeinsam haben:** Meine Test-Identität war intern (`@claimondo.de`).
+> Der Test-SV-Guard und die Send-Isolation greifen dort **absichtlich** — und ein blockierter
+> Schutzmechanismus sieht in der Datenbank genauso aus wie ein kaputtes Feature. Dazu kamen zu
+> enge Abfragen (falsche Spalte, Suche über eine E-Mail, die das Formular nie erhebt).
+>
+> ⭐ **Die Gegenprobe war jedes Mal billiger als der Fehlbefund:** ein Screenshot öffnen, eine
+> Vorbedingung setzen, die zweite Ansicht aufrufen, die richtige Spalte lesen.
+
+
+> **Phase 1 von 2.** Auftrag Aaron 28.08.2026: „spiele alle entry points von der webseite anonym
+> durch bis zum abschluss des claims (immer in der variante nur gutachter) … am anfang schaust du
+> welche entry points wir haben, wie der operative ux ablauf logisch wäre und optimal wäre — immer
+> mit dem ziel, dass wir keine abbrüche haben und der kunde in einem fluss in die app kommt und
+> auch durch die app geleitet wird und mitteilungen als whatsapps bekommt. und danach machen wir
+> die tests und eine bestandsaufnahme."
+>
+> Dieses Dokument ist **Phase 1**: Entry-Point-Karte (Ist) + operatives Soll (Prosa, nach Regel 4
+> Schritt 1: *hergeleitet aus der Fachlogik, nicht aus dem Code gelesen*) + Testplan.
+> Die Testergebnisse kommen als Phase 2 in dieses Dokument.
+>
+> Erhebung im frischen Worktree auf `origin/staging` (`05d0c0d09`), DB-Zahlen READ-only gegen
+> prod (`paizkjajbuxxksdoycev`), Stand 28.08.2026.
+
+---
+
+## 0 · Was „nur Gutachter" technisch ist — und wo die Wahl fällt
+
+| | |
+|---|---|
+| **Feld** | `leads.service_typ` / `claims.service_typ`, CHECK `('komplett','nur_gutachter')` |
+| **UI** | `onboarding_felder.service_typ`, Typ `toggle-cards`: „Komplettservice (empfohlen) — Anwalt + Vollmacht inkl., 0 EUR" vs. **„Nur Gutachten — Sie regulieren selbst mit der gegnerischen Versicherung"** |
+| **Folge-Feld** | `kanzlei_wunsch` ist `conditional_on: {service_typ: komplett}` → bei „Nur Gutachten" **entfällt die Anwalt-Frage** |
+| **Wo gewählt** | **Ausschließlich im `sa`-Step des `/flow`-Wizards** (Sektion `service_kanzlei`). Kein Meldeweg erhebt sie vorher. |
+| **Weg im Claim** | kein KB, keine Kanzlei, **keine Regulierungs-Phase** (`getVisibleMainPhases` blendet sie aus): Erfassung → Begutachtung → Abschluss |
+| **Terminal** | `operative_status = 'termin_durchgefuehrt'` via `closeNurGutachterTerminAlsDurchgefuehrt` (`src/lib/termine/close-nur-gutachter-termin.ts`) |
+| **Wer schließt ab** | drei Caller: **SV** (`markNurGutachterTerminDurchgefuehrt`), **Kunde** (`bestaetigeTerminAlsKunde`), **WhatsApp-Inbound** (Phone-Match, kein Login) |
+| **Prod-Bestand** | 23 Claims `nur_gutachter` / 56 `komplett`; Leads 120 Tage: 16× `self_service`, je 2× `makler-anfrage-flowlink` / `schaden-karte`, 1× `chatgpt.com` |
+
+**⚠ Befund 0-A (vor jedem Test, aus der DB):** `gutachter_finder_anfragen.regulierungs_modus` ist
+**50 von 50 NULL**. Das Feld existiert (`onboarding_felder` mit `db_target` darauf,
+`gutachter-finder-actions.ts:390` schreibt es), wird aber nie befüllt — **der Embed-Finder erhebt
+die Service-Wahl nicht.** Zusätzlich divergieren die Werte: der TS-Typ dort kennt
+`'vollstaendig' | 'nur_gutachten'`, die Feld-Definition und der CHECK kennen
+`'komplett' | 'nur_gutachter'`. Selbst wenn jemand das Feld befüllte, käme der Wert nicht an.
+
+**Konsequenz für den Auftrag:** Die Variante „nur Gutachter" ist **kein Entry-Point-Merkmal**,
+sondern eine Weiche **im Flow**. Alle Einstiege münden erst zusammen, dann wird gewählt. Das
+vereinfacht den Testplan (§4) erheblich und ist gleichzeitig der wichtigste UX-Befund (§3).
+
+---
+
+## 1 · Entry-Point-Karte — was ein anonymer Besucher findet
+
+Zwei Bauten: **claimondo.de** (Marketing-Build `claimondo-marketing/`) und **app.claimondo.de**
+(App `src/`, anon-Zugang über die `publicPaths`-Allowlist in `src/lib/supabase/middleware.ts`).
+Der Finder auf den Marketing-Seiten ist ein **iframe auf die App** — eine Kette, zwei Hosts.
+
+### 1.1 Marketing (claimondo.de) — Einstiege mit Schreib-Wirkung
+
+| # | Seite | Mechanik | Erzeugt | Kanal an den Kunden |
+|---|---|---|---|---|
+| **E1** | `/schaden-melden` | Mini-Wizard → `createLeadFromMiniWizard` | Lead (`mini_wizard`) + FlowLink | Magic-Link **per E-Mail** |
+| **E2** | `/schaden-melden` „Rückruf anfordern" | Modal → `erstelleOeffentlichenRueckruf` | Lead (`schaden-melden-rueckruf`) + `admin_termine` | telefonisch (bewusst) |
+| **E3** | `/schaden-melden/link-versendet` | `RueckrufBuchenCard` → `bucheRueckrufFuerLead` | Rückruf am **bestehenden** Lead | telefonisch |
+| **E4** | `/gutachter-finden` | **iframe** → `app/embed/gutachter-finder` | `gfa` + Lead (`self_service`) + FlowLink + Termin | mehrkanalig (WA→SMS→Mail) |
+| **E5** | `/werkstatt-finden` | **iframe** → `app/embed/werkstatt-finder` | Lead (`werkstatt_finder`) + FlowLink | **keiner** (nur Client-Redirect) |
+| **E6** | `/kfz-gutachter/[stadt]` | **iframe** → `embed/gutachter-finder` (≫300 Stadtseiten) | wie E4 | wie E4 |
+| **E7** | `/kfzgutachter-lp` | eigene `actions.ts` + iframe (Ads-Landing, noindex) | Lead | zu prüfen |
+| **E8** | `/check` | `CheckFunnelClient` → `check-lead-action` | Lead / `anspruch_schaetzungen` | zu prüfen |
+| **E9** | `/` Startseite | `home-lead-action` + `StickyCallBar` (Rückruf) | Lead / Rückruf | zu prüfen |
+| **E10** | `BeratungModal` (glass, mehrere Seiten) | `erstelleOeffentlichenRueckruf` | Rückruf-Lead | telefonisch |
+| **E11** | `/schaden-melden/selbstverschulden` | iframe | Lead | zu prüfen |
+| **E12** | `/beratung-anfragen` | statisch, Widget = E10 | — | — |
+
+Rein statisch (CTA-Router auf E1/E4, **kein** eigener Anlage-Pfad): `/ersteinschaetzung`,
+`/wie-es-funktioniert`, `/vorteile`, `/kosten-kfz-gutachten`, die Wissens-/Decoder-/Versicherer-
+Cluster. Nicht Kunden-gerichtet: `/gutachter-partner`, `/werkstatt/partner-werden`,
+`/makler/partner-werden`, `/flotte/partner-werden`, `/gewinnspiel`.
+
+### 1.2 App (app.claimondo.de) — anon erreichbar
+
+| # | Route | Rolle | Funktion |
+|---|---|---|---|
+| **A1** | `/embed/gutachter-finder` | Kunde | Karte + 3-Step-Wizard + Termin-Engine (Ziel von E4/E6) |
+| **A2** | `/embed/werkstatt-finder` | Kunde | Werkstatt-Suche (Ziel von E5) |
+| **A3** | `/g/[slug]` | Kunde | Claimondo-gehostete SV-Widget-Seite (SV ohne eigene Website) |
+| **A4** | **`/flow/[token]`** | Kunde | **der Konvergenzpunkt** — hier fällt die Service-Wahl, hier entsteht der Claim |
+| **A5** | `/start/[anfrageId]?exp=&sig=` | Kunde | HMAC-Einstieg → Lead + FlowLink → `/flow` |
+| **A6** | `/schaden-melden/fortsetzen/[token]` | Kunde | Brücke Marketing-Lead → `/flow` (Reuse, kein Doppel-Mint) |
+| **A7** | `/schaden/[token]` | **Gegner** | NFC-/QR-Schadenkarte — meldet der *Verursacher*, nicht der Geschädigte |
+| **A8** | `/upload/zb1/[token]`, `/upload/dokumente/[token]` | Kunde | Nachreichungen ohne Account |
+| **A9** | `/kunde/termin/[token]`, `/kunde/re-termin/[token]`, `/kunde-termin`, `/kunde-nps/[token]` | Kunde | Termin-Tracking / Umbuchung / Bewertung |
+
+**Struktur in einem Satz:** ~12 Marketing-Einstiege und 3 App-Einstiege erzeugen einen **Lead**;
+alle führen (oder sollten führen) auf **einen** FlowLink; `/flow/[token]` ist der einzige Ort, an
+dem aus dem Lead ein **Claim** wird.
+
+---
+
+## 2 · Operatives Soll — der Fluss ohne Bruch
+
+> Hergeleitet aus der Fachlogik, nicht aus dem Code. Maßstab für Phase 2; jede Abweichung
+> Code ↔ Soll ist ein **Befund**, keine Seed-Hürde.
+
+**Die Leitidee:** Ein Mensch, dem gerade jemand ins Auto gefahren ist, hat *einen* Bedarf und
+*wenig* Geduld. Er soll an **einer** Stelle anfangen, **nie** vor einem Login stehen, und ab dem
+ersten Absenden **von uns geführt** werden — nicht selbst suchen müssen, wie es weitergeht. Jeder
+Punkt, an dem er selbst aktiv werden müsste, ohne dass wir ihn dorthin geleiten, ist ein Abbruch,
+den wir uns selbst gebaut haben.
+
+### S1 · Der Einstieg (jeder Kanal, ohne Ausnahme)
+
+Der Besucher gibt ab, was er in diesem Moment weiß — nicht mehr. **Genau ein Absenden**, danach
+ist er drin. Egal ob er über die Stadtseite, den Finder, den Mini-Wizard, die Startseite oder den
+Rückruf kam, passiert **dasselbe**:
+
+1. Der Vorgang existiert (Lead), und zwar **sofort** — auch wenn erst drei Felder gefüllt sind.
+   Ein unvollständiger Vorgang ist besser als ein verlorener.
+2. Er bekommt **innerhalb von Sekunden eine WhatsApp** mit einem Link zurück in seinen Vorgang.
+   WhatsApp ist der Primärkanal, weil er dort ohnehin ist; E-Mail ist der Rückfall, SMS der
+   Rückfall dahinter. **Er muss sich nichts merken und nirgends anmelden.**
+3. Wir wissen von ihm — der neue Vorgang ist im Team sichtbar, egal über welchen Kanal er kam.
+4. Ein zweites Absenden desselben Schadens (Doppelklick, Netz-Retry, „ich probier's nochmal")
+   erzeugt **keinen zweiten Vorgang** und **keine zweite Nachricht**.
+5. Bricht die Zustellung über alle Kanäle, entsteht ein **sichtbarer** Auftrag „Melder nicht
+   erreichbar" — nie stille Ablage.
+
+### S2 · Die Führung (der Flow)
+
+Der Link öffnet den Vorgang genau dort, **wo er stehen geblieben ist** — nicht am Anfang. Was wir
+schon wissen, wird gezeigt, nicht erneut gefragt. Der Wizard fragt in der Reihenfolge, in der ein
+Mensch denkt: *Was ist passiert → wo steht das Auto → wann kann jemand schauen → wer macht das →
+womit sind Sie einverstanden.*
+
+Die **Service-Entscheidung** („Komplettservice" vs. „Nur Gutachten") ist die einzige echte
+Weggabelung. Sie gehört an die Stelle, an der der Kunde sie beurteilen kann — also **nachdem** er
+weiß, wer sein Gutachter ist und wann der Termin ist, und **bevor** er unterschreibt. Wählt er
+„Nur Gutachten", verschwindet alles Anwaltliche **sofort und sichtbar**: keine Vollmacht, keine
+Kanzlei-Frage, kein Mandat. Sein Fortschrittsbalken zeigt drei Stationen, nicht vier — sonst
+wartet er auf eine Phase, die für ihn nie kommt.
+
+Jeder Schritt endet mit **einem** naheliegenden Weiter. Es gibt **keinen Zustand ohne Ausweg**:
+kein Schritt, der auf sich selbst zurückverweist, kein Button, der nichts tut, keine Auswahl, die
+nicht gespeichert wird. Verlässt er den Flow, holt ihn eine Erinnerung zurück — an derselben
+Stelle.
+
+### S3 · Die Konversion (Unterschrift)
+
+Mit der Unterschrift wird aus der Anfrage **ein Fall**. In diesem Moment bekommt er **genau eine**
+Nachricht: was er beauftragt hat, wer kommt, wann, und was er dafür tun muss (nichts). Ab hier hat
+er einen Fall, den er jederzeit ansehen kann — **weiterhin ohne Pflicht-Account**; ein Zugang ist
+ein Angebot, keine Hürde.
+
+Intern ist ab jetzt jemand zuständig: Der Gutachter hat einen verbindlichen Auftrag, der Termin
+steht, und wenn kein passender Gutachter gefunden wurde, **weiß das Dispatch** — nicht der Kunde.
+
+### S4 · Die Durchführung
+
+Der Kunde erfährt **jeden** Zustandswechsel, der ihn betrifft, per WhatsApp — und **nur** die:
+Termin bestätigt, Gutachter unterwegs, Termin erledigt, Gutachten fertig. Was intern passiert
+(Qualitätsprüfung, Zuweisungen), erfährt er nicht. **Eine Nachricht pro Ereignis**, nie zwei für
+dasselbe.
+
+### S5 · Der Abschluss (nur Gutachten)
+
+Beim „Nur Gutachten"-Weg endet unsere Leistung mit dem Gutachten. Der Fall wird geschlossen,
+**wenn die Besichtigung stattgefunden hat** — bestätigt vom Gutachter, vom Kunden, oder per
+Antwort auf die WhatsApp. Der Kunde bekommt zum Abschluss: das **Gutachten in der Hand**, eine
+klare Aussage, dass wir fertig sind, und — weil er *selbst* mit der gegnerischen Versicherung
+reguliert — **den nächsten Schritt in seinen Worten**: was er wem schickt und worauf er achtet.
+
+Ein Fall, der ohne dieses letzte Wort geschlossen wird, ist technisch fertig und für den Kunden
+ein Abbruch. **Das ist die kritischste Stelle des ganzen Wegs** — und die, die im Komplettservice
+gar nicht existiert, weil dort die Kanzlei übernimmt.
+
+---
+
+## 3 · Wo dieses Soll heute gefährdet ist (Hypothesen für Phase 2)
+
+Aus Code- und DB-Erhebung, **noch nicht am laufenden System belegt** — genau das macht Phase 2.
+
+| # | Hypothese | Soll-Verstoß | Quelle |
+|---|---|---|---|
+| **H1** | **Werkstatt-Finder (E5) sendet dem Kunden nichts** — kein WA, keine Mail, nur ein Client-Redirect | S1 §2 | A4-Register B-2; J2 IST-Abweichung #5 |
+| **H2** | **Service-Wahl im Embed tot** — `regulierungs_modus` 50/50 NULL + Wertedivergenz `vollstaendig`↔`komplett` | §0 | prod-Zählung + `gutachter-finder-actions.ts:104/390` |
+| **H3** | **Mini-Wizard (E1) schickt nur E-Mail**, nicht WhatsApp — obwohl WA der Primärkanal ist | S1 §2 | `mini_wizard_magic_link`; WA-Outbound ist seit 31.07. wieder gesund (272 zugestellt/30 T) |
+| **H4** | **SMS-Rückfall weiterhin kaputt** — 2 `fehlgeschlagen` in 30 Tagen, 0 erfolgreich | S1 §2 | prod `nachrichten` |
+| **H5** | **Rückruf-Wege (E2/E3/E9/E10) enden ohne Selbstbedienungs-Weg** — kein FlowLink, der Kunde wartet auf einen Anruf | S1 §2 | A4 B-4; Intake-Funnel-Baseline |
+| **H6** | **Doppel-Absenden im Gutachter-Finder erzeugt zwei Vorgänge** — `createCase`-Dedup verlangt Person **+ Kennzeichen**, der Finder erhebt keins | S1 §4 | J2 IST #4 |
+| **H7** | **Mehrfach-WhatsApp im Konversionsmoment** — bis zu 6 Sends ohne gemeinsamen Dedup | S3, S4 | J1 IST #1 (C3b teilweise gelöst) |
+| **H8** | **Der Abschluss sagt dem „nur Gutachten"-Kunden nicht, wie es weitergeht** | **S5** | keine Notification-Zeile für `termin_durchgefuehrt` gefunden |
+| **H9** | **Stadtseiten (E6) = derselbe iframe** — 300+ Einstiege teilen eine Kette; ein Fehler dort trifft alle | Risiko | 5 iframe-Fundstellen |
+| **H10** | Flow-Schleife `termin ↔ gutachter` (#4952) und **Slot-Klick bucht nicht** (B11) — beide im August offen gemeldet | S2 | Entry-Point-Marker 03.08. |
+
+---
+
+## 4 · Testplan Phase 2
+
+**Warum nicht 12 × die volle Kette:** Die Einstiege unterscheiden sich **nur bis zum FlowLink**;
+ab `/flow/[token]` ist der Weg identisch (§0). Zwölf Volldurchstiche würden elfmal dasselbe
+beweisen und dabei elf Test-Fälle auf prod erzeugen. Deshalb zwei Stufen:
+
+**Stufe A — Einstiegs-Vergleich (jeder Kanal, bis zum FlowLink).**
+Je Einstieg per Playwright anonym absenden und **vier Dinge** messen:
+Vorgang da? · FlowLink da? · Nachricht raus (welcher Kanal)? · Zweites Absenden = ein Vorgang?
+Das prüft H1–H6, H9 an der Realität.
+
+**Stufe B — Ein Volldurchstich „nur Gutachter", Rolle für Rolle.**
+Anonym über den stärksten Kanal (E4/E6, Gutachter-Finder) → WhatsApp abfangen → `/flow` →
+Feststellung → Ort → Termin → Gutachter → **Service-Wahl „Nur Gutachten"** → SA unterschreiben →
+Claim. Dann **Dispatch** (sieht der den Fall? Aufgabe?), dann **SV** (Auftrag da? Termin
+bestätigen? „durchgeführt" setzen?) → **Terminal `termin_durchgefuehrt`** → zurück in die
+Kunden-Sicht: sieht er den Abschluss, hat er das Gutachten, weiß er, was jetzt kommt (H8)?
+
+**Sicherheit (Regel 4):** Test-Identität mit `telefon = NULL` → keine echten Comms an Fremde.
+Marker-Präfix in allen Testwerten. Cleanup-Kaskade nach jedem Lauf (**Claims zuerst einsammeln** —
+`claims.lead_id` ist `SET NULL`, wer den Lead zuerst löscht, lässt den Claim verwaist zurück).
+Keine Versicherer-Meldung, kein Payment-Schritt (`nur_gutachter` hat keinen).
+
+**Bekannte Messfallen, die hier greifen** (aus AGENTS.md Regel 4 + Memory):
+iframe-Frame gezielt adressieren · `networkidle` abwarten statt einmal messen · `CI=1` setzen ·
+Klick erst nach Hydration (sonst verpufft er folgenlos) · Werte aus der laufenden Oberfläche
+lesen statt konstruieren · Erfolg am **DB-Zustand** messen, nicht an der Anzeige.
+
+---
+
+## 5 · Ergebnisse Phase 2
+
+Gefahren gegen **prod** (`claimondo.de` + `app.claimondo.de`), 28.08.2026 ab 08:00 UTC.
+Identität intern (`epsweep-*@claimondo.de`) → Test-SV-Guard + Send-Isolation greifen wie vorgesehen;
+Telefon `+491633628571` (Aaron-Freigabe) für den Zustellnachweis.
+
+### 5.1 E1 · Mini-Wizard `/schaden-melden` → Claim `CLM-2026-05610` — **durchgelaufen**
+
+Kette belegt: Formular → Lead `cf009480` (`source_channel='mini_wizard'`, `status='flow-gesendet'`)
+→ FlowLink → 18 Flow-Schritte → SA unterschrieben → **Claim mit `service_typ='nur_gutachter'`,
+`kanzlei_wunsch='nicht_gefragt'`, `abrechnungsweg='haftpflicht'`**.
+
+**Was funktioniert:**
+
+| Soll | Beleg |
+|---|---|
+| Vorgang entsteht sofort | Lead 08:07:44, `dsgvo_zustimmung_am` gesetzt |
+| FlowLink erzeugt + zugestellt | Token `a850d973…`, WhatsApp 08:07:48 **zugestellt** |
+| Team erfährt vom Lead | Team-WA an **beide** Nummern (0163 + 0176) 08:07:47 |
+| Service-Wahl „Nur Gutachten" greift | `data-value="nur_gutachter"` aktiv → Claim `nur_gutachter` |
+| Anwalt-Frage entfällt korrekt | `kanzlei_wunsch='nicht_gefragt'` |
+| Regulierungs-Phase ausgeblendet | Dispatch-Akte zeigt **3** Phasen: Erfassung → Begutachtung → Abschluss |
+| Kunde bekommt Zugang | Zugangsdaten-WhatsApp 08:20:46 |
+| Termin-Schleife (#4952) | **behoben** — „Termin später vereinbaren" führt sauber weiter, kein Loop |
+
+### 5.2 🔴🔴 BEFUND 1 — Die gewählte Adresse wird durch eine **falsche Stadt** ersetzt
+
+**Der schwerwiegendste Fund.** Eingabe „Domkloster 4, 50667 Köln", Vorschlag angeklickt
+(„Domkloster 4, 50667 Köln, Deutschland"). Gespeichert wird:
+
+```
+unfallort                 = "Altstadt, Düsseldorf, North Rhine-Westphalia, Germany"
+unfallort_lat/lng         = 51.225113 / 6.772396      ← Düsseldorf, ~40 km entfernt
+unfallort_plz             = null                      ← die 50667 geht verloren
+fahrzeug_standort_adresse = dieselbe falsche Adresse
+besichtigungsort_adresse  = dieselbe falsche Adresse
+```
+
+**Die Kette, Glied für Glied:**
+
+1. `lib/mapbox/adress-vorschlaege.ts:50` — `ausKontext()` akzeptiert `locality` gleichrangig mit
+   `place`: `if (!stadt && (id.startsWith('place') || id.startsWith('locality'))) stadt = c.text`.
+   Mapbox liefert für eine Kölner Innenstadtadresse `locality = "Altstadt"` (der **Stadtteil**)
+   und `place = "Köln"` (die **Stadt**). Wer zuerst im Array steht, gewinnt → `stadt = "Altstadt"`.
+2. `MiniWizardClient.tsx:184` — `onSelect={(r) => setValue('unfallort', r.stadt || r.plz || r.adresse)}`.
+   In ein Feld, das die **Adresse** trägt, wird `r.stadt` geschrieben. Hausnummer, Straße und PLZ
+   sind damit weg, bevor irgendetwas gespeichert wird.
+3. Der Server geocodiert den Reststring „Altstadt" neu — ohne Stadt-Kontext ist er mehrdeutig und
+   trifft **Düsseldorf-Altstadt**.
+
+**Warum das teuer ist:** `fahrzeug_standort_lat/lng` ist der **erste** Anker, den `findBestSV`
+liest. Der Fall wurde folgerichtig einem Gutachter in **Düsseldorf** zugewiesen, und die
+Werkstattliste bot ausschließlich Betriebe in **Ratingen/Langenfeld** an („9,6 km vom
+Fahrzeugstandort") — die einzige Kölner Werkstatt stand mit 25,4 km ganz unten. Der Kunde sieht
+eine plausible Liste; sie ist nur für die falsche Stadt.
+
+⚠ **Reichweite:** dasselbe `r.stadt || r.plz || r.adresse` steht in **6 Lead-Formularen** —
+`MiniWizardClient` (E1), `CheckFunnelClient` (E8), `HomeLeadFormClient` (E9),
+`kfzgutachter-lp/LeadFormClient` (E7, 2×), **`StadtLeadFormClient` (E6 — alle Stadtseiten)** und
+`autounfall-io/LeadFormClient`. Fehler 1 (`ausKontext`) trifft zusätzlich **jede** Adresseingabe
+der App, auch die Registrierungen — dort allerdings in ein Feld, das „Ort" heißen darf, weshalb
+nur der falsche Stadtteil ankommt, nicht die falsche Stadt.
+
+### 5.3 🔴 BEFUND 2 — Ein interner Test-Lead wird einem **echten** Gutachter zugewiesen
+
+Der Test-SV-Guard blockt die **Buchung** (`entscheideTestSvGuard`: intern → echt = BLOCK, live
+gesehen: „Diese Buchung konnte leider nicht abgeschlossen werden"). Die **Zuweisung am Claim**
+läuft daran vorbei: `claims.sv_id = 9364985e…` = „Sachverständigenbüro KFZcheck", Düsseldorf,
+`ist_testaccount = false`. In der Dispatch-Akte steht der echte Gutachter samt Name, Telefon und
+E-Mail als Ansprechpartner.
+
+✅ **Kein Schaden entstanden:** keine Nachricht an den SV (`nachrichten` im Zeitfenster enthält
+nur Team- und Kunden-Sends), kein `auftraege`-Eintrag. Der Guard schützt also den lauten Teil —
+die stille Zuweisung deckt er nicht ab.
+
+### 5.4 🔄 KORRIGIERT — „Auswählen" funktioniert; der Step erscheint nur zu früh
+
+**Erste Fassung war falsch.** Sie lautete „Auswählen schreibt nichts" — die Ursache lag in meinem
+Testlauf, nicht im Produkt.
+
+`waehleWerkstattFlow` gatet über `brauchtWerkstattVermittlung(lead)`, und das verlangt
+`reparaturwunsch ∈ {'reparatur','fiktiv'}`. Mein Walker hatte den Schritt **„Reparatur oder
+Auszahlung?" übersprungen** (auf „Weiter" geklickt statt eine Option zu wählen) → `reparaturwunsch`
+blieb `null` → jede Auswahl wurde serverseitig abgelehnt.
+
+**Gegenprobe mit gesetztem Intent** („Reparatur (in der Werkstatt)" geklickt), Lead `820864d4`:
+
+```
+reparaturwunsch                    = 'reparatur'
+reparatur_werkstatt_id             = 24c44c6a-…      ← gesetzt
+reparatur_werkstatt_quelle         = 'kunde'
+reparatur_vermittlung_status       = 'vermittelt'
+```
+
+Und die UI führt korrekt weiter zum Folgeschritt „Wunschtermin vorschlagen". **Die Werkstattwahl
+funktioniert vollständig.**
+
+**Was als kleinerer Befund bleibt:** Der Werkstatt-Step wird **auch ohne Reparatur-Intent
+angezeigt**. Seine DB-Bedingung (`flow_szenario_steps.bedingung`) prüft nur
+`{gutachten_vermittelt: null, reparatur_werkstatt_id: null}` — nicht `reparaturwunsch`. Wer bei
+„Reparatur oder Auszahlung?" auf „Vorerst überspringen" klickt, bekommt später fünf Werkstätten
+angeboten, und jede Auswahl endet in „Für diesen Vorgang ist keine Werkstatt-Auswahl möglich."
+Kein Datenverlust (die Meldung wird angezeigt, „Überspringen" führt weiter), aber ein
+Vertrauensbruch mitten im Fluss.
+
+⚠ **Bewusst NICHT gefixt.** Der naheliegende Fix wäre, die Step-Bedingung um
+`reparaturwunsch: ['reparatur','fiktiv']` zu erweitern. Das greift aber in **drei** Szenarien
+(haftpflicht/kasko/selbstzahler); bei Kasko und Selbstzahler ist die Reparatur der Normalfall,
+und wenn `reparaturwunsch` dort nicht gesetzt wird, würde der Fix den Step **ausblenden** und den
+Weg verschlechtern statt verbessern. Das ist ein Produktentscheid mit Messbedarf, kein
+Ein-Zeilen-Fix.
+
+⭐ **Lehre:** Ich habe eine Absage der Server-Action als „schreibt nichts" gelesen, ohne die
+Vorbedingung zu prüfen, die sie verlangt. Die Gegenprobe war ein einziger zusätzlicher Klick.
+
+### 5.5 🟡 BEFUND 4 — Kein Kundenbetreuer vorgesehen, trotzdem einer gebunden
+
+`claims.kundenbetreuer_id = aa000001-…` (Anna Weber), sichtbar in der Dispatch-Akte unter
+„Ansprechpartner". Journey J1 §Varianten sagt für `nur_gutachter` ausdrücklich: **„kein KB, keine
+Kanzlei"**. Die Kanzlei-Seite stimmt (`kanzlei_wunsch='nicht_gefragt'`), die KB-Seite nicht.
+Dazu passend bietet die Akte „**Kanzlei-Paket einlesen**" an — eine Aktion, die es für diesen
+Service-Typ nicht geben sollte.
+
+### 5.6 🟡 BEFUND 5 — Die Unfallskizze entsteht nicht
+
+`leads.unfallhergang` trägt 183 Zeichen (weit über der 20-Zeichen-Schwelle), aber
+`unfallskizze_svg = null` und `unfallskizze_generiert_am = null`, gemessen mehrere Minuten nach
+dem Speichern. Nach J2 §1 soll sie ohne Zutun entstehen — sowohl über `createLead` als auch über
+den Flow-Feststellungs-Schritt.
+⚠ Vor einer Meldung „Regression" zu prüfen: der Generator ruft ein Sprachmodell auf, und das
+prod-Anthropic-Guthaben war zuletzt zweimal leer. Ein leeres Feld sieht in beiden Fällen gleich aus.
+
+### 5.7 🟡 BEFUND 6 — Telefon ist Pflicht, obwohl „WhatsApp **oder** E-Mail" versprochen wird
+
+Die Kopfzeile sagt: „Drei kurze Fragen, dann kommt Ihr sicherer Link per WhatsApp **oder**
+E-Mail." Ein leeres Telefonfeld blockiert den Submit mit „**Ungültiges Telefon-Format**" — der
+Text eines Formatfehlers, nicht einer fehlenden Pflichtangabe. Wer keine Handynummer geben will,
+kommt nicht durch und erfährt nicht, warum.
+
+### 5.8 🟡 BEFUND 7 — Der Wizard verspricht „drei kurze Fragen" und stellt 18 Schritte
+
+Gezählt am gelaufenen Weg: Kontakt → Unfalltyp → Hergang → Verletzte → Reparatur/Auszahlung →
+Wann&Wo → Polizei&Zeugen → Gegnerdaten → Fahrzeugschein → Fahrzeug → Halter → Vorschäden →
+Termin → Gutachter → Fahrzeugstandort → Werkstatt → Beauftragung → Abschluss. Jeder Schritt
+trägt „Vorerst überspringen", die Abbruchmöglichkeit ist also eingebaut — die Erwartung, die die
+Startseite setzt, ist trotzdem eine andere.
+
+### 5.9 Was der Kunde tatsächlich per WhatsApp bekam (Zustellnachweis, echtes Gerät)
+
+| Zeit | Inhalt | Bewertung |
+|---|---|---|
+| 08:07:47 | 🔔 Neuer Lead (Team-Alert, an **beide** Team-Nummern) | intern, korrekt |
+| 08:07:48 | „Hi Epsweep, … Hier dein sicherer Login-Link (gültig 72 Stunden)" | ✅ Soll S1 erfüllt |
+| 08:20:46 | „🔐 Ihre Claimondo-Zugangsdaten … Passwort: …" | ✅ Zugang |
+
+⚠ **Was fehlt (Soll S3):** eine **Auftragsbestätigung**. Nach der Unterschrift bekommt der Kunde
+Zugangsdaten — aber keine Nachricht, die sagt *was* er beauftragt hat („Nur Gutachten"), *wer*
+kommt und *wann*. Der inhaltlich wichtigste Moment des ganzen Wegs ist kommunikativ leer.
+
+⚠ **Nebenbefund zur Send-Isolation:** Die Kunden-WhatsApp ging an eine Nummer, die über
+`istInternesTelefon()` als **intern** gilt (4 `profiles`- und 18 `leads`-Zeilen mit
+`@claimondo.de` tragen sie). Die Unterdrückung greift dort also nicht — konsistent mit dem
+bekannten Befund, dass der Low-Level-Sendeweg ungegatet ist. Für diesen Test war das nützlich;
+als Schutzmechanismus ist es eine Lücke.
+
+### 5.11 E4 · Gutachter-Finder — Lead ✅, Ort ✅, **Termin existiert nicht**
+
+Gefahren über `claimondo.de/gutachter-finden` (iframe auf `app.claimondo.de/embed/gutachter-finder`),
+4 Schritte: Ort → Gutachter+Slot → Schadenart → Kontakt → „Termin reservieren".
+
+**Der Ort ist hier korrekt** — und damit der direkte Gegenbeweis zu Befund 1:
+
+| Einstieg | dieselbe Eingabe „Domkloster 4, 50667 Köln" wird gespeichert als | Koordinaten |
+|---|---|---|
+| **E4 Finder** | `Domkloster 4, 50667 Köln, Deutschland` | 50.941306 → **Köln** ✅ |
+| **E1 Mini-Wizard** | `Altstadt, Düsseldorf, North Rhine-Westphalia, Germany` | 51.225113 → **Düsseldorf** ❌ |
+
+Der Finder liest `r.adresse` + `lat/lng` aus demselben Vorschlag; der Mini-Wizard liest `r.stadt`.
+Ein und dieselbe Komponente, zwei Auswertungen — nur eine davon stimmt.
+
+### 🔄 KORREKTUR zu Befund 8 — **kein Befund. Das System hat korrekt gehandelt.**
+
+Die erste Fassung lautete: „der bestätigte Termin existiert nicht — der Kunde wartet am
+Termintag vergeblich." **Falsch gelesen, in zweierlei Hinsicht:**
+
+1. **Der Text war keine Zusage.** „Ihr Termin bei Gaith · Freitag, 28.08., 11:40 Uhr" steht im
+   Kontaktformular als **Auswahl-Zusammenfassung**, direkt daneben „Termin ändern". Es ist die
+   Anzeige dessen, was man gerade gewählt hat — nicht die Bestätigung einer Buchung.
+2. **Nach dem Absenden erschien eine saubere Fehlermeldung** (Screenshot `e4-nach-reservieren.png`):
+
+   > „Diese Buchung konnte leider nicht abgeschlossen werden. Bitte melden Sie sich kurz bei uns —
+   > wir vereinbaren Ihren Termin persönlich."  ·  **Anderen Termin wählen**
+
+**Die Ursache war meine Test-Identität.** `@claimondo.de` = intern; der Test-SV-Guard verbietet
+intern → echter SV. `reserviereEmbedTermin` behandelt genau das korrekt und dokumentiert es sogar
+im Code (Ops-Test RC-1): ohne Wunschtermin führt eine gescheiterte Buchung zum **harten Abbruch**
+mit `slotWeg: true`, und `sendeEmbedTerminBestaetigung` bekommt ein `bestaetigt`-Flag, damit „nie
+eine Zusage ohne Termin" rausgeht. Der Lead entsteht trotzdem (Schritt 1 läuft vor der Buchung) —
+deshalb sah ich Lead + gfa ohne Termin und hielt das für eine Lücke.
+
+⭐ **Lehre:** Ein Zwischenstand („Lead da, Termin nicht") sieht identisch aus, egal ob das System
+versagt hat oder ein Schutzmechanismus korrekt gegriffen hat. Der Unterschied stand im
+Screenshot, den ich erst zwei Stunden später geöffnet habe.
+
+**🔴 Befund 2 wiederholt sich hier:** `zugeordneter_sv_id = b2754f9c…` = **„UnfallSafe – Kfz-Gutachten
+Köln"**, `ist_testaccount = false`. Das ist genau der Betrieb, der laut Incident-Historie vom
+03.07.2026 schon einmal laufend Test-Termine bekam — der Anlass, aus dem der Test-SV-Guard gebaut
+wurde. Der Guard greift am Buchungs-Chokepoint; die **Zuordnung** in `gutachter_finder_anfragen`
+und in `claims.sv_id` läuft weiterhin daran vorbei.
+
+⚠ Nebenbeobachtung: Die Oberfläche nennt den Gutachter „**Gaith**", gespeichert wird „UnfallSafe".
+Vermutlich Person vs. Firma — vor einer Meldung zu klären, nicht als Divergenz zu werten.
+
+### 5.12 E6 · Stadtseite `/kfz-gutachter/koeln` — Anfrage kommt an, **wird aber kein Lead**
+
+Die Stadtseite (Vorlage für **300+ Seiten**) trägt im Hero ein Rückruf-Formular:
+Name · Telefon · „Köln oder PLZ" · „Jetzt kostenlosen Rückruf erhalten →".
+
+**Zwei getrennte Befunde — die Trennung war nötig, sonst hätte einer den anderen verdeckt:**
+
+**🔴 BEFUND 9 — der Absende-Button ist nicht klickbar, wenn er unter dem Sticky-Header steht.**
+`document.elementFromPoint()` auf der Button-Mitte liefert:
+
+```
+<a href="/gutachter-finden?stadt=Köln&lat=50.9413&lng=6.9583">Gutachter finden</a>
+   aus <header class="sticky top-0 z-40 …">
+```
+
+Playwright verweigert den Klick mit „subtree intercepts pointer events" und nennt **drei**
+abfangende Ebenen: den Sticky-Header, eine fixierte Bottom-Leiste (`fixed bottom-4 z-40`, trägt
+selbst einen „Rückruf"-Button) und die offene Adress-Vorschlagsliste.
+⚠ **Ehrliche Einordnung:** gemessen bei 1440×1100, nachdem der Button an den Viewport-Rand
+gescrollt wurde. Ein Nutzer, der das Formular mittig im Bild hat, trifft ihn. Der Klick geht
+verloren, wenn der Button oben oder unten am Rand liegt — auf kleinen Fenstern also regelmäßig.
+Das ist dieselbe Klasse, die das **Fixed-Overlay-Safe-Area-Gate** (AGENTS.md) abdeckt; der
+Header ist dort nicht erfasst.
+
+**🔴 BEFUND 10 — HTTP 200, und trotzdem kein Lead.** Per JS-Klick (Overlay umgangen) ausgelöst:
+
+```
+POST https://app.claimondo.de/api/anfrage-from-lp  →  200
+```
+
+Entstanden ist eine Zeile in `gutachter_finder_anfragen`:
+
+```
+source                 = 'kfz_gutachter_lp'      stadt_slug = 'koeln'
+status                 = 'neu'                   konvertiert_zu_lead_id = null
+schadenort             = null   ← das eingegebene "Köln" kommt nicht an
+email                  = ''     ← das Formular erhebt keine E-Mail
+```
+
+### 🔄 KORREKTUR zu Befund 10 (nachgeprüft, 28.08.) — **kein Lead ist entgangen**
+
+Die erste Fassung dieses Befunds lautete „der Rückrufwunsch liegt in einer Tabelle, die in der
+Lead-Liste nicht auftaucht". **Das war zu hart und in der Schlussfolgerung falsch.** Drei
+Nachprüfungen:
+
+1. **Es gibt eine eigene Dispatch-Ansicht** — `/dispatch/gutachter-finder` lädt
+   `gutachter_finder_anfragen` und filtert nur `status='embed_free'` heraus. Cluster-LP-Anfragen
+   tragen `status='neu'` → sie werden gezeigt.
+2. **Per UI verifiziert** (nicht aus dem Code gelesen): Als `test-dispatch@` eingeloggt steht die
+   Anfrage vom 29.07. dort — mit Namen, Datum „29.07." und der Markierung „Cluster".
+3. **Kein Lead ist by design, nicht kaputt:** `api/anfrage-from-lp/route.ts:236` erzeugt den Lead
+   nur, wenn `SELF_SERVICE_AUTO_ISSUE === 'true'` — ein ENV-Flag mit **Default AUS**. Daneben
+   läuft `notifyAnfrage()` (Zeile 228) unabhängig davon.
+
+**Das Ausmaß, gemessen:** Genau **eine** Anfrage ohne Lead existiert auf prod — und sie stammt
+von **Aaron Sprafke selbst** (`+4915562740016`, `page_url = kfz-unfallgutachter-koeln.de`,
+29.07.2026, `anliegen='schadensberatung'`). **Kein Kundenkontakt ist verloren gegangen.**
+
+Gegenprobe über alle Nicht-Test-Leads (ohne `@claimondo.de`/`.test`, ohne `smoke*`): 20 Leads
+insgesamt, davon **5 offen** — und alle fünf sind Test- oder Partner-Vorgänge:
+2× Aaron selbst, 1× `mailinator.com`-Wegwerfadresse, 1× „Markus Mayer (Test)",
+1× `info@sv-klug.com` (ein Sachverständigenbüro über `/gutachter/willkommen`, also ein
+Partner-Lead, kein Geschädigter). **Null unbearbeitete echte Kundenanfragen.**
+
+**Was von Befund 10 bleibt** (unverändert gültig, aber kleiner als zuerst formuliert):
+
+* 🟡 **`schadenort = null`** — der im Formular eingegebene Ort erreicht die Anfrage nicht. Der
+  Dispatcher sieht den Namen und die Nummer, aber nicht, wo der Schaden ist.
+* 🟡 **`email = ''`** — das Formular erhebt keine E-Mail; der einzige Rückweg ist das Telefon.
+* 🔴 **Befund 9 (Button unter Overlays) bleibt bestehen** — das ist die Stelle, an der ein Kunde
+  wirklich verloren gehen kann, denn dort entsteht die Anfrage gar nicht erst.
+
+⚠ **Lehre für mich:** `HTTP 200 beweist nicht, dass der Wert ankam` — richtig. Aber „kein Lead in
+`leads`" beweist auch nicht, dass niemand es sieht. Ich habe von einer fehlenden Zeile auf einen
+blinden Prozess geschlossen, ohne die zweite Ansicht zu prüfen. Die Prüfung war ein Login und ein
+Blick auf die Liste.
+
+⚠ **Eine zweite Zahl, die ich bewusst NICHT als Befund melde:** In `leads` haben 35 von 42
+`self_service`-Leads keine einzige Zeile in `nachrichten`. Das sieht nach „niemand wurde
+informiert" aus und ist es nicht — `notifyTeamWhatsApp` schreibt **grundsätzlich nichts** in
+`nachrichten` (dokumentiert in `AUDIT-team-benachrichtigung-9-von-13-lead-quellen-stumm`). Die
+Tabelle ist für Team-Sends blind; messbar sind sie nur im Baileys-Log auf dem VPS.
+
+### 5.13 Was NICHT abgeschlossen wurde — und warum
+
+Der Auftrag lautete: alle Einstiege **komplett bis zum Claim-Abschluss**. Erreicht wurde:
+
+| Einstieg | bis Lead | bis FlowLink | bis Claim | bis Abschluss |
+|---|---|---|---|---|
+| **E1** Mini-Wizard | ✅ | ✅ | ✅ `CLM-2026-05610` | ❌ (§5.16) |
+| **E4** Gutachter-Finder | ✅ | ✅ | ✅ `CLM-2026-05682` | ❌ (§5.16) |
+| **E9** Startseite | ✅ + KB-Termin | — (telefonisch) | n/a Rückruf-Zweig | n/a |
+| **E7** Ads-Landing | ✅ + KB-Termin | — (telefonisch) | n/a Rückruf-Zweig | n/a |
+| **E6** Stadtseite | ❌ nur `gfa` | ❌ | ❌ | ❌ |
+| **E5** Werkstatt-Finder | offen (Script-Lücke, §5.18) | | | |
+| **E8** `/check` | offen (kein `<form>` gefunden) | | | |
+| **E2/E3/E10** Rückruf-Modals | offen | | | |
+
+**Der Abschluss ist strukturell blockiert**, nicht aus Zeitmangel (§5.10): `nur_gutachter` wird
+über `closeNurGutachterTerminAlsDurchgefuehrt(terminId, …)` terminal — und in **keinem** der
+gefahrenen Wege kam ein Termin zustande (E1: Guard-Block; E4: Termin wird gar nicht geschrieben).
+Ein zweiter Anlauf über die Dispatch-Rolle (SV umweisen auf den Test-SV, dann Termin anlegen)
+ist der nächste Schritt; die Dispatch-Akte ist erreichbar und vollständig (§5.14).
+
+Die offenen Einstiege scheiterten an **Selektoren, nicht am Produkt** — die Marketing-Formulare
+tragen weder `name` noch `id` an den Feldern, und meine generische Heuristik traf einmal den
+Sprachwähler. Für jeden von ihnen braucht es ein gezieltes Script wie bei E6.
+
+### 5.14 Rolle Dispatch — Akte vollständig, zwei Auffälligkeiten
+
+Login `test-dispatch@claimondo.de` (das einzige Konto mit `Test1234!`), Route `/faelle/<claimId>`:
+die Akte rendert komplett (Kundendaten, Fahrzeug & Halter, Unfall, SV-Briefing, Dokumente,
+Kommunikation, Prozess, Verlauf, Timeline).
+
+* ✅ **Phasenleiste korrekt:** `01 Erfassung ✓ → 02 Begutachtung (Termin) → 03 Abschluss` — die
+  Regulierung ist für `nur_gutachter` ausgeblendet, genau wie `getVisibleMainPhases` es vorsieht.
+* 🟡 „**Kanzlei-Paket einlesen**" wird angeboten, obwohl der Fall `kanzlei_wunsch='nicht_gefragt'` trägt.
+* 🟡 **Ansprechpartner** zeigt Kundenbetreuerin *und* den echten Gutachter mit Telefon und E-Mail
+  (→ Befund 4 und Befund 2).
+
+### 5.15 Cleanup — 0 Residue, mit einer Lehre
+
+Alle Testdaten entfernt: `epsweep`-Leads **0**, `epsweep`-Anfragen **0**, `CLM-2026-05610` gelöscht.
+
+⚠ **Der erste Cleanup-Lauf ist genau in die dokumentierte Falle gelaufen** und hat den Claim
+verwaist zurückgelassen: `claims.lead_id` ist `SET NULL`, der Lead-Delete lief durch, der Claim
+blieb. Erst der zweite Lauf hat ihn eingesammelt. Drei Spaltenannahmen waren zudem falsch —
+`gutachter_finder_anfragen` verweist über **`konvertiert_zu_lead_id`** (nicht `lead_id`),
+`faelle_claim_bridge` hat **keinen `id`-PK**, und `fall_dokumente.claim_id` ist **NOT NULL**
+(muss vor dem Claim weg).
+
+⭐ **Nebenbefund:** Beim Nachzählen standen **vier verwaiste Claims aus fremden Smokes**
+(`CLM-2026-05642`, `…43`, `…44`, `…46`) im selben Zeitfenster — dieselbe Falle, nur unbemerkt.
+Sie wurden **nicht** angefasst.
+
+### 5.17 E9 · Startseite und E7 · Ads-Landing — **beide vollständig grün**
+
+Dieselbe Formular-Familie wie die Stadtseite („Schaden melden in 30 Sekunden · Drei Felder.
+Ohne Anmeldung." — Name · Telefon · Ort). Sauber gefahren (Felder wirklich gefüllt, Ortsvorschlag
+gewählt, echter Klick):
+
+| | E9 Startseite | E7 Ads-Landing |
+|---|---|---|
+| Button per **echtem** Klick erreichbar | ✅ ja | ✅ ja |
+| **Lead** entsteht | ✅ `claimondo-home-hero` | ✅ `kfzgutachter-ads-lp` |
+| **Team-WhatsApp** | ✅ zugestellt, **mit Ort** („📍 Köln") | ✅ zugestellt, mit Ort + Referer + IP |
+| **Rückruftermin** beim KB | ✅ `kb_beratung`, Mo. 31.08. 08:30, KB zugewiesen | ✅ dito |
+| FlowLink | — (telefonischer Zweig, by design) | — |
+| Ort **am Lead** gespeichert | ❌ `unfallort`/`_plz`/`_lat` alle `null` | ❌ dito |
+
+**Damit wird der Stadtseiten-Befund schärfer, nicht schwächer:** Drei praktisch identische
+Formulare — zwei erzeugen Lead + Team-Alert + Rückruftermin, **eines (die Stadtseite) erzeugt
+nur eine `gutachter_finder_anfragen`-Zeile ohne Lead, ohne Termin.** Und nur dort war der Button
+von Overlays blockiert. Die Stadtseite ist der Ausreißer der Familie — und sie ist die Vorlage
+für **300+ Seiten**.
+
+🔄 **KORRIGIERT — der Ort geht NICHT verloren.** Erste Fassung: „steht in der WhatsApp, aber nicht
+am Lead". Ich hatte auf `unfallort` geprüft. Die RPC `convert_anfrage_zu_lead` schreibt ihn nach
+**`leads.kunde_plz`** — und das ist semantisch richtig: Das Feld heißt „Köln oder PLZ" und fragt
+den *Wohn-/Kontaktort*, nicht den Unfallort. Nachgemessen an einem frischen Lead:
+
+```
+anfragen.kontakt_plz_oder_stadt = "Köln"   →   leads.kunde_plz = "Köln"   ✅
+```
+
+🟡 Was als Kleinigkeit bleibt: Ein Ortsname steht in einer Spalte namens `kunde_plz`
+(`kunde_stadt` bleibt leer). Wer nach PLZ filtert oder sortiert, bekommt „Köln". Vertretbar,
+solange das Feld beides zulässt — aber eine Falle für spätere Auswertungen.
+
+⚠ **Zwei eigene Messfehler auf dem Weg dorthin, beide korrigiert:**
+1. Mein Erfolgs-Regex enthielt `erhalten` — und das Wort steht im **Button** („Jetzt kostenlosen
+   Rückruf **erhalten**"). Der erste Lauf meldete „Bestätigung sichtbar", obwohl nichts passiert
+   war. Erfolg wird jetzt am POST + DB-Zustand gemessen, nicht am Seitentext.
+2. Ich suchte in der DB über die **E-Mail** — diese Formulare erheben gar keine. Der erste Lauf
+   meldete deshalb „0 Leads" für zwei Einstiege, die einwandfrei funktionieren. Suche jetzt über
+   den Namen.
+
+### 5.18 E5 · Werkstatt-Finder und E8 · `/check` — nicht abgeschlossen
+
+* **E5:** kommt bis „Was ist beschädigt?" — dort ist „Weiter" deaktiviert, bis eine Schadens-
+  **Kategorie** (Karosserie/Lackierung/Mechanik/Glas/Smart Repair) gewählt ist. Mein Walker klickte
+  „Fotos auswählen" (öffnet einen Datei-Dialog) und lief in die Schleife. **Script-Lücke, kein
+  Produktbefund** — gefixt, aber nicht mehr nachgefahren.
+* **E8 `/check`:** meine Formular-Erkennung (`<form>` mit den meisten Feldern) findet dort
+  **kein Formular** — der Funnel ist vermutlich ohne `<form>`-Element gebaut. Ungeklärt, ob
+  Produkt oder Messung.
+
+### 5.16 🔴 Der Abschluss-Weg ist über die Oberfläche **nicht erreichbar** — reproduziert + gemessen
+
+Zweiter Volldurchstich über den **Finder** (sauberer Ort): Lead `23cdc2cc` → Flow (21 Schritte,
+inkl. nachgefragter Schuldfrage) → **Claim `CLM-2026-05682`**, `service_typ='nur_gutachter'`,
+`abrechnungsweg='haftpflicht'`, `operative_status='sv-zugewiesen'`, **0 Termine**.
+
+Der Abschluss läuft über `closeNurGutachterTerminAlsDurchgefuehrt(terminId, claimId)` — alle drei
+Aufrufer (SV-Action, Kunde-Action, WhatsApp-Inbound) brauchen eine **`terminId`**. Ohne Termin
+gibt es keinen Endzustand. Also: kann Dispatch einen Termin nachtragen?
+
+**Die Dispatch-Fallakte durchsucht, Tab für Tab** (Übersicht · Dokumente · Kommunikation ·
+Prozess · Verlauf). Verfügbare Aktionen:
+
+```
+Werkstatt vermitteln · Kanzlei-Paket einlesen · Dokument anfordern · Videotermin buchen
+AS hochladen (PDF) · Hochladen · Nachreichen · Neue Anforderung · Neue Nachricht · Speichern
+```
+
+**Kein „Termin anlegen". Kein „Gutachter wechseln".** Beides existiert — aber woanders:
+`/dispatch/kalender` → „Spontan-Termin", `/dispatch/terminwuensche` → „SV zuweisen".
+
+* **Spontan-Termin hilft nicht:** Der Dialog erhebt **Kundendaten neu** (Vorname, Nachname,
+  Telefon, E-Mail, Besichtigungsort) und hat **kein Feld, um einen bestehenden Fall zu wählen**.
+  Er erzeugt einen *neuen* Vorgang, hängt keinen Termin an einen bestehenden Claim.
+* **Terminwünsche hilft nicht:** Dort steht der Fall nur, wenn ein Terminwunsch geschrieben
+  wurde — und genau das unterbleibt (**Befund 8**: der Finder schreibt `wunschtermin=null`).
+
+**Die Kette schließt sich:** Terminbuchung scheitert → kein Termin, kein Terminwunsch → der Fall
+taucht in keiner Termin-Queue auf → Dispatch hat keinen Griff → der Claim hat keinen Endzustand.
+
+**Gemessen auf prod:**
+
+| `nur_gutachter`-Claims | Anzahl | mit Termin |
+|---|---|---|
+| `sv-termin` | 9 | 9 |
+| `ersterfassung` | 8 | 6 |
+| **`sv-zugewiesen`** | **5** | **0** ← die Sackgasse |
+| `gutachten-eingegangen` | 1 | 0 |
+| **`termin_durchgefuehrt`** (terminal) | **1** | 1 |
+
+**23 von 24 `nur_gutachter`-Claims sind nicht abgeschlossen**, der älteste offen seit 17.07.
+Zum Vergleich: `komplett` hat 59 Claims, 10 terminal.
+
+### 🔄 KORREKTUR zur Sackgasse — die Ursache ist der Guard, nicht eine Produktlücke
+
+Nachgeprüft, wer in `sv-zugewiesen` ohne Termin steckt:
+
+| Claim | Kunde | zugewiesener SV | `ist_testaccount` |
+|---|---|---|---|
+| CLM-2026-00984 | `aaron.sprafke@claimondo.de` | Kfz-SV-Büro Brandt | false |
+| CLM-2026-01010 | `aaron.sprafke@claimondo.de` | Brandt | false |
+| CLM-2026-01451 | `aaron.sprafke+kundeneuneu@…` | Brandt | false |
+| CLM-2026-03507 | `aaron.sprafke+kundeneuneuneu@…` | Brandt | false |
+
+**Alle vier sind interne Identitäten mit einem als „echt" markierten SV** — exakt die
+Konstellation, die der Test-SV-Guard blockt. Die Buchung scheiterte also **absichtlich**; der
+Claim blieb ohne Termin auf `sv-zugewiesen` stehen. Mein eigener Durchstich hat dasselbe Muster
+erzeugt und ich habe es für eine Produktlücke gehalten.
+
+⚠ **Was damit NICHT belegt ist:** dass ein *echter* Kunde in dieser Sackgasse landet. Bei ihm
+greift der Guard nicht, die Buchung läuft durch, der Termin steht — und `closeNurGutachterTermin`
+hat, was er braucht. **Die Frage „ist der Abschluss für echte Kunden erreichbar?" ist offen, nicht
+negativ beantwortet.** Nachweisbar wäre sie nur mit einer externen Identität und einem echten SV —
+also mit genau dem Kollateralschaden, den der Guard verhindern soll.
+
+**Was unabhängig davon gilt und bleibt:** In der Dispatch-Fallakte gibt es **keine Aktion
+„Termin anlegen" und keine „Gutachter wechseln"**. Scheitert eine Buchung aus *irgendeinem*
+Grund (Slot weg, SV ausgefallen, technischer Fehler), hat Dispatch am Fall selbst keinen Griff —
+Spontan-Termin erzeugt einen neuen Vorgang, Terminwünsche greift nur bei vorhandenem Wunsch.
+Das ist die Lücke, die zu schließen wäre; die Zahlen oben belegen sie **nicht**.
+
+⚠ **Nebenbefund:** „Kfz-Sachverständigenbüro Brandt" trägt `ist_testaccount = false`, sein
+Profil hängt aber an `nicolas.kitta+testsv@claimondo.de` — faktisch ein Test-SV ohne
+Test-Kennzeichnung. Das ist der Grund, warum diese vier Fälle bei einem „echten" SV landeten,
+ohne dass jemand gestört wurde.
+
+### 5.10 Struktureller Befund — der Abschluss ist ohne Termin nicht erreichbar
+
+`nur_gutachter` wird terminal über `closeNurGutachterTerminAlsDurchgefuehrt(terminId, claimId)` —
+alle drei Aufrufer (SV-Action, Kunde-Action, WhatsApp-Inbound) brauchen eine **`terminId`**.
+Im gelaufenen Fall kam kein Termin zustande (Guard-Block), der Claim steht auf `sv-zugewiesen`,
+und es existiert kein Weg, ihn ohne Termin abzuschließen. Für einen echten Kunden heißt das:
+Scheitert die Terminbuchung und wird sie nie nachgeholt, hat sein Fall **keinen Endzustand**.
