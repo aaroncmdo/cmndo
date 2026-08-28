@@ -181,7 +181,14 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
             className="h-8 w-full min-w-0 rounded-ios-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
             placeholder="Straße, Stadt – z.B. Hauptstraße 12, Köln"
             defaultValue={watch('unfallort')}
-            onSelect={(r) => setValue('unfallort', r.stadt || r.plz || r.adresse, { shouldValidate: true })}
+            // ⚠ `r.adresse` — NICHT `r.stadt`. Das Feld heisst "Unfallort" und traegt eine
+            // ADRESSE (Placeholder: "Straße, Stadt – z.B. Hauptstraße 12, Köln"); der Wert
+            // wird serverseitig neu geocodiert. Vorher stand hier `r.stadt || r.plz || r.adresse`:
+            // aus der Auswahl "Domkloster 4, 50667 Köln" wurde damit der blosse Ortsname, der
+            // Server geocodierte ihn ohne Kontext neu und traf die falsche Stadt (28.08.2026 —
+            // gespeichert wurde "Altstadt, Düsseldorf", 40 km daneben, samt Gutachter dort).
+            // Strasse + Hausnummer + PLZ gingen dabei verloren, bevor irgendetwas gespeichert war.
+            onSelect={(r) => setValue('unfallort', r.adresse || r.stadt || r.plz, { shouldValidate: true })}
             onChange={(v) => setValue('unfallort', v, { shouldValidate: true })}
           />
           {errors.unfallort ? (

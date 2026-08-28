@@ -40,16 +40,33 @@ type MapboxFeature = {
 /** Zieht PLZ und Ort aus dem `context`-Array eines Mapbox-Features.
  *  Mapbox liefert die Hierarchie als Liste mit typisierten IDs
  *  ("postcode.123", "place.456") — die Reihenfolge ist NICHT garantiert,
- *  deshalb wird ueber den Praefix gesucht statt ueber den Index. */
+ *  deshalb wird ueber den Praefix gesucht statt ueber den Index.
+ *
+ *  ⚠ `place` und `locality` sind NICHT gleichwertig: `place` ist die Stadt,
+ *  `locality` ein Stadtteil darin. Beide zusammen in einem `||` zu behandeln
+ *  hiess "wer zuerst im Array steht, gewinnt" — und Mapbox listet den Stadtteil
+ *  zuerst. Gemessen fuer "Domkloster 4, 50667 Köln" (28.08.2026):
+ *
+ *      postcode.28610106   "50667"
+ *      locality.8776250    "Altstadt"     <- stand vorn und gewann
+ *      place.41748538      "Köln"
+ *
+ *  Ergebnis war `stadt = "Altstadt"`. Der Mini-Wizard schrieb das in sein
+ *  ADRESS-Feld, der Server geocodierte den Rest neu — und traf Düsseldorf-Altstadt,
+ *  40 km entfernt. Der Fall ging an einen Düsseldorfer Gutachter, die
+ *  Werkstattliste zeigte Ratingen. Deshalb: `place` hat Vorrang, `locality` ist
+ *  nur der Rueckfall fuer Orte ohne eigenen place-Eintrag. */
 function ausKontext(f: MapboxFeature): { plz: string; stadt: string } {
   let plz = ''
-  let stadt = ''
+  let place = ''
+  let locality = ''
   for (const c of f.context ?? []) {
     const id = c.id ?? ''
     if (!plz && id.startsWith('postcode')) plz = c.text ?? ''
-    else if (!stadt && (id.startsWith('place') || id.startsWith('locality'))) stadt = c.text ?? ''
+    else if (!place && id.startsWith('place')) place = c.text ?? ''
+    else if (!locality && id.startsWith('locality')) locality = c.text ?? ''
   }
-  return { plz, stadt }
+  return { plz, stadt: place || locality }
 }
 
 export function mapboxFeatureZuVorschlag(f: MapboxFeature): AdressVorschlag | null {
