@@ -8,6 +8,7 @@
 // KB-Fallakte (Admin + Kundenbetreuer dürfen).
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireRole } from '@/lib/auth/guards'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
@@ -343,10 +344,18 @@ export async function uploadAnschlussschreiben(
     return { success: false, error: 'Kein Claim zum Fall gefunden' }
   }
 
-  // Upload auf dem User-Client: die Storage-INSERT-Policy ist das Gate (der
-  // Service-Client wäre hier ein unnötiger RLS-Bypass — nur das *Signieren*
-  // braucht ihn, und das passiert erst auf der Leseseite).
-  const { error: upErr } = await supabase.storage
+  // Upload ueber den Service-Client. Der frühere Kommentar hier nahm an, "die
+  // Storage-INSERT-Policy ist das Gate" — diese Annahme ist seit Migration
+  // 20260513220337_aar_storage_buckets_lock ungueltig: Es gibt fuer
+  // 'fall-dokumente' KEINE INSERT-Policy mehr, sondern nur noch
+  // `locked_buckets_block_authenticated`, die den Bucket fuer JEDEN
+  // eingeloggten Nutzer sperrt. Auf dem User-Client scheiterte der Upload
+  // deshalb ausnahmslos mit "new row violates row-level security policy" —
+  // gemessen 28.08. auf prod an CLM-2026-00837, der seit dem 16.07. genau
+  // hier haengt ("Phase laeuft ohne Fortschritt seit 30 Werktagen").
+  // Das Gate ist der requireRole-Guard oben; hier wird kein Recht erweitert.
+  const admin = createAdminClient()
+  const { error: upErr } = await admin.storage
     .from('fall-dokumente')
     .upload(storagePath, file, { contentType: 'application/pdf', upsert: false })
   if (upErr) return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
@@ -377,7 +386,11 @@ export async function uploadAnschlussschreiben(
   //
   // Fehler wird jetzt GEPRUEFT — vorher war der Insert ein nacktes `await`.
   // Ohne diese Zeile findet getAnschlussschreibenUrl spaeter kein Dokument.
-  const { error: dokErr } = await supabase.from('fall_dokumente').insert({
+  // Ebenfalls Service-Client: die INSERT-Policy `fall_dokumente__b1ins_au`
+  // erlaubt nur den Kunden (uploaded_by_kunde am eigenen Claim) und den
+  // zugewiesenen SV — weder KB noch Admin. Mit dem User-Client waere der
+  // Storage-Upload oben also nur der erste von zwei Blockern gewesen.
+  const { error: dokErr } = await admin.from('fall_dokumente').insert({
     fall_id: fallId,
     claim_id: claimIdForAs,
     dokument_typ: 'anschlussschreiben',
