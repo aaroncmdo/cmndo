@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: `${SITE_URL}/gutachter-partner/leads-generieren`,
       title: t('gutachter_partner_leads.og_title'),
       description: t('gutachter_partner_leads.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Leads für Kfz-Gutachter' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Leads für Kfz-Gutachter' }],
     },
   }
 }

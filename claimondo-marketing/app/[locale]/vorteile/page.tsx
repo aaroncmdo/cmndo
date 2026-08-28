@@ -47,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/vorteile`)),
       title: t('vorteile.title'),
       description: t('vorteile.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],
     },
   }
 }

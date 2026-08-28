@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(PAGE_PATH)),
       title: t('kfz_gutachter_online.og_title'),
       description: t('kfz_gutachter_online.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'LG Bremen 2026: Grenzen für Online-Kfz-Gutachten' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'LG Bremen 2026: Grenzen für Online-Kfz-Gutachten' }],
     },
   }
 }

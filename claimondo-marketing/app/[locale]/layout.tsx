@@ -97,13 +97,13 @@ export const metadata: Metadata = {
     title: 'Claimondo – Ihr Kfz-Schaden, digital geregelt',
     description:
       'Unabhängige Schadensregulierung nach Kfz-Unfällen. Gutachten, Anwalt, Werkstatt und Auszahlung – kostenlos für unverschuldet Geschädigte.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Claimondo' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Claimondo – Ihr Kfz-Schaden, digital geregelt',
     description: 'Unabhängige Schadensregulierung nach Kfz-Unfällen. 0 € für unverschuldet Geschädigte.',
-    images: ['/og-default.png'],
+    images: ['/opengraph-image'],
   },
   robots: {
     index: true,

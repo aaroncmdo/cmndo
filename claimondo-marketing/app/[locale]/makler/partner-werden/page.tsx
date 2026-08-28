@@ -38,13 +38,13 @@ export const metadata: Metadata = {
     url: `${MAKLER_LANDING_URL}/`,
     title: 'Makler Partner werden – Kfz-Schäden professionell abwickeln',
     description: 'Kooperation ohne Kosten. Ihre Kunden bekommen Top-Service, Sie stärken die Kundenbindung.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Makler-Partnerschaft' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Claimondo Makler-Partnerschaft' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Makler Partner werden – Claimondo',
     description: 'Kfz-Schadensabwicklung für Ihre Kunden. Ohne Aufwand, ohne Kosten.',
-    images: ['/og-default.png'],
+    images: ['/opengraph-image'],
   },
 }
 

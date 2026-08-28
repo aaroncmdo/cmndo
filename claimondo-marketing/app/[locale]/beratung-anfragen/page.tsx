@@ -31,13 +31,13 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/beratung-anfragen`)),
       title: t('beratung_anfragen.title'),
       description: t('beratung_anfragen.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Beratung anfragen Claimondo' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Beratung anfragen Claimondo' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('beratung_anfragen.twitter_title'),
       description: t('beratung_anfragen.twitter_description'),
-      images: ['/og-default.png'],
+      images: ['/opengraph-image'],
     },
   }
 }
