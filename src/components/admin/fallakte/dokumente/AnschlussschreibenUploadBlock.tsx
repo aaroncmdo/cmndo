@@ -15,6 +15,7 @@ import { EyeIcon, FileTextIcon, Loader2Icon, UploadIcon } from 'lucide-react'
 import { uploadAnschlussschreiben, setAnschlussschreibenDatum } from '../../../../app/faelle/[id]/_actions'
 import { getAnschlussschreibenUrl } from '@/lib/dokumente/fall-dokumente-urls'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Button } from '@/components/primitives/Button'
 
 export type FallAS = {
   anschlussschreiben_url: string | null
@@ -155,19 +156,21 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
                   onChange={(e) => setSendedatum(e.target.value)}
                   className="px-2 py-1 text-xs border border-claimondo-border rounded-ios-md text-claimondo-navy"
                 />
-                <button
-                  type="button"
+                <Button
+                  variant="navy"
+                  size="sm"
                   onClick={handleVersandBestaetigen}
-                  disabled={bestaetigt || !sendedatum}
-                  title={sendedatum ? undefined : 'Bitte zuerst das Sendedatum eintragen'}
-                  className="px-3 py-1.5 rounded-ios-md bg-claimondo-navy text-white text-xs font-medium hover:bg-claimondo-ondo disabled:opacity-50"
+                  loading={bestaetigt}
+                  disabled={!sendedatum}
                 >
-                  {bestaetigt ? 'Wird erfasst…' : 'Versand bestätigen'}
-                </button>
+                  Versand bestätigen
+                </Button>
               </div>
-              {!fallAS.anschlussschreiben_sendedatum && (
+              {!sendedatum && (
                 <p className="text-body-xs text-warning-strong">
-                  Kein Sendedatum im Dokument erkannt — bitte manuell eintragen.
+                  {fallAS.anschlussschreiben_sendedatum
+                    ? 'Bitte das Sendedatum eintragen.'
+                    : 'Kein Sendedatum im Dokument erkannt — bitte manuell eintragen.'}
                 </p>
               )}
             </div>
