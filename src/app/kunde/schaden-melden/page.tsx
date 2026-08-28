@@ -13,7 +13,7 @@ export default async function SchadenMeldenPage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-8">
       <h1 className="text-xl font-bold text-claimondo-navy">Neuen Schaden melden</h1>
       <p className="mt-1 mb-6 text-sm text-claimondo-shield">
-        Ein paar Angaben genügen — wir kümmern uns um den Rest und melden uns bei dir.
+        Ein paar Angaben genügen — wir kümmern uns um den Rest und melden uns bei Ihnen.
       </p>
       <SchadenMeldenWizard />
     </div>
