@@ -23,6 +23,7 @@ import { SITE_URL, WHATSAPP_HREF, articleSchema, autoSchemaGraph, OG_DEFAULT_IMA
 import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { ArticleComments } from '@/components/community/ArticleComments'
 import { WissenVerwandteThemen } from '@/components/content/WissenVerwandteThemen'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 
 const WA = WHATSAPP_HREF
 
@@ -143,6 +144,21 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             <ArticleComments articleSlug={`wissen/${slug}`} />
           </article>
         </div>
+        {/* Autorenschaft + Stand — SICHTBAR, nicht nur im Schema.
+            `wissen_artikel` traegt `author`, `last_modified` und `veroeffentlicht_am`
+            auf ALLEN 68 veroeffentlichten Artikeln (gemessen 28.08.2026) — die Felder
+            wurden nur nie angezeigt. Von 187 geprueften Nicht-Stadtseiten trugen 184
+            keine Autorenschaft; benannte Autorenschaft ist eines der Signale, die
+            AI-Systeme fuer E-E-A-T lesen.
+
+            `rolle="verantwortlich"`: die Artikel sind redaktionell erstellt, aber es
+            gibt kein Feld, das eine fachliche EINZELpruefung belegt. „Fachlich geprüft"
+            zu behaupten, ohne dass es einen Nachweis dafuer gibt, waere geraten. */}
+        <ReviewerByline
+          rolle="verantwortlich"
+          autor={a.author}
+          datum={(a.last_modified ?? a.veroeffentlicht_am ?? '').slice(0, 10)}
+        />
         <SpokeCtaBand />
       </main>
       <LandingFooter />
