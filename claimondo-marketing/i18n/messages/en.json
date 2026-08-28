@@ -692,20 +692,20 @@
     "founders": {
       "items": [
         {
-          "rolle": "Managing Director, CEO & Co-Founder",
-          "foto_label": "right in photo",
-          "bio_kurz": "Nicolas leads Claimondo strategically, overseeing the partner network and investor relations.",
-          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of Kfz-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
-          "quote": "\"It's not about who I am, but what I do. That's how you're judged.\"",
-          "quote_autor": "Bruce Wayne"
-        },
-        {
           "rolle": "Managing Director, COO & Co-Founder",
           "foto_label": "left in photo",
           "bio_kurz": "Aaron builds the Claimondo platform and oversees operations — from photo-based damage capture to final payout.",
           "bio_lang": "Aaron's background is in sales and account management at nextright and AdvoScale, where he saw first-hand how much money is lost in every claim file between promise and payout. At Claimondo he built the entire technical platform: AI-assisted damage capture, GPS self-dispatch to the nearest available expert, ZB1 OCR with Imagin visualisation, digital Sicherungsabtretung signing — and ensures that dispatch, experts, lawyers, and the client all see the same data in real time.",
           "quote": "\"Quality means doing it right when no one is watching.\"",
           "quote_autor": "Henry Ford"
+        },
+        {
+          "rolle": "Managing Director, CEO & Co-Founder",
+          "foto_label": "right in photo",
+          "bio_kurz": "Nicolas leads Claimondo strategically, overseeing the partner network and investor relations.",
+          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of Kfz-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
+          "quote": "\"It's not about who I am, but what I do. That's how you're judged.\"",
+          "quote_autor": "Bruce Wayne"
         }
       ]
     },
@@ -1394,14 +1394,14 @@
       "linkedin_aria": "{name} on LinkedIn",
       "founders": [
         {
-          "rolle": "Managing Director, CEO & Co-Founder",
-          "bio": "Nicolas leads Claimondo and is the point of contact for insurance partnerships and strategic law firm collaborations. His drive: making claim settlement in Germany transparent and on equal terms — no insurer boilerplate, no reduction tactics.",
-          "quote": "\"It's not about who I am, but what I do. That's how one is measured.\" — Batman"
-        },
-        {
           "rolle": "Managing Director, COO & Co-Founder",
           "bio": "Aaron oversees Operations, Product, and the tech platform at Claimondo. With a background in sales and account management at nextright and AdvoScale, he knows exactly where the leverage lies between customer promise and actual payout. Aaron is the interface between expert appraisers, lawyers, and our software.",
           "quote": "\"Quality means doing it right when no one is watching.\" — Henry Ford"
+        },
+        {
+          "rolle": "Managing Director, CEO & Co-Founder",
+          "bio": "Nicolas leads Claimondo and is the point of contact for insurance partnerships and strategic law firm collaborations. His drive: making claim settlement in Germany transparent and on equal terms — no insurer boilerplate, no reduction tactics.",
+          "quote": "\"It's not about who I am, but what I do. That's how one is measured.\" — Batman"
         }
       ]
     },
