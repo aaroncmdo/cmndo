@@ -16,6 +16,7 @@
 //   5. Sonst → hydratisiertes V2-Theme + SV-Logo + Firmenname
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme, type BrandThemeV2 } from './theme'
 import { kundenBrandingErlaubt } from './gate'
 import { istBrandingBezahlt } from './bezahl-status'
@@ -54,8 +55,18 @@ export async function resolveKundenTheme(kundeId: string): Promise<KundenThemeRe
 
   if (!fall?.sv_id) return fallback
 
-  // 2) SV-Daten laden
-  const { data: sv } = await supabase
+  // 2) SV-Daten laden — Admin-Client aus demselben Grund wie 3b: der Kunden-Kontext
+  // darf die SV-Row per RLS nicht lesen. Die SELECT-Policy fuer `authenticated`
+  // (`sachverstaendige__b1sel_au`) erlaubt nur Admin/Dispatch oder den SV selbst;
+  // die permissive Finder-Policy daneben gilt ausschliesslich fuer `anon`. Mit dem
+  // RLS-Client kam hier still `null` zurueck -> `return fallback` -> der Kunde sah
+  // NIE das Branding seines SVs (Whitelabel war in der gesamten Kundensicht tot,
+  // waehrend SV-Portal und Magic-Links korrekt brandeten).
+  // Kein Leak: Die Kunde->SV-Zuordnung ist in Schritt 1 per RLS verifiziert (nur
+  // eigene Claims), und gelesen werden ausschliesslich Branding-Felder eines SVs,
+  // dessen Name dem Kunden ohnehin im Portal angezeigt wird.
+  const admin = createAdminClient()
+  const { data: sv } = await admin
     .from('sachverstaendige')
     .select('verifiziert, use_custom_branding, brand_theme, brand_primary, brand_secondary, logo_url, firmenname')
     .eq('id', fall.sv_id)

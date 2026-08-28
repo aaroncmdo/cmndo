@@ -115,7 +115,7 @@ export default function MyTasksClient({
                     </Td>
                     <Td>
                       <span className={`text-body-xs ${isOverdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
-                        {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
+                        {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }) : '—'}
                       </span>
                     </Td>
                     <Td>

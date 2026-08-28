@@ -9,6 +9,7 @@ type Slot = { startIso: string; datum: string; uhrzeit: string }
 function formatTag(datum: string): string {
   // datum = 'YYYY-MM-DD' (Berlin) — Mittag als DST-sicherer Anker.
   return new Date(`${datum}T12:00:00`).toLocaleDateString('de-DE', {
+    timeZone: 'Europe/Berlin',
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',

@@ -28,7 +28,7 @@ interface SiteRow {
 
 function kurzDatum(iso: string | null): string | null {
   if (!iso) return null
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
+  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: '2-digit' })
 }
 
 export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {

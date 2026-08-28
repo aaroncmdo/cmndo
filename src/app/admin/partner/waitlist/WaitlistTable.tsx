@@ -207,6 +207,7 @@ function Row({
         </Td>
         <Td className="text-body-xs text-claimondo-ondo!">
           {new Date(e.erstellt_am).toLocaleDateString('de-DE', {
+            timeZone: 'Europe/Berlin',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',

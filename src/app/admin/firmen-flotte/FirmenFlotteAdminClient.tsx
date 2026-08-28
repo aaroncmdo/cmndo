@@ -29,6 +29,7 @@ export type FlottenKontoRow = {
 function formatDatum(iso: string | null) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('de-DE', {
+    timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

@@ -45,7 +45,10 @@ export async function GET(request: Request) {
   // v_claim_full durchgereicht). Cron nutzt den Admin-Client → keine RLS-Lücke.
   const { data: faelle } = await db
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, sub_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
+    // 28.08.: + die operativen Fakten. Bis dahin loeste NUR das `szenario` eine Pflicht aus —
+    // „Polizei war vor Ort" blieb folgenlos. `finanzierung_leasing` liegt (noch) nicht in
+    // v_claim_full; die Regel dafuer greift deshalb hier nicht (undefined loest nicht aus).
+    .select('fall_id, claim_nummer, sub_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung, polizei_vor_ort, hat_mietwagen, hat_sachschaden')
     .not('sub_phase', 'is', null)
     .not('szenario', 'is', null)
     .neq('main_phase', 'abschluss')
@@ -68,8 +71,13 @@ export async function GET(request: Request) {
     if (!phase) continue
     const szenario = fall.szenario as Szenario
 
-    // Pflicht-Dokumente berechnen
-    const pflicht = getPflichtDokumenteFuerFall(phase, szenario)
+    // Pflicht-Dokumente berechnen — Szenario-Matrix PLUS erhobene Fakten.
+    const r = fall as Record<string, unknown>
+    const pflicht = getPflichtDokumenteFuerFall(phase, szenario, {
+      polizei_vor_ort: r.polizei_vor_ort as boolean | null,
+      hat_mietwagen: r.hat_mietwagen as boolean | null,
+      hat_sachschaden: r.hat_sachschaden as boolean | null,
+    })
     if (pflicht.length === 0) continue
 
     // Vorhandene fall_dokumente laden

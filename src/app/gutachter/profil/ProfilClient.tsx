@@ -165,7 +165,7 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
     <div className="bg-claimondo-bg/50 rounded-ios-xl p-4 border border-claimondo-border">
       <div className="flex items-center justify-between mb-2">
         <p className="text-claimondo-navy text-sm font-medium">
-          {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+          {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })}
           {' '}
           {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
           –

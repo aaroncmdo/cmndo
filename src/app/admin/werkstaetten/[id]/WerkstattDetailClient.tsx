@@ -46,7 +46,7 @@ function euro(n: number | null | undefined): string {
   return n == null ? '—' : n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
 }
 function datum(iso: string | null): string {
-  return iso ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
+  return iso ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
 }
 
 function Feld({ label, wert }: { label: string; wert: string }) {
