@@ -16,6 +16,8 @@ import {
   upsertQcCheckliste,
 } from '../../../../app/faelle/[id]/_actions'
 import { qcChecklisteVollstaendig } from '@/lib/qc/checkliste-validation'
+import { useFall } from '@/app/faelle/[id]/FallContext'
+import { can } from '@/lib/permissions/helpers'
 // Filmcheck QC-Anomalie-Erkennung: reine (server-import-freie) Logik, hier nur der Typ.
 import type { GutachtenAnomalie } from '@/lib/qc/anomalien'
 
@@ -99,6 +101,12 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
   })
   const [qcKommentar, setQcKommentar] = useState<string>(qcCheckliste?.kommentar ?? '')
   const [qcPending, startQcTransition] = useTransition()
+  // Die QC-Server-Actions gaten auf 'dokumente.qc' (admin + kundenbetreuer; dispatch
+  // darf ausdruecklich NICHT — src/lib/permissions/matrix.test.ts). Ohne dieselbe
+  // Pruefung hier sah dispatch die Aktionen und bekam beim Klick garantiert
+  // "Keine Berechtigung für die QC-Prüfung". Lesen bleibt erlaubt.
+  const { userRolle } = useFall()
+  const darfQc = can(userRolle, 'dokumente.qc')
   const qcStatus = qcCheckliste?.status ?? null
   // Filmcheck-Audit 29.06.2026: "Bestanden" erst freigeben, wenn alle Pflicht-Checks
   // auf "Ja" stehen (Server-Action erzwingt es zusaetzlich hart).
@@ -226,6 +234,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
                 key={key as string}
                 type="button"
                 onClick={() => toggleQc(key as string)}
+                disabled={!darfQc}
                 className={`flex items-center justify-between px-3 py-2 rounded-ios-lg border text-xs font-medium transition-colors hover:border-claimondo-ondo ${badge.bg}`}
               >
                 <span className="text-claimondo-navy">{label}</span>
@@ -246,11 +255,16 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
             className="w-full px-3 py-2 text-xs border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
           />
         </div>
-        <div className="flex flex-wrap gap-2">
+        {!darfQc && (
+          <p className="text-[10px] text-claimondo-ondo/70">
+            Nur Lesezugriff — die QC-Prüfung übernimmt der Kundenbetreuer oder ein Admin.
+          </p>
+        )}
+        <div className={`flex flex-wrap gap-2 ${darfQc ? '' : 'hidden'}`}>
           <button
             type="button"
             onClick={handleSpeichern}
-            disabled={qcPending}
+            disabled={qcPending || !darfQc}
             className="px-3 py-1.5 rounded-ios-md bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
           >
             Zwischenstand speichern
@@ -258,7 +272,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
           <button
             type="button"
             onClick={handleBestanden}
-            disabled={qcPending || !alleChecksOk}
+            disabled={qcPending || !alleChecksOk || !darfQc}
             title={alleChecksOk ? undefined : 'Erst alle Pflicht-Checks auf „Ja" setzen'}
             className="px-3 py-1.5 rounded-ios-md bg-success text-white text-xs font-medium hover:bg-success-strong disabled:opacity-50"
           >
@@ -267,7 +281,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
           <button
             type="button"
             onClick={handleNachbesserung}
-            disabled={qcPending}
+            disabled={qcPending || !darfQc}
             className="px-3 py-1.5 rounded-ios-md bg-warning text-white text-xs font-medium hover:bg-warning-strong disabled:opacity-50"
           >
             Nachbesserung anfordern
