@@ -43,13 +43,13 @@ export const metadata: Metadata = {
     url: `${WERKSTATT_LANDING_URL}/`,
     title: 'Werkstatt Partner werden – Reparaturaufträge über den Finder',
     description: 'Kostenlos gelistet, Aufträge über den Werkstatt-Finder, Provision nur auf Erfolg.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Werkstatt-Partnerschaft' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Claimondo Werkstatt-Partnerschaft' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Werkstatt Partner werden – Claimondo',
     description: 'Reparaturaufträge über den Werkstatt-Finder. Kostenlos gelistet, Provision nur auf Erfolg.',
-    images: ['/og-default.png'],
+    images: ['/opengraph-image'],
   },
 }
 

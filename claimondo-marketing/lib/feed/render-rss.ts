@@ -64,7 +64,7 @@ ${categories}
     <lastBuildDate>${lastBuild}</lastBuildDate>
     <ttl>${meta.ttlMinutes ?? 360}</ttl>
     <image>
-      <url>${SITE_URL}/og-default.png</url>
+      <url>${SITE_URL}/opengraph-image</url>
       <title>${escapeXml(meta.title)}</title>
       <link>${SITE_URL}</link>
     </image>

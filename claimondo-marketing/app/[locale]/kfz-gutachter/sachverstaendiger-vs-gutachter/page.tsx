@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/kfz-gutachter/sachverstaendiger-vs-gutachter`)),
       title: t('kfz_gutachter_sv_vs_gutachter.og_title'),
       description: t('kfz_gutachter_sv_vs_gutachter.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Sachverständiger oder Gutachter' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Sachverständiger oder Gutachter' }],
     },
   }
 }

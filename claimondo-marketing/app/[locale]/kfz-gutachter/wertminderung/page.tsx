@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/kfz-gutachter/wertminderung`)),
       title: t('kfz_gutachter_wertminderung.og_title'),
       description: t('kfz_gutachter_wertminderung.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Wertminderung berechnen' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Wertminderung berechnen' }],
     },
   }
 }

@@ -36,13 +36,13 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/ersteinschaetzung`)),
       title: t('ersteinschaetzung.og_title'),
       description: t('ersteinschaetzung.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'KI-Ersteinschätzung Claimondo' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'KI-Ersteinschätzung Claimondo' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('ersteinschaetzung.title'),
       description: t('ersteinschaetzung.twitter_description'),
-      images: ['/og-default.png'],
+      images: ['/opengraph-image'],
     },
   }
 }

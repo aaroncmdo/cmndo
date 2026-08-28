@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/kfz-gutachter/autoschaden-soforthilfe`)),
       title: t('kfz_gutachter_autoschaden_soforthilfe.og_title'),
       description: t('kfz_gutachter_autoschaden_soforthilfe.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Autoschaden – was tun?' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Autoschaden – was tun?' }],
     },
   }
 }

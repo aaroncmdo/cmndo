@@ -41,13 +41,13 @@ export const metadata: Metadata = {
     url: `${FLOTTE_LANDING_URL}/`,
     title: 'Flottenpartner werden – Schadenmanagement für Ihren Fuhrpark',
     description: 'Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden, Regulierung über die gegnerische Haftpflicht.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Flotten-Partnerschaft' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Claimondo Flotten-Partnerschaft' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Flottenpartner werden – Claimondo',
     description: 'Schadenmanagement für Firmen-Flotten. Kostenlos registrieren, Schäden ohne Aufwand abwickeln.',
-    images: ['/og-default.png'],
+    images: ['/opengraph-image'],
   },
 }
 
