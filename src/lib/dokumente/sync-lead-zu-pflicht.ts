@@ -15,6 +15,10 @@
 // SV-Auftrag-Counter) den korrekten Stand zeigt.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { parseStorageUrl } from '@/lib/storage/url'
+
+/** Der Bucket, in dem Fall-Dokumente liegen. Eine URL auf einen anderen ist nicht unsere Datei. */
+const BUCKET = 'fall-dokumente'
 
 type LeadDocs = Record<string, unknown> | null | undefined
 
@@ -80,19 +84,17 @@ function mapLeadToSlots(lead: LeadDocs): SlotMapping[] {
  */
 export function storagePfadAusUrl(url: string | null | undefined): string | null {
   if (!url) return null
-  const ohneQuery = url.split('?')[0]?.split('#')[0] ?? ''
-  if (ohneQuery.length === 0) return null
 
-  const marker = 'fall-dokumente/'
-  const idx = ohneQuery.indexOf(marker)
-  if (idx !== -1) {
-    const pfad = ohneQuery.slice(idx + marker.length)
-    return pfad.length > 0 ? pfad : null
-  }
+  // Form 1 über den zentralen Helfer — der kennt alle drei Supabase-Varianten
+  // (`/object/public|sign|authenticated/…`) und dekodiert prozent-kodierte Segmente.
+  // Ein eigener Parser hier hätte `%20` in Dateinamen verschluckt.
+  const geparst = parseStorageUrl(url)
+  if (geparst) return geparst.bucket === BUCKET ? geparst.path : null
 
   // Form 2: bereits ein Storage-Pfad. Alles mit Host ist dagegen eine FREMDE URL
-  // (anderer Bucket/Dienst) — daraus einen Pfad zu raten waere falsch.
-  if (/^[a-z]+:\/\//i.test(ohneQuery)) return null
+  // (anderer Dienst) — daraus einen Pfad zu raten wäre falsch.
+  const ohneQuery = url.split('?')[0]?.split('#')[0] ?? ''
+  if (ohneQuery.length === 0 || /^[a-z]+:\/\//i.test(ohneQuery)) return null
   const pfad = ohneQuery.replace(/^\/+/, '')
   return pfad.includes('/') ? pfad : null
 }

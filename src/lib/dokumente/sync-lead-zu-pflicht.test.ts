@@ -28,7 +28,7 @@ describe('storagePfadAusUrl', () => {
   })
 
   it('schneidet Query-String und Fragment ab — die gehoeren nicht zum Pfad', () => {
-    expect(storagePfadAusUrl('…/fall-dokumente/a/b.jpg?x=1#frag')).toBe('a/b.jpg')
+    expect(storagePfadAusUrl('https://x.supabase.co/storage/v1/object/public/fall-dokumente/a/b.jpg?x=1#frag')).toBe('a/b.jpg')
   })
 
   // ⭐⭐ Das Feld heisst „url", traegt aber zwei Formen. Auf prod gemessen (10 belegte Slots):
@@ -58,23 +58,43 @@ describe('storagePfadAusUrl', () => {
     expect(storagePfadAusUrl('kaputt.jpg')).toBeNull()
   })
 
+  // Diese drei kommen aus parseStorageUrl (@/lib/storage/url) — deshalb wird der zentrale
+  // Helfer genutzt statt eines eigenen Parsers.
+  it('dekodiert prozent-kodierte Segmente', () => {
+    expect(storagePfadAusUrl(
+      'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/mein%20schein.jpg',
+    )).toBe('leads/a/mein schein.jpg')
+  })
+
+  it('kennt auch die authenticated-Variante', () => {
+    expect(storagePfadAusUrl(
+      'https://x.supabase.co/storage/v1/object/authenticated/fall-dokumente/leads/a/b.jpg',
+    )).toBe('leads/a/b.jpg')
+  })
+
+  it('eine Storage-URL auf einen ANDEREN Bucket ist nicht unsere Datei', () => {
+    expect(storagePfadAusUrl(
+      'https://x.supabase.co/storage/v1/object/public/gutachten/leads/a/b.pdf',
+    )).toBeNull()
+  })
+
   it('liefert null bei leer/null/undefined', () => {
     expect(storagePfadAusUrl(null)).toBeNull()
     expect(storagePfadAusUrl(undefined)).toBeNull()
     expect(storagePfadAusUrl('')).toBeNull()
-    expect(storagePfadAusUrl('…/fall-dokumente/')).toBeNull()   // Bucket ohne Datei
+    expect(storagePfadAusUrl('https://x.supabase.co/storage/v1/object/public/fall-dokumente/')).toBeNull()   // Bucket ohne Datei
   })
 })
 
 describe('fehlendeAktenZeilen — der reale Fehlerfall', () => {
   it('legt die fehlende Zeile fuer einen belegten Slot an', () => {
-    const r = fehlendeAktenZeilen([slot('pd-1', 'fahrzeugschein', '…/fall-dokumente/leads/a/zb1.jpg')], new Set())
+    const r = fehlendeAktenZeilen([slot('pd-1', 'fahrzeugschein', 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/zb1.jpg')], new Set())
     expect(r).toEqual([{ pflichtdokument_id: 'pd-1', dokument_typ: 'fahrzeugschein', storage_path: 'leads/a/zb1.jpg' }])
   })
 
   it('laesst eine bereits vorhandene Datei in Ruhe (idempotent)', () => {
     const r = fehlendeAktenZeilen(
-      [slot('pd-1', 'fahrzeugschein', '…/fall-dokumente/leads/a/zb1.jpg')],
+      [slot('pd-1', 'fahrzeugschein', 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/zb1.jpg')],
       new Set(['leads/a/zb1.jpg']),
     )
     expect(r).toHaveLength(0)
@@ -84,7 +104,7 @@ describe('fehlendeAktenZeilen — der reale Fehlerfall', () => {
 describe('… ohne Doppeleintraege', () => {
   it('Slot-Aliase auf DIESELBE Datei ergeben EINE Zeile', () => {
     // polizeibericht + polizeiliche_unfallmitteilung zeigen auf dieselbe URL.
-    const url = '…/fall-dokumente/leads/a/polizei.jpg'
+    const url = 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/polizei.jpg'
     const r = fehlendeAktenZeilen(
       [slot('pd-1', 'polizeibericht', url), slot('pd-2', 'polizeiliche_unfallmitteilung', url)],
       new Set(),
@@ -94,7 +114,7 @@ describe('… ohne Doppeleintraege', () => {
   })
 
   it('schadensfotos + unfallfotos ebenso', () => {
-    const url = '…/fall-dokumente/leads/a/foto.jpg'
+    const url = 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/foto.jpg'
     expect(fehlendeAktenZeilen(
       [slot('pd-1', 'schadensfotos', url), slot('pd-2', 'unfallfotos', url)], new Set(),
     )).toHaveLength(1)
@@ -103,8 +123,8 @@ describe('… ohne Doppeleintraege', () => {
   it('der unfallfotos-Nachzug lief VORHER — seine Datei wird nicht doppelt angelegt', () => {
     // convert-lead-to-fall Schritt 5 legt schadensfotos an, Schritt 7 ruft diesen Sync.
     const r = fehlendeAktenZeilen(
-      [slot('pd-1', 'schadensfotos', '…/fall-dokumente/leads/a/foto.jpg'),
-       slot('pd-2', 'fahrzeugschein', '…/fall-dokumente/leads/a/zb1.jpg')],
+      [slot('pd-1', 'schadensfotos', 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/foto.jpg'),
+       slot('pd-2', 'fahrzeugschein', 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/zb1.jpg')],
       new Set(['leads/a/foto.jpg']),
     )
     expect(r.map((x) => x.dokument_typ)).toEqual(['fahrzeugschein'])
@@ -112,8 +132,8 @@ describe('… ohne Doppeleintraege', () => {
 
   it('verschiedene Dateien bleiben verschiedene Zeilen', () => {
     const r = fehlendeAktenZeilen(
-      [slot('pd-1', 'fahrzeugschein', '…/fall-dokumente/leads/a/zb1.jpg'),
-       slot('pd-2', 'polizeibericht', '…/fall-dokumente/leads/a/pol.jpg')],
+      [slot('pd-1', 'fahrzeugschein', 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/zb1.jpg'),
+       slot('pd-2', 'polizeibericht', 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/pol.jpg')],
       new Set(),
     )
     expect(r).toHaveLength(2)
@@ -128,7 +148,7 @@ describe('Abgrenzung', () => {
 
   it('ein Slot ohne dokument_typ wird uebersprungen', () => {
     expect(fehlendeAktenZeilen(
-      [{ id: 'pd-1', dokument_typ: null, url: '…/fall-dokumente/leads/a/x.jpg' }], new Set(),
+      [{ id: 'pd-1', dokument_typ: null, url: 'https://x.supabase.co/storage/v1/object/public/fall-dokumente/leads/a/x.jpg' }], new Set(),
     )).toHaveLength(0)
   })
 
