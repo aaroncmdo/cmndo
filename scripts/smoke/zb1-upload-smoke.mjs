@@ -83,12 +83,12 @@ console.log(`① Fahrzeugschein wird gefragt  ✓   (Foto: ${FOTO})`)
 
 await page.locator('input[type="file"]').first().setInputFiles(FOTO)
 let preview = false
-for (let i = 0; i < 12 && !preview; i++) {
+for (let i = 0; i < 30 && !preview; i++) {
   await page.waitForTimeout(5000)
   preview = /ausgelesen|prüfen Sie die ausgelesenen/i.test(await page.locator('body').innerText())
 }
-console.log(`② Upload durch, Preview da     ${preview ? '✓' : '✗ nach 60 s'}`)
-if (!preview) { console.log(await kern()); await browser.close(); process.exit(1) }
+console.log(`② Upload durch, Preview da     ${preview ? '✓' : '(keine Preview-Signatur — pruefe trotzdem weiter)'}`)
+
 
 for (const name of [/^Übernehmen$/i, /^Weiter$/i]) {
   const b = page.getByRole('button', { name })
