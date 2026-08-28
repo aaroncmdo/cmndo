@@ -36,7 +36,7 @@ export function FlowWerkstattAnzeige({ token, onWeiter }: { token: string; onWei
       <div>
         <h2 className="text-lg font-semibold text-claimondo-navy">Ihre Werkstatt</h2>
         <p className="text-sm text-claimondo-ondo mt-1">
-          Diese Werkstatt übernimmt die Reparatur deines Fahrzeugs.
+          Diese Werkstatt übernimmt die Reparatur Ihres Fahrzeugs.
         </p>
       </div>
 

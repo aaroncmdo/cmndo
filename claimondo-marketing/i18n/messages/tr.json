@@ -692,20 +692,20 @@
     "founders": {
       "items": [
         {
-          "rolle": "Geschäftsführer, CEO & Kurucu Ortak",
-          "foto_label": "fotoğrafta sağda",
-          "bio_kurz": "Nicolas, Claimondo'yu stratejik olarak yönetiyor; iş ortağı ağı ve yatırımcı ilişkilerinden sorumlu.",
-          "bio_lang": "Nicolas, Claimondo'yu basit bir gözlemden yola çıkarak kurdu: Almanya'da trafik kazasına karışan çok sayıda mağdur, yasal haklarının üçte birini kaybettiklerini bilmeden ibraname imzalıyor. Claimondo'da bilirkişilerden ve uzman avukatlardan oluşan iş ortağı ağının kurulumunu yönetiyor — ve her müvekkile, sigorta şirketlerinin kendi büyük müşterileri için çoktan oluşturduğu standardın aynısını sunuyor.",
-          "quote": "\"Önemli olan kim olduğum değil, ne yaptığım. Ölçüt bu.\"",
-          "quote_autor": "Bruce Wayne"
-        },
-        {
           "rolle": "Geschäftsführer, COO & Kurucu Ortak",
           "foto_label": "fotoğrafta solda",
           "bio_kurz": "Aaron, Claimondo platformunu inşa ediyor ve operasyonlardan sorumlu — fotoğrafla hasar tespitinden ödemeye kadar tüm süreç.",
           "bio_lang": "Aaron, nextright ve AdvoScale'de satış ve hesap yönetimi alanlarında çalışırken her hasar dosyasında söz ile ödeme arasında ne kadar paranın kaybolduğunu gördü. Claimondo'da tüm teknik platformu sıfırdan kurdu: yapay zeka destekli hasar tespiti, en yakın müsait bilirkişiye GPS tabanlı Self-Dispatch, Imagin görselleştirmeli ZB1-OCR, dijital Schutzbrief imzalama — ve Dispatch, bilirkişiler, avukatlar ile müvekkillerin aynı verileri gerçek zamanlı olarak görmesini sağlıyor.",
           "quote": "\"Kalite, kimse bakmıyorken doğruyu yapmaktır.\"",
           "quote_autor": "Henry Ford"
+        },
+        {
+          "rolle": "Geschäftsführer, CEO & Kurucu Ortak",
+          "foto_label": "fotoğrafta sağda",
+          "bio_kurz": "Nicolas, Claimondo'yu stratejik olarak yönetiyor; iş ortağı ağı ve yatırımcı ilişkilerinden sorumlu.",
+          "bio_lang": "Nicolas, Claimondo'yu basit bir gözlemden yola çıkarak kurdu: Almanya'da trafik kazasına karışan çok sayıda mağdur, yasal haklarının üçte birini kaybettiklerini bilmeden ibraname imzalıyor. Claimondo'da bilirkişilerden ve uzman avukatlardan oluşan iş ortağı ağının kurulumunu yönetiyor — ve her müvekkile, sigorta şirketlerinin kendi büyük müşterileri için çoktan oluşturduğu standardın aynısını sunuyor.",
+          "quote": "\"Önemli olan kim olduğum değil, ne yaptığım. Ölçüt bu.\"",
+          "quote_autor": "Bruce Wayne"
         }
       ]
     },
@@ -1394,14 +1394,14 @@
       "linkedin_aria": "{name} LinkedIn'de",
       "founders": [
         {
-          "rolle": "Genel Müdür, CEO & Kurucu Ortak",
-          "bio": "Nicolas, Claimondo'yu yönetiyor ve sigorta ortaklıkları ile stratejik hukuk bürosu iş birlikleri için ilk temas noktasıdır. Amacı: Almanya'da hasar tazminatını şeffaf ve eşit düzeyde gerçekleştirmek — standart sigorta görüşmeleri olmadan, kesinti mantığı olmadan.",
-          "quote": "\"Kimin olduğum değil, ne yaptığım önemli. İnsan bununla ölçülür.\" — Batman"
-        },
-        {
           "rolle": "Genel Müdür, COO & Kurucu Ortak",
           "bio": "Aaron, Claimondo'da operasyon, ürün ve teknoloji platformundan sorumludur. nextright ve AdvoScale'deki satış ve müşteri yönetimi geçmişiyle, müşteriye verilen söz ile gerçek ödeme arasındaki kritik noktayı iyi bilir. Aaron; bilirkişiler, avukatlar ve yazılımımız arasındaki köprüdür.",
           "quote": "\"Kalite, kimse bakmıyorken doğru yapmaktır.\" — Henry Ford"
+        },
+        {
+          "rolle": "Genel Müdür, CEO & Kurucu Ortak",
+          "bio": "Nicolas, Claimondo'yu yönetiyor ve sigorta ortaklıkları ile stratejik hukuk bürosu iş birlikleri için ilk temas noktasıdır. Amacı: Almanya'da hasar tazminatını şeffaf ve eşit düzeyde gerçekleştirmek — standart sigorta görüşmeleri olmadan, kesinti mantığı olmadan.",
+          "quote": "\"Kimin olduğum değil, ne yaptığım önemli. İnsan bununla ölçülür.\" — Batman"
         }
       ]
     },

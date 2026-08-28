@@ -227,11 +227,15 @@ async function fahreFlowBisPortal(
 //   selbstzahler: Quali -> Kasko-Weiche -> Schaden(skip) -> Werkstatt-Liste(skip) -> Account
 //   kasko:        Quali -> Kasko-Weiche -> Werkstattbindung#1 -> Schaden(skip)
 //                 -> Werkstattbindung#2 -> Werkstatt-Liste(skip) -> Account
-// Die beiden Werkstattbindungs-Gates sind unterschiedlich formuliert ("Bist du an eine Werkstatt
-// deiner Versicherung gebunden?" / "Darfst du die Werkstatt frei wählen?"), bieten aber je genau
+// Die beiden Werkstattbindungs-Gates sind unterschiedlich formuliert ("Sind Sie an eine Werkstatt
+// Ihrer Versicherung gebunden?" / "Dürfen Sie die Werkstatt frei wählen?"), bieten aber je genau
 // EINE Option mit "kann die Werkstatt frei wählen" (die Gegenoption lautet "...Versicherung
 // schreibt die Werkstatt vor"). Deshalb wird die Zwischenstrecke als Schleife gefahren: das
 // macht den Driver unabhängig von der Gate-Reihenfolge und -Anzahl.
+//
+// Der Selektor unten greift bewusst auf die BUTTON-Beschriftung, nicht auf die Frage: die
+// Buttons stehen in Ich-Form ("Ja, ich kann die Werkstatt frei wählen") und blieben von der
+// Anrede-Umstellung auf Sie (28.08.2026) unberührt.
 async function fahreFlowEigenverschulden(
   page: Page,
   token: string,
@@ -300,7 +304,7 @@ async function fahreFlowTeilschuld(page: Page, token: string): Promise<void> {
   // prod deployt von `main`, und die testid-Commits liegen (Stand 09.08.) nur auf `staging` —
   // getByTestId lief hier deshalb live ins Leere. Rolle+Text sind versionsunabhängig.
   await page.getByRole('button', { name: /Rückruf anfordern/i }).click()
-  await expect(page.getByRole('heading', { name: /Wir rufen dich zurück/i })).toBeVisible({
+  await expect(page.getByRole('heading', { name: /Wir rufen Sie zurück/i })).toBeVisible({
     timeout: 20_000,
   })
 }
