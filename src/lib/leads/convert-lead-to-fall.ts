@@ -19,6 +19,7 @@ import { createNotification } from '@/lib/notifications'
 import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { triggerKonversionTasks } from '@/lib/tasking'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
+import { storagePfadAusUrl } from '@/lib/dokumente/sync-lead-zu-pflicht'
 import { assignKundenbetreuer } from '@/lib/faelle/kb-assignment'
 
 // Der Caller-Client kann ein server-action-Client (createClient) oder ein
@@ -137,10 +138,12 @@ export async function convertLeadToFall(
   if (fotoUrls.length > 0) {
     const fotoRows = fotoUrls
       .map((url) => {
-        const marker = '/public/fall-dokumente/'
-        const idx = url.indexOf(marker)
-        if (idx === -1) return null
-        const storagePath = url.slice(idx + marker.length)
+        // 28.08.: stand als `indexOf('/public/fall-dokumente/')` hier — das verlangt
+        // ausgerechnet die public-Form. Sobald STORAGE_USE_SIGNED_URLS greift, liefert
+        // getStorageUrl `/object/sign/…` und der Nachzug faende NICHTS, ohne Fehler.
+        // storagePfadAusUrl kennt public/sign/authenticated + den nackten Pfad.
+        const storagePath = storagePfadAusUrl(url)
+        if (!storagePath) return null
         return {
           fall_id: fall.id,
           dokument_typ: 'schadensfotos',
