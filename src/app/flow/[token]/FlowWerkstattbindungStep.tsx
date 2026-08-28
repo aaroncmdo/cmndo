@@ -49,11 +49,11 @@ export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; o
   return (
     <div className="max-w-md w-full">
       <h1 className="text-2xl font-semibold text-claimondo-navy mb-2 text-center">
-        Darfst du die Werkstatt frei wählen?
+        Dürfen Sie die Werkstatt frei wählen?
       </h1>
       <p className="text-claimondo-navy/60 text-sm mb-6 text-center">
-        Manche Kasko-Tarife schreiben eine Partnerwerkstatt vor. Wenn du frei wählen darfst, finden wir
-        dir eine passende Werkstatt für die Reparatur.
+        Manche Kasko-Tarife schreiben eine Partnerwerkstatt vor. Wenn Sie frei wählen dürfen, finden
+        wir Ihnen eine passende Werkstatt für die Reparatur.
       </p>
       <div className="flex flex-col gap-3">
         <button
@@ -77,7 +77,7 @@ export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; o
         >
           <span className="block font-semibold text-claimondo-navy">Nein, meine Versicherung schreibt die Werkstatt vor</span>
           <span className="block text-sm text-claimondo-navy/60">
-            Dann wende dich bitte direkt an deine Kaskoversicherung.
+            Dann wenden Sie sich bitte direkt an Ihre Kaskoversicherung.
           </span>
         </button>
       </div>

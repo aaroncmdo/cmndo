@@ -19,13 +19,13 @@ export function FlowWerkstattHinweisHaftpflicht({
         <p className="font-medium mb-1">Reparatur nach dem Gutachten</p>
         {werkstattName ? (
           <p>
-            Zuerst begutachtet dein Sachverständiger den Schaden. Danach übernimmt{' '}
-            <strong>{werkstattName}</strong> die Reparatur — wir koordinieren alles für dich.
+            Zuerst begutachtet Ihr Sachverständiger den Schaden. Danach übernimmt{' '}
+            <strong>{werkstattName}</strong> die Reparatur — wir koordinieren alles für Sie.
           </p>
         ) : (
           <p>
-            Zuerst begutachtet dein Sachverständiger den Schaden. Danach kümmern wir uns um die
-            Reparatur — wir vermitteln dir eine passende Werkstatt oder du nennst uns deine eigene.
+            Zuerst begutachtet Ihr Sachverständiger den Schaden. Danach kümmern wir uns um die
+            Reparatur — wir vermitteln Ihnen eine passende Werkstatt oder Sie nennen uns Ihre eigene.
           </p>
         )}
       </div>
