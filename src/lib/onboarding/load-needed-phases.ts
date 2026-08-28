@@ -22,6 +22,7 @@ import { localizePhase, localizeFeld } from './localize'
 import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, ConditionalOn } from '@/components/onboarding/types'
 import { filterFelderByAudience } from './filter-felder-by-audience'
 import { sollPhaseGeskipptWerden, resolveHergangFromLead } from './phasen-skip'
+import { baueVorbefuellung, type VorbefuellungsDokument } from './baue-vorbefuellung'
 
 export type LoadedWizardState = {
   phases: OnboardingPhase[]
@@ -96,49 +97,16 @@ export async function ladeNoetigePhasen(
   }
 
   // ─── 2. Pre-fill-Map: alle DB-Werte unter ihrem feld_key ────────────
-  const prefilled: Record<string, unknown> = {
-    ...flachKopie(fall as Record<string, unknown>),
-    ...flachKopie((claimRes.data ?? {}) as Record<string, unknown>),
-    ...flachKopie((leadRes.data ?? {}) as Record<string, unknown>),
-    ...flachKopie(vehicle ?? {}),
-  }
-  // Documents: pro Pflichtdokument-Slot + Dokument-Typ ein Flag setzen
-  for (const d of ((docsRes.data ?? []) as Array<{ dokument_typ: string | null; pflichtdokument_id: string | null }>)) {
-    if (d.pflichtdokument_id) prefilled[`doc_${d.pflichtdokument_id}`] = true
-    if (d.dokument_typ) prefilled[`doc_typ_${d.dokument_typ}`] = true
-  }
-
-  // ─── Upload-Felder aus den vorhandenen Dokumenten ableiten ──────────
-  //
-  // ANLASS (Aaron 28.08.2026): *„ich konnte die Daten nicht bestaetigen, ausserdem wurde ich
-  // nochmal nach dem Fahrzeugschein gefragt obwohl ich den schon hochgeladen hatte."*
-  //
-  // Beide Symptome hatten EINE Ursache: `fahrzeugschein_foto` ist `pflicht: true`, hat aber
-  // KEINEN Speicherort — `db_target.tabelle` ist `_self`, und der Save-Router ueberspringt
-  // `_`-Ziele (`save-onboarding-fields.ts`) ebenso wie die Allowlist den Typ `zb1-upload`.
-  // Der Wert lebte damit nur im lokalen React-State: nach jedem Reload war er weg,
-  // `validatePhase` fand das Pflichtfeld leer → erneute Abfrage UND blockiertes Bestaetigen.
-  //
-  // ⭐ Der Nachweis eines Upload-Feldes ist das DOKUMENT, nicht ein Feldwert. Die Schleife
-  // oben kennt es bereits — nur unter einem anderen Schluessel (`doc_typ_fahrzeugschein`
-  // statt `fahrzeugschein_foto`). Diese Bruecke fehlte.
-  //
-  // ⚠ Zwei Dokumenttypen je Feld sind kein Versehen: `schadensfoto` (6 Schreibstellen) und
-  // `schadensfotos` (2) bezeichnen dieselbe Sache — eine dokumentierte Altlast
-  // (src/lib/dokumente/dokument-typen.ts, BEKANNTE_DUBLETTEN). Bis sie zusammengelegt ist,
-  // muss hier jeder Name zaehlen, sonst fragt der Wizard je nach Schreibstelle erneut.
-  const UPLOAD_FELD_ZU_DOKUMENTTYPEN: Record<string, readonly string[]> = {
-    fahrzeugschein_foto: ['fahrzeugschein'],
-    schadensfotos: ['schadensfoto', 'schadensfotos'],
-  }
-  for (const [feldKey, typen] of Object.entries(UPLOAD_FELD_ZU_DOKUMENTTYPEN)) {
-    if (prefilled[feldKey] != null && prefilled[feldKey] !== '') continue
-    if (typen.some((t) => prefilled[`doc_typ_${t}`] === true)) {
-      // Der konkrete Wert ist gleichgueltig — `validatePhase` prueft nur auf „nicht leer",
-      // und der Wizard ueberspringt vorbefuellte Felder.
-      prefilled[feldKey] = true
-    }
-  }
+  // Praezedenz + Dokument-Ableitung liegen in ./baue-vorbefuellung (pure, unit-getestet).
+  // Kern: der Claim schlaegt den Lead — der Lead ist die Erstmeldung, der Claim der
+  // laufende Vorgang. Begruendung + prod-Messung im Header jenes Moduls.
+  const prefilled: Record<string, unknown> = baueVorbefuellung({
+    fall: fall as Record<string, unknown>,
+    claim: (claimRes.data ?? null) as Record<string, unknown> | null,
+    lead: (leadRes.data ?? null) as Record<string, unknown> | null,
+    vehicle,
+    dokumente: (docsRes.data ?? []) as VorbefuellungsDokument[],
+  })
 
   // Bug3-dedupe-Edge (Prod-Smoke 28.07.): Claims, deren convertLeadToClaim-Bridge
   // die Hergang-Kopie ausliess, fragten die Erzaehlung hier ERNEUT (leere textarea)
@@ -258,12 +226,4 @@ export async function ladeNoetigePhasen(
     totalDefinedPhases: phasenRows.length,
     skippedPhases: skipped,
   }
-}
-
-function flachKopie(o: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(o)) {
-    if (v !== null && v !== undefined && v !== '') out[k] = v
-  }
-  return out
 }
