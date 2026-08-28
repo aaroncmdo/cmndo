@@ -1128,6 +1128,9 @@ export default async function FallaktePage({
             anschlussschreiben_sendedatum: (fall.anschlussschreiben_sendedatum as string | null) ?? null,
             anschlussschreiben_unterschrift: (fall.anschlussschreiben_unterschrift as boolean | null) ?? null,
             anschlussschreiben_ocr_am: (fall.anschlussschreiben_ocr_am as string | null) ?? null,
+            // Frist-Anker: gesetzt = Versand ist bestaetigt, der Fall ist weiter.
+            // null = das Schreiben liegt vor, aber niemand hat den Versand erfasst.
+            anschlussschreiben_am: (fall.anschlussschreiben_am as string | null) ?? null,
           },
           // AAR-170: QC-Checkliste direkt im Dokumente-Tab (vorher im Monolithen)
           qcCheckliste: (qcCheckliste ?? null) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['qcCheckliste'],

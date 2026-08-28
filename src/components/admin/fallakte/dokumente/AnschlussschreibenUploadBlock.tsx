@@ -12,7 +12,7 @@ import { EyeIcon, FileTextIcon, Loader2Icon, UploadIcon } from 'lucide-react'
 // null), und der Service-Client darf nicht in den Browser. Die Action nimmt
 // die Datei direkt entgegen (kein URL-Round-Trip), die signierte Ansehen-URL
 // wird lazy beim Klick geholt.
-import { uploadAnschlussschreiben } from '../../../../app/faelle/[id]/_actions'
+import { uploadAnschlussschreiben, setAnschlussschreibenDatum } from '../../../../app/faelle/[id]/_actions'
 import { getAnschlussschreibenUrl } from '@/lib/dokumente/fall-dokumente-urls'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
@@ -21,6 +21,8 @@ export type FallAS = {
   anschlussschreiben_sendedatum: string | null
   anschlussschreiben_unterschrift: boolean | null
   anschlussschreiben_ocr_am: string | null
+  /** Frist-Anker. Gesetzt = Versand bestaetigt, Fall ist in der Regulierung. */
+  anschlussschreiben_am: string | null
 }
 
 type Props = {
@@ -34,6 +36,27 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
   const [uploading, setUploading] = useState(false)
   const [oeffnet, setOeffnet] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
+  // Versand-Bestaetigung: vorbefuellt mit dem OCR-Sendedatum, aber bewusst
+  // aenderbar — die Frist haengt daran, und OCR erkennt nicht jedes Layout.
+  const [sendedatum, setSendedatum] = useState(fallAS.anschlussschreiben_sendedatum ?? '')
+  const [bestaetigt, setBestaetigt] = useState(false)
+
+  const versandErfasst = !!fallAS.anschlussschreiben_am
+
+  async function handleVersandBestaetigen() {
+    setBestaetigt(true)
+    setFehler(null)
+    try {
+      const r = await setAnschlussschreibenDatum(fallId, sendedatum)
+      if (!r.success) {
+        setFehler(r.error ?? 'Versand konnte nicht erfasst werden')
+        return
+      }
+      router.refresh()
+    } finally {
+      setBestaetigt(false)
+    }
+  }
 
   async function handleUpload(file: File) {
     setUploading(true)
@@ -110,6 +133,45 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
               </p>
             </div>
           </div>
+          {/* Versand-Erfassung: Der Fall kommt erst weiter, wenn das VERSAND-Datum
+              feststeht — die VS-Frist laeuft ab da, nicht ab dem Upload
+              (Aaron-Entscheid 28.08.). Ohne diesen Schritt bleibt der Fall in
+              „Kanzlei-Übergabe" stehen. */}
+          {versandErfasst ? (
+            <p className="text-body-xs text-success-strong">
+              Versand erfasst — die Frist gegenüber der Versicherung läuft.
+            </p>
+          ) : (
+            <div className="rounded-ios-lg border border-claimondo-border bg-white p-2 space-y-2">
+              <p className="text-body-xs text-claimondo-ondo">
+                Wann wurde das Schreiben versendet? Die Frist gegenüber der Versicherung läuft ab
+                diesem Tag.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="date"
+                  value={sendedatum}
+                  max={new Date().toISOString().slice(0, 10)}
+                  onChange={(e) => setSendedatum(e.target.value)}
+                  className="px-2 py-1 text-xs border border-claimondo-border rounded-ios-md text-claimondo-navy"
+                />
+                <button
+                  type="button"
+                  onClick={handleVersandBestaetigen}
+                  disabled={bestaetigt || !sendedatum}
+                  title={sendedatum ? undefined : 'Bitte zuerst das Sendedatum eintragen'}
+                  className="px-3 py-1.5 rounded-ios-md bg-claimondo-navy text-white text-xs font-medium hover:bg-claimondo-ondo disabled:opacity-50"
+                >
+                  {bestaetigt ? 'Wird erfasst…' : 'Versand bestätigen'}
+                </button>
+              </div>
+              {!fallAS.anschlussschreiben_sendedatum && (
+                <p className="text-body-xs text-warning-strong">
+                  Kein Sendedatum im Dokument erkannt — bitte manuell eintragen.
+                </p>
+              )}
+            </div>
+          )}
           <button
             type="button"
             onClick={handleOeffnen}
