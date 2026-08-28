@@ -54,18 +54,17 @@ export const FAKTEN_REGELN: FaktenRegel[] = [
     dann: 'polizeibericht',
     begruendung: 'Es wurde angegeben, dass die Polizei vor Ort war — der Bericht belegt den Hergang gegenüber dem Versicherer.',
   },
-  {
-    id: 'mietwagen-genommen',
-    wenn: (f) => f.hat_mietwagen === true,
-    dann: 'mietwagen_rechnung',
-    begruendung: 'Ein Mietwagen wurde genutzt — ohne Rechnung erstattet der Versicherer die Kosten nicht.',
-  },
-  {
-    id: 'fahrzeug-finanziert-oder-leasing',
-    wenn: (f) => f.finanzierung_leasing === true,
-    dann: 'leasingvertrag',
-    begruendung: 'Das Fahrzeug ist finanziert oder geleast — der Vertrag klärt, wem die Entschädigung zusteht.',
-  },
+  // ⚠ HIER STANDEN ZWEI WEITERE REGELN (Mietwagen -> `mietwagen_rechnung`,
+  // Leasing -> `leasingvertrag`). Beide sind ENTFERNT, weil ihre Ziel-Typen im System gar
+  // nicht vergeben werden — der Invarianten-Test (dokument-typen-invariante) hat sie beim
+  // ersten Lauf gefangen. Genau der Fehler, den dieser Umbau beseitigen soll: eine Pflicht
+  // auf ein Dokument, das niemand hochladen kann, blockiert den Fall, statt ihn
+  // voranzubringen.
+  //
+  // Der Mietwagen-Beleg laeuft ohnehin ueber eine eigene Spalte
+  // (`claims.mietwagen_rechnung_url`), nicht ueber `fall_dokumente` — die Regel war also
+  // auch am falschen Mechanismus. Wer sie zurueckholen will, traegt den Typ zuerst in
+  // `dokument-typen.ts` ein UND verdrahtet eine Schreibstelle.
 ]
 
 /**

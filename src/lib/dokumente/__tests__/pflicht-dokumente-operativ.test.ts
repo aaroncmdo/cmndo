@@ -54,9 +54,12 @@ describe('Fakten loesen Pflichten aus (Aaron 28.08.)', () => {
     }
   })
 
-  it('Mietwagen -> Rechnung ist Pflicht', () => {
+  it('ein Fakt OHNE vergebbaren Ziel-Typ loest KEINE Pflicht aus', () => {
+    // Die urspruengliche Mietwagen-Regel forderte `mietwagen_rechnung` — einen Typ, den
+    // niemand vergibt. Der Invarianten-Test (dokument-typen-invariante) hat sie gefangen,
+    // die Regel ist entfernt. Der Mietwagen-Beleg laeuft ueber claims.mietwagen_rechnung_url.
     const docs = getPflichtDokumenteFuerFall('aufnahme', 'normalfall', { hat_mietwagen: true })
-    expect(docs.map((d) => d.typ)).toContain('mietwagen_rechnung')
+    expect(docs).toEqual([])
   })
 
   it('jede Fakten-Pflicht traegt eine Begruendung', () => {
