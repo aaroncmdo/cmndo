@@ -29,18 +29,33 @@ schon gewinnen.**
 
 ## Ist-Stand, gemessen
 
-**Partner-Google-Präsenz** (`sachverstaendige` + `google_bewertungen_cache`, 28.08.):
+**Partner-Google-Präsenz** (28.08., nach Abzug der Test-/Smoke-Konten):
 
 | | Zahl |
 |---|---|
-| aktive Sachverständige | 16 |
-| davon mit Bewertungen im Cache | 7 |
-| davon mit `standort_place_id` | **3** |
+| echte aktive Partner | 12 |
+| mit `profiles.google_place_id` | **6** — alle mit Bewertungen im Cache |
+| ohne | **6** — Luis, Burak, Sahin, Brandt, Dirk, (ohne Namen) |
 | stärkstes Profil | A. Kloss GmbH — 5,0★ / **359** Bewertungen |
 
-⚠ 13 von 16 tragen keine `standort_place_id`. Der Bewertungs-Cache füllt sich über
-`profile_id`, nicht über dieses Feld — die Verknüpfung Partner ↔ Google-Profil ist also
-nur teilweise gepflegt. Ohne sie lässt sich weder messen noch steuern, wo ein Partner steht.
+⚠⚠ **KORREKTUR EINER EIGENEN FEHLMESSUNG.** Zuerst hatte ich
+`sachverstaendige.standort_place_id` gemessen und „nur 3 von 16" gemeldet. Falsches Feld:
+der Bewertungs-Cron (`api/cron/google-bewertungen`) liest **`profiles.google_place_id`**.
+Die beiden bedeuten Verschiedenes:
+
+```
+profiles.google_place_id        ChIJu2k6Cw6vwEcRsiVQzuvtKUU     Google-Business-Profil
+sachverstaendige.standort_…     address.3571743007138268        Mapbox-Adresse  (Fronius)
+                                EiJXZWcgMTAsIDI3NTgw…           Google-ADRESSE  (Brandt)
+                                ChIJvcNuozfDsUcRJemxlOvYEcM     ChIJ-Format     (Dirk)
+```
+
+Nur bei Fronius sind beide gesetzt — und sie sind **nicht identisch**. Das eine ist das
+Geschäftsprofil, das andere der Standort-Geocode. **Kopieren ist keine Option.**
+
+⛔ **Und automatisch matchen erst recht nicht.** Ein falsch verknüpftes Profil zeigt
+**fremde Sterne** auf unserer Stadtseite — mit dem Namen unseres Partners darunter. Die
+Zuordnung muss ein Mensch bestätigen; sie ist eine Aussage über ein fremdes Unternehmen.
 
 **GEO-Signale auf den eigenen Seiten** (Sitemap-Vollmessung, 383 URLs):
 
@@ -66,11 +81,18 @@ Sortiert nach *belegtem* Hebel, nicht nach Aufwand.
 
 Die Profile gewinnen bereits. Fehlt: der Weg von dort zu uns.
 
-- **P1.1** `standort_place_id` für die 13 Partner ohne Eintrag nachpflegen.
-  Ohne sie ist keine Messung möglich. ⚠ **Nicht** über die Places-API massenhaft
-  auflösen — dieselbe API kostete am 24.08. an einem Tag **2.798 €**
-  (`INCIDENT-google-places-2798-euro-an-einem-tag.md`). Manuell oder in kleiner,
-  gedeckelter Charge.
+- **P1.1** `profiles.google_place_id` für die **6** Partner ohne Eintrag nachpflegen:
+  Luis (63584), Burak (50181), Sahin (47259), Brandt (27580), Dirk (21394), einer ohne
+  Namen. Ohne sie liefert der Bewertungs-Cron nichts — die Stadtseite zeigt dann keine
+  Sterne, obwohl der Partner welche hat.
+
+  **Weg:** je Partner das Profil einmal von Hand bestätigen (der Partner weiß, welches
+  seins ist), dann die ID eintragen. Das sind sechs Vorgänge, keine Automatik.
+
+  ⛔ **Nicht** per Namens-/Adress-Match automatisch auflösen — ein falscher Treffer
+  zeigt fremde Bewertungen unter dem Namen unseres Partners.
+  ⛔ **Nicht** massenhaft über die Places-API — dieselbe API kostete am 24.08. an einem
+  Tag **2.798 €** (`INCIDENT-google-places-2798-euro-an-einem-tag.md`).
 - **P1.2** Im Google-Profil jedes Partners das Website-Feld auf **seine Claimondo-
   Stadtseite** zeigen lassen (statt Startseite/Fremddomain). Das ist der direkte Pfad
   von der Maps-Antwort in unseren Funnel. Erfordert Partner-Mitwirkung → Kommunikations-
