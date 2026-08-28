@@ -40,19 +40,22 @@ export const PFLICHT_DOKUMENTE_MATRIX: Record<Phase, Partial<Record<Szenario, st
     gerichtsgutachten: ['gerichtsbeschluss', 'akte_az'],
   },
   aufnahme: {
-    // ⚠ normalfall/ruegefall/klagefall bekommen hier BEWUSST (noch) KEINE Szenario-Pflicht.
-    // Zwei Messungen vom 28.08. stehen dagegen:
-    //  1. Von allen Typen dieser Matrix existiert real genau EINER (`fahrzeugschein`);
-    //     vollmacht/personalausweis/schadenmeldung/versicherungsschein_* kommen in
-    //     `fall_dokumente.dokument_typ` in KEINER Zeile vor. Sie zu fordern hiesse, ein
-    //     Dokument anzumahnen, das niemand hochladen kann.
-    //  2. Selbst `fahrzeugschein` waere hier gefaehrlich: die 70 vorhandenen ZB1-Dokumente
-    //     verteilen sich auf nur **2** Faelle — 78 von 80 Claims haetten sofort einen
-    //     „fehlt"-Task bekommen, in eine Aufgabenliste mit bereits 707 offenen Eintraegen.
-    //     Das waere kein Fortschritt, sondern mehr Rauschen im selben Kanal
-    //     (siehe audit-aufgabenliste-707-offen-davon-41-prozent-test).
-    // Die faktenbasierte Pflicht unten greift dagegen sofort und trifft genau die Faelle,
-    // in denen der Kunde die Angabe selbst gemacht hat.
+    // Der Fahrzeugschein ist die fachliche Untergrenze: ohne ihn kein Gutachten, keine
+    // Regulierung. Er steht hier fuer die drei real vergebenen Haftpflicht-Szenarien.
+    //
+    // ⭐ ZEITPUNKT BEWUSST GEWAEHLT (Aaron 28.08.: „Easy Rent bin auch ich"): auf prod
+    // existiert **kein einziger echter Kundenfall** — alle 79 Claims sind Test oder intern.
+    // Die Regel trifft heute also niemanden und ist scharf, sobald der erste echte Fall
+    // kommt. Waere sie erst dann eingefuehrt worden, haette der erste Kunde zugleich der
+    // erste Test der Regel sein muessen.
+    //
+    // ⚠ NUR `fahrzeugschein` — die uebrigen Typen dieser Matrix (vollmacht, personalausweis,
+    // schadenmeldung, versicherungsschein_*, alle fotos_*) werden von KEINER Schreibstelle
+    // vergeben (siehe dokument-typen.ts). Sie zu fordern hiesse, ein Dokument anzumahnen,
+    // das niemand hochladen kann — und den Fall damit dauerhaft unvollstaendig zu halten.
+    normalfall: ['fahrzeugschein'],
+    ruegefall: ['fahrzeugschein'],
+    klagefall: ['fahrzeugschein'],
     haftpflicht_eindeutig: ['fahrzeugschein', 'versicherungsschein_eigener', 'versicherungsdaten_gegner'],
     haftpflicht_strittig: ['fahrzeugschein', 'versicherungsschein_eigener', 'versicherungsdaten_gegner', 'zeugen_kontakte'],
     bewertung: ['fahrzeugschein', 'kaufvertrag'],

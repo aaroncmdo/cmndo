@@ -10,16 +10,29 @@ import { pflichtAusFakten, FAKTEN_REGELN } from '../pflicht-fakten'
  */
 
 describe('normalfall — der real haeufigste Wert', () => {
-  it('ist als Szenario BEKANNT, loest aber bewusst keine Szenario-Pflicht aus', () => {
-    // Absicht, kein Versehen: die 70 vorhandenen ZB1-Dokumente verteilen sich auf nur
-    // 2 Faelle — ein Fahrzeugschein-Zwang haette 78 von 80 Claims sofort einen Task
-    // gegeben, in eine Liste mit bereits 707 offenen Eintraegen.
-    expect(getPflichtDokumenteFuerFall('aufnahme', 'normalfall')).toEqual([])
+  it('fordert ab der Aufnahme den Fahrzeugschein (war vorher LEER)', () => {
+    // Fachliche Untergrenze: ohne ZB1 kein Gutachten. Eingefuehrt zu einem Zeitpunkt, an
+    // dem prod KEINEN echten Kundenfall traegt — die Regel trifft heute niemanden und ist
+    // scharf, sobald der erste echte Fall kommt.
+    expect(getPflichtDokumenteFuerFall('aufnahme', 'normalfall').map((d) => d.typ))
+      .toEqual(['fahrzeugschein'])
   })
 
-  it('bekommt seine Pflicht ueber die FAKTEN statt ueber das Szenario', () => {
+  it('gilt ebenso fuer ruegefall und klagefall', () => {
+    for (const sz of ['ruegefall', 'klagefall']) {
+      expect(getPflichtDokumenteFuerFall('aufnahme', sz).map((d) => d.typ)).toEqual(['fahrzeugschein'])
+    }
+  })
+
+  it('kombiniert Szenario-Pflicht und Fakten-Pflicht', () => {
     const docs = getPflichtDokumenteFuerFall('aufnahme', 'normalfall', { polizei_vor_ort: true })
-    expect(docs.map((d) => d.typ)).toEqual(['polizeibericht'])
+    expect(docs.map((d) => d.typ).sort()).toEqual(['fahrzeugschein', 'polizeibericht'])
+  })
+
+  it('in der lead-Phase gilt die Aufnahme-Pflicht noch NICHT', () => {
+    // Kumulierend bis zur aktuellen Phase: wer noch nicht in der Aufnahme ist, wird nicht
+    // nach dem Fahrzeugschein gefragt.
+    expect(getPflichtDokumenteFuerFall('lead', 'normalfall')).toEqual([])
   })
 
   it('fordert fuer normalfall NICHT die nie existierenden Typen', () => {
@@ -58,8 +71,9 @@ describe('Fakten loesen Pflichten aus (Aaron 28.08.)', () => {
     // Die urspruengliche Mietwagen-Regel forderte `mietwagen_rechnung` — einen Typ, den
     // niemand vergibt. Der Invarianten-Test (dokument-typen-invariante) hat sie gefangen,
     // die Regel ist entfernt. Der Mietwagen-Beleg laeuft ueber claims.mietwagen_rechnung_url.
+    // Geprueft wird die ABWESENHEIT des Typs — die Szenario-Pflicht bleibt davon unberuehrt.
     const docs = getPflichtDokumenteFuerFall('aufnahme', 'normalfall', { hat_mietwagen: true })
-    expect(docs).toEqual([])
+    expect(docs.map((d) => d.typ)).not.toContain('mietwagen_rechnung')
   })
 
   it('jede Fakten-Pflicht traegt eine Begruendung', () => {
