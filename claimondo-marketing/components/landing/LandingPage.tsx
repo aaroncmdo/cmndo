@@ -16,6 +16,7 @@ import { FaqSection } from './sections/FaqSection'
 import { BottomCtaSection } from './sections/BottomCtaSection'
 import { WissensRatgeberSection } from './sections/WissensRatgeberSection'
 import { VerfuegbarkeitStreifen } from './sections/VerfuegbarkeitStreifen'
+import { NaechsteTermineKompakt } from '../content/NaechsteTermineKompakt'
 import { CommunityTeaserSection } from '../community/CommunityTeaserSection'
 
 type Props = {
@@ -65,6 +66,22 @@ export async function LandingPage({ authenticatedUser }: Props) {
         <CommunityTeaserSection />
         <FaqSection />
         <BottomCtaSection />
+        {/* Die buchbaren URLs als sichtbarer TEXT — dasselbe Muster wie am Ende der
+            ~30 Ratgeber-Seiten.
+
+            Warum zusaetzlich zum VerfuegbarkeitStreifen oben: der Streifen nennt Stadt,
+            Tag und Gutachter, seine URL steckt aber im `href`. Ein LLM-Web-Tool ersetzt
+            `<a href>` durch eine nummerierte Referenz und verliert den Zielwert — gemessen
+            am 28.08.: 357 ChatGPT-User-Abrufe der Startseite, und im ausgelieferten TEXT
+            stand keine einzige buchbare URL. Fuer 3 x ~125 Zeichen ist der schmale
+            Streifen der falsche Ort, das Seitenende der richtige.
+
+            Rendert `null`, wenn nichts frei ist. */}
+        <div className="mx-auto max-w-3xl px-5 pb-8">
+          <Suspense fallback={null}>
+            <NaechsteTermineKompakt />
+          </Suspense>
+        </div>
         <LandingFooter />
       </main>
       {/* whatsappHref: die Leiste rendert den WhatsApp-Knopf nur, wenn sie ihn

@@ -17,6 +17,16 @@ const MARKETING = process.env.MARKETING_BASE_URL ?? 'https://claimondo.de'
 
 // Je eine Seite pro Einbaustelle — nicht alle 18, das waere Laufzeit ohne Erkenntnis.
 const SEITEN = [
+  // ⭐ Die STARTSEITE fehlte hier bis zum 28.08. — und genau deshalb blieb ihr Mangel
+  // unentdeckt. Sie ist mit 357 Abrufen das HAEUFIGSTE Ziel von `ChatGPT-User` (dem
+  // Agent, mit dem ChatGPT eine Seite holt, waehrend ein Nutzer fragt), und lieferte
+  // dabei 464 KB HTML ohne eine einzige buchbare Tatsache: keine Uhrzeit, keine URL im
+  // Text. Der VerfuegbarkeitStreifen war da, aber seine URL steckte im `href` und seine
+  // Zeitangabe war ein blosses Datum.
+  //
+  // Ein Waechter, der die wichtigste Seite auslaesst, ist genau so viel wert wie der
+  // Deeplink-Smoke, der `schadenart` nie an eine URL haengte.
+  { pfad: '/', quelle: 'Startseite — haeufigstes ChatGPT-Ziel (357 Abrufe)' },
   { pfad: '/haftpflicht/wertminderung', quelle: 'SpokeCtaBand (18 Seiten)' },
   { pfad: '/kfz-gutachter/vermittlungsportale-vergleich', quelle: 'RatgeberStaedteSection (9 Seiten)' },
   { pfad: '/decoder/reparatur-unwirtschaftlich', quelle: 'decoder/[slug]' },

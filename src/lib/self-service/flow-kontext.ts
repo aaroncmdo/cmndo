@@ -6,6 +6,7 @@
 // simpel (AND-only, Feld==Wert) und muss weder ODER noch Fallback-Ketten koennen.
 
 import type { FlowKontext } from './flow-szenarien'
+import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 
 export type LeadFuerKontext = {
   schuldfrage?: string | null
@@ -27,6 +28,9 @@ export type LeadFuerKontext = {
   schadentyp?: string | null
   hat_vorschaeden?: boolean | null
   freie_werkstattwahl?: boolean | null
+  // Fuer werkstatt_waehlbar (s.u.) — dieselben Felder, die brauchtWerkstattVermittlung liest.
+  reparaturwunsch?: string | null
+  reparatur_vermittlung_status?: string | null
 }
 
 /**
@@ -57,6 +61,29 @@ export function bauFlowKontext(lead: LeadFuerKontext, svHatTermin: boolean): Flo
 
     // Werkstatt kann an zwei Feldern haengen -> eine Wahrheit fuer die Bedingung.
     reparatur_werkstatt_id: lead.reparatur_werkstatt_id ?? lead.werkstatt_id ?? null,
+
+    // Ist der Werkstatt-Step ueberhaupt BEDIENBAR? Bewusst dieselbe Funktion, die auch die
+    // Server-Action `waehleWerkstattFlow` als Gate benutzt — damit koennen Anzeige und
+    // Annahme nicht auseinanderlaufen.
+    //
+    // Vorher lief das auseinander (prod-verifiziert 28.08.): die Step-Bedingung prueft nur
+    // `reparatur_werkstatt_id`, das Server-Gate zusaetzlich `reparaturwunsch`. Wer die
+    // Pflichtfrage "Wie moechtest du den Schaden abrechnen?" ueberspringt, bekam anschliessend
+    // fuenf Werkstaetten angeboten — und jede Auswahl endete in "Fuer diesen Vorgang ist keine
+    // Werkstatt-Auswahl moeglich." Ein Schritt, der nichts bewirken kann, gehoert nicht in den
+    // Fluss. 'ja'/null statt bool, weil die Bedingungs-Syntax Feld==Wert vergleicht.
+    //
+    // ⚠ Das GATE selbst wird hier nicht dupliziert — waere es nachgebaut, koennte es beim
+    // naechsten Constraint-Wechsel erneut divergieren. Genau das ist der Fehler, den dieser
+    // Fix behebt.
+    werkstatt_waehlbar: brauchtWerkstattVermittlung({
+      reparaturwunsch: lead.reparaturwunsch ?? null,
+      reparatur_werkstatt_id: lead.reparatur_werkstatt_id ?? null,
+      werkstatt_id: lead.werkstatt_id ?? null,
+      reparatur_vermittlung_status: lead.reparatur_vermittlung_status ?? null,
+    })
+      ? 'ja'
+      : null,
 
     // Rohspalten fuer erhebt_felder — roh = echte Erhebung, NICHT die *_effektiv-Fallback-Kette
     // darunter. So sieht der Erhebungs-Gate den unmaskierten Zustand (Symptom 2). `?? null` (nicht ||)

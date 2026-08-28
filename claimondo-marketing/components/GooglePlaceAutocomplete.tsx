@@ -80,6 +80,19 @@ export default function GooglePlaceAutocomplete({
   // sonst oeffnet sich die Liste direkt wieder mit dem gerade gewaehlten Treffer.
   const ausAuswahl = useRef(false)
   const abbruch = useRef<AbortController | null>(null)
+  // Ein VORBEFUELLTER Wert ist keine Suchanfrage.
+  //
+  // Auf den Stadtseiten steht der Ort beim Laden schon drin (der Seiten-Ort, z.B. "Köln").
+  // Der Such-Effect lief deshalb sofort los und klappte die Vorschlagsliste auf — ohne dass
+  // jemand ins Feld getippt oder es auch nur fokussiert haette. Die Liste legte sich ueber
+  // den Absende-Button darunter: gemessen 28.08.2026 auf iPhone 13, Pixel 5, 1280x720 und
+  // 1920x1080 jeweils 3 von 3 Messpunkten verdeckt (document.elementFromPoint traf den
+  // Vorschlag "Kölner Straße, 15566 Schöneiche bei Berlin"). Betroffen waren die ~300
+  // Stadtseiten; Startseite und Ads-Landing (Feld leer) waren ueberall frei.
+  //
+  // Der bestehende `ausAuswahl`-Guard greift hier NICHT: er haengt an
+  // `defaultValue !== value`, und beim ersten Render sind beide gleich (useState-Initialwert).
+  const ersterLauf = useRef(true)
 
   useEffect(() => {
     if (defaultValue !== undefined && defaultValue !== value) {
@@ -92,6 +105,8 @@ export default function GooglePlaceAutocomplete({
   // ---------------------------------------------------------------- Mapbox-Weg
   useEffect(() => {
     if (istFirmenSuche) return
+    // Erster Durchlauf = der Initialwert, keine Eingabe -> nicht suchen, nichts aufklappen.
+    if (ersterLauf.current) { ersterLauf.current = false; return }
     if (ausAuswahl.current) { ausAuswahl.current = false; return }
     const q = value.trim()
     if (q.length < 3) { setVorschlaege([]); setOhneTreffer(false); setOffen(false); return }

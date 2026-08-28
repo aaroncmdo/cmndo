@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/wie-es-funktioniert`)),
       title: t('wie_es_funktioniert.title'),
       description: t('wie_es_funktioniert.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'So funktioniert Claimondo' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'So funktioniert Claimondo' }],
     },
   }
 }

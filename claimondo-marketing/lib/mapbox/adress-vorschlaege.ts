@@ -28,7 +28,11 @@ export type AdressVorschlag = {
   place_id: string
 }
 
-type MapboxFeature = {
+/** Roh-Feature der Geocoding-API. Exportiert, damit auch das SERVER-seitige
+ *  `geocodeAdresse` dieselbe Transformation nutzen kann — sonst laufen die beiden
+ *  Auswertungen desselben Antwortformats auseinander (genau das war der
+ *  Stadtteil-statt-Stadt-Fehler vom 28.08.2026). */
+export type MapboxFeature = {
   id?: string
   text?: string
   address?: string

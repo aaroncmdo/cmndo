@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(PAGE_PATH)),
       title: t('kfz_gutachter_vergleich.og_title'),
       description: t('kfz_gutachter_vergleich.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter-Vermittlungsportale im Vergleich' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Kfz-Gutachter-Vermittlungsportale im Vergleich' }],
     },
   }
 }

@@ -56,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/schadensreport-2026`)),
       title: t('schadensreport_2026.og_title'),
       description: t('schadensreport_2026.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Schadensreport 2026' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Schadensreport 2026' }],
     },
   }
 }
