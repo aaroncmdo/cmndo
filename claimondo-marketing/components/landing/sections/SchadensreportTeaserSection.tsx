@@ -3,30 +3,8 @@ import { ChevronRight, BarChart3 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
 // Doc 35 Fix 5: Coup-Asset (Schadensreport 2026, Layer 3) war nur im Footer.
-// Teaser auf der Hauptseite — gedacht als Daten-Beleg der Kuerzungs-Mechanik,
-// die die VersichererTaktikenSection beschreibt, und deshalb urspruenglich
-// "direkt dahinter" platziert.
-//
-// ⚠ IST-ZUSTAND WEICHT AB (gemessen 28.08.2026 auf prod): Seit dem
-// B1-Schnitt (21 -> 12 Section-Komponenten) liegen zwischen den Taktiken und
-// diesem Teaser DREI Sektionen — ProduktApp, Menschen, SvFinder. In
-// LandingPage.tsx steht <SchadensreportSection /> an Position 10 von 14, auf
-// Bildschirm 27,4 von 34,3 (mobil) bzw. 17,6 von 22 (Desktop).
-//
-// Bewusst NICHT eigenmaechtig zurueckverschoben, aus zwei Gruenden:
-//   1. Der Nutzen waere gering. Die Kernaussage steht laengst weiter vorne:
-//      "32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt" in der
-//      Hero-Subheadline (Bildschirm 0,5) und nochmal in PlattformMechanik
-//      (10,7) — insgesamt 10x im ausgelieferten HTML. Dieser Teaser ist die
-//      Vertiefung, nicht der erste Beweis.
-//   2. Es gaebe ein Rhythmus-Risiko. Diese Sektion und ProduktAppSection sind
-//      beide `bg-claimondo-bg`; direkt hintereinander stuenden zwei helle
-//      Blocks, unmittelbar hinter dem dunklen Abschluss der BeweisSection,
-//      deren ABA-Rhythmus im eigenen Header ausdruecklich festgehalten ist.
-//
-// Wer die urspruengliche Absicht wiederherstellen will, verschiebt in
-// LandingPage.tsx <SchadensreportSection /> vor <ProduktAppSection /> UND
-// prueft dabei den Hell/Dunkel-Wechsel der drei betroffenen Sektionen.
+// Teaser auf der Hauptseite — thematisch direkt hinter den Versicherer-Taktiken,
+// als Daten-Beleg der dort beschriebenen Kuerzungs-Mechanik.
 
 export async function SchadensreportTeaserSection() {
   const t = await getTranslations('home')
