@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/kfz-gutachter/ablauf`)),
       title: t('kfz_gutachter_ablauf.og_title'),
       description: t('kfz_gutachter_ablauf.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Ablauf Schadensregulierung' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Ablauf Schadensregulierung' }],
     },
   }
 }

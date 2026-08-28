@@ -61,13 +61,13 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph('/')),
       title: t('home.title'),
       description: t('home.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Claimondo' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('home.title'),
       description: t('home.twitter_description'),
-      images: ['/og-default.png'],
+      images: ['/opengraph-image'],
     },
   }
 }

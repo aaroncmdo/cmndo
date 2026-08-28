@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(await localeOpenGraph(`/kfz-gutachter/gutachten-service`)),
       title: t('kfz_gutachter_gutachten_service.og_title'),
       description: t('kfz_gutachter_gutachten_service.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachten-Service' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Kfz-Gutachten-Service' }],
     },
   }
 }

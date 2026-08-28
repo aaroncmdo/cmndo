@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: `${GUTACHTER_LANDING_URL}/neukundengewinnung`,
       title: t('gutachter_partner_neukundengewinnung.og_title'),
       description: t('gutachter_partner_neukundengewinnung.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Neukundengewinnung für Kfz-Sachverständige' }],
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Neukundengewinnung für Kfz-Sachverständige' }],
     },
   }
 }

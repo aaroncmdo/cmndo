@@ -24,7 +24,8 @@
 
 ## Varianten / Abzweige
 
-- **`nur_gutachter`** (Kunde reguliert selbst): kein KB, keine Kanzlei; endet nach Schritt 6 mit Gutachten-Übergabe an den Kunden.
+- **`nur_gutachter`** (Kunde reguliert selbst): **keine Kanzlei** (`kanzlei_wunsch='nicht_gefragt'`), aber **sehr wohl ein Kundenbetreuer** — er bleibt der Ansprechpartner, auch wenn der Kunde die Regulierung selbst führt. Endet nach Schritt 6 mit der Gutachten-Übergabe an den Kunden.
+  ⚠ **Korrektur 28.08.2026 (Aaron):** Hier stand bis dahin „kein KB, keine Kanzlei". Der Code setzt `kundenbetreuer_id` auch bei `nur_gutachter` — das ist **richtig so**, die Journey war falsch. Ein Entry-Point-Sweep hatte es als Befund gemeldet; die Klarstellung macht daraus einen Nicht-Befund.
 - **Kasko / Selbstzahler** (nicht unverschuldet): eigener Abrechnungsweg → **J5**; Reparatur-Strecke → **J4** (Status `reparatur-*`).
 - **Makler-vermittelt:** Attribution via `promotion_code_id` → `claims.makler_id`; Provision + `makler.lead_eingegangen`/`makler.provision_status` (→ **J9**).
 - **VS-Kürzung / Ablehnung:** `vs-kuerzt`/`vs-abgelehnt`/`abgelehnt` → Rüge → ggf. `klage`/`klage_rechtsstreit` (→ Kanzlei-Eskalation).

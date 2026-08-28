@@ -635,15 +635,42 @@ solange das Feld beides zulässt — aber eine Falle für spätere Auswertungen.
    meldete deshalb „0 Leads" für zwei Einstiege, die einwandfrei funktionieren. Suche jetzt über
    den Namen.
 
-### 5.18 E5 · Werkstatt-Finder und E8 · `/check` — nicht abgeschlossen
+### 5.18 E5 · Werkstatt-Finder — **vollständig durchgelaufen, gesund**
 
-* **E5:** kommt bis „Was ist beschädigt?" — dort ist „Weiter" deaktiviert, bis eine Schadens-
-  **Kategorie** (Karosserie/Lackierung/Mechanik/Glas/Smart Repair) gewählt ist. Mein Walker klickte
-  „Fotos auswählen" (öffnet einen Datei-Dialog) und lief in die Schleife. **Script-Lücke, kein
-  Produktbefund** — gefixt, aber nicht mehr nachgefahren.
-* **E8 `/check`:** meine Formular-Erkennung (`<form>` mit den meisten Feldern) findet dort
-  **kein Formular** — der Funnel ist vermutlich ohne `<form>`-Element gebaut. Ungeklärt, ob
-  Produkt oder Messung.
+Nachgefahren nach vier Selektor-Korrekturen (alle Script-seitig, kein Produktbefund).
+Neun Schritte: Ort → Fahrzeug → Schadensbild → Kostenträger → Kontakt → „Anfrage absenden".
+
+| Prüfpunkt | Ergebnis |
+|---|---|
+| Lead + FlowLink | ✅ `source_channel='werkstatt_finder'`, FlowLink vorhanden |
+| **Ort** | ✅ `fahrzeug_standort_adresse = "Domkloster 4, 50667 Köln, Deutschland"`, lat **50.941306** |
+| Schadensanalyse | ✅ `bedarf_kategorien = {karosserie, lackierung}`, `bedarf_quelle='schadenbeschreibung'` |
+| Fahrzeug | ✅ BMW / 3er / `fahrzeugklasse='M1'` / `gewerbe_flag=false` |
+| Schuldfrage | ✅ `gegner` (aus „Unverschuldeter Unfall — der Gegner haftet") |
+| Beschreibung | ✅ byte-genau in `fahrzeugschaden_beschreibung` |
+| Team-Benachrichtigung | ✅ WhatsApp zugestellt: „🆕 Neuer Lead: Werkstatt-Finder" |
+
+🔄 **Damit ist Hypothese H1 („Werkstatt-Finder sendet dem Kunden nichts") überholt** — der
+Team-Alert geht raus (das war PR #5533), und der FlowLink existiert. Was weiterhin fehlt, ist
+eine *aktive* Nachricht an den Melder; er wird per Client-Redirect geführt. Das ist der Punkt
+aus dem A4-Register, nicht ein neuer Befund.
+
+⚠ **Vier Selektor-Fallen auf dem Weg** — sie treffen jeden Walker über diesen Wizard:
+1. „Weiter" ist deaktiviert, bis eine Schadens-**Kategorie** gewählt ist; „Fotos auswählen"
+   öffnet nur einen Datei-Dialog.
+2. Auswahl-**Karten** tragen Titel + Beschreibung in **einem** Button (~160 Zeichen) — eine
+   Längengrenze von 80 filtert sie aus der Erhebung, und der Schritt sieht optionslos aus.
+3. `hasText` mit dem **normalisierten** Kartentext trifft nie: der DOM hat Zeilenumbrüche
+   zwischen Titel und Beschreibung. Über den Titelanfang ankern.
+4. Der Absende-Button heißt hier **„Anfrage absenden"** bzw. „Werkstatt anfragen" — nicht
+   „Absenden". Jeder Einstieg nennt ihn anders (Mini-Wizard: „Sicheren Link erhalten",
+   Finder: „Termin reservieren").
+
+### 5.19 E8 · `/check` — offen
+
+Meine Formular-Erkennung (`<form>` mit den meisten Feldern) findet dort **kein Formular** —
+der Funnel ist vermutlich ohne `<form>`-Element gebaut. Ungeklärt, ob Produkt oder Messung.
+Einziger nicht abgeschlossener Einstieg.
 
 ### 5.16 🔴 Der Abschluss-Weg ist über die Oberfläche **nicht erreichbar** — reproduziert + gemessen
 

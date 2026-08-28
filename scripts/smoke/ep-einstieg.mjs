@@ -90,7 +90,11 @@ for (let s = 1; s <= MAX; s++) {
         // im Finder tragen die Kontaktfelder nur das (given-name/family-name/tel/email).
         ac: el.getAttribute('autocomplete') || '',
       })),
-      buttons: [...new Set([...document.querySelectorAll('button')].filter(sichtbar).map((el) => txt(el) + (el.disabled ? '[aus]' : '')).filter((t) => t && t.length < 80))],
+      // ⚠ Laengengrenze grosszuegig: Auswahl-KARTEN tragen Titel + Beschreibung in EINEM
+      // Button ("Unverschuldeter Unfall — der Gegner haftet. Die gegnerische Haftpflicht …",
+      // ~160 Zeichen). Mit `< 80` fielen sie aus der Erhebung, der Walker sah einen Schritt
+      // ohne jede Option und meldete faelschlich "kein Weg weiter".
+      buttons: [...new Set([...document.querySelectorAll('button')].filter(sichtbar).map((el) => txt(el) + (el.disabled ? '[aus]' : '')).filter((t) => t && t.length < 220))],
       body: (document.body?.innerText || '').replace(/\s+/g, ' ').slice(0, 2000),
     }
   })
@@ -182,7 +186,10 @@ for (let s = 1; s <= MAX; s++) {
 
   // ⚠ "Termin ändern" darf NIE als Weiter gelten — es fuehrt zurueck und erzeugt eine
   // Endlosschleife (real passiert: reservieren ↔ ändern ↔ Schadentyp).
-  const weiter = F.getByRole('button', { name: /^(Weiter|Absenden|Senden|Sicheren Link erhalten|Rückruf anfordern|Jetzt anfragen|Anfrage senden|Termin reservieren|Jetzt reservieren|Reservieren|Verbindlich|Kostenlos|Prüfen|Los)/i })
+  // ⚠ Der Absende-Button heisst NICHT ueberall gleich: Mini-Wizard "Sicheren Link erhalten",
+  // Gutachter-Finder "Termin reservieren", Werkstatt-Finder "Anfrage absenden" /
+  // "Werkstatt anfragen". Ein `^Absenden` traf keinen davon.
+  const weiter = F.getByRole('button', { name: /^(Weiter|Absenden|Senden|Sicheren Link erhalten|Rückruf anfordern|Jetzt anfragen|Anfrage senden|Anfrage absenden|Werkstatt anfragen|Termin reservieren|Jetzt reservieren|Reservieren|Verbindlich|Kostenlos|Prüfen|Los)/i })
   const n = await weiter.count()
   let ok = false
   for (let i = 0; i < n; i++) {
@@ -199,9 +206,17 @@ for (let s = 1; s <= MAX; s++) {
     // ("Fotos auswählen" liess den Werkstatt-Finder in einer Schleife stehen, weil der
     //  eigentlich verlangte Klick eine Schadens-KATEGORIE war.)
     const AUS = /^(zurück|beratung vereinbaren|×|x|anderer ort|abbrechen|schließen|überspringen|fotos auswählen|foto aufnehmen|beschreibung analysieren|unfallhergang einsprechen)$/i
-    const wahl = l.buttons.map((t) => t.replace(/\[aus\]$/, '')).find((t) => !AUS.test(t.trim()) && t.length < 40 && !/\d{2}\.\d{2}\./.test(t))
+    // ⚠ Laenge grosszuegig: Auswahl-KARTEN tragen Titel + Beschreibung in einem Button
+    // ("Unverschuldeter Unfall — der Gegner haftet …"). Mit `length < 40` fiel der ganze
+    // Schritt durch und der Walker meldete faelschlich "kein Weg weiter".
+    const wahl = l.buttons.map((t) => t.replace(/\[aus\]$/, '')).find((t) => !AUS.test(t.trim()) && t.length < 220 && !/\d{2}\.\d{2}\./.test(t))
     if (wahl) {
-      const btn = F.locator('button').filter({ hasText: wahl }).first()
+      // ⚠ NICHT mit dem ganzen Text matchen: `wahl` ist normalisiert (Whitespace zu
+      // einfachen Leerzeichen), der DOM enthaelt Zeilenumbrueche zwischen Titel und
+      // Beschreibung — `hasText` findet den langen String deshalb nie. Der Titelanfang
+      // reicht und ist bei Auswahl-Karten eindeutig.
+      const anker = wahl.split(/\s{2,}|\n/)[0].slice(0, 30).trim()
+      const btn = F.locator('button').filter({ hasText: anker }).first()
       if (await btn.count() && !(await btn.isDisabled().catch(() => true))) {
         await btn.click()
         console.log(`  → Auswahl geklickt: "${wahl}"`)

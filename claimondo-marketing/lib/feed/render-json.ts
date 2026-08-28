@@ -24,7 +24,7 @@ export function renderJsonFeed(meta: JsonFeedMeta, items: FeedItem[]) {
     feed_url: `${SITE_URL}${meta.feedPath}`,
     description: meta.description,
     language: 'de-DE',
-    icon: `${SITE_URL}/og-default.png`,
+    icon: `${SITE_URL}/opengraph-image`,
     favicon: `${SITE_URL}/favicon.svg`,
     authors: [{ name: top.name, url: top.url }],
     items: items.map((item) => {

@@ -185,6 +185,14 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
             // unfallort wird mit der formatierten Adresse ersetzt, damit
             // SA-PDF und Onboarding-Texte saubere Adressen zeigen.
             unfallort: geo.formatted,
+            // PLZ + Ort aus derselben Antwort mitnehmen (28.08.2026). `unfallort_plz` ist
+            // die Spalte, aus der convertLeadToClaim `claims.schadenort_plz` fuellt — sie
+            // blieb bisher leer, obwohl der Kunde die PLZ eingetippt hatte. Nur setzen,
+            // wenn Mapbox sie liefert: ein Freitext-Ort ohne PLZ soll ein evtl. schon
+            // vorhandenes Feld nicht ueberschreiben.
+            ...(geo.plz ? { unfallort_plz: geo.plz } : {}),
+            ...(geo.ort ? { unfallort_ort: geo.ort } : {}),
+            ...(geo.placeId ? { unfallort_place_id: geo.placeId } : {}),
             updated_at: new Date().toISOString(),
           })
           .eq('id', lead.id as string)

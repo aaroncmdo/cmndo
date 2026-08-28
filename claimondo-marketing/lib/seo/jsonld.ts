@@ -23,7 +23,7 @@ export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
  * so verloren 167 Seiten ihr Vorschaubild, obwohl das Layout eines definiert.
  */
 export const OG_DEFAULT_IMAGES = [
-  { url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' },
+  { url: '/opengraph-image', width: 1200, height: 630, alt: 'Claimondo' },
 ]
 export const WERKSTATT_LANDING_URL = 'https://werkstatt.claimondo.de'
 export const FLOTTE_LANDING_URL = 'https://flotte.claimondo.de'
