@@ -179,8 +179,23 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
    * wie gut er ihn verarbeiten koennte.
    */
   test('Deeplink reicht schadenart UND schuldfrage in den Embed durch', async ({ page }) => {
+    const t = await holeNaechstenTermin()
+    test.skip(!t, 'Termin-API liefert gerade keinen Slot fuer ' + STADT)
+
+    // ⚠ MIT `sv=`+`slot=`, nicht ohne.
+    //
+    // Die erste Fassung dieses Tests liess beide weg und erwartete trotzdem den Sprung bis
+    // zur Zusammenfassung — sie wurde rot, und zwar zu Recht: `versucheSchadenartVorauswahl()`
+    // haengt am Ende von `versucheSlotVorauswahl` und damit hinter dessen Bedingung
+    // `if (!vorauswahlSvId || !vorauswahlSlotStart) return`. Ohne Gutachter und Termin gibt
+    // es keinen Sprung. Das ist auch das, was llms.txt beschreibt („Termin, Gutachter, Ort
+    // und Schadenart stehen dort zur Bestätigung") — ein vollstaendiger Deeplink.
+    //
+    // Der Fehler lag also im Test, nicht im Produkt. Festgehalten, weil ein spaeterer Leser
+    // sonst dieselbe Abkuerzung nimmt.
     await page.goto(
       `${MARKETING}/gutachter-finden?adresse=${encodeURIComponent('Domkloster 4, 50667 Köln')}` +
+        `&sv=${t!.svId}&slot=${encodeURIComponent(t!.slot)}` +
         `&schadenart=${encodeURIComponent('Parkschaden')}&schuldfrage=gegner`,
       { waitUntil: 'domcontentloaded' },
     )
@@ -213,7 +228,7 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
     const frame = page.frameLocator('iframe[src*="embed/gutachter-finder"]')
     await expect(
       frame.getByText(/Schadenart: Parkschaden/i).first(),
-      'mit Ort + Schadenart muss der Wizard bis zur Buchungs-Zusammenfassung durchspringen',
+      'vollstaendiger Deeplink muss bis zur Buchungs-Zusammenfassung durchspringen',
     ).toBeVisible({ timeout: 40_000 })
   })
 })

@@ -6,7 +6,7 @@ import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
 import { SCHADEN_OPTIONEN } from './_lib/schadenarten'
-import { pruefeSchuldfrage } from './_lib/schuldfrage'
+import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
 
 // AAR-956 — Gutachter-Finder Embed (Haupt-App, standalone, iframe-baar).
 // Zieht den Finder aus der Marketing-App hierher → direkter Termin-Engine-Zugriff,
@@ -45,7 +45,7 @@ export default async function GutachterFinderEmbedPage({
      *  Zusammen mit sv+slot+adresse springt der Wizard direkt zu den Kontaktdaten. */
     schadenart?: string
     /** GEO-Deep-Link: wer den Schaden verursacht hat (`gegner` | `unklar`).
-     *  Gesetzt entfaellt im FlowLink der Quali-Schritt. Siehe `_lib/schuldfrage.ts`. */
+     *  Gesetzt entfaellt im FlowLink der Quali-Schritt. Siehe `@/lib/geo-deeplink/schuldfrage`. */
     schuldfrage?: string
   }>
 }) {
@@ -141,7 +141,7 @@ export default async function GutachterFinderEmbedPage({
   //
   // ⚠ Nur `gegner`/`unklar` — die Schnittmenge der CHECK-Constraints von gfa und leads.
   // Ein Wert ausserhalb liefe beim Promote in einen stillen Reject. Begruendung samt
-  // gemessener Constraint-Werte in `_lib/schuldfrage.ts`.
+  // gemessener Constraint-Werte in `@/lib/geo-deeplink/schuldfrage`.
   const vorauswahlSchuldfrage = pruefeSchuldfrage(sp.schuldfrage)
 
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
