@@ -189,6 +189,15 @@ export async function uploadDokumentViaAnfrageToken(
       return { success: false, error: ocrRes.error }
     }
     extracted = ocrRes.extracted
+    // ⭐ Prod-Smoke 28.08.: Genau dieser Aufruf fehlte — der OCR-Zweig legte KEIN
+    // fall_dokumente an, der Nicht-OCR-Zweig direkt darunter schon. Damit trat exakt
+    // ein, wovor insertFallDokument im eigenen Kommentar warnt: „die Datei liegt bereits
+    // im Storage … existiert aber fuer die Akte gar nicht" — nur nicht durch einen
+    // fehlgeschlagenen Insert, sondern durch einen fehlenden Aufruf.
+    // Gemessen: 2 Bilder im Storage, 0 Zeilen in fall_dokumente.
+    // Folge: Der Wizard fragte den Fahrzeugschein nach jedem Reload erneut ab (Aaron 28.08.),
+    // weil die Vorbefuellung ihn am DOKUMENT erkennt (load-needed-phases → baue-vorbefuellung).
+    await insertFallDokument(db, fallId, slotId, path, contentType, buf.length, slot.label)
   } else if (slotId === 'fahrzeugschein' && !slot.ocr) {
     // Fahrzeugschein ohne OCR — nur speichern, kein leads-Update
     await insertFallDokument(db, fallId, slotId, path, contentType, buf.length, slot.label)

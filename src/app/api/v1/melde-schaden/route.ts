@@ -23,6 +23,7 @@ import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { klassifiziereReservierungsGrund } from './reservierung-grund'
 import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { findRecentMcpLead } from '@/lib/api-v1/recent-lead-dedup'
 import {
@@ -74,6 +75,20 @@ const MeldeSchadenSchema = z.object({
   slot_end: z.string().max(40).optional(),
   /** Vager Wunschtermin-Label (weicher Hold), falls kein konkreter Slot gewaehlt wurde. */
   wunschtermin: z.string().max(40).optional(),
+  /**
+   * Wer den Schaden verursacht hat — `gegner` oder `unklar` (Aliase s.
+   * `@/lib/geo-deeplink/schuldfrage`). Optional.
+   *
+   * Wozu: gesetzt entfaellt fuer den Kunden im FlowLink der komplette Quali-Schritt —
+   * `FlowWizardKfz` rechnet `qualiPending = … && !initialSchuldfrage`.
+   *
+   * ⚠ BEWUSST `z.string()` und NICHT `z.enum([...])`: ein unbekannter Wert soll die
+   * Schadenmeldung NICHT scheitern lassen. Der Lead ist das Wertvolle, die Schuldfrage
+   * die Zugabe — ein 400er wegen eines Bonusfeldes wuerde den Kunden kosten. Geprueft
+   * wird unten mit `pruefeSchuldfrage`; was nicht passt, faellt auf null und der Kunde
+   * beantwortet die Frage selbst.
+   */
+  schuldfrage: z.string().trim().max(40).optional(),
   name: z.string().trim().min(2).max(80),
   telefon: z.string().trim().regex(PHONE_RE),
   /** Stage-1-Einwilligung — Pflicht. zugestimmt MUSS true sein, sonst kein Write. */
@@ -194,12 +209,27 @@ export async function POST(req: Request) {
   // (issueCanonical) -> Slot-Ranking im /flow. Bleibt als Async-Fallback, falls die harte
   // Reservierung unten ausbleibt/verfaellt (819dab90: kurz hart reservieren + weicher Hold).
   const wunschterminIso = input.slot_start ?? input.wunschtermin ?? null
-  if (wunschterminIso) {
-    const { error: wtErr } = await admin
+
+  // Die Schuldfrage aus dem Chat, falls die KI sie geklaert hat. Sie muss auf die gfa,
+  // BEVOR issueCanonicalFlowLinkForAnfrage() unten laeuft — der Promote liest die Zeile
+  // und uebertraegt den Wert nach lead.schuldfrage, was dort den Quali-Schritt entfernt.
+  //
+  // ⚠ `pruefeSchuldfrage` statt roher Durchgriff: `leads_schuldfrage_check` und
+  // `gutachter_finder_anfragen_schuldfrage_check` erlauben NICHT dieselben Werte. Ein
+  // Wert ausserhalb der Schnittmenge braeche den Lead-Insert im Promote — also die
+  // Flowlink-Ausstellung, nicht nur dieses Feld.
+  const schuldfrage = pruefeSchuldfrage(input.schuldfrage)
+
+  // In EINEM Update statt zwei Roundtrips; beide Felder sind optional.
+  const nachtrag: Record<string, string> = {}
+  if (wunschterminIso) nachtrag.wunschtermin = wunschterminIso
+  if (schuldfrage) nachtrag.schuldfrage = schuldfrage
+  if (Object.keys(nachtrag).length > 0) {
+    const { error: ntErr } = await admin
       .from('gutachter_finder_anfragen')
-      .update({ wunschtermin: wunschterminIso })
+      .update(nachtrag)
       .eq('id', ins.anfrageId)
-    if (wtErr) console.error('[melde-schaden] wunschtermin-Update fehlgeschlagen:', wtErr.message)
+    if (ntErr) console.error('[melde-schaden] gfa-Nachtrag fehlgeschlagen:', ntErr.message)
   }
 
   // Stage-1-Consent-Audit (zusaetzlich zu anfragen.dsgvo_zustimmung_am via consent_ts). Non-fatal.

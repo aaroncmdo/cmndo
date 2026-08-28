@@ -56,7 +56,7 @@ export type EmbedBuchungInput = {
   viaDeeplink?: boolean
   /** Welche KI ihn geschickt hat, falls sie sich selbst nennt (`utm_source=chatgpt.com`). */
   utmSource?: string | null
-  /** Schuldfrage aus dem Chat (`?schuldfrage=`) — nur `gegner`|`unklar`, in `_lib/schuldfrage.ts`
+  /** Schuldfrage aus dem Chat (`?schuldfrage=`) — nur `gegner`|`unklar`, in `@/lib/geo-deeplink/schuldfrage`
    *  gegen die CHECK-Schnittmenge von gfa und leads geprueft. Spart den Quali-Schritt. */
   schuldfrage?: string | null
 }
