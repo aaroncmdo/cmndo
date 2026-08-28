@@ -32,6 +32,7 @@ import {
 } from '@/lib/content/claimondo-mdx'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 
 const WA = WHATSAPP_HREF
 
@@ -114,6 +115,11 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <ArticleComments articleSlug={`decoder/${slug}`} />
         </article>
       </main>
+      {/* Autorenschaft + Stand — sichtbar, nicht nur im Schema. Datum aus
+          `a.lastModified` (MDX-Frontmatter), also eine echte Quelle. `verantwortlich`,
+          weil kein Feld eine fachliche Einzelpruefung belegt — Begruendung in
+          ReviewerByline.tsx. */}
+      <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
       <LandingFooter />
       <StickyCallBar quelle={`Decoder: ${a.slug}`} whatsappHref={WA} />
     </div>
