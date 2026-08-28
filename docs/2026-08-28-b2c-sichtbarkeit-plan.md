@@ -33,10 +33,15 @@ schon gewinnen.**
 
 | | Zahl |
 |---|---|
-| echte aktive Partner | 12 |
-| mit `profiles.google_place_id` | **6** — alle mit Bewertungen im Cache |
-| ohne | **6** — Luis, Burak, Sahin, Brandt, Dirk, (ohne Namen) |
+| SV-Profile gesamt (ohne Smoke-/Test-Mails) | 19 |
+| mit `profiles.google_place_id` | **7** — davon 1 internes Konto, alle mit Bewertungen im Cache |
+| ohne, **aber echte Aufgabe** | **3** — Sahin, Burak, Luis (siehe P1.1) |
+| ohne, **keine Aufgabe** | 9 — 6× `pending`, 1× `frist_ueberschritten`, 2 Testkonten |
 | stärkstes Profil | A. Kloss GmbH — 5,0★ / **359** Bewertungen |
+
+⚠ Die Zahlen „12 aktive / 6 ohne" der ersten Fassung waren zu grob: sie zählten
+Onboarding-Karteileichen als Partner mit. Korrigiert am 28.08. beim Aufbereiten der
+Arbeitsliste — Begründung und Namensliste unter P1.1.
 
 ⚠⚠ **KORREKTUR EINER EIGENEN FEHLMESSUNG.** Zuerst hatte ich
 `sachverstaendige.standort_place_id` gemessen und „nur 3 von 16" gemeldet. Falsches Feld:
@@ -81,13 +86,41 @@ Sortiert nach *belegtem* Hebel, nicht nach Aufwand.
 
 Die Profile gewinnen bereits. Fehlt: der Weg von dort zu uns.
 
-- **P1.1** `profiles.google_place_id` für die **6** Partner ohne Eintrag nachpflegen:
-  Luis (63584), Burak (50181), Sahin (47259), Brandt (27580), Dirk (21394), einer ohne
-  Namen. Ohne sie liefert der Bewertungs-Cron nichts — die Stadtseite zeigt dann keine
-  Sterne, obwohl der Partner welche hat.
+- **P1.1** `profiles.google_place_id` nachpflegen. Ohne sie liefert der Bewertungs-Cron
+  nichts — die Stadtseite zeigt dann keine Sterne, obwohl der Partner welche hat.
+
+  ⚠⚠ **KORREKTUR (28.08., zweite Messung).** Die erste Fassung nannte „6 Partner:
+  Luis, Burak, Sahin, **Brandt**, Dirk, einer ohne Namen". Beim Aufbereiten der
+  Arbeitsliste zeigte der Join über `sachverstaendige.profile_id` ein anderes Bild:
+
+  | | |
+  |---|---|
+  | SV-Profile gesamt (ohne Smoke/Test-Mails) | 19 |
+  | **mit** `google_place_id` | 7 — davon 1 internes Konto |
+  | **ohne** | 12 — aber **9 davon sind keine offene Aufgabe** |
+
+  Von den 12 ohne ID sind **6 `onboarding_status = pending`** (nie fertig onboardet,
+  also gar keine aktiven Partner), einer ist `frist_ueberschritten`, und zwei sind
+  Testkonten (`aarondat`, „Onboarding Audit-SV"). Ein „Brandt" kommt in den Daten
+  **nicht vor** — der Name stammte aus der früheren Fehlmessung über
+  `sachverstaendige.standort_place_id` (dort hatte Brandt eine Google-ADRESS-ID, keine
+  Profil-ID; siehe die Tabelle oben).
+
+  **Die echte Arbeitsliste sind drei Partner** — verifiziert, Onboarding abgeschlossen:
+
+  | Partner | Standort |
+  |---|---|
+  | Sahin Daskiran | Mannesmannstr. 41, 47259 |
+  | Burak Yesil | St.-Florian-Str. 5, 50181 Bedburg |
+  | Luis Klug | Gründau, 63584 |
+
+  Grenzfälle, erst nach Klärung: **Dirk Petersen** (21394, `verifizierung ausstehend`,
+  zusätzlich als Dublette angelegt) und **Fabius Thewalt** (50827, `frist_ueberschritten`).
 
   **Weg:** je Partner das Profil einmal von Hand bestätigen (der Partner weiß, welches
-  seins ist), dann die ID eintragen. Das sind sechs Vorgänge, keine Automatik.
+  seins ist), dann die ID eintragen — im SV-Portal über `GoogleBusinessFeld` (verknüpft
+  und holt die Bewertungen sofort) oder in `admin/sachverstaendige/[id]`. Drei Vorgänge,
+  keine Automatik.
 
   ⛔ **Nicht** per Namens-/Adress-Match automatisch auflösen — ein falscher Treffer
   zeigt fremde Bewertungen unter dem Namen unseres Partners.
@@ -110,10 +143,23 @@ Auf den Fachseiten stehen Zahlen und Paragraphen, aber **kein Mensch sagt etwas*
   die Partner-Sachverständigen (7 mit belegter Reputation), die Partnerkanzlei.
 - **P2.3** Ausrollen auf die Seiten, die KI-Crawler laut Log wirklich lesen.
 
-### P3 · Restliche Seiten GEO-fähig nachziehen
+### P3 · Restliche Seiten GEO-fähig nachziehen — ✅ erledigt (#5698)
 
-Aus #5688 offen: `/decoder` (12 — kein `SpokeCtaBand`-Anker), `/versicherer` (13),
-`/sachverstaendige` (9), ~15 Einzelseiten (`/`, `/vorteile`, `/wie-es-funktioniert`, …).
+Nachgemessen an der ausgelieferten Sitemap statt am Dateisystem: **352 von 371
+Inhaltsseiten** tragen die Byline. Von den 19 Resten waren nur **5 echte Lücken**
+(`kfz-gutachter/ablauf`, `autoschaden-soforthilfe`, `gutachten-service`,
+`sachverstaendiger-vs-gutachter`, `kfz-haftpflicht-schaden`) — nachgezogen.
+
+Die übrigen 14 brauchen keine: Übersichtslisten (`/wissen`, `/decoder`, `/versicherer`,
+`/sachverstaendige`, `/community`) sind Verzeichnisse, keine Artikel; dazu Startseiten
+samt Subdomains, `/llms.txt` (keine HTML-Seite) und `/autor/aaron-sprafke` (die
+Autorenseite selbst). Die frühere Auflistung („/decoder 12, /versicherer 13,
+/sachverstaendige 9") zählte die DETAIL-Seiten dieser Rubriken — die haben ihre Byline
+längst; nur die Rubrik-Startseite hat keine, und das ist richtig so.
+
+Ein Prod-Wächter sichert das jetzt ab (`tests/e2e/flows/autorenschaft-byline-smoke.spec.ts`,
+3/3 grün): er prüft die Byline in `page.content()` **und** in `innerText` — im HTML stehen
+und für Menschen sichtbar sein sind zwei verschiedene Aussagen.
 
 ### P4 · Messbarkeit
 
@@ -122,10 +168,25 @@ Aus #5688 offen: `/decoder` (12 — kein `SpokeCtaBand`-Anker), `/versicherer` (
 - **P4.2** Wöchentliche Messung: Wer wird bei „Kfz-Gutachter \<Stadt\>" genannt, und ist
   ein Partner darunter? Bisher einmalig manuell gemacht — der Befund oben stammt daraus.
 
-### P5 · Der Deeplink-Pfad (läuft, teils live)
+### P5 · Der Deeplink-Pfad — ✅ erledigt (#5698), Deploy offen
 
-`schadenart=`/`adresse=` sind gebaut; **Schuldfrage** als nächster Parameter offen
-(spart einen Wizard-Schritt und verbessert die Datenqualität).
+`&schuldfrage=gegner|unklar` gebaut. Der Nutzen entsteht ohne Änderung am FlowLink:
+`FlowWizardKfz` rechnet `qualiPending = istIncomplete && !lead.disqualifiziert &&
+!initialSchuldfrage` — ein gesetzter Wert nimmt den Quali-Schritt aus dem Wizard.
+
+⭐⭐ **Dabei aufgefallen: `&schadenart=` kam seit dem 25.08. nie im Embed an.** Die
+Marketing-Seite reicht nur eine feste Allowlist an den iframe durch, und `schadenart`
+fehlte darin — während `llms.txt` KI-Assistenten ausdrücklich anwies, ihn anzuhängen.
+Auf prod gemessen: `adresse` JA (Gegenprobe), `schadenart` NEIN. Die drei bestehenden
+Smokes waren grün, **weil keiner den Parameter je an eine URL hängte**. Beides gefixt;
+der neue Test war gegen prod rot und wird nach dem Deploy grün.
+
+Dazu Aliase für das Vokabular der eigenen Berater-API (`/pruefe-anspruch` nimmt
+`unverschuldet`, der Deeplink `gegner`) — sonst verliert eine KI, die beides nacheinander
+nutzt, den Wert an der Wertprüfung statt an der Allowlist.
+
+**Offen:** Release nach `main` (prod deployt nur von dort), danach der Regel-4-Nachweis
+mit echter Buchung.
 
 ---
 
@@ -138,5 +199,17 @@ Aus #5688 offen: `/decoder` (12 — kein `SpokeCtaBand`-Anker), `/versicherer` (
 
 ## Reihenfolge
 
-P1.1 (Datenlücke schließen, sonst blind) → P3 (fertig machen, was begonnen ist) →
-P2 (größter Hebel, braucht aber Zulieferung) → P1.2/P1.3 (Partner-Kommunikation) → P4.
+P1.1 (Datenlücke schließen, sonst blind) → ~~P3~~ ✅ → P2 (größter Hebel, braucht aber
+Zulieferung) → P1.2/P1.3 (Partner-Kommunikation) → P4.
+
+## Stand 28.08.2026
+
+| Paket | Stand |
+|---|---|
+| P1.1 Place-IDs | offen — **3 Partner**, braucht Aarons Bestätigung je Profil |
+| P1.2 Website-Feld im Google-Profil | offen — Partner-Kommunikation |
+| P1.3 Bewertungs-Nachfrage | offen — erst Ist-Quote messen |
+| P2 Expertenzitate | zurückgestellt (Aaron: Consent zu aufwendig) |
+| P3 Autorenschaft | ✅ 352/371, Wächter grün |
+| P4 Messbarkeit | offen — Local Falcon braucht OAuth-Freigabe |
+| P5 Deeplink-Parameter | ✅ gebaut, Release nach `main` offen |

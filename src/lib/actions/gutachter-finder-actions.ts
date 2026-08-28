@@ -80,6 +80,15 @@ export type GutachterFinderPayload = {
   schadenort_lat?: number
   schadenort_lng?: number
   wunschtermin?: string
+  /**
+   * Wer den Schaden verursacht hat. NUR `gegner` oder `unklar` — das sind die einzigen
+   * Werte, die sowohl `gutachter_finder_anfragen_schuldfrage_check` als auch
+   * `leads_schuldfrage_check` erlauben. Ein Wert ausserhalb dieser Schnittmenge
+   * (`teilschuld`, `eigenverantwortung`) ueberlebt den Promote gfa→lead NICHT und wird
+   * dort still verworfen. Geprueft wird beim Einstieg, siehe
+   * `src/app/embed/gutachter-finder/_lib/schuldfrage.ts`.
+   */
+  schuldfrage?: string
   /** Kam die Anfrage ueber einen KI-/Verzeichnis-Deeplink (`?sv=…`)? Dann traegt die
    *  Zeile `utm_source='ki-deeplink'` — sonst ist dieser Weg im Nachhinein NICHT von
    *  einem normalen Website-Besuch unterscheidbar. Siehe Insert unten. */
@@ -399,6 +408,7 @@ export async function erstelleGutachterFinderAnfrage(
       werkstatt_id: payload.werkstatt_id ?? null,
       schaetzung_session_id: payload.schaetzung_session_id ?? null,
       fahrzeug_baujahr: payload.fahrzeug_baujahr ?? null,
+      schuldfrage: payload.schuldfrage ?? null,
     })
     .select('id')
     .single()

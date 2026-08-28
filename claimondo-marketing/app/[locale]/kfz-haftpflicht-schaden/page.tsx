@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
@@ -96,6 +97,9 @@ export default function Page() {
         </article>
         <SpokeCtaBand headline={t('cta_band.headline_kfz_haftpflicht')} />
       </main>
+      {/* Datum aus dem gepflegten `last_modified` des Inhalts, nicht hartkodiert — so
+          altert die Angabe mit dem Text statt mit dem Deploy. */}
+      <ReviewerByline datum={a.lastModified.toISOString().slice(0, 10)} rolle="verantwortlich" />
       <LandingFooter />
       <StickyCallBar quelle="Cornerstone: Haftpflicht-Hub" whatsappHref={WA} />
     </div>
