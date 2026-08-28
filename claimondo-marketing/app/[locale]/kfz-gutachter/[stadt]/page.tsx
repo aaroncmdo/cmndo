@@ -17,6 +17,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { NaechsterTerminHinweis } from '@/components/gutachter-finden/NaechsterTerminHinweis'
 import { WerkstattAbdeckungHinweis } from '@/components/gutachter-finden/WerkstattAbdeckungHinweis'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { FounderSection } from '@/components/landing/FounderSection'
@@ -1180,6 +1181,28 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
+      {/* Autorenschaft + Stand — SICHTBAR, nicht nur im JSON-LD.
+          Das `dateModified` steht laengst im Schema (Zeile ~336), aber `<script>`-Bloecke
+          fallen beim Text-Strippen weg: fuer ein LLM ist es unsichtbar. Genau derselbe
+          Fehler wie beim Buchungslink, der drei Tage lang nur im `href` stand.
+
+          Gemessen am 28.08.2026 ueber die Sitemap: von 40 geprueften Inhaltsseiten
+          fehlte auf 27 jede Autorenschaft — darunter ALLE ~173 Stadtseiten. Benannte
+          Autorenschaft ist eines der Signale, die AI-Systeme fuer E-E-A-T lesen; die
+          Komponente liefert sie zusammen mit `Person`-Schema und LinkedIn als `sameAs`.
+
+          ⚠ `rolle="verantwortlich"`, NICHT „fachlich geprüft": die 175 veroeffentlichten
+          Lokalinhalte sind ausnahmslos `ai_generated` und `reviewed_am IS NULL` — keiner
+          wurde einzeln geprueft. Eine Pruef-Behauptung waere eine Falschaussage ueber
+          einen namentlich genannten Menschen, auf 173 oeffentlichen Seiten. Sobald ein
+          Lokalinhalt `reviewed_am` traegt, kann diese Seite auf `geprueft` wechseln.
+
+          Das Datum kommt aus DERSELBEN Quelle wie das Schema — sichtbarer Stand und
+          `dateModified` koennen so nicht auseinanderlaufen. */}
+      <ReviewerByline
+        rolle="verantwortlich"
+        datum={stadtLastModifiedISO(s.slug, freigegeben?.veroeffentlichtAm).slice(0, 10)}
+      />
       <LandingFooter finderHref={finderHrefFuerStadt(s)} />
       <TrackingHooks />
       <StickyCallBar quelle={`Kfz-Gutachter ${s.name}`} finderHref={finderHrefFuerStadt(s)} />
