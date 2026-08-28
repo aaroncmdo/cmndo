@@ -986,20 +986,20 @@
     "founders": {
       "items": [
         {
-          "rolle": "Geschäftsführer, CEO & Mitgründer",
-          "foto_label": "rechts im Bild",
-          "bio_kurz": "Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.",
-          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus Kfz-Sachverständigen und Fachanwälten – und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
-          "quote": "„Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\"",
-          "quote_autor": "Bruce Wayne"
-        },
-        {
           "rolle": "Geschäftsführer, COO & Mitgründer",
           "foto_label": "links im Bild",
           "bio_kurz": "Aaron baut die Claimondo-Plattform und verantwortet Operations – von der Foto-Schadenerfassung bis zur Auszahlung.",
           "bio_lang": "Aaron kommt aus Sales und Account-Management bei nextright und AdvoScale, wo er gesehen hat, wie viel Geld in jeder Schadenakte zwischen Versprechen und Auszahlung verloren geht. Bei Claimondo hat er die komplette technische Plattform aufgebaut: KI-gestützte Schadenerfassung, GPS-Self-Dispatch zum nächsten freien Sachverständigen, ZB1-OCR mit Imagin-Visualisierung, digitale Schutzbrief-Unterzeichnung – und sorgt dafür, dass Dispatch, Sachverständige, Anwälte und Kunde dieselben Daten in Echtzeit sehen.",
           "quote": "„Qualität bedeutet, es richtig zu machen, wenn niemand zuschaut.\"",
           "quote_autor": "Henry Ford"
+        },
+        {
+          "rolle": "Geschäftsführer, CEO & Mitgründer",
+          "foto_label": "rechts im Bild",
+          "bio_kurz": "Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.",
+          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus Kfz-Sachverständigen und Fachanwälten – und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
+          "quote": "„Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\"",
+          "quote_autor": "Bruce Wayne"
         }
       ]
     },
@@ -1541,14 +1541,14 @@
       "linkedin_aria": "{name} auf LinkedIn",
       "founders": [
         {
-          "rolle": "Geschäftsführer, CEO & Mitgründer",
-          "bio": "Nicolas führt Claimondo und ist Ansprechpartner für Versicherungs-Partnerschaften und strategische Kanzlei-Kooperationen. Sein Antrieb: Schadensregulierung in Deutschland transparent und auf Augenhöhe machen – ohne Versicherer-Standardgespräche, ohne Kürzungslogik.",
-          "quote": "\"Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\" – Batman"
-        },
-        {
           "rolle": "Geschäftsführer, COO & Mitgründer",
           "bio": "Aaron verantwortet bei Claimondo Operations, Produkt und Tech-Plattform. Mit Hintergrund in Sales und Account-Management bei nextright und AdvoScale weiß er, wo der Hebel zwischen Kundenversprechen und realer Auszahlung liegt. Aaron ist die Schnittstelle zwischen Gutachtern, Anwälten und unserer Software.",
           "quote": "\"Qualität bedeutet, es richtig zu machen, wenn niemand zuschaut.\" – Henry Ford"
+        },
+        {
+          "rolle": "Geschäftsführer, CEO & Mitgründer",
+          "bio": "Nicolas führt Claimondo und ist Ansprechpartner für Versicherungs-Partnerschaften und strategische Kanzlei-Kooperationen. Sein Antrieb: Schadensregulierung in Deutschland transparent und auf Augenhöhe machen – ohne Versicherer-Standardgespräche, ohne Kürzungslogik.",
+          "quote": "\"Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\" – Batman"
         }
       ]
     },

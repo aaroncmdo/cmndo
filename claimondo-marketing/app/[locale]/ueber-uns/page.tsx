@@ -52,16 +52,27 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Nur strukturelle Felder (Eigennamen, URLs, Fotos) bleiben im Const;
 // Texte (rolle, bio, quote, fotoLabel) kommen aus founderMsgs (t.raw).
+//
+// ⚠ INDEX-GEKOPPELT an ueber_uns.founders.items[0/1] in allen sechs
+// Locale-Dateien. Wer hier tauscht, MUSS dort mittauschen — sonst traegt der
+// eine die Biografie und das foto_label des anderen, ohne dass Build oder tsc
+// etwas merken. Dasselbe Muster steht in components/landing/FounderSection.tsx
+// fuer die Startseite; beide gehoeren zusammen gepflegt.
+//
+// Aaron zuerst, weil er auf team-founders.png LINKS steht (Aaron-Entscheid
+// 28.08.2026) — die Bildunterschrift sagt es ebenfalls ("Aaron Sprafke …,
+// links · Nicolas Kitta …, rechts"). Vorher lief die Textreihenfolge gegen
+// die Bildreihenfolge.
 const FOUNDERS = [
-  {
-    name: FOUNDER_NICOLAS_NAME,
-    foto: '/brand/team-founders.png',
-    linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
-  },
   {
     name: FOUNDER_AARON_NAME,
     foto: '/brand/team-founders.png',
     linkedin: 'https://www.linkedin.com/in/aaronsprafke/',
+  },
+  {
+    name: FOUNDER_NICOLAS_NAME,
+    foto: '/brand/team-founders.png',
+    linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
   },
 ] as const
 

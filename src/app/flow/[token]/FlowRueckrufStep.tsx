@@ -43,11 +43,11 @@ export function FlowRueckrufStep({
           <CheckIcon className="h-7 w-7 text-success-strong" />
         </div>
         <h2 className="text-heading-md font-semibold text-claimondo-navy mb-2">
-          Wir rufen dich zurück
+          Wir rufen Sie zurück
         </h2>
         <p className="text-body-sm text-claimondo-ondo leading-relaxed">
-          Einer unserer Berater meldet sich in der Regel innerhalb von 15 Minuten bei dir und klärt mit
-          dir die Schuldfrage. Danach sagen wir dir genau, wie es weitergeht.
+          Einer unserer Berater meldet sich in der Regel innerhalb von 15 Minuten bei Ihnen und klärt
+          mit Ihnen die Schuldfrage. Danach sagen wir Ihnen genau, wie es weitergeht.
         </p>
       </div>
     )
@@ -64,7 +64,7 @@ export function FlowRueckrufStep({
       </h2>
       <p className="text-body-sm text-claimondo-ondo mb-6 leading-relaxed">
         Wenn die Schuld nicht eindeutig ist, hängt viel davon ab, wie der Unfall genau abgelaufen ist.
-        Statt jetzt einen Gutachter zu buchen, ruft dich ein Berater an, klärt die Haftung mit dir und
+        Statt jetzt einen Gutachter zu buchen, ruft Sie ein Berater an, klärt die Haftung mit Ihnen und
         leitet dann die richtigen Schritte ein.
       </p>
 
