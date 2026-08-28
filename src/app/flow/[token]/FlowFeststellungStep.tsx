@@ -12,6 +12,7 @@
 // inkl. Name-Match auf ist_fahrzeughalter (Kunde == Halter → Halter-Block entfällt).
 
 import { useMemo, useState } from 'react'
+import { autosaveFeststellung } from './autosave-feststellung'
 import { useTranslations } from 'next-intl'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
@@ -145,13 +146,10 @@ export function FlowFeststellungStep({
 
   async function handleWeiter() {
     if (!isLast) {
-      // Hintergrund-Autosave (best effort): Resume + Realtime, nicht blockierend.
-      // Slice 2-write-1: offline -> Outbox (class B), online -> wie bisher.
-      if (!navigator.onLine) {
-        void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values } }).catch(() => {})
-      } else {
-        void speichereFeststellungFlow(token, values).catch(() => {})
-      }
+      // Hintergrund-Autosave: nicht blockierend, aber auch nicht still. Schlaegt der Save
+      // fehl, geht der Wert in die Outbox statt verloren (siehe autosave-feststellung.ts —
+      // das fruehere `.catch(() => {})` fing nichts, weil die Action nie wirft).
+      autosaveFeststellung(token, values)
       setError(null)
       gotoIdx(idx + 1)
       return
@@ -178,12 +176,9 @@ export function FlowFeststellungStep({
   // aus dem Block. Hält die Conversion frei; die Fakten kommen via Dispatch oder später
   // im Kunde-Onboarding nach (DB-vorbefüllt → kein Doppel-Tippen).
   function handleSkipAll() {
-    // Slice 2-write-1: offline -> Outbox (class B), online -> wie bisher.
-    if (!navigator.onLine) {
-      void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values } }).catch(() => {})
-    } else {
-      void speichereFeststellungFlow(token, values).catch(() => {})
-    }
+    // Beim Ueberspringen ist der Save besonders heikel: der Kunde kommt hier NICHT mehr
+    // vorbei. Ein verlorener Autosave waere endgueltig — deshalb ueber die Outbox.
+    autosaveFeststellung(token, values)
     setError(null)
     onWeiter()
   }

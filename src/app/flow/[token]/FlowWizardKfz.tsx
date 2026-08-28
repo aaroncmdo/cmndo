@@ -11,6 +11,7 @@
 // (server-flag-gegatet via CANONICAL_FLOWLINK_ENABLED). Neue Features sind hier ok.
 
 import { useState, useRef, useEffect } from 'react'
+import { autosaveFeststellung } from './autosave-feststellung'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createKundeAccount, updateLeadStammdaten, loginAfterFlowFormAction } from './actions'
@@ -31,7 +32,6 @@ import type { IntakeFeld } from '@/lib/self-service/feststellung-intake-schema'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { meetsCondition } from './feststellung-steps'
-import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import { useOnlineStatus } from '@/lib/offline/use-online-status'
 import { enqueueOp } from '@/lib/offline/enqueue'
 import {
@@ -296,22 +296,22 @@ export default function FlowWizardKfz({
     else setUmbuchen(true)
   }
   // AAR-956 16.06. (Aaron): Service-/Kanzlei-Wahl im SA-/POS-Step. Init aus dem Lead-Stand;
-  // Autosave bei jeder Aenderung (speichereFeststellungFlow), damit signSAandCreateFall den
+  // Autosave bei jeder Aenderung (autosaveFeststellung — mit Outbox-Rueckfall), damit signSAandCreateFall den
   // gewaehlten Service/Kanzlei vom Lead liest.
   const [serviceValues, setServiceValues] = useState<Record<string, unknown>>(serviceWerte ?? {})
   // Slice 2-write-1: debounced Online-Status fuer den Termin-Gate (Task 3) + die
   // Offline-Enqueue-Zweige. Enqueue-Entscheidung nutzt raw navigator.onLine (instant).
   const isOnline = useOnlineStatus()
   function setServiceFeld(key: string, val: unknown) {
-    setServiceValues((v) => {
-      const next = { ...v, [key]: val }
-      if (!navigator.onLine) {
-        void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values: next } }).catch(() => {})
-      } else {
-        void speichereFeststellungFlow(token, next).catch(() => {})
-      }
-      return next
-    })
+    // ⚠ Der Save stand frueher IM State-Updater. Die Funktion in `setServiceValues(v => …)`
+    // muss pur sein — React darf sie mehrfach aufrufen (StrictMode, Concurrent), was zu
+    // doppelten Saves in unbestimmter Reihenfolge fuehrt. Jetzt: Wert aus dem aktuellen
+    // State ableiten, State setzen, DANN den Nebeneffekt ausloesen.
+    const next = { ...serviceValues, [key]: val }
+    setServiceValues(next)
+    // Nicht blockierend, aber bei Fehlschlag ueber die Outbox — das fruehere
+    // `.catch(() => {})` fing nichts, weil die Action ein Result-Object liefert.
+    autosaveFeststellung(token, next)
   }
 
   // Editierbare Stammdaten (KFZ-117: Kunde kann korrigieren)
