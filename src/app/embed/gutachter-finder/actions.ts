@@ -56,6 +56,9 @@ export type EmbedBuchungInput = {
   viaDeeplink?: boolean
   /** Welche KI ihn geschickt hat, falls sie sich selbst nennt (`utm_source=chatgpt.com`). */
   utmSource?: string | null
+  /** Schuldfrage aus dem Chat (`?schuldfrage=`) — nur `gegner`|`unklar`, in `_lib/schuldfrage.ts`
+   *  gegen die CHECK-Schnittmenge von gfa und leads geprueft. Spart den Quali-Schritt. */
+  schuldfrage?: string | null
 }
 
 export async function starteEmbedBuchung(
@@ -101,6 +104,8 @@ export async function starteEmbedBuchung(
     // Harden EZ carry (Aaron 04.07.): EZ-Jahr nativ auf die GFA -> gfa.fahrzeug_baujahr ->
     // lead.fahrzeug_baujahr -> vehicles (2. kanonischer Pfad neben dem Session-Side-Lookup).
     fahrzeug_baujahr: ezJahr ?? undefined,
+    // Schuldfrage aus dem KI-Deeplink -> gfa.schuldfrage -> (Promote) lead.schuldfrage.
+    schuldfrage: input.schuldfrage ?? undefined,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -315,6 +320,8 @@ export async function reserviereEmbedTermin(input: {
   viaDeeplink?: boolean
   /** Welche KI ihn geschickt hat (`utm_source` aus der Einstiegs-URL). */
   utmSource?: string | null
+  /** Schuldfrage aus dem Deeplink (`gegner`|`unklar`) — spart den Quali-Schritt im FlowLink. */
+  schuldfrage?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -364,6 +371,7 @@ export async function reserviereEmbedTermin(input: {
     schaetzungSessionId: input.schaetzungSessionId ?? null,
     viaDeeplink: input.viaDeeplink,
     utmSource: input.utmSource,
+    schuldfrage: input.schuldfrage ?? null,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token

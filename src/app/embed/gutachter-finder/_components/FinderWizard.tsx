@@ -123,6 +123,7 @@ export function FinderWizard({
   vorauswahlAdresse = null,
   vorauswahlSvName = null,
   vorauswahlSchadenart = null,
+  vorauswahlSchuldfrage = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -177,6 +178,14 @@ export function FinderWizard({
    * dann im Chat schon beantwortet. Der Kunde kann jederzeit zurueck.
    */
   vorauswahlSchadenart?: string | null
+  /**
+   * Schuldfrage aus dem Chat (`?schuldfrage=`), bereits auf `gegner`/`unklar` geprueft.
+   *
+   * Anders als die anderen Vorauswahlen steuert sie NICHTS an der Oberflaeche — sie wird
+   * nur mitgeschrieben. Ihr Nutzen liegt spaeter: im FlowLink entfaellt dadurch der
+   * Quali-Schritt (`qualiPending` prueft `!initialSchuldfrage`).
+   */
+  vorauswahlSchuldfrage?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -445,6 +454,9 @@ export function FinderWizard({
         // Nachhinein nicht von einem normalen Website-Besuch zu unterscheiden.
         viaDeeplink: !!vorauswahlSvId,
         utmSource,
+        // Aus dem Chat uebernommen (`?schuldfrage=`) — erspart dem Kunden den
+        // Quali-Schritt im FlowLink. Null, wenn die KI nichts mitgab.
+        schuldfrage: vorauswahlSchuldfrage,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
