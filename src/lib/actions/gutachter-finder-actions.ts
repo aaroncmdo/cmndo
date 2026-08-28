@@ -86,7 +86,7 @@ export type GutachterFinderPayload = {
    * `leads_schuldfrage_check` erlauben. Ein Wert ausserhalb dieser Schnittmenge
    * (`teilschuld`, `eigenverantwortung`) ueberlebt den Promote gfa→lead NICHT und wird
    * dort still verworfen. Geprueft wird beim Einstieg, siehe
-   * `src/app/embed/gutachter-finder/_lib/schuldfrage.ts`.
+   * `src/lib/geo-deeplink/schuldfrage.ts`.
    */
   schuldfrage?: string
   /** Kam die Anfrage ueber einen KI-/Verzeichnis-Deeplink (`?sv=…`)? Dann traegt die
