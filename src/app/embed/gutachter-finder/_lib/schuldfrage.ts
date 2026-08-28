@@ -31,6 +31,28 @@ export const SCHULDFRAGE_DEEPLINK = ['gegner', 'unklar'] as const
 export type SchuldfrageDeeplink = (typeof SCHULDFRAGE_DEEPLINK)[number]
 
 /**
+ * Das Vokabular unserer eigenen Berater-API — und der Grund, warum es Aliase braucht.
+ *
+ * `GET /api/v1/pruefe-anspruch` nimmt `schuldfrage=[unverschuldet|teilschuld|selbst|unklar]`.
+ * Das steht so in llms-full.txt und in der OpenAPI-Spec, die KI-Assistenten direkt als Tool
+ * importieren. Ein Assistent, der erst den Anspruch prueft und dann den Buchungslink baut,
+ * traegt seinen Wert (`unverschuldet`) voellig folgerichtig weiter — und der faellt hier
+ * ohne Alias still weg. Genau die Reibung, die `schadenart` drei Tage lang wirkungslos
+ * gemacht hat, nur eine Ebene hoeher: nicht die Allowlist verwirft, sondern die Wertpruefung.
+ *
+ * `teilschuld` und `selbst` bekommen bewusst KEINEN Alias — sie haben in `leads` kein
+ * Gegenstueck (s.o.), und beide Faelle gehoeren ohnehin ins Gespraech mit einem Berater.
+ */
+const ALIASE: Record<string, SchuldfrageDeeplink> = {
+  unverschuldet: 'gegner',
+  // Wie die KI es im Gespraech formuliert haette, wenn sie unsere Spaltennamen nicht kennt.
+  gegnerisch: 'gegner',
+  fremdverschulden: 'gegner',
+  offen: 'unklar',
+  strittig: 'unklar',
+}
+
+/**
  * Nimmt den rohen Query-Wert und gibt ihn nur zurueck, wenn er in BEIDEN Tabellen
  * erlaubt ist. Alles andere → `null`, der Wizard fragt dann normal.
  *
@@ -40,5 +62,7 @@ export type SchuldfrageDeeplink = (typeof SCHULDFRAGE_DEEPLINK)[number]
 export function pruefeSchuldfrage(roh: unknown): SchuldfrageDeeplink | null {
   if (typeof roh !== 'string') return null
   const v = roh.trim().toLowerCase()
-  return SCHULDFRAGE_DEEPLINK.find((w) => w === v) ?? null
+  const treffer = SCHULDFRAGE_DEEPLINK.find((w) => w === v)
+  if (treffer) return treffer
+  return ALIASE[v] ?? null
 }
