@@ -6,6 +6,7 @@ import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
 import { SCHADEN_OPTIONEN } from './_lib/schadenarten'
+import { pruefeSchuldfrage } from './_lib/schuldfrage'
 
 // AAR-956 — Gutachter-Finder Embed (Haupt-App, standalone, iframe-baar).
 // Zieht den Finder aus der Marketing-App hierher → direkter Termin-Engine-Zugriff,
@@ -43,6 +44,9 @@ export default async function GutachterFinderEmbedPage({
     /** GEO-Deep-Link: die Schadenart aus dem Chat („Parkschaden", „Auffahrunfall", …).
      *  Zusammen mit sv+slot+adresse springt der Wizard direkt zu den Kontaktdaten. */
     schadenart?: string
+    /** GEO-Deep-Link: wer den Schaden verursacht hat (`gegner` | `unklar`).
+     *  Gesetzt entfaellt im FlowLink der Quali-Schritt. Siehe `_lib/schuldfrage.ts`. */
+    schuldfrage?: string
   }>
 }) {
   const sp = await searchParams
@@ -131,6 +135,15 @@ export default async function GutachterFinderEmbedPage({
   const vorauswahlSchadenart =
     SCHADEN_OPTIONEN.find((o) => o.toLowerCase() === schadenartRoh) ?? null
 
+  // Schuldfrage aus dem Chat — spart im FlowLink einen ganzen Schritt (der Quali-Step
+  // faellt bei gesetztem `lead.schuldfrage` aus dem Wizard) und verbessert zugleich die
+  // Datenqualitaet: die KI hat die Frage im Gespraech ohnehin geklaert.
+  //
+  // ⚠ Nur `gegner`/`unklar` — die Schnittmenge der CHECK-Constraints von gfa und leads.
+  // Ein Wert ausserhalb liefe beim Promote in einen stillen Reject. Begruendung samt
+  // gemessener Constraint-Werte in `_lib/schuldfrage.ts`.
+  const vorauswahlSchuldfrage = pruefeSchuldfrage(sp.schuldfrage)
+
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
@@ -170,6 +183,7 @@ export default async function GutachterFinderEmbedPage({
             vorauswahlAdresse={vorauswahlAdresse}
             vorauswahlSvName={vorauswahlSvName}
             vorauswahlSchadenart={vorauswahlSchadenart}
+            vorauswahlSchuldfrage={vorauswahlSchuldfrage}
           />
         }
       />

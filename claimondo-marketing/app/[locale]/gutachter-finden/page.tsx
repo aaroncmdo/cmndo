@@ -93,6 +93,11 @@ export default async function GutachterFindenPage({
      *  eintippen. Bewusst OHNE Name/Telefon/E-Mail: die stuenden sonst in Chatverlaeufen,
      *  Referrern und unseren Zugriffslogs. */
     adresse?: string
+    /** Schadenart aus dem Chat („Parkschaden", …). Wird an den Embed durchgereicht und
+     *  dort gegen die feste Optionsliste geprueft. */
+    schadenart?: string
+    /** Schuldfrage aus dem Chat (`gegner`|`unklar`) — spart im FlowLink den Quali-Schritt. */
+    schuldfrage?: string
   }>
 }) {
   const t = await getTranslations('gutachter_finden')
@@ -175,6 +180,8 @@ export default async function GutachterFindenPage({
         slot={sp.slot}
         utmSource={sp.utm_source}
         adresse={sp.adresse}
+        schadenart={sp.schadenart}
+        schuldfrage={sp.schuldfrage}
       />
 
       {/* Crawl-Pfad — loest die Linkleiste ab und verbessert sie in zwei Punkten:

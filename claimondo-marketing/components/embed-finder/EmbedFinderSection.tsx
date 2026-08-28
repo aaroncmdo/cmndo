@@ -73,6 +73,22 @@ export type EmbedFinderSectionProps = {
   /** Standort des Fahrzeugs aus dem Deeplink — die KI hat ihn im Gespraech erfragt.
    *  Der Embed ueberspringt damit den Ort-Schritt (nur wirksam mit initialCenter). */
   adresse?: string
+  /**
+   * Schadenart aus dem Deeplink („Parkschaden", „Auffahrunfall", …).
+   *
+   * ⚠ NACHGETRAGEN 28.08.2026 — sie fehlte hier, obwohl `llms.txt` die KI seit dem
+   * 25.08. ausdruecklich anweist, `&schadenart=` an `/gutachter-finden` zu haengen.
+   * Diese Allowlist verwarf den Wert still: der Embed hat ihn nie gesehen, der Kunde
+   * musste die Art trotzdem waehlen. Kein Fehler, keine leere Seite — nur die
+   * versprochene Ersparnis blieb aus. Der Smoke war gruen, weil er `stadt=`/`adresse=`
+   * testete und `schadenart=` nie an eine URL haengte.
+   */
+  schadenart?: string
+  /**
+   * Schuldfrage aus dem Deeplink (`gegner` | `unklar`). Der Embed validiert sie erneut
+   * gegen die CHECK-Schnittmenge; hier wird sie nur durchgereicht.
+   */
+  schuldfrage?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -94,6 +110,8 @@ export function EmbedFinderSection({
   slot,
   utmSource,
   adresse,
+  schadenart,
+  schuldfrage,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -119,6 +137,13 @@ export function EmbedFinderSection({
   if (utmSource) params.set('utm_source', utmSource.slice(0, 150))
   // Nur MIT Koordinaten sinnvoll: ohne initialCenter kann der Embed nichts damit anfangen.
   if (adresse && initialCenter) params.set('adresse', adresse.slice(0, 200))
+  // Schadenart + Schuldfrage aus dem Deeplink. Anders als `adresse` OHNE Koordinaten-
+  // Bedingung: beide sind fuer sich nuetzlich (die Schadenart fuellt den Schaden-Schritt
+  // vor, die Schuldfrage spart spaeter den Quali-Schritt im FlowLink), auch wenn der
+  // Kunde seinen Ort noch selbst eingeben muss. Der Embed validiert beide gegen feste
+  // Wertelisten — ein unbekannter Wert faellt dort still weg.
+  if (schadenart) params.set('schadenart', schadenart.slice(0, 60))
+  if (schuldfrage) params.set('schuldfrage', schuldfrage.slice(0, 30))
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 
