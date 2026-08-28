@@ -45,7 +45,15 @@ function makeBuilder(table: string) {
     order: () => b,
     limit: () => b,
     insert: async () => ({ error: null }),
-    update: () => ({ eq: async () => ({ error: null }) }),
+    // `.update().eq()` wird an manchen Stellen direkt awaited, seit dem
+    // filmcheck_ok-Fix an anderer Stelle mit `.select('id')` zur Trefferpruefung
+    // fortgesetzt. Der Rueckgabewert kann daher beides: thenable + .select().
+    update: () => ({
+      eq: () => ({
+        select: async () => ({ data: [{ id: 'auftrag-1' }], error: null }),
+        then: (onF: (v: { error: null }) => unknown) => onF({ error: null }),
+      }),
+    }),
     single: async () => ({ data: resolveRow(table, sel), error: null }),
     maybeSingle: async () => ({ data: resolveRow(table, sel), error: null }),
     then: (onF: (v: { data: unknown[]; error: null }) => unknown) => onF({ data: [], error: null }),
@@ -61,6 +69,12 @@ function makeServerClient() {
 }
 
 vi.mock('@/lib/supabase/server', () => ({ createClient: vi.fn(async () => makeServerClient()) }))
+// filmcheck_ok/_am/_notizen laufen seit dem Stiller-Write-Fix ueber den Admin-Client
+// (die auftraege-UPDATE-Policy kennt den KB nicht). Gleicher Builder — der Test prueft
+// die Handoff-Logik, nicht die Client-Wahl.
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => ({ from: (table: string) => makeBuilder(table) })),
+}))
 vi.mock('@/lib/claims/get-claim-for-role', () => ({ resolveClaimId: (...a: unknown[]) => resolveMock(...a) }))
 vi.mock('@/lib/faelle/state-machine', () => ({ transitionFallStatus: (...a: unknown[]) => transitionMock(...a) }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
