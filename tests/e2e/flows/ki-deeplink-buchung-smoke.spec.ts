@@ -160,4 +160,60 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
       'mit Adresse muss der Wizard Ort UND Termin ueberspringen',
     ).toBeVisible({ timeout: 40_000 })
   })
+
+  /**
+   * Glied 5 der Kette — und die Luecke, durch die `schadenart` drei Tage lang fiel.
+   *
+   * Die Marketing-Seite reicht NICHT jeden Query-Parameter an den Embed weiter, sondern
+   * nur eine feste Allowlist (`EmbedFinderSection`). `schadenart` fehlte darin, obwohl
+   * llms.txt KI-Assistenten seit dem 25.08.2026 ausdruecklich anweist, ihn anzuhaengen.
+   * Am 28.08. auf prod gemessen: `adresse` kam im iframe an, `schadenart` nicht.
+   *
+   * ⚠ Warum die bisherigen drei Tests das nicht fanden: keiner von ihnen haengte
+   * `&schadenart=` ueberhaupt an eine URL. Sie prueften den Ort-Sprung — gruen und
+   * korrekt — und schwiegen ueber den Parameter daneben. Ein Test kann nur finden,
+   * wonach er greift.
+   *
+   * Geprueft wird die iframe-`src`: das ist die URL, mit der der Embed geladen wird.
+   * Steht ein Parameter dort nicht, hat der Embed ihn nie gesehen — unabhaengig davon,
+   * wie gut er ihn verarbeiten koennte.
+   */
+  test('Deeplink reicht schadenart UND schuldfrage in den Embed durch', async ({ page }) => {
+    await page.goto(
+      `${MARKETING}/gutachter-finden?adresse=${encodeURIComponent('Domkloster 4, 50667 Köln')}` +
+        `&schadenart=${encodeURIComponent('Parkschaden')}&schuldfrage=gegner`,
+      { waitUntil: 'domcontentloaded' },
+    )
+
+    const src = await page.getAttribute('iframe[src*="embed/gutachter-finder"]', 'src')
+    expect(src, 'Embed-iframe muss im HTML stehen').toBeTruthy()
+
+    // Gegenprobe zuerst: `adresse` war schon immer in der Allowlist. Fehlt SIE, ist die
+    // Messung kaputt (z.B. Geocoding aus) und die beiden Befunde darunter sagen nichts.
+    expect(src!, 'Gegenprobe — ohne adresse ist die Messung nicht aussagekraeftig').toContain(
+      'adresse=',
+    )
+    expect(src!, 'schadenart muss den Wrapper passieren — llms.txt verspricht es der KI').toContain(
+      'schadenart=',
+    )
+    expect(src!, 'schuldfrage muss den Wrapper passieren — sonst bleibt der Quali-Schritt').toContain(
+      'schuldfrage=',
+    )
+
+    // Und die Wirkung, nicht nur die Anwesenheit.
+    //
+    // Anker ist die Zeile „Schadenart: Parkschaden" aus der Buchungs-Zusammenfassung.
+    // Sie ist der praezise Nachweis, weil sie ZWEI Dinge zugleich belegt: dass der Wert
+    // im Wizard-State angekommen ist (er wird aus `schadentyp` gerendert) und dass der
+    // Wizard im Kontakt-Schritt steht (nur dort existiert dieser Block).
+    //
+    // ⚠ Text aus dem Quelltext uebernommen (`{`Schadenart: ${schadentyp}`}`), nicht
+    // abgetippt: eine erfundene Ueberschrift „Ihre Kontaktdaten" gibt es dort nicht —
+    // der Test waere aus dem falschen Grund rot geworden.
+    const frame = page.frameLocator('iframe[src*="embed/gutachter-finder"]')
+    await expect(
+      frame.getByText(/Schadenart: Parkschaden/i).first(),
+      'mit Ort + Schadenart muss der Wizard bis zur Buchungs-Zusammenfassung durchspringen',
+    ).toBeVisible({ timeout: 40_000 })
+  })
 })

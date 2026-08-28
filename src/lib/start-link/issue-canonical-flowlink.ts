@@ -54,6 +54,26 @@ function clampSchadentyp(raw: string | null): string {
   return 'sonstiges'
 }
 
+// Dasselbe Problem wie bei schadentyp, andere Spalte: die CHECK-Constraints von
+// `gutachter_finder_anfragen` und `leads` sind NICHT deckungsgleich (gemessen 28.08.2026):
+//
+//   gutachter_finder_anfragen   gegner · unklar · teilschuld
+//   leads                       gegner · unklar · eigenverantwortung
+//
+// `teilschuld` existiert also nur auf der Anfrage. Ungeprueft durchgereicht braeche es den
+// GESAMTEN Lead-Insert (Constraint-Verletzung) — nicht nur dieses eine Feld, sondern die
+// Flowlink-Ausstellung. Deshalb faellt alles ausserhalb der Schnittmenge auf `null`.
+//
+// ⚠ Bewusst `null` und NICHT „auf `unklar` runden": das waere eine Verfaelschung einer
+// Aussage ueber die Schuld. `null` heisst „nicht bekannt" — der Kunde bekommt dann im
+// FlowLink den Quali-Schritt und beantwortet sie selbst. Genau richtig fuer einen Fall,
+// den wir nicht sauber abbilden koennen.
+const SCHULDFRAGE_LEAD_ALLOWED = new Set(['gegner', 'unklar', 'eigenverantwortung'])
+function clampSchuldfrage(raw: string | null): string | null {
+  const v = (raw ?? '').toLowerCase().trim()
+  return SCHULDFRAGE_LEAD_ALLOWED.has(v) ? v : null
+}
+
 function buildText(vorname: string | null, url: string): string {
   const greet = vorname ? `Hallo ${vorname}` : 'Hallo'
   return [
@@ -192,6 +212,16 @@ export async function issueCanonicalFlowLinkForAnfrage(
       fahrzeug_baujahr: (gfa.fahrzeug_baujahr as number | null) ?? null,
       wunschtermin: (gfa.wunschtermin as string | null) ?? null,
       ga_client_id: (gfa.ga_client_id as string | null) ?? null,
+      // Schuldfrage mituebernehmen, wenn die Anfrage sie schon kennt (KI-Deeplink
+      // `?schuldfrage=`). Erst hier wird sie wirksam: `FlowWizardKfz` rechnet
+      // `qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage`
+      // — ein gesetzter Wert nimmt den Quali-Schritt aus dem Wizard.
+      //
+      // ⚠ clampSchuldfrage, NICHT roh durchreichen: die beiden CHECK-Constraints sind
+      // NICHT deckungsgleich (gfa kennt `teilschuld`, leads kennt es nicht). Ein roher
+      // Durchgriff liesse den gesamten Lead-Insert an der Constraint scheitern — und
+      // damit den Flowlink, nicht nur ein Feld.
+      schuldfrage: clampSchuldfrage(gfa.schuldfrage as string | null),
     }
     // AAR-956 Werkstatt: werkstatt_id durchreichen (gfa->lead). Record-Cast, da die generierten
     // Lead-Types die frische DB-Spalte noch nicht kennen (Type-Regen aufgeschoben, AGENTS.md §6).
