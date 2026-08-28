@@ -35,6 +35,7 @@
     "check:server-actions": "node scripts/check-server-actions.mjs",
     "check:client-timezone": "node scripts/check-client-timezone.mjs",
     "check:silent-writes": "node scripts/check-silent-writes.mjs",
+    "check:result-catch": "node scripts/check-result-catch.mjs",
     "check:cron-auth": "node scripts/check-cron-auth.mjs",
     "check:stadt-linknetz": "node scripts/check-stadt-linknetz.mjs",
     "lokalinhalt:qualitaet": "npx tsx scripts/lokalinhalt-qualitaet.mts",

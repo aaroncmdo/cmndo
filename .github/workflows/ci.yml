@@ -146,6 +146,15 @@ jobs:
       - name: Stille-Write-Ratchet
         run: npm run check:silent-writes -- --ratchet
 
+      # Result-Catch-Gate: `.catch(() => {})` um eine Action, die ein Result-Object liefert.
+      # Solche Actions WERFEN NIE — der Fehlschlag steht im Rueckgabewert, das catch faengt
+      # nichts. Real geblutet (28.08., Aaron): Feldaenderungen im FlowLink verschwanden
+      # spurlos, waehrend der Wert im lokalen State stand und "uebernommen" aussah.
+      # Die Klasse war beim Messen genau 3 Stellen gross -> Baseline 0, kein Grandfathering.
+      # Ein `.catch(e => console.error(e))` bleibt erlaubt (fire-and-forget MIT Spur).
+      - name: Result-Catch-Gate
+        run: npm run check:result-catch -- --ratchet
+
       # Client-Timezone-Gate: eine 'use client'-Component wird server-seitig vorgerendert
       # UND im Browser hydriert. `toLocaleString()` ohne `timeZone` nimmt auf jeder Seite
       # die dort geltende Zone — prod-Node laeuft mit TZ=Europe/Berlin, GitHub-Runner in
