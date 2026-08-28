@@ -51,10 +51,20 @@ for (const { pfad, quelle } of SEITEN) {
 
     // Die URL muss als TEXT dastehen. Im href allein erreicht sie kein LLM: das Web-Tool
     // ersetzt `<a href>` durch eine nummerierte Referenz und verliert den Zielwert.
+    //
+    // ⭐ Seit dem 28.08. wird die BUCHBARE URL erwartet, nicht mehr die Stadtseite.
+    // Zuvor stand hier `/kfz-gutachter/<slug>` — ein Modell konnte den Termin damit zwar
+    // nennen, aber nicht buchbar machen: der Nutzer landete auf der Stadtseite und musste
+    // erneut suchen. Der Log zeigte 5.486 Live-Abrufe von `ChatGPT-User` auf genau diesen
+    // Fachseiten, also genau dort, wo der Umweg wehtut.
+    //
+    // Bewusst STRENGER als „irgendeine URL": `sv=` und `slot=` muessen dran sein, sonst
+    // ist es kein Deeplink, sondern wieder ein Zwischenschritt. Genau diese Unschaerfe hat
+    // beim schadenart-Parameter drei Tage gekostet — ein Test findet nur, wonach er greift.
     expect(
       text,
-      'die Stadtseiten-URL muss als Fliesstext dastehen, nicht nur im href',
-    ).toMatch(/https:\/\/claimondo\.de\/kfz-gutachter\/[a-z-]+/)
+      'die BUCHBARE URL muss als Fliesstext dastehen (mit sv= und slot=), nicht nur im href',
+    ).toMatch(/https:\/\/claimondo\.de\/gutachter-finden\?[^\s]*sv=[^\s]*slot=/)
 
     // Und eine Uhrzeit — ein Termin ohne Zeit ist keine Terminangabe.
     expect(text, 'der Termin muss eine Uhrzeit nennen').toMatch(/\d{1,2}:\d{2} Uhr/)
