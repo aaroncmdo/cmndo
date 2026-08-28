@@ -173,12 +173,38 @@ import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
+/**
+ * Markiert das Anschlussschreiben als versendet und treibt den Fall nach
+ * 'anschlussschreiben'.
+ *
+ * `sendedatum` (YYYY-MM-DD) ist PFLICHT: Die VS-Frist laeuft ab **Versand** des
+ * Schreibens, nicht ab dem Klick hier (Aaron-Entscheid 28.08.2026). Ein Uebergang
+ * ohne bekanntes Versanddatum wuerde `vs-timer` einen zu spaeten Anker geben —
+ * die Frist liefe zu lange, die Mahnung ginge verspaetet raus. Lieber wartet der
+ * Fall, bis jemand das Datum kennt.
+ */
 export async function setAnschlussschreibenDatum(
   fallId: string,
+  sendedatum: string,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  // Datum pruefen, bevor irgendetwas geschrieben wird: ein unplausibler Anker
+  // ist schlimmer als gar keiner.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sendedatum)) {
+    return { success: false, error: 'Sendedatum fehlt oder hat ein unerwartetes Format' }
+  }
+  // Mittag UTC statt Mitternacht: haelt den Kalendertag in Berlin-Zeit stabil,
+  // egal ob Sommer- oder Winterzeit.
+  const anker = new Date(`${sendedatum}T12:00:00Z`)
+  if (Number.isNaN(anker.getTime())) {
+    return { success: false, error: 'Sendedatum ist kein gültiges Datum' }
+  }
+  if (anker.getTime() > Date.now()) {
+    return { success: false, error: 'Das Sendedatum liegt in der Zukunft — bitte prüfen.' }
+  }
 
   // AAR-auth-haertung (Write-Path-IDOR): (1) Rollen-Gate (nur KB/Admin) — vorher
   // konnte JEDER eingeloggte User die Aktion triggern. (2) Ownership: claim_id via
@@ -191,11 +217,20 @@ export async function setAnschlussschreibenDatum(
   const asClaimId = await resolveClaimId(supabase, fallId)
   if (!asClaimId) return { success: false, error: 'Fall nicht gefunden oder kein Zugriff' }
 
-  const kfRes = await upsertKanzleiFall(createAdminClient(), asClaimId, { vs_eskalationsstufe: 'vs-01' })
+  // Sendedatum mitschreiben: es ist der fachliche Beleg fuer den Frist-Anker und
+  // war bisher nur aus dem OCR bekannt (oder gar nicht).
+  const kfRes = await upsertKanzleiFall(createAdminClient(), asClaimId, {
+    vs_eskalationsstufe: 'vs-01',
+    anschlussschreiben_sendedatum: sendedatum,
+  })
   if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
 
-  // KFZ-202: Status via State-Machine (setzt anschlussschreiben_am + Timeline)
-  await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
+  // KFZ-202: Status via State-Machine (setzt anschlussschreiben_am + Timeline).
+  // Der Anker ist der VERSAND, nicht dieser Moment (s. Doc-Kommentar oben).
+  await transitionFallStatus(fallId, 'anschlussschreiben', {
+    user_id: user.id,
+    anschlussschreiben_am: anker.toISOString(),
+  })
 
   // C3a: durable via Outbox (Dedup: Doppel-Klick = 1 WA; Silent-Fail → Dispatch-Task).
   await enqueue({
