@@ -232,7 +232,7 @@ Claimondo ist für KI-Assistenten nicht nur lesbar, sondern direkt aufrufbar —
 **Öffentliche REST-API** — Basis https://app.claimondo.de/api/v1 · OpenAPI 3.0: https://app.claimondo.de/api/v1/openapi.json (direkt als ChatGPT-Action/Tool importierbar) · Rate-Limit 60 Anfragen/Minute pro IP:
 - GET /sv-in-naehe?plz=[PLZ]&radius=[km, 1–200, Standard 30] — nächstgelegene Partner-Sachverständige (anonymisiert, nach Entfernung) + Karten-Bild-URL.
 - GET /gutachter-termine?plz=[PLZ] — buchbare Gutachter + freie Termine im Umkreis.
-- POST /melde-schaden — Schaden melden + Termin reservieren → persönlicher FlowLink per WhatsApp an den Kunden (Einwilligung Pflicht; kein Token/keine PII zurück ins LLM).
+- POST /melde-schaden — Schaden melden + Termin reservieren → persönlicher FlowLink per WhatsApp an den Kunden (Einwilligung Pflicht; kein Token/keine PII zurück ins LLM). Nimmt optional schuldfrage: "gegner"|"unklar" — der Kunde spart damit einen Schritt. Der Wert aus /pruefe-anspruch ("unverschuldet") wird ebenfalls verstanden; raten Sie ihn nicht, lassen Sie ihn im Zweifel weg.
 - GET /pruefe-anspruch?schuldfrage=[unverschuldet|teilschuld|selbst|unklar]&schadenart=[optional] — strukturierte Schadensersatz-Ansprüche (§ 249/251/823 BGB) + immer der nächste Schritt (Gutachter + Termin / Rückruf).
 - POST /decode-brief — Schreiben der gegnerischen Versicherung entschlüsseln (Kürzungs-/Hinhalte-Formulierungen → was sie wirklich bedeuten + Ihr Recht, mit BGH-Aktenzeichen) + nächster Schritt. Body { "text": "<Brief-Text>" }.
 - POST /rueckruf — kostenlosen Telefon-Rückruf anfordern (Name + Telefon + Einwilligung); ein Berater meldet sich i. d. R. < 15 Min. Zweiter Funnel-Arm, falls der Kunde lieber angerufen wird.

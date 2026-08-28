@@ -132,6 +132,10 @@ const spec = {
                 sv_id: 'b2754f9c-d464-4411-9185-ca69b547f922',
                 slot_start: '2026-06-25T14:00:00.000Z',
                 slot_end: '2026-06-25T14:40:00.000Z',
+                // Passt zum `hergang` oben („der Hintermann ist aufgefahren"): ein Beispiel,
+                // in dem die Schuldfrage aus der Schilderung folgt, lehrt die Nutzung
+                // zuverlaessiger als die Feldbeschreibung allein.
+                schuldfrage: 'gegner',
                 name: 'Max Mustermann',
                 telefon: '+49 151 23456789',
                 einwilligung: { zugestimmt: true, policy_version: 'mcp-consent-2026-06' },
@@ -426,6 +430,12 @@ const spec = {
           slot_start: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Start (termine[].start). Mit slot_end + sv_id → echte Reservierung.' },
           slot_end: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Ende (termine[].end).' },
           wunschtermin: { type: 'string', description: 'Optional: vager Wunschtermin (weicher Hold), falls kein konkreter Slot.' },
+          schuldfrage: {
+            type: 'string',
+            enum: ['gegner', 'unklar'],
+            description:
+              'Optional: wer den Schaden verursacht hat. "gegner" = ein anderer war es, "unklar" = strittig oder noch offen. Ist der Wert gesetzt, entfällt für den Kunden im weiteren Ablauf ein kompletter Schritt — sonst wird er später noch einmal danach gefragt. Der Wert aus /pruefe-anspruch ("unverschuldet") wird ebenfalls verstanden. RATEN SIE NICHT: ist die Schuld nach Ihrem Gespräch nicht eindeutig, lassen Sie das Feld weg, dann beantwortet der Kunde die Frage selbst. Ein unbekannter Wert lässt die Meldung NICHT scheitern, er wird still verworfen. Nicht abbildbar sind Teilschuld und Selbstverschulden — die hängen an Details, die ein Berater klären muss.',
+          },
           name: { type: 'string', description: 'Name des Kunden.' },
           telefon: { type: 'string', description: 'WhatsApp-Nummer des Kunden (für den FlowLink-Versand).' },
           einwilligung: { $ref: '#/components/schemas/Einwilligung' },
