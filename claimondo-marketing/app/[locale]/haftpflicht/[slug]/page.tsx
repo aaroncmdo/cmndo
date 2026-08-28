@@ -33,6 +33,7 @@ import {
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 
 const WA = WHATSAPP_HREF
 
@@ -111,6 +112,15 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             <ArticleComments articleSlug={`haftpflicht/${slug}`} />
           </article>
         </div>
+        {/* Autorenschaft + Stand — SICHTBAR, nicht nur im Schema.
+            Das Frontmatter traegt `last_modified` (z.B. 2026-05-18); der Loader reicht es
+            als `lastModified` durch. Gemessen 28.08.2026: von 187 geprueften Nicht-Stadt-
+            seiten trugen 184 keine Autorenschaft. Benannte Autorenschaft ist eines der
+            Signale, die AI-Systeme fuer E-E-A-T lesen.
+
+            `rolle="verantwortlich"`: es gibt kein Feld, das eine fachliche EINZELpruefung
+            belegt. „Fachlich geprüft" ohne Nachweis waere geraten. */}
+        <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
         <SpokeCtaBand />
       </main>
       <LandingFooter />
