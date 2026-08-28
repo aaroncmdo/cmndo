@@ -108,6 +108,38 @@ export async function ladeNoetigePhasen(
     if (d.dokument_typ) prefilled[`doc_typ_${d.dokument_typ}`] = true
   }
 
+  // ─── Upload-Felder aus den vorhandenen Dokumenten ableiten ──────────
+  //
+  // ANLASS (Aaron 28.08.2026): *„ich konnte die Daten nicht bestaetigen, ausserdem wurde ich
+  // nochmal nach dem Fahrzeugschein gefragt obwohl ich den schon hochgeladen hatte."*
+  //
+  // Beide Symptome hatten EINE Ursache: `fahrzeugschein_foto` ist `pflicht: true`, hat aber
+  // KEINEN Speicherort — `db_target.tabelle` ist `_self`, und der Save-Router ueberspringt
+  // `_`-Ziele (`save-onboarding-fields.ts`) ebenso wie die Allowlist den Typ `zb1-upload`.
+  // Der Wert lebte damit nur im lokalen React-State: nach jedem Reload war er weg,
+  // `validatePhase` fand das Pflichtfeld leer → erneute Abfrage UND blockiertes Bestaetigen.
+  //
+  // ⭐ Der Nachweis eines Upload-Feldes ist das DOKUMENT, nicht ein Feldwert. Die Schleife
+  // oben kennt es bereits — nur unter einem anderen Schluessel (`doc_typ_fahrzeugschein`
+  // statt `fahrzeugschein_foto`). Diese Bruecke fehlte.
+  //
+  // ⚠ Zwei Dokumenttypen je Feld sind kein Versehen: `schadensfoto` (6 Schreibstellen) und
+  // `schadensfotos` (2) bezeichnen dieselbe Sache — eine dokumentierte Altlast
+  // (src/lib/dokumente/dokument-typen.ts, BEKANNTE_DUBLETTEN). Bis sie zusammengelegt ist,
+  // muss hier jeder Name zaehlen, sonst fragt der Wizard je nach Schreibstelle erneut.
+  const UPLOAD_FELD_ZU_DOKUMENTTYPEN: Record<string, readonly string[]> = {
+    fahrzeugschein_foto: ['fahrzeugschein'],
+    schadensfotos: ['schadensfoto', 'schadensfotos'],
+  }
+  for (const [feldKey, typen] of Object.entries(UPLOAD_FELD_ZU_DOKUMENTTYPEN)) {
+    if (prefilled[feldKey] != null && prefilled[feldKey] !== '') continue
+    if (typen.some((t) => prefilled[`doc_typ_${t}`] === true)) {
+      // Der konkrete Wert ist gleichgueltig — `validatePhase` prueft nur auf „nicht leer",
+      // und der Wizard ueberspringt vorbefuellte Felder.
+      prefilled[feldKey] = true
+    }
+  }
+
   // Bug3-dedupe-Edge (Prod-Smoke 28.07.): Claims, deren convertLeadToClaim-Bridge
   // die Hergang-Kopie ausliess, fragten die Erzaehlung hier ERNEUT (leere textarea)
   // obwohl leads.unfallhergang sie traegt. Heilung an der Stelle, wo die Luecke
