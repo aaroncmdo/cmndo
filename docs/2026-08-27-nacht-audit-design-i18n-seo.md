@@ -221,28 +221,10 @@ Bruch für `/gutachter-partner`, und Audit E hält fest, dass er „nicht Teil d
 Freigabe und unverändert" ist. Neu ist die **App**-Seite davon. Ein Kunde kommt
 von der gesiezten Marketing-Seite in den geduzten Flow.
 
-### 4 · Reihenfolge auf der Startseite — ERLEDIGT, Befund war falsch
+### 4 · Reihenfolge auf der Startseite
 
-Nachgemessen am 28.08. auf prod (mobil 390×844, die Seite ist dort 34,3
-Bildschirme lang). Der Befund hielt nicht stand:
-
-| Aussage | hier behauptet | gemessen |
-|---|---|---|
-| „32 Tage statt 4–6 Monate" | Bildschirm 27 | **0,5** (Hero-Subheadline), zusätzlich 10,7, insgesamt **10×** im HTML |
-| BGH | Bildschirm 15 | **4,1** (erste von **34** sichtbaren Nennungen) |
-
-Auf Bildschirm 15 und 27 liegen die **ausführlichen Sektionen** dazu, nicht die
-Aussagen. Aussage vorne, Vertiefung hinten ist der normale Aufbau einer
-Landingpage — der Befund hat beides verwechselt.
-
-Was übrig bleibt, ist klein und in `SchadensreportTeaserSection.tsx` vermerkt
-(PR #5687): Der Teaser sollte laut eigenem Header „direkt hinter den
-Versicherer-Taktiken" stehen, tut es seit dem B1-Schnitt aber nicht — drei
-Sektionen liegen dazwischen. Bewusst **nicht** zurückverschoben: der Nutzen ist
-gering (die Aussage steht dreifach weiter vorne), und es gäbe ein
-Rhythmus-Risiko, weil Teaser und `ProduktAppSection` beide `bg-claimondo-bg`
-sind und direkt hinter dem dunklen Abschluss der rhythmus-dokumentierten
-`BeweisSection` stünden.
+Steht aus einem früheren Durchgang offen: BGH-Beleg erscheint auf Bildschirm 15,
+„32 Tage" auf 27.
 
 ---
 

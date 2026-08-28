@@ -15,6 +15,7 @@ import {
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 
 // Stream B.6 (Doc 26) — Tool-Page „Unfallskizze". Faengt die Tool-/Vorlage-
 // Keywords (unfallskizze vorlage / muster / erstellen). Liefert eine
@@ -222,6 +223,12 @@ export default function Page() {
         <ConversionAnchorBlock variant="cornerstone" />
         <SpokeCtaBand headline={t('cta_band')} />
       </main>
+      {/* Autorenschaft + Stand — sichtbar, nicht nur im Schema.
+          Datum aus `getRouteLastUpdatedISO`, also DERSELBEN Quelle wie das
+          `dateModified` oben — sichtbarer Stand und Schema koennen nicht
+          auseinanderlaufen. `<script>`-Bloecke fallen beim Text-Strippen weg;
+          fuer ein LLM existierte das Datum bisher nicht. */}
+      <ReviewerByline rolle="verantwortlich" datum={getRouteLastUpdatedISO('/unfallskizze').slice(0, 10)} />
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Unfallskizze" whatsappHref={WA} />
     </div>
