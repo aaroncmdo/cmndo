@@ -22,14 +22,21 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 if (!url || !key) { console.error('ENV fehlt — mit --env-file=.env.local starten'); process.exit(1) }
 const db = createClient(url, key, { auth: { persistSession: false } })
 
-/** Identisch zu storagePfadAusUrl in src/lib/dokumente/sync-lead-zu-pflicht.ts. */
+/**
+ * Spiegelt storagePfadAusUrl aus src/lib/dokumente/sync-lead-zu-pflicht.ts
+ * (ein .mjs kann das TS-Modul nicht importieren — bei Aenderungen dort mitziehen).
+ */
 function storagePfadAusUrl(u) {
   if (!u) return null
+  // Form 1: alle drei Supabase-Varianten, wie in @/lib/storage/url parseStorageUrl.
+  const m = u.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/([^?#]+)/)
+  if (m) {
+    if (m[1] !== 'fall-dokumente') return null   // anderer Bucket = nicht unsere Datei
+    try { return decodeURIComponent(m[2]) } catch { return m[2] }
+  }
+  // Form 2: bereits ein Storage-Pfad. Mit Host = fremde URL, daraus nichts raten.
   const ohne = u.split('?')[0].split('#')[0]
-  if (!ohne) return null
-  const i = ohne.indexOf('fall-dokumente/')
-  if (i !== -1) { const p = ohne.slice(i + 'fall-dokumente/'.length); return p.length > 0 ? p : null }
-  if (/^[a-z]+:\/\//i.test(ohne)) return null   // fremde URL -> keinen Pfad raten
+  if (!ohne || /^[a-z]+:\/\//i.test(ohne)) return null
   const p = ohne.replace(/^\/+/, '')
   return p.includes('/') ? p : null
 }
