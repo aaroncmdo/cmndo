@@ -122,14 +122,22 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
   }
 
   // Reparatur-Intent bewusst setzen: `brauchtWerkstattVermittlung` verlangt
-  // reparaturwunsch ∈ {reparatur, fiktiv}. Ohne diese Antwort lehnt die Server-Action
-  // jede Werkstattwahl ab — der Step wird aber trotzdem angezeigt.
+  // reparaturwunsch ∈ {reparatur, fiktiv}.
+  //
+  // Mit EP_SKIP_ABRECHNUNG=1 wird die Frage BEWUSST uebersprungen — das ist der
+  // Regel-4-Nachweis fuer #5734: der Werkstatt-Step wird trotzdem angeboten, und die
+  // Server-Action muss die Auswahl jetzt ANNEHMEN und `reparaturwunsch` nachtragen,
+  // statt sie mit "Fuer diesen Vorgang ist keine Werkstatt-Auswahl moeglich" abzulehnen.
   if (/Reparatur oder Auszahlung/i.test(b)) {
-    const rep = page.locator('button').filter({ hasText: 'Reparatur (in der Werkstatt)' }).first()
-    if (await rep.count()) {
-      await rep.click()
-      console.log('  → Reparatur-Intent: "Reparatur (in der Werkstatt)"')
-      await page.waitForTimeout(1500)
+    if (process.env.EP_SKIP_ABRECHNUNG === '1') {
+      console.log('  → Abrechnungsfrage BEWUSST uebersprungen (EP_SKIP_ABRECHNUNG=1)')
+    } else {
+      const rep = page.locator('button').filter({ hasText: 'Reparatur (in der Werkstatt)' }).first()
+      if (await rep.count()) {
+        await rep.click()
+        console.log('  → Reparatur-Intent: "Reparatur (in der Werkstatt)"')
+        await page.waitForTimeout(1500)
+      }
     }
   }
 
@@ -234,8 +242,13 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
     }
   }
 
-  // ── Werkstattwahl: "Auswählen" schreibt nichts (belegt: reparatur_werkstatt_id blieb
-  // nach 3 Klicks null). Einmal versuchen, dann den Kundenweg "Überspringen" nehmen. ──
+  // ── Werkstattwahl ────────────────────────────────────────────────────────
+  // Historie: "Auswählen" wurde abgelehnt, solange `reparaturwunsch` fehlte — der Step
+  // wurde aber trotzdem angeboten. Seit #5734 traegt die Server-Action den Wunsch nach.
+  // Diese Meldung ist damit ein ROTES Regel-4-Ergebnis, kein erwarteter Zustand mehr.
+  if (/keine Werkstatt-Auswahl möglich/i.test(b)) {
+    console.log('  🔴 REGEL-4 ROT: "Für diesen Vorgang ist keine Werkstatt-Auswahl möglich." — der Fix greift NICHT')
+  }
   if (/Wählen Sie Ihre Werkstatt/i.test(b)) {
     const versuche = protokoll.filter((p) => /Wählen Sie Ihre Werkstatt/.test(p.titel)).length
     if (versuche >= 2) {
