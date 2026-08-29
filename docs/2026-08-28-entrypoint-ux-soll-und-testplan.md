@@ -14,7 +14,7 @@
 > | 6 | Telefon Pflicht trotz „WhatsApp **oder** E-Mail" | echt, UX (§5.7) |
 > | 7 | „Drei kurze Fragen" → 18 Schritte | echt, UX (§5.8) |
 > | 8 | Finder bestätigt Termin, den es nicht gibt | ❌ **Messfehler** — Guard griff korrekt (§5.11) |
-> | 9 | Absende-Button unter Overlays (Stadtseite) | **echt — GEFIXT** (#5717; 12/12 Viewports frei) (§5.12) |
+> | 9 | Absende-Button unter Overlays | **echt, und grösser als gedacht.** #5717 fixte nur den Fall „Feld beim Laden vorbefüllt". Der Fall „Nutzer **wählt** einen Vorschlag" blieb offen — auf `/check` damit **kein Lead möglich** — und ist erst jetzt gefixt (§5.19) |
 > | 10 | Stadtseiten-Anfrage „sieht niemand" | ❌ **Messfehler** — eigene Dispatch-Ansicht (§5.12) |
 > | — | Ort geht am Lead verloren | ❌ **Messfehler** — landet in `kunde_plz` (§5.17). Die Nachprüfung fand daneben einen **echten**: das Server-Geocoding warf PLZ und Ort weg → **GEFIXT** (#5720) |
 > | — | Abschluss ohne Termin unerreichbar | ⚠ **halb** — Ursache war der Guard, die fehlende Dispatch-Aktion bleibt (§5.16) |
@@ -394,6 +394,28 @@ Szenarien, verifiziert). Regel-4-Nachweis nach Deploy: Flow fahren, „Wie möch
 abrechnen?" **überspringen**, Werkstatt wählen → `reparatur_werkstatt_id` gesetzt **und**
 `reparaturwunsch='reparatur'`.
 
+##### ✅ Regel-4-Nachweis auf prod (29.08., nach Deploy 13:17)
+
+Voll gefahren per UI: Lead über den Mini-Wizard erzeugt (`82c8b7c8`, Haftpflicht), dann der Flow
+mit `EP_SKIP_ABRECHNUNG=1` — die Frage „Reparatur oder Auszahlung?" wurde **bewusst übersprungen**:
+
+```
+Schritt  5  Reparatur oder Auszahlung?   → Abrechnungsfrage BEWUSST uebersprungen
+Schritt 18  Wählen Sie Ihre Werkstatt    → geklickt: "Auswählen"
+Schritt 19  Wunschtermin vorschlagen     ← der Folgeschritt: die Wahl wurde ANGENOMMEN
+```
+
+Keine Ablehnungsmeldung mehr (der Walker prüft explizit darauf). DB-Gegenprobe am Lead:
+
+```
+reparaturwunsch                   = 'reparatur'    ← NACHGETRAGEN (war null)
+reparatur_werkstatt_id            = 44996f32-…     ← GESETZT
+reparatur_werkstatt_quelle        = 'kunde'
+reparatur_vermittlung_status      = 'vermittelt'
+```
+
+Damit ist der Fix auf prod belegt. Testdaten anschließend entfernt (0 Leads, 0 Anfragen Rest).
+
 ⭐ **Zweite Lehre, teurer als die erste:** Eine Migration, die auf ein Feld aus dem Anwendungscode
 zeigt, ist ein **Deploy-abhängiger** Write. Sie vor dem Code zu applizieren ist genau die
 Drift-Konstellation, gegen die Regel 3 geschrieben wurde — nur in die andere Richtung: hier war
@@ -593,7 +615,7 @@ Der Auftrag lautete: alle Einstiege **komplett bis zum Claim-Abschluss**. Erreic
 | **E7** Ads-Landing | ✅ + KB-Termin | — (telefonisch) | n/a Rückruf-Zweig | n/a |
 | **E6** Stadtseite | ❌ nur `gfa` | ❌ | ❌ | ❌ |
 | **E5** Werkstatt-Finder | offen (Script-Lücke, §5.18) | | | |
-| **E8** `/check` | offen (kein `<form>` gefunden) | | | |
+| **E8** `/check` | ✅ gefahren 29.08. — 🔴🔴 Blocker gefunden + gefixt (§5.19) | | | |
 | **E2/E3/E10** Rückruf-Modals | offen | | | |
 
 **Der Abschluss ist strukturell blockiert**, nicht aus Zeitmangel (§5.10): `nur_gutachter` wird
@@ -628,6 +650,23 @@ blieb. Erst der zweite Lauf hat ihn eingesammelt. Drei Spaltenannahmen waren zud
 `gutachter_finder_anfragen` verweist über **`konvertiert_zu_lead_id`** (nicht `lead_id`),
 `faelle_claim_bridge` hat **keinen `id`-PK**, und `fall_dokumente.claim_id` ist **NOT NULL**
 (muss vor dem Claim weg).
+
+⭐⭐ **Nachtrag 29.08. — dieselbe Spalte, diesmal im Werkzeug selbst.** `ep-lib.mjs` (die
+gemeinsame Bibliothek beider Cleanup-Scripts) fragte `gutachter_finder_anfragen` weiterhin über
+`lead_id` ab, obwohl `ep-cleanup2.mjs` die richtige Spalte (`konvertiert_zu_lead_id`) sogar im
+Kommentar dokumentiert. Gemessen:
+
+```
+ALT (lead_id):                 FEHLER: column … does not exist
+NEU (konvertiert_zu_lead_id):  ok, 0 Zeilen
+```
+
+Der Fehler war **still**: `out.gfa = gfa.data ?? []` machte aus der fehlgeschlagenen Query eine
+leere Liste, und jeder Report meldete brav `"gfa": 0`. Eine falsche Null liest sich exakt wie
+„nichts entstanden". Gefixt (richtige Spalte + die Query-Fehler werden jetzt laut protokolliert
+statt in `?? []` zu verschwinden) — sonst hätte ein Finder-Lauf Residue hinterlassen, das der
+Report als sauber ausgewiesen hätte. Eine dokumentierte Lehre wirkt erst, wenn sie **am
+gemeinsamen Ort** steht, nicht nur in dem Script, in dem sie gelernt wurde.
 
 ⭐ **Nebenbefund:** Beim Nachzählen standen **vier verwaiste Claims aus fremden Smokes**
 (`CLM-2026-05642`, `…43`, `…44`, `…46`) im selben Zeitfenster — dieselbe Falle, nur unbemerkt.
@@ -706,11 +745,85 @@ aus dem A4-Register, nicht ein neuer Befund.
    „Absenden". Jeder Einstieg nennt ihn anders (Mini-Wizard: „Sicheren Link erhalten",
    Finder: „Termin reservieren").
 
-### 5.19 E8 · `/check` — offen
+### 5.19 E8 · `/check` — durchgelaufen (29.08.), und dabei ein 🔴🔴 **Blocker** gefunden
 
-Meine Formular-Erkennung (`<form>` mit den meisten Feldern) findet dort **kein Formular** —
-der Funnel ist vermutlich ohne `<form>`-Element gebaut. Ungeklärt, ob Produkt oder Messung.
-Einziger nicht abgeschlossener Einstieg.
+Der erste Anlauf meldete „kein `<form>` gefunden" und blieb offen. Das war **wieder eine
+Messfrage**: der Funnel ist state-basiert (3 Options-Fragen → Ergebnis → Kontaktfelder) und ruft
+`submitCheckLead` direkt auf. Eine Heuristik, die „das `<form>` mit den meisten Feldern" sucht,
+findet dort nichts. Der zweite Anlauf traf mit einem generischen Button-Selektor den
+**Sprachwähler** (🇩🇪) — dieselbe Falle, die weiter oben schon protokolliert ist. Erst der dritte,
+gezielte Lauf (`button[type="button"]` mit `›`-Span) fuhr den Weg.
+
+#### 🔴🔴 Nach der Ortswahl ist der Absende-Button nicht klickbar
+
+Voll gefahren mit echter Eingabe (`scripts/smoke/ep-e8-check.mjs`): 3 Fragen geklickt, Name +
+Telefon getippt, Ortsvorschlag **gewählt** — und dann:
+
+```
+[4] Ortsvorschlag GEWAEHLT (5 angeboten): "Domkloster 4, 50667 Köln, Deutschland"
+[5] Nach der Auswahl noch offene Vorschlaege: 5
+[5] Klick auf die Button-Mitte traefe: <BUTTON> "Köln, Nordrhein-Westfalen, Deutschland"
+    — Absende-Button? NEIN ← VERDECKT
+[5] ⚠ normaler Klick abgefangen (Timeout) — weiche auf force aus
+```
+
+**Kein Lead, keine `anfragen`-Zeile.** Die einzige `claimondo-check`-Anfrage auf prod ist vom
+14.07. („Test Kunde"). Der Einstieg ist für jeden, der einen Ortsvorschlag wählt, **tot** — und
+schlimmer als nur blockiert: der natürliche nächste Klick trifft einen **fremden Ort**
+(„Kölner Straße, 01159 Dresden"), also dieselbe Klasse wie der Köln→Düsseldorf-Bug aus §5.2.
+
+#### Die Ursache — ein Token, wo ein Zustand hingehört
+
+`GooglePlaceAutocomplete` unterdrückte die Suche über zwei **verbrauchbare** Flags (`ausAuswahl`,
+und seit #5717 `ersterLauf`): der Such-Effect setzt sie beim Durchlauf selbst zurück, sie gelten
+also für **genau eine** Änderung. Nach einer Auswahl ändert sich `value` aber **zweimal**:
+
+```
+1. waehle()   setzt den gewählten Treffer            -> "Domkloster 4, 50667 Köln"
+2. onSelect() -> Parent setzt seinen State und spielt ihn über defaultValue zurück,
+                 und zwar ANDERS: die Formulare nehmen r.stadt  -> "Köln"
+```
+
+Änderung 1 verbraucht das Token, Änderung 2 läuft ungeschützt → neue Suche nach „Köln" → Liste
+klappt über dem Absende-Button auf.
+
+⭐⭐ **Deshalb hat #5717 es nicht erwischt:** dieser Fix hat ein *zweites* Token neben das erste
+gestellt. Zwei Tokens lösen kein Problem, das aus *zwei aufeinanderfolgenden* Änderungen besteht —
+es verschiebt nur, welche der beiden ungeschützt durchläuft. Gemessen wurde damals mit **leerem
+bzw. vorbefülltem** Feld, nie mit einer **Auswahl**; genau der Pfad blieb blind.
+
+**Der Fix:** ein **Zustand** (`vomTippen`) statt eines Tokens — gesucht wird nur, wenn zuletzt
+jemand getippt hat, unabhängig davon, wie oft `value` sich programmatisch ändert.
+
+**Betroffen waren 5 der 6 Consumer** (alle, die `r.stadt` zurückspielen): `/check`, Startseite,
+die ~300 Stadtseiten, zweimal Ads-Landing. Der Mini-Wizard **nicht** — er spielt `r.adresse`
+zurück, also denselben Wert, und löst die zweite Änderung gar nicht aus. Das deckt sich damit,
+dass er im Sweep durchlief.
+
+**Nachweis (A/B am identischen Detektor, 29.08.):**
+
+| | prod (alter Code) | lokal mit Fix |
+|---|---|---|
+| Vorschläge angeboten | 5 | 5 |
+| Nach der Auswahl noch offen | **5** | **0** |
+| Klick auf die Button-Mitte trifft | „Köln, Nordrhein-Westfalen…" → **verdeckt** | **„Anspruch kostenlos prüfen"** |
+
+Der Detektor ist damit nachweislich nicht blind — er hat auf dem alten Stand rot gemeldet
+(Positivkontrolle) und auf dem gefixten grün.
+
+#### 🟡 Zusätzlich: der Check-Lead landet in keinem Fluss
+
+`submitCheckLead` schreibt `anfragen` → RPC `convert_anfrage_zu_lead` → Lead. **Kein `createCase`,
+also kein FlowLink** — die RPC erzeugt auch selbst keinen (`flow_link` kommt in ihrer Definition
+nicht vor, geprüft). Gemessen: `claimondo-check` = 1 Lead, **0 mit FlowLink**.
+
+Und `notifyNewLead` sendet ausschließlich an `WA_EMPFAENGER` (feste Team-Nummern). **Der Melder
+selbst bekommt nichts** — keine Bestätigung, keinen Link, keinen Weg zurück in seinen Vorgang.
+Er beantwortet drei Fragen, gibt seine Nummer und wartet auf einen Anruf. Gegen das Soll aus §2
+(S1: „ein Fluss in die App", Mitteilungen per WhatsApp) ist das die Gegenrichtung.
+
+Der Intake-Funnel-Ratchet greift hier nicht: er scannt nur `src/**`, und der Aufruf geht über die
+RPC statt über `createLead`.
 
 ### 5.16 🔴 Der Abschluss-Weg ist über die Oberfläche **nicht erreichbar** — reproduziert + gemessen
 

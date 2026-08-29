@@ -908,6 +908,19 @@ export function FinderWizard({
           {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung
               zu einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert
               sich selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}
+          {/* Kostenhinweis unmittelbar vor dem Absenden — der Moment der groessten
+              Zahlungsangst (Aaron 29.08.: "viele kunden haben angst dass die was
+              zahlen muessen"). Gemessen: "0 €" steht 233x in den Marketing-Texten,
+              eine Begruendung dafuer 7x — und die nur auf der Partner-Seite. Hier
+              steht beides in einem Satz.
+              Bewusst OHNE Box und ohne Icon: der Embed laeuft auf 100dvh, jeder
+              zusaetzliche Block drueckt den Absende-Button nach unten (bei 1280x720
+              war er schon einmal unklickbar). */}
+          <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/80">
+            <span className="font-semibold text-claimondo-navy">Sie zahlen nichts.</span> Die
+            Vermittlung zahlen die Sachverständigen, das Gutachten bei unverschuldetem Unfall die
+            gegnerische Versicherung (§ 249 BGB).
+          </p>
           <TeilnahmeHinweis />
           {fehler && (
             <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">
