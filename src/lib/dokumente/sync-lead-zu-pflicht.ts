@@ -15,7 +15,7 @@
 // SV-Auftrag-Counter) den korrekten Stand zeigt.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { parseStorageUrl } from '@/lib/storage/url'
+import { aufloesen } from '@/lib/storage/referenz-check'
 
 /** Der Bucket, in dem Fall-Dokumente liegen. Eine URL auf einen anderen ist nicht unsere Datei. */
 const BUCKET = 'fall-dokumente'
@@ -93,20 +93,17 @@ export function storagePfadAusUrl(
 ): string | null {
   if (!url) return null
 
-  // Form 1 über den zentralen Helfer — der kennt alle drei Supabase-Varianten
-  // (`/object/public|sign|authenticated/…`) und dekodiert prozent-kodierte Segmente.
-  // Ein eigener Parser hier hätte `%20` in Dateinamen verschluckt.
-  const geparst = parseStorageUrl(url)
-  if (geparst) {
-    const erlaubt = geparst.bucket === BUCKET || weitereBuckets.includes(geparst.bucket)
-    return erlaubt ? geparst.path : null
-  }
+  // `aufloesen` ist die erprobte Behandlung des Format-Mix (referenz-check.ts, 21.08.):
+  // volle URL in allen Varianten (public/sign/authenticated und ohne), `data:`-URI,
+  // fremder Host, oder — mit Quell-Bucket — der nackte Pfad. Sie kennt den Fall bereits,
+  // an dem hier zuerst ein eigener Parser gebaut wurde.
+  const auf = aufloesen(url, BUCKET)
+  if (auf.art !== 'storage') return null
+  if (auf.bucket !== BUCKET && !weitereBuckets.includes(auf.bucket)) return null
 
-  // Form 2: bereits ein Storage-Pfad. Alles mit Host ist dagegen eine FREMDE URL
-  // (anderer Dienst) — daraus einen Pfad zu raten wäre falsch.
-  const ohneQuery = url.split('?')[0]?.split('#')[0] ?? ''
-  if (ohneQuery.length === 0 || /^[a-z]+:\/\//i.test(ohneQuery)) return null
-  const pfad = ohneQuery.replace(/^\/+/, '')
+  // Strenger als der Referenz-Check: dort fängt die HTTP-Prüfung einen Unsinns-Pfad,
+  // hier würde er eine Akten-Zeile ins Leere erzeugen. Ohne Verzeichnis kein Storage-Pfad.
+  const pfad = auf.pfad.replace(/^\/+/, '')
   return pfad.includes('/') ? pfad : null
 }
 
