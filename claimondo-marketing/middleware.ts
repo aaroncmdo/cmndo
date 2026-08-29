@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { routing } from './i18n/routing'
 import { refreshSession } from './lib/supabase/middleware'
+import { AI_BOTS_BLOCK } from './lib/seo/ai-bots'
 
 // Host-Routing (Subdomains, de-only) + deterministisches as-needed Locale-Routing
 // fuer claimondo.de/www.
@@ -53,6 +54,19 @@ function rememberLocale(res: NextResponse, locale: string): NextResponse {
 }
 
 export default async function middleware(req: NextRequest) {
+  // Durchsetzung des robots.txt-Disallow — VOR jeder Routing-Logik, damit ein
+  // geblockter Crawler keine Locale-Aufloesung und keinen Session-Refresh
+  // ausloest. robots.txt ist nur eine Bitte: am 29.08.2026 in den nginx-Logs
+  // gemessen kamen von Bytespider 191 HTML-Zugriffe in 14 Tagen, obwohl
+  // `Disallow: /` korrekt ausgeliefert wird. Liste + Begruendung in
+  // lib/seo/ai-bots.ts (dieselbe Quelle speist app/robots.ts).
+  // Vergleich case-insensitiv: der UA-String ist Fremdeingabe, auf deren
+  // Schreibweise wir uns nicht verlassen.
+  const userAgent = (req.headers.get('user-agent') ?? '').toLowerCase()
+  if (userAgent && AI_BOTS_BLOCK.some((bot) => userAgent.includes(bot.toLowerCase()))) {
+    return new NextResponse(null, { status: 403 })
+  }
+
   const host = (req.headers.get('host') ?? '').split(':')[0].toLowerCase()
   const { pathname, search } = req.nextUrl
   const landing = SUBDOMAIN_LANDING[host]
