@@ -82,14 +82,25 @@ function mapLeadToSlots(lead: LeadDocs): SlotMapping[] {
  * Signierte URLs (`/object/sign/…?token=…`) sind ebenfalls abgedeckt; Query-String und
  * Fragment gehören nicht zum Pfad.
  */
-export function storagePfadAusUrl(url: string | null | undefined): string | null {
+export function storagePfadAusUrl(
+  url: string | null | undefined,
+  /**
+   * Zusätzlich akzeptierte Buckets. Nötig für den FlowLink-Nachzug: die Files wurden von
+   * AAR-553 G1.5 aus `dokumente` nach `fall-dokumente` kopiert — unter demselben internen
+   * Pfad, weshalb dort beide Bucket-Namen gültig sind.
+   */
+  weitereBuckets: readonly string[] = [],
+): string | null {
   if (!url) return null
 
   // Form 1 über den zentralen Helfer — der kennt alle drei Supabase-Varianten
   // (`/object/public|sign|authenticated/…`) und dekodiert prozent-kodierte Segmente.
   // Ein eigener Parser hier hätte `%20` in Dateinamen verschluckt.
   const geparst = parseStorageUrl(url)
-  if (geparst) return geparst.bucket === BUCKET ? geparst.path : null
+  if (geparst) {
+    const erlaubt = geparst.bucket === BUCKET || weitereBuckets.includes(geparst.bucket)
+    return erlaubt ? geparst.path : null
+  }
 
   // Form 2: bereits ein Storage-Pfad. Alles mit Host ist dagegen eine FREMDE URL
   // (anderer Dienst) — daraus einen Pfad zu raten wäre falsch.

@@ -18,15 +18,13 @@ const MARKETING = process.env.MARKETING_BASE_URL ?? 'https://claimondo.de'
 // Je eine Seite pro Einbaustelle — nicht alle 18, das waere Laufzeit ohne Erkenntnis.
 const SEITEN = [
   // ⭐ Die STARTSEITE fehlte hier bis zum 28.08. — und genau deshalb blieb ihr Mangel
-  // unentdeckt. Sie ist mit 357 Abrufen das HAEUFIGSTE Ziel von `ChatGPT-User` (dem
-  // Agent, mit dem ChatGPT eine Seite holt, waehrend ein Nutzer fragt), und lieferte
-  // dabei 464 KB HTML ohne eine einzige buchbare Tatsache: keine Uhrzeit, keine URL im
-  // Text. Der VerfuegbarkeitStreifen war da, aber seine URL steckte im `href` und seine
-  // Zeitangabe war ein blosses Datum.
+  // unentdeckt: Sie lieferte 464 KB HTML ohne eine einzige buchbare Tatsache (keine
+  // Uhrzeit, keine URL im Text). Der VerfuegbarkeitStreifen war da, aber seine URL
+  // steckte im `href` und seine Zeitangabe war ein blosses Datum.
   //
   // Ein Waechter, der die wichtigste Seite auslaesst, ist genau so viel wert wie der
   // Deeplink-Smoke, der `schadenart` nie an eine URL haengte.
-  { pfad: '/', quelle: 'Startseite — haeufigstes ChatGPT-Ziel (357 Abrufe)' },
+  { pfad: '/', quelle: 'Startseite' },
   { pfad: '/haftpflicht/wertminderung', quelle: 'SpokeCtaBand (18 Seiten)' },
   { pfad: '/kfz-gutachter/vermittlungsportale-vergleich', quelle: 'RatgeberStaedteSection (9 Seiten)' },
   { pfad: '/decoder/reparatur-unwirtschaftlich', quelle: 'decoder/[slug]' },
@@ -65,8 +63,10 @@ for (const { pfad, quelle } of SEITEN) {
     // ⭐ Seit dem 28.08. wird die BUCHBARE URL erwartet, nicht mehr die Stadtseite.
     // Zuvor stand hier `/kfz-gutachter/<slug>` — ein Modell konnte den Termin damit zwar
     // nennen, aber nicht buchbar machen: der Nutzer landete auf der Stadtseite und musste
-    // erneut suchen. Der Log zeigte 5.486 Live-Abrufe von `ChatGPT-User` auf genau diesen
-    // Fachseiten, also genau dort, wo der Umweg wehtut.
+    // erneut suchen. Der Log zeigte 3.110 erfolgreiche Inhaltsabrufe von `ChatGPT-User`,
+    // ganz oben genau diese Fachseiten — also dort, wo der Umweg wehtut. (Die Zahl zaehlt
+    // nur 200er auf echte Seiten; die rohe Trefferzahl enthielt Assets und Scan-Rauschen
+    // mit gefaelschtem User-Agent.)
     //
     // Bewusst STRENGER als „irgendeine URL": `sv=` und `slot=` muessen dran sein, sonst
     // ist es kein Deeplink, sondern wieder ein Zwischenschritt. Genau diese Unschaerfe hat
