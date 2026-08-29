@@ -394,6 +394,28 @@ Szenarien, verifiziert). Regel-4-Nachweis nach Deploy: Flow fahren, „Wie möch
 abrechnen?" **überspringen**, Werkstatt wählen → `reparatur_werkstatt_id` gesetzt **und**
 `reparaturwunsch='reparatur'`.
 
+##### ✅ Regel-4-Nachweis auf prod (29.08., nach Deploy 13:17)
+
+Voll gefahren per UI: Lead über den Mini-Wizard erzeugt (`82c8b7c8`, Haftpflicht), dann der Flow
+mit `EP_SKIP_ABRECHNUNG=1` — die Frage „Reparatur oder Auszahlung?" wurde **bewusst übersprungen**:
+
+```
+Schritt  5  Reparatur oder Auszahlung?   → Abrechnungsfrage BEWUSST uebersprungen
+Schritt 18  Wählen Sie Ihre Werkstatt    → geklickt: "Auswählen"
+Schritt 19  Wunschtermin vorschlagen     ← der Folgeschritt: die Wahl wurde ANGENOMMEN
+```
+
+Keine Ablehnungsmeldung mehr (der Walker prüft explizit darauf). DB-Gegenprobe am Lead:
+
+```
+reparaturwunsch                   = 'reparatur'    ← NACHGETRAGEN (war null)
+reparatur_werkstatt_id            = 44996f32-…     ← GESETZT
+reparatur_werkstatt_quelle        = 'kunde'
+reparatur_vermittlung_status      = 'vermittelt'
+```
+
+Damit ist der Fix auf prod belegt. Testdaten anschließend entfernt (0 Leads, 0 Anfragen Rest).
+
 ⭐ **Zweite Lehre, teurer als die erste:** Eine Migration, die auf ein Feld aus dem Anwendungscode
 zeigt, ist ein **Deploy-abhängiger** Write. Sie vor dem Code zu applizieren ist genau die
 Drift-Konstellation, gegen die Regel 3 geschrieben wurde — nur in die andere Richtung: hier war
@@ -628,6 +650,23 @@ blieb. Erst der zweite Lauf hat ihn eingesammelt. Drei Spaltenannahmen waren zud
 `gutachter_finder_anfragen` verweist über **`konvertiert_zu_lead_id`** (nicht `lead_id`),
 `faelle_claim_bridge` hat **keinen `id`-PK**, und `fall_dokumente.claim_id` ist **NOT NULL**
 (muss vor dem Claim weg).
+
+⭐⭐ **Nachtrag 29.08. — dieselbe Spalte, diesmal im Werkzeug selbst.** `ep-lib.mjs` (die
+gemeinsame Bibliothek beider Cleanup-Scripts) fragte `gutachter_finder_anfragen` weiterhin über
+`lead_id` ab, obwohl `ep-cleanup2.mjs` die richtige Spalte (`konvertiert_zu_lead_id`) sogar im
+Kommentar dokumentiert. Gemessen:
+
+```
+ALT (lead_id):                 FEHLER: column … does not exist
+NEU (konvertiert_zu_lead_id):  ok, 0 Zeilen
+```
+
+Der Fehler war **still**: `out.gfa = gfa.data ?? []` machte aus der fehlgeschlagenen Query eine
+leere Liste, und jeder Report meldete brav `"gfa": 0`. Eine falsche Null liest sich exakt wie
+„nichts entstanden". Gefixt (richtige Spalte + die Query-Fehler werden jetzt laut protokolliert
+statt in `?? []` zu verschwinden) — sonst hätte ein Finder-Lauf Residue hinterlassen, das der
+Report als sauber ausgewiesen hätte. Eine dokumentierte Lehre wirkt erst, wenn sie **am
+gemeinsamen Ort** steht, nicht nur in dem Script, in dem sie gelernt wurde.
 
 ⭐ **Nebenbefund:** Beim Nachzählen standen **vier verwaiste Claims aus fremden Smokes**
 (`CLM-2026-05642`, `…43`, `…44`, `…46`) im selben Zeitfenster — dieselbe Falle, nur unbemerkt.
