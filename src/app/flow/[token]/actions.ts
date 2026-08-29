@@ -16,7 +16,8 @@ import { generateInitialPassword } from '@/lib/auth/generate-initial-password'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getStorageUrl } from '@/lib/storage/url'
+import { getStorageUrl, parseStorageUrl } from '@/lib/storage/url'
+import { storagePfadAusUrl } from '@/lib/dokumente/sync-lead-zu-pflicht'
 import { trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
@@ -1237,10 +1238,15 @@ export async function signSAandCreateFall(
   // nicht. URLs zeigen auf den (ehemaligen) `dokumente`-Bucket, die Files
   // wurden von AAR-553 G1.5 nach `fall-dokumente` kopiert — daher denselben
   // internen Pfad verwenden. Idempotent via storage_path-Check.
-  const urlToPath = (url: string): string | null => {
-    const m = url.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)
-    return m ? decodeURIComponent(m[1]) : null
-  }
+  // 28.08.: stand als Regex auf `/object/public/` — also nur die public-Form. Real trägt
+  // `leads.zb1_url` aber häufig einen NACKTEN Storage-Pfad (`leads/<id>/zb1_flow_….webp`,
+  // 7 von 10 belegten Slots auf prod). Der Regex lieferte dafür `null` → kein Insert, kein
+  // Fehler: die Unterlagen fehlten still in der Akte (belegt an CLM-2026-03507).
+  // Zusätzlich hätte er bei aktivem STORAGE_USE_SIGNED_URLS auch die `/object/sign/`-Form
+  // verworfen. parseStorageUrl kennt alle drei Varianten, storagePfadAusUrl den nackten Pfad.
+  // `dokumente` zusätzlich erlaubt: die Files wurden von AAR-553 G1.5 nach
+  // `fall-dokumente` kopiert — unter demselben internen Pfad.
+  const urlToPath = (url: string): string | null => storagePfadAusUrl(url, ['dokumente'])
   try {
     const leadAny = lead as Record<string, unknown>
     const zb1Url = (leadAny.zb1_url as string | null) ?? null
@@ -1313,9 +1319,13 @@ export async function signSAandCreateFall(
   // `fall-dokumente` kopieren (Supabase storage.copy mit destinationBucket —
   // kein Bandbreiten-Roundtrip), dann mit dem neuen Pfad inserten. Downstream
   // getPublicUrl('fall-dokumente') erzeugt jetzt valide Preview-URLs.
+  // 28.08.: ebenfalls von `/object/public/` auf parseStorageUrl umgestellt — sonst fällt
+  // die `/object/sign/`-Form durch, sobald STORAGE_USE_SIGNED_URLS greift. Hier KEIN
+  // Rückfall auf den nackten Pfad: ohne Bucket-Angabe wäre nicht entscheidbar, ob er in
+  // `schadensfotos` oder `fall-dokumente` liegt — und die Quelle bestimmt, was kopiert wird.
   const schadensfotoPath = (url: string): string | null => {
-    const m = url.match(/\/storage\/v1\/object\/public\/schadensfotos\/(.+)$/)
-    return m ? decodeURIComponent(m[1]) : null
+    const geparst = parseStorageUrl(url)
+    return geparst?.bucket === 'schadensfotos' ? geparst.path : null
   }
   try {
     const fotoUrls = Array.isArray(lead.schadensfoto_urls)

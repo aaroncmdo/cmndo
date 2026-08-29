@@ -40,7 +40,7 @@ import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 // ⭐ 28.08.2026 — die URL ist jetzt der BUCHUNGS-Deeplink, nicht mehr die Stadtseite.
 //
 // Nachgemessen im nginx-Log: `ChatGPT-User` (der Agent, mit dem ChatGPT eine Seite holt,
-// WAEHREND ein Nutzer fragt) rief 5.486-mal Seiten ab — ganz oben Fachseiten wie
+// WAEHREND ein Nutzer fragt) rief 3.110-mal erfolgreich Inhalte ab — ganz oben Fachseiten wie
 // /haftpflicht/wertminderung, /decoder/kfz-gutachter-kosten-tabelle. Dort stand seit dem
 // Vormittag zwar ein konkreter Termin („Freitag, 28.08., 13:40 Uhr bei Gaith"), die URL
 // daneben fuehrte aber auf die STADTSEITE. Ein Modell konnte den Termin also nennen, aber
