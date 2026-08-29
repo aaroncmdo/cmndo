@@ -11,6 +11,16 @@ on:
       - '.github/workflows/deploy-vps-kfz-duesseldorf.yml'
   workflow_dispatch:
 
+# Zwei Laeufe dieses Workflows duerfen sich nicht ueberlappen: sie teilen sich auf dem VPS
+# denselben Tarball-Pfad (/tmp/deploy*.tar.gz) und loeschen ihn am Ende. Ueberlappen sie,
+# bricht der spaetere mit "tar: ... Cannot open: No such file or directory" ab — am 29.08.
+# zweimal auf staging passiert, beide Male traf es den Deploy des NEUESTEN Standes.
+# cancel-in-progress: false ist Absicht: ein laufender Deploy wird zu Ende gefahren
+# (Abbruch mitten im Entpacken/Restart waere schlimmer als Warten), der naechste reiht sich ein.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
