@@ -21,26 +21,45 @@ export type ReferenzQuelle = {
   kontext: string
 }
 
+/**
+ * ⚠ `bucket: null` heisst „diese Spalte traegt IMMER eine volle URL". Stimmt das nicht,
+ * liefert `aufloesen()` fuer den relativen Wert `{ art: 'extern' }` — die Datei wird dann
+ * **gar nicht geprueft**, und der Waechter schweigt ueber sie.
+ *
+ * Genau das war am 28.08. bei 6 Referenzen der Fall (leads.polizeibericht_url 2×,
+ * leads.zb1_url, leads.zeugenaussage_url, auftraege.gutachten_url,
+ * kanzlei_faelle.anschlussschreiben_url) — alle tragen relative Pfade, alle liegen
+ * nachweislich in `fall-dokumente`. **Ein Waechter, der eine Referenz als „extern" abtut,
+ * meldet nicht „gesund", sondern gar nichts** — und das liest sich wie gesund.
+ *
+ * Beim Ergaenzen einer Spalte den Bucket **nachsehen, nicht raten**: einen relativen Wert
+ * nehmen und per `storage.from(<bucket>).list(<ordner>, { search: <datei> })` gegen alle
+ * Buckets halten. `sachverstaendige.logo_url` zeigt, warum: dessen einziger relativer Wert
+ * (`/claimondo-logo.svg`) liegt in KEINEM Bucket und ist korrekt extern.
+ */
 export const REFERENZ_QUELLEN: ReferenzQuelle[] = [
   { tabelle: 'pflichtdokumente', spalte: 'dokument_url', bucket: 'fall-dokumente', kontext: 'sv_id,dokument_typ,status' },
   { tabelle: 'fall_dokumente', spalte: 'storage_path', bucket: 'fall-dokumente', kontext: 'fall_id,dokument_typ' },
   { tabelle: 'vertraege_unterzeichnet', spalte: 'pdf_storage_path', bucket: 'vertraege', kontext: 'sv_id,vorlage_typ,unterschrift_name' },
+  // `logo_url` bleibt bewusst null: der einzige relative Wert ist `/claimondo-logo.svg` —
+  // ein statisches Asset aus /public, das in KEINEM Bucket liegt (28.08. nachgesehen).
+  // Ein Bucket-Eintrag würde es fälschlich als tote Storage-Datei melden.
   { tabelle: 'sachverstaendige', spalte: 'logo_url', bucket: null, kontext: 'id,firmenname' },
   { tabelle: 'sachverstaendige', spalte: 'unterschrift_url', bucket: null, kontext: 'id,firmenname' },
   { tabelle: 'sachverstaendige', spalte: 'vertrag_pdf_url', bucket: null, kontext: 'id,firmenname' },
   { tabelle: 'profiles', spalte: 'avatar_url', bucket: null, kontext: 'id' },
-  { tabelle: 'auftraege', spalte: 'gutachten_url', bucket: null, kontext: 'id,sv_id' },
-  { tabelle: 'leads', spalte: 'polizeibericht_url', bucket: null, kontext: 'id' },
-  { tabelle: 'leads', spalte: 'zb1_url', bucket: null, kontext: 'id' },
+  { tabelle: 'auftraege', spalte: 'gutachten_url', bucket: 'fall-dokumente', kontext: 'id,sv_id' },
+  { tabelle: 'leads', spalte: 'polizeibericht_url', bucket: 'fall-dokumente', kontext: 'id' },
+  { tabelle: 'leads', spalte: 'zb1_url', bucket: 'fall-dokumente', kontext: 'id' },
   { tabelle: 'leads', spalte: 'unfallskizze_url', bucket: null, kontext: 'id' },
-  { tabelle: 'leads', spalte: 'zeugenaussage_url', bucket: null, kontext: 'id' },
+  { tabelle: 'leads', spalte: 'zeugenaussage_url', bucket: 'fall-dokumente', kontext: 'id' },
   { tabelle: 'claims', spalte: 'sa_pdf_url', bucket: null, kontext: 'id' },
   { tabelle: 'claims', spalte: 'sa_unterschrift_url', bucket: null, kontext: 'id' },
   { tabelle: 'claims', spalte: 'unfallskizze_url', bucket: null, kontext: 'id' },
   { tabelle: 'claims', spalte: 'mietwagen_rechnung_url', bucket: null, kontext: 'id' },
   { tabelle: 'gutachten', spalte: 'bericht_pdf_url', bucket: null, kontext: 'id,sv_id' },
   { tabelle: 'gutachten', spalte: 'unterschrift_sv_url', bucket: null, kontext: 'id,sv_id' },
-  { tabelle: 'kanzlei_faelle', spalte: 'anschlussschreiben_url', bucket: null, kontext: 'id' },
+  { tabelle: 'kanzlei_faelle', spalte: 'anschlussschreiben_url', bucket: 'fall-dokumente', kontext: 'id' },
   { tabelle: 'nachrichten', spalte: 'anhang_url', bucket: null, kontext: 'id' },
 ]
 
