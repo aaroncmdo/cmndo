@@ -56,9 +56,19 @@ export async function zustand(db, email) {
       db.from('claims').select('id, claim_nummer, lead_id, operative_status, service_typ, kanzlei_wunsch, abrechnungsweg, sa_unterschrieben, sv_id, created_at').in('lead_id', leadIds),
       db.from('gutachter_termine').select('id, status, start_zeit, bezug_typ, bezug_id, assignee_id, durchgefuehrt_am').or(leadIds.map((id) => `bezug_id.eq.${id}`).join(',')),
       db.from('admin_termine').select('id, typ, status, lead_id, beschreibung').in('lead_id', leadIds),
-      db.from('gutachter_finder_anfragen').select('id, status, regulierungs_modus, matching_typ, lead_id, termin_id').in('lead_id', leadIds),
+      // ⚠ gutachter_finder_anfragen verweist ueber `konvertiert_zu_lead_id` — eine Spalte
+      // `lead_id` gibt es NICHT. Stand hier falsch (29.08. gefunden): die Query schlug jedes
+      // Mal fehl, `?? []` machte daraus eine leere Liste, und der Report meldete "gfa: 0".
+      // Eine falsche Null liest sich wie "nichts entstanden".
+      db.from('gutachter_finder_anfragen').select('id, status, regulierungs_modus, matching_typ, konvertiert_zu_lead_id, termin_id').in('konvertiert_zu_lead_id', leadIds),
       db.from('nachrichten').select('id, kanal, richtung, status, template_key, lead_id, claim_id, empfaenger_kontakt, created_at').in('lead_id', leadIds),
     ])
+    // Fehler LAUT machen statt in `?? []` verschwinden zu lassen — sonst ist jede Null
+    // zweideutig (nichts da vs. Query kaputt).
+    for (const [name, r] of [['flow_links', fl], ['claims', cl], ['gutachter_termine', gt],
+                             ['admin_termine', at], ['gutachter_finder_anfragen', gfa], ['nachrichten', na]]) {
+      if (r.error) console.error(`  ⚠ zustand(): ${name} — ${r.error.message}`)
+    }
     out.flowLinks = fl.data ?? []
     out.claims = cl.data ?? []
     out.termine = gt.data ?? []
@@ -155,7 +165,9 @@ export async function cleanup(db, email) {
     const { data: t2 } = await db.from('gutachter_termine').select('id').in('lead_id', leadIds)
     await del('gutachter_termine', 'id', [...new Set([...(t1 ?? []), ...(t2 ?? [])].map((x) => x.id))])
     await del('admin_termine', 'lead_id', leadIds)
-    await del('gutachter_finder_anfragen', 'lead_id', leadIds)
+    // ⚠ NICHT `lead_id` — die Spalte heisst `konvertiert_zu_lead_id` (29.08. gefixt; der
+    // Delete schlug jedes Mal fehl und haette bei einem Finder-Lauf Residue hinterlassen).
+    await del('gutachter_finder_anfragen', 'konvertiert_zu_lead_id', leadIds)
     await del('flow_links', 'lead_id', leadIds)
     await del('nachrichten', 'lead_id', leadIds)
     await del('tasks', 'lead_id', leadIds)
