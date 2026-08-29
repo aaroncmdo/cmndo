@@ -142,6 +142,55 @@ Auf den Fachseiten stehen Zahlen und Paragraphen, aber **kein Mensch sagt etwas*
   sind keine Option — dieselbe Grenze wie bei „fachlich geprüft" (siehe #5688). Quellen:
   die Partner-Sachverständigen (7 mit belegter Reputation), die Partnerkanzlei.
 - **P2.3** Ausrollen auf die Seiten, die KI-Crawler laut Log wirklich lesen.
+  **→ gemessen am 29.08. (nginx, 14 Tage).** Die Frage ist damit beantwortet:
+
+  | Seite | KI-Crawler-Zugriffe |
+  |---|---|
+  | `/gutachter-finden` | **458** |
+  | `/werkstatt-finden` | 135 |
+  | `/decoder/kfz-gutachter-kosten-tabelle` | 103 |
+  | `/schadensreport-2026` | 93 |
+  | `/haftpflicht/wertminderung` | 84 |
+  | `/haftpflicht/4-wochen-frist` | 77 |
+  | `/kfz-gutachter/koeln` | 58 |
+
+  ⭐⭐ **Die Größenordnung war unbekannt und ändert die Gewichtung des ganzen Plans:**
+
+  | Crawler | Zugriffe / 14 Tage |
+  |---|---|
+  | ChatGPT-User | **5.129** |
+  | ClaudeBot | 4.313 |
+  | OAI-SearchBot | 3.252 |
+  | PerplexityBot | 2.340 |
+  | GPTBot | 2.142 |
+  | Google-Extended | 891 |
+  | **Summe** | **≈ 18.400** |
+
+  Zum Vergleich: **Googlebot** crawlt im selben Zeitraum **2.073** HTML-Seiten.
+  **Die KI-Crawler sind rund 9× aktiver als Google.** Das ist die empirische
+  Stütze für Aarons Priorisierung („B2C-Leads über KI-Assistenten") — sie war
+  bisher plausibel, jetzt ist sie belegt.
+
+  ✅ **Die von KI genutzte Schnittstelle antwortet sauber:**
+  `/api/v1/gutachter-termine` — 57 Aufrufe von KI-Crawlern, **57× HTTP 200**.
+  Dort geht kein Lead verloren.
+
+  ⚠ **Nebenbefunde derselben Messung** (keiner davon dringend):
+  * **Bytespider ignoriert die robots.txt** — `Disallow: /` steht korrekt drin,
+    trotzdem 191 HTML-Zugriffe. Bekanntes ByteDance-Verhalten; wirksam wäre nur
+    ein nginx-Block. Geringe Menge, bewusst nicht angefasst.
+  * **3.942 × HTTP 429** auf `/api/v1/gutachter-termine` sehen nach einem
+    Nutzerproblem aus, sind aber **self-inflicted**: 3.836 davon von
+    `212.132.119.110` (dem Server selbst, UA „node"), Peak am 27.08. = ein
+    Bau-Tag. Echte Nutzer sind nicht betroffen. ⚠ Offen bleibt, ob SSR-Läufe
+    dadurch je Seiten *ohne* Termine rendern — nicht gemessen, nur möglich.
+  * `/fetch` + `/proxy` (302 + 89 Zugriffe) sind **SSRF-Scans** auf den
+    AWS-Metadaten-Endpoint (`169.254.169.254/…/iam/security-credentials`).
+    Sie prallen mit 404 ab — Internet-Hintergrundrauschen, kein Handlungsbedarf.
+  * `/og-default.png` (823 × 404) ist **Alt-Traffic**: der Fix #5723 wirkt, alle
+    geprüften Seiten liefern heute ein existierendes `og:image` (HTTP 200).
+  * `/robots.txt` (272 × 404) stammt **nicht** von claimondo.de — beide eigenen
+    Domains liefern 200; die Logs bündeln alle vhosts der IP.
 
 ### P3 · Restliche Seiten GEO-fähig nachziehen — ✅ erledigt (#5698)
 
