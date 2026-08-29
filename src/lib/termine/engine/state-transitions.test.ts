@@ -218,3 +218,49 @@ describe('weiseSvGesuchtZu (T4)', () => {
     if (!r.ok) expect(r.code).toBe('nicht_sv_gesucht')
   })
 })
+
+// ⭐⭐ Regel-4-Smoke 29.08.: Der neue Slot verlor bei einem BEZUG-NATIVEN Quell-Termin
+// jeden Fallbezug — `verlege` las nur die Legacy-Spalten (NULL) und kopierte
+// `bezug_typ`/`bezug_id` gar nicht. Folge: ein Waisen-Termin, den `bezugOrExpr()` nie
+// findet; der Kunde sieht den Vorschlag nicht, der alte bleibt auf `verlegt` blockiert.
+describe('verlege — der Fallbezug muss mitwandern', () => {
+  const insertVon = (db: unknown) =>
+    (db as { calls: Array<Record<string, unknown>> }).calls.find((c) => 'insert' in c)!.insert as Record<string, unknown>
+
+  const skript = (alt: Record<string, unknown>) => makeDb([
+    { data: { id: 'alt', assignee_id: 's', assignee_typ: 'sachverstaendiger', status: 'bestaetigt', ...alt }, error: null },
+    { data: [{ id: 'alt' }], error: null },
+    { data: { id: 'neu' }, error: null },
+  ])
+
+  it('bezug-nativer Quell-Termin: bezug_typ/bezug_id wandern mit', async () => {
+    const db = skript({ bezug_typ: 'fall', bezug_id: 'f-1', fall_id: null, claim_id: null, lead_id: null })
+    await verlege('alt', { neuVon: '2099-01-01T09:00:00Z', neuBis: '2099-01-01T10:00:00Z', db: db as never })
+    const ins = insertVon(db)
+    expect(ins.bezug_typ).toBe('fall')
+    expect(ins.bezug_id).toBe('f-1')
+  })
+
+  it('der neue Slot ist NIE ohne jeden Bezug', async () => {
+    const db = skript({ bezug_typ: 'fall', bezug_id: 'f-1', fall_id: null, claim_id: null, lead_id: null })
+    await verlege('alt', { neuVon: '2099-01-01T09:00:00Z', neuBis: '2099-01-01T10:00:00Z', db: db as never })
+    const ins = insertVon(db)
+    const hatBezug = [ins.fall_id, ins.claim_id, ins.lead_id, ins.bezug_id].some((v) => v != null)
+    expect(hatBezug, 'sonst findet bezugOrExpr() den Termin nie').toBe(true)
+  })
+
+  it('Legacy-Quell-Termin: fall_id/claim_id wandern weiterhin mit', async () => {
+    const db = skript({ fall_id: 'f-2', claim_id: 'c-2', bezug_typ: null, bezug_id: null })
+    await verlege('alt', { neuVon: '2099-01-01T09:00:00Z', neuBis: '2099-01-01T10:00:00Z', db: db as never })
+    const ins = insertVon(db)
+    expect(ins.fall_id).toBe('f-2')
+    expect(ins.claim_id).toBe('c-2')
+  })
+
+  it('traegt der Quell-Termin BEIDE Achsen, bleiben auch beide erhalten', async () => {
+    const db = skript({ fall_id: 'f-3', claim_id: 'c-3', bezug_typ: 'fall', bezug_id: 'f-3' })
+    await verlege('alt', { neuVon: '2099-01-01T09:00:00Z', neuBis: '2099-01-01T10:00:00Z', db: db as never })
+    const ins = insertVon(db)
+    expect([ins.fall_id, ins.claim_id, ins.bezug_typ, ins.bezug_id]).toEqual(['f-3', 'c-3', 'fall', 'f-3'])
+  })
+})
