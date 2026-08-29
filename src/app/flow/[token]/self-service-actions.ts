@@ -19,11 +19,8 @@ import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
 import { resolveWunschterminIso } from './wunschtermin'
-import {
-  assignReparaturWerkstatt,
-  findReparaturWerkstaettenForTarget,
-} from '@/lib/werkstatt/vermittlung-server'
-import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
+import { assignReparaturWerkstatt } from '@/lib/werkstatt/vermittlung-server'
+import { pruefeWerkstattAuswahl, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
 import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
@@ -753,14 +750,36 @@ export async function waehleWerkstattFlow(
 
   // Gate/Idempotenz: nur zuweisen, wenn der Lead wirklich eine Vermittlung braucht
   // (Reparatur-Intent, noch keine Werkstatt, Status offen). Verhindert Assign bei
-  // falschem Intent + Re-Assign-Overwrite. Die UI zeigt den Picker ohnehin nur so.
+  // falschem Intent + Re-Assign-Overwrite.
   const { data: leadRow } = await admin
     .from('leads')
     .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status')
     .eq('id', leadId)
     .maybeSingle()
-  if (!leadRow || !brauchtWerkstattVermittlung(leadRow as BedarfRow)) {
+  if (!leadRow) return { ok: false, error: 'Dieser Link ist ungültig.' }
+  const row = leadRow as BedarfRow
+
+  // Die Werkstattwahl IST die Antwort auf "Wie möchtest du den Schaden abrechnen?".
+  // Wer die Frage überspringt, bekam den Step trotzdem angeboten — und jede Auswahl endete
+  // in "Für diesen Vorgang ist keine Werkstatt-Auswahl möglich." (prod-verifiziert 28.08.).
+  // Den Step wegzukonfigurieren geht NICHT (Sequenz beim Mount fixiert, `reparaturwunsch`
+  // wird erst mitten im Flow erhoben) — also wird er hier bedienbar gemacht.
+  // Entscheidungslogik + Begründung: pruefeWerkstattAuswahl in vermittlung-core.ts.
+  const { erlaubt, wunschNachtragen } = pruefeWerkstattAuswahl(row)
+  if (!erlaubt) {
     return { ok: false, error: 'Für diesen Vorgang ist keine Werkstatt-Auswahl möglich.' }
+  }
+
+  if (wunschNachtragen) {
+    // Ergebnis prüfen: supabase-js wirft nicht, und ein stiller Fehlschlag hier hiesse,
+    // dass der Abrechnungsweg unbestimmt bleibt, obwohl der Kunde eine Werkstatt hat.
+    const { error: wunschErr } = await admin
+      .from('leads')
+      .update({ reparaturwunsch: 'reparatur' })
+      .eq('id', leadId)
+    if (wunschErr) {
+      return { ok: false, error: `Abrechnungsweg konnte nicht gesetzt werden: ${wunschErr.message}` }
+    }
   }
 
   // Nur eine der tatsächlich angebotenen zulassen — ein manipulierter Request darf keine beliebige

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Quote } from 'lucide-react'
@@ -6,6 +7,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
+import { NaechsteTermineKompakt } from '@/components/content/NaechsteTermineKompakt'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { VersichererHero } from '@/components/content/VersichererHero'
 import { VersichererProfileCard } from '@/components/content/VersichererProfileCard'
@@ -303,6 +305,18 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           weil kein Feld eine fachliche Einzelpruefung belegt — Begruendung in
           ReviewerByline.tsx. */}
       <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
+
+      {/* Buchbare Termine — gemessen am 28.08. trugen diese 13 Seiten WEDER eine Uhrzeit
+          NOCH eine buchbare URL, obwohl sie die qualifizierteste Frage ueberhaupt bedienen:
+          wer „<Versicherer> Schaden melden" fragt, hat den Schaden bereits und kennt den
+          Gegner. Ein Modell konnte hier alles ueber die Regulierung sagen und nichts
+          darueber, wann jemand kommt. Rendert `null`, wenn nichts frei ist. */}
+      <div className="mx-auto max-w-3xl px-5 pb-8 sm:px-8">
+        <Suspense fallback={null}>
+          <NaechsteTermineKompakt />
+        </Suspense>
+      </div>
+
       <LandingFooter />
       <StickyCallBar quelle={`Versicherer-Hub: ${slug}`} whatsappHref={WHATSAPP_HREF} />
     </div>

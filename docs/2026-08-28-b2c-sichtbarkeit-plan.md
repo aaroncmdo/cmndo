@@ -161,6 +161,89 @@ Ein Prod-Wächter sichert das jetzt ab (`tests/e2e/flows/autorenschaft-byline-sm
 3/3 grün): er prüft die Byline in `page.content()` **und** in `innerText` — im HTML stehen
 und für Menschen sichtbar sein sind zwei verschiedene Aussagen.
 
+### P6 · Klassische Suchsichtbarkeit — gemessen 28./29.08.
+
+Der Plan oben zielt auf **KI-Assistenten**. Parallel gemessen wurde der Google-Kanal;
+er ist die zweite Hälfte derselben Frage und war bisher unbeziffert.
+
+**Search Console, 50 Queries, 3 Monate:**
+
+| | Queries | Impressionen | Klicks | CTR |
+|---|---|---|---|---|
+| B2B | 22 | 1.012 | 11 | 1,1 % |
+| **B2C** | 28 | **884** | **2** | **0,2 %** |
+
+⭐⭐ **Der Kanal hat noch NIE einen echten B2C-Lead erzeugt.** Alle 37 Anfragen in
+`gutachter_finder_anfragen` vor dem 09.08. und alle 6 danach sind eigene Tests
+(Aaron in `+kunde…`-Varianten, Nicolas, „Test/Tet Namen", SMOKE…). Die als
+„Zufluss-Ausfall seit 09.08." dokumentierte Kurve misst die **Testaktivität**, nicht
+den Zufluss — Details in `memory/BROADCAST-zeitreihe-aus-testdaten-sieht-aus-wie-ausfall.md`.
+→ Das Problem sitzt **oben im Trichter** (Sichtbarkeit), nicht unten bei Formular oder
+Conversion. Das Formular ist nachweislich intakt (Regel-4-Smoke 23.08.).
+
+**Wo die Impressionen landen:**
+
+| Seite | Impr. | Klicks | Position |
+|---|---|---|---|
+| `/decoder/kfz-gutachter-kosten-tabelle` | 709 | 8 | 5–9 — **97 % BVSK-Suchen = B2B** |
+| `/` (Startseite) | 356 | 2 | 6,3 |
+| `/kfz-gutachter/online-kfz-gutachten` | 267 | **0** | 11–18 |
+| Stadtseiten (4 von 173+) | ~120 | **0** | 10–16 |
+
+⭐ **Die stärkste Seite bedient den falschen Markt:** 687 der 709 Impressionen sind
+BVSK-Begriffe (Sachverständige/Versicherer). Der eine B2C-Begriff darauf steht auf
+Position 14,7.
+
+#### ✅ Erledigt — auf prod, Regel 4 grün (28.08.)
+
+| PR | Befund | Fix |
+|---|---|---|
+| #5710 | Zwei Seiten zielten auf „nutzungsausfall berechnen"; der Kopfbegriff **„nutzungsausfallentschädigung" (5.000/Mon.)** stand weder in Titel noch H1 | Zielbegriffe getrennt: Erklärseite → Kopfbegriff, Rechner → „berechnen". **Kein Canonical** — die zweite Seite ist ein funktionierender Rechner, kein Duplikat |
+| #5716 | Startseite rankt auf Pos. 6 für „kfz sachverständiger köln" & Co. — **188 Impressionen, 0 Klicks**, weil das gesuchte Wort im Titel fehlte | Titel → „Kfz-Sachverständiger nach Unfall – digital, 0 €" |
+| #5721 | `/kfz-gutachter/online-kfz-gutachten`: **267 Impr., 0 Klicks**. Kein fehlendes Wort, sondern **Intentions-Mismatch** — wer „gutachten online" sucht, will eines beauftragen und bekam „was rechtlich erlaubt ist" | Titel → „Kfz-Gutachten online beauftragen, Termin vor Ort". ⚖ Bewusst so formuliert: beschreibt den *Auftragsweg*, nicht das vom **LG Bremen (9 O 1720/24)** untersagte Produkt, und nennt die Vor-Ort-Pflicht im Titel |
+
+#### 🔵 Gebaut, Deploy offen
+
+**#5729** — `/haftpflicht/gegnerische-versicherung-ermitteln` (neu). Aus dem Abgleich
+der Keyword-Nachfrage (123 Begriffe, 24.150 Suchen/Mon.) gegen den Bestand: „gegnerische
+versicherung herausfinden" (500/Mon., Wettbewerb niedrig) hatte keine Seite, und der
+**Zentralruf der Autoversicherer** kam im ganzen Marketing-Baum **nie** vor. Fakten an
+der Primärquelle verifiziert (0800 250 260 0; Kennzeichen + Schadentag + Unfallland).
+Gemergt nach `staging` am 29.08., auf prod noch **404** → Regel 4 offen bis zum Release.
+
+#### 🔴 Offen — Kannibalisierung bei „Gutachtenkosten" (braucht eine Entscheidung)
+
+Drei Seiten zum selben Thema, zwei davon inhaltliche Dubletten:
+
+| Seite | Wörter | H2 | Suchbesucher/14 T. |
+|---|---|---|---|
+| `/kfz-gutachter/kosten` | 939 | 8 | **1** |
+| `/kosten-kfz-gutachten` | 647 | 5 | **0** |
+| `/decoder/…kosten-tabelle` (B2B) | — | — | **105** |
+
+Beide B2C-Seiten behandeln dasselbe (was kostet es · BVSK-Honorartabelle · wer zahlt),
+sind selbst-canonical, stammen aus **demselben Commit** und haben keinen erkennbaren
+Sonderzweck. Zielvolumen: „kfz gutachten kosten" + „…tabelle" + „…kostenlos" =
+**1.500 Suchen/Mon.**
+
+⚠ **Nicht im Vorbeigehen zu lösen.** Ein geändertes Canonical bei erhaltenen
+hreflang-Alternates erzeugt widersprüchliche Signale; ein Redirect (das etablierte
+Projekt-Muster) vernichtet 647 Wörter, von denen der Abschnitt *„Das Honorar ist
+überhöht — was die Versicherung kürzt"* auf der Zielseite fehlen könnte.
+**Sauber wäre:** diesen Abschnitt in `/kfz-gutachter/kosten` übernehmen, dann
+`/kosten-kfz-gutachten` per 301 auflösen. Risiko gering (0 Suchbesucher), aber es ist
+eine Entscheidung über eine URL → **Aaron**.
+
+#### Was das NICHT löst
+
+Die Titel-Fixes heben die **CTR**, nicht die **Position**. 884 B2C-Impressionen im
+Quartal bleiben wenig gegenüber 24.150 Suchen/Monat im Markt — wir sehen **1,2 %**.
+Für mehr Impressionen braucht es Rankings, und dafür Autorität. Externe Verweise mit
+Traffic sind kaum vorhanden (die größten sind eigene Cluster-Domains, dazu 29
+KI-Verweise/14 T. von ChatGPT + Copilot). ⚠ Referrer-Klicks sind allerdings ein
+**schwacher Ersatz** für eine Backlink-Analyse — Ahrefs ist gesperrt, deshalb bleibt
+das eine begründete Hypothese, kein Befund.
+
 ### P4 · Messbarkeit
 
 - **P4.1** Local Falcon ist als MCP installiert, aber **nicht authentifiziert** — es liefert
@@ -213,3 +296,19 @@ Zulieferung) → P1.2/P1.3 (Partner-Kommunikation) → P4.
 | P3 Autorenschaft | ✅ 352/371, Wächter grün |
 | P4 Messbarkeit | offen — Local Falcon braucht OAuth-Freigabe |
 | P5 Deeplink-Parameter | ✅ gebaut, Release nach `main` offen |
+| **P6 Suchsichtbarkeit** | ✅ 3 Titel-/Intent-Fixes live + Regel 4 grün (#5710/#5716/#5721) · 🔵 #5729 gemergt, Deploy offen · 🔴 **Kosten-Kannibalisierung braucht Aarons Entscheidung** |
+
+## Erfolgsmessung P6 (Search Console, ~4 Wochen nach Deploy)
+
+| Was | heute |
+|---|---|
+| CTR Startseite auf „kfz sachverständiger*" | **0** von 188 Impressionen |
+| Klicks `/kfz-gutachter/online-kfz-gutachten` | **0** von 267 |
+| Position „digitales gutachten" | 10,8 (Seite 1?) |
+| Impressionen „nutzungsausfallentschädigung" (5.000/Mon.) | 0 auf Pos. 5–20 |
+| Impressionen „gegnerische versicherung herausfinden" | 0 (Seite noch nicht live) |
+
+⚠ Die vier PRs betreffen **verschiedene** Seiten und überlagern sich in der Messung
+nicht. Deshalb wurde die Nutzungsausfall-Seite bewusst **nicht** ein zweites Mal
+angefasst (Vokabular-Ergänzungen wären möglich, würden aber den Titel-Effekt
+unmessbar machen — „eine Änderung pro Messung").

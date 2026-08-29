@@ -11,6 +11,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { VerfuegbarkeitStreifen } from '@/components/landing/sections/VerfuegbarkeitStreifen'
+import { NaechsteTermineKompakt } from '@/components/content/NaechsteTermineKompakt'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
@@ -423,6 +424,20 @@ export default function KfzGutachterPillarPage() {
       </section>
 
       <ReviewerByline datum="2026-05-13" />
+
+      {/* Die buchbaren URLs als sichtbarer TEXT.
+          Der VerfuegbarkeitStreifen oben nennt Stadt, Tag, Uhrzeit und Gutachter — seine
+          URL steckt aber im `href`, und ein LLM-Web-Tool ersetzt `<a href>` durch eine
+          nummerierte Referenz. Gemessen am 28.08.: diese Seite trug eine Uhrzeit, aber
+          KEINE buchbare URL im Text. Genau hier faellt das auf, denn laut dem Kommentar
+          oben ist es die Seite, die ein Modell bei „Kfz-Gutachter <Stadt>" oeffnet — es
+          konnte den Termin also nennen, aber nicht buchbar machen.
+          Selbes Muster wie auf `/` und den ~30 Ratgeber-Seiten. */}
+      <div className="mx-auto max-w-3xl px-5 pb-8 sm:px-8">
+        <Suspense fallback={null}>
+          <NaechsteTermineKompakt />
+        </Suspense>
+      </div>
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter Pillar" />
