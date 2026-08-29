@@ -62,11 +62,26 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
     expect(res?.status()).toBe(200)
 
     const html = await page.content()
+
     // Kein Termin verfuegbar (Nacht, Feiertag, Netz leer) → nichts zu pruefen. Bewusst
     // skip statt rot: die Abwesenheit eines Termins ist kein Defekt.
+    //
+    // ⚠ Die Bedingung haengt an der DATENLAGE (Termin-API), NICHT am Text der Seite.
+    //
+    // Vorher stand hier `!html.includes('Nächster freier Vor-Ort-Termin')` — also genau
+    // der Block, dessen INHALT die drei Zusicherungen darunter pruefen (Uhrzeit,
+    // Direktlink-URL, kein React-Trenner). Faellt der Block von der Stadtseite weg, war
+    // die Bedingung erfuellt und der Test uebersprang sich selbst: der Ausfall haette wie
+    // „gerade kein Termin frei" ausgesehen. Ein Waechter, der sein eigenes Beweisziel als
+    // Abbruchbedingung nimmt, kann den Fehler nicht finden.
+    //
+    // Nachgezogen 29.08. aus demselben Befund in termine-auf-ki-seiten-smoke.spec.ts.
+    // Dort war es beim Aufnehmen einer Seite aufgefallen, die im Lauf gar nicht erst
+    // erschien, obwohl ihr der Block fehlte.
+    const verfuegbar = await holeNaechstenTermin()
     test.skip(
-      !html.includes('Nächster freier Vor-Ort-Termin'),
-      'Aktuell kein freier Termin in ' + STADT + ' — nichts zu pruefen',
+      !verfuegbar,
+      'Termin-API liefert gerade keinen Slot fuer ' + STADT + ' — nichts zu pruefen',
     )
 
     // Glied 1: UHRZEIT, nicht nur Datum. Vorher stand dort „Dienstag, 25.08." und sonst

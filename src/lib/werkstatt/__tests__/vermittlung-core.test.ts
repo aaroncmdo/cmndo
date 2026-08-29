@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { brauchtWerkstattVermittlung, buildZuweisungPatch } from '../vermittlung-core'
+import { brauchtWerkstattVermittlung, buildZuweisungPatch, pruefeWerkstattAuswahl } from '../vermittlung-core'
 
 describe('brauchtWerkstattVermittlung', () => {
   const base = {
@@ -55,5 +55,43 @@ describe('buildZuweisungPatch', () => {
   it('leerer String als userId -> ebenfalls null (defensiv)', () => {
     const p = buildZuweisungPatch('w1', '', 'kunde')
     expect(p.reparatur_werkstatt_zugewiesen_von).toBeNull()
+  })
+})
+
+describe('pruefeWerkstattAuswahl — der Step wird bedienbar statt versteckt (28.08.2026)', () => {
+  // Der Werkstatt-Step laesst sich nicht wegkonfigurieren: FlowWizardKfz friert die
+  // Step-Sequenz beim Mount ein, `reparaturwunsch` wird aber erst mitten im Flow erhoben.
+  // Wer die Frage ueberspringt, bekommt den Step also trotzdem — und muss ihn bedienen koennen.
+  const frei = { reparatur_werkstatt_id: null, werkstatt_id: null, reparatur_vermittlung_status: null }
+
+  it('mit echtem Wunsch: erlaubt, nichts nachzutragen', () => {
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: 'reparatur' }))
+      .toEqual({ erlaubt: true, wunschNachtragen: false })
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: 'fiktiv' }))
+      .toEqual({ erlaubt: true, wunschNachtragen: false })
+  })
+
+  it('Frage uebersprungen (null) -> erlaubt, Wunsch wird nachgetragen', () => {
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: null }))
+      .toEqual({ erlaubt: true, wunschNachtragen: true })
+  })
+
+  it("'unentschieden' zaehlt als nicht festgelegt -> ebenfalls nachtragen", () => {
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: 'unentschieden' }))
+      .toEqual({ erlaubt: true, wunschNachtragen: true })
+  })
+
+  it("'keine' ist eine ABSAGE und wird nie ueberschrieben", () => {
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: 'keine' }))
+      .toEqual({ erlaubt: false, wunschNachtragen: false })
+  })
+
+  it('alle uebrigen Sperren bleiben in Kraft — auch ohne Wunsch', () => {
+    // bereits vermittelt
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: null, reparatur_werkstatt_id: 'w1' }).erlaubt).toBe(false)
+    // Inbound-QR-Werkstatt
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: null, werkstatt_id: 'i1' }).erlaubt).toBe(false)
+    // Status nicht mehr offen
+    expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: null, reparatur_vermittlung_status: 'vermittelt' }).erlaubt).toBe(false)
   })
 })
