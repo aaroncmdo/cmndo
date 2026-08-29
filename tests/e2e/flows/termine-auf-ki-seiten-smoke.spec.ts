@@ -14,6 +14,7 @@
 import { test, expect } from '@playwright/test'
 
 const MARKETING = process.env.MARKETING_BASE_URL ?? 'https://claimondo.de'
+const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 
 // Je eine Seite pro Einbaustelle — nicht alle 18, das waere Laufzeit ohne Erkenntnis.
 const SEITEN = [
@@ -31,6 +32,18 @@ const SEITEN = [
   { pfad: '/kfz-gutachter/vermittlungsportale-vergleich', quelle: 'RatgeberStaedteSection (9 Seiten)' },
   { pfad: '/decoder/reparatur-unwirtschaftlich', quelle: 'decoder/[slug]' },
   { pfad: '/schadensreport-2026', quelle: 'Report-Seite' },
+  // ⭐ Nachgezogen 28.08., zweite Runde derselben Luecke. Beide trugen eine Uhrzeit
+  // (bzw. gar nichts), aber KEINE buchbare URL:
+  //
+  //   /kfz-gutachter   ist laut zweier ChatGPT-Laeufe vom 24.08. GENAU die Seite, die ein
+  //                    Modell bei „Kfz-Gutachter <Stadt>" oeffnet — es zitierte sie, nicht
+  //                    die Stadtseite. Sie nutzt den VerfuegbarkeitStreifen, dessen URL im
+  //                    `href` steckt.
+  //   /versicherer/*   13 Seiten, die die qualifizierteste Frage ueberhaupt bedienen
+  //                    („<Versicherer> Schaden melden" = Schaden da, Gegner bekannt) und
+  //                    weder Uhrzeit noch URL trugen.
+  { pfad: '/kfz-gutachter', quelle: 'Pillar-Seite — was ein LLM bei „Kfz-Gutachter <Stadt>" oeffnet' },
+  { pfad: '/versicherer/huk-coburg-allgemeine', quelle: 'versicherer/[slug] (13 Seiten)' },
 ]
 
 for (const { pfad, quelle } of SEITEN) {
@@ -54,9 +67,24 @@ for (const { pfad, quelle } of SEITEN) {
     // Kein Termin frei (Nacht, Feiertag, Netz leer) → nichts zu pruefen. Bewusst skip
     // statt rot: die Abwesenheit eines Termins ist kein Defekt, und ein regelmaessig
     // grundlos roter Waechter wird weggeklickt statt gelesen.
+    //
+    // ⚠ Die Bedingung haengt an der DATENLAGE (Termin-API), NICHT mehr am Text der Seite.
+    //
+    // Vorher stand hier `!text.includes('Nächste freie Vor-Ort-Termine')` — also genau
+    // das, was der Test beweisen soll. Eine Seite OHNE den Block wurde dadurch
+    // uebersprungen statt rot: sie sah aus wie „gerade kein Termin frei". Am 28.08. beim
+    // Aufnehmen von /versicherer/[slug] gesehen — die Seite tauchte im Lauf gar nicht
+    // auf, obwohl ihr der Block fehlte. Ein spaeter entfernter Block waere genauso
+    // stillschweigend durchgegangen. (Vgl. „Zwischenzustaende, die wie Erfolg aussehen".)
+    //
+    // Jetzt: liefert die API einen Termin, MUSS die Seite ihn zeigen.
+    const api = await page.request.get(`${APP}/api/v1/gutachter-termine?ort=K%C3%B6ln`)
+    const termineDa =
+      api.ok() && (((await api.json()) as { gutachter?: Array<{ termine?: unknown[] }> })
+        .gutachter ?? []).some((g) => (g.termine ?? []).length > 0)
     test.skip(
-      !text.includes('Nächste freie Vor-Ort-Termine'),
-      'aktuell kein freier Termin im Netz — nichts zu pruefen',
+      !termineDa,
+      'Termin-API liefert gerade keinen freien Slot — nichts zu pruefen',
     )
 
     // Die URL muss als TEXT dastehen. Im href allein erreicht sie kein LLM: das Web-Tool
