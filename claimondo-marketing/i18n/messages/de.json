@@ -203,7 +203,8 @@
         "heading": "Produkt",
         "melden": "Schaden melden",
         "einschaetzung": "Ersteinschätzung",
-        "beratung": "Beratung anfragen"
+        "beratung": "Beratung anfragen",
+        "was_kostet": "Was kostet das?"
       },
       "partner": {
         "heading": "Partner",
@@ -216,6 +217,18 @@
         "datenschutz": "Datenschutz"
       },
       "rights": "Alle Rechte vorbehalten."
+    },
+    "kosten_transparenz": {
+      "eyebrow": "Transparenz",
+      "heading": "Warum ist das für Sie kostenlos?",
+      "absatz1": "Weil nicht Sie uns bezahlen, sondern unsere Partner. Sachverständige zahlen uns eine Vermittlungsgebühr für Aufträge, die über Claimondo zustande kommen.",
+      "absatz2": "Von Ihrer Entschädigung geht dadurch nichts ab: Wir behalten nichts ein, ziehen nichts ab und stellen Ihnen nichts in Rechnung.",
+      "punkte": [
+        "Keine Anmeldegebühr",
+        "Keine Vermittlungsgebühr für Sie",
+        "Keine Rechnung im Nachhinein"
+      ],
+      "mehr_link": "Wie wir Geld verdienen"
     }
   },
   "flow": {
@@ -865,6 +878,11 @@
       "description": "Nutzungsausfall nach Unfall berechnen – Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "Nutzungsausfall berechnen – Rechner + Tabelle",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."
+    },
+    "was_kostet_claimondo": {
+      "title": "Was kostet Claimondo? 0 € für Geschädigte",
+      "description": "Claimondo kostet Sie nichts – weil nicht Sie uns bezahlen, sondern die Sachverständigen. Was die Versicherung trägt und wann doch Kosten entstehen können.",
+      "og_description": "Warum unser Service für Sie 0 € kostet: Sachverständige zahlen uns eine Vermittlungsgebühr. Von Ihrer Entschädigung geht nichts ab."
     }
   },
   "ueber_uns": {
@@ -2197,7 +2215,7 @@
         "fragen": [
           {
             "frage": "Was kostet Claimondo – wirklich?",
-            "antwort": "Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten – alles trägt die gegnerische Haftpflichtversicherung. Das ist gesetzlich verankert (§249 BGB). Claimondo finanziert sich ausschließlich aus diesen Positionen."
+            "antwort": "Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten – alles trägt die gegnerische Haftpflichtversicherung, gesetzlich verankert in § 249 BGB. Und uns bezahlen nicht Sie, sondern unsere Partner: Sachverständige zahlen eine Vermittlungsgebühr für Aufträge, die über Claimondo zustande kommen. Von Ihrer Entschädigung geht dadurch nichts ab – wir behalten nichts ein und stellen Ihnen nichts in Rechnung."
           },
           {
             "frage": "Was verliere ich, wenn ich einfach \"Geld nehme\" ohne Gutachter?",
@@ -4720,5 +4738,24 @@
     "hinweis_lange_dauer": "Im Reparaturfall erstatten Versicherer typischerweise etwa 12 bis 14 Tage. Längere Zeiträume brauchen eine Begründung aus dem Gutachten (z. B. Teileverzug) oder eine verzögerte Regulierung.",
     "disclaimer": "Unverbindliche Orientierung, keine Rechtsberatung. Verbindlich sind Fahrzeugklasse und Ausfalldauer aus dem Sachverständigen-Gutachten.",
     "cta": "Gutachten beauftragen"
+  },
+  "was_kostet_claimondo": {
+    "h1": "Was kostet Claimondo?",
+    "lead": "Für Sie: 0 €. Keine Anmeldegebühr, keine Vermittlungsgebühr, keine Rechnung im Nachhinein.",
+    "warum_h": "Warum ist das kostenlos?",
+    "warum_p": "Weil nicht Sie uns bezahlen, sondern unsere Partner. Sachverständige zahlen uns eine Vermittlungsgebühr für Aufträge, die über Claimondo zustande kommen – ähnlich wie ein Betrieb für eine Anzeige zahlt. Von Ihrer Entschädigung geht dadurch nichts ab: Wir behalten nichts ein, ziehen nichts ab und stellen Ihnen nichts in Rechnung.",
+    "gegner_h": "Und das Gutachten selbst?",
+    "gegner_p": "Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten der Schadenfeststellung – Gutachterhonorar, Anwalt, Abschleppen. Das ist kein Entgegenkommen, sondern Gesetz (§ 249 BGB). Sie treten den Honoraranspruch an den Sachverständigen ab und müssen nichts vorstrecken.",
+    "ehrlich_h": "Wann können doch Kosten entstehen?",
+    "ehrlich_p": "Damit Sie nicht überrascht werden – drei Fälle, in denen die Gegenseite nicht oder nicht voll zahlt:",
+    "ehrlich_items": [
+      "Bagatellschaden unter rund 750 €: Hier erkennen Versicherer meist nur einen Kostenvoranschlag an, kein Gutachten.",
+      "Teilschuld: Die Kosten werden nach Ihrer Quote geteilt – bei 50 % Mithaftung also zur Hälfte.",
+      "Eigenverschulden: Dann zahlt Ihre Kaskoversicherung oder Sie selbst."
+    ],
+    "ehrlich_schluss": "In allen drei Fällen gilt weiterhin: Für die Vermittlung über Claimondo zahlen Sie nichts. Wir sagen Ihnen vorher, woran Sie sind.",
+    "cta_h": "Unverschuldet im Unfall?",
+    "cta_p": "Lassen Sie in zwei Minuten prüfen, was Ihnen zusteht – kostenfrei und unverbindlich.",
+    "cta_btn": "Anspruch kostenlos prüfen"
   }
 }

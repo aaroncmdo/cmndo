@@ -112,6 +112,11 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
                 </Link>
               </li>
               <li>
+                <Link href="/was-kostet-claimondo" className="transition-colors hover:text-white">
+                  {t('product.was_kostet')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/schadensreport-2026" className="transition-colors hover:text-white">
                   Schadensreport 2026
                 </Link>

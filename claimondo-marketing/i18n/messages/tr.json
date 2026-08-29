@@ -203,7 +203,8 @@
         "heading": "Ürün",
         "melden": "Hasar bildir",
         "einschaetzung": "İlk değerlendirme",
-        "beratung": "Danışmanlık talebi"
+        "beratung": "Danışmanlık talebi",
+        "was_kostet": "Ne kadar tutar?"
       },
       "partner": {
         "heading": "Ortaklar",
@@ -216,6 +217,18 @@
         "datenschutz": "Gizlilik politikası"
       },
       "rights": "Tüm hakları saklıdır."
+    },
+    "kosten_transparenz": {
+      "eyebrow": "Şeffaflık",
+      "heading": "Bu sizin için neden ücretsiz?",
+      "absatz1": "Çünkü bize siz değil, iş ortaklarımız ödeme yapar. Bilirkişiler, Claimondo üzerinden gelen işler için bize aracılık ücreti öder.",
+      "absatz2": "Tazminatınızdan bu nedenle hiçbir kesinti yapılmaz: Hiçbir şey alıkoymaz, hiçbir şey düşmez ve size fatura göndermeyiz.",
+      "punkte": [
+        "Kayıt ücreti yok",
+        "Sizin için aracılık ücreti yok",
+        "Sonradan fatura yok"
+      ],
+      "mehr_link": "Paramızı nasıl kazanıyoruz"
     }
   },
   "flow": {
@@ -1729,7 +1742,7 @@
         "fragen": [
           {
             "frage": "Claimondo gerçekten ne kadar tutar?",
-            "antwort": "Sizin için, kusursuz mağdur olarak: 0 €. Bilirkişi ücreti, avukatlık masrafları, çekici ücretleri — tümünü karşı tarafın zorunlu mali sorumluluk sigortası öder. Bu kanunla güvence altına alınmıştır (§249 BGB). Claimondo yalnızca bu kalemlerden gelir sağlar."
+            "antwort": "Sizin için, kusursuz mağdur olarak: 0 €. Bilirkişi ücreti, avukatlık masrafları, çekici ücretleri — tümünü karşı tarafın zorunlu mali sorumluluk sigortası öder; bu kanunla güvence altına alınmıştır (§249 BGB). Bize ödemeyi siz değil, iş ortaklarımız yapar: Bilirkişiler, Claimondo üzerinden gelen işler için aracılık ücreti öder. Tazminatınızdan hiçbir kesinti yapılmaz — hiçbir şey alıkoymayız ve size fatura göndermeyiz."
           },
           {
             "frage": "\"Gutachtersiz sadece para alırsam\" ne kaybederim?",
@@ -4286,6 +4299,11 @@
       "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "Kullanım kaybı tazminatını hesaplayın",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."
+    },
+    "was_kostet_claimondo": {
+      "title": "Claimondo ne kadar tutar? Mağdurlar için 0 €",
+      "description": "Claimondo size hiçbir ücrete mal olmaz – çünkü bize siz değil, bilirkişiler ödeme yapar. Sigortanın neyi karşıladığı ve hangi durumlarda yine de masraf doğabileceği.",
+      "og_description": "Hizmetimiz sizin için neden 0 €: Bilirkişiler bize aracılık ücreti öder. Tazminatınızdan hiçbir kesinti yapılmaz."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4716,5 +4734,24 @@
     "hinweis_lange_dauer": "Im Reparaturfall erstatten Versicherer typischerweise etwa 12 bis 14 Tage. Längere Zeiträume brauchen eine Begründung aus dem Gutachten (z. B. Teileverzug) oder eine verzögerte Regulierung.",
     "disclaimer": "Unverbindliche Orientierung, keine Rechtsberatung. Verbindlich sind Fahrzeugklasse und Ausfalldauer aus dem Sachverständigen-Gutachten.",
     "cta": "Gutachten beauftragen"
+  },
+  "was_kostet_claimondo": {
+    "h1": "Claimondo ne kadar tutar?",
+    "lead": "Sizin için: 0 €. Kayıt ücreti yok, aracılık ücreti yok, sonradan fatura yok.",
+    "warum_h": "Bu neden ücretsiz?",
+    "warum_p": "Çünkü bize siz değil, iş ortaklarımız ödeme yapar. Bilirkişiler, Claimondo üzerinden gelen işler için bize aracılık ücreti öder – bir işletmenin ilan için ödeme yapması gibi. Tazminatınızdan bu nedenle hiçbir kesinti yapılmaz: Hiçbir şey alıkoymaz, hiçbir şey düşmez ve size fatura göndermeyiz.",
+    "gegner_h": "Peki ekspertiz raporunun kendisi?",
+    "gegner_p": "Kusurunuz olmayan bir kazada hasar tespitinin masraflarını karşı tarafın zorunlu mali sorumluluk sigortası üstlenir – bilirkişi ücreti, avukat, çekici. Bu bir jest değil, kanundur (§249 BGB). Ücret alacağını bilirkişiye temlik edersiniz ve peşin ödeme yapmanız gerekmez.",
+    "ehrlich_h": "Hangi durumlarda yine de masraf doğabilir?",
+    "ehrlich_p": "Sürprizle karşılaşmamanız için – karşı tarafın ödemediği veya tam ödemediği üç durum:",
+    "ehrlich_items": [
+      "Yaklaşık 750 € altındaki küçük hasarlar: Sigortacılar burada genellikle yalnızca keşif bedelini kabul eder, tam rapor değil.",
+      "Müşterek kusur: Masraflar kusur oranınıza göre paylaşılır – %50 müşterek kusurda yarı yarıya.",
+      "Kendi kusurunuz: O zaman kasko sigortanız veya siz ödersiniz."
+    ],
+    "ehrlich_schluss": "Üç durumda da şu geçerlidir: Claimondo üzerinden aracılık için hiçbir ücret ödemezsiniz. Durumunuzu önceden size açıkça söyleriz.",
+    "cta_h": "Kusursuz bir kaza mı geçirdiniz?",
+    "cta_p": "Hakkınız olanı iki dakikada kontrol ettirin – ücretsiz ve yükümlülüksüz.",
+    "cta_btn": "Hakkınızı ücretsiz kontrol edin"
   }
 }
