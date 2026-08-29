@@ -33,6 +33,36 @@ export function brauchtWerkstattVermittlung(row: BedarfRow): boolean {
 }
 
 /**
+ * Darf DIESE Auswahl angenommen werden — und muss dabei der Abrechnungswunsch nachgetragen
+ * werden? (28.08.2026)
+ *
+ * Hintergrund: Der Werkstatt-Step im /flow laesst sich nicht wegkonfigurieren, wenn der Kunde
+ * die Frage "Wie moechtest du den Schaden abrechnen?" uebersprungen hat — FlowWizardKfz friert
+ * die Step-Sequenz beim Mount ein (gegen die Stale-Index-Falle), und `reparaturwunsch` wird
+ * erst mitten im Flow erhoben. Der Schritt wird also angeboten; dann muss er auch bedienbar
+ * sein. Prod-verifiziert war vorher: fuenf Werkstaetten sichtbar, jede Auswahl abgelehnt.
+ *
+ * Die Werkstattwahl IST die Antwort auf die uebersprungene Frage — aber nur, wenn ueberhaupt
+ * keine gegeben wurde. `'keine'` ist eine klare Absage an die Reparatur und wird NIE
+ * ueberschrieben.
+ */
+export function pruefeWerkstattAuswahl(row: BedarfRow): {
+  erlaubt: boolean
+  /** true = `reparaturwunsch` muss vor der Zuweisung auf 'reparatur' gesetzt werden. */
+  wunschNachtragen: boolean
+} {
+  if (brauchtWerkstattVermittlung(row)) return { erlaubt: true, wunschNachtragen: false }
+
+  const nichtFestgelegt = row.reparaturwunsch == null || row.reparaturwunsch === 'unentschieden'
+  // Nur der WUNSCH darf fehlen — alle uebrigen Sperren (bereits vermittelt, Inbound-Werkstatt,
+  // Status nicht offen) bleiben in Kraft.
+  const nurDerWunschFehlt =
+    nichtFestgelegt && brauchtWerkstattVermittlung({ ...row, reparaturwunsch: 'reparatur' })
+
+  return { erlaubt: nurDerWunschFehlt, wunschNachtragen: nurDerWunschFehlt }
+}
+
+/**
  * Die fuenf Felder einer Zuweisung (die vier reparatur_werkstatt_* + status).
  * Type-Lag: die generierten DB-Types kennen die Spalten (noch) nicht -> der
  * Caller schreibt das Objekt via Record-/`as never`-Cast.

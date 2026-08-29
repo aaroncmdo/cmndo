@@ -8,15 +8,15 @@
 > |---|---|---|
 > | **1** | Mini-Wizard speichert die falsche Stadt | **echt — Ursache bewiesen, GEFIXT** (§5.2) |
 > | 2 | Interner Test-Lead wird echtem Gutachter zugewiesen | echt, offen (§5.3) |
-> | 3 | „Auswählen" bei der Werkstattwahl schreibt nichts | ❌ **Messfehler** — Reparatur-Intent fehlte (§5.4) |
+> | 3 | „Auswählen" bei der Werkstattwahl schreibt nichts | ❌ **Messfehler** — Reparatur-Intent fehlte; der Nebenbefund (Step erscheint ohne Intent) ist **GEFIXT** (§5.4.1) |
 > | 4 | Kundenbetreuer trotz `nur_gutachter` | echt, Produktentscheid (§5.5) |
 > | 5 | Unfallskizze entsteht nicht | unklar — Anthropic-Guthaben prüfen (§5.6) |
 > | 6 | Telefon Pflicht trotz „WhatsApp **oder** E-Mail" | echt, UX (§5.7) |
 > | 7 | „Drei kurze Fragen" → 18 Schritte | echt, UX (§5.8) |
 > | 8 | Finder bestätigt Termin, den es nicht gibt | ❌ **Messfehler** — Guard griff korrekt (§5.11) |
-> | 9 | Absende-Button unter Overlays (Stadtseite) | echt, offen (§5.12) |
+> | 9 | Absende-Button unter Overlays (Stadtseite) | **echt — GEFIXT** (#5717; 12/12 Viewports frei) (§5.12) |
 > | 10 | Stadtseiten-Anfrage „sieht niemand" | ❌ **Messfehler** — eigene Dispatch-Ansicht (§5.12) |
-> | — | Ort geht am Lead verloren | ❌ **Messfehler** — landet in `kunde_plz` (§5.17) |
+> | — | Ort geht am Lead verloren | ❌ **Messfehler** — landet in `kunde_plz` (§5.17). Die Nachprüfung fand daneben einen **echten**: das Server-Geocoding warf PLZ und Ort weg → **GEFIXT** (#5720) |
 > | — | Abschluss ohne Termin unerreichbar | ⚠ **halb** — Ursache war der Guard, die fehlende Dispatch-Aktion bleibt (§5.16) |
 >
 > **Was die Fehlbefunde gemeinsam haben:** Meine Test-Identität war intern (`@claimondo.de`).
@@ -350,15 +350,55 @@ angeboten, und jede Auswahl endet in „Für diesen Vorgang ist keine Werkstatt-
 Kein Datenverlust (die Meldung wird angezeigt, „Überspringen" führt weiter), aber ein
 Vertrauensbruch mitten im Fluss.
 
-⚠ **Bewusst NICHT gefixt.** Der naheliegende Fix wäre, die Step-Bedingung um
-`reparaturwunsch: ['reparatur','fiktiv']` zu erweitern. Das greift aber in **drei** Szenarien
-(haftpflicht/kasko/selbstzahler); bei Kasko und Selbstzahler ist die Reparatur der Normalfall,
-und wenn `reparaturwunsch` dort nicht gesetzt wird, würde der Fix den Step **ausblenden** und den
-Weg verschlechtern statt verbessern. Das ist ein Produktentscheid mit Messbedarf, kein
-Ein-Zeilen-Fix.
-
 ⭐ **Lehre:** Ich habe eine Absage der Server-Action als „schreibt nichts" gelesen, ohne die
 Vorbedingung zu prüfen, die sie verlangt. Die Gegenprobe war ein einziger zusätzlicher Klick.
+
+#### 5.4.1 ✅ Der Fix — und die zwei Versuche davor, die auf prod scheiterten
+
+Aaron am 28.08.: **„werkstatt step — ja mach das".** Gefixt wurde er **nicht** durch Verstecken.
+Zwei Konfigurations-Versuche gingen voraus, beide appliziert und beide zurückgerollt:
+
+| # | Ansatz | Ergebnis |
+|---|---|---|
+| 1 | Step-Bedingung an ein abgeleitetes `werkstatt_waehlbar` binden — appliziert **vor** dem Deploy des zugehörigen Codes | 🔴 **Prod-Breaker.** Das Feld existierte im laufenden Code nicht → `undefined === 'ja'` → der Step verschwand **für alle** Kunden. 16 Minuten scharf (11:13:38–11:29:34 UTC). Gemessener Schaden: **0** Leads, **0** Claims, **0** FlowLinks, **0** Werkstatt-Zuweisungen in dem Fenster. Zurückgerollt. |
+| 2 | Dieselbe Bedingung, diesmal **nach** dem Deploy (Code inhaltlich auf `origin/main` verifiziert) | 🔴 Step blieb **trotzdem** aus, obwohl der Lead ihn haben musste (`reparaturwunsch='reparatur'`, keine Werkstatt, Status offen). Sofort zurückgerollt. |
+
+**Warum Ansatz 2 scheitern *musste*** — die Ursache steht in `src/app/flow/[token]/FlowWizardKfz.tsx:450`:
+
+```js
+// Beim Mount fixiert: sonst schrumpft/waechst die Sequenz mid-flow durch einen RSC-Re-Render
+// (LeadRealtimeRefresh) und der numerische stepIndex zeigt auf den falschen Step.
+const [steps, setSteps] = useState<StepId[]>(() => { … })
+```
+
+Die Sequenz wird **beim Mount eingefroren** — bewusst, gegen die Stale-Index-Falle.
+`reparaturwunsch` wird aber erst **mitten im Flow** erhoben. Eine Bedingung darauf sieht deshalb
+immer `null`, für jeden Kunden.
+
+⭐⭐ **Die verallgemeinerbare Regel** (liegt jetzt als Kommentar an genau der Stelle in
+`src/lib/self-service/flow-kontext.ts`, wo das Feld stand): **Eine Step-Bedingung darf nur Felder
+nutzen, die beim Betreten des Flows bereits ihren Endwert haben.** Alles, was der Wizard selbst
+erst erhebt, ist als Bedingung ungeeignet — unabhängig davon, wie richtig es fachlich aussieht.
+Der zweite Fehlversuch war fachlich korrekt und technisch zwangsläufig wirkungslos.
+
+**Der gebaute Fix** — `pruefeWerkstattAuswahl` (`src/lib/werkstatt/vermittlung-core.ts`),
+verdrahtet in `waehleWerkstattFlow`: Der Schritt wird angeboten, **also muss er auch annehmen**.
+Fehlt ausschließlich der Abrechnungswunsch, ist die Werkstattwahl selbst die Antwort auf die
+übersprungene Frage → `reparaturwunsch` wird auf `'reparatur'` nachgetragen, dann zugewiesen.
+Alle übrigen Sperren bleiben in Kraft (bereits vermittelt, Inbound-QR-Werkstatt, Status nicht
+offen). `'keine'` — eine ausdrückliche Absage an die Reparatur — wird **nie** überschrieben.
+
+Der Fix wirkt allein in der Server-Action und braucht **keine** Migration; die DB steht wieder auf
+dem Alt-Stand (`{gutachten_vermittelt: null, reparatur_werkstatt_id: null}` in allen drei
+Szenarien, verifiziert). Regel-4-Nachweis nach Deploy: Flow fahren, „Wie möchtest du den Schaden
+abrechnen?" **überspringen**, Werkstatt wählen → `reparatur_werkstatt_id` gesetzt **und**
+`reparaturwunsch='reparatur'`.
+
+⭐ **Zweite Lehre, teurer als die erste:** Eine Migration, die auf ein Feld aus dem Anwendungscode
+zeigt, ist ein **Deploy-abhängiger** Write. Sie vor dem Code zu applizieren ist genau die
+Drift-Konstellation, gegen die Regel 3 geschrieben wurde — nur in die andere Richtung: hier war
+die **DB voraus**. Die Reihenfolge ist nicht verhandelbar: erst Code auf prod, verifizieren, dann
+die Bedingung.
 
 ### 5.5 🟡 BEFUND 4 — Kein Kundenbetreuer vorgesehen, trotzdem einer gebunden
 
