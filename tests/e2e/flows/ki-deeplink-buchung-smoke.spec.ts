@@ -245,5 +245,20 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
       frame.getByText(/Schadenart: Parkschaden/i).first(),
       'vollstaendiger Deeplink muss bis zur Buchungs-Zusammenfassung durchspringen',
     ).toBeVisible({ timeout: 40_000 })
+
+    // Die Kostenaussage steht GENAU HIER, wo der Kunde seine Daten eintippt.
+    //
+    // Aaron 29.08.2026: „viele kunden hatten angst dass der service etwas kostet".
+    // Nachgemessen: im Formular stand dazu nichts — die einzige Kostenaussage der Datei
+    // kam NACH der Buchung im Rueckruf-Text. Beide Haelften muessen dastehen: dass es
+    // kostenlos ist UND wer stattdessen zahlt. „Kostenlos" allein weckt Misstrauen.
+    await expect(
+      frame.getByText(/Für Sie kostenlos/i).first(),
+      'im Kontakt-Schritt muss stehen, dass der Service den Kunden nichts kostet',
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(
+      frame.getByText(/bezahlt der Sachverständige für die Vermittlung, nicht Sie/i).first(),
+      'und WER stattdessen zahlt — sonst bleibt die Gegenfrage offen',
+    ).toBeVisible({ timeout: 20_000 })
   })
 })
