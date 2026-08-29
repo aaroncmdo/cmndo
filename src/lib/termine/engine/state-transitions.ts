@@ -9,6 +9,34 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 const AKTIV = ['bestaetigt', 'reserviert', 'verlegt', 'verlegung_pending'] as const
 
+/**
+ * Felder, die beim Verlegen vom Quell- auf den Ziel-Termin übergehen.
+ *
+ * ⭐⭐ ANLASS (Regel-4-Smoke 29.08.): Die Auswahl trug nur die LEGACY-Bezug-Spalten
+ * (`fall_id`, `claim_id`). `gutachter_termine` führt den Bezug aber auf **zwei** Achsen —
+ * Legacy und kanonisch (`bezug_typ` + `bezug_id`) — und die Engine schreibt neue Termine
+ * **bezug-nativ**: dort sind die Legacy-Spalten NULL.
+ *
+ * Folge: Beim Verlegen eines bezug-nativen Termins las `verlege()` `fall_id`/`claim_id` als
+ * NULL und legte den neuen Slot **ganz ohne Fallbezug** an — `bezug_typ`/`bezug_id` wurden
+ * nie kopiert. Der neue Termin ist damit ein **Waise**: `bezugOrExpr()` findet ihn nie, der
+ * Kunde sieht den Vorschlag nicht und kann ihn nicht annehmen, während der alte Termin auf
+ * `verlegt` blockiert stehen bleibt. **Der Vorgang hängt, ohne dass irgendwo ein Fehler steht.**
+ *
+ * Auf prod gemessen: 3 von 10 aktiven Terminen waren bezug-nativ und damit betroffen; 51 der
+ * 79 Termine insgesamt. Die Zahl wächst, weil die Engine neue Termine so schreibt — **die
+ * Migration auf bezug-nativ hat die Verlegung schleichend gebrochen.**
+ *
+ * ⚠ Verwandt mit AGENTS.md §Termin-Bezug-Gate, aber vom Ratchet NICHT gedeckt: der gatet
+ * naive **Filter** (`.eq('fall_id', …)`), nicht das **Kopieren** beim Insert.
+ *
+ * Beide Achsen werden 1:1 übernommen — welche gefüllt ist, entscheidet der Quell-Termin.
+ * Kein Trigger verbietet das (`trg_validate_gutachter_termine_claim_id` fordert nur
+ * `claim_id`, sobald `fall_id` gesetzt ist — beim Kopieren bleibt das Paar konsistent).
+ */
+const BEZUG_UND_KONTEXT_FELDER =
+  'id, assignee_id, assignee_typ, sv_lead_id, fall_id, claim_id, lead_id, bezug_typ, bezug_id, kb_id, kanal, typ, status'
+
 export type AbsageStatus = 'abgesagt' | 'storniert' | 'abgelehnt'
 
 /**
@@ -59,7 +87,7 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
 
   const { data: alt, error: ladeErr } = await db
     .from('gutachter_termine')
-    .select('id, assignee_id, assignee_typ, sv_lead_id, fall_id, claim_id, kb_id, kanal, typ, status')
+    .select(BEZUG_UND_KONTEXT_FELDER)
     .eq('id', terminId)
     .maybeSingle()
   if (ladeErr) return { ok: false, error: ladeErr.message, code: 'db' }
@@ -93,8 +121,15 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
       assignee_id: alt.assignee_id,
       assignee_typ: alt.assignee_typ,
       sv_lead_id: alt.sv_lead_id,
+      // Beide Bezug-Achsen 1:1 uebernehmen — welche gefuellt ist, entscheidet der
+      // Quell-Termin. Vorher wurden nur fall_id/claim_id kopiert; bei einem
+      // BEZUG-NATIVEN Quell-Termin (Legacy-Spalten NULL) entstand dadurch ein Termin
+      // ganz OHNE Fallbezug. Details im Kommentar an BEZUG_UND_KONTEXT_FELDER.
       fall_id: alt.fall_id,
       claim_id: alt.claim_id,
+      lead_id: alt.lead_id,
+      bezug_typ: alt.bezug_typ,
+      bezug_id: alt.bezug_id,
       kb_id: alt.kb_id,
       kanal: alt.kanal,
       typ: alt.typ ?? 'sv_begutachtung',
