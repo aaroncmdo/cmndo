@@ -23,6 +23,7 @@ keyFacts:
   - 500 € Selbstbeteiligung bei Sachschäden, kein Selbstbehalt bei Personenschäden
   - Polizeianzeige binnen 7 Tagen ist Pflichtvoraussetzung
 related:
+  - /haftpflicht/gegnerische-versicherung-ermitteln
   - /haftpflicht/unversicherte-voh
   - /haftpflicht/kasko-versicherung
   - /haftpflicht/anwaltskosten-erstattung
