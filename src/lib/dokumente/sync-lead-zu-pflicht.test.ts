@@ -78,6 +78,20 @@ describe('storagePfadAusUrl', () => {
     )).toBeNull()
   })
 
+  it('per Parameter lassen sich weitere Buckets zulassen', () => {
+    // FlowLink-Nachzug: die Files wurden aus `dokumente` nach `fall-dokumente` kopiert,
+    // unter demselben internen Pfad — dort sind beide Namen gueltig.
+    const u = 'https://x.supabase.co/storage/v1/object/public/dokumente/leads/a/zb1.jpg'
+    expect(storagePfadAusUrl(u)).toBeNull()
+    expect(storagePfadAusUrl(u, ['dokumente'])).toBe('leads/a/zb1.jpg')
+  })
+
+  it('ein nicht gelisteter Bucket bleibt auch mit Parameter abgelehnt', () => {
+    expect(storagePfadAusUrl(
+      'https://x.supabase.co/storage/v1/object/public/schadensfotos/a/b.jpg', ['dokumente'],
+    )).toBeNull()
+  })
+
   it('liefert null bei leer/null/undefined', () => {
     expect(storagePfadAusUrl(null)).toBeNull()
     expect(storagePfadAusUrl(undefined)).toBeNull()
