@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
 // Warum ist das fuer Sie kostenlos? — die Antwort auf die haeufigste unausge-
@@ -59,6 +60,16 @@ export async function KostenTransparenzSection() {
                 </li>
               ))}
             </ul>
+
+            {/* Die Langfassung nennt auch die Faelle, in denen die Gegenseite
+                NICHT zahlt (Bagatellgrenze, Teilschuld, Eigenverschulden). */}
+            <Link
+              href="/was-kostet-claimondo"
+              className="mt-8 inline-flex items-center gap-2 text-base font-semibold text-claimondo-ondo underline-offset-4 transition-colors hover:text-claimondo-navy hover:underline"
+            >
+              {t('mehr_link')}
+              <span aria-hidden>→</span>
+            </Link>
           </div>
         </div>
       </div>

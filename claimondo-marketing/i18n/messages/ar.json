@@ -203,7 +203,8 @@
         "heading": "المنتج",
         "melden": "الإبلاغ عن حادث",
         "einschaetzung": "التقييم الأولي",
-        "beratung": "طلب استشارة"
+        "beratung": "طلب استشارة",
+        "was_kostet": "كم يكلّف؟"
       },
       "partner": {
         "heading": "الشركاء",
@@ -226,7 +227,8 @@
         "لا رسوم تسجيل",
         "لا رسوم وساطة عليك",
         "لا فاتورة لاحقاً"
-      ]
+      ],
+      "mehr_link": "كيف نكسب أموالنا"
     }
   },
   "flow": {
@@ -4297,6 +4299,11 @@
       "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "احسب تعويض فقدان الاستخدام",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."
+    },
+    "was_kostet_claimondo": {
+      "title": "كم تكلّف Claimondo؟ 0 € للمتضررين",
+      "description": "لا تكلّفك Claimondo شيئاً – لأن من يدفع لنا ليس أنت، بل الخبراء. ما تتحمّله شركة التأمين ومتى قد تنشأ تكاليف رغم ذلك.",
+      "og_description": "لماذا تكلّفك خدمتنا 0 €: الخبراء يدفعون لنا رسوم وساطة. ولا يُقتطع من تعويضك شيء."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4727,5 +4734,24 @@
     "hinweis_lange_dauer": "Im Reparaturfall erstatten Versicherer typischerweise etwa 12 bis 14 Tage. Längere Zeiträume brauchen eine Begründung aus dem Gutachten (z. B. Teileverzug) oder eine verzögerte Regulierung.",
     "disclaimer": "Unverbindliche Orientierung, keine Rechtsberatung. Verbindlich sind Fahrzeugklasse und Ausfalldauer aus dem Sachverständigen-Gutachten.",
     "cta": "Gutachten beauftragen"
+  },
+  "was_kostet_claimondo": {
+    "h1": "كم تكلّف Claimondo؟",
+    "lead": "بالنسبة لك: 0 €. لا رسوم تسجيل، لا رسوم وساطة، لا فاتورة لاحقاً.",
+    "warum_h": "لماذا هذا مجاني؟",
+    "warum_p": "لأن من يدفع لنا ليس أنت، بل شركاؤنا. الخبراء يدفعون لنا رسوم وساطة عن المهام التي تأتي عبر Claimondo — تماماً كما تدفع منشأة مقابل إعلان. ولا يُقتطع من تعويضك شيء بسبب ذلك: لا نحتجز شيئاً ولا نخصم شيئاً ولا نرسل إليك فاتورة.",
+    "gegner_h": "وماذا عن تقرير الخبير نفسه؟",
+    "gegner_p": "في حادث لا ذنب لك فيه، تتحمّل شركة تأمين الطرف الآخر تكاليف تقدير الضرر — أتعاب الخبير والمحامي والسحب. هذا ليس تفضّلاً بل قانون (§249 BGB). أنت تحيل حق الأتعاب إلى الخبير ولا تدفع شيئاً مقدماً.",
+    "ehrlich_h": "متى قد تنشأ تكاليف رغم ذلك؟",
+    "ehrlich_p": "حتى لا تُفاجأ — ثلاث حالات لا يدفع فيها الطرف الآخر أو لا يدفع كامل المبلغ:",
+    "ehrlich_items": [
+      "ضرر بسيط دون نحو 750 €: هنا تقبل شركات التأمين عادةً عرض تكلفة فقط، لا تقريراً كاملاً.",
+      "الخطأ المشترك: تُقسَّم التكاليف بحسب نسبتك — عند 50 ٪ مسؤولية مشتركة، بالنصف.",
+      "خطؤك أنت: عندئذٍ يدفع تأمينك الشامل أو تدفع أنت."
+    ],
+    "ehrlich_schluss": "وفي الحالات الثلاث يبقى الأمر كما هو: لا تدفع شيئاً مقابل الوساطة عبر Claimondo. ونخبرك مسبقاً بوضعك.",
+    "cta_h": "تعرّضت لحادث لا ذنب لك فيه؟",
+    "cta_p": "دع حقّك يُفحص في دقيقتين — مجاناً ودون التزام.",
+    "cta_btn": "افحص مطالبتك مجاناً"
   }
 }

@@ -203,7 +203,8 @@
         "heading": "Продукт",
         "melden": "Сообщить об ущербе",
         "einschaetzung": "Предварительная оценка",
-        "beratung": "Запросить консультацию"
+        "beratung": "Запросить консультацию",
+        "was_kostet": "Сколько это стоит?"
       },
       "partner": {
         "heading": "Партнёры",
@@ -226,7 +227,8 @@
         "Без платы за регистрацию",
         "Без комиссии для вас",
         "Без счёта в дальнейшем"
-      ]
+      ],
+      "mehr_link": "Как мы зарабатываем"
     }
   },
   "flow": {
@@ -4297,6 +4299,11 @@
       "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "Рассчитать компенсацию за простой автомобиля",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."
+    },
+    "was_kostet_claimondo": {
+      "title": "Сколько стоит Claimondo? Для пострадавших 0 €",
+      "description": "Claimondo вам ничего не стоит – потому что платим не вы, а эксперты. Что покрывает страховая и когда расходы всё же могут возникнуть.",
+      "og_description": "Почему наш сервис стоит для вас 0 €: эксперты платят нам комиссию. Из вашей компенсации ничего не вычитается."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4727,5 +4734,24 @@
     "hinweis_lange_dauer": "Im Reparaturfall erstatten Versicherer typischerweise etwa 12 bis 14 Tage. Längere Zeiträume brauchen eine Begründung aus dem Gutachten (z. B. Teileverzug) oder eine verzögerte Regulierung.",
     "disclaimer": "Unverbindliche Orientierung, keine Rechtsberatung. Verbindlich sind Fahrzeugklasse und Ausfalldauer aus dem Sachverständigen-Gutachten.",
     "cta": "Gutachten beauftragen"
+  },
+  "was_kostet_claimondo": {
+    "h1": "Сколько стоит Claimondo?",
+    "lead": "Для вас: 0 €. Без платы за регистрацию, без комиссии, без счёта в дальнейшем.",
+    "warum_h": "Почему это бесплатно?",
+    "warum_p": "Потому что платим не вы, а наши партнёры. Эксперты платят нам комиссию за заказы, полученные через Claimondo, – примерно как предприятие платит за объявление. Из вашей компенсации при этом ничего не вычитается: мы ничего не удерживаем, ничего не вычитаем и не выставляем вам счёт.",
+    "gegner_h": "А само экспертное заключение?",
+    "gegner_p": "При ДТП не по вашей вине расходы на установление ущерба несёт страховая виновника – гонорар эксперта, юрист, эвакуатор. Это не жест доброй воли, а закон (§249 BGB). Вы уступаете право на гонорар эксперту и ничего не платите вперёд.",
+    "ehrlich_h": "Когда расходы всё же могут возникнуть?",
+    "ehrlich_p": "Чтобы для вас не было неожиданностей – три случая, когда другая сторона не платит или платит не полностью:",
+    "ehrlich_items": [
+      "Мелкий ущерб примерно до 750 €: здесь страховщики обычно признают только смету, а не полное заключение.",
+      "Обоюдная вина: расходы делятся по вашей доле – при 50 % вины пополам.",
+      "Ваша вина: тогда платит ваше каско или вы сами."
+    ],
+    "ehrlich_schluss": "Во всех трёх случаях остаётся верным: за посредничество через Claimondo вы не платите ничего. Мы заранее говорим вам, как обстоят дела.",
+    "cta_h": "ДТП не по вашей вине?",
+    "cta_p": "Проверьте за две минуты, что вам причитается, – бесплатно и без обязательств.",
+    "cta_btn": "Проверить требование бесплатно"
   }
 }

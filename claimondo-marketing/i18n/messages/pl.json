@@ -203,7 +203,8 @@
         "heading": "Produkt",
         "melden": "Zgłoś szkodę",
         "einschaetzung": "Wstępna ocena",
-        "beratung": "Zapytaj o konsultację"
+        "beratung": "Zapytaj o konsultację",
+        "was_kostet": "Ile to kosztuje?"
       },
       "partner": {
         "heading": "Partnerzy",
@@ -226,7 +227,8 @@
         "Bez opłaty rejestracyjnej",
         "Bez prowizji dla Ciebie",
         "Bez rachunku w późniejszym terminie"
-      ]
+      ],
+      "mehr_link": "Jak zarabiamy"
     }
   },
   "flow": {
@@ -4297,6 +4299,11 @@
       "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "Oblicz odszkodowanie za brak możliwości korzystania z pojazdu",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."
+    },
+    "was_kostet_claimondo": {
+      "title": "Ile kosztuje Claimondo? 0 € dla poszkodowanych",
+      "description": "Claimondo nic Cię nie kosztuje – bo płacisz nam nie Ty, lecz rzeczoznawcy. Co pokrywa ubezpieczyciel i kiedy koszty mimo to mogą powstać.",
+      "og_description": "Dlaczego nasza usługa kosztuje Cię 0 €: rzeczoznawcy płacą nam prowizję. Z Twojego odszkodowania nic nie ubywa."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4727,5 +4734,24 @@
     "hinweis_lange_dauer": "Im Reparaturfall erstatten Versicherer typischerweise etwa 12 bis 14 Tage. Längere Zeiträume brauchen eine Begründung aus dem Gutachten (z. B. Teileverzug) oder eine verzögerte Regulierung.",
     "disclaimer": "Unverbindliche Orientierung, keine Rechtsberatung. Verbindlich sind Fahrzeugklasse und Ausfalldauer aus dem Sachverständigen-Gutachten.",
     "cta": "Gutachten beauftragen"
+  },
+  "was_kostet_claimondo": {
+    "h1": "Ile kosztuje Claimondo?",
+    "lead": "Dla Ciebie: 0 €. Bez opłaty rejestracyjnej, bez prowizji, bez rachunku w późniejszym terminie.",
+    "warum_h": "Dlaczego jest to bezpłatne?",
+    "warum_p": "Ponieważ płacisz nam nie Ty, lecz nasi partnerzy. Rzeczoznawcy płacą nam prowizję za zlecenia, które powstają przez Claimondo – podobnie jak firma płaci za ogłoszenie. Z Twojego odszkodowania nic przez to nie ubywa: niczego nie zatrzymujemy, niczego nie potrącamy i nie wystawiamy Ci rachunku.",
+    "gegner_h": "A sama opinia rzeczoznawcy?",
+    "gegner_p": "Przy wypadku nie z Twojej winy koszty ustalenia szkody pokrywa ubezpieczenie sprawcy – honorarium rzeczoznawcy, adwokat, holowanie. To nie uprzejmość, lecz prawo (§249 BGB). Cedujesz roszczenie o honorarium na rzeczoznawcę i nic nie musisz wykładać.",
+    "ehrlich_h": "Kiedy koszty mimo to mogą powstać?",
+    "ehrlich_p": "Żeby Cię nic nie zaskoczyło – trzy przypadki, w których druga strona nie płaci lub płaci nie w pełni:",
+    "ehrlich_items": [
+      "Drobna szkoda poniżej około 750 €: ubezpieczyciele uznają tu zwykle tylko kosztorys, nie pełną opinię.",
+      "Współwina: koszty dzieli się według Twojego udziału – przy 50 % współodpowiedzialności po połowie.",
+      "Wina własna: wtedy płaci Twoje ubezpieczenie AC albo Ty sam."
+    ],
+    "ehrlich_schluss": "We wszystkich trzech przypadkach nadal obowiązuje: za pośrednictwo przez Claimondo nie płacisz nic. Mówimy Ci wcześniej, jak wygląda Twoja sytuacja.",
+    "cta_h": "Wypadek nie z Twojej winy?",
+    "cta_p": "Sprawdź w dwie minuty, co Ci przysługuje – bezpłatnie i bez zobowiązań.",
+    "cta_btn": "Sprawdź roszczenie bezpłatnie"
   }
 }
