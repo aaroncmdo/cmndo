@@ -56,6 +56,12 @@ Träger: Verband der Versicherungswirtschaft. Sitz Hamburg.
 - Insolventer Versicherung
 - Vorsätzlich-rechtswidrig genutzten Fahrzeugen (Diebstahl, Schwarzfahrt)
 
+⚠ **Kennzeichen doch notiert – etwa von einem Zeugen?** Dann ist der Verursacher
+nicht unbekannt, und die VOH ist der falsche Weg (500 € Selbstbeteiligung, die du
+sonst nicht hättest). Die zuständige Haftpflicht ermittelst du dann direkt über den
+[Zentralruf der Autoversicherer](/haftpflicht/gegnerische-versicherung-ermitteln) –
+kostenfrei, es genügen Kennzeichen, Schadentag und Unfallland.
+
 **Erstattung:**
 - **Personenschäden:** vollständig
 - **Sachschäden:** Selbstbeteiligung 500 € (Vermeidung Bagatell-Missbrauch)
