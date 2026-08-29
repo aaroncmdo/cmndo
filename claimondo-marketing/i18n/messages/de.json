@@ -216,6 +216,17 @@
         "datenschutz": "Datenschutz"
       },
       "rights": "Alle Rechte vorbehalten."
+    },
+    "kosten_transparenz": {
+      "eyebrow": "Transparenz",
+      "heading": "Warum ist das für Sie kostenlos?",
+      "absatz1": "Weil nicht Sie uns bezahlen, sondern unsere Partner. Sachverständige zahlen uns eine Vermittlungsgebühr für Aufträge, die über Claimondo zustande kommen.",
+      "absatz2": "Von Ihrer Entschädigung geht dadurch nichts ab: Wir behalten nichts ein, ziehen nichts ab und stellen Ihnen nichts in Rechnung.",
+      "punkte": [
+        "Keine Anmeldegebühr",
+        "Keine Vermittlungsgebühr für Sie",
+        "Keine Rechnung im Nachhinein"
+      ]
     }
   },
   "flow": {
@@ -2197,7 +2208,7 @@
         "fragen": [
           {
             "frage": "Was kostet Claimondo – wirklich?",
-            "antwort": "Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten – alles trägt die gegnerische Haftpflichtversicherung. Das ist gesetzlich verankert (§249 BGB). Claimondo finanziert sich ausschließlich aus diesen Positionen."
+            "antwort": "Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten – alles trägt die gegnerische Haftpflichtversicherung, gesetzlich verankert in § 249 BGB. Und uns bezahlen nicht Sie, sondern unsere Partner: Sachverständige zahlen eine Vermittlungsgebühr für Aufträge, die über Claimondo zustande kommen. Von Ihrer Entschädigung geht dadurch nichts ab – wir behalten nichts ein und stellen Ihnen nichts in Rechnung."
           },
           {
             "frage": "Was verliere ich, wenn ich einfach \"Geld nehme\" ohne Gutachter?",

@@ -216,6 +216,17 @@
         "datenschutz": "Gizlilik politikası"
       },
       "rights": "Tüm hakları saklıdır."
+    },
+    "kosten_transparenz": {
+      "eyebrow": "Şeffaflık",
+      "heading": "Bu sizin için neden ücretsiz?",
+      "absatz1": "Çünkü bize siz değil, iş ortaklarımız ödeme yapar. Bilirkişiler, Claimondo üzerinden gelen işler için bize aracılık ücreti öder.",
+      "absatz2": "Tazminatınızdan bu nedenle hiçbir kesinti yapılmaz: Hiçbir şey alıkoymaz, hiçbir şey düşmez ve size fatura göndermeyiz.",
+      "punkte": [
+        "Kayıt ücreti yok",
+        "Sizin için aracılık ücreti yok",
+        "Sonradan fatura yok"
+      ]
     }
   },
   "flow": {
@@ -1729,7 +1740,7 @@
         "fragen": [
           {
             "frage": "Claimondo gerçekten ne kadar tutar?",
-            "antwort": "Sizin için, kusursuz mağdur olarak: 0 €. Bilirkişi ücreti, avukatlık masrafları, çekici ücretleri — tümünü karşı tarafın zorunlu mali sorumluluk sigortası öder. Bu kanunla güvence altına alınmıştır (§249 BGB). Claimondo yalnızca bu kalemlerden gelir sağlar."
+            "antwort": "Sizin için, kusursuz mağdur olarak: 0 €. Bilirkişi ücreti, avukatlık masrafları, çekici ücretleri — tümünü karşı tarafın zorunlu mali sorumluluk sigortası öder; bu kanunla güvence altına alınmıştır (§249 BGB). Bize ödemeyi siz değil, iş ortaklarımız yapar: Bilirkişiler, Claimondo üzerinden gelen işler için aracılık ücreti öder. Tazminatınızdan hiçbir kesinti yapılmaz — hiçbir şey alıkoymayız ve size fatura göndermeyiz."
           },
           {
             "frage": "\"Gutachtersiz sadece para alırsam\" ne kaybederim?",

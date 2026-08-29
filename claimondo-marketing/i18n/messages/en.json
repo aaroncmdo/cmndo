@@ -216,6 +216,17 @@
         "datenschutz": "Privacy"
       },
       "rights": "All rights reserved."
+    },
+    "kosten_transparenz": {
+      "eyebrow": "Transparency",
+      "heading": "Why is this free for you?",
+      "absatz1": "Because it is not you who pays us, but our partners. Expert assessors pay us a placement fee for jobs that come through Claimondo.",
+      "absatz2": "Nothing is deducted from your compensation: we keep nothing back, take nothing off and never send you an invoice.",
+      "punkte": [
+        "No registration fee",
+        "No placement fee for you",
+        "No invoice afterwards"
+      ]
     }
   },
   "flow": {
@@ -1729,7 +1740,7 @@
         "fragen": [
           {
             "frage": "What does Claimondo actually cost?",
-            "antwort": "For you as the party not at fault: €0. Expert fees, legal costs, towing costs — all are borne by the opposing liability insurer. This is enshrined in law (§249 BGB). Claimondo is funded exclusively from these line items."
+            "antwort": "For you as the party not at fault: €0. Expert fees, legal costs, towing costs — all are borne by the opposing liability insurer, as laid down in §249 BGB. And it is not you who pays us, but our partners: expert assessors pay a placement fee for jobs that come through Claimondo. Nothing is deducted from your compensation — we keep nothing back and never send you an invoice."
           },
           {
             "frage": "What do I lose if I simply \"take the money\" without an expert report?",

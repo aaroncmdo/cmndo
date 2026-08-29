@@ -216,6 +216,17 @@
         "datenschutz": "Ochrona danych"
       },
       "rights": "Wszelkie prawa zastrzeżone."
+    },
+    "kosten_transparenz": {
+      "eyebrow": "Przejrzystość",
+      "heading": "Dlaczego jest to dla Ciebie bezpłatne?",
+      "absatz1": "Ponieważ płacisz nam nie Ty, lecz nasi partnerzy. Rzeczoznawcy płacą nam prowizję za zlecenia, które powstają przez Claimondo.",
+      "absatz2": "Z Twojego odszkodowania nic przez to nie ubywa: niczego nie zatrzymujemy, niczego nie potrącamy i nie wystawiamy Ci rachunku.",
+      "punkte": [
+        "Bez opłaty rejestracyjnej",
+        "Bez prowizji dla Ciebie",
+        "Bez rachunku w późniejszym terminie"
+      ]
     }
   },
   "flow": {
@@ -1729,7 +1740,7 @@
         "fragen": [
           {
             "frage": "Ile naprawdę kosztuje Claimondo?",
-            "antwort": "Dla Ciebie jako osoby poszkodowanej bez winy: 0 €. Honorarium rzeczoznawcy, koszty adwokackie, koszty holowania — wszystko pokrywa ubezpieczenie sprawcy. To jest uregulowane prawnie (§249 BGB). Claimondo finansuje się wyłącznie z tych pozycji."
+            "antwort": "Dla Ciebie jako osoby poszkodowanej bez winy: 0 €. Honorarium rzeczoznawcy, koszty adwokackie, koszty holowania — wszystko pokrywa ubezpieczenie sprawcy, co jest uregulowane prawnie (§249 BGB). A płacisz nam nie Ty, lecz nasi partnerzy: rzeczoznawcy płacą prowizję za zlecenia, które powstają przez Claimondo. Z Twojego odszkodowania nic przez to nie ubywa — niczego nie potrącamy i nie wystawiamy Ci rachunku."
           },
           {
             "frage": "Co tracę, jeśli po prostu „wezmę pieniądze\" bez rzeczoznawcy?",
