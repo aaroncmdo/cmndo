@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/seo/jsonld'
+import { AI_BOTS_BLOCK } from '@/lib/seo/ai-bots'
 
 /**
  * robots.txt — Max-Visibility-Setup für klassisches SEO + GEO (LLM-Crawler).
@@ -101,9 +102,8 @@ const AI_BOTS_ALLOW = [
  * Siehe docs/conversion-tracking-attribution-runbook.md (A3) und
  * docs/superpowers/specs/2026-08-12-hyperlokal-geo-content-design.md §8.
  */
-const AI_BOTS_BLOCK = [
-  'Bytespider', // ByteDance/TikTok — aggressiver Scraper
-] as const
+// Die Liste lebt in `lib/seo/ai-bots.ts` — dieselbe Quelle nutzt die Middleware,
+// die den Disallow durchsetzt (Bytespider ignoriert ihn, 29.08.2026 gemessen).
 
 export default function robots(): MetadataRoute.Robots {
   return {

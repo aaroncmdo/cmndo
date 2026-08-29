@@ -7,6 +7,7 @@ import { HeroSection } from './sections/HeroSection'
 import { HomeTrustStripSection } from './sections/HomeTrustStripSection'
 import { AnsprueecheSection } from './sections/AnsprueecheSection'
 import { WieEsFunktioniertSection } from './sections/WieEsFunktioniertSection'
+import { KostenTransparenzSection } from './sections/KostenTransparenzSection'
 import { BeweisSection } from './sections/BeweisSection'
 import { ProduktAppSection } from './sections/ProduktAppSection'
 import { MenschenSection } from './sections/MenschenSection'
@@ -57,6 +58,7 @@ export async function LandingPage({ authenticatedUser }: Props) {
         </Suspense>
         <AnsprueecheSection />
         <WieEsFunktioniertSection />
+        <KostenTransparenzSection />
         <BeweisSection />
         <ProduktAppSection />
         <MenschenSection />

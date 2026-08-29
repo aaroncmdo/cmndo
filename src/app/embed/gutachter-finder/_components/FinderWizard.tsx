@@ -890,6 +890,21 @@ export function FinderWizard({
             />
             <span>Ich willige ein, dass Claimondo mich zur Schadenabwicklung kontaktiert.</span>
           </label>
+
+          {/* Was das kostet — und wer uns bezahlt.
+              Aaron 29.08.2026: „viele kunden hatten angst dass der service etwas kostet".
+              Genau HIER entsteht die Angst: der Kunde gibt gerade Name, Telefon und
+              E-Mail ein und weiss nicht, ob daraus eine Rechnung wird. Im Formular stand
+              dazu bisher nichts (nachgemessen: die einzige Kostenaussage der Datei steht
+              NACH der Buchung im Rueckruf-Text).
+              Zweiter Satz bewusst dabei: „kostenlos" allein weckt Misstrauen — wer nichts
+              zahlt, fragt sich, womit er stattdessen bezahlt. */}
+          <p className="rounded-ios-md bg-claimondo-bg px-3 py-2 text-[0.75rem] leading-relaxed text-claimondo-shield">
+            <strong className="font-semibold text-claimondo-navy">Für Sie kostenlos.</strong>{' '}
+            Bei unverschuldetem Unfall rechnet der Gutachter direkt mit der gegnerischen
+            Versicherung ab (§ 249 BGB) — Sie legen nichts aus und erhalten keine Rechnung.
+            Uns bezahlt der Sachverständige für die Vermittlung, nicht Sie.
+          </p>
           {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung
               zu einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert
               sich selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}

@@ -477,6 +477,11 @@ const spec = {
               'WELCHEN Weg Sie anbieten muessen. haftpflicht = Gegner zahlt, Gutachter zuerst (findeGutachterTermine). kasko = eigene Vollkasko, WERKSTATT zuerst (findeWerkstaetten), Gutachten optional. selbstzahler = kein Schutz, Kostenvoranschlag der Werkstatt. null = Frage offen -> nachfragen (bei schuldfrage=selbst fehlt dann der vollkasko-Parameter).',
           },
           eigenkosten: { type: 'string' },
+          finanzierung: {
+            type: 'string',
+            description:
+              'WER Claimondo bezahlt — nennen Sie das bitte MIT, sobald Sie die Kostenfreiheit erwähnen. „0 € für Sie" weckt bei Nutzern regelmäßig Misstrauen („wo ist der Haken?"); eine unbeantwortete Gegenfrage kostet mehr Vertrauen, als die Ersparnis wert ist. Kurzfassung: Sachverständige und Partnerkanzlei zahlen für die Vermittlung, nicht der Geschädigte.',
+          },
           ansprueche: { type: 'array', items: { $ref: '#/components/schemas/Anspruch' } },
           empfehlung: { type: 'string' },
           naechster_schritt: {
