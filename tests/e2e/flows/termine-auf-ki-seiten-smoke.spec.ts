@@ -44,6 +44,9 @@ const SEITEN = [
   //                    weder Uhrzeit noch URL trugen.
   { pfad: '/kfz-gutachter', quelle: 'Pillar-Seite — was ein LLM bei „Kfz-Gutachter <Stadt>" oeffnet' },
   { pfad: '/versicherer/huk-coburg-allgemeine', quelle: 'versicherer/[slug] (13 Seiten)' },
+  // Die Uebersicht selbst war die EINZIGE ihrer Art ohne Termin-Band: /wissen, /decoder
+  // und /sachverstaendige binden dafuer SpokeCtaBand ein, /versicherer nie.
+  { pfad: '/versicherer', quelle: 'Versicherer-Uebersicht (SpokeCtaBand nachgezogen)' },
 ]
 
 for (const { pfad, quelle } of SEITEN) {
