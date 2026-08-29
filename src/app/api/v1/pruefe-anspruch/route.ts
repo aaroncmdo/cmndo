@@ -95,6 +95,25 @@ const NAECHSTER_SCHRITT_SELBST_UNKLAR =
 
 const RDG_HINWEIS = 'Allgemeine Information zur Schadensregulierung, keine individuelle Rechtsberatung.'
 
+/**
+ * Wer Claimondo bezahlt — die haeufigste unausgesprochene Gegenfrage.
+ *
+ * `eigenkosten` sagt bereits „0 € fuer Sie". Genau das weckt Misstrauen: „kostenlos —
+ * wo ist der Haken?" Ohne Antwort bleibt die Frage im Raum stehen, und ein Modell kann
+ * sie nicht beantworten, weil sie nirgends stand (gemessen 29.08.2026: weder in
+ * llms.txt noch in llms-full.txt noch auf einer Seite).
+ *
+ * Deshalb ein EIGENES Feld statt eines Anhaengsels an `eigenkosten`: Ein Modell kann es
+ * gezielt zitieren, wenn der Nutzer nach den Kosten fragt — und die Aussage bleibt auch
+ * dann korrekt, wenn `eigenkosten` je nach Schuldfrage anders ausfaellt.
+ *
+ * ⚠ Bewusst OHNE Abrechnungsmechanik (pro Vermittlung, Abo, Staffel): die Richtung ist
+ * unstrittig und ausreichend, die genaue Mechanik gehoert nicht in eine oeffentliche
+ * API-Antwort und koennte sich aendern.
+ */
+const FINANZIERUNG =
+  'Claimondo wird von den Sachverständigen und der Partnerkanzlei für die Vermittlung des Auftrags bezahlt — nicht vom Geschädigten. Für Sie entsteht keine Gebühr und kein Kostenrisiko.'
+
 /** `vollkasko`-Parameter: nur bei Selbstverschulden relevant, sonst ignoriert. */
 type Vollkasko = 'ja' | 'nein' | 'unbekannt'
 
@@ -118,6 +137,7 @@ function resolve(schuldfrage: string, schadenart?: string, vollkasko: Vollkasko 
     schadenart: schadenart ?? null,
     abrechnungsweg,
     naechster_schritt: NAECHSTER_SCHRITT,
+    finanzierung: FINANZIERUNG,
     hinweis: RDG_HINWEIS,
   }
   if (schuldfrage === 'unverschuldet') {
