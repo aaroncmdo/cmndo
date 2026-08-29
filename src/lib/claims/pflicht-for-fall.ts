@@ -49,8 +49,18 @@ export async function getPflichtdokumenteForFall(
     const admin = createAdminClient()
 
     // Parallel: pflichtdokumente, Katalog, fall_dokumente
+    //
+    // Alle drei ueber den Admin-Client: Der Zugriff ist oben bereits
+    // rollengeprueft (`getClaimForRole(supabase, claimId, rolle)` — ohne
+    // Berechtigung steht die Funktion mit `return []`), und die Slots gehoeren
+    // zu genau diesem Claim. Die Slot-Query lief als einzige der drei ueber den
+    // RLS-Client, und die SELECT-Policy `pflichtdokumente__b1sel_au` kennt nur
+    // admin bzw. den Claim-Bezug (Kunde/SV) — den Kundenbetreuer nicht.
+    // Gemessen 29.08. als test-kb: 0 von 5 Zeilen sichtbar. Folge: keine
+    // `pflichtdokument_id` in der Ansicht, und der Upload brach mit
+    // "Slot noch nicht initialisiert" ab, obwohl die Slots existieren.
     const [pflichtRes, katalogRes, dokRes] = await Promise.all([
-      supabase
+      admin
         .from('pflichtdokumente')
         .select('id, dokument_typ, status, pflicht, dokument_url, hochgeladen_am, frist, begruendung, angefordert_von_rolle, angefordert_am, sort_order')
         .eq('fall_id', fallId),
