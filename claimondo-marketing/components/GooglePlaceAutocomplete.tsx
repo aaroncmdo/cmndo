@@ -76,27 +76,36 @@ export default function GooglePlaceAutocomplete({
 
   const onSelectRef = useRef(onSelect)
   onSelectRef.current = onSelect
-  // Unterdrueckt die naechste Suche, wenn der Wert aus einer Auswahl stammt —
-  // sonst oeffnet sich die Liste direkt wieder mit dem gerade gewaehlten Treffer.
-  const ausAuswahl = useRef(false)
   const abbruch = useRef<AbortController | null>(null)
-  // Ein VORBEFUELLTER Wert ist keine Suchanfrage.
+
+  // NUR eine echte Tastatureingabe darf eine Suche ausloesen.
   //
-  // Auf den Stadtseiten steht der Ort beim Laden schon drin (der Seiten-Ort, z.B. "Köln").
-  // Der Such-Effect lief deshalb sofort los und klappte die Vorschlagsliste auf — ohne dass
-  // jemand ins Feld getippt oder es auch nur fokussiert haette. Die Liste legte sich ueber
-  // den Absende-Button darunter: gemessen 28.08.2026 auf iPhone 13, Pixel 5, 1280x720 und
-  // 1920x1080 jeweils 3 von 3 Messpunkten verdeckt (document.elementFromPoint traf den
-  // Vorschlag "Kölner Straße, 15566 Schöneiche bei Berlin"). Betroffen waren die ~300
-  // Stadtseiten; Startseite und Ads-Landing (Feld leer) waren ueberall frei.
+  // Vorgeschichte — zwei Anlaeufe, beide mit einem VERBRAUCHBAREN Token:
+  //   `ausAuswahl`  unterdrueckt die naechste Suche nach einer Auswahl
+  //   `ersterLauf`  ein vorbefuelltes Feld ist keine Suchanfrage (#5717; auf den ~300
+  //                 Stadtseiten klappte die Liste beim Laden ueber den Absende-Button)
+  // Beide setzt der Such-Effect beim Durchlauf selbst zurueck — sie gelten also fuer
+  // GENAU EINE Aenderung.
   //
-  // Der bestehende `ausAuswahl`-Guard greift hier NICHT: er haengt an
-  // `defaultValue !== value`, und beim ersten Render sind beide gleich (useState-Initialwert).
-  const ersterLauf = useRef(true)
+  // Das reicht nicht. Nach einer Auswahl aendert sich `value` ZWEIMAL (gemessen 29.08.
+  // auf /check, Playwright + document.elementFromPoint):
+  //   1. waehle() setzt den gewaehlten Treffer                 -> "Domkloster 4, 50667 Köln"
+  //   2. onSelect() -> der Parent setzt seinen State und spielt ihn ueber `defaultValue`
+  //      zurueck, und zwar ANDERS: die 5 Lead-Formulare nehmen `r.stadt`  -> "Köln"
+  // Aenderung 1 verbraucht das Token, Aenderung 2 laeuft ungeschuetzt durch -> eine neue
+  // Suche nach "Köln" klappt die Liste wieder auf, direkt ueber dem Absende-Button.
+  // Folge: der naechste Klick des Nutzers traf einen Vorschlag ("Kölner Straße, 01159
+  // Dresden") statt "Absenden" — also ein FALSCHER Ort statt einer Meldung.
+  //
+  // Ein ZUSTAND statt eines Tokens loest die ganze Klasse: wie oft `value` sich
+  // programmatisch auch aendert, gesucht wird nur, wenn zuletzt jemand getippt hat.
+  // (Der Mini-Wizard war nie betroffen — er spielt `r.adresse` zurueck, also denselben
+  // Wert, und loest die zweite Aenderung gar nicht erst aus.)
+  const vomTippen = useRef(false)
 
   useEffect(() => {
     if (defaultValue !== undefined && defaultValue !== value) {
-      ausAuswahl.current = true
+      vomTippen.current = false
       setValue(defaultValue)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,9 +114,8 @@ export default function GooglePlaceAutocomplete({
   // ---------------------------------------------------------------- Mapbox-Weg
   useEffect(() => {
     if (istFirmenSuche) return
-    // Erster Durchlauf = der Initialwert, keine Eingabe -> nicht suchen, nichts aufklappen.
-    if (ersterLauf.current) { ersterLauf.current = false; return }
-    if (ausAuswahl.current) { ausAuswahl.current = false; return }
+    // Kein Tippen, keine Suche — deckt Initialwert, Auswahl und Parent-Sync gleichermassen ab.
+    if (!vomTippen.current) return
     const q = value.trim()
     if (q.length < 3) { setVorschlaege([]); setOhneTreffer(false); setOffen(false); return }
 
@@ -130,7 +138,7 @@ export default function GooglePlaceAutocomplete({
   }, [value, istFirmenSuche])
 
   const waehle = useCallback((v: AdressVorschlag) => {
-    ausAuswahl.current = true
+    vomTippen.current = false
     setValue(v.adresse)
     setOffen(false)
     setVorschlaege([])
@@ -167,7 +175,7 @@ export default function GooglePlaceAutocomplete({
             else if (!stadt && c.types.includes('postal_town')) stadt = c.long_name
           }
           const adresse = p.formatted_address ?? p.name ?? ''
-          ausAuswahl.current = true
+          vomTippen.current = false
           setValue(adresse)
           onSelectRef.current({
             adresse, plz, strasse: [route, nr].filter(Boolean).join(' ').trim(), stadt,
@@ -196,7 +204,8 @@ export default function GooglePlaceAutocomplete({
         role={istFirmenSuche ? undefined : 'combobox'}
         aria-expanded={istFirmenSuche ? undefined : offen}
         aria-autocomplete={istFirmenSuche ? undefined : 'list'}
-        onChange={e => { setValue(e.target.value); onChange?.(e.target.value) }}
+        // vomTippen: der EINZIGE Pfad, der eine Suche ausloesen darf.
+        onChange={e => { vomTippen.current = true; setValue(e.target.value); onChange?.(e.target.value) }}
         onKeyDown={e => {
           // Enter darf nie das umgebende Formular abschicken (AAR-237) — es waehlt
           // stattdessen den markierten Vorschlag.
