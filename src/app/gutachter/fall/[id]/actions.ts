@@ -16,6 +16,7 @@ import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 import { filterWerteFelder } from '@/lib/gutachter/gutachten-werte-felder'
 // P3.3: bezug-aware Termin-Filter (matcht Legacy fall_id UND bezug_typ+bezug_id).
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
+import { setzeAuszahlungsart } from '@/lib/claims/auszahlungsart'
 
 type ActionResult = { success?: boolean; error?: string }
 
@@ -890,5 +891,38 @@ export async function updateGutachtenWerteSv(
 
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath(`/kunde/faelle/${claimId}`)
+  return { success: true }
+}
+
+/**
+ * Auszahlungsart aendern (Aaron 30.08.): Der Sachverstaendige darf sie korrigieren — er sieht
+ * den Schaden und die Wirtschaftlichkeit und erkennt z.B. einen Totalschaden, bei dem eine
+ * Reparatur nicht mehr sinnvoll ist. Mit der Fertigstellung des Gutachtens ist sie final;
+ * diese Sperre liegt in setzeAuszahlungsart, damit sie fuer Kunde UND SV identisch gilt.
+ */
+export async function aendereAuszahlungsartAlsSv(
+  fallId: string,
+  wert: string,
+): Promise<ActionResult> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { error: 'Nicht angemeldet' }
+
+  // Ownership wie in uploadGutachten: sv_id-Match auf dem Claim. Der RLS-Client liest nur
+  // Faelle, die dieser SV sehen darf — eine non-null Row IST der Nachweis.
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
+  const claimId = await resolveClaimId(supabase, fallId)
+  const { data: fall } = claimId
+    ? await supabase.from('claims').select('sv_id').eq('id', claimId).eq('sv_id', sv.id).maybeSingle()
+    : { data: null }
+  if (!fall || !claimId) return { error: 'Fall nicht gefunden' }
+
+  const res = await setzeAuszahlungsart(createAdminClient(), claimId, wert)
+  if (!res.ok) return { error: res.error }
+
+  revalidatePath(`/gutachter/fall/${fallId}`)
+  revalidatePath(`/kunde/faelle/${claimId}`)
+  revalidatePath(`/werkstatt/auftraege/${claimId}`)
   return { success: true }
 }
