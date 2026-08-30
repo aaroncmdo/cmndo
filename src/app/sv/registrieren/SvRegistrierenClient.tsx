@@ -527,10 +527,17 @@ function NeuSchritt({
           autoComplete="tel"
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-claimondo-shield">Adresse (Straße + Hausnummer, Ort) *</label>
+          {/* `htmlFor` + `id` verknuepfen Beschriftung und Feld. Ohne das ist das Feld fuer
+              Hilfstechnik NAMENLOS und ein Klick auf die Beschriftung fokussiert es nicht —
+              die Beschriftung stand hier nur DANEBEN. Aufgefallen ist es am roten
+              `netzwerk-kalt-redemption-smoke` (3 von 3 nightly-Laeufen, `getByLabel` lief in
+              den 180-s-Timeout): Playwright sucht ein Label auf demselben Weg wie ein
+              Screenreader. Der rote Test zeigte also einen echten Mangel, kein Testartefakt. */}
+          <label htmlFor="sv-reg-adresse" className="text-xs font-semibold text-claimondo-shield">Adresse (Straße + Hausnummer, Ort) *</label>
           {/* P2 Ortseingaben: Google-Places-Autocomplete füllt Adresse + PLZ. onChange hält den
               Freitext (Direkt-Submit ohne Dropdown-Auswahl → Server-Geocoding). PLZ bleibt editierbar. */}
           <GooglePlaceAutocomplete
+            id="sv-reg-adresse"
             className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
             defaultValue={adresse}
             placeholder="Musterstraße 1, 42103 Wuppertal"
