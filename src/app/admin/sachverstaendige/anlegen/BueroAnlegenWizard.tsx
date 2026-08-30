@@ -451,11 +451,12 @@ export default function BueroAnlegenWizard({ onSuccess, onCancel }: {
                     auch als Standort 1 = Hauptbuero verwendet, daher Geo-Pflicht).
                     BUG-94: bei Validation-Fehler roter Border. */}
                 <div className="sm:col-span-2">
-                  <label className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
+                  <label htmlFor="adr-bueroanlegenwizard-1" className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                     Anschrift Hauptbüro (= Rechnungsadresse) *
                     {bueroAnschriftLat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
+                    id="adr-bueroanlegenwizard-1"
                     defaultValue={bueroAnschrift}
                     placeholder="Adresse via Auswahl wählen..."
                     onSelect={place => {
@@ -559,10 +560,11 @@ export default function BueroAnlegenWizard({ onSuccess, onCancel }: {
                   </div>
                 ) : (
                   <div>
-                    <label className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
+                    <label htmlFor="adr-bueroanlegenwizard-2" className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                       Anschrift * {std.anschrift_lat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo</span>}
                     </label>
                     <GooglePlaceAutocomplete
+                      id="adr-bueroanlegenwizard-2"
                       defaultValue={std.anschrift}
                       placeholder="Adresse via Auswahl..."
                       onSelect={place => { setStandortPlace(std.id, place); clearFieldError(`std-${std.id}-anschrift`) }}

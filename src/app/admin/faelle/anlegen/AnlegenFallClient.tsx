@@ -137,9 +137,10 @@ export default function AnlegenFallClient() {
             <Field label="Kennzeichen" value={form.kennzeichen ?? ''} onChange={v => update('kennzeichen', v)} mono />
             <Field label="Schadens-PLZ *" value={form.schadens_plz} onChange={v => update('schadens_plz', v)} required />
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-claimondo-shield">Schadens-Adresse</label>
+              <label htmlFor="adr-anlegenfallclient" className="text-xs font-semibold text-claimondo-shield">Schadens-Adresse</label>
               {/* P3 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort. PLZ/Ort bleiben editierbar. */}
               <GooglePlaceAutocomplete
+                id="adr-anlegenfallclient"
                 className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
                 defaultValue={form.schadens_adresse ?? ''}
                 placeholder="Straße + Hausnummer, Ort eingeben…"

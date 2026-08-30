@@ -234,9 +234,10 @@ function ProfilCard(props: WerkstattSettingsProps) {
           placeholder="DE123456789"
         />
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-claimondo-shield">Straße &amp; Hausnummer</label>
+          <label htmlFor="adr-werkstattsettings" className="text-xs font-semibold text-claimondo-shield">Straße &amp; Hausnummer</label>
           {/* P2 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort (controlled state → Submit). */}
           <GooglePlaceAutocomplete
+            id="adr-werkstattsettings"
             className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
             defaultValue={adr.strasse}
             placeholder="Straße + Hausnummer eingeben…"
