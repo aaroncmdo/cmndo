@@ -1616,7 +1616,9 @@
       "success_heading": "Wir rufen zurück",
       "success_sub": "Ein Berater meldet sich bei Ihnen – meistens in unter 15 Minuten während der Geschäftszeiten.",
       "close_aria": "Schließen",
-      "datenschutz_note": "Mit dem Absenden willigen Sie ein, dass wir Sie zurückrufen. Datenschutz nach DSGVO."
+      "datenschutz_note": "Mit dem Absenden willigen Sie ein, dass wir Sie zurückrufen. Datenschutz nach DSGVO.",
+      "einklappen_aria": "Kontaktleiste einklappen",
+      "ausklappen_aria": "Kontaktleiste einblenden"
     }
   },
   "nav": {

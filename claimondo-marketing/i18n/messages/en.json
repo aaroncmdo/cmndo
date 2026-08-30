@@ -1443,7 +1443,9 @@
       "success_heading": "We'll call you back",
       "success_sub": "An advisor will be in touch — usually within 15 minutes during business hours.",
       "close_aria": "Close",
-      "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR)."
+      "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR).",
+      "einklappen_aria": "Collapse contact bar",
+      "ausklappen_aria": "Show contact bar"
     },
     "lead_form": {
       "rueckruf_badge": "Callback within 15 minutes · 8am–8pm",
