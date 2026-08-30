@@ -255,6 +255,12 @@ export default async function FallaktePage({
   // Die schweren Abhängigkeits-Queries (Timeline, Dokumente, Parteien, etc.)
   // werden weiterhin hier geladen und als Props an die Tabs durchgereicht.
   // Der Shell + die Übersicht brauchen nur fall + lead + sv + kundenbetreuer.
+  //
+  // Der Zugriff auf DIESEN Fall ist oben bereits geprüft (user-Check + getFallById
+  // via RLS → notFound). Wer hier ankommt, darf die Akte sehen; die Pflichtdokumente
+  // gehören zu genau diesem Fall. Deshalb liest die pflichtdokumente-Query unten
+  // über den Admin-Client — dieselbe Begründung wie in `pflicht-for-fall.ts`.
+  const adminPflicht = createAdminClient()
   const [
     { data: dokumente },
     events,
@@ -280,11 +286,19 @@ export default async function FallaktePage({
       console.error('[AAR-650] getFallEventStream fehlgeschlagen:', err)
       return []
     }),
-    supabase
+    adminPflicht
       .from('pflichtdokumente')
       // AAR-327: zusätzlich angefordert_* + begruendung + frist für
       // AnforderungenListe (Filter auf angefordert_von_user_id = current
       // User erfolgt client-side, damit bestehende Renderer gleich bleiben).
+      //
+      // Admin-Client (Begründung oben): über den RLS-Client sah der Kundenbetreuer
+      // hier 0 Zeilen — die SELECT-Policy `pflichtdokumente__b1sel_au` kennt nur
+      // admin bzw. den Claim-Bezug (Kunde/SV). Folge: die Checkliste im
+      // Dokumente-Tab blieb für ihn leer, und mit ihr der einzige Zugang zu
+      // „Nachreichen anfordern". A/B gemessen 29.08. am selben Fall
+      // (CLM-2026-01838): Admin 3 Einträge, KB 0. Gleiche Klasse wie #5736,
+      // die dort gefixte Slot-Query war nur der zweite Leser derselben Tabelle.
       .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at, angefordert_von_rolle, angefordert_von_user_id, angefordert_am, begruendung, frist')
       .eq('fall_id', id)
       .order('sort_order', { ascending: true })
