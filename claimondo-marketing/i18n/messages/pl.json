@@ -1443,7 +1443,9 @@
       "success_heading": "Oddzwonimy do Państwa",
       "success_sub": "Doradca skontaktuje się z Państwem — zazwyczaj w ciągu 15 minut w godzinach pracy.",
       "close_aria": "Zamknij",
-      "datenschutz_note": "Wysyłając formularz, wyrażają Państwo zgodę na kontakt zwrotny. Ochrona danych zgodnie z RODO."
+      "datenschutz_note": "Wysyłając formularz, wyrażają Państwo zgodę na kontakt zwrotny. Ochrona danych zgodnie z RODO.",
+      "einklappen_aria": "Zwiń pasek kontaktowy",
+      "ausklappen_aria": "Pokaż pasek kontaktowy"
     },
     "lead_form": {
       "rueckruf_badge": "Oddzwonienie w 15 minut · 8–20",

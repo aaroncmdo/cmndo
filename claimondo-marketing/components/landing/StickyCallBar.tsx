@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react'
 import Link from 'next/link'
-import { Phone, X, Send, Check, Search } from 'lucide-react'
+import { Phone, X, Send, Check, Search, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
 import { trackEvent } from '@/lib/analytics/track-event'
@@ -10,6 +10,42 @@ import { setUserData } from '@/lib/analytics/user-data'
 import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
 const PHONE_TEL = PHONE_E164
+
+// ── Speicher fuer den Einklapp-Zustand ──────────────────────────────────────
+// sessionStorage statt localStorage: "ich will die Leiste GERADE nicht" ist eine situative
+// Entscheidung, keine dauerhafte Praeferenz. Sie ueberlebt den Seitenwechsel (sonst waere das
+// Wegklicken sinnlos) und endet mit dem Besuch. Nach TDDDG §25 Abs. 2 einwilligungsfrei: sie
+// stellt genau die Darstellung her, die der Nutzer ausdruecklich verlangt hat.
+//
+// Als externer Store statt als useState+useEffect, damit der Wert schon beim ersten
+// Client-Render feststeht — sonst erscheint die Leiste kurz und springt dann weg.
+const SPEICHER_SCHLUESSEL = 'claimondo:kontaktleiste-eingeklappt'
+const zuhoerer = new Set<() => void>()
+
+function abonniere(melde: () => void) {
+  zuhoerer.add(melde)
+  return () => {
+    zuhoerer.delete(melde)
+  }
+}
+
+function leseEingeklappt() {
+  try {
+    return sessionStorage.getItem(SPEICHER_SCHLUESSEL) === '1'
+  } catch {
+    return false // privater Modus / Speicher gesperrt — dann eben ohne Merken
+  }
+}
+
+function setzeEingeklappt(zu: boolean) {
+  try {
+    if (zu) sessionStorage.setItem(SPEICHER_SCHLUESSEL, '1')
+    else sessionStorage.removeItem(SPEICHER_SCHLUESSEL)
+  } catch {
+    /* s.o. — der Zustand gilt dann nur fuer diese Seite */
+  }
+  zuhoerer.forEach((melde) => melde())
+}
 
 type Props = {
   /** Quellen-Tag damit Dispatch sieht von welcher Seite der Rückruf kam */
@@ -111,7 +147,38 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
   }, [])
 
   // Die Leiste weicht, wenn der Footer da ist ODER sie den echten CTA verdecken wuerde.
-  const weicht = footerSichtbar || ctaKollision
+  const automatischWeg = footerSichtbar || ctaKollision
+
+  // ── Vom Nutzer eingeklappt ────────────────────────────────────────────────
+  // Aaron 30.08.: die Leiste soll sich zur Seite wegschieben lassen. Das ist die dritte
+  // Ebene neben den beiden automatischen — Footer-Naehe und CTA-Kollision entscheidet die
+  // Seite, das Einklappen entscheidet der Nutzer, und seine Entscheidung schlaegt beide.
+  //
+  // Gelesen wird ueber useSyncExternalStore statt ueber einen useEffect. Zwei Gruende:
+  //   1. `setState` synchron in einem Effect ist seit react-hooks v6 ein Lint-Fehler
+  //      ("can trigger cascading renders") — und die Regel hat recht, es ist genau der
+  //      Umweg, den dieser Hook ersetzt.
+  //   2. Der Wert steht schon beim ERSTEN Client-Render fest. Mit dem Effect-Umweg waere
+  //      die Leiste erst da und wuerde danach wegspringen.
+  const eingeklappt = useSyncExternalStore(abonniere, leseEingeklappt, () => false)
+
+  // Waehrend der Bewegung bleibt die Leiste im DOM, danach fliegt sie raus — sonst sind
+  // Telefon-Link und Buttons ausserhalb des Bildes weiter per Tastatur erreichbar.
+  // Abgeleitet statt eigener Effect: aus dem Speicher gelesen ist `faehrtGerade` false,
+  // die Leiste ist also sofort weg (kein Einfahren bei jedem Seitenaufruf).
+  const [faehrtGerade, setFaehrtGerade] = useState(false)
+  const ausgehaengt = eingeklappt && !faehrtGerade
+
+  function klappen(zu: boolean) {
+    if (zu) {
+      setFaehrtGerade(true)
+      window.setTimeout(() => setFaehrtGerade(false), 340)
+    }
+    setzeEingeklappt(zu)
+  }
+
+  // Sichtbar ist die Leiste nur, wenn weder Automatik noch Nutzer sie wegnehmen.
+  const weicht = automatischWeg || eingeklappt
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -131,11 +198,29 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
   return (
     <>
       {/* Sticky Bar – Floating-Pill mit Glass-Backdrop */}
+      {/* Aussen: nur Positionierung. Die mobile Zentrierung (-translate-x-1/2) muss auf einer
+          EIGENEN Ebene bleiben — das Einfahren nutzt ebenfalls translate-x und wuerde sie sonst
+          ueberschreiben (die Leiste spraenge beim Einklappen aus der Mitte). */}
+      {!ausgehaengt && (
       <div
         ref={leisteRef}
         aria-hidden={weicht}
-        className={`fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 transition-opacity duration-200 sm:left-auto sm:right-6 sm:translate-x-0 ${
-          weicht ? 'pointer-events-none opacity-0' : 'opacity-100'
+        className={`fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 sm:left-auto sm:right-6 sm:translate-x-0 ${
+          weicht ? 'pointer-events-none' : ''
+        }`}
+      >
+      {/* Innen: die Bewegung. Zwei verschiedene Arten wegzugehen —
+          automatisch (Footer/CTA-Kollision) blendet nur aus, damit nichts wandert;
+          eingeklappt faehrt zur Seite, weil der Nutzer genau das angestossen hat. */}
+      <div
+        className={`flex flex-col gap-2 ${
+          'transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none'
+        } ${
+          eingeklappt
+            ? 'translate-x-[calc(100%+2rem)] opacity-0 rtl:-translate-x-[calc(100%+2rem)]'
+            : automatischWeg
+              ? 'opacity-0'
+              : 'translate-x-0 opacity-100'
         }`}
       >
         {/* ZEILE 1 — Anruf als Primaeraktion, daneben WhatsApp.
@@ -201,8 +286,46 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
         >
           {t('sticky_call.btn_rueckruf')}
         </button>
+        {/* Wegschieben. Sitzt IN dieser Zeile, nicht darueber: eine eigene Zeile haette die
+            Leiste hoeher gemacht — das Gegenteil dessen, wofuer der Griff da ist. `items-stretch`
+            der Zeile gibt ihm die volle Hoehe, w-11 die Breite: 44x44 als Touch-Ziel.
+            Glas statt Navy, weil er eine Bedienhilfe ist und kein Angebot — die Leiste soll
+            nicht an drei Stellen zugleich rufen. */}
+        <button
+          type="button"
+          onClick={() => klappen(true)}
+          aria-label={t('sticky_call.einklappen_aria')}
+          aria-expanded={true}
+          className="flex w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-claimondo-ondo shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white hover:text-claimondo-navy active:scale-[0.95]"
+        >
+          <ChevronRight className="h-5 w-5 rtl:rotate-180" aria-hidden />
+        </button>
         </div>
       </div>
+      </div>
+      )}
+
+      {/* Der Griff, der zurueckholt. Eigenes fixed-Element, damit er stehen bleibt, waehrend
+          die Leiste hinausfaehrt.
+          ⚠ BEWUSST ein Chevron und KEIN Telefon: ein Telefon-Symbol am Bildrand liest sich wie
+          "hier anrufen" — der Klick klappt aber nur wieder aus. Das waere eine eingebaute
+          Fehlklick-Einladung, ausgerechnet bei einer Zielgruppe unter Stress.
+          48px, also ueber dem geforderten 44px-Touch-Ziel. */}
+      <button
+        type="button"
+        onClick={() => klappen(false)}
+        aria-label={t('sticky_call.ausklappen_aria')}
+        aria-expanded={false}
+        className={`fixed bottom-4 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/90 text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.16)] backdrop-blur-md sm:right-6 rtl:left-4 rtl:right-auto sm:rtl:left-6 ${
+          'transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none'
+        } ${
+          eingeklappt && !automatischWeg
+            ? 'translate-x-0 opacity-100 hover:bg-white active:scale-[0.95]'
+            : 'pointer-events-none translate-x-[calc(100%+1.5rem)] opacity-0 rtl:-translate-x-[calc(100%+1.5rem)]'
+        }`}
+      >
+        <ChevronLeft className="h-5 w-5 rtl:rotate-180" aria-hidden />
+      </button>
 
       {/* Modal – Glass-Backdrop + glassy Sheet */}
       {open && (

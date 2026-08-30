@@ -1443,7 +1443,9 @@
       "success_heading": "Sizi Geri Arayacağız",
       "success_sub": "Bir danışman sizinle iletişime geçecek — mesai saatleri içinde genellikle 15 dakika içinde.",
       "close_aria": "Kapat",
-      "datenschutz_note": "Formu göndererek geri aranmayı kabul etmiş olursunuz. DSGVO kapsamında veri gizliliği güvencesi."
+      "datenschutz_note": "Formu göndererek geri aranmayı kabul etmiş olursunuz. DSGVO kapsamında veri gizliliği güvencesi.",
+      "einklappen_aria": "İletişim çubuğunu daralt",
+      "ausklappen_aria": "İletişim çubuğunu göster"
     },
     "lead_form": {
       "rueckruf_badge": "15 Dakika İçinde Geri Arama · 08–20",
