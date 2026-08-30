@@ -67,6 +67,13 @@ export async function setzeAuszahlungsart(
   db: SupabaseClient,
   claimId: string,
   wert: unknown,
+  /**
+   * Protokoll-Kontext. Ohne ihn wird der Wert STILL geaendert — bei einem Feld, das Kunde,
+   * Werkstatt UND Sachverstaendiger lesen und das ZWEI Parteien aendern duerfen, waere
+   * hinterher nicht nachvollziehbar, wer umgestellt hat. Optional, damit Aufrufer ohne
+   * Nutzerkontext (Backfills, Migrationen) die Funktion weiter nutzen koennen.
+   */
+  protokoll?: { fallId: string; userId: string; akteur: string },
 ): Promise<AuszahlungsartErgebnis> {
   if (!istAuszahlungsart(wert)) {
     return { ok: false, error: 'Ungültige Auszahlungsart.' }
@@ -92,5 +99,29 @@ export async function setzeAuszahlungsart(
 
   if (error) return { ok: false, error: error.message }
   if (!data || data.length === 0) return { ok: false, error: 'Vorgang nicht gefunden.' }
+
+  // Non-critical (AGENTS.md §Server-Actions): die Aenderung steht bereits. Ein Fehler beim
+  // Protokollieren darf sie nicht zuruecknehmen — aber er wird geloggt, nicht verschluckt.
+  // `typ: 'system'` ist der etablierte Wert fuer solche Aenderungen (259 Eintraege auf prod,
+  // u.a. saveBankdaten). Nur `fall_id` setzen genuegt: zwei Trigger
+  // (trg_derive_claim_id, trg_timeline_fill_claim_id) leiten claim_id daraus ab.
+  if (protokoll) {
+    const { error: protoErr } = await db.from('timeline').insert({
+      fall_id: protokoll.fallId,
+      typ: 'system',
+      titel: `Abrechnungsart geändert: ${LABEL[wert]}`,
+      beschreibung: `Geändert durch ${protokoll.akteur}. Mit der Fertigstellung des Gutachtens ist die Abrechnungsart final.`,
+      erstellt_von: protokoll.userId,
+    })
+    if (protoErr) console.error('[auszahlungsart] Timeline-Eintrag fehlgeschlagen:', protoErr.message)
+  }
+
   return { ok: true, wert }
+}
+
+/** Nutzersichtbare Bezeichnungen — auch im Protokoll, damit dort nicht `fiktiv` steht. */
+const LABEL: Record<Auszahlungsart, string> = {
+  reparatur: 'Reparatur in der Werkstatt',
+  fiktiv: 'Fiktive Abrechnung (Auszahlung)',
+  unentschieden: 'Noch offen',
 }

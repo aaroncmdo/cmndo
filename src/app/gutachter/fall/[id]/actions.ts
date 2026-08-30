@@ -918,7 +918,11 @@ export async function aendereAuszahlungsartAlsSv(
     : { data: null }
   if (!fall || !claimId) return { error: 'Fall nicht gefunden' }
 
-  const res = await setzeAuszahlungsart(createAdminClient(), claimId, wert)
+  const res = await setzeAuszahlungsart(createAdminClient(), claimId, wert, {
+    fallId,
+    userId: user.id,
+    akteur: 'den Sachverständigen',
+  })
   if (!res.ok) return { error: res.error }
 
   revalidatePath(`/gutachter/fall/${fallId}`)
