@@ -123,13 +123,31 @@ export function getSvSubphase(
     }
   }
 
-  // Phase 5 — Kanzlei-Bearbeitung. CMM-49 T1.2: das abgeleitete 4-Phasen-Modell ist
-  // gröber als das alte 19-Wert-fall_status-Enum. 'anschlussschreiben' + 'regulierung'
-  // kollabieren auf sub_phase 'versicherungskontakt' → der distinkte „Anspruchsschreiben
-  // versandt"-Step (PHASE_5_SUBPHASEN[1]) ist nicht mehr separat ableitbar (bleibt als
-  // Stepper-Step sichtbar, ist aber kein aktiver Endzustand mehr). 'kanzlei-uebergeben'/
-  // 'filmcheck'/'qc-pruefung' → sub_phase 'kanzlei_uebergabe'.
-  if (fall.sub_phase === 'versicherungskontakt') {
+  // Phase 5 — Kanzlei-Bearbeitung.
+  //
+  // ⚠ Die frühere Annahme hier war, das 4-Phasen-Modell kollabiere
+  // 'anschlussschreiben'/'regulierung' auf 'versicherungskontakt' und
+  // 'filmcheck'/'qc-pruefung' auf 'kanzlei_uebergabe'. **Die DB tut das nicht** —
+  // gemessen 30.08.2026 auf prod (service_role-Sicht auf v_claim_phase): sie führt
+  // `anschlussschreiben`, `filmcheck`, `vs-kuerzt` und `an_externe_kanzlei` als
+  // EIGENE Werte. Kein Phase-5-Zweig griff für sie; sie fielen auf den Phase-4-
+  // Default („Auftrag eingegangen") zurück. Folge im SV-Portal: falscher Stepper —
+  // und ohne `gutachten_eingegangen_am` verschwand die GutachtenCard ganz
+  // (GutachtenCard.tsx: `if (!istAbGutachtenErstellen(subphase) && …) return null`).
+  //
+  // Der Unit-Test fing das nicht: er speiste die Werte ein, die der Code erwartet,
+  // teilte also dessen Annahme. Die Fälle unten sind deshalb mit den REAL in der
+  // DB vorkommenden Werten belegt.
+  //
+  // Bewusst NICHT über `main_phase` gemappt: die Achsen sind nicht deckungsgleich.
+  // `kanzlei_uebergabe` trägt `main_phase='begutachtung'` (der Claim ist noch in
+  // Prüfung), gehört aus SV-Sicht aber in Phase 5 — seine Arbeit ist dort durch.
+  // Ein main_phase-Mapping hätte diese 5 Fälle zurückgestuft.
+  if (
+    fall.sub_phase === 'versicherungskontakt' ||
+    fall.sub_phase === 'anschlussschreiben' ||
+    fall.sub_phase === 'vs-kuerzt'
+  ) {
     return {
       code: 'regulierung',
       phase: 5,
@@ -139,7 +157,14 @@ export function getSvSubphase(
       subphaseCount: PHASE_5_SUBPHASEN.length,
     }
   }
-  if (fall.sub_phase === 'kanzlei_uebergabe') {
+  if (
+    fall.sub_phase === 'kanzlei_uebergabe' ||
+    fall.sub_phase === 'filmcheck' ||
+    fall.sub_phase === 'qc-pruefung' ||
+    // an eine externe Kanzlei abgegeben: für den SV ist der Fall aus der
+    // Begutachtung raus — Phase 4 („Auftrag eingegangen") wäre schlicht falsch.
+    fall.sub_phase === 'an_externe_kanzlei'
+  ) {
     return {
       code: 'kanzlei-uebergeben',
       phase: 5,

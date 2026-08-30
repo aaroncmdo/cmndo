@@ -61,16 +61,41 @@ describe('getSvSubphase', () => {
     expect(s.label).toMatch(/wartet auf Kanzlei/)
   })
 
-  it('5.1 kanzlei-uebergeben: sub_phase=kanzlei_uebergabe (== alt kanzlei-uebergeben/filmcheck/qc)', () => {
+  it('5.1 kanzlei-uebergeben: sub_phase=kanzlei_uebergabe', () => {
     const s = getSvSubphase({ ...baseFall, sub_phase: 'kanzlei_uebergabe' })
     expect(s.code).toBe('kanzlei-uebergeben')
     expect(s.phase).toBe(5)
   })
 
-  it('5.3 regulierung: sub_phase=versicherungskontakt (== alt regulierung + anschlussschreiben, kollabiert)', () => {
+  it('5.3 regulierung: sub_phase=versicherungskontakt', () => {
     const s = getSvSubphase({ ...baseFall, sub_phase: 'versicherungskontakt' })
     expect(s.code).toBe('regulierung')
     expect(s.phase).toBe(5)
+  })
+
+  // ⚠ Die beiden Tests darueber trugen frueher den Zusatz „== alt filmcheck/qc"
+  // bzw. „== alt anschlussschreiben, kollabiert" — sie behaupteten damit dieselbe
+  // Zuordnung wie der Code und speisten nur den erwarteten Wert ein. Auf prod
+  // gemessen (30.08.2026) fuehrt die DB diese Werte EIGENSTAENDIG; sie fielen
+  // deshalb auf den Phase-4-Default zurueck. Die folgenden Faelle sind die real
+  // vorkommenden Werte — sie sind der eigentliche Regressionsschutz.
+  it.each([
+    ['anschlussschreiben', 'regulierung'],
+    ['vs-kuerzt', 'regulierung'],
+    ['filmcheck', 'kanzlei-uebergeben'],
+    ['qc-pruefung', 'kanzlei-uebergeben'],
+    ['an_externe_kanzlei', 'kanzlei-uebergeben'],
+  ])('5.x echter DB-Wert sub_phase=%s -> Phase 5 (%s)', (subPhase, code) => {
+    const s = getSvSubphase({ ...baseFall, sub_phase: subPhase })
+    expect(s.code).toBe(code)
+    expect(s.phase).toBe(5)
+  })
+
+  it('Phase-4-Werte bleiben Phase 4 (Gegenprobe: der Fix greift nicht zu weit)', () => {
+    for (const subPhase of ['termin', 'sa_offen', 'vollmacht_offen', 'gutachten']) {
+      const s = getSvSubphase({ ...baseFall, sub_phase: subPhase })
+      expect(s.phase, `${subPhase} darf Phase 4 bleiben`).toBe(4)
+    }
   })
 
   it('6.1 zahlung-eingegangen: sub_phase=auszahlung (== alt zahlung-eingegangen)', () => {
