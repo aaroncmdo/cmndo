@@ -25,6 +25,7 @@ import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
 import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
+import { spiegleQualiAufClaim } from '@/lib/leads/spiegle-quali-auf-claim'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -208,6 +209,14 @@ export async function speichereQualiFlow(
   }
   const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
+
+  // Existiert der Claim schon (Konversion lief VOR der Beantwortung), kaeme die Antwort dort
+  // nie an — und Kunde/Werkstatt/SV lesen alle den Claim, nicht den Lead. Non-critical: der
+  // Lead-Update oben steht bereits, ein Fehler hier darf ihn nicht zurueckdrehen.
+  const spiegel = await spiegleQualiAufClaim(admin, leadId, update)
+  if (!spiegel.ok) {
+    console.error('[self-service-quali] Spiegeln auf den Claim fehlgeschlagen:', spiegel.error)
+  }
 
   // Ops-Test 11.08. (RC-5): reparaturwunsch='reparatur' ist die Reparatur-Abzweigung
   // (selbstzahler bzw. kasko mit freier Werkstattwahl) — dort gibt es bewusst KEIN
@@ -779,6 +788,12 @@ export async function waehleWerkstattFlow(
       .eq('id', leadId)
     if (wunschErr) {
       return { ok: false, error: `Abrechnungsweg konnte nicht gesetzt werden: ${wunschErr.message}` }
+    }
+    // Derselbe Nachtrag muss den Claim erreichen — sonst zeigt die Werkstatt, die der Kunde
+    // GERADE waehlt, im eigenen Auftrag weiterhin keine Auszahlungsart an.
+    const spiegel = await spiegleQualiAufClaim(admin, leadId, { reparaturwunsch: 'reparatur' })
+    if (!spiegel.ok) {
+      console.error('[werkstattwahl-quali] Spiegeln auf den Claim fehlgeschlagen:', spiegel.error)
     }
   }
 
