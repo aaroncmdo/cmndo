@@ -18,6 +18,7 @@ import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
+import { AuszahlungsartWahlKunde } from '@/app/kunde/faelle/[id]/AuszahlungsartWahlKunde'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
@@ -121,6 +122,23 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
           restwert={gw?.restwert ?? null}
         />
       )}
+
+      {/* Aaron 30.08.: Der Kunde darf seine Abrechnungsart aendern — es ist seine
+          Geldentscheidung, und sie kann sich aendern, solange das Gutachten aussteht.
+          Bewusst AUCH sichtbar, wenn noch nichts gesetzt ist (dann ist es die Erst-Wahl) und
+          im gesperrten Zustand (dann als Anzeige mit Begruendung, statt wortlos zu fehlen). */}
+      <div className="rounded-ios-xl border border-claimondo-border bg-white px-4 py-4">
+        <p className="text-body-sm font-semibold text-claimondo-navy">Abrechnungsart</p>
+        <p className="text-caption text-claimondo-ondo mt-0.5">
+          Reparatur in der Werkstatt oder Auszahlung auf Gutachtenbasis.
+        </p>
+        <AuszahlungsartWahlKunde
+          fallId={vm.claimId}
+          aktuell={geld.reparaturwunsch}
+          gesperrt={geld.auszahlungsartGesperrt}
+          gesperrtSeit={geld.auszahlungsartGesperrtSeit}
+        />
+      </div>
 
       {/* Mietwagen-/Nutzungsausfall-Card (XOR) — Card entscheidet Sichtbarkeit selbst. */}
       {geld.ausfall && <KundeAusfallEntschaedigungCard {...geld.ausfall} />}

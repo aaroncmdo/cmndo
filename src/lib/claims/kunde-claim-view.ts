@@ -179,6 +179,11 @@ export type KundeClaimViewModel = {
     kvaAbgelehntGrund: string | null
     // P3 (GeldZone): FiktiveAbrechnungCard-Gate (claims.reparaturwunsch === 'fiktiv').
     reparaturwunsch: string | null
+    // Aaron 30.08.: Der Kunde darf die Abrechnungsart aendern — bis das Gutachten vorliegt.
+    // Danach ist sie final. Serverseitig ermittelt; die Durchsetzung liegt in
+    // setzeAuszahlungsart, dieses Flag steuert nur die Anzeige.
+    auszahlungsartGesperrt: boolean
+    auszahlungsartGesperrtSeit: string | null
     gutachtenWerte: KundeGutachtenWerte | null
     // P3 (GeldZone): KundeAusfallEntschaedigungCard (null wenn keine Gutachten-/claims-Basis).
     ausfall: KundeAusfallDaten | null
@@ -253,7 +258,10 @@ export async function getKundeClaimView(
       // Gutachten-F+G-Werte aus der Dual-Source-View v_gutachten_werte (P3: +ocr/tagessaetze fuer GeldZone).
       admin
         .from('v_gutachten_werte')
-        .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_ocr_processed_at, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, gutachten_ocr_manuell_ueberschrieben')
+        // `fertiggestellt_am` (Aaron 30.08.): sperrt die Abrechnungsart-Auswahl — liegt das
+        // Gutachten vor, ist sie final. Die View fuehrt das Feld bereits, deshalb kostet die
+        // Sperre hier keine zusaetzliche Abfrage.
+        .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_ocr_processed_at, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, gutachten_ocr_manuell_ueberschrieben, fertiggestellt_am')
         .eq('claim_id', resolvedClaimId)
         .maybeSingle(),
       // P3 (GeldZone): Kunden-Zahlungsweg der Auszahlung (faelle_kunde_view) — Card-Gate = Row existiert.
@@ -667,6 +675,9 @@ export async function getKundeClaimView(
       kvaAbgelehntAm: (fall.kva_abgelehnt_am as string | null) ?? null,
       kvaAbgelehntGrund: (fall.kva_abgelehnt_grund as string | null) ?? null,
       reparaturwunsch: (claimExtra?.reparaturwunsch as string | null) ?? null,
+      // Aaron 30.08.: aenderbar bis zum fertigen Gutachten, danach final.
+      auszahlungsartGesperrt: Boolean(gw?.fertiggestellt_am),
+      auszahlungsartGesperrtSeit: (gw?.fertiggestellt_am as string | null) ?? null,
       gutachtenWerte,
       ausfall,
     },
