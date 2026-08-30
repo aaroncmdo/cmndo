@@ -811,6 +811,41 @@ dass er im Sweep durchlief.
 Der Detektor ist damit nachweislich nicht blind — er hat auf dem alten Stand rot gemeldet
 (Positivkontrolle) und auf dem gefixten grün.
 
+#### 🟡 Direkt darunter der nächste: der StickyCallBar fängt denselben Button ab
+
+⭐⭐ **Erst sichtbar geworden, NACHDEM die Vorschlagsliste weg war.** Solange die über dem Button
+lag, war *sie* das oberste Element — der Balken darunter fiel gar nicht auf. **Ein Fehler kann
+einen zweiten maskieren; nach einem Fix neu messen, nicht nur den Fix bestätigen.**
+
+Gemessen am Verhalten (`document.elementFromPoint`, 3 Punkte je Button, mehrere Scroll-Positionen):
+
+| Viewport | prod (ohne Fix) | mit Fix |
+|---|---|---|
+| 1440×900 | **2/8** Positionen blockiert (Leiste, jeweils 3/3 Punkte) | **0/8** |
+| 1280×720 | **5/8** blockiert (3× Leiste 3/3, 2× Bewertungs-Widget 1/3) | **2/8** — nur noch das Widget |
+| 1920×1080 | — | 0/8 |
+
+Der Button „Jetzt kostenlosen Rückruf erhalten" liegt bei Dokument-Y **882**; bei 900 px Viewport
+also knapp unter der Falz. Wer minimal scrollt, um ihn zu sehen, hat ihn in den unteren ~12 % —
+und dort trafen alle drei Messpunkte „Sofort anrufen" bzw. „Rückruf". Beide führen zwar zu einem
+Rückruf, aber das Leisten-Formular startet **leer**: Name, Telefon und Ort sind weg.
+
+**Der Fix** liegt in derselben Logik, die die Leiste schon hatte: sie weicht bereits, wenn der
+Footer sichtbar ist (der Kommentar dort begründet das ausführlich). Die Regel war nur zu eng —
+sie kannte den Footer, nicht den echten CTA in der Seitenmitte. Jetzt prüft sie zusätzlich die
+**tatsächliche Überlappung** mit `[data-tracking^="lead-form"] button[type="submit"]`.
+
+⚠ Bewusst Kollision statt „CTA sichtbar → ausblenden": die Leiste ist selbst ein
+Conversion-Element. Gegentest gefahren — sie ist an **5 von 7** Scroll-Positionen weiter aktiv
+(`opacity=1, pointer-events=auto`) und weicht nur bei `y=0` (dort liegt der Button in ihrer Zone)
+und am Seitenende (die bestehende Footer-Regel). Ein Fix, der ein Conversion-Element abschaltet,
+wäre schlimmer als der Fehler.
+
+**Offen, nicht in diesem Zug gefixt:** das ProvenExpert-Bewertungs-Widget („Sehr Gut · 27
+Kundenbewertungen") verdeckt bei 1280×720 an zwei Scroll-Positionen das **rechte Drittel**
+desselben Buttons. Third-Party-Overlay, Bestand, deutlich kleiner (die linken zwei Drittel bleiben
+klickbar) — aber es ist dieselbe Klasse und gehört auf die Liste.
+
 #### 🟡 Zusätzlich: der Check-Lead landet in keinem Fluss
 
 `submitCheckLead` schreibt `anfragen` → RPC `convert_anfrage_zu_lead` → Lead. **Kein `createCase`,
