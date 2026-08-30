@@ -247,6 +247,12 @@ export default function KostenPage() {
             <Link href="/haftpflicht/sv-kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
               {t('crosslink_sv_kosten_recht')}
             </Link>
+            {/* Nachtrag zu Doc 37 §2: die Decoder-Kostentabelle war im Cluster
+                verwaist (0 eingehende Links), obwohl sie in 14 Tagen 135 Besucher
+                in den Finder geschickt hat — mehr als jede andere Kosten-Seite. */}
+            <Link href="/decoder/kfz-gutachter-kosten-tabelle" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
+              {t('crosslink_kosten_tabelle')}
+            </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
               {t('crosslink_gutachter')}
             </Link>

@@ -3112,7 +3112,8 @@
     "crosslink_gutachter": "Bilirkişi bul →",
     "cta_h2": "Davanızla ilgili somut bir sorunuz mu var?",
     "cta_p": "Ücretsiz ilk danışma — yükümlülük olmadan.",
-    "cta_schaden": "Hasarı bildir — 0 € maliyet"
+    "cta_schaden": "Hasarı bildir — 0 € maliyet",
+    "crosslink_kosten_tabelle": "Maliyet tablosu (BVSK kademeleri)"
   },
   "kfz_gutachter_wertminderung": {
     "breadcrumb_start": "Kfz Bilirkişisi",
@@ -3530,7 +3531,8 @@
     "crosslinks": [
       "\"Kendi eksperi göndereceğiz\" — açıklayıcı rehber",
       "Bilirkişi ücretleri: Hak ve iade — ayrıntılı",
-      "Kfz Bilirkişi Ücretleri: Bagatell sınırı ve süreç"
+      "Kfz Bilirkişi Ücretleri: Bagatell sınırı ve süreç",
+      "Maliyet tablosu: BVSK kademeleri ve sigorta kesintileri"
     ],
     "cta_band": "Kusursuz kaza mı? Ekspertiz size 0 €'ya mal olur."
   },

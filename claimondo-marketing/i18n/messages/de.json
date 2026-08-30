@@ -3531,7 +3531,8 @@
     "crosslink_gutachter": "Gutachter finden →",
     "cta_h2": "Konkrete Frage zu Ihrem Fall?",
     "cta_p": "Kostenlose Erstberatung – ohne Verpflichtung.",
-    "cta_schaden": "Schaden melden – 0 € Kosten"
+    "cta_schaden": "Schaden melden – 0 € Kosten",
+    "crosslink_kosten_tabelle": "Kosten-Tabelle (BVSK-Stufen)"
   },
   "kfz_gutachter_wertminderung": {
     "breadcrumb_start": "Kfz-Gutachter",
@@ -4174,7 +4175,8 @@
     "crosslinks": [
       "„Wir schicken unseren Gutachter\" – Decoder",
       "Sachverständigen-Kosten: Anspruch & Erstattung im Detail",
-      "Kfz-Gutachter Kosten: Bagatellgrenze & Ablauf"
+      "Kfz-Gutachter Kosten: Bagatellgrenze & Ablauf",
+      "Kosten-Tabelle: BVSK-Stufen & Versicherer-Kürzungen"
     ],
     "cta_band": "Unverschuldeter Unfall? Gutachten kostet Sie 0 €."
   },
