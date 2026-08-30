@@ -176,7 +176,11 @@ export default async function GutachterFallPage({
       lpClaimId
         ? admin
             .from('claims')
-            .select('lead_preis_netto, lead_preis_typ, bkat_unfallart')
+            // `reparaturwunsch` (reparatur | fiktiv) hier mitgeladen: der SV muss die
+            // Auszahlungsart VOR der Besichtigung kennen — bei fiktiver Abrechnung sind
+            // UPE-Aufschläge und Verbringungskosten strittig, das gehört ins Gutachten.
+            // v_claim_full führt das Feld nicht; dieser Load hat denselben sv_id-Guard.
+            .select('lead_preis_netto, lead_preis_typ, bkat_unfallart, reparaturwunsch')
             .eq('id', lpClaimId)
             .eq('sv_id', sv.id)
             .maybeSingle()
@@ -257,6 +261,9 @@ export default async function GutachterFallPage({
     ...fall,
     _leadpreis: abrechnung?.lead_preis_netto != null ? Number(abrechnung.lead_preis_netto) : null,
     _preistyp: abrechnung?.lead_preis_typ ?? null,
+    // Auszahlungsart (reparatur | fiktiv) — s. Kommentar am claims-Select oben.
+    _reparaturwunsch:
+      (abrechnung as { reparaturwunsch?: string | null } | null)?.reparaturwunsch ?? null,
   }
 
   // AV3-SV: Auffahrunfall-Hinweis fuer den SV (Aaron 09.07.) — reiner Hinweis (Stoßfänger/
@@ -595,6 +602,32 @@ export default async function GutachterFallPage({
           </p>
         </div>
       )}
+      {/* Auszahlungsart (Aaron 29.08.): `reparatur` oder `fiktiv` gehoert VOR die Besichtigung —
+          bei fiktiver Abrechnung sind UPE-Aufschlaege und Verbringungskosten strittig, das
+          entscheidet ueber Positionen im Gutachten. Der SV bekam das Feld bisher gar nicht
+          geliefert (v_claim_full fuehrt es nicht); jetzt aus dem claims-SSoT, s. Select oben. */}
+      {fallWithAbrechnung._reparaturwunsch === 'fiktiv' ? (
+        // Radius als Token (18px) statt Tailwind-Default (16px): der Radii-Ratchet laesst fuer
+        // NEUEN Code keine Default-Radien zu. Die uebrigen Bloecke dieser Datei behalten bewusst
+        // ihren Default-Radius — grandfathered Bestand, dessen Umbau in einen eigenen
+        // Boy-Scout-Durchgang gehoert, nicht in diese PR.
+        // (Klassennamen hier bewusst NICHT ausgeschrieben: der Ratchet zaehlt Textvorkommen und
+        //  strippt keine Kommentare — eine Erklaerung mit dem Literal zaehlt als Verstoss.)
+        <div className="rounded-ios-md border-2 border-warning/30 bg-warning-soft p-4">
+          <p className="text-sm font-semibold text-warning-strong">Fiktive Abrechnung</p>
+          <p className="text-xs text-warning-strong mt-1">
+            Der Kunde lässt sich die Gutachtensumme auszahlen. UPE-Aufschläge und
+            Verbringungskosten sind hier regelmäßig strittig — bitte gesondert ausweisen.
+          </p>
+        </div>
+      ) : fallWithAbrechnung._reparaturwunsch === 'reparatur' ? (
+        <div className="rounded-ios-xl bg-claimondo-bg px-4 py-3">
+          <p className="text-xs text-claimondo-ondo">Auszahlungsart</p>
+          <p className="text-sm font-semibold text-claimondo-navy">
+            Reparatur — der Schaden wird instand gesetzt
+          </p>
+        </div>
+      ) : null}
       {/* AAR-Followup (SV-Lead-Ablehnung): Lead-Ablehnen-Card nur in
           sv-zugewiesen + sv-termin sichtbar (Component intern gegated). */}
       <LeadAblehnenCard fallId={id} status={fall.status as string | null} />
