@@ -1,28 +1,27 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 
 // KFZ-172 Phase 2: Upload-Server-Action fuer Fall-Dokumente.
 // Speichert in Supabase Storage Bucket 'fall-dokumente' und erstellt
 // einen Eintrag in fall_dokumente mit ocr_status='pending'.
 //
-// ⚠ ZUSTAND (gemessen 29.08.2026): Dieser Pfad hat in `fall_dokumente` **0 Zeilen,
-// jemals** — der Upload unten laeuft ueber den RLS-Client, und
-// `20260513220337_aar_storage_buckets_lock` sperrt `fall-dokumente` fuer JEDEN
-// authenticated. Belegt ueber alle Pfadmuster der Tabelle: 174 Zeilen aus anderen
-// (admin-basierten) Pfaden, 0 im hiesigen Muster `<fallId>/<typ>_<ts>.<ext>`.
+// Dieser Pfad war von `20260513220337_aar_storage_buckets_lock` (13.05.) bis heute
+// TOT: Upload + Insert liefen ueber den RLS-Client, und die Migration sperrt
+// `fall-dokumente` fuer JEDEN authenticated. In `fall_dokumente` gab es dadurch
+// **0 Zeilen im Muster `<fallId>/<typ>_<ts>.<ext>`, jemals** (bei 174 Zeilen aus
+// anderen, admin-basierten Pfaden). Auf prod gemessen als SV (30.08.):
+// "Upload fehlgeschlagen: new row violates row-level security policy".
 //
-// ⛔ DER FIX IST NICHT „Client auf createAdminClient() tauschen". Diese Action
-// prueft NUR `if (!user)` — es gibt **keinen Fall-Bezug-Guard**: `fallId` kommt
-// ungeprueft vom Aufrufer. Heute faengt die RLS das auf (der Upload scheitert
-// ohnehin); mit Admin-Client koennte jeder Eingeloggte mit fremder `fallId` in
-// fremde Akten laden. Erst Guard (`getClaimForRole`/Rollenpruefung), dann Client.
-//
-// Der funktionierende, gegatete Weg fuer Pflichtdokumente ist
-// `uploadPflichtdokument` (kunde/onboarding/actions.ts) — Admin-Client MIT
-// Ownership-Check. Verbliebene Aufrufer hier: DokumentSlot (SV-Gutachten,
-// GutachtenCard) + feldmodus. Details: memory/AUDIT-uploadfalldokument-rls-pfad-null-zeilen.
+// ⛔ Der Fix ist NICHT nur "Client tauschen" — die Action hatte **keinen
+// Fall-Bezug-Guard**: `fallId` kommt vom Aufrufer. Mit Admin-Client allein
+// koennte jeder Eingeloggte mit fremder `fallId` in fremde Akten laden.
+// Deshalb steht unten ZUERST der Guard (Sichtbarkeit ueber `v_claim_full` mit dem
+// RLS-Client) und erst danach der Admin-Client fuer Storage + Insert — dieselbe
+// Reihenfolge wie in `pflicht-for-fall.ts`.
 
 export async function uploadFallDokument(
   fallId: string,
@@ -47,13 +46,33 @@ export async function uploadFallDokument(
     return { success: false, error: 'Nur JPG, PNG, WebP oder PDF erlaubt' }
   }
 
+  // GUARD (vor jedem Admin-Zugriff): Darf dieser User in DIESEN Fall schreiben?
+  // Gelesen wird mit dem RLS-Client ueber `v_claim_full` — die View traegt
+  // `claim_sichtbar_fuer_aktuellen_user()`, also exakt die Sichtbarkeit, die auch
+  // die Fallakte gewaehrt (Owner/Party/SV/Makler/Werkstatt/KB/Kanzlei/Admin).
+  // Bewusst rollenunabhaengig: die Rolle steuert in `getClaimForRole` nur die
+  // Spaltenauswahl, gefiltert wird ohnehin von der View.
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden' }
+
+  const { data: sichtbar } = await supabase
+    .from('v_claim_full')
+    .select('id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!sichtbar) return { success: false, error: 'Kein Zugriff auf diesen Fall' }
+
   // Storage Path
   const ext = file.name.split('.').pop() ?? 'bin'
   const timestamp = Date.now()
   const storagePath = `${fallId}/${dokumentTyp}_${timestamp}.${ext}`
 
+  // Ab hier Admin-Client: der Bucket ist fuer authenticated gesperrt (s.o.),
+  // die Berechtigung ist mit dem Guard oben bereits geklaert.
+  const admin = createAdminClient()
+
   // Upload in Storage
-  const { error: uploadErr } = await supabase.storage
+  const { error: uploadErr } = await admin.storage
     .from('fall-dokumente')
     .upload(storagePath, file, {
       contentType: file.type,
@@ -65,8 +84,9 @@ export async function uploadFallDokument(
     return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
   }
 
-  // DB-Eintrag
-  const { data: row, error: insertErr } = await supabase
+  // DB-Eintrag — ebenfalls Admin: die INSERT-Policy auf `fall_dokumente` kennt
+  // nicht jede schreibberechtigte Rolle (gleiche Klasse wie #5736/#5754).
+  const { data: row, error: insertErr } = await admin
     .from('fall_dokumente')
     .insert({
       fall_id: fallId,
