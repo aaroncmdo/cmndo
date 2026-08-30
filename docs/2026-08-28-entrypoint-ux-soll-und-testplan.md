@@ -885,10 +885,39 @@ Fehlbefund geworden.
 (`status='reserviert'`, 31.08. 08:30) — und der Kunde erfährt davon **nichts**. Ein reservierter
 Termin ohne Nachricht an den Melder ist schlechter als gar keiner.
 
-**Was zu tun wäre** (nicht gebaut — löst Kunden-Comms aus, braucht Aarons Go): den
-FlowLink-Block des Mini-Wizards (`create-lead-from-mini-wizard.ts:238-300`) in eine geteilte
-Funktion heben und in den drei RPC-Actions aufrufen. Dann gilt für jeden Marketing-Einstieg,
-was das Soll aus §2 verlangt: ein Kanal zurück in den Vorgang und eine Bestätigung per WhatsApp.
+#### ✅ Gebaut (Aaron-Go 30.08.): `erzeugeUndSendeFlowLink` für alle vier Call-Sites
+
+`claimondo-marketing/lib/leads/flowlink-fuer-lead.ts` — legt den FlowLink an und schickt ihn
+per `dispatchMagicLink` (WhatsApp bevorzugt, Email-Fallback) an den **Melder**. Verdrahtet in
+Startseite, `/check` und **beide** Ads-Landing-Actions (`app/kfzgutachter-lp` und
+`app/[locale]/kfzgutachter-lp` — die Datei existiert doppelt).
+
+Drei bewusste Unterschiede zum Mini-Wizard-Original:
+
+* **Non-fatal.** Beim Mini-Wizard ist der Versand Teil des Erfolgspfads und bricht die Action
+  ab. Hier existiert der Lead bereits (die RPC hat ihn konvertiert) — ein Versand-Fehler darf
+  ihn nicht kippen. Der Caller loggt und macht weiter (AGENTS.md §Server-Actions).
+* **Idempotent.** Vor dem Insert wird auf einen vorhandenen Link geprüft; ein Doppel-Submit
+  darf keine zwei gültigen Tokens auf denselben Vorgang erzeugen.
+* **Kein `localhost`-Fallback.** Der Mini-Wizard fällt bei fehlender `NEXT_PUBLIC_APP_URL` auf
+  `http://localhost:3000` zurück. Hier geht der Link an einen echten Kunden — fehlt die
+  Basis-URL, wird **nicht** versendet (der Link steht trotzdem für Dispatch).
+
+**Lokal bewiesen** (Dev-Server, Formular vollständig per UI abgesendet):
+
+```
+vorher (prod):       FlowLinks: 0
+mit Fix (lokal):     FlowLinks: 1
+Nachrichten am Lead: 0          ← Versand scheitert (keine BAILEYS-Env lokal)
+konvertier_status:   success    ← der Lead bleibt intakt
+```
+
+⭐ Der lokal fehlende WhatsApp-Zugang hat dabei den **Fehlerpfad** mitgeprüft — genau den, den
+man sonst nie zu Gesicht bekommt: Versand scheitert, Lead und Link stehen trotzdem.
+
+⚠ **OFFEN — Regel 4:** Dass die WhatsApp beim Melder *ankommt*, ist damit **nicht** gezeigt
+(lokal gibt es keine Baileys-Anbindung). Nach dem Deploy: Startseiten-Formular mit einer
+erreichbaren Nummer absenden und die Zustellung am Gerät prüfen.
 
 #### 🟡 Zusätzlich: der Check-Lead landet in keinem Fluss
 
