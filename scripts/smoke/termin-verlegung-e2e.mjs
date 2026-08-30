@@ -63,7 +63,24 @@ const termineDesFalls = async () => {
 const browser = await chromium.launch({ headless: true })
 const neuerKontext = async () => (await browser.newContext({ locale: 'de-DE', timezoneId: 'Europe/Berlin' })).newPage()
 const login = async (p, konto) => {
-  await p.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
+  const antwort = await p.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
+  // Erst pruefen, ob ueberhaupt eine Login-Seite kam. Ohne das laeuft der Lauf in ein
+  // nichtssagendes `page.fill: Timeout … waiting for input[type="email"]` — genau so ist er
+  // gegen staging gestorben, das hinter einer HTTP-Basic-Auth liegt (401). Die Ursache stand
+  // dann nirgends; der Statuscode benennt sie sofort.
+  const status = antwort?.status() ?? 0
+  if (status === 401) {
+    throw new Error(
+      `${BASE} verlangt eine HTTP-Basic-Auth (401). Sie liegt nur als GitHub-Secret vor ` +
+        `(SMOKE_BASIC_AUTH_USER/_PASS) — dieser Lauf ist von hier aus nicht fahrbar. ` +
+        `Gegen prod (app.claimondo.de) laeuft er ohne Basic-Auth.`,
+    )
+  }
+  if (status >= 400) throw new Error(`${BASE}/login antwortet mit HTTP ${status}`)
+  if ((await p.locator('input[type="email"]').count()) === 0) {
+    const text = (await p.evaluate(() => document.body.innerText)).slice(0, 200)
+    throw new Error(`Keine Login-Maske auf ${BASE}/login (HTTP ${status}). Seitenanfang: „${text}"`)
+  }
   await p.fill('input[type="email"]', konto.mail)
   await p.fill('input[type="password"]', konto.pw)
   await p.click('button[type="submit"]')
@@ -144,6 +161,13 @@ try {
     pruefe(!!pending2 && !!(pending2.bezug_id ?? pending2.fall_id ?? pending2.claim_id),
            'auch der zweite Slot hat einen Fallbezug')
   }
+} catch (err) {
+  // Ohne dieses catch beendet eine Ausnahme den Prozess mit einem Node-Stacktrace — und
+  // verschluckt damit genau die Bilanz, die der Lauf liefern soll: welche Schritte VOR dem
+  // Abbruch gruen waren, steht dann nirgends. Zweimal so passiert (zb1-Smoke, dieser Lauf
+  // gegen staging). Der Fehler wird zu einer normalen roten Pruefung.
+  console.error(`\n   ✗ Abbruch: ${err.message}`)
+  fehler.push(`Abbruch: ${err.message}`)
 } finally {
   await browser.close()
 }
