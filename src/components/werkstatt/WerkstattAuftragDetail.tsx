@@ -474,20 +474,36 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const betrag = auftrag.kostenvoranschlag_brutto ?? auftrag.kostenvoranschlag_netto
   const betragLabel = auftrag.kostenvoranschlag_brutto != null ? 'brutto' : 'netto'
 
+  // Bei FIKTIVER Abrechnung wird nicht repariert — der Kunde laesst sich auf Basis der
+  // Bezifferung auszahlen (§ 249 BGB, netto). Der Kostenvoranschlag ist dann trotzdem
+  // noetig, aber als GRUNDLAGE DER ABRECHNUNG, nicht als Reparatur-Vorstufe: bei Kasko/
+  // Selbstzahler ohne SV-Gutachten ist er die einzige Bezifferung des Schadens.
+  // Ohne diese Unterscheidung stand neben dem Badge „Fiktiv" woertlich „die Reparatur
+  // kann starten" — die Werkstatt haette einen Termin fuer einen Auftrag eingeplant, der
+  // nie kommt (prod-Smoke 30.08., beide Saetze im fiktiv-Lauf gemessen).
+  const fiktiv = auftrag.reparaturwunsch === 'fiktiv'
   const hinweis =
     status === 'benoetigt'
-      ? 'Als Erstes den Kostenvoranschlag hochladen — der Kunde benötigt ihn für die Reparatur.'
+      ? fiktiv
+        ? 'Als Erstes den Kostenvoranschlag hochladen — er ist die Grundlage der fiktiven Abrechnung. Ein Reparaturauftrag besteht nicht.'
+        : 'Als Erstes den Kostenvoranschlag hochladen — der Kunde benötigt ihn für die Reparatur.'
       : status === 'erstellt'
         ? 'Kostenvoranschlag liegt vor, wartet auf Freigabe durch den Kunden.'
         : status === 'abgelehnt'
           ? `Der Kunde hat den Kostenvoranschlag abgelehnt${auftrag.kva_abgelehnt_grund ? ` — „${auftrag.kva_abgelehnt_grund}"` : ''}. Bitte überarbeiten und einen neuen Kostenvoranschlag hochladen.`
-          : auftrag.reparatur_freigegeben_am
-            ? `Freigegeben am ${formatBerlin(auftrag.reparatur_freigegeben_am, {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })} — die Reparatur kann starten.`
-            : 'Freigegeben — die Reparatur kann starten.'
+          : fiktiv
+            ? `Freigegeben${
+                auftrag.reparatur_freigegeben_am
+                  ? ` am ${formatBerlin(auftrag.reparatur_freigegeben_am, { day: '2-digit', month: '2-digit', year: 'numeric' })}`
+                  : ''
+              } — die Abrechnung erfolgt fiktiv auf Basis dieser Bezifferung. Es wird nicht repariert.`
+            : auftrag.reparatur_freigegeben_am
+              ? `Freigegeben am ${formatBerlin(auftrag.reparatur_freigegeben_am, {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                })} — die Reparatur kann starten.`
+              : 'Freigegeben — die Reparatur kann starten.'
 
   return (
     <SectionCard title="Kostenvoranschlag (KVA)" className="mt-3">
