@@ -14,6 +14,25 @@ import { touchClaimRecency } from '@/lib/claims/touch-recency'
 import { verlege, entscheideVerlegung } from '@/lib/termine/engine'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
+// ⭐⭐ ANLASS (Regel-4-Smoke 29.08.): Diese Datei las durchgehend nur `termin.fall_id` —
+// die LEGACY-Spalte. Die Termin-Engine schreibt neue Termine aber BEZUG-NATIV
+// (`bezug_typ`+`bezug_id`, Legacy-Spalten NULL). Folge, live nachgestellt:
+//
+//   Der Kunde klickt „Verlegung bestätigen" → `terminVerlegungBestaetigen` bricht bei
+//   `if (!neu.fall_id)` ab („Pending-Slot hat keine fall_id"). POST 200, die Oberfläche
+//   geht weiter — und in der DB ändert sich NICHTS. Der Termin bleibt ewig pending.
+//
+// Dieselbe Lücke traf `terminVerlegungAblehnen` + `kundeTerminVerlegungVorschlagen`
+// (harte Abbrüche) sowie Revalidierung und SV-Benachrichtigung, die still ins Leere
+// liefen — ohne Fehler, nur ohne Wirkung.
+//
+// ⚠ Die Klasse war BEKANNT und BENANNT: der Kopf von `effektive-bezug-ids.ts` beschreibt
+// sie wörtlich („Consumer, die … NUR über die Legacy-Spalten auflösen, verfehlen
+// bezug-native Termine"), und `effektiveFallClaimId` ist das fertige Werkzeug dagegen.
+// Ein dokumentiertes Werkzeug schützt nicht, solange eine Datei es nicht benutzt.
+//
+// ⚠ Jeder Select hier muss `bezug_typ, bezug_id` mitladen, sonst löst der Helper ins Leere.
+import { effektiveFallClaimId } from '@/lib/termine/effektive-bezug-ids'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
 function fmtDatum(iso: string): string {
@@ -117,7 +136,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // bei manchen Rows nur über auftrag_id.fall_id auflösbar.
   const { data: termin, error: terminErr } = await admin
     .from('gutachter_termine')
-    .select('id, assignee_id, start_zeit, end_zeit, status, fall_id, auftrag_id')
+    .select('id, assignee_id, start_zeit, end_zeit, status, fall_id, claim_id, lead_id, bezug_typ, bezug_id, auftrag_id')
     .eq('id', input.terminId)
     .maybeSingle()
   if (terminErr || !termin) {
@@ -141,10 +160,12 @@ export async function getVerlegungsVorschlaegeAction(input: {
   }
 
   // AAR-864 — Aaron-Datenmodell-Spec: Termin → Auftrag → Fall → Claim.
-  // 1) Direkter Shortcut über termin.fall_id (häufig gesetzt)
+  // 1) Direkt am Termin — über BEIDE Bezug-Achsen (Legacy + bezug_typ/bezug_id).
+  //    Vorher nur `termin.fall_id`: bei einem bezug-nativen Termin fiel die Auflösung
+  //    stumm auf Stufe 2/3 durch und lieferte im Zweifel den Caller-Prop.
   // 2) Sonst über termin.auftrag_id → auftraege.fall_id
   // 3) Sonst Caller-Prop als letzter Fallback
-  let fallId: string | null = (termin.fall_id as string | null) ?? null
+  let fallId: string | null = effektiveFallClaimId(termin)
   if (!fallId && termin.auftrag_id) {
     const { data: auftrag } = await admin
       .from('auftraege')
@@ -270,7 +291,7 @@ export async function terminVerlegungVorschlagen(input: {
   // Alter Termin laden — muss bestaetigt sein und dem SV gehören
   const { data: alt, error: altErr } = await supabase
     .from('gutachter_termine')
-    .select('id, assignee_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit')
+    .select('id, assignee_id, fall_id, claim_id, lead_id, bezug_typ, bezug_id, kb_id, kanal, typ, status, start_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (altErr || !alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -309,26 +330,31 @@ export async function terminVerlegungVorschlagen(input: {
     console.error(`[termin-verlegung] Benachrichtigungs-Marker nicht gesetzt (Termin ${neu.id}):`, benachrichtigtFehler.message)
   }
 
-  if (alt.fall_id) {
-    revalidatePath(`/gutachter/fall/${alt.fall_id}`)
-    revalidatePath(`/faelle/${alt.fall_id}`)
-    revalidatePath(`/kunde/faelle/${alt.fall_id}`)
+  // Beide Bezug-Achsen: bei einem bezug-nativen Termin ist `fall_id` NULL — dann liefen
+  // Revalidierung und Recency-Bump still ins Leere und die Oberflächen blieben stehen,
+  // obwohl die Verlegung in der DB stand. Kein Fehler, nur nichts.
+  const altFallId = effektiveFallClaimId(alt)
+  if (altFallId) {
+    revalidatePath(`/gutachter/fall/${altFallId}`)
+    revalidatePath(`/faelle/${altFallId}`)
+    revalidatePath(`/kunde/faelle/${altFallId}`)
 
     // CMM-65: Recency-Bump auf claims (SSoT) — feuert die claims-Realtime-
     // Subscription in FallRealtimeRefresh (Kunde/SV/Admin). Ersetzt den
     // frueheren faelle.updated_at-Touch (faelle ist nicht mehr der Recency-Ort).
-    void touchClaimRecency(createAdminClient(), alt.claim_id as string | null)
+    // fall und claim sind claim-first dieselbe UUID (s. effektive-bezug-ids.ts).
+    void touchClaimRecency(createAdminClient(), (alt.claim_id as string | null) ?? altFallId)
   }
   revalidatePath('/gutachter/auftraege')
   revalidatePath('/gutachter/heute')
 
   // Notifikation fire-and-forget — Worker nimmt's auf, Caller wird nicht blockiert
-  if (alt.fall_id && alt.assignee_id) {
+  if (altFallId && alt.assignee_id) {
     const svVorname = await lookupSvVorname(alt.assignee_id as string)
     emitEvent(
       'termin.verlegung_vorgeschlagen',
       {
-        fallId: alt.fall_id as string,
+        fallId: altFallId,
         terminId: neu.id as string,
         alterTerminId: alt.id as string,
         alterDatum: fmtDatum(alt.start_zeit as string),
@@ -338,7 +364,7 @@ export async function terminVerlegungVorschlagen(input: {
         svVorname,
         grund: input.grund?.trim() || undefined,
       },
-      { fallId: alt.fall_id as string, triggeredBy: user.id },
+      { fallId: altFallId, triggeredBy: user.id },
     ).catch((e) => console.error('[AAR-864] emit verlegung_vorgeschlagen failed', e))
   }
 
@@ -369,16 +395,17 @@ export async function getKundeTerminVorschlaegeAction(
 
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, assignee_id, fall_id, start_zeit, end_zeit, status')
+    .select('id, assignee_id, fall_id, claim_id, lead_id, bezug_typ, bezug_id, start_zeit, end_zeit, status')
     .eq('id', terminId)
     .maybeSingle()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden.' }
   if (termin.status !== 'bestaetigt') {
     return { ok: false, error: 'Termin ist nicht mehr bestätigt.' }
   }
-  if (!termin.fall_id) return { ok: false, error: 'Termin ohne Fall-Verknüpfung.' }
+  const terminFallId = effektiveFallClaimId(termin)
+  if (!terminFallId) return { ok: false, error: 'Termin ohne Fall-Verknüpfung.' }
 
-  const guardErr = await assertDarfVerlegungEntscheiden(user.id, termin.fall_id as string)
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, terminFallId)
   if (guardErr) return { ok: false, error: guardErr }
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
@@ -387,7 +414,7 @@ export async function getKundeTerminVorschlaegeAction(
   const { data: fallRaw } = await admin
     .from('faelle_claim_bridge')
     .select('claim_id, claims:claims!fk_bridge_claim(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('fall_id', termin.fall_id as string)
+    .eq('fall_id', terminFallId)
     .maybeSingle()
   const fall = fallRaw as unknown as { claim_id: string | null; claims: { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null } | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }[] | null } | null
   if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
@@ -481,7 +508,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // Termin laden
   const { data: alt } = await admin
     .from('gutachter_termine')
-    .select('id, assignee_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
+    .select('id, assignee_id, fall_id, claim_id, lead_id, bezug_typ, bezug_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (!alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -490,8 +517,9 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   }
 
   // Auth: User muss Kunde des Falls sein
-  if (!alt.fall_id) return { ok: false, error: 'Termin nicht mit einem Fall verknüpft.' }
-  const guardErr = await assertDarfVerlegungEntscheiden(user.id, alt.fall_id as string)
+  const altFallId = effektiveFallClaimId(alt)
+  if (!altFallId) return { ok: false, error: 'Termin nicht mit einem Fall verknüpft.' }
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, altFallId)
   if (guardErr) return { ok: false, error: guardErr }
 
   // Slot-Dauer aus altem Termin
@@ -555,14 +583,14 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   }
   const neu = { id: verlegeRes.neuerTerminId }
 
-  revalidateFallPaths(alt.fall_id as string | null)
+  revalidateFallPaths(altFallId)
 
   // Notifikation: SV informieren — kein Bestätigungs-Request, nur Hinweis
   const svVorname = await lookupSvVorname(alt.assignee_id as string)
   emitEvent(
     'termin.verschoben_durch_kunde',
     {
-      fallId: alt.fall_id as string,
+      fallId: altFallId,
       terminId: neu.id as string,
       alterTerminId: alt.id as string,
       alterDatum: fmtDatum(alt.start_zeit as string),
@@ -572,7 +600,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
       svVorname,
       grund: input.grund?.trim() || undefined,
     },
-    { fallId: alt.fall_id as string, triggeredBy: user.id },
+    { fallId: altFallId, triggeredBy: user.id },
   ).catch((e) => console.error('[AAR-864] emit kunde-verlegung_vorgeschlagen failed', e))
 
   return { ok: true, neuerTerminId: neu.id as string }
@@ -656,7 +684,7 @@ export async function terminVerlegungBestaetigen(input: {
 
   const { data: neu, error: neuErr } = await admin
     .from('gutachter_termine')
-    .select('id, status, verlegung_quelle_id, fall_id, start_zeit')
+    .select('id, status, verlegung_quelle_id, fall_id, claim_id, lead_id, bezug_typ, bezug_id, start_zeit')
     .eq('id', input.neuerTerminId)
     .maybeSingle()
   if (neuErr || !neu) return { ok: false, error: 'Verlegungs-Slot nicht gefunden.' }
@@ -669,11 +697,12 @@ export async function terminVerlegungBestaetigen(input: {
   if (!neu.verlegung_quelle_id) {
     return { ok: false, error: 'Kein verlegung_quelle_id auf dem Pending-Slot.' }
   }
-  if (!neu.fall_id) {
-    return { ok: false, error: 'Pending-Slot hat keine fall_id.' }
+  const neuFallId = effektiveFallClaimId(neu)
+  if (!neuFallId) {
+    return { ok: false, error: 'Pending-Slot hat keinen Fallbezug.' }
   }
 
-  const guardErr = await assertDarfVerlegungEntscheiden(user.id, neu.fall_id as string)
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, neuFallId)
   if (guardErr) return { ok: false, error: guardErr }
 
   // P3a: DB-Transition via Engine entscheideVerlegung (neu -> bestaetigt, alt(verlegt) -> verschoben+cancelled).
@@ -687,14 +716,14 @@ export async function terminVerlegungBestaetigen(input: {
     }
   }
 
-  revalidateFallPaths(neu.fall_id as string | null)
+  revalidateFallPaths(neuFallId)
 
   // Notifikation an SV
-  if (neu.fall_id) {
+  if (neuFallId) {
     const { data: fall } = await admin
       .from('v_claim_full')
       .select('kunde_id')
-      .eq('fall_id', neu.fall_id as string)
+      .eq('fall_id', neuFallId)
       .maybeSingle()
     const kundenVorname = await lookupKundenVorname((fall?.kunde_id as string | null) ?? null)
     const von_wem = await lookupUserRolle(user.id)
@@ -704,7 +733,7 @@ export async function terminVerlegungBestaetigen(input: {
     emitEvent(
       'termin.verlegung_bestaetigt',
       {
-        fallId: neu.fall_id as string,
+        fallId: neuFallId,
         terminId: neu.id as string,
         alterTerminId: neu.verlegung_quelle_id as string,
         neuesDatum: fmtDatum(neu.start_zeit as string),
@@ -712,7 +741,7 @@ export async function terminVerlegungBestaetigen(input: {
         kundenVorname,
         von_wem: von_wem_safe,
       },
-      { fallId: neu.fall_id as string, triggeredBy: user.id },
+      { fallId: neuFallId, triggeredBy: user.id },
     ).catch((e) => console.error('[AAR-864] emit verlegung_bestaetigt failed', e))
   }
 
@@ -754,11 +783,12 @@ export async function terminVerlegungAblehnen(input: {
   if (!neu.verlegung_quelle_id) {
     return { ok: false, error: 'Kein verlegung_quelle_id auf dem Pending-Slot.' }
   }
-  if (!neu.fall_id) {
-    return { ok: false, error: 'Pending-Slot hat keine fall_id.' }
+  const neuFallId = effektiveFallClaimId(neu)
+  if (!neuFallId) {
+    return { ok: false, error: 'Pending-Slot hat keinen Fallbezug.' }
   }
 
-  const guardErr = await assertDarfVerlegungEntscheiden(user.id, neu.fall_id as string)
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, neuFallId)
   if (guardErr) return { ok: false, error: guardErr }
 
   // P3a: DB-Transition via Engine entscheideVerlegung (neu -> storniert+cancelled+grund, alt(verlegt) -> bestaetigt).
@@ -775,14 +805,14 @@ export async function terminVerlegungAblehnen(input: {
     }
   }
 
-  revalidateFallPaths(neu.fall_id as string | null)
+  revalidateFallPaths(neuFallId)
 
   // Notifikation an SV (mit Grund)
-  if (neu.fall_id) {
+  if (neuFallId) {
     const { data: fall } = await admin
       .from('v_claim_full')
       .select('kunde_id')
-      .eq('fall_id', neu.fall_id as string)
+      .eq('fall_id', neuFallId)
       .maybeSingle()
     const kundenVorname = await lookupKundenVorname((fall?.kunde_id as string | null) ?? null)
     const von_wem = await lookupUserRolle(user.id)
@@ -792,14 +822,14 @@ export async function terminVerlegungAblehnen(input: {
     emitEvent(
       'termin.verlegung_abgelehnt',
       {
-        fallId: neu.fall_id as string,
+        fallId: neuFallId,
         terminId: neu.id as string,
         alterTerminId: neu.verlegung_quelle_id as string,
         kundenVorname,
         grund: input.grund?.trim() || undefined,
         von_wem: von_wem_safe,
       },
-      { fallId: neu.fall_id as string, triggeredBy: user.id },
+      { fallId: neuFallId, triggeredBy: user.id },
     ).catch((e) => console.error('[AAR-864] emit verlegung_abgelehnt failed', e))
   }
 
