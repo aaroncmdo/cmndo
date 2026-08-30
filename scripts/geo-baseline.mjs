@@ -167,7 +167,26 @@ function analyze(url, cluster, html, meta) {
 
   // Paragraphen-Zitate ("laut", "gemaess", "nach § ...", Urteil-Aktenzeichen)
   const legalRefs = (text.match(/§\s?\d+[a-z]?/gi) || []).length
-  const caseRefs = (text.match(/\b(?:BGH|OLG|LG|AG)\b[^.]{0,40}?(?:Az\.?|Urteil|Beschluss)/gi) || []).length
+  // ⚠ 30.08.2026 ERWEITERT um das nackte Aktenzeichen. Vorher verlangte das Muster
+  // zwingend "Az."/"Urteil"/"Beschluss" NACH dem Gericht — die uebliche Schreibweise
+  // unserer Seiten ist aber "Nach BGH VI ZR 280/22 traegt das Werkstatt-Risiko der
+  // Schaediger". Die fiel durch, und das Skript meldete `caseRefs: 0`.
+  //
+  // Gemessen ueber dieselben 27 Seiten: erkannte Urteilsverweise 17 -> 25 Seiten,
+  // avgScore 69,1 -> 70,0. Faelschlich auf 0 standen u.a. /haftpflicht/anerkenntnis-bgb212
+  // (FUENF Verweise), /kosten-kfz-gutachten und /wie-es-funktioniert (je vier).
+  //
+  // ⭐⭐ Der Schaden war nicht der Score-Punkt, sondern die HANDLUNGSEMPFEHLUNG:
+  // "/gegnerische-versicherung-zahlt-nicht hat null Urteilsverweise" liest sich wie eine
+  // inhaltliche Luecke — dort steht ein korrekt eingeordnetes BGH-Urteil. Beinahe waeren
+  // Urteile ergaenzt worden, die laengst dastehen; auf einer Rechtsseite die
+  // gefaehrlichste Art von Fleiss.
+  //
+  // ⚠ Scores sind dadurch NICHT mehr mit Messungen vor dem 30.08. vergleichbar:
+  // caseRefs gibt 3 Punkte ab dem ersten Treffer, 10 der 27 Seiten standen auf 0.
+  const caseRefs = (text.match(
+    /\b(?:BGH|OLG|LG|AG)\b[^.]{0,40}?(?:Az\.?|Urteil|Beschluss|(?:[IVX]+\s)?ZR\s?\d{1,4}\/\d{2})/gi,
+  ) || []).length
   const attribution = (text.match(/\b(laut|gem(?:ä|ae)ß|zufolge|nach Angaben|Quelle:|Studie|Statistik)\b/gi) || []).length
 
   // Aktualitaet -- ChatGPT zitiert Inhalte <30 Tage 3,2x haeufiger
