@@ -16,6 +16,20 @@ import { test, expect } from '@playwright/test'
 const MARKETING = process.env.MARKETING_BASE_URL ?? 'https://claimondo.de'
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 
+// ⚠ SERIELL, und mit mehr Zeit je Test.
+//
+// Am 30.08. gemessen: dieselbe Anfrage an `/` brauchte zwischen **1,4 s und 20,5 s** —
+// isoliert 6 von 6 gruen, im vollen Lauf (8 Tests parallel) aber sporadisch rot. Nicht
+// der Test schwankt, sondern die Antwortzeit des Servers; acht gleichzeitige Requests
+// druecken die groesste Seite (464 KB) ueber den 30-s-Default.
+//
+// Serieller Lauf ist hier ohnehin richtig: Der Waechter misst einen FREMDEN, produktiven
+// Server. Ihn mit acht parallelen Abrufen zu belegen verfaelscht die eigene Messung und
+// belastet prod ohne Not. Kostet ~15 s mehr Laufzeit — ein Waechter, der sporadisch
+// grundlos rot ist, kostet mehr: er wird weggeklickt statt gelesen.
+test.describe.configure({ mode: 'serial' })
+test.setTimeout(60_000)
+
 // Je eine Seite pro Einbaustelle — nicht alle 18, das waere Laufzeit ohne Erkenntnis.
 const SEITEN = [
   // ⭐ Die STARTSEITE fehlte hier bis zum 28.08. — und genau deshalb blieb ihr Mangel
@@ -48,18 +62,26 @@ const SEITEN = [
 ]
 
 for (const { pfad, quelle } of SEITEN) {
-  test(`${pfad} traegt einen buchbaren Termin — ${quelle}`, async ({ page }) => {
-    const res = await page.goto(`${MARKETING}${pfad}`, { waitUntil: 'domcontentloaded' })
-    expect(res?.status(), 'Seite muss erreichbar sein').toBe(200)
+  test(`${pfad} traegt einen buchbaren Termin — ${quelle}`, async ({ request }) => {
 
-    // ⚠ `content()` (HTML), NICHT `innerText`.
+    // ⚠ Die rohe HTTP-Antwort, KEIN Browser-DOM.
     //
-    // Gemessen am 28.08.2026: der Block steht im DOM und `isVisible` meldet true —
-    // `body.innerText()` gibt ihn trotzdem NICHT aus, weil er unterhalb des Viewports
-    // liegt und innerText nur liefert, was im Layout gerendert ist. Vier Seiten wurden
-    // dadurch als „Block FEHLT" gemeldet, obwohl er auf allen vieren stand.
-    // Fuer die Frage hier ist das HTML ohnehin die richtige Quelle: ein Crawler scrollt nicht.
-    const text = (await page.content())
+    // Erste Fassung: `page.innerText('body')` — sah den Block nicht, weil er unterhalb
+    // des Viewports lag und innerText nur GERENDERTES Layout liefert. Vier Seiten wurden
+    // als „Block FEHLT" gemeldet, obwohl er auf allen vieren stand.
+    //
+    // Zweite Fassung: `page.content()` nach `waitUntil: 'domcontentloaded'` — behob das,
+    // war aber FLAKY. Am 30.08. gesehen: Startseite erst rot, im Retry gruen. Grund ist
+    // das Streaming — der Termin-Block haengt in einem <Suspense>, und
+    // `domcontentloaded` feuert, bevor der Stream durch ist. Gegenprobe: 12 von 12
+    // curl-Abrufen trugen den Block. Also kein Produktfehler, sondern ein Messfehler.
+    //
+    // Jetzt: die vollstaendige HTTP-Antwort. Genau das liest ein Crawler — er fuehrt
+    // kein JS aus, wartet auf kein Hydration-Event und scrollt nicht. Damit ist der Test
+    // zugleich praeziser (echte Crawler-Sicht) und stabil (kein Browser-Timing).
+    const res = await request.get(`${MARKETING}${pfad}`)
+    expect(res.status(), 'Seite muss erreichbar sein').toBe(200)
+    const text = (await res.text())
       .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
       .replace(/<[^>]+>/g, ' ')
       .replace(/&amp;/g, '&')
@@ -79,7 +101,7 @@ for (const { pfad, quelle } of SEITEN) {
     // stillschweigend durchgegangen. (Vgl. „Zwischenzustaende, die wie Erfolg aussehen".)
     //
     // Jetzt: liefert die API einen Termin, MUSS die Seite ihn zeigen.
-    const api = await page.request.get(`${APP}/api/v1/gutachter-termine?ort=K%C3%B6ln`)
+    const api = await request.get(`${APP}/api/v1/gutachter-termine?ort=K%C3%B6ln`)
     const termineDa =
       api.ok() && (((await api.json()) as { gutachter?: Array<{ termine?: unknown[] }> })
         .gutachter ?? []).some((g) => (g.termine ?? []).length > 0)
