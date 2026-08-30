@@ -5473,7 +5473,9 @@
     "vorRepReparatur": "Repair actually carried out — workshop invoice as proof",
     "vorRepNutzungswille": "You had the intent and ability to use the car (no hospital stay, no holiday)",
     "vorRepKeinZweitwagen": "No reasonably available second car",
-    "alternativMietwagen": "Took a rental car instead? Let us know — the insurer pays either rental car costs ({satz}/day depending on class) <b>or</b> loss of use, not both."
+    "alternativMietwagen": "Took a rental car instead? Let us know — the insurer pays either rental car costs ({satz}/day depending on class) <b>or</b> loss of use, not both.",
+    "werteFehlenNurSatz": "You're entitled to loss-of-use compensation for {tage} days. We couldn't read the daily rate from your report yet — your case manager will clarify this and get back to you.",
+    "wasIstNutzungsausfall": "Loss-of-use is money for not being able to use your car during this time."
   },
   "kanzleiPaket": {
     "versendetTitel": "Law firm package sent",

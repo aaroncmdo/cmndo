@@ -190,6 +190,12 @@ export default async function KundeAusfallEntschaedigungCard({
   const tagessatz = nutzungsausfallTagessatzEur
   if (!effDauerTage || !tagessatz) {
     // Werte fehlen — wir zeigen einen Hinweis statt einer Pseudo-Zahl.
+    //
+    // Frontend-Audit 30.08.2026 (prod): Hier stand pauschal „Tagessatz ODER Dauer
+    // konnten wir nicht auslesen", obwohl im gemessenen Fall die Dauer sehr wohl
+    // vorlag (6 Tage) und nur der Tagessatz fehlte. Der Text war unschaerfer als
+    // die Datenlage und liess den Kunden glauben, es sei gar nichts bekannt.
+    // Jetzt: die bekannte Zahl nennen, nur das wirklich Fehlende offenlassen.
     return (
       <section className="rounded-2xl border border-dashed border-claimondo-border bg-claimondo-bg p-5 space-y-2 text-xs text-claimondo-ondo">
         <header className="flex items-center gap-2">
@@ -198,8 +204,12 @@ export default async function KundeAusfallEntschaedigungCard({
             {nutzungsausfallHeading}
           </h3>
         </header>
+        {/* PRODUCT.md Prinzip 4: der Begriff wird erklaert, wo er auftaucht. */}
+        <p className="text-claimondo-ondo/80">{t('wasIstNutzungsausfall')}</p>
         <p>
-          {t('werteFehlen')}
+          {effDauerTage && !tagessatz
+            ? t('werteFehlenNurSatz', { tage: effDauerTage })
+            : t('werteFehlen')}
         </p>
       </section>
     )
