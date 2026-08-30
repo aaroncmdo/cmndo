@@ -378,8 +378,10 @@ export default function FlowWizardKfz({
   const [kiFallback, setKiFallback] = useState(false)
   const istIncomplete = initialNeedsBooking
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
-  // Task 12: Haftpflicht (schuldfrage='gegner') erreicht den Werkstatt-Step nie
-  // (quali-flow-outcome: reparaturwunsch=null) — read-only Reparatur-nach-Gutachten-Hinweis am SA-Step.
+  // Task 12: Bei Haftpflicht (schuldfrage='gegner') setzt quali-flow-outcome `reparaturwunsch=null`
+  // — read-only Reparatur-nach-Gutachten-Hinweis am SA-Step. Seit 30.08. (Aaron) wird die
+  // Auszahlungsart dort zusaetzlich ERHOBEN (serviceFelder enthaelt `reparaturwunsch`, s. page.tsx):
+  // vor dem Gutachten gewaehlt, danach vom Gutachten bestaetigt oder geaendert.
   //
   // Spec A (14.07.): die SERVER-Weiche hat Vorrang — sie kennt eigene_versicherung, der Client nicht.
   // Vorher stand hier resolveAbrechnungsweg({ …, ueberEigeneVersicherung: null }) mit HARDCODIERTEM
