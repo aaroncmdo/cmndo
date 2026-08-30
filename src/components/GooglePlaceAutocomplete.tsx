@@ -50,8 +50,29 @@ export default function GooglePlaceAutocomplete({
   className,
   scrollIntoViewOnFocus,
   autoFocus,
+  id,
+  ariaLabel,
 }: {
   defaultValue?: string
+  /**
+   * DOM-`id` des Eingabefelds — damit ein `<label htmlFor={id}>` es beschriften kann.
+   *
+   * WARUM DAS NOETIG WAR (30.08.2026): 17 der 38 Consumer setzen ein nacktes `<label>`
+   * NEBEN diese Komponente, ohne `htmlFor` und ohne umschliessendes Element. Fuer den
+   * Browser ist das Feld damit UNBESCHRIFTET: ein Screenreader liest es ohne Namen vor,
+   * und ein Klick auf die Beschriftung fokussiert es nicht. Betroffen ist auch die
+   * Kundenstrecke (`FlowWizardKfz`).
+   *
+   * Aufgefallen ist es am Test, nicht am Produkt: `netzwerk-kalt-redemption-smoke` war
+   * im nightly 3 von 3 Laeufen rot mit `locator.fill: Test timeout … waiting for
+   * getByLabel(/^Adresse \(Straße/)`. Playwright findet ueber `getByLabel` nur ein
+   * VERKNUEPFTES Label — derselbe Weg, den auch Hilfstechnik geht. Der rote Test war
+   * also kein Testartefakt, sondern die Anzeige eines echten Mangels.
+   */
+  id?: string
+  /** Alternative, wenn kein sichtbares Label existiert (z.B. Such-Leisten). `id` ist der
+   *  bessere Weg, weil nur ein echtes `<label>` auch den Klick-Fokus mitbringt. */
+  ariaLabel?: string
   /** AAR-956: Autocomplete-Typ. Default ['address'] (Mapbox); ['establishment'] = Google-Business-Suche. */
   types?: string[]
   placeholder?: string
@@ -198,6 +219,8 @@ export default function GooglePlaceAutocomplete({
         type="text"
         value={value}
         autoComplete="off"
+        id={id}
+        aria-label={ariaLabel}
         role={istFirmenSuche ? undefined : 'combobox'}
         aria-expanded={istFirmenSuche ? undefined : offen}
         aria-autocomplete={istFirmenSuche ? undefined : 'list'}

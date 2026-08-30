@@ -255,14 +255,54 @@ function distanzKm(aLat: number, aLng: number, bLat: number, bLng: number): numb
   return 2 * R * Math.asin(Math.sqrt(x))
 }
 
+/**
+ * Gesamt-Budget fuer den Uebersichts-Streifen.
+ *
+ * WARUM ZUSAETZLICH zu TIMEOUT_MS: das Einzel-Timeout deckelt EINE Stadt, nicht
+ * die Summe. Laufen die Abfragen parallel, ist beides dasselbe — unter
+ * Speicherdruck serialisiert der Server sie aber, und dann addieren sich die
+ * Wartezeiten. Am 28.08.2026 nach dem R428-Deploy gemessen: claimondo.de/
+ * brauchte 30 s, dann 45 s, einmal lief die Anfrage in den Timeout; zwoelf
+ * Minuten spaeter war alles wieder bei 1,4 s. Rechnung dazu: ~10 Einsatz-
+ * Staedte x 4 s = 40 s. Der Streifen haengt ohne Suspense-Boundary im
+ * Seiten-`await`, blockiert also das Rendern der GANZEN Startseite.
+ * (Marker: audit-startseite-nach-deploy-minutenlang-unbenutzbar.)
+ *
+ * ⭐ Warum `Promise.race` und NICHT ein kuerzeres TIMEOUT_MS: ein abgebrochener
+ * Fetch cacht nichts — genau daran scheiterte laut Kommentar oben schon der
+ * 2500-ms-Entwurf, der Block waere DAUERHAFT unsichtbar geblieben. Hier laeuft
+ * der Fetch weiter und fuellt den Cache; nur das WARTEN endet. Der naechste
+ * Aufruf findet den Wert also vor.
+ *
+ * 5000 ms: liegt ueber dem gemessenen Einzel-Maximum (2,14 s) und damit ueber
+ * dem Normalfall — es greift nur, wenn die Abfragen tatsaechlich serialisieren.
+ */
+const UEBERSICHT_BUDGET_MS = 5000
+
+/** Wartet hoechstens `ms` auf `p` und liefert sonst `fallback`. Bricht `p` NICHT ab. */
+function mitFrist<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>
+  const frist = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms)
+  })
+  return Promise.race([p, frist]).finally(() => clearTimeout(timer))
+}
+
 export async function ladeUebersichtsTermine(): Promise<StadtTermin[]> {
   const staedte = await ladeEinsatzStaedte()
   if (staedte.length === 0) return []
+  // Frist pro Stadt, aber alle starten gleichzeitig -> die Gesamtdauer ist
+  // gedeckelt, und bereits fertige Staedte behalten ihr Ergebnis (kein
+  // Alles-oder-nichts). Ein leeres Ergebnis rendert den Block einfach nicht —
+  // der weiche Ausfall, den ladeNaechstenTermin oben ohnehin zusichert.
   const ergebnisse = await Promise.all(
-    staedte.map(async (stadt) => {
-      const t = await ladeNaechstenTermin(stadt)
-      return t ? { ...t, stadt } : null
-    }),
+    staedte.map((stadt) =>
+      mitFrist(
+        ladeNaechstenTermin(stadt).then((t) => (t ? { ...t, stadt } : null)),
+        UEBERSICHT_BUDGET_MS,
+        null,
+      ),
+    ),
   )
   return ergebnisse.filter((x): x is StadtTermin => x !== null)
 }
