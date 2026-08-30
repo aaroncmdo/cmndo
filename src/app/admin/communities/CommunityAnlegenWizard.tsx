@@ -170,12 +170,13 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
               />
             </div>
             <div>
-              <label className="text-body-xs text-claimondo-ondo mb-1.5 block">
+              <label htmlFor="adr-communityanlegenwizard" className="text-body-xs text-claimondo-ondo mb-1.5 block">
                 <MapPinIcon className="w-3 h-3 inline mr-1" />
                 Gebiet-Zentrum *
                 {zentrumLat !== null && <span className="text-success ml-2">✓ Geo gesetzt</span>}
               </label>
               <GooglePlaceAutocomplete
+                id="adr-communityanlegenwizard"
                 defaultValue={zentrumAnschrift}
                 placeholder="z.B. Hauptbahnhof München"
                 onSelect={place => {

@@ -800,10 +800,11 @@ export default function WerkstattDetailClient({
         <p className="text-body-xs text-claimondo-ondo mb-3">Aktuell: {adresse}</p>
         <div className="space-y-3">
           <div>
-            <label className="block text-body-xs font-medium text-claimondo-navy mb-1">
+            <label htmlFor="adr-werkstattdetailclient" className="block text-body-xs font-medium text-claimondo-navy mb-1">
               Neue Adresse (aus den Vorschlägen wählen)
             </label>
-            <GooglePlaceAutocomplete placeholder="Adresse eingeben…" onSelect={(r) => setNeueAdresse(r)} />
+            <GooglePlaceAutocomplete
+              id="adr-werkstattdetailclient" placeholder="Adresse eingeben…" onSelect={(r) => setNeueAdresse(r)} />
           </div>
           {neueAdresse && <p className="text-body-sm text-claimondo-navy">Gewählt: {neueAdresse.adresse}</p>}
           <p className="text-body-xs text-claimondo-ondo">Das 30-Minuten-Fahrgebiet wird neu berechnet.</p>

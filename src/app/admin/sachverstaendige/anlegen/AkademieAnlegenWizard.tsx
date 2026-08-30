@@ -218,11 +218,12 @@ export default function AkademieAnlegenWizard({ onSuccess, onCancel }: {
                 <Field label="Rechtsform" value={rechtsform} onChange={setRechtsform} placeholder="z.B. e.V., GmbH" />
                 <Field label="Steuernummer *" value={steuernummer} onChange={setSteuernummer} />
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-claimondo-ondo mb-1.5 block">
+                  <label htmlFor="adr-akademieanlegenwizard" className="text-xs text-claimondo-ondo mb-1.5 block">
                     Anschrift *
                     {anschriftLat !== null && <span className="text-success ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
+                    id="adr-akademieanlegenwizard"
                     defaultValue={anschrift}
                     placeholder="Adresse der Akademie wählen..."
                     onSelect={place => {

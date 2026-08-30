@@ -174,8 +174,9 @@ export default function WerkstattAnlegenForm({
           placeholder="z.B. Max Mustermann"
         />
         <div>
-          <label className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
+          <label htmlFor="adr-werkstattanlegenform" className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
           <GooglePlaceAutocomplete
+            id="adr-werkstattanlegenform"
             placeholder="Adresse der Werkstatt eingeben…"
             onSelect={handlePlaceSelect}
             defaultValue={adresse.display}
