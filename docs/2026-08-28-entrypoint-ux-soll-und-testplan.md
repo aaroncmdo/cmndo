@@ -915,9 +915,43 @@ konvertier_status:   success    ← der Lead bleibt intakt
 ⭐ Der lokal fehlende WhatsApp-Zugang hat dabei den **Fehlerpfad** mitgeprüft — genau den, den
 man sonst nie zu Gesicht bekommt: Versand scheitert, Lead und Link stehen trotzdem.
 
-⚠ **OFFEN — Regel 4:** Dass die WhatsApp beim Melder *ankommt*, ist damit **nicht** gezeigt
-(lokal gibt es keine Baileys-Anbindung). Nach dem Deploy: Startseiten-Formular mit einer
-erreichbaren Nummer absenden und die Zustellung am Gerät prüfen.
+##### ✅ Regel-4-Nachweis auf prod (30.08., nach Release R435/#5763, Deploy 19:37 UTC)
+
+Startseiten-Formular vollständig per UI ausgefüllt und abgesendet:
+
+```
+anfragen 1 → 2 · quelle=claimondo-home-hero · konvertier_status=success
+FlowLinks am Lead: 1          (vorher 0)
+Nachrichten am Lead: 2        (vorher 1 — nur Team)
+```
+
+Beide WhatsApps **zugestellt**:
+
+```
+19:44:07  an den MELDER:  "Hi EPSWEEP, danke für deine Schadenmeldung bei Claimondo.
+                           Hier dein sicherer Login-Link (gültig 72 Stunden):
+                           https://claimondo.de/flow/68a26f1e…"      enthaelt_flowlink: true
+19:44:08  an das TEAM:    "🔔 Neuer Lead …"                          (wie bisher)
+```
+
+Und der Link **führt tatsächlich in den Vorgang** — nicht nur „sieht richtig aus": `claimondo.de/flow/<token>`
+leitet auf `app.claimondo.de` weiter, Status **200**, und die Seite begrüsst den Melder namentlich
+(„Hallo EPSWEEP! Bitte prüfen und korrigieren Sie Ihre Daten"). Damit ist die Kette geschlossen:
+Formular → Lead → Link per WhatsApp → Wizard.
+
+Testdaten anschliessend restlos entfernt (0 EPSWEEP-Leads, `anfragen` zurück auf 1).
+
+##### ✅ Regel-4-Nachweis StickyCallBar (#5753) auf prod
+
+| Messung | vorher | nachher |
+|---|---|---|
+| 1440×900, 8 Scroll-Positionen | **2/8** blockiert (Leiste, je 3/3 Punkte) | **0/8** |
+| 1280×720, 8 Scroll-Positionen | **5/8** (3× Leiste 3/3, 2× Widget 1/3) | **2/8** — nur noch das Widget |
+| Viewport-Matrix (5 × 3 Seiten) | 1/15 | **0/15** |
+| Gegentest Conversion | — | Leiste an **5/7** Positionen weiter aktiv |
+
+Das ProvenExpert-Widget (rechtes Drittel bei 1280×720) bleibt wie angekündigt unangetastet — es ist
+sichtbar als einzige verbliebene Blockade und damit sauber isoliert.
 
 #### 🟡 Zusätzlich: der Check-Lead landet in keinem Fluss
 
