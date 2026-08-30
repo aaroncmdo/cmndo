@@ -252,12 +252,24 @@ test.describe('KI-Deeplink — von der Stadtseite bis in den Finder', () => {
     // Nachgemessen: im Formular stand dazu nichts — die einzige Kostenaussage der Datei
     // kam NACH der Buchung im Rueckruf-Text. Beide Haelften muessen dastehen: dass es
     // kostenlos ist UND wer stattdessen zahlt. „Kostenlos" allein weckt Misstrauen.
+    //
+    // ⚠ Geprueft wird die AUSSAGE, nicht ein Wortlaut. Die erste Fassung verlangte
+    // woertlich „Für Sie kostenlos" + „bezahlt der Sachverständige für die Vermittlung,
+    // nicht Sie" — also exakt meine eigene Formulierung. Am 29.08. hat eine zweite
+    // Session unabhaengig denselben Befund behoben, kuerzer und mit der besseren
+    // Layout-Begruendung („Sie zahlen nichts. Die Vermittlung zahlen die
+    // Sachverständigen …"). Ihre Fassung blieb, meine wurde entfernt — und ein Test, der
+    // am Wortlaut haengt, waere dabei rot geworden, obwohl die Seite BESSER wurde.
     await expect(
-      frame.getByText(/Für Sie kostenlos/i).first(),
+      frame.getByText(/(Sie zahlen nichts|für Sie kostenlos|kostenfrei für Sie)/i).first(),
       'im Kontakt-Schritt muss stehen, dass der Service den Kunden nichts kostet',
     ).toBeVisible({ timeout: 20_000 })
     await expect(
-      frame.getByText(/bezahlt der Sachverständige für die Vermittlung, nicht Sie/i).first(),
+      frame
+        .getByText(
+          /(Vermittlung[^.]{0,60}(zahlen|bezahlt|trägt)|(zahlen|bezahlt)[^.]{0,60}Vermittlung)/i,
+        )
+        .first(),
       'und WER stattdessen zahlt — sonst bleibt die Gegenfrage offen',
     ).toBeVisible({ timeout: 20_000 })
   })

@@ -13,6 +13,7 @@ import type { WerkstattAuftrag, WerkstattAuftragExtra, WerkstattChatMessage } fr
 import { WerkstattChatTab } from '@/components/werkstatt/WerkstattChatTab'
 import { WerkstattCopilotPanel } from '@/components/werkstatt/WerkstattCopilotPanel'
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
+import { reparaturwunschLabel } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import {
   werkstattAuftragSegment,
   abrechnungswegLabel,
@@ -543,6 +544,11 @@ export function WerkstattAuftragDetail({
 }) {
   const segment = werkstattAuftragSegment(auftrag)
   const typ = abrechnungswegLabel(auftrag.abrechnungsweg)
+  // Auszahlungsart (reparatur | fiktiv) — für die Werkstatt der Unterschied zwischen
+  // „wir reparieren und rechnen ab" und „der Kunde lässt sich auszahlen". Die Daten lagen
+  // längst im Auftrag (queries.ts) und `reparaturwunschLabel` existierte samt Test — nur
+  // gerendert hat es niemand (einziger Konsument war der eigene Test).
+  const auszahlungsart = reparaturwunschLabel(auftrag.reparaturwunsch)
   const kundeName = auftrag.kunde_name ?? '–'
 
   // Früh-Zustand: der Kunde ist noch mitten in der Ersterfassung — es gibt noch
@@ -571,6 +577,17 @@ export function WerkstattAuftragDetail({
             </h1>
             {typ && (
               <StatusBadge tone="neutral" size="xs">{typ}</StatusBadge>
+            )}
+            {auszahlungsart && (
+              // `fiktiv` bewusst hervorgehoben: der Kunde lässt sich die Gutachtensumme
+              // auszahlen — die Werkstatt muss das VOR der Terminvereinbarung wissen,
+              // weil sich daran hängt, wer am Ende bezahlt.
+              <StatusBadge
+                tone={auftrag.reparaturwunsch === 'fiktiv' ? 'warning' : 'info'}
+                size="xs"
+              >
+                {auszahlungsart}
+              </StatusBadge>
             )}
             {auftrag.meine_rolle === 'beide' && auftrag.provision_betrag_netto != null && (
               <StatusBadge tone="info" size="xs">
