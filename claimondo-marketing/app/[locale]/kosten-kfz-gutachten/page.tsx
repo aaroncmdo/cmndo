@@ -218,6 +218,14 @@ export default function Page() {
             <li>
               → <Link href="/kfz-gutachter/kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[2]}</Link>
             </li>
+            {/* Die Decoder-Kostentabelle blieb bei Doc 37 §2 aussen vor, obwohl sie
+                die staerkste Seite des Clusters ist: gemessen ueber 14 Tage 294
+                menschliche Aufrufe und 135 Weiterklicks in den Finder (Platz 3
+                aller Finder-Quellen). Eingehende Links aus dem Cluster hatte sie
+                dabei KEINE — sie lebte allein von Startseite + Direktaufrufen. */}
+            <li>
+              → <Link href="/decoder/kfz-gutachter-kosten-tabelle" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[3]}</Link>
+            </li>
           </ul>
         </section>
 

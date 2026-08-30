@@ -1443,7 +1443,9 @@
       "success_heading": "We'll call you back",
       "success_sub": "An advisor will be in touch — usually within 15 minutes during business hours.",
       "close_aria": "Close",
-      "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR)."
+      "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR).",
+      "einklappen_aria": "Collapse contact bar",
+      "ausklappen_aria": "Show contact bar"
     },
     "lead_form": {
       "rueckruf_badge": "Callback within 15 minutes · 8am–8pm",
@@ -3112,7 +3114,8 @@
     "crosslink_gutachter": "Find an expert →",
     "cta_h2": "A specific question about your case?",
     "cta_p": "Free initial consultation — no obligation.",
-    "cta_schaden": "Report your claim — €0 costs"
+    "cta_schaden": "Report your claim — €0 costs",
+    "crosslink_kosten_tabelle": "Cost table (BVSK bands)"
   },
   "kfz_gutachter_wertminderung": {
     "breadcrumb_start": "Kfz expert",
@@ -3530,7 +3533,8 @@
     "crosslinks": [
       "“We’ll send our own appraiser” — decoded",
       "Appraiser costs: entitlement and reimbursement in detail",
-      "Car expert report costs: minor damage threshold and process"
+      "Car expert report costs: minor damage threshold and process",
+      "Cost table: BVSK bands & insurer reductions"
     ],
     "cta_band": "No-fault accident? The expert report costs you 0 €."
   },
