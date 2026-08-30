@@ -5473,7 +5473,9 @@
     "vorRepReparatur": "Reparatur tatsächlich durchgeführt — Werkstattrechnung als Nachweis",
     "vorRepNutzungswille": "Du hattest Nutzungswillen + -möglichkeit (kein Krankenhaus, kein Urlaub)",
     "vorRepKeinZweitwagen": "Kein zumutbarer Zweitwagen verfügbar",
-    "alternativMietwagen": "Alternativ Mietwagen genommen? Sag uns Bescheid — die VS zahlt entweder Mietwagen-Kosten ({satz}/Tag laut Klasse) <b>oder</b> Nutzungsausfall, nicht beides."
+    "alternativMietwagen": "Alternativ Mietwagen genommen? Sag uns Bescheid — die VS zahlt entweder Mietwagen-Kosten ({satz}/Tag laut Klasse) <b>oder</b> Nutzungsausfall, nicht beides.",
+    "werteFehlenNurSatz": "Für {tage} Tage steht dir Nutzungsausfall zu. Den Tagessatz konnten wir aus deinem Gutachten noch nicht auslesen — dein Kundenbetreuer klärt das und meldet sich.",
+    "wasIstNutzungsausfall": "Nutzungsausfall ist Geld dafür, dass du dein Auto in dieser Zeit nicht nutzen konntest."
   },
   "kanzleiPaket": {
     "versendetTitel": "Kanzleipaket versendet",

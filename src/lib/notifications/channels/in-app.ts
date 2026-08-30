@@ -15,6 +15,7 @@
 
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 import { EVENT_MATRIX } from '../channel-matrix'
+import { statusLabel } from '@/lib/status'
 import type { ChannelHandler } from './types'
 import type {
   EmpfaengerRolle,
@@ -55,9 +56,12 @@ function asNumber(v: unknown): number | undefined {
 }
 
 // Liefert (titel, inhalt, kontext_typ, kontext_id) aus EventType + Payload.
+// `rolle` steuert die Formulierung: der Kunde bekommt Klartext statt Slug
+// (siehe fall.status_changed).
 function mapEventToMitteilung(
   eventType: EventType,
   payload: Record<string, unknown>,
+  rolle?: EmpfaengerRolle,
 ): {
   titel: string
   inhalt: string | null
@@ -108,7 +112,28 @@ function mapEventToMitteilung(
       return { titel: 'Sachverständiger zugewiesen', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     case 'fall.status_changed': {
       const newStatus = asString(payload.newStatus)
-      return { titel: 'Fall-Status geändert', inhalt: newStatus ? `Neuer Status: ${newStatus}` : null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+      if (!newStatus) {
+        return { titel: 'Fall-Status geändert', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+      }
+      // Frontend-Audit 30.08. (prod): hier stand der ROHE Slug — der Kunde las
+      // „Neuer Status: filmcheck" und „Neuer Status: begutachtung-laeuft"
+      // (Bindestrich, kein Umlaut), zehnmal untereinander in seiner Fallakte.
+      // PRODUCT.md Prinzip 4: „Die Sprache des Geschädigten, nicht die der Branche."
+      //
+      // Der Kunde bekommt den Klartext als TITEL — die Zeile trägt damit die
+      // Aussage, statt sie hinter „Fall-Status geändert" zu verstecken.
+      // Interne Rollen behalten Titel + Slug-Zeile: dort ist der Code die
+      // präzisere Information.
+      if (rolle === 'kunde') {
+        return {
+          titel: statusLabel('fall-status', newStatus, 'kunde'),
+          inhalt: null,
+          kategorie: 'update',
+          kontext_typ: kontext.typ,
+          kontext_id: kontext.id,
+        }
+      }
+      return { titel: 'Fall-Status geändert', inhalt: `Neuer Status: ${statusLabel('fall-status', newStatus)}`, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     }
     case 'fall.storniert':
       return { titel: 'Fall storniert', inhalt: asString(payload.grund) ?? null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
@@ -267,7 +292,7 @@ export const inAppHandler: ChannelHandler = async (input) => {
   const matrixPrio = EVENT_MATRIX[input.eventType]?.priority
   const prioritaet = PRIO_MAP[matrixPrio ?? 'normal']
 
-  const mapped = mapEventToMitteilung(input.eventType, input.payload)
+  const mapped = mapEventToMitteilung(input.eventType, input.payload, empfaengerRolle)
 
   const result = await createMitteilung({
     empfaenger_id: input.recipientUserId,
