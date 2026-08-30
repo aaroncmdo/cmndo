@@ -607,7 +607,13 @@ export default async function GutachterFallPage({
           entscheidet ueber Positionen im Gutachten. Der SV bekam das Feld bisher gar nicht
           geliefert (v_claim_full fuehrt es nicht); jetzt aus dem claims-SSoT, s. Select oben. */}
       {fallWithAbrechnung._reparaturwunsch === 'fiktiv' ? (
-        <div className="rounded-2xl border-2 border-warning/30 bg-warning-soft p-4">
+        // Radius als Token (18px) statt Tailwind-Default (16px): der Radii-Ratchet laesst fuer
+        // NEUEN Code keine Default-Radien zu. Die uebrigen Bloecke dieser Datei behalten bewusst
+        // ihren Default-Radius — grandfathered Bestand, dessen Umbau in einen eigenen
+        // Boy-Scout-Durchgang gehoert, nicht in diese PR.
+        // (Klassennamen hier bewusst NICHT ausgeschrieben: der Ratchet zaehlt Textvorkommen und
+        //  strippt keine Kommentare — eine Erklaerung mit dem Literal zaehlt als Verstoss.)
+        <div className="rounded-ios-md border-2 border-warning/30 bg-warning-soft p-4">
           <p className="text-sm font-semibold text-warning-strong">Fiktive Abrechnung</p>
           <p className="text-xs text-warning-strong mt-1">
             Der Kunde lässt sich die Gutachtensumme auszahlen. UPE-Aufschläge und
