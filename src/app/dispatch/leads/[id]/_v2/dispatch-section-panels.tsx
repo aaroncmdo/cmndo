@@ -34,6 +34,70 @@ function zeugenKontakteAus(lead: Record<string, unknown>): ZeugenKontakt[] {
   return Array.isArray(raw) ? (raw as ZeugenKontakt[]) : []
 }
 
+// Quelle B — Anzeige der unverbindlichen Selbst-Auswertung.
+// tier-Klartext spiegelt resolveTier() aus claimondo-marketing/lib/check/result-model.ts;
+// die Paragraphen stehen dort im Kommentar (voll = §249, quote = §254).
+const TIER_LABEL: Record<string, string> = {
+  voll: 'Vollanspruch gegen die Gegenseite (§ 249)',
+  quote: 'Anteiliger Anspruch — Teilschuld angegeben (§ 254)',
+  pruefen: 'Schuldfrage offen — Prüfung nötig',
+  kasko: 'Eigenverschulden — Kasko-Weg',
+}
+
+const ANTWORT_LABEL: Record<string, Record<string, string>> = {
+  schuld: {
+    gegner: 'Schuld: der Unfallgegner',
+    teils: 'Schuld: teils ich, teils der Gegner',
+    unklar: 'Schuld: noch unklar',
+    selbst: 'Schuld: ich selbst',
+  },
+  unfall_her: {
+    unter_woche: 'Unfall: vor weniger als 1 Woche',
+    bis_monat: 'Unfall: vor 1–4 Wochen',
+    ueber_monat: 'Unfall: vor über einem Monat',
+  },
+  gutachten: {
+    nein: 'Gutachten: noch keins',
+    versicherung: 'Gutachten: die gegnerische Versicherung will eins schicken',
+    ja: 'Gutachten: liegt vor',
+  },
+}
+
+type AuswertungAnzeige = { tier: string; antwortZeilen: string[]; erstelltAm: string | null }
+
+/** Liest leads.auswertung_unverbindlich defensiv — das Feld ist jsonb und kann alles enthalten. */
+function auswertungAus(lead: Record<string, unknown>): AuswertungAnzeige | null {
+  const roh = lead.auswertung_unverbindlich
+  if (!roh || typeof roh !== 'object' || Array.isArray(roh)) return null
+  const obj = roh as Record<string, unknown>
+  const tier = typeof obj.tier === 'string' ? obj.tier : null
+  if (!tier) return null
+
+  const antworten =
+    obj.antworten && typeof obj.antworten === 'object' && !Array.isArray(obj.antworten)
+      ? (obj.antworten as Record<string, unknown>)
+      : {}
+  const antwortZeilen = Object.entries(antworten)
+    .map(([feld, wert]) => (typeof wert === 'string' ? ANTWORT_LABEL[feld]?.[wert] : undefined))
+    .filter((z): z is string => Boolean(z))
+
+  // timeZone explizit: ohne sie rendert Server (UTC) und Client (lokal) verschieden
+  // -> Hydration-Mismatch (React #418).
+  let erstelltAm: string | null = null
+  if (typeof obj.erstellt_am === 'string') {
+    const d = new Date(obj.erstellt_am)
+    if (!Number.isNaN(d.getTime())) {
+      erstelltAm = d.toLocaleDateString('de-DE', {
+        timeZone: 'Europe/Berlin',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    }
+  }
+  return { tier, antwortZeilen, erstelltAm }
+}
+
 // Record<DispatchSectionPanelKey, …> erzwingt: Map-Keys == Liste im keys-Modul.
 const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) => ReactNode[]> = {
   // Unfallhergang: KI-Unfallskizze + (bedingt) Zeugen-Kontakte.
@@ -66,6 +130,40 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
           leadId={ctx.leadId}
           initialAngefragtAm={(ctx.lead.gegner_versicherung_anfrage_datum as string | null) ?? null}
         />,
+      )
+    }
+    // Quelle B: die unverbindliche Selbst-Auswertung aus der Anspruchsprüfung.
+    // Read-only wie das Werkstatt-KVA-Panel — was hier steht, sind drei Klicks des
+    // Kunden, kein Gutachten. Der Hinweis MUSS mitlaufen (Auftrag: "in jeder Ansicht,
+    // die den Wert zeigt, muss erkennbar bleiben, dass er unverbindlich ist").
+    // Bewusst OHNE Eurobetrag: die im Funnel gezeigten Spannen sind statisch.
+    // Conditional-render: ohne Auswertung erscheint gar nichts.
+    const auswertung = auswertungAus(ctx.lead)
+    if (auswertung) {
+      panels.push(
+        <SectionCard
+          key="auswertung-unverbindlich"
+          title="Selbst-Einschätzung des Kunden (unverbindlich)"
+          subtitle="Aus der Anspruchsprüfung — drei angeklickte Antworten, kein Gutachten und keine Zusage"
+        >
+          <p className="text-body font-semibold text-claimondo-navy">
+            {TIER_LABEL[auswertung.tier] ?? auswertung.tier}
+          </p>
+          {auswertung.antwortZeilen.length > 0 ? (
+            <ul className="mt-2 space-y-1">
+              {auswertung.antwortZeilen.map((z) => (
+                <li key={z} className="text-body-sm text-claimondo-shield">
+                  {z}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {auswertung.erstelltAm ? (
+            <p className="text-caption text-claimondo-ondo/70 mt-2">
+              Angegeben am {auswertung.erstelltAm} — eine Einschätzung von damals, nicht von heute
+            </p>
+          ) : null}
+        </SectionCard>,
       )
     }
     return panels
