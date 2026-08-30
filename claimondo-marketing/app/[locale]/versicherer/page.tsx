@@ -4,6 +4,7 @@ import { ShieldAlert } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { getVersicherer } from '@/lib/content/claimondo-mdx'
 import { BAFIN_BRANCHENSCHNITT_2024 } from '@/data/versicherer-mapping'
 import { getInitials } from '@/lib/initials'
@@ -146,6 +147,13 @@ export default function Page() {
             })}
           </ul>
         )}
+
+        {/* Termine + buchbare URL. Gemessen am 28.08.: diese Seite trug als EINZIGE der
+            Uebersichtsseiten weder Uhrzeit noch Buchungslink — /wissen, /decoder und
+            /sachverstaendige haben beides ueber genau dieses Band, /versicherer band es
+            nie ein. Der Kontext passt: wer ein Versicherer-Verzeichnis liest, hat einen
+            Schaden und einen Gegner. */}
+        <SpokeCtaBand headline="Gegnerische Versicherung kürzt oder verzögert? Wir regeln Ihren Schaden – kostenfrei nach § 249 BGB." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Versicherer-Hub-Index" whatsappHref={WHATSAPP_HREF} />
