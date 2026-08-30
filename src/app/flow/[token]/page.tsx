@@ -484,9 +484,21 @@ export default async function FlowPage({
   // im Flow/Lead NICHT mehr gefragt (Aaron): Komplettservice = LexDrive immer;
   // convert-lead-to-claim setzt komplett -> 'partnerkanzlei'. Die Kanzlei-Wahl
   // (eigene Kanzlei) lebt nur auf Claim-Ebene (KanzleiWunschModal im Portal).
+  // `reparaturwunsch` (Aaron 30.08.): Die Auszahlungsart soll VOR dem Gutachten erhoben und
+  // danach vom Gutachten bestaetigt oder geaendert werden. Bisher erreichte die Frage den Kunden
+  // NIE — sie ist zwar seit 02.07. in onboarding_felder konfiguriert (toggle-cards mit
+  // reparatur | fiktiv | unentschieden), haengt dort aber am flow_key 'lead-erfassung', also an
+  // der INTERNEN Erfassungsmaske. Dieser Filter war der einzige Grund, warum sie im Kunden-Flow
+  // nicht auftauchte. Gemessen 30.08. auf prod: Kasko/Selbstzahler 100 % mit Auszahlungsart
+  // (dort wird sie abgeleitet), Haftpflicht 42 von 48 OHNE — und genau bei Haftpflicht braucht
+  // sie das Gutachten (UPE-Aufschlaege/Verbringungskosten haengen daran).
+  //
+  // Der SA-Step ist der richtige Ort: Er existiert laut flow_szenario_steps NUR im
+  // Haftpflicht-Szenario und liegt vor der Beauftragung — also vor dem Gutachten. Bei
+  // Kasko/Selbstzahler taucht die Frage damit gar nicht erst auf (dort gibt es kein Gutachten).
   const serviceFelder = allKundeConfig
     .flatMap((p) => p.felder)
-    .filter((f) => f.feld_key === 'service_typ')
+    .filter((f) => f.feld_key === 'service_typ' || f.feld_key === 'reparaturwunsch')
   const serviceWerte: Record<string, unknown> = {}
   for (const f of serviceFelder) {
     const v = leseFeldWert(f.db_target?.spalte)
