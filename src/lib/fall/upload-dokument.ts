@@ -10,7 +10,7 @@
 // Tabellen `fall_dokumente` (Live-Daten + OCR) und `pflichtdokumente`
 // (Katalog-Status pro Fall) nie auseinanderlaufen.
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { uploadFallDokument } from '@/lib/dokumente/upload'
 import { revalidatePath } from 'next/cache'
 
@@ -59,17 +59,24 @@ export async function uploadDokumentToOutbox(
 
   // Falls ein slot angegeben wurde: pflichtdokumente auf 'hochgeladen' setzen.
   if (slotId) {
-    const supabase = await createClient()
+    // Admin-Client: `uploadFallDokument` hat oben bereits geprueft, dass dieser
+    // User in DIESEN Fall schreiben darf — ohne die Berechtigung waere der Upload
+    // gar nicht so weit gekommen. Der Write bleibt zusaetzlich auf
+    // (slotId, fallId) eingegrenzt, kann also keinen fremden Slot treffen.
+    // Ueber den RLS-Client lief er bei Rollen, die `pflichtdokumente__b1sel_au`
+    // nicht kennt (z.B. Kundenbetreuer), auf 0 Zeilen — und wurde unten nur
+    // geloggt, war also still. Gleiche Klasse wie #5736/#5754.
+    const admin = createAdminClient()
 
     // Storage-Pfad der gerade angelegten fall_dokumente-Row lesen.
-    const { data: doc } = await supabase
+    const { data: doc } = await admin
       .from('fall_dokumente')
       .select('storage_path')
       .eq('id', upload.dokumentId)
       .single()
 
     if (doc) {
-      const { error: pflErr } = await supabase
+      const { error: pflErr } = await admin
         .from('pflichtdokumente')
         .update({
           status: 'hochgeladen',
