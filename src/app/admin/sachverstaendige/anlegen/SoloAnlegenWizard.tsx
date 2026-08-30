@@ -361,10 +361,11 @@ export default function SoloAnlegenWizard({ onSuccess, onCancel }: {
                 <Field label="Firmenname" value={data.firmenname} onChange={v => update('firmenname', v)} />
                 <Field label="Rechtsform" value={data.rechtsform} onChange={v => update('rechtsform', v)} placeholder="z.B. GmbH" />
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-claimondo-ondo mb-1.5 block">
+                  <label htmlFor="adr-soloanlegenwizard" className="text-xs text-claimondo-ondo mb-1.5 block">
                     Anschrift * {data.anschrift_lat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
+                    id="adr-soloanlegenwizard"
                     defaultValue={data.anschrift}
                     placeholder="Adresse eingeben (Auswahl optional, wird sonst beim Speichern geocoded)"
                     onSelect={place => setData(prev => ({
