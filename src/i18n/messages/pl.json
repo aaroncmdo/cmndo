@@ -5473,7 +5473,9 @@
     "vorRepReparatur": "Naprawa faktycznie wykonana — faktura warsztatu jako dowód",
     "vorRepNutzungswille": "Mieli Państwo wolę i możliwość korzystania (bez pobytu w szpitalu, bez urlopu)",
     "vorRepKeinZweitwagen": "Brak rozsądnie dostępnego drugiego auta",
-    "alternativMietwagen": "Wzięli Państwo zamiast tego samochód zastępczy? Proszę dać nam znać — ubezpieczyciel płaci albo koszty najmu ({satz}/dzień zależnie od klasy) <b>albo</b> utratę możliwości użytkowania, nie oba."
+    "alternativMietwagen": "Wzięli Państwo zamiast tego samochód zastępczy? Proszę dać nam znać — ubezpieczyciel płaci albo koszty najmu ({satz}/dzień zależnie od klasy) <b>albo</b> utratę możliwości użytkowania, nie oba.",
+    "werteFehlenNurSatz": "Przysługuje Ci odszkodowanie za {tage} dni. Nie udało nam się jeszcze odczytać stawki dziennej z Twojej opinii — Twój opiekun to wyjaśni i się odezwie.",
+    "wasIstNutzungsausfall": "To pieniądze za to, że w tym czasie nie mogłeś korzystać ze swojego samochodu."
   },
   "kanzleiPaket": {
     "versendetTitel": "Pakiet dla kancelarii wysłany",
