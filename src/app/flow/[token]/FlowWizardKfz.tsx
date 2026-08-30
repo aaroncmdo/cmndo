@@ -677,8 +677,24 @@ export default function FlowWizardKfz({
                   {/* AAR-956: Besichtigungsort — vom Makler vorausgefuellt, vom Kunden bestaetig-/aenderbar. */}
                   {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
                     <div>
-                      <label className="block text-xs font-medium text-claimondo-ondo mb-1">{t('step_summary.labels.standort')}</label>
+                      {/* `htmlFor` + `id` verknuepfen Beschriftung und Feld. Ohne das ist das
+                          Feld fuer Hilfstechnik NAMENLOS: ein Screenreader liest es ohne
+                          Beschriftung vor, und ein Tippen auf die Beschriftung fokussiert es
+                          nicht — auf dem Handy der haeufigere Weg. Die Beschriftung stand hier
+                          nur DANEBEN.
+
+                          Dieselbe Luecke steckt in 19 Stellen (Marker
+                          `COORDINATION-adressfelder-ohne-label-verknuepfung`); dies ist die
+                          EINZIGE mit Endkunden-Kontakt — der FlowLink ist der Kundenkanal.
+
+                          Belegt am 30.08. auf prod per Playwright an der Schwester-Stelle
+                          /sv/registrieren, mit Positivkontrolle:
+                            Beschriftung sichtbar : true
+                            Kontrollfeld "PLZ"    : 1   <- Instrument lebt
+                            Adressfeld            : 0   -> nach dem Fix 1 */}
+                      <label htmlFor="flow-standort-adresse" className="block text-xs font-medium text-claimondo-ondo mb-1">{t('step_summary.labels.standort')}</label>
                       <GooglePlaceAutocomplete
+                        id="flow-standort-adresse"
                         types={['address']}
                         defaultValue={standortPrefill}
                         onSelect={(p) => { setEditStandortText(p.adresse); setEditStandortPlace(p) }}
