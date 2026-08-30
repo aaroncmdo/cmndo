@@ -891,36 +891,35 @@ export function FinderWizard({
             <span>Ich willige ein, dass Claimondo mich zur Schadenabwicklung kontaktiert.</span>
           </label>
 
-          {/* Was das kostet — und wer uns bezahlt.
-              Aaron 29.08.2026: „viele kunden hatten angst dass der service etwas kostet".
-              Genau HIER entsteht die Angst: der Kunde gibt gerade Name, Telefon und
-              E-Mail ein und weiss nicht, ob daraus eine Rechnung wird. Im Formular stand
-              dazu bisher nichts (nachgemessen: die einzige Kostenaussage der Datei steht
-              NACH der Buchung im Rueckruf-Text).
-              Zweiter Satz bewusst dabei: „kostenlos" allein weckt Misstrauen — wer nichts
-              zahlt, fragt sich, womit er stattdessen bezahlt. */}
-          <p className="rounded-ios-md bg-claimondo-bg px-3 py-2 text-[0.75rem] leading-relaxed text-claimondo-shield">
-            <strong className="font-semibold text-claimondo-navy">Für Sie kostenlos.</strong>{' '}
-            Bei unverschuldetem Unfall rechnet der Gutachter direkt mit der gegnerischen
-            Versicherung ab (§ 249 BGB) — Sie legen nichts aus und erhalten keine Rechnung.
-            Uns bezahlt der Sachverständige für die Vermittlung, nicht Sie.
-          </p>
-          {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung
-              zu einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert
-              sich selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}
           {/* Kostenhinweis unmittelbar vor dem Absenden — der Moment der groessten
-              Zahlungsangst (Aaron 29.08.: "viele kunden haben angst dass die was
-              zahlen muessen"). Gemessen: "0 €" steht 233x in den Marketing-Texten,
-              eine Begruendung dafuer 7x — und die nur auf der Partner-Seite. Hier
-              steht beides in einem Satz.
+              Zahlungsangst (Aaron 29.08.: „viele kunden hatten angst dass der service
+              etwas kostet"). Der Kunde tippt hier gerade Name, Telefon und E-Mail ein und
+              weiss nicht, ob daraus eine Rechnung wird. Im Formular stand dazu nichts —
+              die einzige Kostenaussage der Datei kam NACH der Buchung im Rueckruf-Text.
+              Gemessen: „0 €" steht 233x in den Marketing-Texten, eine BEGRUENDUNG dafuer
+              7x — und die nur auf der Partner-Seite. Hier steht beides in einem Satz;
+              „kostenlos" allein weckt Misstrauen, weil offen bleibt, womit man
+              stattdessen bezahlt.
+
               Bewusst OHNE Box und ohne Icon: der Embed laeuft auf 100dvh, jeder
-              zusaetzliche Block drueckt den Absende-Button nach unten (bei 1280x720
-              war er schon einmal unklickbar). */}
+              zusaetzliche Block drueckt den Absende-Button nach unten (bei 1280x720 war
+              er schon einmal unklickbar).
+
+              ⚠ 29.08. standen hier voruebergehend ZWEI Kostenhinweise: zwei Sessions
+              haben unabhaengig denselben Befund behoben (PR #5741 mit Box + drei Saetzen,
+              #5744 einzeilig ohne Box). Beide landeten in staging, ohne Konflikt — sie
+              standen ja nebeneinander, nicht uebereinander. Behalten wurde die
+              einzeilige Fassung, weil ihre Layout-Begruendung die staerkere ist. Der
+              Merge hatte ausserdem den Spec-6.3-Kommentar von seinem
+              <TeilnahmeHinweis /> getrennt; er steht wieder dort. */}
           <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/80">
             <span className="font-semibold text-claimondo-navy">Sie zahlen nichts.</span> Die
             Vermittlung zahlen die Sachverständigen, das Gutachten bei unverschuldetem Unfall die
             gegnerische Versicherung (§ 249 BGB).
           </p>
+          {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung
+              zu einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert
+              sich selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}
           <TeilnahmeHinweis />
           {fehler && (
             <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">
