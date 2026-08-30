@@ -58,6 +58,13 @@ for (const s of SEITEN) {
     const submit = page.locator('button[type="submit"]:visible').first()
     if (!(await submit.count())) { zeile.status = 'kein Submit-Button'; ergebnisse.push(zeile); await page.close(); continue }
 
+    // ⚠ ZUERST in den sichtbaren Bereich scrollen. Liegt der Button darunter (Startseite:
+    // y=915 bei 900px Viewport), liefert elementFromPoint fuer Koordinaten ausserhalb des
+    // Viewports NICHTS — und ein leeres Ergebnis liest sich wie "verdeckt". Genau dieser
+    // Falschbefund entstand beim ersten Lauf (29.08.).
+    await submit.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
+
     zeile.treffer = await submit.evaluate((btn) => {
       const r = btn.getBoundingClientRect()
       const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)

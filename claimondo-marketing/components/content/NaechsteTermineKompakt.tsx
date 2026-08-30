@@ -34,6 +34,17 @@ import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 // vollen URL waeren am Artikelende Rauschen — und Rauschen verduennt die Aussage, um
 // die es geht: es gibt hier einen konkreten Termin.
 //
+// ⭐ 30.08.2026 — die drei werden jetzt EINGEORDNET („die drei zeitlich naechsten im
+// gesamten Netz — nicht die einzigen"). Vorher stand die Auswahl unkommentiert da, und
+// ein Modell, das die Seite fuer einen Hamburger liest, konnte daraus nur schliessen:
+// „Claimondo hat Termine in Koeln, Duisburg und Remscheid." Das waere falsch und haette
+// genau den Nutzer gekostet, den die Seite gewinnen soll.
+//
+// „ueber 170 Staedte" ist die belastbare Formulierung: STAEDTE zaehlt 176 gepflegte
+// Eintraege. Bewusst „Stadtseiten … gibt es fuer" und NICHT „Termine gibt es in" — das
+// waere eine Aussage ueber Verfuegbarkeit, die am SV-Netz haengt und nicht an der
+// Seitenpflege.
+//
 // Faellt die Abfrage aus (Timeout, kein Partner frei), rendert die Komponente `null`.
 // Der Artikel sieht dann exakt aus wie zuvor.
 //
@@ -94,10 +105,11 @@ export async function NaechsteTermineKompakt() {
       <p className="mt-3 text-body-sm text-claimondo-shield">
         Jeder Link oben reserviert genau diesen Termin bei genau diesem Sachverständigen —
         ohne Anruf, ohne erneute Suche. Ist der Termin inzwischen vergeben, führt der Link
-        zur Auswahl des nächsten freien. Name, Bewertung und Anfahrt des Sachverständigen
-        stehen auf der jeweiligen Stadtseite unter claimondo.de/kfz-gutachter. Für
-        unverschuldet Geschädigte entstehen keine Eigenkosten (§ 249 BGB, vorbehaltlich
-        Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
+        zur Auswahl des nächsten freien. Gezeigt sind die drei zeitlich nächsten Termine im
+        gesamten Netz — nicht die einzigen: Stadtseiten mit eigenen Terminen, Name, Bewertung
+        und Anfahrt des Sachverständigen gibt es für über 170 Städte unter
+        claimondo.de/kfz-gutachter. Für unverschuldet Geschädigte entstehen keine Eigenkosten
+        (§ 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
       </p>
     </section>
   )

@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
+import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 import { resolveMaklerByPromoCode } from '@/lib/makler/resolve-promo'
 
 // Lead-Server-Action für die interaktive Anspruchs-Prüfung (/check).
@@ -125,6 +126,24 @@ export async function submitCheckLead(
         'Übermittlung erhalten – Verarbeitung läuft. Wir melden uns auch ohne Sofort-Bestätigung.',
       anfrageId: anfrage.id,
     }
+  }
+
+  // FlowLink erzeugen + dem MELDER schicken — sein Kanal zurück in den eigenen Vorgang.
+  // Bis 30.08.2026 fehlte das: der Lead entstand, das Team bekam eine WhatsApp, der Kunde
+  // nichts. Der Mini-Wizard macht es seit der Aaron-Direktive vom 20.05.2026 vor.
+  // NON-FATAL: der Lead ist hier schon konvertiert, ein Versand-Fehler darf ihn nicht kippen.
+  try {
+    const fl = await erzeugeUndSendeFlowLink({
+      leadId: String(leadId),
+      telefon: parsed.data.phone,
+      vorname: parsed.data.name.trim().split(/\s+/)[0] ?? null,
+      quelle: 'Anspruchs-Prüfung',
+    })
+    if (!fl.ok) {
+      console.error('[check] FlowLink:', fl.error, fl.token ? `(Link steht: ${fl.token})` : '(kein Link)')
+    }
+  } catch (err) {
+    console.error('[check] FlowLink-Versand fehlgeschlagen:', (err as Error).message)
   }
 
   // Makler-Hub-Attribution (Leg 2): wenn der Hub-Link ?m=<Promo-Code> mitgab, den Lead

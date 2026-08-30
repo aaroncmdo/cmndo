@@ -6,6 +6,23 @@ import { revalidatePath } from 'next/cache'
 // KFZ-172 Phase 2: Upload-Server-Action fuer Fall-Dokumente.
 // Speichert in Supabase Storage Bucket 'fall-dokumente' und erstellt
 // einen Eintrag in fall_dokumente mit ocr_status='pending'.
+//
+// ⚠ ZUSTAND (gemessen 29.08.2026): Dieser Pfad hat in `fall_dokumente` **0 Zeilen,
+// jemals** — der Upload unten laeuft ueber den RLS-Client, und
+// `20260513220337_aar_storage_buckets_lock` sperrt `fall-dokumente` fuer JEDEN
+// authenticated. Belegt ueber alle Pfadmuster der Tabelle: 174 Zeilen aus anderen
+// (admin-basierten) Pfaden, 0 im hiesigen Muster `<fallId>/<typ>_<ts>.<ext>`.
+//
+// ⛔ DER FIX IST NICHT „Client auf createAdminClient() tauschen". Diese Action
+// prueft NUR `if (!user)` — es gibt **keinen Fall-Bezug-Guard**: `fallId` kommt
+// ungeprueft vom Aufrufer. Heute faengt die RLS das auf (der Upload scheitert
+// ohnehin); mit Admin-Client koennte jeder Eingeloggte mit fremder `fallId` in
+// fremde Akten laden. Erst Guard (`getClaimForRole`/Rollenpruefung), dann Client.
+//
+// Der funktionierende, gegatete Weg fuer Pflichtdokumente ist
+// `uploadPflichtdokument` (kunde/onboarding/actions.ts) — Admin-Client MIT
+// Ownership-Check. Verbliebene Aufrufer hier: DokumentSlot (SV-Gutachten,
+// GutachtenCard) + feldmodus. Details: memory/AUDIT-uploadfalldokument-rls-pfad-null-zeilen.
 
 export async function uploadFallDokument(
   fallId: string,

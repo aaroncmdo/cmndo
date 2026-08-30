@@ -7,29 +7,18 @@
 // QcChecklisteBlock), Pflichtdokumente-Liste mit Upload, Drag&Drop-
 // Sortierung, Anforderungs-Listen und die "Alle Dateien"-Tabelle.
 
-import { useRef, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
   DownloadIcon,
   FileCheckIcon,
   FileTextIcon,
-  Loader2Icon,
   SearchIcon,
-  UploadIcon,
   BellIcon,
   CheckCircle2Icon,
   ClockIcon,
 } from 'lucide-react'
-// Storage-RLS-Rest: Upload laeuft ueber den kanonischen Server-Helper
-// (Storage + fall_dokumente + OCR + pflichtdokumente-Sync in einem Schritt).
-// Der fruehere Browser-Upload signte anschliessend selbst eine URL — auf dem
-// privaten Bucket liefert createSignedUrl im Browser aber `null`, der Upload
-// brach danach still ab. Ausserdem reichte er die URL als String an die
-// Action weiter, die sie in `pflichtdokumente.dokument_url` schrieb; alle
-// anderen Writer legen dort den storage_path ab (upload-dokument.ts:76,
-// zuordnung.ts:107). uploadDokumentToOutbox macht beides richtig.
-import { uploadDokumentToOutbox } from '@/lib/fall/upload-dokument'
 import {
   markDokumentNachgereicht,
   syncPflichtdokumenteForFall,
@@ -177,11 +166,8 @@ export default function DokumenteTab({
   isAdmin,
 }: DokumenteTabProps) {
   const router = useRouter()
-  const [uploading, setUploading] = useState<string | null>(null)
   const [filter, setFilter] = useState('')
   const [matrixSyncPending, startMatrixSyncTransition] = useTransition()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [uploadTarget, setUploadTarget] = useState<{ id: string; typ: string } | null>(null)
   const [nachreichPending, startNachreichTransition] = useTransition()
   const [qcDoc, setQcDoc] = useState<QcDoc | null>(null)
   const [qcOpen, setQcOpen] = useState(false)
@@ -211,28 +197,6 @@ export default function DokumenteTab({
         router.refresh()
       } else toast.error(r.error ?? 'Nachreichen fehlgeschlagen')
     })
-  }
-
-  async function handleFileUpload(file: File, pflichtdokId: string) {
-    setUploading(pflichtdokId)
-    try {
-      const slot = pflichtdokumente.find((d) => d.id === pflichtdokId)
-      const r = await uploadDokumentToOutbox(
-        fallId,
-        pflichtdokId,
-        file,
-        slot?.dokument_typ ?? 'sonstiges',
-        { istPflicht: slot?.pflicht ?? true },
-      )
-      if (!r.ok) {
-        toast.error(r.error)
-        return
-      }
-      toast.success('Dokument hochgeladen')
-      router.refresh()
-    } finally {
-      setUploading(null)
-    }
   }
 
   const pflichtCount = pflichtdokumente.length
@@ -325,31 +289,14 @@ export default function DokumenteTab({
                       {dok.status === 'nachgereicht_angefordert' && (
                         <StatusBadge tone="warning">Nachreichen angefordert</StatusBadge>
                       )}
-                      <input
-                        ref={uploadTarget?.id === dok.id ? fileRef : undefined}
-                        type="file"
-                        accept="image/*,.pdf"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0]
-                          if (f) handleFileUpload(f, dok.id)
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          setUploadTarget({ id: dok.id, typ: dok.dokument_typ })
-                          setTimeout(() => fileRef.current?.click(), 50)
-                        }}
-                        disabled={uploading === dok.id}
-                        className="text-[10px] text-claimondo-ondo hover:text-claimondo-navy font-medium flex items-center gap-1 disabled:opacity-50"
-                      >
-                        {uploading === dok.id ? (
-                          <Loader2Icon className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <UploadIcon className="w-3 h-3" />
-                        )}
-                        Hochladen
-                      </button>
+                      {/* Kein Upload-Button mehr: der lief über
+                          `uploadDokumentToOutbox` → `uploadFallDokument`, das mit
+                          dem RLS-Client in den seit `20260513220337` gesperrten
+                          Bucket `fall-dokumente` schreibt — in der gesamten
+                          Tabelle 0 Zeilen, jemals. Hochgeladen wird direkt
+                          darüber in `PflichtdokumenteSection` (Admin-Client,
+                          Ownership-Check). Diese Liste bleibt Status-Übersicht
+                          + „Nachreichen". */}
                       {dok.status === 'ausstehend' && (
                         <button
                           onClick={() => handleNachreichen(dok.id, label)}
