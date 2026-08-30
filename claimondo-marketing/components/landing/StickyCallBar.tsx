@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Phone, X, Send, Check, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -68,6 +68,51 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
     return () => beobachter.disconnect()
   }, [])
 
+  // Dieselbe Ueberlegung wie beim Footer, nur fuer den ECHTEN CTA: die Leiste darf den
+  // Absende-Button des Lead-Formulars nicht abfangen.
+  //
+  // Gemessen 29.08.2026 auf der Startseite bei 1440x900 (die verbreitetste Laptop-Groesse):
+  // der Button "Jetzt kostenlosen Rückruf erhalten" liegt bei Dokument-Y 882 — bei 900 px
+  // Viewport also knapp unterhalb der Falz. Wer minimal scrollt, um ihn zu sehen, hat ihn
+  // in den unteren ~12 % — und dort trafen ALLE DREI Messpunkte (25/50/75 % der Breite)
+  // "Sofort anrufen" bzw. "Rückruf" statt des Buttons. Beide fuehren zwar zum Rueckruf,
+  // aber das Leiste-Formular startet LEER: Name, Telefon und Ort sind weg.
+  //
+  // ⚠ Warum Kollision statt "CTA sichtbar -> ausblenden": die Leiste ist selbst ein
+  // Conversion-Element. Auf der Startseite steht das Formular im Hero, sie waere also
+  // schon beim Laden verschwunden. Geprueft wird deshalb die TATSAECHLICHE Ueberlappung —
+  // damit weicht sie genau dann, wenn sie im Weg ist, und sonst nie.
+  //
+  // ⭐ Aufgefallen ist das erst, NACHDEM die Vorschlagsliste vom Button wegkam (#5744):
+  // solange die ueber ihm lag, war SIE das oberste Element. Ein Fehler kann einen zweiten
+  // maskieren — nach einem Fix neu messen, nicht nur den Fix bestaetigen.
+  const leisteRef = useRef<HTMLDivElement>(null)
+  const [ctaKollision, setCtaKollision] = useState(false)
+  useEffect(() => {
+    const cta = document.querySelector('[data-tracking^="lead-form"] button[type="submit"]')
+    if (!cta) return
+    let angefordert = false
+    const pruefe = () => {
+      angefordert = false
+      const leiste = leisteRef.current
+      if (!leiste) return
+      const b = cta.getBoundingClientRect()
+      const l = leiste.getBoundingClientRect()
+      setCtaKollision(b.bottom > l.top && b.top < l.bottom && b.right > l.left && b.left < l.right)
+    }
+    const geplant = () => { if (!angefordert) { angefordert = true; requestAnimationFrame(pruefe) } }
+    pruefe()
+    window.addEventListener('scroll', geplant, { passive: true })
+    window.addEventListener('resize', geplant)
+    return () => {
+      window.removeEventListener('scroll', geplant)
+      window.removeEventListener('resize', geplant)
+    }
+  }, [])
+
+  // Die Leiste weicht, wenn der Footer da ist ODER sie den echten CTA verdecken wuerde.
+  const weicht = footerSichtbar || ctaKollision
+
   function submit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
@@ -87,9 +132,10 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
     <>
       {/* Sticky Bar – Floating-Pill mit Glass-Backdrop */}
       <div
-        aria-hidden={footerSichtbar}
+        ref={leisteRef}
+        aria-hidden={weicht}
         className={`fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 transition-opacity duration-200 sm:left-auto sm:right-6 sm:translate-x-0 ${
-          footerSichtbar ? 'pointer-events-none opacity-0' : 'opacity-100'
+          weicht ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
       >
         {/* ZEILE 1 — Anruf als Primaeraktion, daneben WhatsApp.
