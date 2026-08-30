@@ -9,6 +9,7 @@
 import { revalidatePath } from 'next/cache'
 import { ladeLeadErfassungLeadsFelder } from '@/lib/onboarding/lead-erfassung-allowlist'
 import { saveOnboardingFields } from '@/lib/onboarding/save-onboarding-fields'
+import { spiegleQualiAufClaim } from '@/lib/leads/spiegle-quali-auf-claim'
 import { resolveFlowLeadId } from '@/lib/flow/flow-token'
 import type { OnboardingFeld } from '@/components/onboarding/types'
 import type { OnboardingWriteContext } from '@/lib/onboarding/write-context'
@@ -43,6 +44,16 @@ export async function speichereFeststellungFlow(
   }
   const r = await saveOnboardingFields(ctx, felder, values)
   if (!r.ok) return { ok: false, error: r.error }
+
+  // DRITTER Schreibpfad derselben Klasse: auch dieser Save landet im LEAD, waehrend Kunde,
+  // Werkstatt und SV den CLAIM lesen. Die Allowlist dieser Action kommt aus onboarding_felder
+  // und enthaelt u.a. `reparaturwunsch` und `schuldfrage` — sobald ein Config-Feld eines dieser
+  // Quali-Felder im Kunden-Flow erhoben wird, muss der Wert den Claim erreichen.
+  // Non-critical: der Lead-Save oben steht bereits; ein Fehler hier darf ihn nicht zuruecknehmen.
+  const spiegel = await spiegleQualiAufClaim(admin, leadId, values)
+  if (!spiegel.ok) {
+    console.error('[feststellung-flow] Spiegeln auf den Claim fehlgeschlagen:', spiegel.error)
+  }
 
   // Ops-Test 11.08. (RC-8): Der Unfallort wurde als reiner Text gespeichert —
   // unfallort_lat/lng blieben NULL (prod-Beleg: 'Ecke Wiesenstrasse' ohne Koordinaten).
