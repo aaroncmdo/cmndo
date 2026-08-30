@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
+import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 
 // Lead-Server-Action für das Hero-Lead-Formular der Hauptseite (claimondo.de).
 // Spiegelt submitKfzgutachterLead (src/app/kfzgutachter-lp/actions.ts): zuerst
@@ -105,6 +106,25 @@ export async function submitHomeLead(
         'Übermittlung erhalten – Verarbeitung läuft. Wir melden uns auch ohne Sofort-Bestätigung.',
       anfrageId: anfrage.id,
     }
+  }
+
+  // 4b. FlowLink erzeugen + dem MELDER schicken — sein Kanal zurück in den eigenen Vorgang.
+  //     Bis 30.08.2026 fehlte das hier: der Lead entstand, das Team bekam eine WhatsApp, der
+  //     Kunde nichts. Der Mini-Wizard macht es seit der Aaron-Direktive vom 20.05.2026 vor.
+  //     NON-FATAL: der Lead ist an dieser Stelle schon konvertiert, ein Versand-Fehler darf ihn
+  //     nicht kippen.
+  try {
+    const fl = await erzeugeUndSendeFlowLink({
+      leadId: String(leadId),
+      telefon: parsed.data.phone,
+      vorname: parsed.data.name.trim().split(/\s+/)[0] ?? null,
+      quelle: 'Startseite',
+    })
+    if (!fl.ok) {
+      console.error('[home-hero] FlowLink:', fl.error, fl.token ? `(Link steht: ${fl.token})` : '(kein Link)')
+    }
+  } catch (err) {
+    console.error('[home-hero] FlowLink-Versand fehlgeschlagen:', (err as Error).message)
   }
 
   // 5. Push-Notification an alle aktiven Dispatcher + Admins.

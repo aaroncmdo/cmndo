@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
+import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 
 // Lead-Server-Action für die kfzgutachter-Ads-Landeseite.
 // Schreibt zuerst eine anfragen-Zeile (Inbox/Audit), ruft dann atomic
@@ -128,6 +129,24 @@ export async function submitKfzgutachterLead(
         'Übermittlung erhalten – Verarbeitung läuft. Wir melden uns auch ohne Sofort-Bestätigung.',
       anfrageId: anfrage.id,
     }
+  }
+
+  // 4b. FlowLink erzeugen + dem MELDER schicken — sein Kanal zurück in den eigenen Vorgang.
+  //     Bis 30.08.2026 fehlte das: der Lead entstand, das Team bekam eine WhatsApp, der Kunde
+  //     nichts. Der Mini-Wizard macht es seit der Aaron-Direktive vom 20.05.2026 vor.
+  //     NON-FATAL: der Lead ist hier schon konvertiert, ein Versand-Fehler darf ihn nicht kippen.
+  try {
+    const fl = await erzeugeUndSendeFlowLink({
+      leadId: String(leadId),
+      telefon: parsed.data.phone,
+      vorname: parsed.data.name.trim().split(/\s+/)[0] ?? null,
+      quelle: 'Ads-Landing',
+    })
+    if (!fl.ok) {
+      console.error('[kfzgutachter-lp] FlowLink:', fl.error, fl.token ? `(Link steht: ${fl.token})` : '(kein Link)')
+    }
+  } catch (err) {
+    console.error('[kfzgutachter-lp] FlowLink-Versand fehlgeschlagen:', (err as Error).message)
   }
 
   // 5. Push-Notification an alle aktiven Dispatcher + Admins.

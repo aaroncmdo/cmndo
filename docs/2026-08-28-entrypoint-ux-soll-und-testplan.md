@@ -811,6 +811,114 @@ dass er im Sweep durchlief.
 Der Detektor ist damit nachweislich nicht blind — er hat auf dem alten Stand rot gemeldet
 (Positivkontrolle) und auf dem gefixten grün.
 
+#### 🟡 Direkt darunter der nächste: der StickyCallBar fängt denselben Button ab
+
+⭐⭐ **Erst sichtbar geworden, NACHDEM die Vorschlagsliste weg war.** Solange die über dem Button
+lag, war *sie* das oberste Element — der Balken darunter fiel gar nicht auf. **Ein Fehler kann
+einen zweiten maskieren; nach einem Fix neu messen, nicht nur den Fix bestätigen.**
+
+Gemessen am Verhalten (`document.elementFromPoint`, 3 Punkte je Button, mehrere Scroll-Positionen):
+
+| Viewport | prod (ohne Fix) | mit Fix |
+|---|---|---|
+| 1440×900 | **2/8** Positionen blockiert (Leiste, jeweils 3/3 Punkte) | **0/8** |
+| 1280×720 | **5/8** blockiert (3× Leiste 3/3, 2× Bewertungs-Widget 1/3) | **2/8** — nur noch das Widget |
+| 1920×1080 | — | 0/8 |
+
+Der Button „Jetzt kostenlosen Rückruf erhalten" liegt bei Dokument-Y **882**; bei 900 px Viewport
+also knapp unter der Falz. Wer minimal scrollt, um ihn zu sehen, hat ihn in den unteren ~12 % —
+und dort trafen alle drei Messpunkte „Sofort anrufen" bzw. „Rückruf". Beide führen zwar zu einem
+Rückruf, aber das Leisten-Formular startet **leer**: Name, Telefon und Ort sind weg.
+
+**Der Fix** liegt in derselben Logik, die die Leiste schon hatte: sie weicht bereits, wenn der
+Footer sichtbar ist (der Kommentar dort begründet das ausführlich). Die Regel war nur zu eng —
+sie kannte den Footer, nicht den echten CTA in der Seitenmitte. Jetzt prüft sie zusätzlich die
+**tatsächliche Überlappung** mit `[data-tracking^="lead-form"] button[type="submit"]`.
+
+⚠ Bewusst Kollision statt „CTA sichtbar → ausblenden": die Leiste ist selbst ein
+Conversion-Element. Gegentest gefahren — sie ist an **5 von 7** Scroll-Positionen weiter aktiv
+(`opacity=1, pointer-events=auto`) und weicht nur bei `y=0` (dort liegt der Button in ihrer Zone)
+und am Seitenende (die bestehende Footer-Regel). Ein Fix, der ein Conversion-Element abschaltet,
+wäre schlimmer als der Fehler.
+
+**Offen, nicht in diesem Zug gefixt:** das ProvenExpert-Bewertungs-Widget („Sehr Gut · 27
+Kundenbewertungen") verdeckt bei 1280×720 an zwei Scroll-Positionen das **rechte Drittel**
+desselben Buttons. Third-Party-Overlay, Bestand, deutlich kleiner (die linken zwei Drittel bleiben
+klickbar) — aber es ist dieselbe Klasse und gehört auf die Liste.
+
+#### 🔴 Der größere Befund dahinter: drei von vier Einstiegen führen nirgendwohin
+
+Nachgemessen am 30.08., weil `/check` selbst kaum Volumen hat — das **Muster** aber nicht.
+
+**Zwei Familien im Marketing-Build**, keine davon nutzt `createCase` (den Funnel mit
+FlowLink-Garantie; der lebt in `src/`, und der Intake-Ratchet gatet nur dort):
+
+| Einstieg | Weg | FlowLink | Nachricht an den Melder |
+|---|---|---|---|
+| Mini-Wizard `/schaden-melden` | `createLead` + eigener `flow_links`-Insert | ✅ | ✅ WhatsApp mit `/flow/<token>` |
+| **Startseite** (`claimondo-home-hero`) | `anfragen` → RPC `convert_anfrage_zu_lead` | ❌ | ❌ |
+| **Ads-Landing** (`kfzgutachter-ads-lp`) | dieselbe RPC | ❌ | ❌ |
+| **`/check`** (`claimondo-check`) | dieselbe RPC | ❌ | ❌ |
+
+⭐ **Der Standard existiert bereits** — der Mini-Wizard sendet den FlowLink seit der
+Aaron-Direktive vom 20.05.2026 an die Kundennummer. Die anderen drei halten ihn schlicht nicht
+ein. Der Fix wäre also keine neue Politik, sondern eine Angleichung.
+
+**Prod-Test (30.08., Startseite vollständig per UI ausgefüllt und abgesendet):**
+
+```
+anfragen  1 → 2                       ← das Formular SCHREIBT
+quelle    claimondo-home-hero
+Ort       "Köln"  (korrekt gespeichert)
+konvertier_status  success
+FlowLinks 0                           ← kein Weg in die App
+Nachrichten am Lead  1  = 🔔 "Neuer Lead" an die TEAM-Nummer
+```
+
+⭐⭐ **Damit ist eine eigene Hypothese widerlegt:** Aus der leeren Historie (`anfragen` enthielt
+über die *gesamte* Laufzeit **eine einzige** Zeile — einen Test vom 14.07.) hatte sich der
+Verdacht „das Formular ist tot" aufgedrängt. Es ist **nicht** tot. Die Null ist eine Traffic-
+bzw. Conversion-Frage, kein gebrochener Write. Ohne den Absende-Test wäre daraus ein
+Fehlbefund geworden.
+
+⚠ **Nebenbefund aus demselben Lauf:** Der Lead bekam automatisch einen **Termin**
+(`status='reserviert'`, 31.08. 08:30) — und der Kunde erfährt davon **nichts**. Ein reservierter
+Termin ohne Nachricht an den Melder ist schlechter als gar keiner.
+
+#### ✅ Gebaut (Aaron-Go 30.08.): `erzeugeUndSendeFlowLink` für alle vier Call-Sites
+
+`claimondo-marketing/lib/leads/flowlink-fuer-lead.ts` — legt den FlowLink an und schickt ihn
+per `dispatchMagicLink` (WhatsApp bevorzugt, Email-Fallback) an den **Melder**. Verdrahtet in
+Startseite, `/check` und **beide** Ads-Landing-Actions (`app/kfzgutachter-lp` und
+`app/[locale]/kfzgutachter-lp` — die Datei existiert doppelt).
+
+Drei bewusste Unterschiede zum Mini-Wizard-Original:
+
+* **Non-fatal.** Beim Mini-Wizard ist der Versand Teil des Erfolgspfads und bricht die Action
+  ab. Hier existiert der Lead bereits (die RPC hat ihn konvertiert) — ein Versand-Fehler darf
+  ihn nicht kippen. Der Caller loggt und macht weiter (AGENTS.md §Server-Actions).
+* **Idempotent.** Vor dem Insert wird auf einen vorhandenen Link geprüft; ein Doppel-Submit
+  darf keine zwei gültigen Tokens auf denselben Vorgang erzeugen.
+* **Kein `localhost`-Fallback.** Der Mini-Wizard fällt bei fehlender `NEXT_PUBLIC_APP_URL` auf
+  `http://localhost:3000` zurück. Hier geht der Link an einen echten Kunden — fehlt die
+  Basis-URL, wird **nicht** versendet (der Link steht trotzdem für Dispatch).
+
+**Lokal bewiesen** (Dev-Server, Formular vollständig per UI abgesendet):
+
+```
+vorher (prod):       FlowLinks: 0
+mit Fix (lokal):     FlowLinks: 1
+Nachrichten am Lead: 0          ← Versand scheitert (keine BAILEYS-Env lokal)
+konvertier_status:   success    ← der Lead bleibt intakt
+```
+
+⭐ Der lokal fehlende WhatsApp-Zugang hat dabei den **Fehlerpfad** mitgeprüft — genau den, den
+man sonst nie zu Gesicht bekommt: Versand scheitert, Lead und Link stehen trotzdem.
+
+⚠ **OFFEN — Regel 4:** Dass die WhatsApp beim Melder *ankommt*, ist damit **nicht** gezeigt
+(lokal gibt es keine Baileys-Anbindung). Nach dem Deploy: Startseiten-Formular mit einer
+erreichbaren Nummer absenden und die Zustellung am Gerät prüfen.
+
 #### 🟡 Zusätzlich: der Check-Lead landet in keinem Fluss
 
 `submitCheckLead` schreibt `anfragen` → RPC `convert_anfrage_zu_lead` → Lead. **Kein `createCase`,
