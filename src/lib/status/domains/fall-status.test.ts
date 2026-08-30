@@ -34,3 +34,42 @@ describe('FALL_STATUS_DEFS', () => {
     expect(missing).toEqual([])
   })
 })
+
+// Frontend-Audit 30.08.2026 (prod): Die Kunden-Mitteilungen zeigten den ROHEN
+// Slug — „Neuer Status: filmcheck", „Neuer Status: begutachtung-laeuft".
+// Fuer die Badge war die Klasse schon abgesichert (Test oben), fuer die
+// Mitteilung nicht. PRODUCT.md Prinzip 4: Sprache des Geschaedigten.
+describe('Kunden-Labels (labelByRole.kunde)', () => {
+  // Status, die ein Kunde real in seinen Mitteilungen zu sehen bekommt.
+  const KUNDE_SICHTBAR = [
+    'ersterfassung', 'sv-gesucht', 'sv-termin',
+    'begutachtung-laeuft', 'gutachten-eingegangen',
+    'filmcheck', 'qc-pruefung',
+    'kanzlei-uebergeben', 'anschlussschreiben',
+    'regulierung', 'zahlung-eingegangen',
+    'reparatur-laeuft', 'reparatur-erledigt',
+    'abgeschlossen', 'storniert',
+  ]
+
+  it.each(KUNDE_SICHTBAR)('%s hat ein Kunden-Label', (code) => {
+    expect(FALL_STATUS_DEFS[code]?.labelByRole?.kunde, `${code} ohne Kunden-Label`).toBeTruthy()
+  })
+
+  it('kein Kunden-Label sieht aus wie ein Slug', () => {
+    for (const [code, def] of Object.entries(FALL_STATUS_DEFS)) {
+      const l = def.labelByRole?.kunde
+      if (!l) continue
+      // Slugs sind kleingeschrieben und tragen Binde-/Unterstriche.
+      expect(l, `${code}: "${l}" sieht aus wie ein Slug`).not.toMatch(/^[a-z0-9]+([-_][a-z0-9]+)+$/)
+      expect(l[0], `${code}: "${l}" faengt klein an`).toBe(l[0].toUpperCase())
+    }
+  })
+
+  it('Kunden-Label unterscheidet sich von der Mitarbeiter-Sicht, wo es eins gibt', () => {
+    // Sonst waere die Rollen-Variante sinnlos — genau das war der Befund.
+    expect(FALL_STATUS_DEFS['filmcheck'].labelByRole?.kunde).not.toBe(
+      FALL_STATUS_DEFS['filmcheck'].label,
+    )
+    expect(FALL_STATUS_DEFS['filmcheck'].labelByRole?.kunde).toBe('Wir prüfen dein Gutachten')
+  })
+})

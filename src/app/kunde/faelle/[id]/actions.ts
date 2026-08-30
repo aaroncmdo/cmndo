@@ -197,7 +197,11 @@ export async function aendereAuszahlungsartAlsKunde(
   if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
   if (!ownership.claimId) return { success: false, error: 'Fall hat keinen verknüpften Claim' }
 
-  const res = await setzeAuszahlungsart(admin, ownership.claimId, wert)
+  const res = await setzeAuszahlungsart(admin, ownership.claimId, wert, {
+    fallId,
+    userId: user.id,
+    akteur: 'den Kunden',
+  })
   if (!res.ok) return { success: false, error: res.error, gesperrt: res.gesperrt }
 
   revalidatePath(`/kunde/faelle/${ownership.claimId}`)
