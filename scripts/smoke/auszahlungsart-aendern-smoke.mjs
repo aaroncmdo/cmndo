@@ -75,7 +75,16 @@ const login = async (p, konto) => {
   }
   await p.waitForLoadState('networkidle').catch(() => {})
 }
-/** Klickt die Auswahl-Karte mit dem Label und wartet auf die Server-Antwort. */
+/**
+ * Klickt die Auswahl-Karte und wartet auf die Server-Antwort.
+ *
+ * ⚠ Der `name` einer Rollen-Abfrage ist der ACCESSIBLE NAME — und der enthaelt bei diesen
+ * Karten Label UND Hinweiszeile ("Reparatur" + "Das Fahrzeug wird in einer Werkstatt instand
+ * gesetzt."). Ein verankertes `^Reparatur$` matcht deshalb NIE. Genau daran ist der erste Lauf
+ * gescheitert: Schritt 2 meldete "SV kann nicht klicken", obwohl Schritt 3 dieselbe Auswahl
+ * fand — ein Testfehler, der wie ein Produktfehler aussah, plus drei Folgefehler.
+ * Deshalb: Teilstring-Suche ohne Anker.
+ */
 const waehle = async (p, label) => {
   const karte = p.getByRole('button', { name: new RegExp(label, 'i') }).first()
   if (!(await karte.count())) return false
@@ -106,7 +115,8 @@ try {
   await sv.waitForTimeout(4000)
   const sText = await sv.evaluate(() => document.body.innerText)
   pruefe(/Abrechnungsart ändern/i.test(sText), 'die Auswahl ist in der SV-Fallakte sichtbar')
-  const s1 = await waehle(sv, '^Reparatur$')
+  // Der Hinweistext ist eindeutig — "Reparatur" allein kaeme auch in anderen Karten vor.
+  const s1 = await waehle(sv, 'Das Fahrzeug wird in einer Werkstatt')
   pruefe(s1 === true, 'der SV kann die Auswahl anklicken')
   pruefe((await lies()) === 'reparatur', 'der DB-Wert steht auf „reparatur"')
 
