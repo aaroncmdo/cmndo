@@ -21,13 +21,40 @@ import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
+import { KanzleiWahlBanner } from '@/components/kunde/KanzleiWahlBanner'
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 import { RegulierungsVerlaufCard } from './RegulierungsVerlaufCard'
 
 export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
   const t = await getTranslations('kunde.fall')
   const format = await getFormatter()
-  const { fall, status, lifecycle } = vm
+  const { fall, status, lifecycle, kanzlei } = vm
+
+  // Kanzlei-Wahl (Aaron 31.08.): der Ort, den KanzleiPfadCard seit CMM-32 verspricht
+  // („lebt jetzt im lila Top-Banner des ClaimSteppers") und der nie gebaut wurde — der
+  // einzige Consumer des Modals verschwand mit AAR-904 (alter 4-Step-Wizard, -5000 LOC).
+  //
+  // Gefragt wird, wenn ALLE drei zutreffen:
+  //   1. Komplettservice — nur dort ist überhaupt eine Kanzlei vorgesehen
+  //   2. noch keine Antwort ('nicht_gefragt' | 'noch_unentschieden' | null). 'nicht_gefragt'
+  //      MUSS dabei sein: 11 Claims tragen ihn (ein Wechsel des service_typ auf 'komplett' zog
+  //      kanzlei_wunsch nicht nach), und genau die wurden nie gefragt.
+  //   3. noch nicht an die Kanzlei übergeben — danach ist die Wahl gegenstandslos
+  //
+  // ⭐ BEWUSST OHNE Gutachten-Bedingung. Der erste Entwurf verlangte ein fertiges Gutachten
+  // (der Modal-Text sagt „Dein Gutachten ist da"). Nachgemessen auf prod (31.08.):
+  //     Komplettservice 56 → Frage offen 9 → davon mit Gutachten 1 → nach Übergabe-Filter 0.
+  // Das Banner hätte NIEMAND gesehen — derselbe Fehler, den es behebt. Ursache: die meisten
+  // Claims erreichen das Gutachten nie (21 hängen in `ersterfassung`). Aarons ursprünglicher
+  // Ablauf saß denn auch im 4-Step-Wizard, also FRÜH (`lead_konvertierung`), nicht danach.
+  // Ohne die Bedingung erreicht es die 9 offenen Fälle.
+  const kanzleiFrageOffen =
+    lifecycle.serviceTyp === 'komplett' &&
+    (kanzlei.wunsch === null || kanzlei.wunsch === 'nicht_gefragt' || kanzlei.wunsch === 'noch_unentschieden') &&
+    !kanzlei.uebergebenAm
+  // Der Modal-/Banner-Text folgt dem Zustand: liegt das Gutachten vor, ist „Dein Gutachten ist
+  // da" richtig — sonst die neutrale Formulierung. Beide Phasen kennt das Modal seit AAR-841.
+  const kanzleiPhase = status.gutachtenUrl ? 'phase_4_re_frage' : 'lead_konvertierung'
   const fallStatus = (fall.status as string | null) ?? ''
   const svName = vm.team.sv?.name ?? null
   const sv = status.svTermin
@@ -86,6 +113,11 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         <ClaimStepper
           lifecycle={lifecycle}
           terminInfo={terminInfo}
+          topSlot={
+            kanzleiFrageOffen ? (
+              <KanzleiWahlBanner claimId={vm.claimId} phase={kanzleiPhase} />
+            ) : undefined
+          }
           bottomSlot={
             status.verlegung ? (
               <TerminVerlegungBanner
