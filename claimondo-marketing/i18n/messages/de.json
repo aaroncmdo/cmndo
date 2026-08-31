@@ -714,8 +714,8 @@
       "twitter_description": "Passende Werkstatt in der Nähe: nach Marke, Schadensbild und Entfernung gerankt. Anfrage in wenigen Minuten."
     },
     "gutachter_finden": {
-      "title": "Kfz-Gutachter finden – Karte für {anzahl} Städte",
-      "description": "Kfz-Gutachter in {anzahl} Städten auf einer Karte – freie Termine sehen, in unter 48 h vor Ort. Für unverschuldet Geschädigte 0 € (§ 249 BGB).",
+      "title": "Kfz-Gutachter-Termin online buchen – ohne Anruf | Claimondo",
+      "description": "Freien Termin bei einem geprüften Kfz-Sachverständigen direkt online buchen – ohne Anruf, ohne Rückruf. In {anzahl} Städten, vor Ort in unter 48 h. Für unverschuldet Geschädigte 0 € (§ 249 BGB).",
       "og_title": "Kfz-Gutachter finden – Karte für {anzahl} Städte",
       "og_description": "Zertifizierte Kfz-Sachverständige in {anzahl} deutschen Städten, mit freien Terminen. Gutachter in unter 48 h vor Ort, 0 € nach § 249 BGB.",
       "twitter_title": "Kfz-Gutachter finden – Karte mit Kfz-SVs",
@@ -2024,7 +2024,7 @@
     "sr_h1": "Kfz-Werkstatt in Ihrer Nähe finden – interaktive Karte mit geprüften Partner-Werkstätten, gerankt nach Marke und Schadensbild"
   },
   "gutachter_finden": {
-    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden – Karte mit Kfz-Sachverständigen, kostenfrei nach §249 BGB",
+    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden und Termin direkt online buchen – ohne Anruf, kostenfrei nach § 249 BGB",
     "kpis": [
       {
         "wert": "BVSK",
