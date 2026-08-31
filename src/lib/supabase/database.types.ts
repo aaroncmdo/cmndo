@@ -3845,6 +3845,7 @@ export type Database = {
           abtretung_signiert_am: string | null
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
+          auswertung_unverbindlich: Json | null
           auszahlung_zahlungsweg: string | null
           bankdaten_hinterlegt_am: string | null
           bedarf_confidence: number | null
@@ -4053,6 +4054,7 @@ export type Database = {
           abtretung_signiert_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           auszahlung_zahlungsweg?: string | null
           bankdaten_hinterlegt_am?: string | null
           bedarf_confidence?: number | null
@@ -4263,6 +4265,7 @@ export type Database = {
           abtretung_signiert_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           auszahlung_zahlungsweg?: string | null
           bankdaten_hinterlegt_am?: string | null
           bedarf_confidence?: number | null
@@ -12286,6 +12289,7 @@ export type Database = {
           anruf_versuche: number | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
           auslandskennzeichen: boolean | null
+          auswertung_unverbindlich: Json | null
           bedarf_confidence: number | null
           bedarf_ermittelt_am: string | null
           bedarf_kategorien: string[] | null
@@ -12353,6 +12357,7 @@ export type Database = {
           gespraech_dauer_sekunden: number | null
           gespraech_gestartet_am: string | null
           gewerbe_flag: boolean | null
+          gutachten_status: string | null
           gutachter_termin: string | null
           halter_email: string | null
           halter_geburtsdatum: string | null
@@ -12448,10 +12453,12 @@ export type Database = {
           sprache: string | null
           status: Database["public"]["Enums"]["lead_status"]
           telefon: string | null
+          telefon_ziffern: string | null
           timeline: Json | null
           tsn: string | null
           unfall_konstellation: string | null
           unfall_uhrzeit: string | null
+          unfall_zeitfenster: string | null
           unfalldatum: string | null
           unfallhergang: string | null
           unfallort: string | null
@@ -12508,6 +12515,7 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           bedarf_confidence?: number | null
           bedarf_ermittelt_am?: string | null
           bedarf_kategorien?: string[] | null
@@ -12575,6 +12583,7 @@ export type Database = {
           gespraech_dauer_sekunden?: number | null
           gespraech_gestartet_am?: string | null
           gewerbe_flag?: boolean | null
+          gutachten_status?: string | null
           gutachter_termin?: string | null
           halter_email?: string | null
           halter_geburtsdatum?: string | null
@@ -12674,6 +12683,7 @@ export type Database = {
           tsn?: string | null
           unfall_konstellation?: string | null
           unfall_uhrzeit?: string | null
+          unfall_zeitfenster?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
           unfallort?: string | null
@@ -12730,6 +12740,7 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           bedarf_confidence?: number | null
           bedarf_ermittelt_am?: string | null
           bedarf_kategorien?: string[] | null
@@ -12797,6 +12808,7 @@ export type Database = {
           gespraech_dauer_sekunden?: number | null
           gespraech_gestartet_am?: string | null
           gewerbe_flag?: boolean | null
+          gutachten_status?: string | null
           gutachter_termin?: string | null
           halter_email?: string | null
           halter_geburtsdatum?: string | null
@@ -12896,6 +12908,7 @@ export type Database = {
           tsn?: string | null
           unfall_konstellation?: string | null
           unfall_uhrzeit?: string | null
+          unfall_zeitfenster?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
           unfallort?: string | null
@@ -17328,6 +17341,7 @@ export type Database = {
           sprache: string | null
           sv_paket: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon: string | null
+          telefon_ziffern: string | null
           titel: string | null
           twilio_nummer_provisioned_am: string | null
           twilio_phone_sid: string | null
