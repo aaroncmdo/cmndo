@@ -1,6 +1,6 @@
 # Kunde-Portal — Architektur-Walkthrough
 
-End-User-App für Geschädigte. URL: `/kunde/**`. Test-Login: `test-kunde@claimondo.de` / `Test1234!`.
+End-User-App für Geschädigte. URL: `/kunde/**`. Test-Login: `test-kunde@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`.
 
 ## Layout
 

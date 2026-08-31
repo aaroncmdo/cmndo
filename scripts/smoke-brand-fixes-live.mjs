@@ -13,7 +13,7 @@ import { join } from 'path'
 const BASE = 'http://localhost:3007'
 const OUT = 'docs/14.05.2026/design-audit/screenshots-brand-fixes-live'
 const EMAIL = 'aaron.sprafke@claimondo.de'
-const PW = 'Test1234!'
+const PW = (process.env.TEST_PASSWORT ?? '')
 const LOGO_PATH = 'tests/fixtures/test-logo.png'
 
 if (existsSync(OUT)) rmSync(OUT, { recursive: true, force: true })

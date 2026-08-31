@@ -22,7 +22,7 @@ import {
 // TEST_SV_PASSWORD muss man nicht mehr setzen — der Default in _golden-path-lib.ts (ROLES)
 // traegt jetzt den gemessenen Wert. Frueher stand hier 'Claimondo-SV-Smoke-2026';
 // nachgemessen am 20.08. per echtem Login: dieses Passwort wird abgelehnt, test-sv@ traegt
-// `Claimondo2026!`.
+// `<PASSWORT: GitHub-Secret>`.
 test.describe.configure({ mode: 'serial' })
 test.skip(!process.env.RUN_GOLDEN_PATH_DEEP, 'set RUN_GOLDEN_PATH_DEEP=1 (läuft echt gegen Prod)')
 

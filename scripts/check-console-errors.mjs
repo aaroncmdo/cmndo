@@ -14,7 +14,7 @@ import { chromium } from 'playwright'
 const BASE_URL = (process.argv.find((a) => a.startsWith('--base='))?.split('=')[1])
   ?? process.env.SCREENSHOT_BASE_URL
   ?? 'https://app.claimondo.de'
-const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? ''
 const WAIT_MS = parseInt(process.argv.find((a) => a.startsWith('--wait='))?.split('=')[1] ?? '6000', 10)
 
 const TEST_USERS = {

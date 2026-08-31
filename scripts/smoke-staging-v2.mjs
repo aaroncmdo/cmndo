@@ -39,7 +39,7 @@ ladeEnv()
 // --- Konfiguration ----------------------------------------------------------
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASS
-const TEST_PASS = 'Test1234!'
+const TEST_PASS = (process.env.TEST_PASSWORT ?? '')
 
 if (!BASIC_USER || !BASIC_PASS) {
   console.error('FEHLER: STAGING_BASIC_AUTH_USER + STAGING_BASIC_AUTH_PASS fehlen als ENV-Vars.')

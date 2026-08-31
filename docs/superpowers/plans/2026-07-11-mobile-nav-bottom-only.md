@@ -440,7 +440,7 @@ Run: `npx tsc --noEmit` → 0 errors. `npm run check:token-audit -- --ratchet` �
 
 - [ ] **Step 6: Playwright mobile smoke (admin + kanzlei)**
 
-Reuse the harness shape from `docs/superpowers/…` mobile tests: 390×844 context, login `smoke-admin@claimondo.test` / `Sm0ke-Admin-Cl@im!2026` → `/admin`; assert the pill (`[data-mobile-nav="pill"]`) is visible with exactly 5 slots (4 links + Menü button); tap Menü → the sheet shows sections + `footerSlot` (Abmelden); tap a nav link → route changes and sheet closes. Repeat login `test-kanzlei@claimondo.de` / `Claimondo2026!` → `/kanzlei`.
+Reuse the harness shape from `docs/superpowers/…` mobile tests: 390×844 context, login `smoke-admin@claimondo.test` / `Sm0ke-Admin-Cl@im!2026` → `/admin`; assert the pill (`[data-mobile-nav="pill"]`) is visible with exactly 5 slots (4 links + Menü button); tap Menü → the sheet shows sections + `footerSlot` (Abmelden); tap a nav link → route changes and sheet closes. Repeat login `test-kanzlei@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` → `/kanzlei`.
 Expected: all assertions pass. (Run against the local dev server or staging.)
 
 - [ ] **Step 7: Commit**
@@ -523,7 +523,7 @@ Remove the `import { GutachterMobileTabBar }` and add `import { MobileNav } from
 
 - [ ] **Step 4: Typecheck + ratchets + SV mobile smoke**
 
-`npx tsc --noEmit` → 0. Ratchets 0-new. Playwright: login `test-sv@claimondo.de` / `Claimondo2026!` → `/gutachter`; assert pill with Heute/Aufträge/Fälle/Kalender + Menü; Menü sheet shows all SV sections + Abmelden; no top bar present.
+`npx tsc --noEmit` → 0. Ratchets 0-new. Playwright: login `test-sv@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` → `/gutachter`; assert pill with Heute/Aufträge/Fälle/Kalender + Menü; Menü sheet shows all SV sections + Abmelden; no top bar present.
 
 - [ ] **Step 5: Commit**
 

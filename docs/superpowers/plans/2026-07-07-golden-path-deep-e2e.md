@@ -60,14 +60,14 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-// Fixture-Accounts (Passwörter: Test1234! grandfathered, sv per env).
+// Fixture-Accounts (Passwörter: <PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD> grandfathered, sv per env).
 export const ROLES = {
   sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '' },
-  dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!' },
-  kunde: { email: 'test-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Test1234!' },
-  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Test1234!' },
-  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!' },
-  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!' },
+  dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>' },
+  kunde: { email: 'test-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>' },
+  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>' },
+  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>' },
+  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>' },
 } as const
 
 export type RoleKey = keyof typeof ROLES

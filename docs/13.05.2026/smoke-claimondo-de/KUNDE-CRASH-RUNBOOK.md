@@ -149,7 +149,7 @@ curl -sI https://app.claimondo.de/kunde | head -3
 Erwartet `200 OK` oder `302 → /login` (kein 500).
 
 ### Browser-Test
-1. Login `test-kunde@claimondo.de` / `Test1234!` auf Staging
+1. Login `test-kunde@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` auf Staging
 2. `/kunde` muss rendern (Portal-Skelett mindestens)
 3. DevTools-Console: kein `Error: An error occurred in the Server Components render` mehr
 

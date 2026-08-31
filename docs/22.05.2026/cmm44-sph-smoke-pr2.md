@@ -3,7 +3,7 @@
 **Datum:** 2026-05-22
 **PR:** #1537 (gemergt staging, squash `f9381d23`)
 **Script:** `scripts/smoke-cmm44-sph.mjs` · **Screenshots:** `docs/22.05.2026/cmm44-sph-smoke/`
-**Ziel:** app.staging.claimondo.de (Basic-Auth + Test-User je Rolle, `Test1234!`)
+**Ziel:** app.staging.claimondo.de (Basic-Auth + Test-User je Rolle, `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`)
 
 ## Ergebnis: **0 SP-H-Regressionen.** (HARD=3, SOFT=1, OK=10 — alle HARD/SOFT non-SP-H, siehe Triage.)
 

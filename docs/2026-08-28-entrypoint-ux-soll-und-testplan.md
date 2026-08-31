@@ -630,7 +630,7 @@ Sprachwähler. Für jeden von ihnen braucht es ein gezieltes Script wie bei E6.
 
 ### 5.14 Rolle Dispatch — Akte vollständig, zwei Auffälligkeiten
 
-Login `test-dispatch@claimondo.de` (das einzige Konto mit `Test1234!`), Route `/faelle/<claimId>`:
+Login `test-dispatch@claimondo.de` (das einzige Konto mit `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`), Route `/faelle/<claimId>`:
 die Akte rendert komplett (Kundendaten, Fahrzeug & Halter, Unfall, SV-Briefing, Dokumente,
 Kommunikation, Prozess, Verlauf, Timeline).
 

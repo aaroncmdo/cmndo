@@ -29,7 +29,7 @@ import { join } from 'node:path'
 
 const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 const DISPATCH_EMAIL = process.env.SMOKE_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de'
-const DISPATCH_PW = process.env.SMOKE_DISPATCH_PW ?? 'Test1234!'
+const DISPATCH_PW = process.env.SMOKE_DISPATCH_PW ?? ''
 
 // e2e-toplevel-fs: gekapselt — fehlt der Seed, skippt der Test statt die Collection zu sprengen.
 let seed: { leadId?: string; claimId?: string; vehicleId?: string } | null = null

@@ -11,7 +11,7 @@ Die Test-Infra ist fragmentiert & gedriftet:
 - Weitere überlappende Seeds: `scripts/smoke-cj/seed-*.mjs`, `scripts/e2e-seed-fixtures.mjs`, `scripts/seed-staging-test-users.mjs` — kein gepflegter Single-Source-of-Truth.
 - ~50 one-off `scripts/smoke-*.mjs` / `probe-*.mjs` (Graveyard).
 - **test-sv@** ist gesperrt (`sachverstaendige`-Ebene, nicht `profiles.aktiv`) + hat 0 auftraege → SV-Flows (z. B. Stellungnahme-CTA #3729) NICHT live-smokebar.
-- Passwörter teils gedriftet (Test1234! HIBP-blockiert bei Reset; grandfatherte Accounts behalten es).
+- Passwörter teils gedriftet (<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD> HIBP-blockiert bei Reset; grandfatherte Accounts behalten es).
 
 **`test-sv-guard.ts`** ist bewusste Laufzeit-Isolation am Buchungs-Chokepoint: blockt intern/Test-Lead→echter SV UND echter Kunde→Test-SV (Matrix in `entscheideTestSvGuard`). Intern→Test & Echt→Echt laufen durch. ⇒ Ein Test-SV ist nur buchbar, wenn der Lead **interne Identität** (`istInterneIdentitaet(email,name)`, z. B. `@claimondo.de`) trägt. Der Seed-Graph muss das respektieren.
 
@@ -31,7 +31,7 @@ NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npx tsx scripts/test-
 2. **`accounts.ts`** — `ensureAccounts(db)`: stellt die 7 Accounts sicher.
    - profiles-Row je Rolle vorhanden + `aktiv=true` (upsert auf bekannter ID).
    - `sachverstaendige`-Row für test-sv: `ist_testaccount=true`, **entsperrt**, verifiziert, buchbar (die konkreten Sperr-/Verifiziert-Spalten werden im Plan verifiziert).
-   - **Passwort-Strategie (grandfathering):** funktionierende Test1234!-Accounts NICHT anfassen (kein Reset → kein HIBP-Trip → keine Kollision mit den ~laufenden Session-Smokes). Nur test-sv (gedriftet) → ein dokumentierter Stark-Wert via `auth.admin.updateUserById`. Passwörter zentral in `README.md`.
+   - **Passwort-Strategie (grandfathering):** funktionierende <PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>-Accounts NICHT anfassen (kein Reset → kein HIBP-Trip → keine Kollision mit den ~laufenden Session-Smokes). Nur test-sv (gedriftet) → ein dokumentierter Stark-Wert via `auth.admin.updateUserById`. Passwörter zentral in `README.md`.
 
 3. **`seed-graph.ts`** — `ensureSeedGraph(db)`: die kanonischen Stage-Claims (idempotenter upsert), **test-kunde = geschädigter** (`claim_parties.user_id = <test-kunde>`, `rolle='geschaedigter'`) auf allen, Leads mit interner Identität (guard-konform):
    - **C1 @ `ersterfassung`** → **Dispatch** (assign-from-map: offener Lead) · **Kunde** (Fallakte + `pflichtdokumente`-Slots = Upload-CTA) · **Makler** (Attribution).

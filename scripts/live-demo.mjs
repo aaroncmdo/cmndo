@@ -24,7 +24,7 @@ const admin = createClient(envLocal.NEXT_PUBLIC_SUPABASE_URL, envLocal.SUPABASE_
 const STAGING_USER = process.env.STAGING_BASIC_AUTH_USER
 const STAGING_PASS = process.env.STAGING_BASIC_AUTH_PASS
 const SV_EMAIL = process.env.SMOKE_TEST_SV_EMAIL ?? 'smoke-sv@claimondo.test'
-const SV_PASS  = process.env.SMOKE_TEST_SV_PASSWORT ?? 'Test1234!'
+const SV_PASS  = process.env.SMOKE_TEST_SV_PASSWORT ?? ''
 const BASE     = 'https://app.staging.claimondo.de'
 
 const FALL_NUMMER = process.argv[2] ?? 'CLM-20260513-009'
