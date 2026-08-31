@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { sindTier2DocsGeprueft, tier2FreigabeErlaubt, berechneTier2Patch } from '../tier2-docs'
+import {
+  sindTier2DocsGeprueft,
+  tier2FreigabeErlaubt,
+  berechneTier2Patch,
+  berechneVerifiziertPatch,
+} from '../tier2-docs'
 
 // Thenable-Builder-Mock: from().select().eq().eq().in() → { data } (Muster queries.test.ts).
 function mockDb(rows: Array<{ dokument_typ: string }>) {
@@ -63,5 +68,46 @@ describe('tier2FreigabeErlaubt', () => {
   })
   it('false wenn ein Slot ganz fehlt', () => {
     expect(tier2FreigabeErlaubt([{ dokument_typ: 'sv_berufshaftpflicht', status: 'geprueft' }])).toBe(false)
+  })
+})
+
+// Regression 31.08.2026: `verifiziert` ist die ZWEITE Verifizierungs-Achse und die
+// einzige, die der Kunde sieht (gruenes "Verifiziert"-Badge in der Fallakte) bzw. die
+// das Whitelabel-Gate oeffnet. Der Enforcement-Fix vom 08.08. band nur
+// `verifizierung_status` an die Doc-Pruefung; `verifiziert` blieb blind auf true.
+// Auf prod gemessen: 4 SVs mit verifiziert=true + status='ausstehend' + verifiziert_von=NULL.
+describe('berechneVerifiziertPatch', () => {
+  const JETZT_ISO = '2026-08-31T12:00:00.000Z'
+
+  it('Docs geprueft -> setzt verifiziert + Zeitstempel', () => {
+    expect(berechneVerifiziertPatch(true, JETZT_ISO)).toEqual({
+      verifiziert: true,
+      verifiziert_am: JETZT_ISO,
+    })
+  })
+
+  it('Docs NICHT geprueft -> leerer Patch, das Feld wird gar nicht angefasst', () => {
+    expect(berechneVerifiziertPatch(false, JETZT_ISO)).toEqual({})
+  })
+
+  it('setzt NIE auf false — ein erneuter Lauf darf ein echtes Siegel nicht entziehen', () => {
+    const patch = berechneVerifiziertPatch(false, JETZT_ISO)
+    expect('verifiziert' in patch).toBe(false)
+    expect('verifiziert_am' in patch).toBe(false)
+  })
+
+  it('laeuft synchron mit berechneTier2Patch: nie verifiziert=true bei status ausstehend', () => {
+    const jetztMs = Date.UTC(2026, 7, 31)
+    for (const geprueft of [true, false]) {
+      const statusPatch = berechneTier2Patch(geprueft, null, null, jetztMs)
+      const flagPatch = berechneVerifiziertPatch(geprueft, JETZT_ISO)
+      const zusammen = { ...flagPatch, ...statusPatch }
+      if (zusammen.verifizierung_status === 'ausstehend') {
+        expect(zusammen.verifiziert).toBeUndefined()
+      }
+      if (zusammen.verifiziert === true) {
+        expect(zusammen.verifizierung_status).toBe('geprueft')
+      }
+    }
   })
 })

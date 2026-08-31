@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
-import { sindTier2DocsGeprueft, berechneTier2Patch } from '@/lib/sv/tier2-docs'
+import { sindTier2DocsGeprueft, berechneTier2Patch, berechneVerifiziertPatch } from '@/lib/sv/tier2-docs'
 import { haversineKm } from '@/lib/gps/geofence'
 
 type AdminClient = ReturnType<typeof createAdminClient>
@@ -108,8 +108,10 @@ export async function freigebeBasicSvCore(
   // der Reminder-Cron + der FG3-Dispatch-Gate (frist_ueberschritten) greifen. Der
   // fruehere Blind-'geprueft'-Setter war der Bypass, der 9 SVs ohne Docs dispatchbar
   // machte (prod 08.08.). 'geprueft' setzt kuenftig NUR tier2Freigeben nach Doc-Pruefung.
+  // EINMAL bestimmt und fuer BEIDE Verifizierungs-Achsen genutzt (siehe update unten).
+  const tier2Geprueft = await sindTier2DocsGeprueft(db, svId)
   const tier2Patch = berechneTier2Patch(
-    await sindTier2DocsGeprueft(db, svId),
+    tier2Geprueft,
     (sv as { verifizierung_status?: string | null }).verifizierung_status ?? null,
     (sv as { verifizierung_frist_bis?: string | null }).verifizierung_frist_bis ?? null,
     Date.now(),
@@ -122,8 +124,21 @@ export async function freigebeBasicSvCore(
   const { error: svErr } = await db
     .from('sachverstaendige')
     .update({
-      verifiziert: true,
-      verifiziert_am: new Date().toISOString(),
+      // `verifiziert` ist die ZWEITE Verifizierungs-Achse neben `verifizierung_status`
+      // -- und die nutzersichtbare: sie speist das gruene "Verifiziert"-Badge in der
+      // Kundensicht (components/kunde/claim-view/TeamZone.tsx) und das Whitelabel-Gate
+      // (branding/token-theme.ts: `verifiziert && use_custom_branding`).
+      //
+      // Der Tier-2-Fix vom 08.08. (Kommentar oben) hat `verifizierung_status` an die
+      // echte Doc-Pruefung gebunden, `verifiziert` aber blind auf true gelassen. Folge
+      // auf prod (31.08. gemessen): 4 SVs mit `verifiziert=true`, `status='ausstehend'`
+      // und `verifiziert_von=NULL` -- ein Vertrauens-Siegel gegenueber Endkunden, das
+      // niemand geprueft hat; bei 2 davon war zusaetzlich `use_custom_branding=true`,
+      // sie erfuellten das Whitelabel-Gate also vollstaendig.
+      //
+      // Nur SETZEN, nie zuruecksetzen: ein erneuter Lauf dieser Freigabe darf einem
+      // echt verifizierten SV das Flag nicht entziehen.
+      ...berechneVerifiziertPatch(tier2Geprueft, new Date().toISOString()),
       ist_aktiv: true,
       portal_zugang_freigeschaltet: true,
       onboarding_status: 'abgeschlossen',

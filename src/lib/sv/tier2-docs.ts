@@ -26,6 +26,31 @@ export async function sindTier2DocsGeprueft(db: AdminClient, svId: string): Prom
 export const TIER2_FRIST_TAGE = 14
 
 /**
+ * Patch fuer die ZWEITE, nutzersichtbare Verifizierungs-Achse `sachverstaendige.verifiziert`.
+ *
+ * Warum es die zweite Achse ueberhaupt gibt: `verifizierung_status` steuert intern den
+ * Dispatch (FG3-Gate, Reminder-Cron), `verifiziert` steuert das, was der KUNDE sieht —
+ * das gruene "Verifiziert"-Badge in der Fallakte (kunde/claim-view/TeamZone.tsx) und das
+ * Whitelabel-Gate (branding/token-theme.ts: `verifiziert && use_custom_branding`).
+ *
+ * Der Enforcement-Fix vom 08.08. hat NUR `verifizierung_status` an die Doc-Pruefung
+ * gebunden. `verifiziert` blieb blind auf true — auf prod am 31.08. gemessen: 4 SVs mit
+ * `verifiziert=true`, `verifizierung_status='ausstehend'` und `verifiziert_von=NULL`,
+ * zwei davon zusaetzlich mit `use_custom_branding=true`. Ein Vertrauens-Siegel gegenueber
+ * Endkunden, das nie jemand geprueft hat.
+ *
+ * ⚠ Bewusst nur SETZEN, nie zuruecksetzen: die Freigabe laeuft auch erneut (Admin-Knopf
+ * `gibBasicSvFrei`), und sie darf einem echt verifizierten SV das Flag nicht entziehen.
+ * Entzogen wird ausschliesslich ueber den Admin-Pfad (setzeSvVerifiziert / Tier-2-Widerruf).
+ */
+export function berechneVerifiziertPatch(
+  tier2Geprueft: boolean,
+  jetztIso: string,
+): Record<string, unknown> {
+  return tier2Geprueft ? { verifiziert: true, verifiziert_am: jetztIso } : {}
+}
+
+/**
  * Bestimmt, welchen verifizierung_status/-frist-Patch die Freischaltung schreibt.
  * Kern des Enforcements (Spec 2026-08-08): NICHT mehr blind 'geprueft'.
  *  - Docs beide geprueft            → 'geprueft'
