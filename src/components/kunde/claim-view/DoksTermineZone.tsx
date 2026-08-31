@@ -60,9 +60,6 @@ export async function DoksTermineZone({ vm }: { vm: KundeClaimViewModel }) {
       <FallDetailSections
         fall={vm.fall}
         svName={vm.team.sv?.name ?? null}
-        svTelefon={vm.team.sv?.telefon ?? null}
-        svVerifiziert={vm.team.sv?.verifiziert ?? false}
-        kbName={vm.team.kb?.name ?? null}
         dokumente={doks.dokumente}
         aktiverTermin={doks.aktiverTermin}
       />
