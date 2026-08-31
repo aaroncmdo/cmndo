@@ -26,7 +26,7 @@ export async function getNpsByToken(
   const { db, row } = await loadByToken(token)
   if (!row) return { feedback: null, error: 'Link ungültig.' }
   if (row.beantwortet_am) {
-    return { feedback: null, error: 'Vielen Dank — Ihre Bewertung liegt uns bereits vor.' }
+    return { feedback: null, error: 'Vielen Dank — deine Bewertung liegt uns bereits vor.' }
   }
   if (isTokenExpired(row.token_expires_at as string | null)) {
     return { feedback: null, error: 'Dieser Link ist abgelaufen.' }
@@ -53,7 +53,7 @@ export async function submitNpsByToken(
   }
   const { db, row } = await loadByToken(token)
   if (!row) return { ok: false, error: 'Link ungültig.' }
-  if (row.beantwortet_am) return { ok: false, error: 'Ihre Bewertung liegt uns bereits vor.' }
+  if (row.beantwortet_am) return { ok: false, error: 'Deine Bewertung liegt uns bereits vor.' }
   if (isTokenExpired(row.token_expires_at as string | null)) {
     return { ok: false, error: 'Dieser Link ist abgelaufen.' }
   }

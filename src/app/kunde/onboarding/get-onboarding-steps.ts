@@ -30,7 +30,7 @@ export type OnboardingStep = {
 
 const ALL_STEPS: readonly OnboardingStep[] = [
   { id: 'welcome', label: 'Willkommen' },
-  { id: 'fall', label: 'Ihr Fall' },
+  { id: 'fall', label: 'Dein Fall' },
   { id: 'termin', label: 'Termin' },
   { id: 'dokumente', label: 'Dokumente' },
   { id: 'fertig', label: 'Fertig' },
