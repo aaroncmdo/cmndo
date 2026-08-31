@@ -230,7 +230,31 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
         continue
       }
     }
-    const slot = page.locator('button').filter({ hasText: /\d{2}\.\d{2}\.,?\s*\d{1,2}:\d{2}\s*Uhr/ }).first()
+    const slots = page.locator('button').filter({ hasText: /\d{2}\.\d{2}\.,?\s*\d{1,2}:\d{2}\s*Uhr/ })
+    // EP_SV_NAME: gezielt den Slot EINES bestimmten Gutachters treffen statt des erstbesten.
+    // Noetig fuer den Terminpfad-Nachweis — ein interner Bucher darf nur beim Wegwerf-SV
+    // buchen (Test-SV-Guard), und der steht nicht zwingend an erster Stelle.
+    let slot = slots.first()
+    if (process.env.EP_SV_NAME) {
+      const idx = await page.evaluate((name) => {
+        const passt = (b) => /\d{2}\.\d{2}\.,?\s*\d{1,2}:\d{2}\s*Uhr/.test(b.innerText || '')
+        const btns = [...document.querySelectorAll('button')].filter(passt)
+        return btns.findIndex((b) => {
+          let el = b
+          for (let i = 0; i < 6 && el; i++) {
+            el = el.parentElement
+            if (el && (el.innerText || '').includes(name)) return true
+          }
+          return false
+        })
+      }, process.env.EP_SV_NAME)
+      if (idx >= 0) {
+        slot = slots.nth(idx)
+        console.log(`  → Slot von "${process.env.EP_SV_NAME}" gefunden (Index ${idx})`)
+      } else {
+        console.log(`  ⚠ "${process.env.EP_SV_NAME}" NICHT unter den Vorschlaegen — nehme den ersten Slot`)
+      }
+    }
     if (await slot.count()) {
       const t = (await slot.innerText()).trim().replace(/\s+/g, ' ')
       await slot.click()

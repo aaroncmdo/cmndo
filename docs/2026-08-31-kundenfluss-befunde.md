@@ -29,18 +29,39 @@ Korrekturen lief der Weg bis zur Unterschrift durch. Die Befunde unten sind die,
 
 ## 🔴 Blocker — der Kunde bleibt ohne Information
 
-### F1 · Nach der Unterschrift erfährt er auf keinem Kanal etwas
-Er unterschreibt eine **Sicherungsabtretung** (ein Vertrag) — danach:
+### F1 · ⚠ KORRIGIERT (01.09.) — die Bestätigung geht raus, ist aber nicht nachweisbar
 
-| Zeitpunkt | Kanal | Inhalt |
-|---|---|---|
-| 11:20:29 | WhatsApp → **Team** | „🔔 Neuer Lead" |
-| 11:20:30 | WhatsApp → **Kunde** | Login-Link |
-| 11:34:37 | `gruppenchat` (nur **in** der App) | „Fall CLM-2026-06271 wurde erstellt" |
+**Mein ursprünglicher Befund war zu stark und ist zurückgenommen.** Er lautete: „Nach der
+Unterschrift erfährt er auf keinem Kanal etwas." Zwei Messfehler steckten darin:
 
-**Keine WhatsApp, keine E-Mail nach der Beauftragung.** Die einzige Nachricht liegt in
-einem Chat, den er von sich aus aufrufen müsste — und zu dem er keinen Weg hat (→ F2).
-Für die *Meldung* gibt es eine Bestätigung, für den *Vertragsabschluss* nicht.
+1. **Send-Isolation.** Mein Test-Lead war `…@claimondo.de` = intern. `actions.ts:833-842`
+   unterdrückt für interne Identitäten **bewusst** jede Kunden-WhatsApp. Ich habe damit die
+   Isolation gemessen, nicht das Produkt.
+2. **Falscher Filter.** Meine DB-Abfrage suchte `nachrichten.template_key='fall_eroeffnet'`
+   → 0 Treffer. Aber der **Template-Sendeweg schreibt diese Spalte gar nicht**. Ein Fehlen
+   beweist dort nichts.
+
+**Was tatsächlich passiert** (gemessen): `signSAandCreateFall` stellt `fall_eroeffnet`
+(Fallnummer + Portal-Link, 6 Sprachen) in die Notification-Outbox. Dort stehen **8 Zeilen,
+alle `status='sent'`**, davon **2 für echte Kunden** (25.08.). Der Worker setzt `failed` mit
+Grund, wenn nicht gesendet wurde — also lief der Versand.
+
+**Was bleibt — und das ist der echte Mangel:**
+
+> **Der Template-Sendeweg hinterlässt keine Spur.** `sendManualWhatsApp` protokolliert nach
+> `nachrichten`, `sendCommunication` nicht. Ob ein Kunde seine Bestätigung zur
+> **Sicherungsabtretung** bekommen hat, ist damit weder in der Fallakte noch per Query
+> feststellbar — und jede Messung dieser Frage läuft ins Leere. Mir genau so passiert.
+
+→ **behoben** in `send-fall.ts`: nach erfolgreichem Versand wird der **Anlass** protokolliert
+(`template_key` + Zeitpunkt + Empfänger + Kanal), non-fatal. Bewusst **nicht** der Wortlaut —
+der entsteht bei WA-Templates erst in der i18n-Schicht; ein erfundener Text wäre schlechter
+als keiner.
+
+### F1b · Der Versand stand in `catch { /* */ }`
+Der Aufruf verwarf sein Ergebnis (`{ sent, reason }`) **und** verschluckte jede Ausnahme.
+„zugestellt" und „kein Empfänger" waren nicht unterscheidbar. → behoben (beide Stellen der
+Datei, auch `notifyNeuerFall`).
 
 ### F2 · Beide Abschluss-Bildschirme bieten **null** Aktionen
 Es gibt zwei, und keiner führt weiter (beide gemessen, `innerText` + Button-Zählung):
@@ -120,11 +141,18 @@ Gemessen: `select … from werkstaetten where name ~* '(smoke|test|dummy|fixture
 **5 Treffer, alle `status='aktiv'`** = 16 % des produktiven Pools. Ein echter Kunde kann
 eine davon zugewiesen bekommen.
 
-⚠ **Nicht eigenmächtig deaktiviert** — parallel laufende Werkstatt-Smokes anderer Sessions
-hängen an genau diesen Datensätzen (belegt: `throwaway-kunde-repweg-…@claimondo.test`,
-31.08. vormittags). Erst klären, welche Fixture wem gehört; sonst bricht man fremde Läufe.
-Sauberer Zielzustand wäre ein `ist_testaccount`-Äquivalent wie bei `sachverstaendige`,
-das der Matching-Filter respektiert — statt Deaktivieren.
+✅ **Erledigt (01.09.), chirurgisch:** Migration `20260831225956` setzt `status='gesperrt'`
+(der CHECK erlaubt nur `aktiv`/`gesperrt` — `inaktiv` wäre ein stiller Reject gewesen).
+Beide Matching-Pfade filtern `.eq('status','aktiv')`, der Eingriff wirkt also.
+
+Drei Schutzbedingungen, weil fremde Smokes an diesen Daten hängen:
+nur der maschinelle Präfix `^SMOKE ` · **keine Claims daran** · **älter als 6 Stunden**.
+Gemessen: `SMOKE`-aktiv **3 → 1**; die verbliebene war **0,0 h alt** (fremder Lauf, lief
+gerade) und bleibt unangetastet. `Test Werkstatt` trägt **8 echte Claims** — nie anfassen.
+
+⚠ **Die Ursache bleibt offen:** Die Smoke-Läufe räumen ihre Werkstätten nicht zuverlässig
+ab (die Population schwankte während der Messung selbst). Für SVs existiert dafür ein
+Muster — `purgeStaleThrowawayFinderSvs` — für Werkstätten nicht.
 
 ---
 
@@ -154,18 +182,29 @@ gegen 11:30 Uhr). Wer heute nicht kann, hat nur „Termin lieber später vereinb
 
 ## 🔧 Testbarkeit (kein Kundenfehler, aber es blockiert Regel 4)
 
-### F15 · Der Buchungspfad ist auf prod nicht smokebar — die Vorrichtung dafür ist leer
+### F15 · ⚠ TEILWEISE KORRIGIERT (01.09.) — die Tabelle ist nicht „vergessen", sie ist transient
 Ein interner Lead bekommt **echte** SVs angeboten; beim Klick lehnt der Test-SV-Guard ab
-(`writes.ts` → `code:'test_guard'`). Das ist **so gewollt** (der Guard sperrt die
-Konstellation, nicht die Uhrzeit) und trifft echte Kunden **nicht**.
+(`writes.ts` → `code:'test_guard'`). Das ist **so gewollt** und trifft echte Kunden **nicht**.
 
-Dafür existiert eine gebaute Ausnahme — `e2e_test_fixtures` (Mig `20260812152026`): ein SV,
-der fürs Matching echt zählt, für den Guard als Test. **Die Tabelle ist leer** (gemessen).
-Folge: Genau der Schritt, an dem der Termin entsteht, ist end-to-end nie bewiesen.
+**Korrektur meines Befunds:** `e2e_test_fixtures` ist **by design leer zwischen Läufen** —
+`seedThrowawayFinderSv` (`tests/e2e/lib/test-sv.ts`) trägt einen Wegwerf-SV pro Lauf ein,
+`ON DELETE CASCADE` räumt ihn ab. Für den **Finder** ist der Buchungspfad damit seit #5225
+bewiesen (#5229 grün). Ich hätte prüfen müssen, ob ein Seed sie befüllt, bevor ich „leer"
+als Defekt meldete.
 
-⚠ **Nicht eigenmächtig befüllen:** Ein Eintrag macht den betreffenden SV für **echte**
-Kunden unbuchbar (Guard-Matrix: echt → Test = BLOCK). Das ist eine Aaron-Entscheidung,
-kein Nebenbei-Fix.
+**Was offen bleibt — enger gefasst:** Der **Flow-Wizard**-Terminpfad (`/flow/[token]` →
+„Ihr Gutachter-Termin") ist ein *anderer* Matching-Pfad als der Finder und weiterhin nicht
+end-to-end bewiesen.
+
+**Stand nach dem Versuch am 01.09.** (`scripts/smoke/ep-terminpfad-sv.mjs`, neu):
+Wegwerf-SV in Köln angelegt (Domkloster-Koordinaten, Isochronen-Box, Fixture-Eintrag) — er
+passiert `applyDispatchableFilter` nachweislich (alle 7 Bedingungen erfüllt), **erscheint aber
+nicht unter den Terminvorschlägen**. Die Hürde liegt damit in der Geo-/Slot-Schicht, nicht
+in der Guard-/Fixture-Mechanik. `arbeitszeiten` ist es **nicht** (kein einziger aktiver SV
+auf prod hat die Spalte gesetzt, auch die vorschlagenden nicht).
+
+✅ **Rückstandsfrei aufgeräumt** (gemessen: 0 Wegwerf-SVs, 0 Fixture-Einträge, 0 Profile) —
+ein SV mit `ist_testaccount=false` darf keine Minute länger im produktiven Pool stehen.
 
 ---
 
@@ -178,6 +217,9 @@ kein Nebenbei-Fix.
 | **F7** | Umlaute in den DB-Texten (`onboarding_felder`): **8 Datensätze**, `fuer Sie`→`für Sie`, `Kfz-Schaeden`→`Kfz-Schäden`, `kuemmern`, `uebergeben`, `Sachverstaendigen`. Migration `20260831114106`. | **live auf prod bewiesen** — Lauf B las danach „wir regeln alles **für** Sie" (vorher „fuer"). `noch_kaputt: 0` |
 | **F6** | „SA unterzeichnen" → „Beauftragung unterschreiben" (alle 6 Locales; en/pl/tr/ru/ar trugen dasselbe Kürzel) | JSON validiert; Regel-4-Smoke **offen bis Deploy** |
 | **F3b** | Doppelter Satz auf dem Abschluss-Screen (nur `de`) | JSON validiert; Regel-4 offen |
+| **F1** | Kunden-Kommunikation ist jetzt **nachweisbar**: der Template-Weg protokolliert den Anlass nach `nachrichten` (`send-fall.ts`) | Regel-4 offen bis Deploy — dann muss `fall_eroeffnet` dort als Zeile erscheinen |
+| **F1b** | `catch { /* */ }` um den Bestätigungs-Versand **und** um `notifyNeuerFall` durch Ergebnisprüfung + Log ersetzt | — |
+| **F9** | **2 Smoke-Werkstatt-Leichen gesperrt** (Migration `20260831225956`) — darunter genau die, die mir angeboten wurde | gemessen: `SMOKE`-aktiv 3→1; die verbliebene ist **0,0 h alt** = fremder Lauf, bewusst verschont; `Test Werkstatt` (8 Claims) unberührt |
 
 ⚠ **Beim Umlaut-Fix bewusst ausgelassen:** `unfall_zeitfenster` → `"value": "ueber_monat"`.
 Das ist ein **DB-Schlüssel**, kein sichtbarer Text — ihn zu „korrigieren" hätte den
@@ -187,8 +229,8 @@ gespeicherten Wert von der Anzeige entkoppelt. Der sichtbare Teil („> 1 Monat"
 
 | # | Befund | Warum es hier liegen bleibt |
 |---|---|---|
-| **F1** | Keine Bestätigung nach der Beauftragung | ⚠ sendet echte Kunden-Comms → **Aaron-Go nötig** |
-| **F16** | Konto entsteht nur, wenn der Tab offen bleibt | Server-seitig nachziehen oder Nachholpfad — Eingriff in die Abschluss-Action |
+| **F16** | Konto entsteht nur, wenn der Tab offen bleibt | Server-seitig nachziehen oder Nachholpfad — Eingriff in die Abschluss-Action. ⚠ **Hängt mit F1 zusammen:** auch die Willkommens-Benachrichtigung (`kunde.account_bereit`) sitzt in `finalizeKundeSetup` und entfällt mit dem Konto |
+| **F15b** | Flow-Terminpfad end-to-end beweisen | Werkzeug steht (`ep-terminpfad-sv.mjs`), Hürde liegt in der Geo-/Slot-Schicht — der Wegwerf-SV passiert den Dispatchable-Filter, erscheint aber nicht in den Vorschlägen |
 | **F2** | Abschluss ohne Fallnummer / ohne Weg weiter | `onSigned` reicht nur die `fallId` durch; die Fallnummer bräuchte eine erweiterte Action-Rückgabe. ⚠ Nachbar-Session arbeitet am Claim-Stepper — nicht parallel anfassen |
 | **F4** | Abrechnungsfrage zweimal | Fachentscheidung: welche der beiden Stellen entfällt |
 | **F5** | „Komplettservice" vorausgewählt | Produktentscheidung Aaron |
