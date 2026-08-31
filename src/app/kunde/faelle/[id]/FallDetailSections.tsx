@@ -16,7 +16,6 @@ import { FallIdentityHeader } from '@/components/shared/fall-header'
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
 // AAR Fallakte-Kanonisierung: kanonische Status/Notice-Box (statt inline bg-X-soft).
 import { NoticeBox } from '@/components/shared/NoticeBox'
-import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 import { Modal } from '@/components/primitives/Modal'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
@@ -44,13 +43,10 @@ function fmtDateTime(val: string | null): string {
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, svVerifiziert = false, kbName, dokumente, aktiverTermin,
+  fall, svName, dokumente, aktiverTermin,
 }: {
   fall: Record<string, unknown>
   svName: string | null
-  svTelefon: string | null
-  svVerifiziert?: boolean
-  kbName?: string | null
   dokumente: Dokument[]
   aktiverTermin?: AktiverTermin | null
 }) {
@@ -97,28 +93,18 @@ export default function FallDetailSections({
             />
           </div>
 
-          {/* AAR-754: Shared FallKontakteCard — ersetzt die handgerollten
-              "Ihr Ansprechpartner" + "Ihr Gutachter" Sections. Kunde-Rolle
-              nutzt Labels "Ihr Betreuer" / "Ihr Gutachter" automatisch. */}
-          <FallKontakteCard
-            rolle="kunde"
-            kundenbetreuer={
-              kbName
-                ? { vorname: kbName, nachname: null, telefon: null, email: null }
-                : null
-            }
-            sv={
-              svName
-                ? {
-                    vorname: svName,
-                    nachname: null,
-                    telefon: svTelefon,
-                    email: null,
-                    verifiziert: svVerifiziert,
-                  }
-                : null
-            }
-          />
+          {/* Kundenseite-Audit 30.08.: Hier stand eine zweite Kontakt-Karte
+              („ANSPRECHPARTNER — Ihr Betreuer / Ihr Gutachter"). Sie zeigte
+              dieselben Personen wie die `TeamZone` weiter oben auf derselben
+              Seite — beide Zonen laufen im selben `KundeClaimView`
+              (team -> TeamZone, doksTermine -> DoksTermineZone -> hier).
+              Zwei Rebuilds, die sich nicht abgestimmt hatten.
+
+              Entfernt statt der anderen, weil `TeamZone` die Obermenge ist:
+              sie zeigt zusaetzlich Werkstatt und Kanzlei, hat die
+              KB-Telefonnummer (hier war sie fest `null`) und kann das
+              Verifiziert-Badge ebenso (`verifiziert={sv.verifiziert}`).
+              Kein Informationsverlust. */}
 
           {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
               Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
