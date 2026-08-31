@@ -14,7 +14,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const appUrl = process.env.SMOKE_APP_URL ?? 'https://app.claimondo.de'
 const email = process.env.SMOKE_EMAIL ?? 'test-makler@claimondo.de'
-// Kein Default mehr: 'Test1234!' ist auf prod nicht mehr setzbar (GoTrue pwned-Password-Policy,
+// Kein Default mehr: (process.env.TEST_PASSWORT ?? '') ist auf prod nicht mehr setzbar (GoTrue pwned-Password-Policy,
 // 14.07.) und ein funktionierendes prod-Passwort gehoert ohnehin nicht ins Repo.
 const password = process.env.SMOKE_PASSWORD
 if (!password) { console.error('SMOKE_PASSWORD fehlt (Passwort der Test-Fixtures — siehe Memory-Marker coordination-test-makler-prod-auth-500).'); process.exit(1) }

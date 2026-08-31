@@ -21,7 +21,7 @@ Lehren: `docs/` bzw. Memory `reference-playwright-prod-smoke-recipe`.
 # Render-Smoke mehrerer Seiten als test-dispatch (--env-file lädt NEXT_PUBLIC_SUPABASE_*):
 node --env-file=.env.local scripts/prod-smoke/smoke.mjs \
   --app-url https://app.claimondo.de \
-  --email test-dispatch@claimondo.de --password 'Test1234!' \
+  --email test-dispatch@claimondo.de --password '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>' \
   --checks '[{"label":"dashboard","path":"/dispatch/dashboard","markers":["Abmelden","Dashboard"]}]'
 ```
 

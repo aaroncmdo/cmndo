@@ -42,7 +42,7 @@ const projectRef = new URL(URL_SB).hostname.split('.')[0]
 const APP = process.env.PLAYWRIGHT_BASE_URL || 'https://app.claimondo.de'
 const TS = Date.now()
 const EMAIL = `smoke-feld-${TS}@claimondo.test`
-const PW = 'Claimondo2026!'
+const PW = (process.env.TEST_PASSWORT ?? '')
 const berlinToday = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' })
 const IDS_FILE = 'feld-smoke-ids.json'
 

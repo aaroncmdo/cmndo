@@ -20,9 +20,9 @@ const APP_BASE = 'https://app.claimondo.de'
 const MARKETING_BASE = 'https://claimondo.de'
 
 const KUNDE_EMAIL = 'test-kunde@claimondo.de'
-const KUNDE_PASS = 'Test1234!'
+const KUNDE_PASS = (process.env.TEST_PASSWORT ?? '')
 const DISPATCH_EMAIL = 'test-dispatch@claimondo.de'
-const DISPATCH_PASS = 'Test1234!'
+const DISPATCH_PASS = (process.env.TEST_PASSWORT ?? '')
 
 const SHOTS_DIR = path.join(__dirname, 'prod-iter-1')
 const findings = []

@@ -195,14 +195,25 @@ export function StammdatenReadSection({
             {fahrzeugZeile && (
               <p className="text-claimondo-navy font-medium">{fahrzeugZeile}</p>
             )}
-            <p className="text-claimondo-ondo mt-0.5">
-              KZ: <span className="font-mono">{kennzeichen ?? '—'}</span>
-              {fin && (
-                <>
-                  {' · '}FIN: <span className="font-mono text-[10px]">{fin}</span>
-                </>
-              )}
-            </p>
+            {/* Kundenseite-Audit 30.08.: Ohne Kennzeichen stand hier „KZ: —" —
+                ein Label ohne Wert. Genau der Zustand direkt nach der
+                Schadenmeldung, wo die Sektion dann nur aus diesem Strich
+                bestand. Fehlt beides, faellt die Zeile weg. */}
+            {(kennzeichen || fin) && (
+              <p className="text-claimondo-ondo mt-0.5">
+                {kennzeichen && (
+                  <>
+                    KZ: <span className="font-mono">{kennzeichen}</span>
+                  </>
+                )}
+                {fin && (
+                  <>
+                    {kennzeichen ? ' · ' : ''}FIN:{' '}
+                    <span className="font-mono text-[10px]">{fin}</span>
+                  </>
+                )}
+              </p>
+            )}
             {(fahrbereit !== null || leasing || finanzierung) && (
               <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-claimondo-ondo">
                 {fahrbereit === true && (

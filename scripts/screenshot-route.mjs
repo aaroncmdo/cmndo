@@ -25,7 +25,7 @@ import { join } from 'node:path'
 const BASE_URL = (process.argv.find((a) => a.startsWith('--base='))?.split('=')[1])
   ?? process.env.SCREENSHOT_BASE_URL
   ?? 'https://app.claimondo.de'
-const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? ''
 const OUT_DIR = 'tmp/screenshots'
 
 const ALL_VIEWPORTS = {

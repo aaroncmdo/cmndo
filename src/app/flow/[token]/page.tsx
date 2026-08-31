@@ -496,9 +496,24 @@ export default async function FlowPage({
   // Der SA-Step ist der richtige Ort: Er existiert laut flow_szenario_steps NUR im
   // Haftpflicht-Szenario und liegt vor der Beauftragung — also vor dem Gutachten. Bei
   // Kasko/Selbstzahler taucht die Frage damit gar nicht erst auf (dort gibt es kein Gutachten).
+  // ⚠ NUR wenn noch nicht beantwortet: Dasselbe Feld steht in der Phase `schaden` und wird
+  // deshalb AUCH vom Feststellungs-Wizard gerendert — prod-verifiziert 31.08. („Schaden 4/11:
+  // Reparatur oder Auszahlung?"). Läuft dieser Wizard, käme die Frage am SA-Step ein zweites
+  // Mal. Sie hier auszublenden, sobald ein Wert steht, hält beide Wege konfliktfrei.
+  //
+  // Der SA-Step bleibt trotzdem nötig: Der Feststellungs-Wizard läuft NICHT für jeden Lead.
+  // Gemessen 31.08. — von 25 Haftpflicht-Claims ohne Auszahlungsart hatten 21 den Flow
+  // ABGESCHLOSSEN, aber nur 4 einen `unfallhergang` und 2 ein `kennzeichen`: die Feststellung
+  // lief bei ihnen gar nicht, also konnte die Frage dort nie gestellt werden. Der `sa`-Step
+  // hat als einziger keine Bedingung und wird von jedem Haftpflicht-Lead passiert.
+  const auszahlungsartSchonBeantwortet = Boolean(leseFeldWert('reparaturwunsch'))
   const serviceFelder = allKundeConfig
     .flatMap((p) => p.felder)
-    .filter((f) => f.feld_key === 'service_typ' || f.feld_key === 'reparaturwunsch')
+    .filter(
+      (f) =>
+        f.feld_key === 'service_typ' ||
+        (f.feld_key === 'reparaturwunsch' && !auszahlungsartSchonBeantwortet),
+    )
   const serviceWerte: Record<string, unknown> = {}
   for (const f of serviceFelder) {
     const v = leseFeldWert(f.db_target?.spalte)

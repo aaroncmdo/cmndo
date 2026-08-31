@@ -21,7 +21,7 @@ import { basicAuthFuerZiel } from '../lib/ziel'
 
 const APP = process.env.SMOKE_APP_URL ?? 'https://app.claimondo.de'
 const EMAIL = process.env.SMOKE_ENROLL_EMAIL ?? 'smoke-enroll@claimondo.de'
-const PW = process.env.SMOKE_ENROLL_PASSWORD ?? 'Claimondo2026!'
+const PW = process.env.SMOKE_ENROLL_PASSWORD ?? ''
 
 test.use({ serviceWorkers: 'block' })
 test.skip(

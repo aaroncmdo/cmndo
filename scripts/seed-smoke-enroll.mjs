@@ -37,7 +37,7 @@ if (!URL || !SERVICE) {
 }
 
 const EMAIL = 'smoke-enroll@claimondo.de'
-const PW = process.env.SMOKE_ENROLL_PASSWORD ?? 'Claimondo2026!'
+const PW = process.env.SMOKE_ENROLL_PASSWORD ?? ''
 const admin = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } })
 
 let userId

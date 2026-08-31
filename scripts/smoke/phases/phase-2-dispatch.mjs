@@ -112,11 +112,11 @@ export async function runPhase2(dispatchContext, phase1Result) {
   // --- Login als test-dispatch@claimondo.de --------------------------------
   logPhase(2, 'Login als test-dispatch@claimondo.de')
   try {
-    page = await loginAs(dispatchContext, 'test-dispatch@claimondo.de', 'Test1234!', BASE_URL)
+    page = await loginAs(dispatchContext, 'test-dispatch@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
   } catch (err) {
     const msg = `Login als test-dispatch fehlgeschlagen: ${err.message}`
     logHard(2, msg)
-    notes.push(`HARD: ${msg} — Prüfe: test-dispatch@claimondo.de existiert in auth.users mit Passwort Test1234! und force_password_change=false`)
+    notes.push(`HARD: ${msg} — Prüfe: test-dispatch@claimondo.de existiert in auth.users mit Passwort <PASSWORT: GitHub-Secret> und force_password_change=false`)
     return { phase: 2, result: 'hard', notes, auftragId: null }
   }
 

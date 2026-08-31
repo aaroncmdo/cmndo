@@ -14,6 +14,7 @@
 //     für jumpTo() und auto-route-url-Resolution.
 
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { EVENT_MATRIX } from '../channel-matrix'
 import { statusLabel } from '@/lib/status'
 import type { ChannelHandler } from './types'
@@ -293,6 +294,37 @@ export const inAppHandler: ChannelHandler = async (input) => {
   const prioritaet = PRIO_MAP[matrixPrio ?? 'normal']
 
   const mapped = mapEventToMitteilung(input.eventType, input.payload, empfaengerRolle)
+
+  // Kundenseite-Audit 30.08.: 392 von 469 Kunden-Mitteilungen waren
+  // „Fall-Status geändert" — nach Dedup blieben 15, also 96 % Wiederholung. Wer
+  // seine Fallakte öffnete, sah zuerst zehn identische Karten statt seines
+  // Standes; mobil ~2 Bildschirmhöhen, bevor irgendein Inhalt kam.
+  //
+  // Unterdrückt wird nur, wenn die ZULETZT erzeugte Mitteilung im selben Kontext
+  // schon dasselbe sagte. Ein echter Rückschritt A→B→A meldet weiterhin.
+  //
+  // Der Check sitzt hier und nicht in `createMitteilung`, weil nur hier
+  // „nichts geschrieben" ein ERFOLG ist — der Handler unten wertet ein `null`
+  // aus createMitteilung sonst als Fehlschlag (`success: false`).
+  if (mapped.kontext_id) {
+    const admin = createAdminClient()
+    const { data: letzte } = await admin
+      .from('mitteilungen')
+      .select('titel, inhalt')
+      .eq('empfaenger_id', input.recipientUserId)
+      .eq('kontext_id', mapped.kontext_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (
+      letzte &&
+      letzte.titel === mapped.titel &&
+      (letzte.inhalt ?? null) === (mapped.inhalt ?? null)
+    ) {
+      return { success: true, externalId: 'deduped' }
+    }
+  }
 
   const result = await createMitteilung({
     empfaenger_id: input.recipientUserId,

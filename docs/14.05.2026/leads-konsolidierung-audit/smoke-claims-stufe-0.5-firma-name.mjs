@@ -71,7 +71,7 @@ console.log('\n=== ADMIN ===')
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const page = await ctx.newPage()
-  await login(page, 'test-admin@claimondo.de', 'Test1234!')
+  await login(page, 'test-admin@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   for (const [p, l] of [
     ['/admin', '10-admin-dashboard'],
     ['/admin/faelle', '11-admin-faelle'],
@@ -93,7 +93,7 @@ console.log('\n=== KUNDE ===')
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const page = await ctx.newPage()
-  await login(page, 'test-kunde@claimondo.de', 'Test1234!')
+  await login(page, 'test-kunde@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   for (const [p, l] of [
     ['/kunde', '30-kunde-home'],
     ['/kunde/faelle', '31-kunde-faelle'],
@@ -108,7 +108,7 @@ console.log('\n=== SV ===')
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const page = await ctx.newPage()
-  await login(page, 'test-sv@claimondo.de', 'Test1234!')
+  await login(page, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   for (const [p, l] of [
     ['/gutachter', '40-sv-home'],
     ['/gutachter/heute', '41-sv-heute'],

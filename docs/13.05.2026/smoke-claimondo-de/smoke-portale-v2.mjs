@@ -25,11 +25,11 @@ if (!BASIC_USER || !BASIC_PASS) {
 const BASE = `https://app.staging.claimondo.de`
 
 const TEST_USERS = {
-  dispatch: { email: 'test-dispatch@claimondo.de', pass: 'Test1234!' },
-  sv:       { email: 'test-sv@claimondo.de',       pass: 'Test1234!' },
-  admin:    { email: 'test-admin@claimondo.de',     pass: 'Test1234!' },
-  kanzlei:  { email: 'test-kanzlei@claimondo.de',  pass: 'Test1234!' },
-  makler:   { email: 'test-makler@claimondo.de',   pass: 'Test1234!' },
+  dispatch: { email: 'test-dispatch@claimondo.de', pass: (process.env.TEST_PASSWORT ?? '') },
+  sv:       { email: 'test-sv@claimondo.de',       pass: (process.env.TEST_PASSWORT ?? '') },
+  admin:    { email: 'test-admin@claimondo.de',     pass: (process.env.TEST_PASSWORT ?? '') },
+  kanzlei:  { email: 'test-kanzlei@claimondo.de',  pass: (process.env.TEST_PASSWORT ?? '') },
+  makler:   { email: 'test-makler@claimondo.de',   pass: (process.env.TEST_PASSWORT ?? '') },
 }
 
 const SHOTS_DIR = __dirname

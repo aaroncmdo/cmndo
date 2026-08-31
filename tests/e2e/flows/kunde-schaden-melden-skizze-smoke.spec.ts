@@ -28,7 +28,7 @@
 import { test, expect } from '@playwright/test'
 
 const KUNDE_EMAIL = 'smoke-kunde@claimondo.de'
-const KUNDE_PW = 'Claimondo2026!'
+const KUNDE_PW = (process.env.TEST_PASSWORT ?? '')
 
 // Eindeutiger Marker: macht den Lead in der DB auffindbar und beim Aufraeumen
 // unverwechselbar. `SMOKE-D2` folgt der Praefix-Konvention der uebrigen Seeds.

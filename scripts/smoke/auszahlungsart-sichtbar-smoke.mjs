@@ -29,8 +29,8 @@ import { chromium } from 'playwright'
 const BASE = process.env.SMOKE_BASE_URL || 'https://app.claimondo.de'
 const MIT = 'fbc10002-0000-4000-8000-000000000002'   // CLM-2026-00834 — geseedet auf fiktiv
 const OHNE = 'fbc10004-0000-4000-8000-000000000004'  // CLM-2026-00837 — reparaturwunsch NULL
-const SV = { mail: process.env.TEST_SV_EMAIL || 'test-sv@claimondo.de', pw: process.env.TEST_SV_PASSWORD || 'Claimondo2026!' }
-const KUNDE = { mail: process.env.SMOKE_KUNDE_EMAIL || 'smoke-kunde@claimondo.de', pw: process.env.SMOKE_KUNDE_PASS || 'Claimondo2026!' }
+const SV = { mail: process.env.TEST_SV_EMAIL || 'test-sv@claimondo.de', pw: process.env.TEST_SV_PASSWORD || '' }
+const KUNDE = { mail: process.env.SMOKE_KUNDE_EMAIL || 'smoke-kunde@claimondo.de', pw: process.env.SMOKE_KUNDE_PASS || '' }
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY

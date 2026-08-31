@@ -70,11 +70,11 @@ if (!SUPABASE_URL || !ANON_KEY) {
 // ─── Test-Rollen Konfiguration ──────────────────────────────────────────────
 
 const TEST_ROLLEN = [
-  { rolle: 'kunde',        email: 'test-kunde@claimondo.de',    passwort: 'Test1234!' },
-  { rolle: 'sv',           email: 'test-sv@claimondo.de',       passwort: 'Test1234!' },
-  { rolle: 'dispatch',     email: 'test-dispatch@claimondo.de', passwort: 'Test1234!' },
-  { rolle: 'admin',        email: 'test-admin@claimondo.de',    passwort: 'Test1234!' },
-  { rolle: 'kb',           email: 'test-kb@claimondo.de',       passwort: 'Test1234!' },
+  { rolle: 'kunde',        email: 'test-kunde@claimondo.de',    passwort: (process.env.TEST_PASSWORT ?? '') },
+  { rolle: 'sv',           email: 'test-sv@claimondo.de',       passwort: (process.env.TEST_PASSWORT ?? '') },
+  { rolle: 'dispatch',     email: 'test-dispatch@claimondo.de', passwort: (process.env.TEST_PASSWORT ?? '') },
+  { rolle: 'admin',        email: 'test-admin@claimondo.de',    passwort: (process.env.TEST_PASSWORT ?? '') },
+  { rolle: 'kb',           email: 'test-kb@claimondo.de',       passwort: (process.env.TEST_PASSWORT ?? '') },
 ]
 
 // ─── Tabellen die geprüft werden ─────────────────────────────────────────────
@@ -466,7 +466,7 @@ async function hauptProgramm() {
     zeilen.push('## ⛔ Hard-Blocker — Login fehlgeschlagen')
     zeilen.push('')
     zeilen.push('Die folgenden Rollen konnten sich nicht einloggen. RLS-Prüfung für diese Rollen')
-    zeilen.push('ist nicht möglich. Test-User müssen in `auth.users` vorhanden sein mit Passwort `Test1234!`.')
+    zeilen.push('ist nicht möglich. Test-User müssen in `auth.users` vorhanden sein mit Passwort `<PASSWORT: GitHub-Secret>`.')
     zeilen.push('')
     for (const blocker of hardBlocker) {
       zeilen.push(`- **${blocker.rolle}** (\`${blocker.email}\`): ${blocker.fehler}`)

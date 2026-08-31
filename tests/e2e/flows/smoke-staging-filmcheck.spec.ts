@@ -20,12 +20,12 @@ const BASIC_AUTH = {
   password: process.env.STAGING_BASIC_PASS ?? 'ClaimondoSuperuser123789!!',
 }
 // Kanonische Staging-Fixtures (tests/e2e/fixtures.ts + onboarding-pflichtdok.spec.ts).
-// KB hat ein eigenes Passwort (TestKB2026!), der Rest Test1234!.
+// KB hat ein eigenes Passwort (TestKB2026!), der Rest <PASSWORT: GitHub-Secret>.
 const CRED = {
-  admin: { email: process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!' },
+  admin: { email: process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? '' },
   kb: { email: process.env.TEST_KB_EMAIL ?? 'test-kb-anna@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'TestKB2026!' },
-  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Test1234!' },
-  kanzlei: { email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!' },
+  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '' },
+  kanzlei: { email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? '' },
 }
 
 const OUT_DIR = path.join(process.cwd(), 'docs', '01.07.2026', 'filmcheck-smoke')
