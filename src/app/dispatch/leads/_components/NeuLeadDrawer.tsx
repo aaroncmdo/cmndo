@@ -188,8 +188,9 @@ export default function NeuLeadDrawer() {
               Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin
               für Isochrone-Matching gebraucht. */}
           <div>
-            <label className="block text-xs text-claimondo-ondo mb-1.5">Adresse</label>
+            <label htmlFor="adr-neuleaddrawer" className="block text-xs text-claimondo-ondo mb-1.5">Adresse</label>
             <GooglePlaceAutocomplete
+              id="adr-neuleaddrawer"
               defaultValue={data.kunde_adresse}
               placeholder="Straße, PLZ, Stadt"
               onSelect={handlePlaceSelect}

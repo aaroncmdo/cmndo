@@ -478,8 +478,9 @@ export default function SvLeadsClient({
               placeholder="z.B. Muster Gutachten GmbH"
             />
             <div>
-              <label className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
+              <label htmlFor="adr-svleadsclient" className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
               <GooglePlaceAutocomplete
+                id="adr-svleadsclient"
                 placeholder="Adresse eingeben…"
                 onSelect={handlePlaceSelect}
                 defaultValue={adresse.display}
