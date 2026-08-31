@@ -14,7 +14,7 @@ const supabase = createClient(URL, ANON)
 console.log('Login als test-dispatch ...')
 const { data: auth, error: authErr } = await supabase.auth.signInWithPassword({
   email: 'test-dispatch@claimondo.de',
-  password: 'Test1234!',
+  password: (process.env.TEST_PASSWORT ?? ''),
 })
 if (authErr) {
   console.error('Login-Fehler:', authErr)

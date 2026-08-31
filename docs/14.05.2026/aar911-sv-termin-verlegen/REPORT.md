@@ -125,7 +125,7 @@ Macht den Smoke robust gegen frische PM2-Reloads, ohne Server-Code zu ändern.
 Die ursprüngliche Spec hatte hardcoded Default für die **Staging-Basic-Auth-PW** (`ClaimondoSuperuser123789!!`) im Source — der echte Schutz vor öffentlichem Zugriff auf den Staging-Slot. Das ist jetzt entfernt:
 
 - `BASIC_USER` + `BASIC_PASS`: via `requireEnv()`, nur Pflicht wenn Base-URL `.staging.claimondo.de` enthält → wirft sofort bei fehlender ENV
-- `SV_PASS`: Default `Test1234!` bleibt — das ist das öffentlich-dokumentierte Test-User-Passwort (siehe Memory `project_e2e_test_users.md`), kein Secret
+- `SV_PASS`: Default `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` bleibt — das ist das öffentlich-dokumentierte Test-User-Passwort (siehe Memory `project_e2e_test_users.md`), kein Secret
 - `SV_EMAIL`: Default `aaron.sprafke@claimondo.de` — Aarons Test-Konto auf Staging (2FA-frei, Aaron-Freigabe 14.05.2026)
 - `BASE`/`PLAYWRIGHT_BASE_URL`: Default `https://app.staging.claimondo.de` (öffentlich)
 

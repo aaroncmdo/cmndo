@@ -88,6 +88,8 @@ Die BVSK-Honorartabelle ordnet das Sachverständigen-Honorar gestuft nach Schade
 
 → Werte sind Orientierung. Die exakten Honorare ergeben sich aus der jeweils aktuellen BVSK-Tabelle plus Auslagen (Lichtbilder, Fahrtkosten, Schreibgebühr, MwSt).
 
+→ Ausführlich mit allen Stufen und den typischen Kürzungs-Formulierungen der Versicherer: [Kfz-Gutachter Kosten-Tabelle (BVSK)](/decoder/kfz-gutachter-kosten-tabelle).
+
 ---
 
 ## Was die Rechtsprechung dazu sagt
@@ -168,6 +170,7 @@ Werkstatt-Risiko-Logik nach BGH: Schädiger-Risiko, nicht dein Risiko. Du musst 
 - [Wertminderung](/haftpflicht/wertminderung) – Im SV-Gutachten enthalten
 - [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) – SV-Berechnung
 - [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger) – Versicherer-SV-Strategie
+- [Kfz-Gutachter Kosten-Tabelle (BVSK)](/decoder/kfz-gutachter-kosten-tabelle) – Alle Honorar-Stufen + Kürzungs-Formulierungen
 - [Sachverständige & Verbände](/sachverstaendige) – Verbände, Zertifizierungen & öffentliche Bestellung (öbV)
 - [Was kostet ein Kfz-Gutachten? (Überblick)](/kosten-kfz-gutachten) – Kosten-Hub mit BVSK-Korridoren
 - [Kfz-Gutachter Kosten (Detail)](/kfz-gutachter/kosten) – Sicherungsabtretung, 750-€-Bagatellgrenze

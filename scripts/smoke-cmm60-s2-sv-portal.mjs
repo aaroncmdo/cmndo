@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, rmSync } from 'fs'
 const BASE = 'https://app.staging.claimondo.de'
 const OUT = 'docs/16.05.2026/cmm60-s2-sv-smoke'
 const EMAIL = 'test-sv@claimondo.de'
-const PW = 'Test1234!'
+const PW = (process.env.TEST_PASSWORT ?? '')
 const FALL_ID = '33bf8685-6941-426c-b16b-3e29b1255000' // CLM-20260515-014, test-sv zugewiesen
 const BASIC = { username: process.env.STAGING_BASIC_AUTH_USER, password: process.env.STAGING_BASIC_AUTH_PASS }
 

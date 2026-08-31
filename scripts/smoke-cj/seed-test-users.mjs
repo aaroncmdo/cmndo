@@ -24,7 +24,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { autoRefreshToken: false, persistSession: false },
 })
 
-const PASSWORT = 'Test1234!'  // Konvention aus e2e_test_users-Memory
+const PASSWORT = (process.env.TEST_PASSWORT ?? '')  // Konvention aus e2e_test_users-Memory
 
 const TEST_USERS = [
   {

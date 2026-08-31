@@ -24,7 +24,7 @@ const APP = process.env.SMOKE_APP_URL ?? 'https://app.claimondo.de'
 
 const SMOKE = {
   email: process.env.SMOKE_2FA_EMAIL ?? 'smoke-2fa@claimondo.de',
-  pass: process.env.SMOKE_2FA_PASSWORD ?? 'Claimondo2026!',
+  pass: process.env.SMOKE_2FA_PASSWORD ?? '',
   secret: process.env.SMOKE_2FA_TOTP_SECRET,
 }
 

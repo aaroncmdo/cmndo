@@ -121,10 +121,11 @@ export function NeueAnfrageDrawer() {
           </button>
           {standortOffen ? (
             <div className="space-y-1">
-              <label className="block text-xs font-semibold text-claimondo-shield">
+              <label htmlFor="adr-neueanfragedrawer" className="block text-xs font-semibold text-claimondo-shield">
                 Besichtigungsort (wo steht das Fahrzeug?)
               </label>
               <GooglePlaceAutocomplete
+                id="adr-neueanfragedrawer"
                 types={['address']}
                 placeholder="Adresse oder Ort eingeben …"
                 defaultValue={standortText}

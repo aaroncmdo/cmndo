@@ -1,6 +1,6 @@
 # Dispatch-Portal — Architektur-Walkthrough
 
-Frontend für die Lead-Verteilung auf Sachverständige. URL: `/dispatch/**`. Test-Login: `test-dispatch@claimondo.de` / `Test1234!`.
+Frontend für die Lead-Verteilung auf Sachverständige. URL: `/dispatch/**`. Test-Login: `test-dispatch@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`.
 
 `dispatch` ist eine **eigene Rolle** ≠ admin (siehe Memory `project_dispatch_rolle.md`).
 

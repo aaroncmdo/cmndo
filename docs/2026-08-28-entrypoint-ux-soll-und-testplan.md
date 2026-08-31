@@ -630,7 +630,7 @@ Sprachwähler. Für jeden von ihnen braucht es ein gezieltes Script wie bei E6.
 
 ### 5.14 Rolle Dispatch — Akte vollständig, zwei Auffälligkeiten
 
-Login `test-dispatch@claimondo.de` (das einzige Konto mit `Test1234!`), Route `/faelle/<claimId>`:
+Login `test-dispatch@claimondo.de` (das einzige Konto mit `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`), Route `/faelle/<claimId>`:
 die Akte rendert komplett (Kundendaten, Fahrzeug & Halter, Unfall, SV-Briefing, Dokumente,
 Kommunikation, Prozess, Verlauf, Timeline).
 
@@ -841,10 +841,31 @@ Conversion-Element. Gegentest gefahren — sie ist an **5 von 7** Scroll-Positio
 und am Seitenende (die bestehende Footer-Regel). Ein Fix, der ein Conversion-Element abschaltet,
 wäre schlimmer als der Fehler.
 
-**Offen, nicht in diesem Zug gefixt:** das ProvenExpert-Bewertungs-Widget („Sehr Gut · 27
-Kundenbewertungen") verdeckt bei 1280×720 an zwei Scroll-Positionen das **rechte Drittel**
-desselben Buttons. Third-Party-Overlay, Bestand, deutlich kleiner (die linken zwei Drittel bleiben
-klickbar) — aber es ist dieselbe Klasse und gehört auf die Liste.
+**Der vierte Fall — ausgemessen und bewusst nicht gefixt (31.08.):** das ProvenExpert-Widget
+(„Sehr Gut · 27 Kundenbewertungen") verdeckt das **rechte Drittel** desselben Buttons.
+Vollständig vermessen, statt geschätzt:
+
+| Seite | Viewport | blockiert |
+|---|---|---|
+| **Startseite** | **1280×720** | **2 von 8** Positionen, nur der 75-%-Messpunkt |
+| Startseite | 1366×768 | 0/8 |
+| Startseite | 1440×900 | 0/8 |
+| Startseite | 1920×1080 | 0/8 |
+| Stadtseite Köln | 1280×720 | 0/8 |
+
+**Ein einziger Fall**, und dort bleiben zwei Drittel der Buttonbreite klickbar.
+
+⚖️ **Warum nicht gefixt:** Das Siegel trägt in `globals.css` und `ProSealWidget.tsx` mehrere
+ausführlich begründete, gemessene Entscheidungen — `top: 340px` (das Widget kennt keine
+top-Option), `hideOnMobile` (H1 war zu 15–33 % verdeckt), und vor allem `z-index: 39`, gesetzt
+am 23.08. **genau gegen diese Klasse**: darunter die eigene Overlay-Schicht (40), darüber
+normaler Inhalt. Die Lücke ist, dass ein Formular-Button *normaler Inhalt* ist — die Analyse
+damals galt Bottom-Sheets.
+
+Ein Eingriff hieße, im Fremd-DOM eines Trust-Elements eine Kollisionsprüfung nachzurüsten
+(wie beim StickyCallBar). Machbar, aber gegen **einen** Viewport bei **zwei** von acht
+Positionen und einem Drittel der Breite steht das in keinem Verhältnis. Der Befund ist damit
+gemessen, eingeordnet und liegt entscheidungsreif — nicht übersehen.
 
 #### 🔴 Der größere Befund dahinter: drei von vier Einstiegen führen nirgendwohin
 
@@ -915,9 +936,43 @@ konvertier_status:   success    ← der Lead bleibt intakt
 ⭐ Der lokal fehlende WhatsApp-Zugang hat dabei den **Fehlerpfad** mitgeprüft — genau den, den
 man sonst nie zu Gesicht bekommt: Versand scheitert, Lead und Link stehen trotzdem.
 
-⚠ **OFFEN — Regel 4:** Dass die WhatsApp beim Melder *ankommt*, ist damit **nicht** gezeigt
-(lokal gibt es keine Baileys-Anbindung). Nach dem Deploy: Startseiten-Formular mit einer
-erreichbaren Nummer absenden und die Zustellung am Gerät prüfen.
+##### ✅ Regel-4-Nachweis auf prod (30.08., nach Release R435/#5763, Deploy 19:37 UTC)
+
+Startseiten-Formular vollständig per UI ausgefüllt und abgesendet:
+
+```
+anfragen 1 → 2 · quelle=claimondo-home-hero · konvertier_status=success
+FlowLinks am Lead: 1          (vorher 0)
+Nachrichten am Lead: 2        (vorher 1 — nur Team)
+```
+
+Beide WhatsApps **zugestellt**:
+
+```
+19:44:07  an den MELDER:  "Hi EPSWEEP, danke für deine Schadenmeldung bei Claimondo.
+                           Hier dein sicherer Login-Link (gültig 72 Stunden):
+                           https://claimondo.de/flow/68a26f1e…"      enthaelt_flowlink: true
+19:44:08  an das TEAM:    "🔔 Neuer Lead …"                          (wie bisher)
+```
+
+Und der Link **führt tatsächlich in den Vorgang** — nicht nur „sieht richtig aus": `claimondo.de/flow/<token>`
+leitet auf `app.claimondo.de` weiter, Status **200**, und die Seite begrüsst den Melder namentlich
+(„Hallo EPSWEEP! Bitte prüfen und korrigieren Sie Ihre Daten"). Damit ist die Kette geschlossen:
+Formular → Lead → Link per WhatsApp → Wizard.
+
+Testdaten anschliessend restlos entfernt (0 EPSWEEP-Leads, `anfragen` zurück auf 1).
+
+##### ✅ Regel-4-Nachweis StickyCallBar (#5753) auf prod
+
+| Messung | vorher | nachher |
+|---|---|---|
+| 1440×900, 8 Scroll-Positionen | **2/8** blockiert (Leiste, je 3/3 Punkte) | **0/8** |
+| 1280×720, 8 Scroll-Positionen | **5/8** (3× Leiste 3/3, 2× Widget 1/3) | **2/8** — nur noch das Widget |
+| Viewport-Matrix (5 × 3 Seiten) | 1/15 | **0/15** |
+| Gegentest Conversion | — | Leiste an **5/7** Positionen weiter aktiv |
+
+Das ProvenExpert-Widget (rechtes Drittel bei 1280×720) bleibt wie angekündigt unangetastet — es ist
+sichtbar als einzige verbliebene Blockade und damit sauber isoliert.
 
 #### 🟡 Zusätzlich: der Check-Lead landet in keinem Fluss
 

@@ -263,7 +263,7 @@ test('Phase 4: Dispatch übernimmt Lead → SV-Zuweisung (NICHT Hasan Cakmak)', 
   })
 
   // 1. Login als test-dispatch
-  await login(page, 'test-dispatch@claimondo.de', 'Test1234!')
+  await login(page, 'test-dispatch@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   await shot(page, 'p4-dispatch-eingeloggt')
   console.log(`[4] URL nach Login: ${page.url()}`)
 

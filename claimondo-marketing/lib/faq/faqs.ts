@@ -14,8 +14,13 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
     fragen: [
       {
         frage: 'Was kostet Claimondo – wirklich?',
+        // ⚠ DIESE ANTWORT EXISTIERT ZWEIMAL. Sichtbar auf /faq kommt sie aus
+        // i18n/messages/*.json (faq.groups[0].fragen[0]); hier steht die Fassung,
+        // die ins FAQPage-Schema UND nach /llms-full.txt geht. Wer nur eine
+        // Stelle aendert, korrigiert entweder nur die Seite oder nur das, was
+        // Google und die KI-Crawler lesen — am 30.08.2026 genau so passiert.
         antwort:
-          'Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten – alles trägt die gegnerische Haftpflichtversicherung. Das ist gesetzlich verankert (§249 BGB). Claimondo finanziert sich ausschließlich aus diesen Positionen.',
+          'Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten – alles trägt die gegnerische Haftpflichtversicherung, gesetzlich verankert in § 249 BGB. Und uns bezahlen nicht Sie, sondern unsere Partner: Sachverständige zahlen eine Vermittlungsgebühr für Aufträge, die über Claimondo zustande kommen. Von Ihrer Entschädigung geht dadurch nichts ab – wir behalten nichts ein und stellen Ihnen nichts in Rechnung.',
       },
       {
         frage: 'Was verliere ich, wenn ich einfach "Geld nehme" ohne Gutachter?',

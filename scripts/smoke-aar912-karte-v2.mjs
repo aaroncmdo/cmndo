@@ -36,7 +36,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms))
       console.log(`   Attempt ${attempt}`)
       await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
       await page.fill('input[type=email]', 'test-dispatch@claimondo.de')
-      await page.fill('input[type=password]', 'Test1234!')
+      await page.fill('input[type=password]', (process.env.TEST_PASSWORT ?? ''))
       await page.click('button[type=submit]')
       try {
         await page.waitForURL((u) => !String(u).includes('/login'), { timeout: 60000 })

@@ -5473,7 +5473,9 @@
     "vorRepReparatur": "Onarım fiilen yapıldı — kanıt olarak servis faturası",
     "vorRepNutzungswille": "Aracı kullanma isteğiniz ve imkânınız vardı (hastane yok, tatil yok)",
     "vorRepKeinZweitwagen": "Makul ölçüde kullanılabilir bir ikinci araç yok",
-    "alternativMietwagen": "Bunun yerine kiralık araç mı aldınız? Bize bildirin — sigorta ya kiralık araç masraflarını (sınıfa göre günlük {satz}) <b>ya da</b> kullanım kaybını öder, ikisini birden değil."
+    "alternativMietwagen": "Bunun yerine kiralık araç mı aldınız? Bize bildirin — sigorta ya kiralık araç masraflarını (sınıfa göre günlük {satz}) <b>ya da</b> kullanım kaybını öder, ikisini birden değil.",
+    "werteFehlenNurSatz": "{tage} gün için kullanım kaybı tazminatı hakkınız var. Günlük tutarı raporunuzdan henüz okuyamadık — müşteri temsilciniz bunu açıklığa kavuşturup size dönecek.",
+    "wasIstNutzungsausfall": "Kullanım kaybı, bu süre boyunca aracınızı kullanamadığınız için ödenen paradır."
   },
   "kanzleiPaket": {
     "versendetTitel": "Avukatlık paketi gönderildi",

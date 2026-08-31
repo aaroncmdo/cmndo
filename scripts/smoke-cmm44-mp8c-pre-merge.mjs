@@ -46,7 +46,7 @@ loadEnv()
 const BASE = process.env.SMOKE_STAGING_BASE ?? 'https://app.staging.claimondo.de'
 const BA_USER = process.env.STAGING_BASIC_AUTH_USER ?? process.env.SMOKE_BASIC_AUTH_USER ?? 'aaroncmdo'
 const BA_PASS = process.env.STAGING_BASIC_AUTH_PASS ?? process.env.SMOKE_BASIC_AUTH_PASS ?? ''
-const PW = 'Test1234!'
+const PW = (process.env.TEST_PASSWORT ?? '')
 
 if (!BA_PASS) {
   console.error('FEHLER: STAGING_BASIC_AUTH_PASS nicht gesetzt (.env.local).')

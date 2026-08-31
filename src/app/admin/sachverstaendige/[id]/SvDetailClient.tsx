@@ -211,10 +211,11 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
 
         {/* Standort mit Google Places Autocomplete */}
         <div className="border border-claimondo-border rounded-ios-xl p-4 bg-claimondo-bg/50">
-          <label className="flex items-center gap-1.5 text-claimondo-ondo text-xs mb-2">
+          <label htmlFor="adr-svdetailclient" className="flex items-center gap-1.5 text-claimondo-ondo text-xs mb-2">
             <MapPinIcon className="w-3.5 h-3.5" /> Standort (Google Places)
           </label>
           <GooglePlaceAutocomplete
+            id="adr-svdetailclient"
             defaultValue={standort.adresse}
             placeholder="Adresse eingeben..."
             onSelect={handlePlaceSelect}

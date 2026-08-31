@@ -73,7 +73,7 @@ Re-Smoke beider Renderer; (später) Kunden-Flowlink auf `lead-erfassung` umstell
 ## 4. Smoke / Verifikation
 
 - **Smoke-Script:** `scripts/smoke-dispatch-v2-staging.mjs` (untracked; im Worktree). `node scripts/smoke-dispatch-v2-staging.mjs` (Render) bzw. `DO_AUTOSAVE=1 node …` (Autosave-Test).
-- **Dispatcher-Login (staging):** `test-dispatch@claimondo.de` / `Test1234!` (2FA aus). Staging-Basic-Auth: `aaroncmdo` / `ClaimondoSuperuser123789!!`. URL `app.staging.claimondo.de`.
+- **Dispatcher-Login (staging):** `test-dispatch@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (2FA aus). Staging-Basic-Auth: `aaroncmdo` / `ClaimondoSuperuser123789!!`. URL `app.staging.claimondo.de`.
 - **Test-Lead:** `c1964512-23af-4973-bf37-ff62d80599d5` (Aaron Sprafke, nicht-konvertiert).
 - **Verifiziert:** P2a-Render = PASS (Sektionen + Prefill + audience-Filter, 0 Errors). P2b-Autosave = PASS (Notiz getippt → „Gespeichert ✓" → `leads.notiz` persistiert, DB-Round-Trip). Screenshots: `docs/02.06.2026/smoke-dispatch-v2/`.
 - **Kosmetik:** Smoke hinterließ „smoke 23:23:53" in `leads.notiz` des Test-Leads — harmlose Test-Spur.

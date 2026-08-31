@@ -33,6 +33,8 @@ import { getLetzterScanFuerVehicle } from '@/lib/vehicles/vehicle-scan-view'
 import { VehicleScanGalerie } from '@/components/shared/VehicleScanGalerie'
 // P3.3: bezug-aware Termin-Filter (matcht Legacy fall_id UND bezug_typ+bezug_id).
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
+import { gutachtenIstFinal } from '@/lib/claims/auszahlungsart'
+import { AuszahlungsartWahlSv } from './AuszahlungsartWahlSv'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 // AAR-651: Zentrale Fall-Loader-Lib
 
@@ -282,6 +284,14 @@ export default async function GutachterFallPage({
     _reparaturwunsch:
       (abrechnung as { reparaturwunsch?: string | null } | null)?.reparaturwunsch ?? null,
   }
+
+  // Aaron 30.08.: Kunde UND SV duerfen die Auszahlungsart aendern — aber nur, solange kein
+  // fertiges Gutachten vorliegt. Danach ist sie final. Serverseitig ermittelt, damit die
+  // Auswahl die Sperre begruendet anzeigen kann (die Durchsetzung liegt in
+  // setzeAuszahlungsart, nicht in dieser Anzeige).
+  const auszahlungsartSperre = lpClaimId
+    ? await gutachtenIstFinal(admin, lpClaimId)
+    : { final: false, seit: null }
 
   // AV3-SV: Auffahrunfall-Hinweis fuer den SV (Aaron 09.07.) — reiner Hinweis (Stoßfänger/
   // Hebebühne + Hilfestellungskosten individuell mit der Werkstatt aushandeln), KEINE
@@ -645,6 +655,22 @@ export default async function GutachterFallPage({
           </p>
         </div>
       ) : null}
+      {/* Aaron 30.08.: Der SV darf die Auszahlungsart korrigieren — er sieht den Schaden und
+          die Wirtschaftlichkeit (z.B. Totalschaden, bei dem eine Reparatur keinen Sinn ergibt).
+          Bewusst AUCH sichtbar, wenn noch nichts gesetzt ist: sonst koennte er einen fehlenden
+          Wert nie nachtragen (der Anzeige-Block darueber rendert bei null gar nichts).
+          Mit dem fertigen Gutachten ist die Wahl final — dann nur noch Anzeige. */}
+      {lpClaimId && (
+        <div className="rounded-ios-xl bg-claimondo-bg px-4 py-3">
+          <p className="text-xs text-claimondo-ondo">Abrechnungsart ändern</p>
+          <AuszahlungsartWahlSv
+            fallId={id}
+            aktuell={fallWithAbrechnung._reparaturwunsch}
+            gesperrt={auszahlungsartSperre.final}
+            gesperrtSeit={auszahlungsartSperre.seit}
+          />
+        </div>
+      )}
       {/* AAR-Followup (SV-Lead-Ablehnung): Lead-Ablehnen-Card nur in
           sv-zugewiesen + sv-termin sichtbar (Component intern gegated). */}
       <LeadAblehnenCard fallId={id} status={fall.status as string | null} />

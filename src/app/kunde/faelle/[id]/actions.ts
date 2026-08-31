@@ -18,6 +18,7 @@ import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getStorageUrl } from '@/lib/storage/url'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
+import { setzeAuszahlungsart } from '@/lib/claims/auszahlungsart'
 // KFZ-206: Bankdaten für Auszahlung
 export async function saveBankdaten(
   fallId: string,
@@ -174,5 +175,37 @@ export async function updateZahlungsweg(
 
   // K5: Route ist claimId-kanonisch — den claimId-Pfad revalidieren (fallId zeigt auf niemanden).
   revalidatePath(`/kunde/faelle/${ownership.claimId ?? fallId}`)
+  return { success: true }
+}
+
+/**
+ * Auszahlungsart aendern (Aaron 30.08.): Der Kunde darf sie umstellen — es ist seine
+ * Geldentscheidung, und sie kann sich aendern, solange das Gutachten nicht vorliegt.
+ * Mit dessen Fertigstellung ist sie final; die Sperre liegt in setzeAuszahlungsart, damit
+ * sie fuer Kunde UND Sachverstaendigen dieselbe ist.
+ */
+export async function aendereAuszahlungsartAlsKunde(
+  fallId: string,
+  wert: string,
+): Promise<{ success: boolean; error?: string; gesperrt?: boolean }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
+  if (!ownership.claimId) return { success: false, error: 'Fall hat keinen verknüpften Claim' }
+
+  const res = await setzeAuszahlungsart(admin, ownership.claimId, wert, {
+    fallId,
+    userId: user.id,
+    akteur: 'den Kunden',
+  })
+  if (!res.ok) return { success: false, error: res.error, gesperrt: res.gesperrt }
+
+  revalidatePath(`/kunde/faelle/${ownership.claimId}`)
+  revalidatePath(`/gutachter/fall/${ownership.claimId}`)
+  revalidatePath(`/werkstatt/auftraege/${ownership.claimId}`)
   return { success: true }
 }

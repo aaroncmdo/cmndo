@@ -73,10 +73,22 @@ export default async function FaqPage() {
           ]),
         ])}
       />
-      {/* H1 explizit in der Server-Component fuer Crawler/AI-Suchmaschinen.
-          FaqClient rendert seinen eigenen Hero-H1 nochmal als Glass-Variante,
-          aber der hier ist garantiert im initialen SSR-HTML. */}
-      <h1 className="sr-only">Häufige Fragen zum Kfz-Schaden – BGH-belegt</h1>
+      {/* ⚠ 30.08.2026 ENTFERNT: hier stand zusaetzlich ein `<h1 className="sr-only">`
+          mit der Begruendung, der Hero-H1 des FaqClient sei nicht "garantiert im
+          initialen SSR-HTML".
+
+          Die Annahme ist widerlegt. `FaqClient` ist zwar eine Client-Component, wird
+          von Next aber server-seitig VORGERENDERT — sein H1 steht im ausgelieferten
+          HTML. Gemessen mit AI-Bot-User-Agent gegen prod:
+
+              H1-Tags im ausgelieferten HTML: 2
+
+          Damit erzeugte der Zusatz-H1 genau den Fehler, den er verhindern sollte:
+          zwei H1 auf einer Seite (aufgefallen im GEO-Baseline-Lauf, `pagesMultiH1: 1`
+          — /faq war die einzige Seite der Stichprobe mit dem Problem).
+
+          Der sichtbare H1 traegt "Häufige Fragen – Antworten in unter 60 Sekunden";
+          das Keyword "BGH-belegt" steht weiterhin im <title> und im trust_badge. */}
       <FaqClient groups={groups} />
     </>
   )

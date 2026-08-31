@@ -7,7 +7,7 @@
 // Run with the app env loaded, e.g.:
 //   node --env-file=.env.local scripts/prod-smoke/smoke.mjs \
 //     --app-url https://app.claimondo.de \
-//     --email test-dispatch@claimondo.de --password 'Test1234!' \
+//     --email test-dispatch@claimondo.de --password (process.env.TEST_PASSWORT ?? '') \
 //     --checks '[{"label":"dash","path":"/dispatch/dashboard","markers":["Abmelden"]}]'
 import { chromium } from 'playwright'
 import { tmpdir } from 'node:os'

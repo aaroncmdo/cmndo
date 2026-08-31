@@ -57,7 +57,7 @@ Reihenfolge & Details stehen vollständig im Plan-Dokument. Kurzfassung:
 
 ## Test-Login (falls du was im Browser smoken willst — Branding/SV-Portal)
 
-`app.staging.claimondo.de/login` (nginx-Basic-Auth: User `aaroncmdo`) · `test-sv@claimondo.de` / `Test1234!` · SV `Test Aaron Gutachter GmbH`, `verifiziert=true`, `use_custom_branding=true`, `brand_primary=#E11D48` (knallrot), kein Logo.
+`app.staging.claimondo.de/login` (nginx-Basic-Auth: User `aaroncmdo`) · `test-sv@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` · SV `Test Aaron Gutachter GmbH`, `verifiziert=true`, `use_custom_branding=true`, `brand_primary=#E11D48` (knallrot), kein Logo.
 
 ## Was NICHT in Phase 1 ist (kommt in Phase 2 — eigener Plan)
 

@@ -18,7 +18,7 @@ const APP = 'https://app.claimondo.de'
 const CRED = {
   email: process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de',
   // Interner Test-Account (0 Faktoren -> Direkt-Login, Stand 08.07.); Prod-only, kein Produktiv-Secret.
-  pass: process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!',
+  pass: process.env.TEST_ADMIN_PASSWORD ?? '',
 }
 
 const OUT_DIR = path.join(process.cwd(), 'test-results', 'orchestrator-smoke')

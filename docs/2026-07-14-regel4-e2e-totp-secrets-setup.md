@@ -16,15 +16,15 @@ Credentials-Seite komplett erledigt. Was noch fehlt, steht unten.
 ## ✅ Erledigt (14.07.)
 
 - **Accounts neu angelegt** auf Prod (`paizkjajbuxxksdoycev`): `test-admin@`, `test-kb@`, `test-dispatch@`,
-  `test-sv@claimondo.de` — Passwort `Test1234!`, `email_confirm` (⇒ **keine** Mail verschickt),
+  `test-sv@claimondo.de` — Passwort `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`, `email_confirm` (⇒ **keine** Mail verschickt),
   **`telefon = NULL`** (⇒ keine echten SMS/WhatsApp), Rollen `admin` / `kundenbetreuer` / `dispatch` /
   `sachverstaendiger`. SV zusätzlich mit `sachverstaendige`-Row (`ist_testaccount=true`,
   `portal_zugang_freigeschaltet=true`, **ohne Geo/Isochrone** ⇒ bleibt aus dem Live-Dispatch raus).
 - **TOTP-Faktoren frisch enrollt + verifiziert** (je genau 1 `totp:verified` pro Account).
 - **GitHub-Secrets neu gesetzt**: `TEST_{ADMIN,KB,DISPATCH,SV}_TOTP_SECRET` + `TEST_ADMIN_PASSWORD`,
   `TEST_SV_PASSWORD`, `TEST_SV_EMAIL`. (`kb`/`dispatch` brauchen **kein** Passwort-Secret — sie fallen in
-  `_golden-path-lib` sauber auf den Default `Test1234!` zurück. Ein Passwort-**Passthrough** wäre hier sogar
-  schädlich: ein unbesetztes Secret rendert als `''`, und `?? 'Test1234!'` fängt `''` **nicht** ab.)
+  `_golden-path-lib` sauber auf den Default `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` zurück. Ein Passwort-**Passthrough** wäre hier sogar
+  schädlich: ein unbesetztes Secret rendert als `''`, und `?? '<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>'` fängt `''` **nicht** ab.)
 - **`force_password_change=false`** gesetzt (der Spalten-Default ist `true` → sonst redirect auf
   `/passwort-aendern` **vor** jeder Portal-Seite → Test scheitert). ⚠ Bei künftiger Account-Anlage mit setzen.
 - **`ci.yml`-Passthrough** der 4 TOTP-Secrets ergänzt (in diesem PR).
