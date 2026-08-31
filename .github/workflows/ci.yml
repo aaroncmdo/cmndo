@@ -718,7 +718,10 @@ jobs:
           # den Klartext-Default in `_golden-path-lib.ts`; seit dessen (richtiger) Entfernung
           # ist er '' -> invalid_credentials. Der Code liest TEST_KUNDE_*, das Secret heisst
           # SMOKE_KUNDE_* — Namensuebersetzung an der Job-Grenze.
-          TEST_KUNDE_EMAIL: ${{ secrets.SMOKE_KUNDE_EMAIL }}
+          # ⚠ Wirkt erst, wenn das Secret erneuert ist: die Test-Konto-Passwoerter wurden am
+          # 31.08. rotiert, nachgezogen wurde nur TEST_SV_PASSWORD (Beleg: von 8 Test-Konten
+          # hat seither nur test-sv@ einen last_sign_in_at). TEST_KUNDE_EMAIL bewusst NICHT
+          # gesetzt — der Code-Default smoke-kunde@ ist korrekt.
           TEST_KUNDE_PASSWORD: ${{ secrets.SMOKE_KUNDE_PASS }}
           # ⚠ TEST_KB_PASSWORD hier BEWUSST NICHT — anders als im journey-gate steht oben
           # TEST_KB_TOTP_SECRET. Mit Passwort kaeme der Login durch und liefe dann in den
