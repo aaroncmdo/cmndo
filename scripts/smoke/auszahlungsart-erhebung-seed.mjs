@@ -72,11 +72,31 @@ const { data: lead, error: lErr } = await db
     schuldfrage: 'gegner',
     abrechnungsweg: 'haftpflicht',
     service_typ: 'nur_gutachter',
-    // Kuerzt die 6 Zwischen-Steps weg (s. Kopf) — KEIN werkstatt_intake_am!
-    source_channel: 'gutachter-vermittlung',
+    // ⚠ NICHT 'gutachter-vermittlung': das loest den Vermittlungs-Kurzschluss aus
+    // (page.tsx:326, signaturBenoetigtFallId) — der Flow springt dann direkt in die
+    // SA-Signatur, ohne den Wizard und damit ohne den SA-Step mit den serviceFeldern.
+    // Dritter Kurzschluss dieser Art (nach werkstatt_intake_am und flow_status).
+    //
+    // 'self_service' ist der REALE Hauptweg der Luecke: prod-Messung 31.08. — 17 der 24
+    // Haftpflicht-Claims ohne Auszahlungsart kamen so, ALLE mit FlowLink, ALLE mit
+    // sa_unterschrieben=true, KEINER mit Feststellung. Sie sind am SA-Step vorbeigekommen,
+    // dort fehlte die Frage bis #5772.
+    source_channel: 'self_service',
     unfallort: MARKER,
     kunde_plz: '50667',
     kunde_stadt: 'Köln',
+    // ⭐ Feststellungs-Daten vorbefuellt, `reparaturwunsch` bewusst NICHT.
+    // Das ist der REALE Zustand der Faelle, um die es geht: prod-Messung 31.08. — von 23
+    // Haftpflicht-Claims ohne Auszahlungsart haben 4 einen `unfallhergang`, d.h. sie haben
+    // den Feststellungs-Wizard durchlaufen und die EINE Frage darin uebersprungen. Genau
+    // fuer sie greift der SA-Step. Ohne diese Vorbefuellung blockieren die Pflichtfelder des
+    // 11-teiligen Wizards den Lauf, bevor er den SA-Step erreicht (erster Versuch: 16 Klicks,
+    // immer noch im Wizard) — der Seed stellt den Ausgangszustand her, den ein durchlaufender
+    // Kunde erzeugt haette, nicht den geprueften Schritt selbst.
+    unfallhergang: 'Auffahrunfall an der Ampel, Gegner ist aufgefahren.',
+    kennzeichen: 'K-SM 4711',
+    fahrzeug_hersteller: 'VW',
+    fahrzeug_modell: 'Golf',
   })
   .select('id')
   .single()
