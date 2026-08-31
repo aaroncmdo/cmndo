@@ -102,7 +102,7 @@ getKundeUserIdForClaim(admin, claimId): Promise<string | null>
 ### Branch-Strategie
 - **Frische Branch off `origin/staging`** (PRs werden squash-gemergt → alte Branches sind NICHT mehr Ancestor; nicht re-pushen). PR4 berührt peripher, **nicht** kunde-Portal → kein Konflikt mit #1673.
 
-### Test-Fixture (kunde owned-fall, prod) — `test-kunde@claimondo.de` / `Test1234!` (`113aebe5-0630-4753-809a-6756df5ba432`) besitzt NICHTS, also anlegen:
+### Test-Fixture (kunde owned-fall, prod) — `test-kunde@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (`113aebe5-0630-4753-809a-6756df5ba432`) besitzt NICHTS, also anlegen:
 - `claims{ status: 'dispatch_done'` (claims_status_check — **NICHT 'neu'**!)`, geschaedigter_user_id, schadentag, onboarding_complete: true }` ← **onboarding_complete=true Pflicht**, sonst leitet das layout ALLE `/kunde/*` auf `/kunde/onboarding` um und maskiert den Smoke.
 - `claim_parties{ rolle: 'geschaedigter', user_id, quelle: 'lead_konvertierung'` (NOT NULL!)`, vorname, nachname }`
 - `faelle{ claim_id, kunde_id, status: 'ersterfassung'` (fall_status-enum — **NICHT 'neu'**!)`}`

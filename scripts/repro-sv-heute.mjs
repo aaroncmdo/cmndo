@@ -20,7 +20,7 @@ page.on('console', (m) => {
 
 await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded', timeout: 90000 })
 await page.fill('input[type="email"], input[name="email"]', 'test-sv@claimondo.de').catch(() => {})
-await page.fill('input[type="password"], input[name="password"]', 'Test1234!').catch(() => {})
+await page.fill('input[type="password"], input[name="password"]', (process.env.TEST_PASSWORT ?? '')).catch(() => {})
 await page.click('button[type="submit"]').catch(() => {})
 await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 30000 }).catch(() => {})
 console.log(`post-login at ${page.url()}`)

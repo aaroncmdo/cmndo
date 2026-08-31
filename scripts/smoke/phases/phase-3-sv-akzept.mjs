@@ -81,7 +81,7 @@ export async function runPhase3(svContext, phase2Result) {
   // --- Login als test-sv@claimondo.de -------------------------------------
   logPhase(3, 'Login als test-sv@claimondo.de')
   try {
-    page = await loginAs(svContext, 'test-sv@claimondo.de', 'Test1234!', BASE_URL)
+    page = await loginAs(svContext, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
   } catch (err) {
     const msg = `Login als test-sv fehlgeschlagen: ${err.message}`
     logHard(3, msg)
@@ -93,7 +93,7 @@ export async function runPhase3(svContext, phase2Result) {
   if (page.url().includes('/login')) {
     const msg = 'SV-Login fehlgeschlagen — URL ist /login'
     logHard(3, msg)
-    notes.push(`HARD: ${msg} — test-sv@claimondo.de muss rolle='sachverstaendiger' haben + Test1234! + force_password_change=false`)
+    notes.push(`HARD: ${msg} — test-sv@claimondo.de muss rolle='sachverstaendiger' haben + <PASSWORT: GitHub-Secret> + force_password_change=false`)
     await page.close().catch(() => {})
     return { phase: 3, result: 'hard', notes, auftragId: null }
   }

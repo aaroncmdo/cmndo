@@ -9,7 +9,7 @@ Sammelt Screenshots aller Routen in den drei Portalen (Gutachter / Dispatch / Ku
 npx playwright install chromium
 
 # 2. Test-User mit Daten seeden (falls noch nicht passiert)
-#    Erzeugt test-sv@/test-dispatch@/test-kunde@claimondo.de mit Passwort Test1234!
+#    Erzeugt test-sv@/test-dispatch@/test-kunde@claimondo.de mit Passwort <PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>
 npx tsx src/scripts/seed-test-data.ts
 ```
 

@@ -217,7 +217,7 @@ Alles als **Spanne** (min–max). Ausgabe = **ein** Anspruch mit Gesamt-Spanne.
 - **Unit (TDD):** `positionen.ts` — Anwendbarkeit + Spannen über Matrix (fahrbereit ja/nein × jung/alt × leicht/mittel/schwer × bagatelle/totalschaden-hint).
 - **Vision:** Schema-Validierung + Fixture-Foto-Smoke (das getestete Bild als Fixture).
 - **Integration:** Handoff erzeugt `gfa → lead → flow_link` mit vollständigem Carry-over; RLS-Sim als authenticated.
-- **E2E:** durchgehender Wizard → FlowLink; Login-Fixtures `test-*@claimondo.de` / `Test1234!` (nie Realaccounts).
+- **E2E:** durchgehender Wizard → FlowLink; Login-Fixtures `test-*@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (nie Realaccounts).
 - **Kalibrier-Harness:** Estimate-vs-Gutachten-Log.
 
 ---

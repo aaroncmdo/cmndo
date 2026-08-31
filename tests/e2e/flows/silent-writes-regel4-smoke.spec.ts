@@ -39,7 +39,7 @@ test('Gutachter-Profil rendert samt Terminanfrage-Bereich (neuer sonner-Import)'
     if (m.type() === 'error') fehler.push(`console: ${m.text()}`)
   })
 
-  await login(page, 'test-sv@claimondo.de', 'Claimondo2026!')
+  await login(page, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   await page.goto(`${BASE}/gutachter/profil`)
   // ⚠ 23.08.: `waitForLoadState('networkidle')` hier ENTFERNT — es war der Grund, warum
   // dieser Test im nightly rot lief ("Test timeout of 30000ms exceeded" beim Warten).
@@ -61,7 +61,7 @@ test('Gutachter bestaetigt eine Terminanfrage — die Zusage wirkt (RLS-Row-Chec
   const fehler: string[] = []
   page.on('pageerror', (e) => fehler.push(`pageerror: ${e.message}`))
 
-  await login(page, 'test-sv@claimondo.de', 'Claimondo2026!')
+  await login(page, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   await page.goto(`${BASE}/gutachter/profil`)
   // `networkidle` entfernt (Begruendung s. Test oben). ⚠ Hier ist der Ersatz NICHT
   // optional: das `isVisible()` unten wartet NICHT. Ohne eine vorgelagerte
@@ -94,7 +94,7 @@ test('Kunde-Portal rendert (Reaktivierungs-Schleife mit continue)', async ({ pag
   const fehler: string[] = []
   page.on('pageerror', (e) => fehler.push(`pageerror: ${e.message}`))
 
-  await login(page, 'smoke-kunde@claimondo.de', 'Claimondo2026!')
+  await login(page, 'smoke-kunde@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   await page.goto(`${BASE}/kunde`)
   // `networkidle` entfernt (Begruendung s. erster Test) — die Assertion unten prueft
   // die Bereitschaft mit eigenem Timeout.

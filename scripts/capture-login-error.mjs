@@ -49,7 +49,7 @@ await page.waitForTimeout(2000)
 
 console.log('▶ fill email + password')
 await page.locator('[name="email"]').fill('smoke-sv@claimondo.test')
-await page.locator('[name="password"]').fill('Test1234!')
+await page.locator('[name="password"]').fill((process.env.TEST_PASSWORT ?? ''))
 await page.waitForTimeout(500)
 
 console.log('▶ submit Einloggen')

@@ -1,6 +1,6 @@
 # CMM-44 SP-G2 — Smoke (PRE-MERGE Baseline), 2026-05-21
 
-**Target:** `https://app.staging.claimondo.de` (Basic-Auth, Test-User `Test1234!`)
+**Target:** `https://app.staging.claimondo.de` (Basic-Auth, Test-User `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`)
 **Script:** `scripts/smoke-cmm44-spg2.mjs` (read-only; Re-Run-Harness fuer nach dem staging-Merge)
 **Stand:** PR1 #1521 **noch nicht** auf staging gemergt → dieser Lauf testet den **Ist-Zustand
 (alter Code)** als Baseline. Der eigentliche PR1-Write-Pfad (Buchung setzt claim_id ueber den

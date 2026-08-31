@@ -136,7 +136,7 @@ async function rueckruf(page) {
 async function dispatchLogin(page) {
   console.log('\n▶ Step 1: Login als test-dispatch')
   const email = process.env.TEST_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de'
-  const password = process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!'
+  const password = process.env.TEST_DISPATCH_PASSWORD ?? ''
 
   console.log(`  → ${STAGING_URL}/login`)
   await page.goto(`${STAGING_URL}/login`, { waitUntil: 'domcontentloaded' })

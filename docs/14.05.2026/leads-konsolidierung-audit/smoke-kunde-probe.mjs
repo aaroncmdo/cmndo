@@ -6,7 +6,7 @@ const ctx = await browser.newContext({ viewport: { width: 1440, height: 3000 } }
 const page = await ctx.newPage()
 await page.goto('http://localhost:3030/login', { waitUntil: 'networkidle' })
 await page.fill('input[name="email"]', 'test-kunde@claimondo.de')
-await page.fill('input[name="password"]', 'Test1234!')
+await page.fill('input[name="password"]', (process.env.TEST_PASSWORT ?? ''))
 await page.click('button[type="submit"]')
 await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 20_000 })
 await page.goto('http://localhost:3030/kunde/faelle/65a7640b-62dc-48ca-975f-27c8450477c6', { waitUntil: 'networkidle' })

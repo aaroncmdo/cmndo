@@ -21,7 +21,7 @@ mkdirSync(OUT, { recursive: true })
 const BASE = 'https://app.staging.claimondo.de'
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASS
-const TEST_PASS = 'Test1234!'
+const TEST_PASS = (process.env.TEST_PASSWORT ?? '')
 if (!BASIC_USER || !BASIC_PASS) { console.error('HARD: STAGING_BASIC_AUTH_USER/PASS fehlen'); process.exit(1) }
 
 const SPI3 = ['regulierung_am','regulierung_angekuendigt_am','vs_eskalationsstufe','regulierungsweise','vs_reaktion_typ','vs_reaktion_am','kuerzungs_betrag','vs_frist_bis','vs_kuerzung_grund','vs_quote_prozent','vs_quote_grund','vs_quote_akzeptiert_am','vs_quote_betrag_ausgezahlt','vs_kuerzungs_typ']

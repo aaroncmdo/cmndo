@@ -11,7 +11,7 @@ import { join } from 'path'
 const BASE = process.env.AUDIT_BASE_URL ?? 'https://app.staging.claimondo.de'
 const BASIC_USER = process.env.STAGING_BASIC_USER ?? 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_PASS ?? ''
-const PASSWORD = process.env.TEST_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.TEST_PASSWORD ?? ''
 const OUT = process.env.AUDIT_OUT ?? 'docs/14.05.2026/mobile-hygiene'
 
 // iPhone 14 Pro

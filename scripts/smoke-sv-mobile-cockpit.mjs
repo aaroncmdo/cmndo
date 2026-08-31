@@ -8,7 +8,7 @@ import { join } from 'path'
 const BASE = 'http://localhost:3007'
 const OUT = 'docs/14.05.2026/design-audit/sv-mobile-cockpit'
 const EMAIL = 'aaron.sprafke@claimondo.de'
-const PW = 'Test1234!'
+const PW = (process.env.TEST_PASSWORT ?? '')
 
 if (existsSync(OUT)) rmSync(OUT, { recursive: true, force: true })
 mkdirSync(OUT, { recursive: true })

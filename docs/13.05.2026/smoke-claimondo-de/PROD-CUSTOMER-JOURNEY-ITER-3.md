@@ -82,7 +82,7 @@ PR #917 (korrekter Fix) wurde 13:24 UTC von paralleler Session CLOSED ohne Merge
 ### Step 4 — Kunden-Login (`test-kunde@claimondo.de`)
 
 - **Status:** ✅ OK — Login gelingt, Redirect zu `/kunde`
-- **Credentials:** `test-kunde@claimondo.de` / `Test1234!`
+- **Credentials:** `test-kunde@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`
 - **2FA:** Deaktiviert (`twofa_aktiviert: false`, `twofa_email_aktiviert: false`)
 - **`force_password_change`:** `false`
 - **URL nach Login:** `https://app.staging.claimondo.de/kunde`
@@ -165,7 +165,7 @@ const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
 ### Step 8 — Dispatch-Login + Dashboard
 
 - **Status:** ⚠️ Login OK, Dashboard hat Server-Component-Error
-- **Login:** `test-dispatch@claimondo.de` / `Test1234!` → Redirect zu `/dispatch/dashboard` ✅
+- **Login:** `test-dispatch@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` → Redirect zu `/dispatch/dashboard` ✅
 - **Dashboard-Console-Error:** `Error: An error occurred in the Server Components render. [...] digest: ...` (3× in Console-Log)
 - **Ursache:** `dispatch/dashboard/page.tsx`:16: `const admin = createAdminClient()` ohne try/catch
 - **Sichtbarkeit:** Dispatch hat eigenes `error.tsx` → kein lila Root-Screen, aber Dashboard-Content teilweise nicht gerendert

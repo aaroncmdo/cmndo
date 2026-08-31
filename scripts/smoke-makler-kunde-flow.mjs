@@ -20,7 +20,7 @@ const BASIC_PASS = process.env.STAGING_BASIC_PASS ?? ''
 // Promo-Code muss Regex `MK-[A-Z0-9]{4}` matchen (isValidPromoCodeFormat).
 const PROMO_CODE = process.env.PROMO_CODE ?? 'MK-SMKE'
 const MAKLER_EMAIL = 'test-makler@claimondo.de'
-const PASSWORD = 'Test1234!'
+const PASSWORD = (process.env.TEST_PASSWORT ?? '')
 const OUT = 'docs/15.05.2026/smoke-makler-kunde'
 
 const RUN_ID = Date.now().toString(36)

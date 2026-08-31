@@ -8,7 +8,7 @@ import { computeTotp } from './lib/totp.mjs'
  * Rollen-Stammdaten an EINER Stelle.
  *
  * ⚠ Die Passwoerter sind gemessen, nicht angenommen: Konvention ist `test-*@` =
- * `Claimondo2026!` mit der EINEN Ausnahme `test-dispatch` = `Test1234!`
+ * `<PASSWORT: GitHub-Secret>` mit der EINEN Ausnahme `test-dispatch` = `<PASSWORT: GitHub-Secret>`
  * (memory/reference-internal-test-account-logins.md). Genau diese Ausnahme stand hier
  * frueher als Default fuer ALLE Rollen und liess die Logins scheitern — die Portale
  * waren dadurch ungeprueft, ohne dass ein Test rot wurde.
@@ -17,12 +17,12 @@ import { computeTotp } from './lib/totp.mjs'
  * Golive-Accounts-Cleanup (13.07.) geloescht.
  */
 const ROLLEN = {
-  admin: { datei: 'admin.json', emailVar: 'TEST_ADMIN_EMAIL', email: 'test-admin@claimondo.de', passVar: 'TEST_ADMIN_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_ADMIN_TOTP_SECRET' },
-  sv: { datei: 'sv.json', emailVar: 'TEST_SV_EMAIL', email: 'test-sv@claimondo.de', passVar: 'TEST_SV_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_SV_TOTP_SECRET' },
-  dispatch: { datei: 'dispatch.json', emailVar: 'TEST_DISPATCH_EMAIL', email: 'test-dispatch@claimondo.de', passVar: 'TEST_DISPATCH_PASSWORD', pass: 'Test1234!', totpVar: 'TEST_DISPATCH_TOTP_SECRET' },
-  kb: { datei: 'kb.json', emailVar: 'TEST_KB_EMAIL', email: 'test-kb@claimondo.de', passVar: 'TEST_KB_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_KB_TOTP_SECRET' },
-  kunde: { datei: 'kunde.json', emailVar: 'TEST_KUNDE_EMAIL', email: 'smoke-kunde@claimondo.de', passVar: 'TEST_KUNDE_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_KUNDE_TOTP_SECRET' },
-  kanzlei: { datei: 'kanzlei.json', emailVar: 'TEST_KANZLEI_EMAIL', email: 'test-kanzlei@claimondo.de', passVar: 'TEST_KANZLEI_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_KANZLEI_TOTP_SECRET' },
+  admin: { datei: 'admin.json', emailVar: 'TEST_ADMIN_EMAIL', email: 'test-admin@claimondo.de', passVar: 'TEST_ADMIN_PASSWORD', pass: (process.env.TEST_PASSWORT ?? ''), totpVar: 'TEST_ADMIN_TOTP_SECRET' },
+  sv: { datei: 'sv.json', emailVar: 'TEST_SV_EMAIL', email: 'test-sv@claimondo.de', passVar: 'TEST_SV_PASSWORD', pass: (process.env.TEST_PASSWORT ?? ''), totpVar: 'TEST_SV_TOTP_SECRET' },
+  dispatch: { datei: 'dispatch.json', emailVar: 'TEST_DISPATCH_EMAIL', email: 'test-dispatch@claimondo.de', passVar: 'TEST_DISPATCH_PASSWORD', pass: (process.env.TEST_PASSWORT ?? ''), totpVar: 'TEST_DISPATCH_TOTP_SECRET' },
+  kb: { datei: 'kb.json', emailVar: 'TEST_KB_EMAIL', email: 'test-kb@claimondo.de', passVar: 'TEST_KB_PASSWORD', pass: (process.env.TEST_PASSWORT ?? ''), totpVar: 'TEST_KB_TOTP_SECRET' },
+  kunde: { datei: 'kunde.json', emailVar: 'TEST_KUNDE_EMAIL', email: 'smoke-kunde@claimondo.de', passVar: 'TEST_KUNDE_PASSWORD', pass: (process.env.TEST_PASSWORT ?? ''), totpVar: 'TEST_KUNDE_TOTP_SECRET' },
+  kanzlei: { datei: 'kanzlei.json', emailVar: 'TEST_KANZLEI_EMAIL', email: 'test-kanzlei@claimondo.de', passVar: 'TEST_KANZLEI_PASSWORD', pass: (process.env.TEST_PASSWORT ?? ''), totpVar: 'TEST_KANZLEI_TOTP_SECRET' },
 } as const
 
 async function login(

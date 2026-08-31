@@ -21,7 +21,7 @@ const page = await ctx.newPage()
 // Login Admin
 await page.goto(BASE + '/login', { waitUntil: 'networkidle' })
 await page.fill('input[name="email"]', 'test-admin@claimondo.de')
-await page.fill('input[name="password"]', 'Test1234!')
+await page.fill('input[name="password"]', (process.env.TEST_PASSWORT ?? ''))
 await page.click('button[type="submit"]')
 await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 30_000 })
 console.log('✓ Admin login ok')

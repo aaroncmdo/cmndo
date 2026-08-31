@@ -27,7 +27,7 @@ const BASE = process.env.SMOKE_BASE_URL || 'https://app.claimondo.de'
 const CLAIM = '39734007-2680-44b9-b05a-4c317ae10bc7'   // CLM-2026-00816
 const WERKSTATT = {
   mail: process.env.TEST_WERKSTATT_EMAIL || 'nicolas.kitta+testwerkstatt@claimondo.de',
-  pw: process.env.TEST_WERKSTATT_PASSWORD || 'Claimondo2026!',
+  pw: process.env.TEST_WERKSTATT_PASSWORD || '',
 }
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL

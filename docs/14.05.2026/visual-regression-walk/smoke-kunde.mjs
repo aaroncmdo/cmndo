@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const BASE = process.env.BASE_URL ?? 'http://localhost:3010'
 const OUT = join(__dirname, 'kunde-screenshots')
 const KUNDE_EMAIL = process.env.TEST_KUNDE_EMAIL ?? 'test-kunde@claimondo.de'
-const KUNDE_PASS = process.env.TEST_KUNDE_PASSWORD ?? 'Test1234!'
+const KUNDE_PASS = process.env.TEST_KUNDE_PASSWORD ?? ''
 
 if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true })
 
