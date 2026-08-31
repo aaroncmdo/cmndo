@@ -35,7 +35,11 @@ describe('send-lead-reminders — Nurture/Timeout + 4. Reminder', () => {
   })
 
   it('schliesst flow-gesendet NICHT aus (erfolgreicher Versand != erledigt)', () => {
-    expect(src()).not.toContain(".eq('status', 'neu')\n")
+    // Bewusst nur auf ANWESENHEIT geprueft. Eine Abwesenheits-Assertion auf
+    // `.eq('status','neu')` waere falsch: der Timeout-Block (mark_expired_leads,
+    // weiter unten) filtert weiterhin korrekt auf 'neu' und darf das auch.
+    // Erster Versuch hing zudem an einem `\n` im Suchstring — auf Windows (CRLF)
+    // gruen, in der CI (LF) rot. Zeilenenden gehoeren nicht in eine Assertion.
     expect(src()).toContain(".in('status', ['neu', 'flow-gesendet'])")
   })
 

@@ -3,6 +3,7 @@ import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendLeadReminderEmail } from '@/lib/email/lead-reminders'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { createNotification } from '@/lib/notifications'
 
 // AAR-477 C11: Cron-Route — Reminder-Kaskade 2h/24h/72h/168h + Timeout-Marker.
@@ -166,17 +167,19 @@ export async function GET(request: Request) {
     if (!WHATSAPP_STUFEN.has(step)) return null
     if (!lead.telefon) return false
 
-    const { data: fl } = await supabase
-      .from('flow_links')
-      .select('token')
-      .eq('lead_id', lead.id)
-      .limit(1)
-      .maybeSingle()
-    const token = fl?.token as string | undefined
-    if (!token) {
-      console.warn('[AAR-477] WhatsApp-Reminder ohne FlowLink-Token uebersprungen:', lead.id)
+    // ⚠ NICHT den Token roh aus flow_links lesen. Die Links haben eine TTL, und
+    // `/flow/[token]` weist einen abgelaufenen ab (page.tsx:91) — ein Reminder mit
+    // totem Link ist schlechter als gar keiner: der Kunde klickt und landet auf
+    // einer Fehlerseite. Der Reminder greift per Definition SPAET (24h/72h), also
+    // ist genau das der wahrscheinliche Fall.
+    // ensureCanonicalFlowLinkForLead verwendet den juengsten noch GUELTIGEN Link
+    // wieder und stellt sonst einen neuen aus — derselbe Weg wie beim Erstversand.
+    const flRes = await ensureCanonicalFlowLinkForLead(lead.id, { admin: supabase })
+    if (!flRes.ok) {
+      console.warn('[AAR-477] WhatsApp-Reminder ohne FlowLink uebersprungen:', lead.id, flRes.error)
       return false
     }
+    const token = flRes.token
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
     const res = await sendWhatsAppText(lead.telefon, whatsappText(lead.vorname, `${baseUrl}/flow/${token}`))
