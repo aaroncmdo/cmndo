@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendLeadReminderEmail } from '@/lib/email/lead-reminders'
+import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { createNotification } from '@/lib/notifications'
 
 // AAR-477 C11: Cron-Route — Reminder-Kaskade 2h/24h/72h/168h + Timeout-Marker.
@@ -17,7 +19,9 @@ export const dynamic = 'force-dynamic'
 
 type Candidate = {
   id: string
-  email: string
+  /** Null bei Formularen, die keine Adresse erheben (/check, Rueckruf, mcp). */
+  email: string | null
+  telefon: string | null
   vorname: string | null
   reminder_token: string
 }
@@ -56,13 +60,22 @@ export async function GET(request: Request) {
   ): Promise<Candidate[]> {
     let query = supabase
       .from('leads')
-      .select('id, email, vorname, reminder_token, source_channel')
-      .eq('status', 'neu')
+      .select('id, email, telefon, vorname, reminder_token, source_channel')
+      // 'flow-gesendet' gehoert dazu: den Status setzt der ERFOLGREICHE FlowLink-
+      // Versand. Wer den Link bekommen und NICHT geklickt hat, ist genau der, den
+      // man erinnern muesste — mit `.eq('status','neu')` schloss der geglueckte
+      // Versand den Lead aus der Kaskade aus. (Gemessen 31.08.: ein echter
+      // /check-Kunde stand auf 'flow-gesendet' und war damit doppelt draussen.)
+      .in('status', ['neu', 'flow-gesendet'])
       .eq('disqualifiziert', false)
       .not('source_channel', 'in', '(makler-anfrage,manuell)') // Nurture alle kundengetriebenen Akquise-Channels; nur makler/manuell (menschl. Follow-up) raus. Timeout unten ist channel-agnostisch.
       .is(reminderField, null)
       .lte('created_at', before.toISOString())
-      .not('email', 'is', null)
+      // Frueher `.not('email','is',null)`. Die Kaskade war damit rein E-Mail-basiert —
+      // und /check, oeffentlicher Rueckruf und mcp erheben gar keine Adresse. Gemessen
+      // ueber 90 Tage: claimondo-check 2 Leads / 0 mit E-Mail, mcp 8 / 0. Diese Quellen
+      // konnten die Nurture NIE erreichen, zu 100 % konstruktionsbedingt.
+      .or('email.not.is.null,telefon.not.is.null')
     if (prevField) {
       const spaetestens = new Date(now.getTime() - MIN_STUFEN_ABSTAND_MS).toISOString()
       query = query.not(prevField, 'is', null).lte(prevField, spaetestens)
@@ -103,7 +116,8 @@ export async function GET(request: Request) {
       .filter((l) => !skip.has(l.id as string))
       .map((l) => ({
         id: l.id as string,
-        email: l.email as string,
+        email: (l.email as string | null) ?? null,
+        telefon: (l.telefon as string | null) ?? null,
         vorname: (l.vorname as string | null) ?? null,
         reminder_token: l.reminder_token as string,
       }))
@@ -118,14 +132,76 @@ export async function GET(request: Request) {
 
   let sent = 0
   let failed = 0
+  let sentWhatsApp = 0
+  let stillMarkiert = 0
+
+  // WhatsApp-Nurture nur auf Stufe 2 (24h) und 3 (72h).
+  //
+  // Bewusst NICHT alle vier Stufen: WhatsApp landet auf dem Sperrbildschirm, E-Mail
+  // im Postfach. Vier Nachrichten binnen einer Woche lesen sich dort als Belaestigung
+  // — und ein Kunde, der uns blockiert, ist teurer als einer, der nicht antwortet.
+  // Stufe 1 (2h) faellt weg, weil der FlowLink-Erstversand meist Minuten vorher
+  // rausging; Stufe 4 (7 Tage) faellt weg, weil danach ohnehin der 10-Tage-Timeout
+  // greift.
+  const WHATSAPP_STUFEN = new Set([2, 3])
+
+  // Der Erinnerungstext. Kurz, mit dem Link — der Kunde hat ihn schon einmal
+  // bekommen, das hier ist ein Anstupser, keine Neuvorstellung.
+  function whatsappText(vorname: string | null, flowUrl: string): string {
+    const anrede = vorname ? `Hallo ${vorname}` : 'Hallo'
+    return [
+      `${anrede}, Ihre Schadenmeldung bei Claimondo ist noch offen.`,
+      '',
+      'Hier geht es weiter — der Link ist nur für Sie:',
+      flowUrl,
+      '',
+      'Falls Sie Fragen haben, antworten Sie einfach auf diese Nachricht.',
+    ].join('\n')
+  }
+
+  /** true = zugestellt, false = Fehler, null = bewusst uebersprungen (Marker trotzdem setzen). */
+  async function sendeWhatsAppReminder(lead: Candidate, step: 1 | 2 | 3 | 4): Promise<boolean | null> {
+    // Nicht-WhatsApp-Stufen werden MARKIERT, nicht gesendet. Das ist kein Detail:
+    // das Kaskaden-Gate verlangt fuer Stufe N, dass reminder_(N-1)_sent_at gesetzt
+    // ist. Wer Stufe 1 einfach ueberspringt, erreicht Stufe 2 nie.
+    if (!WHATSAPP_STUFEN.has(step)) return null
+    if (!lead.telefon) return false
+
+    // ⚠ NICHT den Token roh aus flow_links lesen. Die Links haben eine TTL, und
+    // `/flow/[token]` weist einen abgelaufenen ab (page.tsx:91) — ein Reminder mit
+    // totem Link ist schlechter als gar keiner: der Kunde klickt und landet auf
+    // einer Fehlerseite. Der Reminder greift per Definition SPAET (24h/72h), also
+    // ist genau das der wahrscheinliche Fall.
+    // ensureCanonicalFlowLinkForLead verwendet den juengsten noch GUELTIGEN Link
+    // wieder und stellt sonst einen neuen aus — derselbe Weg wie beim Erstversand.
+    const flRes = await ensureCanonicalFlowLinkForLead(lead.id, { admin: supabase })
+    if (!flRes.ok) {
+      console.warn('[AAR-477] WhatsApp-Reminder ohne FlowLink uebersprungen:', lead.id, flRes.error)
+      return false
+    }
+    const token = flRes.token
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+    const res = await sendWhatsAppText(lead.telefon, whatsappText(lead.vorname, `${baseUrl}/flow/${token}`))
+    if (!res.ok) {
+      console.error('[AAR-477] WhatsApp-Reminder fehlgeschlagen:', lead.id, step, res.error)
+      return false
+    }
+    return true
+  }
 
   async function processStep(
     lead: Candidate,
     step: 1 | 2 | 3 | 4,
     field: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at' | 'reminder_4_sent_at',
   ) {
-    const ok = await sendLeadReminderEmail(lead, step)
-    if (!ok) {
+    // Kanal folgt dem, was der Lead hergibt: E-Mail bleibt der Normalfall, WhatsApp
+    // greift fuer die Formulare, die keine Adresse erheben (/check, Rueckruf, mcp).
+    const perWhatsApp = !lead.email
+    const ok = perWhatsApp
+      ? await sendeWhatsAppReminder(lead, step)
+      : await sendLeadReminderEmail({ ...lead, email: lead.email as string }, step)
+    if (ok === false) {
       failed += 1
       return
     }
@@ -138,7 +214,10 @@ export async function GET(request: Request) {
       failed += 1
       return
     }
-    sent += 1
+    // Getrennt zaehlen, sonst liest sich eine still markierte Stufe wie ein Versand.
+    if (ok === null) stillMarkiert += 1
+    else if (perWhatsApp) sentWhatsApp += 1
+    else sent += 1
   }
 
   // Sequenziell pro Stufe, parallel zwischen den Stufen wäre möglich, aber
@@ -216,6 +295,10 @@ export async function GET(request: Request) {
   return NextResponse.json({
     sent,
     failed,
+    // Getrennt ausgewiesen, damit im Cron-Log ablesbar bleibt, ueber welchen Kanal
+    // nachgefasst wurde — und wie viele Stufen nur markiert (nicht gesendet) wurden.
+    sent_whatsapp: sentWhatsApp,
+    still_markiert: stillMarkiert,
     cohorts: {
       r1: cohort1.length,
       r2: cohort2.length,
