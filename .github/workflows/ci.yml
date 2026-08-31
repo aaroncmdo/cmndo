@@ -247,6 +247,14 @@ jobs:
       - name: E2E-Toplevel-FS-Ratchet
         run: npm run check:e2e-toplevel-fs -- --ratchet
 
+      # Ein Test hinter `test.skip(!process.env.RUN_X, …)` laeuft nur, wenn RUN_X gesetzt
+      # wird. Steht der Schalter in KEINEM Workflow, meldet sich der Waechter nie — und
+      # faellt trotzdem niemandem auf, weil er als `skipped` zaehlt statt als `failed`.
+      # Gemessen 31.08.: 15 solcher Waechter, darunter golden-path, 2fa-hardening und
+      # trusted-device. Siehe AGENTS.md §Stumme-Waechter-Gate.
+      - name: Stumme-Waechter-Ratchet
+        run: npm run check:stumme-waechter -- --ratchet
+
       # Query-Drift-Bremse (Ratchet): blockt NEUE Queries auf nicht-existente Spalten —
       # Filter-/Order-Params (.order('created_at') auf flow_links/auftraege), insert/update-
       # Keys (pflichtdokumente.datei_url) und top-level select-Spalten — gg. database.types.ts

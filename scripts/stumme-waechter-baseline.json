@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-08-31T10:58:50.751Z",
+  "count": 15,
+  "eintraege": [
+    "tests/e2e/flows/2fa-hardening-smoke.spec.ts::RUN_2FA_SMOKE",
+    "tests/e2e/flows/finder-wunschzeit-anfrage-prod.spec.ts::RUN_WUNSCHZEIT_SMOKE",
+    "tests/e2e/flows/flag-drift-ad-hoc-doc-request.spec.ts::RUN_FLAG_DRIFT_E2E",
+    "tests/e2e/flows/golden-path-completion-prod.spec.ts::RUN_GOLDEN_PATH_PROD",
+    "tests/e2e/flows/golden-path-finder-prod.spec.ts::RUN_GOLDEN_PATH_PROD",
+    "tests/e2e/flows/golden-path-prod.spec.ts::RUN_GOLDEN_PATH_PROD",
+    "tests/e2e/flows/kunde-schaden-melden-skizze-smoke.spec.ts::RUN_SKIZZE_SMOKE",
+    "tests/e2e/flows/kunde-termin-aufgabe-f3-smoke.spec.ts::RUN_F3_TERMIN_AUFGABE_SMOKE",
+    "tests/e2e/flows/quali-gutachter-bindung-c1-smoke.spec.ts::RUN_C1_QUALI_SMOKE",
+    "tests/e2e/flows/smoke-cmm65-kunde-realtime.spec.ts::RUN_CMM65_SMOKE",
+    "tests/e2e/flows/smoke-kundenfunnel-szenarien-prod.spec.ts::RUN_KUNDENFUNNEL_SMOKE",
+    "tests/e2e/flows/smoke-orchestrator-prod.spec.ts::RUN_ORCHESTRATOR_SMOKE",
+    "tests/e2e/flows/trusted-device-smoke.spec.ts::RUN_TRUSTED_DEVICE_SMOKE",
+    "tests/e2e/flows/vehicles-nachzug-b-smoke.spec.ts::RUN_VEHICLES_NACHZUG_SMOKE",
+    "tests/e2e/flows/werkstatt-haftpflicht-gate-smoke.spec.ts::RUN_WERKSTATT_GATE_SMOKE"
+  ]
+}

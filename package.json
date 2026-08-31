@@ -38,6 +38,7 @@
     "check:cron-auth": "node scripts/check-cron-auth.mjs",
     "check:stadt-linknetz": "node scripts/check-stadt-linknetz.mjs",
     "lokalinhalt:qualitaet": "npx tsx scripts/lokalinhalt-qualitaet.mts",
+    "check:stumme-waechter": "node scripts/check-stumme-waechter.mjs",
     "check:status-registry": "node scripts/check-status-registry.mjs",
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
     "check:termin-bezug": "node scripts/check-termin-bezug.mjs",
