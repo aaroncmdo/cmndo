@@ -115,21 +115,32 @@ export async function erzeugeUndSendeFlowLink(opts: {
   // Verhalten bewusst identisch zu persistFlowLinkVersand (src/lib/start-link/): read-modify-
   // write fuers Increment, gleiche drei Felder. NICHT importierbar — claimondo-marketing ist
   // ein eigener Next-Build mit eigenem @/-Alias. Aendert sich dort die Semantik, hier nachziehen.
+  //
+  // ⚠ NUR wenn der Marker noch leer ist. Grund: PR #5792 setzt denselben Marker eine Ebene
+  // TIEFER, in dispatchMagicLink() — also in genau der Funktion, die oben aufgerufen wurde.
+  // Ohne diesen Guard zaehlten beide Ebenen, und ein einzelner Versand stuende als
+  // gesendet_anzahl = 2 in der Buchhaltung. Git meldet das nicht: die beiden Aenderungen
+  // liegen in verschiedenen Dateien, der Konflikt ist rein semantisch.
+  // Mit dem Guard ist die Reihenfolge der Merges egal — wer zuerst schreibt, gewinnt, der
+  // zweite sieht den gesetzten Marker und laesst ihn in Ruhe.
   const { data: flVorher } = await admin
     .from('flow_links')
-    .select('gesendet_anzahl')
+    .select('gesendet_am, gesendet_anzahl')
     .eq('token', token)
     .maybeSingle()
-  const { error: versandFehler } = await admin
-    .from('flow_links')
-    .update({
-      gesendet_am: new Date().toISOString(),
-      gesendet_kanal: kanal,
-      gesendet_anzahl: ((flVorher?.gesendet_anzahl as number | null) ?? 0) + 1,
-    })
-    .eq('token', token)
-  if (versandFehler) {
-    console.error('[flowlink-fuer-lead] Versand-State-Update fehlgeschlagen:', versandFehler.message)
+
+  if (!flVorher?.gesendet_am) {
+    const { error: versandFehler } = await admin
+      .from('flow_links')
+      .update({
+        gesendet_am: new Date().toISOString(),
+        gesendet_kanal: kanal,
+        gesendet_anzahl: ((flVorher?.gesendet_anzahl as number | null) ?? 0) + 1,
+      })
+      .eq('token', token)
+    if (versandFehler) {
+      console.error('[flowlink-fuer-lead] Versand-State-Update fehlgeschlagen:', versandFehler.message)
+    }
   }
 
   // Status nachziehen wie im Mini-Wizard. Ergebnis pruefen: supabase-js wirft nicht, und ein
