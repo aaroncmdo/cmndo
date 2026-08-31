@@ -23,6 +23,8 @@ import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
 import { LeadAblehnenCard } from './_components/LeadAblehnenCard'
 import { AnspruchVorschauCard } from './_components/AnspruchVorschauCard'
+import { AuswertungUnverbindlichCard } from './_components/AuswertungUnverbindlichCard'
+import { leseAuswertung, type AuswertungAnzeige } from '@/lib/anspruch/auswertung-unverbindlich'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
@@ -115,6 +117,21 @@ export default async function GutachterFallPage({
   // KI-Vorschaetzung (Anspruch-pruefen-Tool) fuer den SV — read-only. Admin-Client NACH dem
   // getFallForSv-Ownership-Gate (Defense-in-Depth wie AAR-771; anspruch_schaetzungen ist RLS-deny-all).
   const anspruchVorschau = lpClaimId ? await getAnspruchVorschauFuerFall(admin, lpClaimId) : null
+
+  // Selbstauskunft aus der Anspruchspruefung (claims.auswertung_unverbindlich, Mig 20260830230040).
+  // Getrennt von der Foto-Vorschaetzung oben: die eine ist statisch (drei Klicks), die andere
+  // fallbezogen aus Fotos gerechnet. Record-Cast wg. Type-Lag.
+  let auswertungUnverbindlich: AuswertungAnzeige | null = null
+  if (lpClaimId) {
+    const { data: claimAuswertung } = await admin
+      .from('claims')
+      .select('auswertung_unverbindlich')
+      .eq('id', lpClaimId)
+      .maybeSingle()
+    auswertungUnverbindlich = leseAuswertung(
+      (claimAuswertung as Record<string, unknown> | null)?.auswertung_unverbindlich,
+    )
+  }
 
   const [
     { data: lead },
@@ -723,6 +740,9 @@ export default async function GutachterFallPage({
         />
       )}
       {anspruchVorschau && <AnspruchVorschauCard vorschau={anspruchVorschau} />}
+      {auswertungUnverbindlich && (
+        <AuswertungUnverbindlichCard auswertung={auswertungUnverbindlich} />
+      )}
       {/* Zustandsdoku-Vorzustand (Read-only): letzter FM-Scan des Fahrzeugs — Fotos +
           Qualitaets-Ampel + Vorschaeden. Null-safe: die Galerie rendert nichts ohne Scan. */}
       <VehicleScanGalerie scan={vehicleScan} />

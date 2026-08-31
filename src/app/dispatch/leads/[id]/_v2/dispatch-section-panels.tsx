@@ -19,6 +19,7 @@ import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
 import { EigentuemerTypPanel } from './EigentuemerTypPanel'
 import { DispatchGrueneKartePanel } from './DispatchGrueneKartePanel'
+import { leseAuswertung } from '@/lib/anspruch/auswertung-unverbindlich'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -35,68 +36,8 @@ function zeugenKontakteAus(lead: Record<string, unknown>): ZeugenKontakt[] {
 }
 
 // Quelle B — Anzeige der unverbindlichen Selbst-Auswertung.
-// tier-Klartext spiegelt resolveTier() aus claimondo-marketing/lib/check/result-model.ts;
-// die Paragraphen stehen dort im Kommentar (voll = §249, quote = §254).
-const TIER_LABEL: Record<string, string> = {
-  voll: 'Vollanspruch gegen die Gegenseite (§ 249)',
-  quote: 'Anteiliger Anspruch — Teilschuld angegeben (§ 254)',
-  pruefen: 'Schuldfrage offen — Prüfung nötig',
-  kasko: 'Eigenverschulden — Kasko-Weg',
-}
-
-const ANTWORT_LABEL: Record<string, Record<string, string>> = {
-  schuld: {
-    gegner: 'Schuld: der Unfallgegner',
-    teils: 'Schuld: teils ich, teils der Gegner',
-    unklar: 'Schuld: noch unklar',
-    selbst: 'Schuld: ich selbst',
-  },
-  unfall_her: {
-    unter_woche: 'Unfall: vor weniger als 1 Woche',
-    bis_monat: 'Unfall: vor 1–4 Wochen',
-    ueber_monat: 'Unfall: vor über einem Monat',
-  },
-  gutachten: {
-    nein: 'Gutachten: noch keins',
-    versicherung: 'Gutachten: die gegnerische Versicherung will eins schicken',
-    ja: 'Gutachten: liegt vor',
-  },
-}
-
-type AuswertungAnzeige = { tier: string; antwortZeilen: string[]; erstelltAm: string | null }
-
-/** Liest leads.auswertung_unverbindlich defensiv — das Feld ist jsonb und kann alles enthalten. */
-function auswertungAus(lead: Record<string, unknown>): AuswertungAnzeige | null {
-  const roh = lead.auswertung_unverbindlich
-  if (!roh || typeof roh !== 'object' || Array.isArray(roh)) return null
-  const obj = roh as Record<string, unknown>
-  const tier = typeof obj.tier === 'string' ? obj.tier : null
-  if (!tier) return null
-
-  const antworten =
-    obj.antworten && typeof obj.antworten === 'object' && !Array.isArray(obj.antworten)
-      ? (obj.antworten as Record<string, unknown>)
-      : {}
-  const antwortZeilen = Object.entries(antworten)
-    .map(([feld, wert]) => (typeof wert === 'string' ? ANTWORT_LABEL[feld]?.[wert] : undefined))
-    .filter((z): z is string => Boolean(z))
-
-  // timeZone explizit: ohne sie rendert Server (UTC) und Client (lokal) verschieden
-  // -> Hydration-Mismatch (React #418).
-  let erstelltAm: string | null = null
-  if (typeof obj.erstellt_am === 'string') {
-    const d = new Date(obj.erstellt_am)
-    if (!Number.isNaN(d.getTime())) {
-      erstelltAm = d.toLocaleDateString('de-DE', {
-        timeZone: 'Europe/Berlin',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
-    }
-  }
-  return { tier, antwortZeilen, erstelltAm }
-}
+// Labels + Parsing liegen in @/lib/anspruch/auswertung-unverbindlich, weil die
+// SV-Fallakten-Karte dieselben braucht (eine Quelle statt zweier Label-Maps).
 
 // Record<DispatchSectionPanelKey, …> erzwingt: Map-Keys == Liste im keys-Modul.
 const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) => ReactNode[]> = {
@@ -138,7 +79,7 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
     // die den Wert zeigt, muss erkennbar bleiben, dass er unverbindlich ist").
     // Bewusst OHNE Eurobetrag: die im Funnel gezeigten Spannen sind statisch.
     // Conditional-render: ohne Auswertung erscheint gar nichts.
-    const auswertung = auswertungAus(ctx.lead)
+    const auswertung = leseAuswertung(ctx.lead.auswertung_unverbindlich)
     if (auswertung) {
       panels.push(
         <SectionCard
@@ -146,9 +87,7 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
           title="Selbst-Einschätzung des Kunden (unverbindlich)"
           subtitle="Aus der Anspruchsprüfung — drei angeklickte Antworten, kein Gutachten und keine Zusage"
         >
-          <p className="text-body font-semibold text-claimondo-navy">
-            {TIER_LABEL[auswertung.tier] ?? auswertung.tier}
-          </p>
+          <p className="text-body font-semibold text-claimondo-navy">{auswertung.tierLabel}</p>
           {auswertung.antwortZeilen.length > 0 ? (
             <ul className="mt-2 space-y-1">
               {auswertung.antwortZeilen.map((z) => (
