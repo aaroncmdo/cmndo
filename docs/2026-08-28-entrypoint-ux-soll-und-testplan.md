@@ -841,10 +841,31 @@ Conversion-Element. Gegentest gefahren — sie ist an **5 von 7** Scroll-Positio
 und am Seitenende (die bestehende Footer-Regel). Ein Fix, der ein Conversion-Element abschaltet,
 wäre schlimmer als der Fehler.
 
-**Offen, nicht in diesem Zug gefixt:** das ProvenExpert-Bewertungs-Widget („Sehr Gut · 27
-Kundenbewertungen") verdeckt bei 1280×720 an zwei Scroll-Positionen das **rechte Drittel**
-desselben Buttons. Third-Party-Overlay, Bestand, deutlich kleiner (die linken zwei Drittel bleiben
-klickbar) — aber es ist dieselbe Klasse und gehört auf die Liste.
+**Der vierte Fall — ausgemessen und bewusst nicht gefixt (31.08.):** das ProvenExpert-Widget
+(„Sehr Gut · 27 Kundenbewertungen") verdeckt das **rechte Drittel** desselben Buttons.
+Vollständig vermessen, statt geschätzt:
+
+| Seite | Viewport | blockiert |
+|---|---|---|
+| **Startseite** | **1280×720** | **2 von 8** Positionen, nur der 75-%-Messpunkt |
+| Startseite | 1366×768 | 0/8 |
+| Startseite | 1440×900 | 0/8 |
+| Startseite | 1920×1080 | 0/8 |
+| Stadtseite Köln | 1280×720 | 0/8 |
+
+**Ein einziger Fall**, und dort bleiben zwei Drittel der Buttonbreite klickbar.
+
+⚖️ **Warum nicht gefixt:** Das Siegel trägt in `globals.css` und `ProSealWidget.tsx` mehrere
+ausführlich begründete, gemessene Entscheidungen — `top: 340px` (das Widget kennt keine
+top-Option), `hideOnMobile` (H1 war zu 15–33 % verdeckt), und vor allem `z-index: 39`, gesetzt
+am 23.08. **genau gegen diese Klasse**: darunter die eigene Overlay-Schicht (40), darüber
+normaler Inhalt. Die Lücke ist, dass ein Formular-Button *normaler Inhalt* ist — die Analyse
+damals galt Bottom-Sheets.
+
+Ein Eingriff hieße, im Fremd-DOM eines Trust-Elements eine Kollisionsprüfung nachzurüsten
+(wie beim StickyCallBar). Machbar, aber gegen **einen** Viewport bei **zwei** von acht
+Positionen und einem Drittel der Breite steht das in keinem Verhältnis. Der Befund ist damit
+gemessen, eingeordnet und liegt entscheidungsreif — nicht übersehen.
 
 #### 🔴 Der größere Befund dahinter: drei von vier Einstiegen führen nirgendwohin
 

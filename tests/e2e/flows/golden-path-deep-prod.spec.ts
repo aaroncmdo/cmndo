@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type FileChooser } from '@playwright/test'
 import { execSync } from 'node:child_process'
 import {
   loginContext,
@@ -56,10 +56,29 @@ test('SV #3729 — Stellungnahme einreichen (C2) → auftrag hochgeladen', async
   //    verpufft auf DIESER Seite — das synthetische change-Event erreicht Reacts Handler nicht
   //    (React-Fiber vorhanden, onClick lebt; echte User funktionieren). Deshalb den ECHTEN
   //    User-Pfad fahren: Dropzone-Klick -> FileChooser (bewiesen gruen).
+  //    31.08. Zweiter Wurzelbefund — HYDRATION: Die Navigation oben wartet nur auf
+  //    `domcontentloaded`. Da steht das SSR-HTML (die Dropzone ist sichtbar und fuer
+  //    Playwright klickbar), aber Reacts onClick haengt noch nicht am Button. Ein Klick
+  //    davor verpufft FOLGENLOS — kein Fehler, kein Event, der FileChooser kommt nie und
+  //    die 15s laufen leer ab. Genau so scheiterte der Test am 31.08. zweimal in Folge,
+  //    waehrend die Seite im Screenshot vollstaendig gerendert dasteht.
+  //    Ein Zeitfenster ("warte 3s") waere geraten; deshalb wird auf den FileChooser SELBST
+  //    gewartet und der Klick wiederholt — er ist der Beweis, dass der Handler haengt.
   const dateiAngezeigt = page.getByText('test-upload.pdf', { exact: false })
-  const chooserPromise = page.waitForEvent('filechooser', { timeout: 15_000 })
-  await page.getByRole('button', { name: /Datei auswählen|max\. 20 MB/i }).first().click()
-  const chooser = await chooserPromise
+  await page.waitForLoadState('networkidle').catch(() => {})
+  const dropzone = page.getByRole('button', { name: /Datei auswählen|max\. 20 MB/i }).first()
+  await expect(dropzone, 'Dropzone sichtbar').toBeVisible({ timeout: 15_000 })
+
+  let chooser: FileChooser | null = null
+  for (let versuch = 1; versuch <= 3 && chooser === null; versuch++) {
+    const wartetAufChooser = page.waitForEvent('filechooser', { timeout: 8_000 }).catch(() => null)
+    await dropzone.click()
+    chooser = await wartetAufChooser
+  }
+  // Bleibt er aus, ist der Upload fuer echte Nutzer kaputt — das ist ein BEFUND, kein Flake.
+  expect(chooser, 'FileChooser nach Klick auf die Dropzone (Handler hydriert?)').toBeTruthy()
+  if (chooser === null) return
+
   await chooser.setFiles('tests/e2e/fixtures/test-upload.pdf')
   await expect(dateiAngezeigt, 'Datei-State in React angekommen').toBeVisible({ timeout: 10_000 })
   await page.locator('input[type="checkbox"]').first().check()
