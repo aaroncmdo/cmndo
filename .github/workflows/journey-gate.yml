@@ -95,10 +95,10 @@ env:
   # weil der Login auf /login stehenblieb. Ursache identisch: `SMOKE_ENROLL_PASSWORD`
   # verlor mit #5797 seinen Klartext-Default (richtig) und wurde nie durchgereicht.
   #
-  # ⚠ Diese Zeile ist wieder die VORAUSSETZUNG, nicht die Loesung: ein Secret dieses
-  # Namens existiert (Stand 01.09.) noch nicht. Solange es fehlt, bricht jetzt der Seed
-  # `seed-smoke-enroll.mjs` laut ab, statt dem Konto ein LEERES Passwort zu setzen und
-  # Erfolg zu melden — dieser stille Auth-Write war der eigentliche Schaden.
+  # Das Secret EXISTIERT (angelegt 01.09. 11:17) — es fehlte nur diese Zeile. Der Seed
+  # `seed-smoke-enroll.mjs` bricht jetzt zusaetzlich laut ab, wenn der Wert leer ist,
+  # statt dem Konto ein LEERES Passwort zu setzen und Erfolg zu melden; dieser stille
+  # Auth-Write war der eigentliche Schaden.
   SMOKE_ENROLL_PASSWORD: ${{ secrets.SMOKE_ENROLL_PASSWORD }}
 
 jobs:

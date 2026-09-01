@@ -59,7 +59,21 @@ if (!URL || !ANON || !SERVICE) {
 }
 
 const NOBODY_EMAIL = 'test-rls-nobody@claimondo.de'
-const NOBODY_PW = 'Rls-Nobody-Check-2026!'
+// Das Passwort stand hier im Klartext — im OEFFENTLICHEN Repo. Die Bereinigung #5797
+// hat es nicht erwischt, weil `check-secrets.mjs` nur die beiden BEKANNTEN Leak-Werte
+// sucht (`Claimondo2026!|Test1234!`); ein drittes Passwort ist fuer das Gate unsichtbar.
+// Aufgefallen ist es erst, als die Konto-Rotation vom 31.08. den Wert entwertete und
+// dieser Check mit `Invalid login credentials` DREI PRs blockierte (#5813, #5808, #5784)
+// — ohne dass eine davon inhaltlich etwas damit zu tun hatte.
+const NOBODY_PW = process.env.TEST_RLS_NOBODY_PASSWORD ?? ''
+if (!NOBODY_PW) {
+  console.error(
+    '❌ ENV fehlt: TEST_RLS_NOBODY_PASSWORD — der Check meldet sich als ' +
+      `${NOBODY_EMAIL} an und kann ohne Passwort nicht pruefen, ob RLS greift. ` +
+      'Das Secret existiert (rotiert 31.08.); es muss im CI-Step durchgereicht werden.',
+  )
+  process.exit(1)
+}
 
 // Claim-Tabellen, aus denen ein Nobody NICHTS sehen darf (RLS muss greifen).
 const CLAIM_TABLES = [
