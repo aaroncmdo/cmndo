@@ -98,9 +98,30 @@ Die Konto-Anlage läuft **client-seitig nach** der Unterschrift (`creatingAccoun
 | A | sofort geschlossen | ✅ | **0** |
 | B / C | blieb offen | ✅ | 1 |
 
-Wer den Tab direkt nach dem Unterschreiben schließt, hat einen **Fall ohne Zugang**: Der
-Claim existiert, das Konto nicht — und sein FlowLink zeigt ab da nur noch den karg-en
-`done`-Screen ohne jede Aktion (F2). ⚠ Kein Fehler, keine Meldung, kein Nachholpfad.
+Am Tab hängt mehr als das Konto: `geschaedigter_user_id` (**ohne die sperrt die RLS den
+Kunden aus seinem eigenen Fall aus**), `claim_parties.user_id`, die Pflichtdokumente und
+die Willkommens-Benachrichtigung `kunde.account_bereit` — alle sitzen in
+`finalizeKundeSetup`. Kein Fehler, keine Meldung, kein Nachholpfad.
+
+**⚠ Ausmaß gemessen (01.09.) — es ist ein Risiko, kein laufender Schaden:**
+
+| | Claims mit SA (90 T) | ohne Profil | ohne RLS-Owner |
+|---|---|---|---|
+| **echte Kunden** | 5 | **0** | **0** |
+| intern (Testläufe) | 26 | 3 | 13 |
+
+Echte Kunden bleiben offenbar lange genug auf der Seite (die Anlage dauert ~5 s). Betroffen
+war bisher **nur** mein eigener abgebrochener Lauf A.
+
+✅ **Wächter gebaut (01.09.), Migration `20260901093923`** — statt eines Umbaus der
+Abschluss-Strecke, der bei 0 realen Fällen unverhältnismäßig wäre. Check 8 im bestehenden
+`cron_konsistenz_check` (täglich, erzeugt Task + Slack, schließt sich selbst wieder):
+meldet Claims mit unterschriebener SA, die nach >1 h keinen Kunden-Zugang haben.
+
+⭐ **Positivkontrolle gefahren** — eine Null zählt nur, wenn das Instrument einen Treffer
+auch zeigen würde: scharf **0**, dieselbe Abfrage ohne Email-Filter **2**. Der Detektor
+findet den Zustand; die Testdaten-Filter halten ihn nur sauber. Nachlauf verifiziert:
+`status=success`, alle sieben Altchecks intakt, Findings unverändert zum 08:00-Lauf.
 
 ---
 
@@ -150,9 +171,19 @@ nur der maschinelle Präfix `^SMOKE ` · **keine Claims daran** · **älter als 
 Gemessen: `SMOKE`-aktiv **3 → 1**; die verbliebene war **0,0 h alt** (fremder Lauf, lief
 gerade) und bleibt unangetastet. `Test Werkstatt` trägt **8 echte Claims** — nie anfassen.
 
-⚠ **Die Ursache bleibt offen:** Die Smoke-Läufe räumen ihre Werkstätten nicht zuverlässig
-ab (die Population schwankte während der Messung selbst). Für SVs existiert dafür ein
-Muster — `purgeStaleThrowawayFinderSvs` — für Werkstätten nicht.
+✅ **Ursache behoben (01.09.), Migration `20260901093854`.**
+
+Die Ursache war subtiler als „die Seeds räumen nicht auf": **Sie tun es** — aber erst
+**beim nächsten Lauf ihrer eigenen Sorte** („Leichen abgestürzter Vorläufe zuerst
+entfernen", 2 der 4 Seeds machen das explizit). Beide gefundenen Leichen *hätten* einen
+Purge gehabt; er lief nur seit ~14 h nicht.
+
+> **Aufräumen am Lauf-Anfang schützt nicht die Zeit ZWISCHEN den Läufen.**
+> Läuft ein Seed tagelang nicht, steht seine Werkstatt tagelang im Kundenangebot.
+
+→ pg_cron-Job `smoke-werkstatt-leichen-sperren`, **stündlich**, mit denselben drei
+Schutzbedingungen. Das Fenster schrumpft von „unbegrenzt" auf maximal ~7 Stunden.
+Muster übernommen von `cmm36-sv-live-location-cleanup` (reines SQL im Cron-Command).
 
 ---
 
@@ -220,6 +251,8 @@ ein SV mit `ist_testaccount=false` darf keine Minute länger im produktiven Pool
 | **F1** | Kunden-Kommunikation ist jetzt **nachweisbar**: der Template-Weg protokolliert den Anlass nach `nachrichten` (`send-fall.ts`) | Regel-4 offen bis Deploy — dann muss `fall_eroeffnet` dort als Zeile erscheinen |
 | **F1b** | `catch { /* */ }` um den Bestätigungs-Versand **und** um `notifyNeuerFall` durch Ergebnisprüfung + Log ersetzt | — |
 | **F9** | **2 Smoke-Werkstatt-Leichen gesperrt** (Migration `20260831225956`) — darunter genau die, die mir angeboten wurde | gemessen: `SMOKE`-aktiv 3→1; die verbliebene ist **0,0 h alt** = fremder Lauf, bewusst verschont; `Test Werkstatt` (8 Claims) unberührt |
+| **F9-Ursache** | **stündlicher pg_cron** `smoke-werkstatt-leichen-sperren` (`20260901093854`) — die Seeds räumten erst beim *nächsten* Lauf auf, das Fenster dazwischen war unbegrenzt | Job angelegt, Fenster jetzt max. ~7 h |
+| **F16-Wächter** | Check 8 in `cron_konsistenz_check` (`20260901093923`): beauftragt, aber ohne Kunden-Zugang | Baseline **0**; Positivkontrolle **2** ohne Email-Filter; Nachlauf `success`, alle 7 Altchecks intakt |
 
 ⚠ **Beim Umlaut-Fix bewusst ausgelassen:** `unfall_zeitfenster` → `"value": "ueber_monat"`.
 Das ist ein **DB-Schlüssel**, kein sichtbarer Text — ihn zu „korrigieren" hätte den
@@ -229,7 +262,7 @@ gespeicherten Wert von der Anzeige entkoppelt. Der sichtbare Teil („> 1 Monat"
 
 | # | Befund | Warum es hier liegen bleibt |
 |---|---|---|
-| **F16** | Konto entsteht nur, wenn der Tab offen bleibt | Server-seitig nachziehen oder Nachholpfad — Eingriff in die Abschluss-Action. ⚠ **Hängt mit F1 zusammen:** auch die Willkommens-Benachrichtigung (`kunde.account_bereit`) sitzt in `finalizeKundeSetup` und entfällt mit dem Konto |
+| **F16b** | *Nachholpfad* für das Konto (der Wächter meldet nur) | Erst bauen, wenn der Wächter je anschlägt — bei 0 realen Fällen wäre ein Umbau der Abschluss-Strecke unverhältnismäßig |
 | **F15b** | Flow-Terminpfad end-to-end beweisen | Werkzeug steht (`ep-terminpfad-sv.mjs`), Hürde liegt in der Geo-/Slot-Schicht — der Wegwerf-SV passiert den Dispatchable-Filter, erscheint aber nicht in den Vorschlägen |
 | **F2** | Abschluss ohne Fallnummer / ohne Weg weiter | `onSigned` reicht nur die `fallId` durch; die Fallnummer bräuchte eine erweiterte Action-Rückgabe. ⚠ Nachbar-Session arbeitet am Claim-Stepper — nicht parallel anfassen |
 | **F4** | Abrechnungsfrage zweimal | Fachentscheidung: welche der beiden Stellen entfällt |
