@@ -891,6 +891,11 @@
       "keine",
       "leasing"
     ],
+    "leads.gutachten_status": [
+      "ja",
+      "nein",
+      "versicherung"
+    ],
     "leads.kanzlei_wunsch": [
       "eigene_kanzlei",
       "keine_kanzlei",
@@ -990,6 +995,11 @@
       "pl",
       "ru",
       "tr"
+    ],
+    "leads.unfall_zeitfenster": [
+      "bis_monat",
+      "ueber_monat",
+      "unter_woche"
     ],
     "leads.unfallort_kategorie": [
       "autobahn",
