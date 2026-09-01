@@ -32,6 +32,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { randomBytes } from 'node:crypto'
+import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
 
 const RUN = process.env.RUN_KUNDENFUNNEL_SMOKE === '1'
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
@@ -204,7 +205,7 @@ async function fahreFlowBisPortal(
   await page.getByRole('button', { name: opts.serviceRegex }).click()
   await paintCanvas(page)
   await checkAlleCheckboxen(page)
-  const saBtn = page.getByRole('button', { name: /SA unterzeichnen/i })
+  const saBtn = page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN })
   await expect(saBtn).toBeEnabled({ timeout: 10_000 })
   await saBtn.click()
 

@@ -157,10 +157,14 @@ test('Vollstaendig: Startseite → Termin gebucht (so weit es geht)', async ({ p
       await shot(page, `07-flow-step-${String(step + 1).padStart(2, '0')}-signed`)
     }
 
-    // Weiter-Button (umfassend: SA unterzeichnen, beauftragen, weiter, …)
+    // Weiter-Button (umfassend: Beauftragung unterschreiben, beauftragen, weiter, …)
+    // `unterschreiben` ist der Vertrags-CTA seit #5808; `unterzeichnen` bleibt fuer den
+    // prod-Stand vor dem Deploy und fuer einen moeglichen Rollback stehen. Achtung: die
+    // beiden Verben teilen KEINEN gemeinsamen Praefix (unterschreiben/unterzeichnen), und
+    // `beauftragen` matcht `Beauftragung` nicht — es braucht beide Zweige einzeln.
     const nextBtn = page
       .getByRole('button', {
-        name: /weiter|jetzt absenden|beauftragen|konto erstellen|account erstellen|fortfahren|annehmen|sa unterzeichnen|unterzeichnen|absenden/i,
+        name: /weiter|jetzt absenden|beauftragen|konto erstellen|account erstellen|fortfahren|annehmen|unterschreiben|unterzeichnen|absenden/i,
       })
       .filter({ hasNot: page.locator('[disabled]') })
       .first()
