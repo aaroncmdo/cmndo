@@ -4,6 +4,7 @@ import {
   ermittleImStatusSeit,
   tageImStatus,
   baueHaengerTaskText,
+  terminSchuetztNoch,
   HAENGER_SCHWELLE_TAGE,
 } from '../haenger-detektor'
 
@@ -155,5 +156,43 @@ describe('baueHaengerTaskText', () => {
     expect(t.beschreibung).toContain('prüfen')
     expect(t.beschreibung).toContain('nächsten')
     expect(t.beschreibung).not.toMatch(/pruefen|naechsten/)
+  })
+})
+
+describe('terminSchuetztNoch', () => {
+  // Der Detektor lief bis 31.08. ohne jede Zeitpruefung: ein Termin mit aktivem Status
+  // galt als Schutz, auch wenn er Wochen zurueck lag. Diese Faelle sind die realen,
+  // an denen es aufgefallen ist.
+  it('ein Termin in der Zukunft schuetzt', () => {
+    expect(terminSchuetztNoch('2026-08-20T08:00:00.000Z', JETZT)).toBe(true)
+  })
+
+  it('ein Termin von gestern schuetzt noch (Karenz — das Gutachten kann heute kommen)', () => {
+    expect(terminSchuetztNoch('2026-08-11T08:00:00.000Z', JETZT)).toBe(true)
+  })
+
+  it('genau an der Schwelle schuetzt noch', () => {
+    // JETZT minus exakt HAENGER_SCHWELLE_TAGE
+    const grenze = new Date(JETZT.getTime() - HAENGER_SCHWELLE_TAGE * 24 * 60 * 60 * 1000)
+    expect(terminSchuetztNoch(grenze.toISOString(), JETZT)).toBe(true)
+  })
+
+  it('⭐ ein laengst verstrichener Termin schuetzt NICHT mehr — der eigentliche Fix', () => {
+    // CLM-2026-00935: bestaetigt fuer den 27.07., ohne Assignee, nie durchgefuehrt.
+    expect(terminSchuetztNoch('2026-07-27T08:00:00.000Z', JETZT)).toBe(false)
+    // CLM-2026-01005: bestaetigt fuer den 30.07., Kunde wartet aktiv.
+    expect(terminSchuetztNoch('2026-07-30T08:00:00.000Z', JETZT)).toBe(false)
+  })
+
+  it('unbekannte oder unparsbare Zeit schuetzt defensiv weiter (kein NEUER Alarm)', () => {
+    expect(terminSchuetztNoch(null, JETZT)).toBe(true)
+    expect(terminSchuetztNoch(undefined, JETZT)).toBe(true)
+    expect(terminSchuetztNoch('', JETZT)).toBe(true)
+    expect(terminSchuetztNoch('kein-datum', JETZT)).toBe(true)
+  })
+
+  it('die Schwelle ist parametrierbar', () => {
+    expect(terminSchuetztNoch('2026-08-01T12:00:00.000Z', JETZT, 30)).toBe(true)
+    expect(terminSchuetztNoch('2026-08-01T12:00:00.000Z', JETZT, 3)).toBe(false)
   })
 })
