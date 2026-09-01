@@ -53,10 +53,12 @@ const modusBeweisbar = argv.includes('--beweisbar')
 const modusMarker = argv.includes('--marker')
 const modusZuruecksetzen = argv.includes('--zuruecksetzen')
 const fensterArg = argv.find((a) => a.startsWith('--fenster='))?.split('=')[1]
+const domainFensterArg = argv.find((a) => a.startsWith('--domain-fenster='))?.split('=')[1]
 
-if (!modusBeweisbar && !modusMarker && !fensterArg && !modusZuruecksetzen) {
+if (!modusBeweisbar && !modusMarker && !fensterArg && !domainFensterArg && !modusZuruecksetzen) {
   console.error(
-    'Kein Modus gewaehlt. Nutze --beweisbar, --marker, --fenster="VON,BIS" oder --zuruecksetzen.\n' +
+    'Kein Modus gewaehlt. Nutze --beweisbar, --marker, --fenster="VON,BIS",\n' +
+      '--domain-fenster="<domain>,VON,BIS" oder --zuruecksetzen.\n' +
       'Ohne --apply laeuft jeder Modus als Dry-Run.',
   )
   process.exit(1)
@@ -187,6 +189,53 @@ if (fensterArg) {
     )
   }
   if ((rows?.length ?? 0) > 0) await setzeFlag(rows.map((r) => r.id), true)
+}
+
+// ── Modus C: Batch AUF EINER DOMAIN (interne Testlaeufe) ──────────────────────
+// Fuer Claims, die einen Lead HABEN (Modus B greift nur bei Waisen). Hier ist weder das
+// Zeitfenster allein ein Beweis noch die Domain allein:
+//   • Eine Haeufung kann auch echtes Aufkommen sein.
+//   • @claimondo.de heisst "intern", nicht "Test" — ein Mitarbeiter mit echtem Unfall
+//     haette einen echten Fall unter der Firmen-Domain.
+// ZUSAMMEN tragen sie: mehrere Faelle derselben internen Domain innerhalb von Minuten
+// sind ein Testlauf, kein Zufall.
+//
+//   --domain-fenster="<domain>,<von>,<bis>"
+if (domainFensterArg) {
+  const [domain, von, bis] = domainFensterArg.split(',').map((s) => s.trim())
+  if (!domain || !von || !bis) {
+    console.error('--domain-fenster braucht "<domain>,<VON>,<BIS>".')
+    process.exit(1)
+  }
+  trenner(`Modus C — Domain @${domain} im Fenster ${von} .. ${bis}`)
+  const { data: rows, error } = await db
+    .from('claims')
+    .select('id, claim_nummer, created_at, operative_status, leads!claims_lead_id_fkey!inner(email)')
+    .eq('ist_testfall', false)
+    .gte('created_at', von)
+    .lte('created_at', bis)
+    .order('created_at')
+  if (error) {
+    console.error('Read fehlgeschlagen:', error.message)
+    process.exit(1)
+  }
+  const treffer = (rows ?? []).filter((r) => {
+    const lead = Array.isArray(r.leads) ? r.leads[0] : r.leads
+    return String(lead?.email ?? '').toLowerCase().endsWith(`@${domain.toLowerCase()}`)
+  })
+  console.log(`  ${rows?.length ?? 0} Claims im Fenster, ${treffer.length} davon auf @${domain}:`)
+  for (const t of treffer) {
+    console.log(`   · ${t.claim_nummer}  ${t.created_at}  ${t.operative_status ?? '—'}`)
+  }
+  // Die HAEUFUNG ist das Indiz — bei ein oder zwei Zeilen traegt sie nicht.
+  if (treffer.length > 0 && treffer.length < 3) {
+    console.log(
+      '  ⚠ Weniger als 3 Treffer. Dieser Modus stuetzt sich auf die Haeufung —\n' +
+        '    darunter ist es keine. Fenster pruefen oder einzeln bewerten.',
+    )
+  } else if (treffer.length >= 3) {
+    await setzeFlag(treffer.map((t) => t.id), true)
+  }
 }
 
 // ── Rueckwaerts: alles wieder auf false ───────────────────────────────────────
