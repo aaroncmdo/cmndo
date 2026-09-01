@@ -24,6 +24,49 @@ export const HAENGER_SCHWELLE_TAGE = 5
 export const HAENGER_TASK_CODE = 'haenger-pruefen'
 
 /**
+ * Schuetzt dieser Termin den Claim noch vor dem Haenger-Alarm?
+ *
+ * ⭐ BEFUND 31.08.: Bis hierher galt JEDER Termin mit "aktivem" Status
+ * (reserviert/bestaetigt/verlegt/verlegung_pending) als Schutz — UNABHAENGIG davon, ob
+ * seine Zeit laengst verstrichen war. Damit schloss der Detektor genau die am
+ * schlimmsten haengenden Faelle vom Alarm aus:
+ *
+ *   CLM-2026-00935 — Termin `bestaetigt` fuer den 27.07., ohne jeden Assignee,
+ *                    ersatzlos verstrichen. Claim 43 Tage alt, NIE gemeldet.
+ *   CLM-2026-01005 — Termin `bestaetigt` fuer den 30.07. Kunde hat Portalzugang und
+ *                    wartet aktiv. Claim 33 Tage alt, NIE gemeldet.
+ *
+ * Gemessen: von 6 durch einen "aktiven" Termin geschuetzten Claims war genau EINER zu
+ * Recht geschuetzt (Termin in der Zukunft); die anderen 5 lagen alle ueber 5 Tage
+ * zurueck, zwei ueber 30 Tage.
+ *
+ * ⭐ Die Fehlerklasse: ein ERFOLGSMARKER als Ausschlusskriterium. `bestaetigt` heisst
+ * "ein Termin wurde vereinbart" — und schliesst dadurch ausgerechnet die Faelle aus,
+ * deren Termin vereinbart war und NICHT stattfand. Dieselbe Klasse wie
+ * `status='flow-gesendet'`, das die Leads vom Nachfassen ausschloss, die den Link
+ * bekamen und nicht klickten.
+ *
+ * Die Karenzzeit ist bewusst dieselbe Schwelle wie der Detektor selbst: ein Termin von
+ * gestern soll den Fall NICHT sofort melden (der SV laedt womoeglich heute das Gutachten
+ * hoch) — einer von vor zwei Wochen dagegen schuetzt nichts mehr.
+ *
+ * @param startZeit ISO-Zeitstempel des Termins; `null` schuetzt defensiv weiter
+ *                  (unbekannte Zeit soll keinen NEUEN Alarm ausloesen).
+ */
+export function terminSchuetztNoch(
+  startZeit: string | null | undefined,
+  jetzt: Date,
+  schwelleTage: number = HAENGER_SCHWELLE_TAGE,
+): boolean {
+  if (!startZeit) return true
+  const start = new Date(startZeit)
+  // Ein unparsbarer Wert ist kein Beleg fuer einen verstrichenen Termin -> weiter schuetzen.
+  if (Number.isNaN(start.getTime())) return true
+  const grenze = new Date(jetzt.getTime() - schwelleTage * 24 * 60 * 60 * 1000)
+  return start.getTime() >= grenze.getTime()
+}
+
+/**
  * Status, in denen ein Claim NICHT mehr handlungspflichtig ist. `abgelehnt` gehoert
  * bewusst dazu: ein abgelehnter Fall wartet nicht auf uns.
  */

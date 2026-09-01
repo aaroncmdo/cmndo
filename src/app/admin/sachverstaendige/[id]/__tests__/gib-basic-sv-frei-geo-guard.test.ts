@@ -117,9 +117,11 @@ describe('gibBasicSvFrei — Go-Live-Geo-Guard', () => {
     expect(res.success).toBe(true)
     expect(calcSpy).toHaveBeenCalledWith(51.25, 7.15, 25)
     const upd = updateCapture.sachverstaendige!
-    expect(upd.verifiziert).toBe(true)
     expect(upd.ist_aktiv).toBe(true)
     expect(upd.portal_zugang_freigeschaltet).toBe(true)
+    // Freischalten heisst NICHT verifizieren: ohne geprüfte Tier-2-Dokumente bleibt das
+    // kundensichtbare Siegel aus (31.08. — es wurde vorher blind mitgesetzt).
+    expect('verifiziert' in upd).toBe(false)
     expect(upd.isochrone_polygon).toBeTruthy() // nachberechnet mitgeschrieben
   })
 
@@ -136,9 +138,9 @@ describe('gibBasicSvFrei — Go-Live-Geo-Guard', () => {
     expect(res.success).toBe(true)
     expect(calcSpy).not.toHaveBeenCalled()
     const upd = updateCapture.sachverstaendige!
-    expect(upd.verifiziert).toBe(true)
     expect(upd.ist_aktiv).toBe(true)
     expect(upd.portal_zugang_freigeschaltet).toBe(true)
+    expect('verifiziert' in upd).toBe(false) // siehe oben: Freischalten ≠ Verifizieren
     expect('isochrone_polygon' in upd).toBe(false) // nicht angefasst
   })
 })

@@ -85,7 +85,7 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
   await page.screenshot({ path: join(SHOTS, `flow-${String(schritt).padStart(2, '0')}.png`), fullPage: true }).catch(() => {})
 
   // ── Endzustand? (praezise: der Abschluss-Screen, nicht irgendein "abgeschlossen" im Text) ──
-  if (/Ihr Fall wurde angelegt|Wir haben alles|Vielen Dank für Ihren Auftrag|Fall-Nummer/i.test(l.body)) {
+  if (/(Ihr|Dein) Fall wurde angelegt|Wir haben alles|Vielen Dank für (Ihren|deinen) Auftrag|Fall-Nummer/i.test(l.body)) {
     console.log('\n>>> Endzustand erreicht.')
     break
   }
@@ -249,8 +249,8 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
   if (/keine Werkstatt-Auswahl möglich/i.test(b)) {
     console.log('  🔴 REGEL-4 ROT: "Für diesen Vorgang ist keine Werkstatt-Auswahl möglich." — der Fix greift NICHT')
   }
-  if (/Wählen Sie Ihre Werkstatt/i.test(b)) {
-    const versuche = protokoll.filter((p) => /Wählen Sie Ihre Werkstatt/.test(p.titel)).length
+  if (/Wähle deine Werkstatt|Wählen Sie Ihre Werkstatt/i.test(b)) {
+    const versuche = protokoll.filter((p) => /Wähle deine Werkstatt|Wählen Sie Ihre Werkstatt/.test(p.titel)).length
     if (versuche >= 2) {
       const skip = page.getByRole('button', { name: /^Überspringen/i }).first()
       if (await skip.count()) {
