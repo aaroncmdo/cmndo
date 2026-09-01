@@ -76,9 +76,33 @@ export default async function TasksPage() {
         .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei']),
     ])
 
+  // ⭐ Aufgaben zu TESTFAELLEN ausblenden (Mig 20260831222740). Gemessen 01.09. nach der
+  // Testdaten-Bereinigung: 111 der offenen Aufgaben haengen an Claims, die als Testdaten
+  // markiert sind — Phantomarbeit, die echte Meldungen zudeckt.
+  //
+  // ⚠ Bewusst AUSBLENDEN statt schliessen: ein Massen-Statuswechsel verfaelscht die
+  // Erledigungs-Statistik. Genau das hat die Aufraeumaktion vom 13.08. getan (1213
+  // Aufgaben eines Typs an EINEM Tag) — seither sieht die Historie nach reger
+  // Abarbeitung aus, obwohl an normalen Tagen 1-6 Aufgaben geschlossen werden, die
+  // meisten davon automatisch. Ein Filter aendert keine Daten und ist umkehrbar.
+  //
+  // Zwei Schritte statt Embed-Join: ein `claims!inner(...)` wuerde alle Aufgaben OHNE
+  // Claim-Bezug mit ausblenden — davon gibt es 330.
+  const { data: testClaims } = await supabase.from('claims').select('id').eq('ist_testfall', true)
+  const testClaimIds = new Set((testClaims ?? []).map((c) => c.id as string))
+  const istTestAufgabe = (t: { claim_id?: string | null }) =>
+    !!t.claim_id && testClaimIds.has(t.claim_id)
+
+  const offeneSichtbar = (offeneTasks ?? []).filter((t) => !istTestAufgabe(t))
+  const erledigteSichtbar = (erledigteTasks ?? []).filter((t) => !istTestAufgabe(t))
+  // Kein stilles Filtern: wie viele Zeilen die Testdaten-Regel entfernt hat, wird gezeigt.
+  const testAufgabenAusgeblendet =
+    (offeneTasks?.length ?? 0) - offeneSichtbar.length
+
   // Beide Teilmengen wieder zu EINER Liste — das Board gruppiert selbst nach Status.
-  const tasks = [...(offeneTasks ?? []), ...(erledigteTasks ?? [])]
+  const tasks = [...offeneSichtbar, ...erledigteSichtbar]
   // Reissleine gerissen? Dann fehlen offene Aufgaben, und das darf nicht still passieren.
+  // Am ROHwert gemessen — der Cap greift beim Laden, nicht nach dem Testdaten-Filter.
   const offeneAbgeschnitten = (offeneTasks?.length ?? 0) >= NICHT_ERLEDIGT_CAP
 
   // CMM-49: faelleNormalized aus dem Bridge+claims-Resultat (id == fall_id).
@@ -126,6 +150,16 @@ export default async function TasksPage() {
         <div className="mb-4 rounded-ios-lg border border-warning bg-warning-soft px-4 py-3 text-body-sm text-warning-strong">
           Es sind mehr als {NICHT_ERLEDIGT_CAP} offene Aufgaben vorhanden — das Board zeigt
           nicht alle. Bitte Aufgaben abarbeiten oder die Ansicht filtern.
+        </div>
+      )}
+      {testAufgabenAusgeblendet > 0 && (
+        // Kein stilles Filtern: die Zahl gehört sichtbar, sonst wirkt die Liste
+        // kürzer, als sie ist, und niemand kann die Regel überprüfen.
+        <div className="mb-4 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-4 py-3 text-body-sm text-claimondo-ondo">
+          {testAufgabenAusgeblendet}{' '}
+          {testAufgabenAusgeblendet === 1 ? 'Aufgabe gehört' : 'Aufgaben gehören'} zu
+          Testfällen und {testAufgabenAusgeblendet === 1 ? 'wird' : 'werden'} hier nicht
+          angezeigt.
         </div>
       )}
       <KanbanBoard
