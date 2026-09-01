@@ -5,7 +5,7 @@
 //
 // Voraussetzungen:
 //   - lokaler Dev-Server laeuft auf SCREENSHOT_BASE_URL (Default http://localhost:3000)
-//   - test-User existieren (test-sv@/test-dispatch@/test-kunde@claimondo.de mit Test1234!)
+//   - test-User existieren (test-sv@/test-dispatch@/test-kunde@claimondo.de mit <PASSWORT: GitHub-Secret>)
 //     siehe scripts/seed-test-data.ts
 //   - npx playwright install chromium  (einmalig)
 //
@@ -21,7 +21,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const BASE_URL = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:3000'
-const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? ''
 const OUT_DIR = process.env.SCREENSHOT_OUT_DIR ?? 'docs/portals-review/screenshots'
 
 // SCREENSHOT_VIEWPORTS=desktop,tablet,mobile (Default: desktop+mobile fuer

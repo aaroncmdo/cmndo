@@ -138,11 +138,11 @@ export async function teardown() {
 // ─── Auth ──────────────────────────────────────────────────────────────────
 
 const ROLE_CREDS = {
-  admin: { email: 'test-admin@claimondo.de', pwd: 'Test1234!' },
-  dispatch: { email: 'test-dispatch@claimondo.de', pwd: 'Test1234!' },
-  sv: { email: 'test-sv@claimondo.de', pwd: 'Test1234!' },
-  kunde: { email: 'test-kunde@claimondo.de', pwd: 'Test1234!' },
-  kanzlei: { email: 'test-kanzlei@claimondo.de', pwd: 'Test1234!' },
+  admin: { email: 'test-admin@claimondo.de', pwd: (process.env.TEST_PASSWORT ?? '') },
+  dispatch: { email: 'test-dispatch@claimondo.de', pwd: (process.env.TEST_PASSWORT ?? '') },
+  sv: { email: 'test-sv@claimondo.de', pwd: (process.env.TEST_PASSWORT ?? '') },
+  kunde: { email: 'test-kunde@claimondo.de', pwd: (process.env.TEST_PASSWORT ?? '') },
+  kanzlei: { email: 'test-kanzlei@claimondo.de', pwd: (process.env.TEST_PASSWORT ?? '') },
 }
 
 export async function loginAs(role) {

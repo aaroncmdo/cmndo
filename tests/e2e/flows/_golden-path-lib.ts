@@ -35,19 +35,19 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 // importieren `ROLES` von hier, statt eigene Defaults zu schreiben (genau daraus entstand
 // die Drift unten).
 //
-// ⚠ `Test1234!` gilt auf prod NUR NOCH fuer test-dispatch@. Die frueher hier notierte
-// Annahme „Test1234! grandfathered" ist widerlegt — GoTrue lehnt das Passwort seit der
-// pwned-Password-Policy ab, die uebrigen Konten wurden auf `Claimondo2026!` gezogen.
+// ⚠ `<PASSWORT: GitHub-Secret>` gilt auf prod NUR NOCH fuer test-dispatch@. Die frueher hier notierte
+// Annahme „<PASSWORT: GitHub-Secret> grandfathered" ist widerlegt — GoTrue lehnt das Passwort seit der
+// pwned-Password-Policy ab, die uebrigen Konten wurden auf `<PASSWORT: GitHub-Secret>` gezogen.
 // Gemessen 20.08. gegen app.claimondo.de, jede Zelle ein echter Browser-Login:
 //
-//   admin     test-admin@      Claimondo2026! -> /admin              Test1234! = falsch
-//   dispatch  test-dispatch@   Claimondo2026! = falsch               Test1234! -> /dispatch/dashboard
-//   kb        test-kb@         Claimondo2026! -> /mitarbeiter        Test1234! = falsch
-//   kanzlei   test-kanzlei@    Claimondo2026! -> /kanzlei/mandate    Test1234! = falsch
-//   sv        test-sv@         Claimondo2026! -> /gutachter/heute    Test1234! = falsch
-//   kunde     smoke-kunde@     Claimondo2026! -> /kunde              Test1234! = falsch
+//   admin     test-admin@      <PASSWORT: GitHub-Secret> -> /admin              <PASSWORT: GitHub-Secret> = falsch
+//   dispatch  test-dispatch@   <PASSWORT: GitHub-Secret> = falsch               <PASSWORT: GitHub-Secret> -> /dispatch/dashboard
+//   kb        test-kb@         <PASSWORT: GitHub-Secret> -> /mitarbeiter        <PASSWORT: GitHub-Secret> = falsch
+//   kanzlei   test-kanzlei@    <PASSWORT: GitHub-Secret> -> /kanzlei/mandate    <PASSWORT: GitHub-Secret> = falsch
+//   sv        test-sv@         <PASSWORT: GitHub-Secret> -> /gutachter/heute    <PASSWORT: GitHub-Secret> = falsch
+//   kunde     smoke-kunde@     <PASSWORT: GitHub-Secret> -> /kunde              <PASSWORT: GitHub-Secret> = falsch
 //
-// ⭐ Die eine Rolle, die `Test1234!` behielt, ist die dokumentierte AUSNAHME — und genau
+// ⭐ Die eine Rolle, die `<PASSWORT: GitHub-Secret>` behielt, ist die dokumentierte AUSNAHME — und genau
 // sie wurde verallgemeinert. Wer eine Sonderregel abschreibt, schreibt oft die Sonderregel
 // ab, nicht die Regel.
 //
@@ -55,15 +55,15 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 // reicht nur TEST_ADMIN_* und TEST_SV_* durch. Fuer kb/kanzlei/kunde gibt es kein
 // wirksames Secret — dort IST der Default das, was laeuft.
 export const ROLES = {
-  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Claimondo2026!' },
-  // Einzige Rolle mit Test1234! — nicht "korrigieren".
-  dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!' },
+  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '' },
+  // Einzige Rolle mit <PASSWORT: GitHub-Secret> — nicht "korrigieren".
+  dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? '' },
   // 17.07.: test-kunde@ existiert seit dem Golive-Accounts-Cleanup nicht mehr; dediziertes
   // Smoke-Konto = smoke-kunde@ (reference-internal-test-account-logins, Aaron-Go).
-  kunde: { email: process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!' },
-  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Claimondo2026!' },
-  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Claimondo2026!' },
-  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!' },
+  kunde: { email: process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? '' },
+  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? '' },
+  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? '' },
+  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? '' },
 } as const
 
 export type RoleKey = keyof typeof ROLES

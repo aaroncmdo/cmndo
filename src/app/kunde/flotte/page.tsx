@@ -23,8 +23,8 @@ export default async function FlottePage() {
         title="Firma & Flotte"
         description={
           firma
-            ? 'Ihre Firmenfahrzeuge — beim Schaden melden direkt auswählbar.'
-            : 'Legen Sie Ihr Firmen-Konto an, um mehrere Fahrzeuge zentral zu verwalten.'
+            ? 'Deine Firmenfahrzeuge — beim Schaden melden direkt auswählbar.'
+            : 'Leg dein Firmen-Konto an, um mehrere Fahrzeuge zentral zu verwalten.'
         }
         size="lg"
       />

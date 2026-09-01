@@ -112,7 +112,7 @@ npm ci                    # eigenes reales node_modules — tsc/vitest/build/nex
 - **Migrationen** via `npx supabase db push --linked --yes` (AGENTS Regel 2 — nie Management-API-DDL).
 - **Staging-Smoke (NEU, Session 5):** `node scripts/smoke-cmm44-mp4-staging.mjs` → Basic-Auth via
   `httpCredentials` (`STAGING_BASIC_AUTH_*` aus `.env.local`), Form-Login alle Test-Accounts
-  `test-*@claimondo.de` / `Test1234!` (2FA off), **Viewport**-Screenshots (NICHT fullPage — Fallakte hat
+  `test-*@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (2FA off), **Viewport**-Screenshots (NICHT fullPage — Fallakte hat
   Realtime → `networkidle` nie) + Phasen-Label-Textsignal + pageerror-Capture → `docs/27.05.2026/
   smoke-mp4-staging/`. **playwright via `@playwright/test` importieren** (Repo-Pin 1.59 → Browser-Build 1217
   gecacht; `npm i playwright` unpinned will 1223 → Executable-Mismatch).

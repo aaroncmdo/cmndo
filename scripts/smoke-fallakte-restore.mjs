@@ -12,8 +12,8 @@
 //
 // Defaults:
 //   Base       = http://localhost:3000
-//   Admin-User = test-admin@claimondo.de   / Test1234!
-//   Kunde-User = test-kunde@claimondo.de   / Test1234!
+//   Admin-User = test-admin@claimondo.de   / <PASSWORT: GitHub-Secret>
+//   Kunde-User = test-kunde@claimondo.de   / <PASSWORT: GitHub-Secret>
 //   Admin-Fall = 4ae54c7f-9425-4d3f-b214-26cbdf9f56a7  (gleicher wie smoke-stammdaten)
 //   Kunde-Fall = via Auto-Detect (erster Fall auf /kunde nach Login)
 //
@@ -33,7 +33,7 @@ const ADMIN_FALL_ID = arg('admin-fall', 'aaaa3333-0000-4000-8000-000000000003')
 const KUNDE_FALL_ID = arg('kunde-fall', 'aaaa3333-0000-4000-8000-000000000003')
 const ADMIN_EMAIL = process.env.SMOKE_ADMIN_EMAIL ?? 'test-admin@claimondo.de'
 const KUNDE_EMAIL = process.env.SMOKE_KUNDE_EMAIL ?? 'test-kunde@claimondo.de'
-const PASSWORD = process.env.SMOKE_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.SMOKE_PASSWORD ?? ''
 // Staging hat nginx Basic-Auth davor (User aaroncmdo). Per Env-Var setzen.
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER ?? 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASSWORD ?? null

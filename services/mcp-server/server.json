@@ -1,10 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "de.claimondo/sv-finder",
-  "title": "Claimondo — Kfz-Gutachter finden & Schaden melden",
-  "description": "Kfz-Schadenhilfe für Deutschland: findet zertifizierte Kfz-Sachverständige/Gutachter nach Postleitzahl, zeigt buchbare Termine, prüft den Schadenersatzanspruch (§ 249 BGB) und erklärt Versichererbriefe. Meldet auf Wunsch — nur nach ausdrücklicher Einwilligung des Nutzers — den Schaden an oder fordert einen Rückruf an; der persönliche Termin-/Kontaktlink geht anschließend per WhatsApp an den Kunden (kein Link im Chat). Anonyme Suche, geführte Buchung mit Consent-Pflicht.",
-  "version": "1.0.0",
+  "title": "Claimondo — Kfz-Gutachter finden & Termin buchen",
+  "description": "Findet Kfz-Gutachter in Deutschland, zeigt freie Termine und bucht den Besichtigungstermin.",
+  "version": "1.1.0",
   "websiteUrl": "https://claimondo.de",
+  "icons": [
+    {
+      "src": "https://claimondo.de/brand/logo-mark.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["44x44"]
+    }
+  ],
   "remotes": [
     {
       "type": "streamable-http",

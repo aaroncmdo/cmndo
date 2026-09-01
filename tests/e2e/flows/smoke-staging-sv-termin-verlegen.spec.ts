@@ -10,7 +10,7 @@ import fs from 'node:fs'
 const BASE = 'https://app.staging.claimondo.de'
 const BASIC_AUTH = { username: 'aaroncmdo', password: 'ClaimondoSuperuser123789!!' }
 const SV_EMAIL = 'aaron.sprafke@claimondo.de'
-const SV_PASS = 'Test1234!'
+const SV_PASS = (process.env.TEST_PASSWORT ?? '')
 
 const OUT_DIR = path.join(
   process.cwd(),

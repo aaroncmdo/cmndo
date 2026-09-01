@@ -9,7 +9,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 // smoke-admin@claimondo.test wurde vom prod-golive-Account-Cleanup (13.07.) entfernt —
 // test-admin@claimondo.de ist der aktuelle faktorfreie Admin-Smoke-Account.
-const ADMIN = { email: 'test-admin@claimondo.de', pw: 'Claimondo2026!' }
+const ADMIN = { email: 'test-admin@claimondo.de', pw: (process.env.TEST_PASSWORT ?? '') }
 
 async function login(page: Page) {
   await page.goto('/login', { waitUntil: 'domcontentloaded' })

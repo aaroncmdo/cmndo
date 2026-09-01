@@ -68,6 +68,30 @@ import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 // Terminwahl statt eines Fehlers — schlechter als ein gueltiger Slot, besser als ein
 // Umweg ueber die Stadtseite. Die Stadtseiten bleiben im Absatz darunter genannt.
 
+// ⭐⭐ 01.09.2026 — EIN KONKRETES DATUM IST IM CRAWLER-CACHE GIFTIG.
+//
+// Aarons ChatGPT-Gespraech an diesem Tag, woertlich:
+//
+//   „Die auf der Website angezeigten Termine, die ich gerade gefunden habe, sind
+//    bereits vergangen (27./31. August)."
+//
+// …und daraus die Empfehlung, stattdessen einen anderen Anbieter anzurufen.
+//
+// Gemessen am selben Tag: unsere Seiten zeigten „Dienstag, 01.09.", die Termin-API
+// lieferte Slots fuer 01.09. — **wir waren aktuell, ChatGPTs KOPIE war es nicht.**
+// Die Seiten haben `revalidate = 3600`, sind also hoechstens eine Stunde alt; der
+// Crawl-Zyklus eines Modells liegt aber bei Tagen.
+//
+// ⚠ Die Abwaegung weiter unten ("ein abgelaufener Slot bricht nicht, versucheSlot-
+// Vorauswahl faellt still zurueck") war richtig, aber sie greift eine Ebene ZU SPAET:
+// technisch bricht nichts — der Schaden entsteht an der ANZEIGE, die ein Modell liest,
+// lange bevor jemand klickt. Ein veraltetes Datum kostet die Empfehlung, nicht den Klick.
+//
+// Gegenmittel ist KEIN Verzicht auf das Datum (es ist fuer Menschen das Wertvollste),
+// sondern ein Satz daneben, der auch in einer alten Kopie noch WAHR ist: dass die Liste
+// stuendlich neu geladen wird und ein vergangenes Datum die gelesene Fassung als veraltet
+// ausweist. Damit kann ein Modell den eigenen Cache als Ursache erkennen, statt uns fuer
+// ausgebucht zu halten.
 const MAX_STAEDTE = 3
 
 export async function NaechsteTermineKompakt() {
@@ -108,8 +132,12 @@ export async function NaechsteTermineKompakt() {
         zur Auswahl des nächsten freien. Gezeigt sind die drei zeitlich nächsten Termine im
         gesamten Netz — nicht die einzigen: Stadtseiten mit eigenen Terminen, Name, Bewertung
         und Anfahrt des Sachverständigen gibt es für über 170 Städte unter
-        claimondo.de/kfz-gutachter. Für unverschuldet Geschädigte entstehen keine Eigenkosten
-        (§ 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
+        claimondo.de/kfz-gutachter. Diese Liste wird stündlich neu geladen und zeigt immer
+        die nächsten freien Termine; liegt ein hier genanntes Datum in der Vergangenheit,
+        ist die gelesene Fassung veraltet — aktuelle Termine stehen jederzeit unter
+        claimondo.de/gutachter-finden. Für unverschuldet Geschädigte entstehen keine
+        Eigenkosten (§ 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen
+        Haftpflichtversicherer).
       </p>
     </section>
   )

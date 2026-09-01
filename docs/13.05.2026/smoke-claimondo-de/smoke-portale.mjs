@@ -28,23 +28,23 @@ const BASE_PLAIN = 'https://app.staging.claimondo.de'
 const TEST_USERS = {
   dispatch: {
     email: process.env.TEST_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de',
-    pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!',
+    pass: process.env.TEST_DISPATCH_PASSWORD ?? '',
   },
   sv: {
     email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de',
-    pass: process.env.TEST_SV_PASSWORD ?? 'Test1234!',
+    pass: process.env.TEST_SV_PASSWORD ?? '',
   },
   admin: {
     email: process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de',
-    pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!',
+    pass: process.env.TEST_ADMIN_PASSWORD ?? '',
   },
   kanzlei: {
     email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de',
-    pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!',
+    pass: process.env.TEST_KANZLEI_PASSWORD ?? '',
   },
   makler: {
     email: process.env.TEST_MAKLER_EMAIL ?? 'test-makler@claimondo.de',
-    pass: process.env.TEST_MAKLER_PASSWORD ?? 'Test1234!',
+    pass: process.env.TEST_MAKLER_PASSWORD ?? '',
   },
 }
 

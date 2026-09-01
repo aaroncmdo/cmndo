@@ -310,7 +310,7 @@ gh pr create --base main --title "refactor(frontend): P2-T7.2 — admin/finance-
 - Modify: `src/app/gutachter/team/TeamClient.tsx`
 - *(+ weitere die `grep -rln "<table\b" src/app/gutachter` zeigt — vor Batch-Start greppen, Liste vervollständigen)*
 
-- [ ] **Step 1–4:** Wie T7.2. PR `kitta/aar-datatable-gutachter`, Titel `P2-T7.4 — gutachter-Tabellen → shared/DataTable`. **Hinweis:** Gutachter-Portal ist whitelabel-gebrandet → die `claimondo-*`-Klassen in `DataTable` greifen automatisch das Brand-Theme (`globals.css` biegt sie auf `var(--brand-*)` um); kein Sonderfall. Trotzdem im PR notieren + (wenn möglich) im SV-Test-Login (`test-sv@claimondo.de` / `Test1234!`, `use_custom_branding=true`) durchklicken.
+- [ ] **Step 1–4:** Wie T7.2. PR `kitta/aar-datatable-gutachter`, Titel `P2-T7.4 — gutachter-Tabellen → shared/DataTable`. **Hinweis:** Gutachter-Portal ist whitelabel-gebrandet → die `claimondo-*`-Klassen in `DataTable` greifen automatisch das Brand-Theme (`globals.css` biegt sie auf `var(--brand-*)` um); kein Sonderfall. Trotzdem im PR notieren + (wenn möglich) im SV-Test-Login (`test-sv@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`, `use_custom_branding=true`) durchklicken.
 
 ---
 

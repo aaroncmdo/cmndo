@@ -79,6 +79,7 @@ function autoIcon(kategorie: MitteilungKategorie, kontextTyp?: KontextTyp): stri
 
 export async function createMitteilung(input: CreateMitteilungInput): Promise<{ id: string } | null> {
   const admin = createAdminClient()
+
   const routeUrl = input.route_url ?? (await autoRouteUrl(input.kontext_typ, input.kontext_id, input.empfaenger_rolle))
   const icon = input.icon ?? autoIcon(input.kategorie, input.kontext_typ)
   const { data, error } = await admin.from('mitteilungen').insert({
