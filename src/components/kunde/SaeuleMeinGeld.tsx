@@ -163,13 +163,13 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
                     {fmt(summe)}
                   </span>
                 </div>
-                <p className="text-[11px] text-claimondo-ondo">{t('summeVorbehalt')}</p>
+                <p className="text-body-sm text-claimondo-ondo">{t('summeVorbehalt')}</p>
               </div>
             )}
           </div>
         )}
 
-        <p className="text-[11px] text-claimondo-ondo">
+        <p className="text-body-sm text-claimondo-ondo">
           {t('auszahlungHinweis')}
         </p>
       </div>
