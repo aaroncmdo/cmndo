@@ -65,7 +65,7 @@ export default function KostenvoranschlagCard({
 
   async function handleFreigeben() {
     if (!signature) {
-      toast.error('Bitte unterschreiben Sie den Reparaturauftrag.')
+      toast.error('Bitte unterschreibe den Reparaturauftrag.')
       return
     }
     const res = await genehmigeKvaPortal(claimId, signature)
@@ -148,7 +148,7 @@ export default function KostenvoranschlagCard({
               freigeben.
             </p>
             {abgelehntGrund && (
-              <p className="text-body-sm text-claimondo-ondo mt-1.5">Ihr Hinweis: „{abgelehntGrund}“</p>
+              <p className="text-body-sm text-claimondo-ondo mt-1.5">Dein Hinweis: „{abgelehntGrund}“</p>
             )}
           </div>
         )}

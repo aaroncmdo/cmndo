@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "الدفع:",
         "aufMeinKonto": "إلى حسابي",
         "direktWerkstatt": "مباشرةً إلى الورشة",
-        "auszahlungFrage": "إلى أين يجب توجيه الدفع؟"
+        "auszahlungFrage": "إلى أين يجب توجيه الدفع؟",
+        "summeTitel": "مطالبتك بناءً على التقرير",
+        "summeVorbehalt": "قد يختلف ما تدفعه شركة التأمين في النهاية — نحن نتفاوض على ذلك نيابة عنك."
       },
       "meinBetreuer": {
         "heading": "مسؤول حسابي",

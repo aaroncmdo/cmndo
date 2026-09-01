@@ -42,7 +42,7 @@ export default function FlowAiIntake({
   const [verlauf, setVerlauf] = useState<Turn[]>([
     {
       role: 'assistant',
-      content: 'Hallo! Ich helfe Ihnen, Ihren Unfall kurz zu schildern. Was ist passiert?',
+      content: 'Hallo! Ich helfe dir, deinen Unfall kurz zu schildern. Was ist passiert?',
     },
   ])
   const [eingabe, setEingabe] = useState('')
@@ -76,7 +76,7 @@ export default function FlowAiIntake({
         {
           role: 'assistant',
           content: !res.ok
-            ? (res.error ?? 'Das Foto konnte nicht gespeichert werden — erzählen Sie einfach weiter.')
+            ? (res.error ?? 'Das Foto konnte nicht gespeichert werden — erzähl einfach weiter.')
             : res.beschreibung
               ? `Danke! Auf dem Foto erkenne ich: ${res.beschreibung}`
               : 'Danke, das Foto ist gespeichert.',
