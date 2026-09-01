@@ -7,6 +7,7 @@ import {
   ermittleImStatusSeit,
   tageImStatus,
   baueHaengerTaskText,
+  terminSchuetztNoch,
   HAENGER_SCHWELLE_TAGE,
   HAENGER_TASK_CODE,
 } from '@/lib/claims/haenger-detektor'
@@ -85,13 +86,19 @@ export async function GET(request: Request) {
 
   // 3) Aktive Termine. Der Bezug haengt je nach Alter an claim_id, fall_id ODER bezug_id
   //    — alle drei beruecksichtigen, sonst gilt ein terminierter Fall faelschlich als Haenger.
+  //    ⭐ `start_zeit` MUSS mitgelesen werden: ein Termin mit aktivem Status galt bis
+  //    31.08. unabhaengig von seiner Zeit als Schutz — dadurch fielen ausgerechnet die
+  //    Faelle mit laengst verstrichenem "bestaetigtem" Termin aus dem Alarm (belegt an
+  //    CLM-2026-00935 / CLM-2026-01005, 43 bzw. 33 Tage nie gemeldet). Die Zeitregel
+  //    liegt pur und unit-getestet in terminSchuetztNoch.
   const { data: termine } = await db
     .from('gutachter_termine')
-    .select('claim_id, fall_id, bezug_id')
+    .select('claim_id, fall_id, bezug_id, start_zeit')
     .is('cancelled_at', null)
     .in('status', AKTIVE_TERMIN_STATUS)
   const mitAktivemTermin = new Set<string>()
   for (const t of termine ?? []) {
+    if (!terminSchuetztNoch(t.start_zeit as string | null, jetzt)) continue
     for (const key of ['claim_id', 'fall_id', 'bezug_id'] as const) {
       const v = t[key] as string | null
       if (v) mitAktivemTermin.add(v)
