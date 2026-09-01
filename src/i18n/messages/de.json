@@ -4686,8 +4686,8 @@
       },
       "meinGeld": {
         "heading": "Mein Geld",
-        "totalschadenBadge": "Ihr Fahrzeug ist ein Totalschaden",
-        "ihreForderung": "Ihre Forderung",
+        "totalschadenBadge": "Dein Fahrzeug ist ein Totalschaden",
+        "ihreForderung": "Deine Forderung",
         "beforeGutachten": "Beträge werden nach Gutachten-Erstellung angezeigt.",
         "ausGutachten": "Aus dem Gutachten",
         "vomGutachterGeprueft": "Vom Gutachter geprüft",
@@ -4695,11 +4695,13 @@
         "wiederbeschaffungswert": "Wiederbeschaffungswert",
         "abzglRestwert": "abzgl. Restwert",
         "minderwert": "Minderwert",
-        "auszahlungHinweis": "Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.",
+        "auszahlungHinweis": "Die tatsächliche Auszahlung siehst du nach der Regulierung.",
         "auszahlungLabel": "Auszahlung:",
         "aufMeinKonto": "Auf mein Konto",
         "direktWerkstatt": "Direkt an Werkstatt",
-        "auszahlungFrage": "Wohin soll die Auszahlung gehen?"
+        "auszahlungFrage": "Wohin soll die Auszahlung gehen?",
+        "summeTitel": "Deine Forderung aus dem Gutachten",
+        "summeVorbehalt": "Was die Versicherung am Ende zahlt, kann davon abweichen — wir verhandeln das für dich."
       },
       "meinBetreuer": {
         "heading": "Mein Betreuer",
