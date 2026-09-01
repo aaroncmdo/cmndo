@@ -129,7 +129,10 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
           im gesperrten Zustand (dann als Anzeige mit Begruendung, statt wortlos zu fehlen). */}
       <div className="rounded-ios-xl border border-claimondo-border bg-white px-4 py-4">
         <p className="text-body-sm font-semibold text-claimondo-navy">Abrechnungsart</p>
-        <p className="text-caption text-claimondo-ondo mt-0.5">
+        {/* Lesbarkeits-Audit 01.09.: stand auf `text-caption` — das ist der OVERLINE-Token
+            (10 px, weight 600, letter-spacing), gedacht fuer Labels wie „AUS GUTACHTEN".
+            Fuer einen ganzen Satz ist er die falsche Stufe; gemessen kamen 10 px an. */}
+        <p className="text-body-sm text-claimondo-ondo mt-0.5">
           Reparatur in der Werkstatt oder Auszahlung auf Gutachtenbasis.
         </p>
         <AuszahlungsartWahlKunde

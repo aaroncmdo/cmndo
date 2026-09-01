@@ -54,6 +54,8 @@ async function run() {
     schadenart: 'haftpflicht',
     schadentag: new Date().toISOString().slice(0, 10),
     status: 'in_bearbeitung',
+    // Testdaten-Marker (Mig 20260831222740) — direkter Insert ohne den Convert-Pfad.
+    ist_testfall: true,
   }).select('id').single()
   if (claimErr) { console.error('[f04-int] Claim-Insert fehlgeschlagen:', claimErr.message); process.exit(1) }
   claimId = claim.id
