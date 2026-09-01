@@ -21,17 +21,27 @@
 --   2. keine Claims daran
 --   3. aelter als 6 h — kein laufender Smoke wird unterbrochen (ein Test laeuft nie 6 h)
 
-select cron.schedule(
-  'smoke-werkstatt-leichen-sperren',
-  '0 * * * *',
-  $$
-  update public.werkstaetten
-     set status = 'gesperrt'
-   where name ~ '^SMOKE '
-     and status = 'aktiv'
-     and created_at < now() - interval '6 hours'
-     and not exists (
-       select 1 from public.claims c where c.werkstatt_id = werkstaetten.id
-     )
-  $$
-);
+-- ⚠ GEGUARDET (nachgezogen 01.09.): Im From-Scratch-Replay (Supabase-Preview) existiert das
+-- Schema "cron" nicht — ein ungeguardetes cron.schedule bricht dort den gesamten Replay mit
+-- `ERROR: schema "cron" does not exist (SQLSTATE 3F000)`. Genau so passiert, bevor dieser
+-- Guard hier stand. Muster uebernommen von 20260630191718_comment_retention_cron.sql.
+-- Auf prod ist der Job bereits angelegt; der Guard aendert dort nichts (das Schema existiert).
+do $$
+begin
+  if exists (select 1 from pg_namespace where nspname = 'cron') then
+    perform cron.schedule(
+      'smoke-werkstatt-leichen-sperren',
+      '0 * * * *',
+      $job$
+      update public.werkstaetten
+         set status = 'gesperrt'
+       where name ~ '^SMOKE '
+         and status = 'aktiv'
+         and created_at < now() - interval '6 hours'
+         and not exists (
+           select 1 from public.claims c where c.werkstatt_id = werkstaetten.id
+         )
+      $job$
+    );
+  end if;
+end $$;

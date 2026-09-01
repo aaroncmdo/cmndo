@@ -1471,15 +1471,27 @@ export async function signSAandCreateFall(
   // Der Termin bleibt ein eigener Zweck (T4 `termin_bestaetigt`) — hier steht nur der
   // neutrale Satz „Zu Ihrem Gutachter-Termin melden wir uns", der in beiden Fällen
   // stimmt (reserviert wie noch offen) und keine Fallunterscheidung braucht.
+  // ⚠ Das Ergebnis wird GEPRUEFT, nicht verworfen (31.08.): hier stand ein `catch { /* */ }`.
+  // Diese Nachricht ist die einzige Bestaetigung, die der Kunde nach dem Unterschreiben der
+  // Sicherungsabtretung bekommt — ein stiller Fehlschlag ist genau der Fall, den niemand
+  // bemerkt. `sendFallCommunication` wirft nicht, es liefert `{ sent, reason }`; ohne diese
+  // Pruefung sind „zugestellt" und „kein Empfaenger" nicht unterscheidbar.
   try {
     const { sendFallCommunication } = await import('@/lib/communications/send-fall')
     // '2' würde sonst auf regulierung_betrag zeigen; '3' ist der Portal-Link.
     const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/faelle/${fall.id}`
-    await sendFallCommunication(fall.id, 'fall_eroeffnet', {
+    const res = await sendFallCommunication(fall.id, 'fall_eroeffnet', {
       '2': fallNummer,
       '3': portalUrl,
     })
-  } catch { /* */ }
+    if (!res.sent) {
+      console.error(
+        `[signSAandCreateFall] Auftragsbestaetigung 'fall_eroeffnet' NICHT zugestellt (Fall ${fall.id}, ${fallNummer}): ${res.reason ?? 'unbekannt'}`,
+      )
+    }
+  } catch (err) {
+    console.error(`[signSAandCreateFall] Auftragsbestaetigung 'fall_eroeffnet' warf (Fall ${fall.id}):`, err)
+  }
 
   // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)
   if (lead.gutachter_termin) {
@@ -1604,8 +1616,13 @@ export async function signSAandCreateFall(
     }
   }
 
-  // 11. Benachrichtigung
-  try { await notifyNeuerFall(fall.id) } catch { /* */ }
+  // 11. Benachrichtigung — Fehler wird geloggt statt verschluckt (31.08.): schlaegt sie
+  // still fehl, erfaehrt das Team von einem frisch beauftragten Fall gar nichts.
+  try {
+    await notifyNeuerFall(fall.id)
+  } catch (err) {
+    console.error(`[signSAandCreateFall] notifyNeuerFall fehlgeschlagen (Fall ${fall.id}):`, err)
+  }
 
   // 12. AAR-127: Welcome-Mail wird jetzt aus createKundeAccount mit Magic-Link
   // + Zugangsdaten verschickt, nicht mehr hier. Der SA-Step und createKundeAccount
