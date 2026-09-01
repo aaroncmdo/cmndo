@@ -143,8 +143,8 @@ export default function KostenvoranschlagCard({
         {abgelehnt && (
           <div className="rounded-ios-lg bg-warning-soft px-3 py-2.5">
             <p className="text-body-sm text-claimondo-navy">
-              Sie haben den Kostenvoranschlag abgelehnt. Die Werkstatt wurde benachrichtigt und
-              überarbeitet ihn — sobald ein neuer Kostenvoranschlag vorliegt, können Sie ihn hier
+              Du hast den Kostenvoranschlag abgelehnt. Die Werkstatt wurde benachrichtigt und
+              überarbeitet ihn — sobald ein neuer Kostenvoranschlag vorliegt, kannst du ihn hier
               freigeben.
             </p>
             {abgelehntGrund && (
@@ -157,7 +157,7 @@ export default function KostenvoranschlagCard({
         {!freigegeben && !abgelehnt && (
           <div className="space-y-3 pt-1">
             <p className="text-body-sm text-claimondo-ondo">
-              Prüfen Sie den Kostenvoranschlag und erteilen Sie den Reparaturauftrag mit Ihrer
+              Prüf den Kostenvoranschlag und erteil den Reparaturauftrag mit deiner
               Unterschrift, damit die Werkstatt mit der Reparatur beginnen kann.
             </p>
             <div>
