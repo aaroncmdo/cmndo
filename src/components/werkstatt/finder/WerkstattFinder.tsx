@@ -187,7 +187,13 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
                       </div>
                     ) : null}
                     {adresse ? (
-                      <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
+                      // Mobil-Audit 31.08. (375 px): `truncate` schnitt die Adresse
+                      // mitten im Ort ab — „Ernst-Reuter-Straße 42A, 41836 Hückelh…".
+                      // Der Kunde soll eine Werkstatt WÄHLEN und sah den Ort nicht;
+                      // zusammen mit der fehlenden Entfernung blieb ihm kein
+                      // Kriterium ausser dem Namen. Ab `sm` bleibt die kompakte
+                      // Einzeiler-Darstellung.
+                      <p className="mt-0.5 text-sm text-claimondo-ondo sm:truncate">
                         {adresse}
                       </p>
                     ) : null}
