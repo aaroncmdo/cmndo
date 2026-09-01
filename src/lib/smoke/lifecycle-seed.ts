@@ -190,6 +190,15 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     // CMM-44 SP-A3: szenario-spezifischer Marker (SMOKE-LC-<idx>) — dient
     // Reset-Filter UND Szenario↔Claim-Zuordnung in der Smoke-Lifecycle-Page.
     fall_typ: smokeTagForScenario(idx),
+    // Kanonischer Testdaten-Marker (Mig 20260831222740). Der fall_typ-Praefix oben bleibt
+    // Reset-/Zuordnungs-Schluessel dieses Seeders; ist_testfall ist die TABELLENWEITE
+    // Achse, auf der Listen und Kennzahlen filtern. Hier explizit gesetzt statt aus der
+    // Email abgeleitet: dieser Seeder legt seine Claims DIREKT an, nicht ueber
+    // convert-lead-to-claim.ts — die dortige Ableitung greift also nie.
+    // ⚠ Ohne diese Zeile entstuende genau die Luecke, die bei ist_testaccount schon
+    // dokumentiert ist (api/cron/sv-buchbarkeit/route.ts:48: "reicht als Filter NICHT —
+    // die ZZ-Smoke-Konten sind nicht so markiert").
+    ist_testfall: true,
     // CMM-44 MP-6c: claims.phase gedroppt — kein phase-Write mehr. Die Phase
     // leitet sich aus status + Sub-Entity-Zustand ab (v_claim_phase).
     // T3-S4: claims.status wird nicht mehr geseedet — operative_status ist die einzige Achse.
