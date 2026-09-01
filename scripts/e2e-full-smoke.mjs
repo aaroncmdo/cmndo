@@ -388,6 +388,11 @@ async function main() {
                   schadenart: 'haftpflicht',
                   status: 'dispatch_done',
                   created_via: 'lead_konvertierung',
+                  // Testdaten-Marker (Mig 20260831222740): dieser Claim entsteht DIREKT,
+                  // nicht ueber convert-lead-to-claim.ts — die dortige Ableitung aus der
+                  // Lead-Domain greift also nie. Ohne diese Zeile bliebe er nach einem
+                  // Lead-Cleanup von einem echten Kundenfall ununterscheidbar.
+                  ist_testfall: true,
                 })
                 .select('id')
                 .single()
