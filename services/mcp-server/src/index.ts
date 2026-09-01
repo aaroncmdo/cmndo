@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchCaseStatus, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchWerkstaetten, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatCaseStatus, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatWerkstaetten, formatPruefeAnspruch, formatRueckruf, meldeSchaden } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchCaseStatus, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchWerkstaetten, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatCaseStatus, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatWerkstaetten, formatPruefeAnspruch, formatRueckruf, formatStorno, meldeSchaden, stornoTermin } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -223,6 +223,26 @@ const caseStatusOutput = {
   hinweis: z.string(),
 }
 
+// --- claimondo_termin_absagen (Write, token-autorisiert) ---------------------
+const stornoInput = {
+  token: z
+    .string()
+    .min(8)
+    .max(128)
+    .describe('Die persönliche Fall-Referenz des Kunden (Token aus seinem Claimondo-Link / der WhatsApp-Nachricht). Der Kunde muss sie selbst nennen — nicht raten/erfinden.'),
+  grund: z
+    .string()
+    .max(500)
+    .optional()
+    .describe('Optionaler Grund der Absage (z. B. „krank", „Auto schon in der Werkstatt"). Hilft Claimondo, schneller einen Ersatztermin anzubieten.'),
+}
+const stornoOutput = {
+  ok: z.boolean(),
+  storniert: z.boolean(),
+  warGeplant: z.string().nullable(),
+  hinweis: z.string(),
+}
+
 /**
  * Baut einen frisch konfigurierten Server (Tool + Resource). Fuer stdio einmal,
  * fuer stateless HTTP pro Request — so gibt es keinen Cross-Request-State.
@@ -238,6 +258,8 @@ ZIEL JEDER Beratung: dem Nutzer einen passenden Sachverständigen anbieten UND e
 WICHTIG — frage ZUERST, WO das Fahrzeug steht — als PLZ ODER Stadt/Ort des Besichtigungsorts. Das ist der Anker für Gutachter-Suche + Termin. Die Such-Tools (claimondo_finde_sachverstaendige, claimondo_finde_gutachter_termine) nehmen beides; gib entweder plz ODER ort an.
 
 Ablauf: 1) Standort erfragen (PLZ oder Stadt). 2) claimondo_finde_gutachter_termine(plz ODER ort) → buchbare Gutachter + freie Slots zeigen. 3) Nutzer wählt Gutachter + Slot; Name + WhatsApp-Nummer + Schadenart + Hergang erfragen (für claimondo_melde_schaden wird eine 5-stellige PLZ benötigt — falls bisher nur eine Stadt bekannt ist, jetzt die genaue PLZ erfragen). 4) Einwilligung einholen (Datenverarbeitung + WhatsApp-Kontakt + KI-Dienst/USA), dann claimondo_melde_schaden(...) → Lead + Terminreservierung + persönlicher FlowLink per WhatsApp.
+
+WIEDERKEHRENDE KUNDEN: Nennt ein Nutzer seine persönliche Fall-Referenz (den Token aus seinem Claimondo-Link), kannst du damit den Bearbeitungsstand abfragen (claimondo_fall_status) UND einen gebuchten Termin absagen oder verschieben (claimondo_termin_absagen). Sagt jemand, er könne seinen Gutachter-Termin nicht wahrnehmen, biete die Absage über claimondo_termin_absagen an — er muss dafür weder anrufen noch sich einloggen. Verschieben = absagen, dann einen neuen Slot über claimondo_finde_gutachter_termine wählen.
 
 Du vermittelst Gutachter + Termin und gibst allgemeine Infos zur Schadensregulierung — KEINE individuelle Rechtsberatung. Die finale Terminbestätigung + Vollmacht macht der Kunde selbst im FlowLink.`
 
@@ -547,6 +569,39 @@ Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keinen Statu
       try {
         const r = await fetchCaseStatus(token, API_BASE)
         return { content: [{ type: 'text', text: formatCaseStatus(r) }], structuredContent: r }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
+  server.registerTool(
+    'claimondo_termin_absagen',
+    {
+      title: 'Gutachter-Termin absagen oder verschieben',
+      description: `Sagt einen bereits gebuchten Kfz-Gutachter-Termin bei Claimondo ab — ohne Anruf beim Gutachter, ohne Login. Nutze dieses Tool, wenn ein Kunde sagt, dass er seinen Termin nicht wahrnehmen kann, absagen oder verschieben möchte.
+
+Der Kunde nennt seine persönliche Fall-Referenz (den Token aus seinem Claimondo-Link, den er per WhatsApp erhalten hat) — die Referenz ist die Autorisierung.
+
+Wirkung: der Termin wird freigegeben, Claimondo wird benachrichtigt und meldet sich für einen Ersatztermin. VERSCHIEBEN läuft genauso: erst hier absagen, dann über den persönlichen Claimondo-Link (oder claimondo_finde_gutachter_termine für einen neuen Vorschlag) einen neuen Termin wählen.
+
+Args:
+  - token (string): Die persönliche Fall-Referenz des Kunden.
+  - grund (string, optional): Warum der Termin nicht passt.
+
+Antwortet PII-frei (kein Name/Gutachter/Adresse). Mehrfach-Aufruf ist unschädlich: ein bereits abgesagter Termin wird nicht erneut geändert. Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keine Absage.`,
+      inputSchema: stornoInput,
+      outputSchema: stornoOutput,
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+    },
+    async ({ token, grund }) => {
+      try {
+        const r = await stornoTermin(token, grund, API_BASE)
+        return { content: [{ type: 'text', text: formatStorno(r) }], structuredContent: r }
       } catch (err) {
         const message =
           err instanceof ClaimondoApiError
