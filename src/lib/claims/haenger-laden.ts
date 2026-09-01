@@ -53,10 +53,20 @@ export async function ladeHaengendeClaims(
   jetzt: Date = new Date(),
 ): Promise<HaengerLadeErgebnis> {
   // 1) Aktive Claims. Grob-Filter in der DB, Feinentscheidung in der puren istHaenger.
+  //
+  // ⭐ `ist_testfall` MUSS mit (Mig 20260831222740). Gemessen 01.09. NACH der
+  // Testdaten-Bereinigung: von 51 stillstehenden Claims waren **27 Testdaten** — mehr als
+  // die Haelfte. Ohne diesen Filter zeigte das Dashboard mehrheitlich Phantome und
+  // reproduzierte damit genau das Problem, gegen das es gebaut wurde.
+  //
+  // Der Namens-/Email-Filter in istHaenger reicht dafuer NICHT: er greift nur, wenn ein
+  // Kundenprofil haengt. Die Ops-Test-Claims haben gar keines (und ihr Lead ist geloescht,
+  // claims_lead_id_fkey = ON DELETE SET NULL) — genau deshalb existiert die Spalte.
   const { data: claims, error: claimErr } = await db
     .from('claims')
-    .select('id, claim_nummer, operative_status, abgeschlossen_am, created_at, geschaedigter_user_id')
+    .select('id, claim_nummer, operative_status, abgeschlossen_am, created_at, geschaedigter_user_id, ist_testfall')
     .is('abgeschlossen_am', null)
+    .eq('ist_testfall', false)
   if (claimErr) return { haenger: [], geprueft: 0, error: claimErr.message }
   if (!claims || claims.length === 0) return { haenger: [], geprueft: 0 }
 
