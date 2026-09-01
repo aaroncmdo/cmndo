@@ -64,8 +64,8 @@ export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
           <h2 className="text-sm font-semibold text-claimondo-navy">Werkstatt finden</h2>
         </div>
         <p className="text-body-sm text-claimondo-ondo">
-          Wähle eine Partner-Werkstatt in deiner Nähe für die Reparatur. Sie meldet sich danach zur
-          Terminabstimmung bei dir.
+          Wähle eine Partner-Werkstatt in deiner Nähe für die Reparatur. Die Werkstatt meldet sich
+          danach zur Terminabstimmung bei dir.
         </p>
         <WerkstattFinderMap
           werkstaetten={werkstaetten ?? []}
