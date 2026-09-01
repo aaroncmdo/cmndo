@@ -483,7 +483,7 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
 Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu"). Erfrage zuerst die Schuldfrage (unverschuldet/teilschuld/selbst). Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
       inputSchema: pruefeAnspruchInput,
       outputSchema: pruefeAnspruchOutput,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     async ({ schuldfrage, schadenart, vollkasko }) => {
       try {
@@ -508,7 +508,7 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
 Übergib den Brief-Text (oder den relevanten Auszug) als "text". Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
       inputSchema: decodeBriefInput,
       outputSchema: decodeBriefOutput,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     async ({ text }) => {
       try {
@@ -533,7 +533,7 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
 Erfrage Name + Telefonnummer + (optional) Schadenart/Anliegen/PLZ. Rufe dies NUR mit einwilligung_erteilt=true auf, NACHDEM der Nutzer der Datenverarbeitung + dem telefonischen Kontakt (Verarbeitung teils über einen KI-Dienst in den USA) ausdrücklich zugestimmt hat.`,
       inputSchema: rueckrufInput,
       outputSchema: rueckrufOutput,
-      annotations: { readOnlyHint: false, openWorldHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
     async ({ name, telefon, schadenart, anliegen, plz, ort, wunschzeit, einwilligung_erteilt }) => {
       try {
@@ -563,7 +563,7 @@ Args:
 Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keinen Status. Unbekannte/ungültige Referenz -> „kein Fall gefunden".`,
       inputSchema: caseStatusInput,
       outputSchema: caseStatusOutput,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     async ({ token }) => {
       try {
