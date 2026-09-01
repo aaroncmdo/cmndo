@@ -151,6 +151,37 @@ export async function sendFallCommunicationDirekt(
     // sendCommunication liefert void und WIRFT bei Fehlern (AAR-117) -> catch.
     // Kommen wir hier an, wurde ueber mind. einen Kanal (WA/Email) gesendet.
     await sendCommunication(triggerName, data, { locale: recipientLocale })
+
+    // ── Spur in der Fallakte (31.08.) ────────────────────────────────────────
+    // Der Template-Weg hinterliess bisher KEINE Zeile in `nachrichten` — nur der direkte
+    // (`sendManualWhatsApp`, Zugangsdaten) tut das. Folge: ob ein Kunde seine
+    // Auftragsbestaetigung bekommen hat, war weder in der Akte noch per Query feststellbar.
+    // Gemessen 31.08.: `fall_eroeffnet` = 8x `sent` in der Outbox, 0 Zeilen in `nachrichten`
+    // -> eine Messung "hat der Kunde etwas bekommen?" lief zwangslaeufig ins Leere (mir genau
+    // so passiert). Bei einer Bestaetigung zur Sicherungsabtretung ist das die falsche Seite
+    // des Zweifels.
+    //
+    // Protokolliert wird der ANLASS (template_key + Zeitpunkt + Empfaenger), nicht der
+    // Wortlaut: der entsteht bei WA-Templates erst in der i18n-Schicht und liegt hier nicht
+    // vor. Ein erfundener Text waere schlechter als keiner.
+    // Non-fatal: der Versand ist an dieser Stelle durch — ein Protokollfehler darf ihn nie
+    // nachtraeglich als gescheitert erscheinen lassen.
+    const kanalFuerProtokoll = config.channel.includes('whatsapp') ? 'whatsapp' : 'email'
+    const { error: protokollFehler } = await supabase.from('nachrichten').insert({
+      claim_id: claimId,
+      kanal: kanalFuerProtokoll,
+      richtung: 'outbound',
+      status: 'gesendet',
+      template_key: triggerName,
+      nachricht: config.description,
+      empfaenger_kontakt: (kanalFuerProtokoll === 'whatsapp' ? telefon : email) ?? null,
+      is_system: true,
+      sender_rolle: 'system',
+    })
+    if (protokollFehler) {
+      console.error(`[sendFallCommunicationDirekt] ${triggerName}: gesendet, aber NICHT protokolliert (Claim ${claimId}):`, protokollFehler.message)
+    }
+
     return { sent: true }
   } catch (err) {
     console.error(`[sendFallCommunicationDirekt] ${triggerName} for fall ${fallId}:`, err)
