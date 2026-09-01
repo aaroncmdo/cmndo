@@ -356,6 +356,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Das Nobody-Passwort stand bis 01.09. im Klartext im Script (siehe dort). Seit
+          # der Konto-Rotation vom 31.08. war es tot und blockierte drei fachfremde PRs.
+          # Das Secret existiert seit der Rotation — es fehlte nur diese Zeile.
+          TEST_RLS_NOBODY_PASSWORD: ${{ secrets.TEST_RLS_NOBODY_PASSWORD }}
 
       # Claims-Spalten-Cap (14.07.2026): SPALTEN-Schicht. Die beiden Checks oben pruefen, ob
       # jemand ZEILEN sieht, die er nicht darf — nie, ob er von einer erlaubten Zeile ZU VIELE

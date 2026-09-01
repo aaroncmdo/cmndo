@@ -90,6 +90,16 @@ env:
   # drei Konten haben 0 verifizierte Faktoren (auth.mfa_factors, gemessen 01.09.), und ein
   # BESETZTES TOTP-Secret bei faktorlosem Konto laesst loginContext() in MFA laufen.
   TEST_KB_PASSWORD: ${{ secrets.TEST_KB_PASSWORD }}
+  # 01.09., dritte Instanz derselben Kette: nachdem der Kunde-Login (oben) stand, blieb
+  # `2fa-enroll-smoke` am eigenen Konto haengen — `page.waitForURL` lief 20 s ins Leere,
+  # weil der Login auf /login stehenblieb. Ursache identisch: `SMOKE_ENROLL_PASSWORD`
+  # verlor mit #5797 seinen Klartext-Default (richtig) und wurde nie durchgereicht.
+  #
+  # Das Secret EXISTIERT (angelegt 01.09. 11:17) — es fehlte nur diese Zeile. Der Seed
+  # `seed-smoke-enroll.mjs` bricht jetzt zusaetzlich laut ab, wenn der Wert leer ist,
+  # statt dem Konto ein LEERES Passwort zu setzen und Erfolg zu melden; dieser stille
+  # Auth-Write war der eigentliche Schaden.
+  SMOKE_ENROLL_PASSWORD: ${{ secrets.SMOKE_ENROLL_PASSWORD }}
 
 jobs:
   journey-gate:

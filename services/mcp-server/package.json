@@ -1,6 +1,6 @@
 {
   "name": "claimondo-mcp-server",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": true,
   "description": "MCP server for Claimondo's public /api/v1 (Germany, Kfz-Schaden): find Kfz-Sachverstaendige/Gutachter, show bookable slots, check claim eligibility, decode insurer letters, and — with explicit user consent — file a claim or request a callback (personal FlowLink delivered to the customer via WhatsApp). For LLM clients (claude.ai/Claude Desktop, ChatGPT connectors, Cursor).",
   "type": "module",

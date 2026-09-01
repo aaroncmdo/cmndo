@@ -82,7 +82,7 @@ export function FlowWerkstattStep({ token, onWeiter }: { token: string; onWeiter
         <div>
           <h2 className="text-lg font-semibold text-claimondo-navy">Wunschtermin vorschlagen</h2>
           <p className="text-sm text-claimondo-ondo mt-1">
-            Ihr Fahrzeug wird zu <strong>{anzeige}</strong> gebracht. Wann möchten Sie es
+            Dein Fahrzeug wird zu <strong>{anzeige}</strong> gebracht. Wann möchtest du es
             hinbringen? (optional)
           </p>
         </div>

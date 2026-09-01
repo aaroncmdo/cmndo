@@ -123,7 +123,7 @@ export default function WerkstattIntakeSignatur({
       <div className="max-w-md mx-auto">
         <h1 className="text-2xl font-semibold text-claimondo-navy mb-1 text-center">Bitte bestätigen &amp; unterschreiben</h1>
         <p className="text-claimondo-ondo text-sm mb-6 text-center">
-          Ihre Werkstatt hat Ihren Vorgang vorbereitet. Bitte prüfen Sie die Angaben und unterschreiben Sie
+          Deine Werkstatt hat deinen Vorgang vorbereitet. Bitte prüf die Angaben und unterschreib
           die Sicherungsabtretung.
         </p>
 
