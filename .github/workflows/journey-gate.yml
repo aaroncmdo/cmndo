@@ -59,6 +59,37 @@ env:
   TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
   TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
   TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
+  # 01.09.: #5797 hat die Klartext-Defaults aus `_golden-path-lib.ts` entfernt (richtig —
+  # das Repo ist oeffentlich). Damit war der Kunde-Login die ganze Zeit auf DIESEN Default
+  # angewiesen und lief ohne ihn ins Leere: der Code liest `TEST_KUNDE_PASSWORD`, das
+  # Secret heisst `SMOKE_KUNDE_PASS`, und durchgereicht wurde keines von beiden.
+  # Ergebnis im Gate-Lauf 33388771615: `invalid_credentials` bei leerem Passwort —
+  # `golden-path-deep-prod.spec.ts:98`, direkt nachdem der FileChooser-Fix (#5802) den
+  # vorherigen Fehler beseitigt hatte. Ein Fehler maskierte den naechsten.
+  #
+  # Die Namensuebersetzung passiert hier an der Job-Grenze, wie oben bei STAGING_BASIC_AUTH_*.
+  #
+  # ⚠ NOTWENDIG, ABER NICHT HINREICHEND: Der Lauf 33448528682 gegen genau diesen Branch
+  # blieb an derselben Zeile 98 stehen — die Variablen kamen an (im Log `***`, also
+  # besetzt), aber der WERT von SMOKE_KUNDE_PASS ist veraltet. Die Test-Konto-Passwoerter
+  # wurden am 31.08. zwischen 08:53 und 09:50 UTC rotiert (richtig — sie standen im
+  # oeffentlichen Repo); nachgezogen wurde nur TEST_SV_PASSWORD. Belegt an
+  # auth.users.last_sign_in_at: von 8 Test-Konten hat seither NUR test-sv@ einen Login.
+  # `smoke-staging.yml` scheitert seit 09:50 an genau diesem Kunden-Login
+  # („E-Mail oder Passwort ist falsch"). Solange das Secret nicht erneuert ist, bleibt
+  # das Gate rot — diese Zeile ist die Voraussetzung, nicht die Loesung.
+  #
+  # TEST_KUNDE_EMAIL wird BEWUSST NICHT gesetzt: der Code-Default ist smoke-kunde@ und
+  # ist korrekt; SMOKE_KUNDE_EMAIL traegt in einem aelteren Skript den Default
+  # test-kunde@ — ein Konto, das seit dem Golive-Cleanup nicht mehr existiert. Eine
+  # gesetzte, aber falsche Adresse wuerde den richtigen Default ueberschreiben
+  # (`?? ` greift bei '' nicht).
+  TEST_KUNDE_PASSWORD: ${{ secrets.SMOKE_KUNDE_PASS }}
+  # KB traegt dieselbe Wunde: golden-path-deep-prod faehrt kb/kunde/sv, aber nur sv war
+  # gedeckt. Das Secret existiert unter exakt diesem Namen. Kein TOTP durchreichen — die
+  # drei Konten haben 0 verifizierte Faktoren (auth.mfa_factors, gemessen 01.09.), und ein
+  # BESETZTES TOTP-Secret bei faktorlosem Konto laesst loginContext() in MFA laufen.
+  TEST_KB_PASSWORD: ${{ secrets.TEST_KB_PASSWORD }}
 
 jobs:
   journey-gate:

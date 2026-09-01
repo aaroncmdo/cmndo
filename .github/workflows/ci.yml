@@ -714,6 +714,19 @@ jobs:
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
           TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
           TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
+          # 01.09.: golden-path-deep faehrt kb/kunde/sv. Der Kunde-Login lief bis #5797 ueber
+          # den Klartext-Default in `_golden-path-lib.ts`; seit dessen (richtiger) Entfernung
+          # ist er '' -> invalid_credentials. Der Code liest TEST_KUNDE_*, das Secret heisst
+          # SMOKE_KUNDE_* — Namensuebersetzung an der Job-Grenze.
+          # ⚠ Wirkt erst, wenn das Secret erneuert ist: die Test-Konto-Passwoerter wurden am
+          # 31.08. rotiert, nachgezogen wurde nur TEST_SV_PASSWORD (Beleg: von 8 Test-Konten
+          # hat seither nur test-sv@ einen last_sign_in_at). TEST_KUNDE_EMAIL bewusst NICHT
+          # gesetzt — der Code-Default smoke-kunde@ ist korrekt.
+          TEST_KUNDE_PASSWORD: ${{ secrets.SMOKE_KUNDE_PASS }}
+          # ⚠ TEST_KB_PASSWORD hier BEWUSST NICHT — anders als im journey-gate steht oben
+          # TEST_KB_TOTP_SECRET. Mit Passwort kaeme der Login durch und liefe dann in den
+          # MFA-Zweig, obwohl test-kb@ 0 verifizierte Faktoren hat (auth.mfa_factors, 01.09.).
+          # Erst das TOTP-Secret hier entfernen, dann das Passwort ergaenzen — nicht umgekehrt.
           # 21.08.: TEST_SV_EMAIL/_PASSWORD BEWUSST NICHT MEHR durchgereicht — aus genau dem
           # Grund, der zwei Bloecke weiter unten schon fuer KB/Dispatch/Kanzlei steht: ein
           # unbesetztes Secret rendert als '' und ueberschreibt damit den (korrekten) Default.
