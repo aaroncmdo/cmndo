@@ -25,7 +25,9 @@ async function assertOwnerOhneWerkstatt(
   if (!user) return { ok: false, error: 'Nicht angemeldet.' }
   const { data: claim } = await supabase
     .from('claims')
-    .select('id, reparatur_werkstatt_id, schadenort_lat, schadenort_lng')
+    .select(
+      'id, reparatur_werkstatt_id, schadenort_lat, schadenort_lng, schadenort_adresse, schadenort_plz, schadenort_ort',
+    )
     .eq('id', claimId)
     .maybeSingle()
   if (!claim) return { ok: false, error: 'Vorgang nicht gefunden.' }
@@ -33,16 +35,54 @@ async function assertOwnerOhneWerkstatt(
     reparatur_werkstatt_id: string | null
     schadenort_lat: number | null
     schadenort_lng: number | null
+    schadenort_adresse: string | null
+    schadenort_plz: string | null
+    schadenort_ort: string | null
   }
   if (c.reparatur_werkstatt_id) {
     return { ok: false, error: 'Es ist bereits eine Werkstatt hinterlegt.' }
   }
   // Karten-Center (SP-C2) aus dem Schadenort — Kunde liest es via Owner-RLS.
-  const center =
-    c.schadenort_lat != null && c.schadenort_lng != null
-      ? { lat: Number(c.schadenort_lat), lng: Number(c.schadenort_lng) }
-      : null
-  return { ok: true, userId: user.id, center }
+  if (c.schadenort_lat != null && c.schadenort_lng != null) {
+    return {
+      ok: true,
+      userId: user.id,
+      center: { lat: Number(c.schadenort_lat), lng: Number(c.schadenort_lng) },
+    }
+  }
+
+  // Mobil-/Frontend-Audit 31.08. (prod): **73 von 81 Claims** hatten kein
+  // `schadenort_lat`. Ohne Origin liefert `findWerkstaetten` seinen dokumentierten
+  // Fallback — „ohne Distanz nach NAME sortiert". Die Liste war damit alphabetisch,
+  // obwohl die UI „Partner-Werkstatt in deiner Nähe" verspricht, und die
+  // Distanz-Zeile fiel still weg (`distanzLabel` gibt bei Infinity null zurück).
+  //
+  // Deshalb hier einmalig nachgeholt und PERSISTIERT (Aaron-Entscheidung 31.08.):
+  // ein Geocoding-Aufruf pro Claim, nicht pro Seitenaufruf. Ohne das Schreiben
+  // würde jeder Aufruf des Finders erneut kosten — Kostenkontext:
+  // memory/INCIDENT-google-places-2798-euro-an-einem-tag.
+  const ortsteile = [c.schadenort_adresse, c.schadenort_plz, c.schadenort_ort].filter(Boolean)
+  if (ortsteile.length === 0) return { ok: true, userId: user.id, center: null }
+
+  const { geocodeAdresse } = await import('@/lib/mapbox/geocode')
+  const geo = await geocodeAdresse(ortsteile.join(', '))
+  // Kein Treffer / kein Token / API-Fehler: `geocodeAdresse` liefert null und wir
+  // bleiben beim bisherigen Verhalten (Fallback-Sortierung), statt zu scheitern.
+  if (!geo) return { ok: true, userId: user.id, center: null }
+
+  // Schreiben über den Service-Client: der Kunde hat kein UPDATE-Recht auf `claims`.
+  // Fehler wird geprüft (claims ist eine kritische Tabelle, silent-write-Gate) —
+  // aber er darf den Finder nicht blockieren: der Center steht ja bereits fest,
+  // beim nächsten Aufruf wird eben erneut geocodet.
+  const { error: geoWriteErr } = await createServiceClient()
+    .from('claims')
+    .update({ schadenort_lat: geo.lat, schadenort_lng: geo.lng })
+    .eq('id', claimId)
+  if (geoWriteErr) {
+    console.error('[werkstatt-finder] Geo-Persistierung fehlgeschlagen:', geoWriteErr.message)
+  }
+
+  return { ok: true, userId: user.id, center: { lat: geo.lat, lng: geo.lng } }
 }
 
 /** Die naechsten aktiven Partner-Werkstaetten zum Schadenort des Claims (bedarf-qualifiziert). */

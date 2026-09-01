@@ -96,7 +96,7 @@ export async function runPhase6(svContext, reportRef = { notes: [] }, phase5Resu
     // Falls Phase 5 keine funktionierende Page zurückgegeben hat: neu einloggen
     if (!page || page.isClosed()) {
       logPhase(6, 'Kein Page-Handle aus Phase 5 — neuer Login')
-      page = await loginAs(svContext, 'test-sv@claimondo.de', 'Test1234!', BASE_URL)
+      page = await loginAs(svContext, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
       await gotoAndShoot(page, `${BASE_URL}/gutachter/heute`, 'heute-hub-p6-recovery')
       await page.waitForTimeout(4_000)
     } else {

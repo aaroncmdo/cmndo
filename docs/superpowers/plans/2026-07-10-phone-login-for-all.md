@@ -262,7 +262,7 @@ git commit -m "feat(auth): phone-login-actions — Selbst-Service Nummer-Verify 
 > Der volle Round-Trip braucht echten SMS-Empfang (nicht automatisierbar), ABER die Sende-Seite (ist phone_change im Projekt aktiv?) ist prüfbar: als Test-Account einloggen und `updateUser({phone})` gegen eine Nummer aufrufen — akzeptiert Supabase den Request (OTP-Send, evtl. Twilio-„invalid number" bei Fake-Nummer = TROTZDEM aktiv), oder lehnt es als „phone change disabled/not configured" ab? Script (Controller führt aus, mit `CLAIMONDO_ENV_FILE`):
 > ```js
 > import { createClient } from '@supabase/supabase-js'
-> // anon key + Test-Account (z.B. smoke-2fa@ / Claimondo2026!) -> signInWithPassword -> updateUser({phone:'+49151<ts>'}) -> error inspizieren -> cleanup (updateUser zuruecksetzen ist optional; Smoke-Account).
+> // anon key + Test-Account (z.B. smoke-2fa@ / <PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>) -> signInWithPassword -> updateUser({phone:'+49151<ts>'}) -> error inspizieren -> cleanup (updateUser zuruecksetzen ist optional; Smoke-Account).
 > ```
 > Fehler enthält „disabled"/„not configured"/„provider" → phone_change NICHT nutzbar → **Fallback** (Appendix A) einbauen, bevor Task 3 weitergeht. Sonst: phone_change bestätigt, weiter mit Task 3.
 

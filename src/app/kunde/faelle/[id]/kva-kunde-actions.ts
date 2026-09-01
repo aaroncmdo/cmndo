@@ -37,8 +37,8 @@ export async function ladeKundePreisdokument(
     return {
       ok: false,
       error: input.art === 'gutachten'
-        ? 'Bitte laden Sie das Gutachten als PDF hoch.'
-        : 'Bitte laden Sie den Kostenvoranschlag als PDF hoch.',
+        ? 'Bitte lade das Gutachten als PDF hoch.'
+        : 'Bitte lade den Kostenvoranschlag als PDF hoch.',
     }
   }
 

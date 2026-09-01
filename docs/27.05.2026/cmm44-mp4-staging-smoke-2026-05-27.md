@@ -25,7 +25,7 @@ MP-4e #1857 (14:10), Handoff #1859 (14:44), Wave-C #1860 (14:49) — alle `succe
 ## Methode
 
 - Playwright, Basic-Auth via `httpCredentials` (nicht in URL), Form-Login `/login`, alle Test-Accounts
-  `Test1234!` (2FA off + force_pw off — DB-verifiziert).
+  `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (2FA off + force_pw off — DB-verifiziert).
 - Navigation an echten, invariant-sauberen claim_ids (`claim_id == faelle.id`) aus `v_claim_phase`:
   begutachtung `28492ffb…87`, erfassung `dcc6734d…0`.
 - Phasen-Verteilung staging: **53 erfassung + 12 begutachtung** (0 regulierung/abschluss — erwartet:

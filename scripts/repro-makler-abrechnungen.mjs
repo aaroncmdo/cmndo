@@ -6,7 +6,7 @@ import { chromium } from 'playwright'
 
 const BASE = process.env.REPRO_BASE ?? 'http://localhost:3001'
 const EMAIL = process.env.TEST_EMAIL ?? 'test-makler@claimondo.de'
-const PASSWORD = process.env.TEST_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.TEST_PASSWORD ?? ''
 
 const browser = await chromium.launch({ headless: false, slowMo: 200 })
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } })

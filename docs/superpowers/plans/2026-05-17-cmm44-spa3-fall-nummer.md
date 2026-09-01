@@ -521,7 +521,7 @@ Expected: Build grün.
 
 - [ ] **Step 3: Smoke-Script anlegen**
 
-`scripts/smoke-cmm44-spa3.mjs` — Vorlage `scripts/smoke-cmm44-spa2-pr2.mjs`. Loggt sich in 5 Portale ein (Admin / Dispatch / SV / Kunde / Public), öffnet je eine Seite mit angezeigter Aktennummer (Fall-Liste, Fallakte-Header, Finance), macht Screenshots. Test-User aus `docs/`-E2E-Setup (Memory: `twofa_aktiviert=false`, Passwort `Test1234!`).
+`scripts/smoke-cmm44-spa3.mjs` — Vorlage `scripts/smoke-cmm44-spa2-pr2.mjs`. Loggt sich in 5 Portale ein (Admin / Dispatch / SV / Kunde / Public), öffnet je eine Seite mit angezeigter Aktennummer (Fall-Liste, Fallakte-Header, Finance), macht Screenshots. Test-User aus `docs/`-E2E-Setup (Memory: `twofa_aktiviert=false`, Passwort `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`).
 
 - [ ] **Step 4: Smoke gegen staging fahren**
 

@@ -83,7 +83,7 @@
 
 ## 7. Smoke / Validierung für P4
 
-- **Test-User** (2FA aus, `Test1234!`): `test-kunde@claimondo.de` (kunde), `test-dispatch@claimondo.de` (dispatch), + admin/sv/kanzlei/kb/makler analog.
+- **Test-User** (2FA aus, `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`): `test-kunde@claimondo.de` (kunde), `test-dispatch@claimondo.de` (dispatch), + admin/sv/kanzlei/kb/makler analog.
 - **Smoke-Muster:** `scripts/smoke-p2d4-sidebar.mjs` (BASE_URL/NO_V2/LEAD_ID) + `scripts/smoke-cutover-roles.mjs` (Multi-Rolle). Lokal: `.env.local` aus dem Main-Checkout in den Worktree kopieren, `npx next dev -p <port>`, Smoke gegen `localhost:<port>`; danach Server killen + `.env.local` entfernen. Staging-Smoke: `BASE_URL=https://app.staging.claimondo.de` (Basic-Auth ist im Script).
 - **P4-spezifisch:** den **pre-fall** Kunden-Flowlink öffnen (Magic-Link), ZB1 hochladen → Werte editieren → **Persistenz pre-fall** verifizieren (das ist der §8b-Fix); i18n-Sprachwechsel; die 4 Minor.
 

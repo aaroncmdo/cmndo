@@ -65,7 +65,7 @@ Secret nur im CI-Repo-Secret) → golden-path braucht die CI-Umgebung; (b) in di
 **Job-Rezept:**
 - **J4** (TOTP-frei, `@claimondo.test`-Wegwerf-Konten): `node scripts/smoke/reparatur-weg-e2e-seed.mjs` → `CI=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test reparatur-weg-e2e-smoke --project=chromium` → `--assert` → `--clean`.
 - **J1** (golden-path): `RUN_GOLDEN_PATH_PROD=1 npx playwright test golden-path-prod --workers=1` — mit dem `e2e-ci`-TOTP-Secret für die test-sv-2FA-Challenge; Kunde-Rolle auf `smoke-kunde@` umstellen (der Spec-Default `test-kunde@` ist tot).
-- **Secrets (CI-Repo):** `TEST_SV_PASSWORD=Claimondo2026!`, `TEST_ADMIN/DISPATCH/KB_PASSWORD`, `e2e-ci`-TOTP-Secret, `.env.local`-`SERVICE_ROLE` (Seed). Regel-4-sicher: `reserviere()`-Guard blockt echte SV-Buchung; Seed nutzt Wegwerf-Konten (`telefon=NULL`).
+- **Secrets (CI-Repo):** `TEST_SV_PASSWORD=<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`, `TEST_ADMIN/DISPATCH/KB_PASSWORD`, `e2e-ci`-TOTP-Secret, `.env.local`-`SERVICE_ROLE` (Seed). Regel-4-sicher: `reserviere()`-Guard blockt echte SV-Buchung; Seed nutzt Wegwerf-Konten (`telefon=NULL`).
 
 Das ist der Übergang zu **B2** (CI-Gate): die Journey-Smokes als post-merge-Wächter grün halten.
 

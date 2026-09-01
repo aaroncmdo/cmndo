@@ -48,7 +48,7 @@ async function loginAndProbe(email, label, url) {
   const page = await ctx.newPage()
   await page.goto(BASE + '/login', { waitUntil: 'networkidle' })
   await page.fill('input[name="email"]', email)
-  await page.fill('input[name="password"]', 'Test1234!')
+  await page.fill('input[name="password"]', (process.env.TEST_PASSWORT ?? ''))
   await page.click('button[type="submit"]')
   try {
     await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 20_000 })

@@ -103,7 +103,7 @@ export async function runPhase7(svContext, reportRef = { notes: [] }, phase6Resu
     // Falls Page nicht übergeben oder geschlossen: Recovery-Login
     if (!page || page.isClosed()) {
       logPhase(7, 'Kein Page-Handle aus Phase 6 — neuer Login + direkte Navigation')
-      page = await loginAs(svContext, 'test-sv@claimondo.de', 'Test1234!', BASE_URL)
+      page = await loginAs(svContext, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
       // Direkt in den Feldmodus — Session muss existieren
       await page.goto(`${BASE_URL}/gutachter/feldmodus`, { waitUntil: 'domcontentloaded', timeout: 30_000 })
       await page.waitForTimeout(4_000)

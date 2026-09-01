@@ -125,7 +125,7 @@ const page = await (await browser.newContext({ viewport: { width: 1400, height: 
 try {
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
   await page.locator('input[type="email"]').fill('test-admin@claimondo.de')
-  await page.locator('input[type="password"]').fill('Claimondo2026!')
+  await page.locator('input[type="password"]').fill((process.env.TEST_PASSWORT ?? ''))
   await page.locator('button[type="submit"]').first().click()
   await page.waitForURL((u) => !String(u).includes('/login'), { timeout: 30000 })
   ok('Admin-Login')

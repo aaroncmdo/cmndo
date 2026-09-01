@@ -137,7 +137,7 @@ Der Handoff sah P4-B vor: `confirmZb1Korrekturen`/`clearZb1Felder` **token-basie
 
 - **E2E (Flag an, staging-isoliert):** Marketing-Wizard → `/start` → `/flow` → **① Feststellung** (Fakten/Flags setzen) → Quali → Slot → Gutachter → **SA** → Account → Login → **`/kunde/onboarding` dokumente-Step zeigt genau die laut Flags offenen Pflicht-Slots** (z.B. `personenschaden_flag=true` → Attest erscheint; `polizei_vor_ort=true` → Polizeibericht). ZB1-Foto hochladen → OCR füllt Fahrzeugdaten → `confirmZb1Korrekturen(fallId)` persistiert.
 - **DB-Verify:** Lead-Spalten aus ① gesetzt → `convertLeadToClaim` → `claim_parties` (geschädigter + ggf. verursacher), `claims.hat_personenschaden/...`, `pflichtdokumente`-Slots korrekt.
-- **Test-User:** `test-kunde@claimondo.de` / `Test1234!` (2FA aus). Test-SV `1da11741-...`. Fixture + Cleanup wie §3a-Walk.
+- **Test-User:** `test-kunde@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (2FA aus). Test-SV `1da11741-...`. Fixture + Cleanup wie §3a-Walk.
 - **Negativ:** ohne Flag (`CANONICAL_FLOWLINK_ENABLED` unset) bleibt `/flow` der §3a-Pfad — keine Feststellungs-Steps, kein Regress.
 
 ---

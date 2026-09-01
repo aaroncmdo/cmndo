@@ -20,9 +20,9 @@ const MARKETING_BASE = process.env.SMOKE_MARKETING_BASE ?? 'https://claimondo.de
 const BASIC_AUTH_USER = process.env.SMOKE_BASIC_AUTH_USER ?? 'aaroncmdo'
 const BASIC_AUTH_PASS = process.env.SMOKE_BASIC_AUTH_PASS ?? ''
 const KUNDE_EMAIL = process.env.SMOKE_KUNDE_EMAIL ?? 'test-kunde@claimondo.de'
-const KUNDE_PASS = process.env.SMOKE_KUNDE_PASS ?? 'Test1234!'
+const KUNDE_PASS = process.env.SMOKE_KUNDE_PASS ?? ''
 const DISPATCH_EMAIL = process.env.SMOKE_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de'
-const DISPATCH_PASS = process.env.SMOKE_DISPATCH_PASS ?? 'Test1234!'
+const DISPATCH_PASS = process.env.SMOKE_DISPATCH_PASS ?? ''
 
 if (!BASIC_AUTH_PASS) {
   console.error('FEHLER: SMOKE_BASIC_AUTH_PASS ist nicht gesetzt — Staging Basic-Auth pflicht.')

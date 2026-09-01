@@ -219,14 +219,14 @@ git commit -m "feat(ki-task-executor): KiExecuteButton (Footer-Button + Confirm-
 ```typescript
 // Run (post-deploy, nach TASK_EXECUTOR_ENABLED=true):
 //   PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test tests/e2e/flows/ki-task-executor-smoke.spec.ts --headed
-// Test-Konto: test-dispatch@claimondo.de / Test1234!  (Admin-Kanban /admin/tasks)
+// Test-Konto: test-dispatch@claimondo.de / <PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>  (Admin-Kanban /admin/tasks)
 import { test, expect } from '@playwright/test'
 
 test('KI-Executor: Button auf KI-faehiger Task -> Plan/Confirm', async ({ page }) => {
   // Login (App nutzt @supabase/ssr Cookie; hier UI-Login)
   await page.goto('/login')
   await page.getByLabel(/e-?mail/i).fill('test-dispatch@claimondo.de')
-  await page.getByLabel(/passwort/i).fill('Test1234!')
+  await page.getByLabel(/passwort/i).fill('<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>')
   await page.getByRole('button', { name: /anmelden|login/i }).click()
   await page.waitForURL(/\/(admin|dispatch|faelle)/)
 

@@ -104,7 +104,7 @@ async function main() {
   await ensureUser('test-kb-anna@claimondo.de', 'TestKB2026!', 'Anna', 'Mueller', 'kundenbetreuer', USER_IDS.kbAnna)
   await ensureUser('test-kb-bernd@claimondo.de', 'TestKB2026!', 'Bernd', 'Schmidt', 'kundenbetreuer', USER_IDS.kbBernd)
   // Kanzlei-Test-Account (fuer Rollen-Smoke /kanzlei — fehlte auf staging, PR #3202).
-  await ensureUser('test-kanzlei@claimondo.de', 'Test1234!', 'Test', 'Kanzlei', 'kanzlei')
+  await ensureUser('test-kanzlei@claimondo.de', (process.env.TEST_PASSWORT ?? ''), 'Test', 'Kanzlei', 'kanzlei')
   await ensureUser('test-lukas.weber@example.com', 'TestKunde2026!', 'Lukas', 'Weber', 'kunde', USER_IDS.lukas)
   await ensureUser('test-sophie.klein@example.com', 'TestKunde2026!', 'Sophie', 'Klein', 'kunde', USER_IDS.sophie)
   await ensureUser('test-mehmet.yilmaz@example.com', 'TestKunde2026!', 'Mehmet', 'Yilmaz', 'kunde', USER_IDS.mehmet)
@@ -246,7 +246,7 @@ test-kb-anna@claimondo.de    | TestKB2026!
 test-kb-bernd@claimondo.de   | TestKB2026!
 
 KANZLEI-USER:
-test-kanzlei@claimondo.de    | Test1234!
+test-kanzlei@claimondo.de    | <PASSWORT: GitHub-Secret>
 
 KUNDEN-USER:
 test-lukas.weber@example.com    | TestKunde2026!  (Lead, kein Fall)

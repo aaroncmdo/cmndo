@@ -50,12 +50,12 @@ export function NpsFormClient({
     return (
       <Card className="max-w-md w-full text-center">
         <p className="text-lg font-semibold text-claimondo-navy">Vielen Dank!</p>
-        <p className="text-sm text-claimondo-ondo mt-2">Ihre Bewertung hilft uns, besser zu werden.</p>
+        <p className="text-sm text-claimondo-ondo mt-2">Deine Bewertung hilft uns, besser zu werden.</p>
         {/* GEO: NPS->Review-Funnel — allen Antwortenden angeboten (ungated, Trustpilot/
             ProvenExpert-Richtlinien-konform). Dormant bis NPS_REVIEW_URL gesetzt ist. */}
         {reviewUrl && (
           <div className="mt-4 pt-4 border-t border-claimondo-border">
-            <p className="text-sm text-claimondo-ondo mb-3">Möchten Sie Ihre Erfahrung auch öffentlich teilen?</p>
+            <p className="text-sm text-claimondo-ondo mb-3">Möchtest du deine Erfahrung auch öffentlich teilen?</p>
             <a
               href={reviewUrl}
               target="_blank"
@@ -73,7 +73,7 @@ export function NpsFormClient({
   if (view === 'abgemeldet') {
     return (
       <Card className="max-w-md w-full text-center">
-        <p className="text-claimondo-navy">Sie erhalten keine Feedback-Anfragen mehr. Danke für Ihre Rückmeldung.</p>
+        <p className="text-claimondo-navy">Du erhältst keine Feedback-Anfragen mehr. Danke für deine Rückmeldung.</p>
       </Card>
     )
   }
@@ -81,7 +81,7 @@ export function NpsFormClient({
   if (view === 'abmelden') {
     return (
       <Card className="max-w-md w-full text-center">
-        <p className="text-claimondo-navy mb-4">Möchten Sie keine Feedback-Anfragen mehr erhalten?</p>
+        <p className="text-claimondo-navy mb-4">Möchtest du keine Feedback-Anfragen mehr erhalten?</p>
         {error && <p className="text-sm text-danger-strong mb-3">{error}</p>}
         <Button variant="navy" fullWidth loading={pending} onClick={handleAbmelden}>
           Abmelden bestätigen
@@ -99,7 +99,7 @@ export function NpsFormClient({
   return (
     <Card className="max-w-md w-full">
       <div className="mb-4">
-        <p className="text-lg font-semibold text-claimondo-navy">Wie zufrieden waren Sie mit der Abwicklung?</p>
+        <p className="text-lg font-semibold text-claimondo-navy">Wie zufrieden warst du mit der Abwicklung?</p>
         {claimNummer && <p className="text-xs text-claimondo-ondo mt-1">Vorgang {claimNummer}</p>}
         <p className="text-sm text-claimondo-ondo mt-1">0 = gar nicht, 10 = sehr zufrieden</p>
       </div>

@@ -77,7 +77,7 @@ export async function runPhase10(adminContext, prevResult = { notes: [] }) {
   // --- Login als test-admin ------------------------------------------------
   logPhase(10, 'Login als test-admin@claimondo.de')
   try {
-    page = await loginAs(adminContext, 'test-admin@claimondo.de', 'Test1234!', BASE_URL)
+    page = await loginAs(adminContext, 'test-admin@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
   } catch (err) {
     const msg = `Admin-Login fehlgeschlagen: ${err.message}`
     logHard(10, msg)

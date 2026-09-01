@@ -99,13 +99,13 @@ export default function WerkstattIntakeSignatur({
           <div className="w-14 h-14 rounded-full bg-success-soft flex items-center justify-center mx-auto mb-4">
             <CheckIcon className="w-7 h-7 text-success" />
           </div>
-          <h1 className="text-xl font-bold text-claimondo-navy mb-2">Vielen Dank — Ihr Auftrag ist eingegangen</h1>
+          <h1 className="text-xl font-bold text-claimondo-navy mb-2">Vielen Dank — dein Auftrag ist eingegangen</h1>
           <p className="text-claimondo-ondo text-sm">
             {accountError
-              ? 'Ihre Unterschrift ist gespeichert. Wir richten Ihren Zugang in Kürze ein und melden uns bei Ihnen.'
+              ? 'Deine Unterschrift ist gespeichert. Wir richten deinen Zugang in Kürze ein und melden uns bei dir.'
               : creatingAccount
-                ? 'Wir richten Ihren persönlichen Zugang ein …'
-                : 'Wir haben Ihnen einen Zugang per E-Mail geschickt. Ihr Gutachter wird zugewiesen und meldet sich zeitnah bei Ihnen.'}
+                ? 'Wir richten deinen persönlichen Zugang ein …'
+                : 'Wir haben dir einen Zugang per E-Mail geschickt. Dein Gutachter wird zugewiesen und meldet sich zeitnah bei dir.'}
           </p>
         </Card>
       </div>
@@ -129,7 +129,7 @@ export default function WerkstattIntakeSignatur({
 
         {/* Read-only-Zusammenfassung der Werkstatt-Eingaben */}
         <Card p={5} className="mb-6 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-claimondo-ondo/70">Ihre Angaben</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-claimondo-ondo/70">Deine Angaben</p>
           <SummaryRow label="Name" value={name || '–'} />
           <SummaryRow label="Fahrzeug" value={fahrzeugZeile || '–'} />
           <SummaryRow label="Unfall" value={unfallZeile || '–'} />

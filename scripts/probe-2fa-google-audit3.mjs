@@ -16,7 +16,7 @@ function loadEnv(){const p=join(ROOT,'.env.local');if(!existsSync(p))return;for(
 loadEnv()
 const BASE=process.env.SMOKE_STAGING_BASE??'https://app.staging.claimondo.de'
 const BA_USER=process.env.STAGING_BASIC_AUTH_USER??'aaroncmdo'; const BA_PASS=process.env.STAGING_BASIC_AUTH_PASS??''
-const PW='Test1234!'; const ADMIN_EMAIL='test-admin@claimondo.de'
+const PW=(process.env.TEST_PASSWORT ?? ''); const ADMIN_EMAIL='test-admin@claimondo.de'
 if(!BA_PASS){console.error('STAGING_BASIC_AUTH_PASS fehlt');process.exit(2)}
 const BASIC='Basic '+Buffer.from(`${BA_USER}:${BA_PASS}`).toString('base64')
 const OUT=join(ROOT,'docs/31.05.2026/2fa-google-audit'); mkdirSync(OUT,{recursive:true})

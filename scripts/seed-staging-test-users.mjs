@@ -101,7 +101,7 @@ const IDS = {
 }
 
 const SMOKE_MARKER = 'SMOKE-SEED 13.05.2026 — Staging-Testdaten, löschen wenn Staging eigene DB bekommt'
-const PASSWORT     = 'Test1234!'
+const PASSWORT     = (process.env.TEST_PASSWORT ?? '')
 
 // ─── Hilfsfunktionen ──────────────────────────────────────────────────────────
 

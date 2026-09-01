@@ -144,7 +144,7 @@ console.log('\n=== ADMIN ===')
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const page = await ctx.newPage()
   try {
-    await login(page, 'test-admin@claimondo.de', 'Test1234!')
+    await login(page, 'test-admin@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
     for (const [path, label] of ADMIN_ROUTES) results.admin.push(await visit(page, path, label))
   } catch (err) {
     console.error('[admin] login failed:', err)
@@ -158,7 +158,7 @@ console.log('\n=== KUNDE ===')
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const page = await ctx.newPage()
   try {
-    await login(page, 'test-kunde@claimondo.de', 'Test1234!')
+    await login(page, 'test-kunde@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
     for (const [path, label] of KUNDE_ROUTES) results.kunde.push(await visit(page, path, label))
   } catch (err) {
     console.error('[kunde] login failed:', err)
@@ -172,7 +172,7 @@ console.log('\n=== SV ===')
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
   const page = await ctx.newPage()
   try {
-    await login(page, 'test-sv@claimondo.de', 'Test1234!')
+    await login(page, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
     for (const [path, label] of SV_ROUTES) results.sv.push(await visit(page, path, label))
   } catch (err) {
     console.error('[sv] login failed:', err)

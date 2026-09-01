@@ -62,7 +62,7 @@ export async function runPhase8(svContext, prevResult = { notes: [] }) {
   // --- Login als test-sv ----------------------------------------------------
   logPhase(8, 'Login als test-sv@claimondo.de')
   try {
-    page = await loginAs(svContext, 'test-sv@claimondo.de', 'Test1234!', BASE_URL)
+    page = await loginAs(svContext, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
   } catch (err) {
     const msg = `Login fehlgeschlagen: ${err.message}`
     logHard(8, msg)

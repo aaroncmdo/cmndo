@@ -19,7 +19,7 @@ mkdirSync(SHOT_DIR, { recursive: true })
 
 const BASE = 'https://app.staging.claimondo.de'
 const BASIC_AUTH = { username: 'aaroncmdo', password: 'ClaimondoSuperuser123789!!' }
-const DISPATCH = { email: 'test-dispatch@claimondo.de', password: 'Test1234!' }
+const DISPATCH = { email: 'test-dispatch@claimondo.de', password: (process.env.TEST_PASSWORT ?? '') }
 const LEAD_ID = 'c1964512-23af-4973-bf37-ff62d80599d5'
 const out = (m) => console.log(m)
 

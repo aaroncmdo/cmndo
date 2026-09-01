@@ -18,7 +18,7 @@ mkdirSync(OUT, { recursive: true })
 const BASE = 'https://app.staging.claimondo.de'
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASS
-const TEST_PASS = 'Test1234!'
+const TEST_PASS = (process.env.TEST_PASSWORT ?? '')
 if (!BASIC_USER || !BASIC_PASS) { console.error('HARD: STAGING_BASIC_AUTH_USER/PASS fehlen'); process.exit(1) }
 
 const SPI2 = ['anschlussschreiben_am','anschlussschreiben_url','anschlussschreiben_sendedatum','anschlussschreiben_unterschrift','anschlussschreiben_ocr_am','as_geforderte_summe','as_frist','as_vs_reaktion_text','as_salesforce_id','as_zuletzt_synced_am','mandatsnummer']
