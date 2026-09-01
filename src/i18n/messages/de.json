@@ -585,7 +585,7 @@
       "agb_link": "AGB",
       "widerruf_link": "und der Widerrufsbelehrung zu.",
       "submitting": "Wird verarbeitet ...",
-      "cta_sign": "SA unterzeichnen",
+      "cta_sign": "Beauftragung unterschreiben",
       "error_fallback": "Fehler bei der Beauftragung",
       "volltext": {
         "s1_titel": "1. Abtretungserklärung",
@@ -614,7 +614,7 @@
       "termin_folgt": "Deinen Besichtigungstermin vereinbaren wir in Kürze persönlich mit dir.",
       "heading": "Geschafft!",
       "sub": "Dein Fall wurde erfolgreich erstellt.",
-      "success_text": "Dein Fall wurde erfolgreich erstellt. Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei dir.",
+      "success_text": "Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei dir.",
       "lexdrive": {
         "label": "Dein juristischer Ansprechpartner",
         "hinweis": "Unsere Partnerkanzlei — sie meldet sich in den nächsten Werktagen direkt bei dir."
