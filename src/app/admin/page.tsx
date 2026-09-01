@@ -8,6 +8,7 @@ import AusstehendeZahlungenWidget from './_components/AusstehendeZahlungenWidget
 import WichtigeUpdatesWidget from './_components/WichtigeUpdatesWidget'
 import DashboardStats from './_components/DashboardStats'
 import TageskalenderWidget from './_components/TageskalenderWidget'
+import HaengendeFaelleWidget from './_components/HaengendeFaelleWidget'
 import TermineIntegritaetWidget from './_components/TermineIntegritaetWidget'
 import ReparaturWorkstateWidget from './_components/ReparaturWorkstateWidget'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
@@ -180,6 +181,14 @@ export default async function AdminDashboardPage() {
         {/* Kritische Updates (conditional, voll-breit) */}
         <Suspense fallback={<WidgetSkeleton height="h-20" />}>
           <KritischeUpdatesWidget />
+        </Suspense>
+
+        {/* Fälle ohne Bewegung — bewusst weit oben: hier warten echte Kunden.
+            Der Hänger-Detektor meldete seit dem 13.08. korrekt, seine Meldungen lagen
+            aber unbeachtet in /admin/aufgaben/alle (Messung 01.09.: manuelle Abarbeitung
+            findet dort praktisch nicht statt). Dieselbe Information, sichtbarer Ort. */}
+        <Suspense fallback={<WidgetSkeleton height="h-48" />}>
+          <HaengendeFaelleWidget />
         </Suspense>
 
         {/* Tageskalender */}

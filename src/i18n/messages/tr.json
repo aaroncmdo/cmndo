@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "Ödeme:",
         "aufMeinKonto": "Hesabıma",
         "direktWerkstatt": "Doğrudan servise",
-        "auszahlungFrage": "Ödeme nereye yapılsın?"
+        "auszahlungFrage": "Ödeme nereye yapılsın?",
+        "summeTitel": "Rapora göre talebiniz",
+        "summeVorbehalt": "Sigortanın sonunda ödeyeceği tutar farklı olabilir — bunu sizin için müzakere ediyoruz."
       },
       "meinBetreuer": {
         "heading": "Müşteri temsilcim",

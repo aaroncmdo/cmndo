@@ -43,7 +43,7 @@ export function UnfallskizzeCard({ claimId, svg }: { claimId: string; svg: strin
     toast.success(
       res.neuGeneriert
         ? 'Danke — wir haben die Skizze neu gezeichnet.'
-        : 'Danke, Ihre Korrektur ist angekommen. Wir schauen sie uns an.',
+        : 'Danke, deine Korrektur ist angekommen. Wir schauen sie uns an.',
     )
     startTransition(() => router.refresh())
   }

@@ -346,7 +346,7 @@ export async function createKundeAccount(
   telefon: string | null
 ): Promise<CreateKundeAccountResult> {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { success: false, error: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' }
+    return { success: false, error: 'Bitte gib eine gültige E-Mail-Adresse ein.' }
   }
   if (!fallId) return { success: false, error: 'Fall-ID fehlt.' }
   if (!flowToken) return { success: false, error: 'Nicht autorisiert.' }
@@ -388,7 +388,7 @@ export async function createKundeAccount(
       // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
       return {
         success: false,
-        error: 'Konto konnte nicht erstellt werden (interner Konflikt). Bitte kontaktieren Sie uns.',
+        error: 'Konto konnte nicht erstellt werden (interner Konflikt). Bitte kontaktiere uns.',
       }
     }
 
@@ -423,7 +423,7 @@ export async function createKundeAccount(
       console.error('[createKundeAccount] createUser fehlgeschlagen:', authError)
       return {
         success: false,
-        error: 'Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+        error: 'Konto konnte nicht erstellt werden. Bitte versuche es erneut oder kontaktiere uns.',
       }
     }
 
@@ -437,7 +437,7 @@ export async function createKundeAccount(
     console.error('[createKundeAccount] unerwarteter Fehler:', err)
     return {
       success: false,
-      error: 'Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+      error: 'Konto konnte nicht erstellt werden. Bitte versuche es erneut oder kontaktiere uns.',
     }
   }
 }
@@ -476,14 +476,14 @@ async function finalizeKundeSetup(
     try {
       const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
       const credsText = [
-        '🔐 Ihre Claimondo-Zugangsdaten',
+        '🔐 Deine Claimondo-Zugangsdaten',
         '',
         `E-Mail: ${email}`,
         `Passwort: ${password}`,
         '',
         `Login: ${base}/login`,
         '',
-        'Bitte ändern Sie Ihr Passwort beim ersten Login. Ihr Claimondo-Team',
+        'Bitte ändere dein Passwort beim ersten Login. Dein Claimondo-Team',
       ].join('\n')
       const r = await sendWhatsAppText(telefon, credsText)
       if (!r.ok) console.error('[D] Login-Daten-WA fehlgeschlagen:', r.code, r.error)
@@ -1586,7 +1586,7 @@ export async function signSAandCreateFall(
           | { vorname: string | null }
           | null
       }
-      const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
+      const svName = (profile?.vorname ?? '').trim() || 'deinem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')

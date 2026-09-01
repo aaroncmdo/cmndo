@@ -317,6 +317,38 @@ const spec = {
         },
       },
     },
+    '/api/v1/termin-stornieren': {
+      post: {
+        operationId: 'terminStornieren',
+        summary: 'Gebuchten Gutachter-Termin absagen',
+        description:
+          'Sagt einen bereits gebuchten Kfz-Gutachter-Termin ab — ohne Anruf beim Gutachter, ohne Login. Nutze dies, wenn ein Kunde sagt, dass er seinen Termin nicht wahrnehmen kann, absagen oder verschieben möchte. Der Kunde nennt seine persönliche Referenz (den Token aus seinem Claimondo-Link, den er per WhatsApp erhalten hat) — der Token ist die Autorisierung. SCHREIBEND: der Termin wird freigegeben und Claimondo für einen Ersatztermin benachrichtigt. VERSCHIEBEN läuft genauso: erst hier absagen, dann über gutachterTermine einen neuen Slot wählen. Mehrfach-Aufruf ist unschädlich (ein bereits abgesagter Termin wird nicht erneut geändert). Antwortet PII-frei.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/TerminStornierenRequest' },
+              example: { token: 'a1b2c3d4e5f6', grund: 'Bin krank geworden' },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Termin abgesagt (oder war es bereits).',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/TerminStornierenResponse' } } },
+          },
+          '404': {
+            description:
+              'Kein laufender Termin zu dieser Referenz gefunden (auch bei ungültigem Token — bewusst kein Enumerations-Signal).',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
+          },
+          '429': {
+            description: 'Rate-Limit überschritten (10/min/IP).',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -554,6 +586,41 @@ const spec = {
           hinweis: { type: 'string' },
         },
         required: ['ok', 'status'],
+      },
+      TerminStornierenRequest: {
+        type: 'object',
+        properties: {
+          token: {
+            type: 'string',
+            minLength: 8,
+            maxLength: 128,
+            description:
+              'Die persönliche Fall-Referenz des Kunden (Token aus seinem Claimondo-Link / der WhatsApp-Nachricht). Nicht raten oder erfinden — der Kunde muss sie selbst nennen.',
+          },
+          grund: {
+            type: 'string',
+            maxLength: 500,
+            description: 'Optionaler Grund der Absage. Hilft Claimondo, schneller einen Ersatztermin anzubieten.',
+          },
+        },
+        required: ['token'],
+      },
+      TerminStornierenResponse: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          storniert: {
+            type: 'boolean',
+            description: 'true = mit diesem Aufruf abgesagt. false = der Termin war bereits abgesagt, es wurde nichts geändert.',
+          },
+          war_geplant: {
+            type: 'string',
+            nullable: true,
+            description: 'Startzeitpunkt des abgesagten Termins als ISO-8601, oder null.',
+          },
+          hinweis: { type: 'string' },
+        },
+        required: ['ok', 'storniert'],
       },
     },
   },

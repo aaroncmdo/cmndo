@@ -26,6 +26,33 @@ describe('send-lead-reminders — Nurture/Timeout + 4. Reminder', () => {
     expect(src()).toContain('cohort4')
     expect(src()).toContain('168 * 60 * 60 * 1000')
   })
+
+  // 31.08.2026: die Kaskade erreichte /check, oeffentlichen Rueckruf und mcp NIE —
+  // beide Filter unten schlossen sie aus. Ein echter Kunde lief so ins Leere.
+  it('nurtured auch Leads OHNE E-Mail (Telefon reicht)', () => {
+    expect(src()).not.toContain(".not('email', 'is', null)")
+    expect(src()).toContain(".or('email.not.is.null,telefon.not.is.null')")
+  })
+
+  it('schliesst flow-gesendet NICHT aus (erfolgreicher Versand != erledigt)', () => {
+    // Bewusst nur auf ANWESENHEIT geprueft. Eine Abwesenheits-Assertion auf
+    // `.eq('status','neu')` waere falsch: der Timeout-Block (mark_expired_leads,
+    // weiter unten) filtert weiterhin korrekt auf 'neu' und darf das auch.
+    // Erster Versuch hing zudem an einem `\n` im Suchstring — auf Windows (CRLF)
+    // gruen, in der CI (LF) rot. Zeilenenden gehoeren nicht in eine Assertion.
+    expect(src()).toContain(".in('status', ['neu', 'flow-gesendet'])")
+  })
+
+  it('WhatsApp nur auf Stufe 2+3 — vier WA-Nachrichten/Woche waeren Belaestigung', () => {
+    expect(src()).toContain('WHATSAPP_STUFEN')
+    expect(src()).toContain('new Set([2, 3])')
+  })
+
+  it('markiert Nicht-WhatsApp-Stufen still, statt sie zu ueberspringen', () => {
+    // Sonst reisst die Kaskade: Stufe N verlangt reminder_(N-1)_sent_at IS NOT NULL.
+    expect(src()).toContain('if (!WHATSAPP_STUFEN.has(step)) return null')
+    expect(src()).toContain('stillMarkiert')
+  })
 })
 
 describe('send-lead-reminders — Kaskaden-Gate (17.07.2026)', () => {
