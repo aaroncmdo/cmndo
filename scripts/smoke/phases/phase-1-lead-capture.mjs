@@ -110,7 +110,7 @@ export async function runPhase1(anonContext, reportRef = { notes: [] }) {
 
       // Login als test-kunde und dann zum Formular navigieren
       await page.close().catch(() => {})
-      page = await loginAs(anonContext, 'test-kunde@claimondo.de', 'Test1234!', BASE_URL)
+      page = await loginAs(anonContext, 'test-kunde@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
       logPhase(1, `Nach Login als test-kunde: ${page.url()}`)
 
       // Jetzt direkt zum Formular

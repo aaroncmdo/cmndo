@@ -132,7 +132,7 @@ export async function runPhase5(svContext, reportRef = { notes: [] }) {
   try {
     // --- Login oder Session wiederverwenden --------------------------------
     logPhase(5, 'Login als test-sv@claimondo.de')
-    page = await loginAs(svContext, 'test-sv@claimondo.de', 'Test1234!', BASE_URL)
+    page = await loginAs(svContext, 'test-sv@claimondo.de', (process.env.TEST_PASSWORT ?? ''), BASE_URL)
     logPhase(5, `Nach Login URL: ${page.url()}`)
 
     // --- Navigation zu /gutachter/heute ------------------------------------

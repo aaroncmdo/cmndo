@@ -520,7 +520,7 @@ git commit -m "feat(repair-loop): Kunde BelegePaketCard (KVA+Schlussrechnung+Fot
 
 - [ ] **Step 4: DB-Verify (READ)** via service-role Skript: `reparatur_termine.status='erledigt'` + `erledigt_am` gesetzt; `claims.operative_status='abgeschlossen'` + `abgeschlossen_am` + `geschlossen_grund='reparatur_erledigt'`; `partner_provisionen` (werkstatt, claim=29dd7ad5) `status='freigegeben'`; `fall_dokumente` neue Zeile `dokument_typ='schlussrechnung'` `sichtbar_fuer` inkl. `kunde`.
 
-- [ ] **Step 5: Kunde-Download** — Login Kunde (`aaron.sprafke+kunde-20260515123218@claimondo.de` / `Claimondo2026!`) → `/kunde/faelle/29dd7ad5…` → „Deine Belege"-Card zeigt KVA + Schlussrechnung + Fotos, Download klickbar. Screenshot desktop+mobile.
+- [ ] **Step 5: Kunde-Download** — Login Kunde (`aaron.sprafke+kunde-20260515123218@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`) → `/kunde/faelle/29dd7ad5…` → „Deine Belege"-Card zeigt KVA + Schlussrechnung + Fotos, Download klickbar. Screenshot desktop+mobile.
 
 - [ ] **Step 6: Report** — Ergebnis + Screenshots. (Tmp-Skripte/`.env.local` danach löschen.)
 

@@ -10,7 +10,7 @@ mkdirSync(OUT, { recursive: true })
 
 const BASE = 'http://localhost:3013'
 const SV_EMAIL = 'aaron.sprafke@claimondo.de'
-const SV_PASS = 'Test1234!'
+const SV_PASS = (process.env.TEST_PASSWORT ?? '')
 
 const browser = await chromium.launch({ headless: false, slowMo: 200 })
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })

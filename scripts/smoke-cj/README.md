@@ -10,9 +10,9 @@ SMOKE_TEST_KUNDE_USER_ID=<uuid>
 SMOKE_TEST_KUNDE_EMAIL=smoke-kunde@claimondo.test
 SMOKE_TEST_SV_USER_ID=<uuid>
 SMOKE_TEST_SV_EMAIL=smoke-sv@claimondo.test
-SMOKE_TEST_SV_PASSWORT=Test1234!
+SMOKE_TEST_SV_PASSWORT=<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>
 SMOKE_TEST_ADMIN_EMAIL=smoke-admin@claimondo.test
-SMOKE_TEST_ADMIN_PASSWORT=Test1234!
+SMOKE_TEST_ADMIN_PASSWORT=<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>
 SMOKE_TEST_PLZ=50667
 
 # 2a. LIVE-Watch (Browser sichtbar, SlowMo, Step-HUD im Browser)

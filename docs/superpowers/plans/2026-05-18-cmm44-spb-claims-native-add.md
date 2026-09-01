@@ -577,7 +577,7 @@ gh pr create --base staging --title "CMM-44 SP-B PR2a — Cluster Workflow/Zuwei
 
 - [ ] **Step 8: Smoke-Script anlegen + Portal-Smoke (nach staging-Deploy)**
 
-`scripts/smoke-cmm44-spb.mjs` anlegen (Vorlage `scripts/smoke-cmm44-spa2-pr2.mjs`): loggt sich in die 5 Portale ein (Public/Admin/Dispatch/SV/Kunde), öffnet je die Fallakte-/Listen-Seiten mit SP-B-Werten, macht Screenshots. Test-User aus dem E2E-Setup (`twofa_aktiviert=false`, Passwort `Test1234!`). Dann `node scripts/smoke-cmm44-spb.mjs` gegen `app.staging.claimondo.de`; Screenshots im selben Schritt auswerten (`feedback_smoke_screenshot_pflicht`). Prüfen: Status/Phase, Notizen, Eskalation, Onboarding-Gate, Sprache erscheinen in Fallakte/Listen unverändert. Ergebnis in `docs/18.05.2026/cmm44-spb-smoke-pr2a.md`. (PR2b/c nutzen das Script wieder.)
+`scripts/smoke-cmm44-spb.mjs` anlegen (Vorlage `scripts/smoke-cmm44-spa2-pr2.mjs`): loggt sich in die 5 Portale ein (Public/Admin/Dispatch/SV/Kunde), öffnet je die Fallakte-/Listen-Seiten mit SP-B-Werten, macht Screenshots. Test-User aus dem E2E-Setup (`twofa_aktiviert=false`, Passwort `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`). Dann `node scripts/smoke-cmm44-spb.mjs` gegen `app.staging.claimondo.de`; Screenshots im selben Schritt auswerten (`feedback_smoke_screenshot_pflicht`). Prüfen: Status/Phase, Notizen, Eskalation, Onboarding-Gate, Sprache erscheinen in Fallakte/Listen unverändert. Ergebnis in `docs/18.05.2026/cmm44-spb-smoke-pr2a.md`. (PR2b/c nutzen das Script wieder.)
 
 ---
 

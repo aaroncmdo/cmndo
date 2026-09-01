@@ -435,8 +435,12 @@ test.describe('Kundenfunnel-Szenarien (Prod, gated RUN_KUNDENFUNNEL_SMOKE)', () 
         await expect(page.getByRole('heading', { name: /Willkommen bei Claimondo/i })).toBeVisible({
           timeout: 20_000,
         })
-        await expect(page.getByText(/Ihr Gutachter/i).first()).toBeVisible()
-        await expect(page.getByText(/Ihr Betreuer|Kundenbetreuer/i).first()).toBeVisible()
+        // Anrede-tolerant: die Aussage ist "Gutachter-/Betreuer-Karte ist sichtbar",
+        // nicht "sie heisst genau so". Die Kundensicht ist am 31.08. auf "du"
+        // umgestellt worden (Aaron-Entscheidung) — waere hier "Ihr" fest verdrahtet,
+        // haette derselbe unveraenderte Bildschirm den Test rot gemacht.
+        await expect(page.getByText(/(Dein|Ihr) Gutachter/i).first()).toBeVisible()
+        await expect(page.getByText(/(Dein|Ihr) Betreuer|Kundenbetreuer/i).first()).toBeVisible()
       }
     })
   }

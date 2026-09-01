@@ -31,7 +31,7 @@ import { join } from 'node:path'
 
 const BASE_URL = process.env.FELDMODUS_BASE_URL ?? 'http://localhost:3000'
 const EMAIL = process.env.FELDMODUS_EMAIL ?? 'test-sv@claimondo.de'
-const PASSWORD = process.env.FELDMODUS_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.FELDMODUS_PASSWORD ?? ''
 const VIEWPORT_NAME = process.env.FELDMODUS_VIEWPORT ?? 'desktop'
 
 // Test-Daten: Höninger Weg 100, 50969 Köln (Termin den Aaron geseedet hat)

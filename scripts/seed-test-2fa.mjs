@@ -41,10 +41,10 @@ if (!URL || !ANON) {
 }
 
 const ALL = [
-  // test-admin: Passwort NUR aus CI-env (nicht Test1234!) — Aaron/CI setzt TEST_ADMIN_PASSWORD.
+  // test-admin: Passwort NUR aus CI-env (nicht <PASSWORT: GitHub-Secret>) — Aaron/CI setzt TEST_ADMIN_PASSWORD.
   { email: 'test-admin@claimondo.de', pw: process.env.TEST_ADMIN_PASSWORD ?? '', env: 'TEST_ADMIN_TOTP_SECRET' },
-  { email: 'test-dispatch@claimondo.de', pw: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!', env: 'TEST_DISPATCH_TOTP_SECRET' },
-  // test-sv: starkes Passwort NUR aus env (Supabase lehnt Test1234! als schwach ab).
+  { email: 'test-dispatch@claimondo.de', pw: process.env.TEST_DISPATCH_PASSWORD ?? '', env: 'TEST_DISPATCH_TOTP_SECRET' },
+  // test-sv: starkes Passwort NUR aus env (Supabase lehnt <PASSWORT: GitHub-Secret> als schwach ab).
   { email: 'test-sv@claimondo.de', pw: process.env.TEST_SV_PASSWORD ?? '', env: 'TEST_SV_TOTP_SECRET' },
   // AAR-2fa-blast-radius: kanzlei + kundenbetreuer sind ebenfalls Pflicht-2FA-Rollen
   // (istZweiFaktorPflicht) und werden von e2e genutzt (golden-path-prod, onboarding-

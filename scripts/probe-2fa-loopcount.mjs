@@ -22,7 +22,7 @@ page.on('framenavigated',(f)=>{ if(f===page.mainFrame()) navs.push(new URL(f.url
 try{
   await page.goto(`${BASE}/login`,{waitUntil:'domcontentloaded',timeout:45000}); await page.waitForTimeout(700)
   await page.fill('input[name="email"], #email','test-admin@claimondo.de')
-  await page.fill('input[name="password"], #password','Test1234!')
+  await page.fill('input[name="password"], #password',(process.env.TEST_PASSWORT ?? ''))
   await page.click('button:has-text("Einloggen")')
   await page.waitForURL((u)=>!u.pathname.startsWith('/login'),{timeout:60000})
   await ctx.clearCookies({name:'claimondo_2fa_verified'})

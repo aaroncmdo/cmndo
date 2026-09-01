@@ -52,13 +52,13 @@ export function BeratungsterminCard({ token, termin }: Props) {
 
   return (
     <div className="mb-5 rounded-ios-md border border-claimondo-ondo/20 bg-claimondo-ondo/[0.06] p-5">
-      <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">Ihr Beratungstermin</p>
+      <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">Dein Beratungstermin</p>
       <p className="text-base font-semibold text-claimondo-navy">{fmt(startZeit)}</p>
       {termin.kbVorname && (
         <p className="text-sm text-claimondo-ondo mb-1">mit {termin.kbVorname}</p>
       )}
       <p className="text-xs text-claimondo-shield/80 mb-3">
-        {status === 'bestaetigt' ? 'Bestätigt — wir rufen Sie zur vereinbarten Zeit an.' : 'Passt Ihnen dieser Termin?'}
+        {status === 'bestaetigt' ? 'Bestätigt — wir rufen dich zur vereinbarten Zeit an.' : 'Passt dir dieser Termin?'}
       </p>
 
       {fehler && <p className="text-sm text-danger-strong mb-2">{fehler}</p>}

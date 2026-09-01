@@ -10,7 +10,7 @@ import { chromium } from '@playwright/test'
 
 const BASE = process.env.SMOKE_BASE_URL || 'https://app.claimondo.de'
 const EMAIL = process.env.SMOKE_ADMIN_EMAIL || 'test-admin@claimondo.de'
-const PASSWORD = process.env.SMOKE_ADMIN_PASSWORD || 'Claimondo2026!'
+const PASSWORD = process.env.SMOKE_ADMIN_PASSWORD || ''
 
 const browser = await chromium.launch()
 const ctx = await browser.newContext()

@@ -48,7 +48,7 @@ if (!URL || !ANON || !SERVICE) {
 }
 
 const EMAIL = 'smoke-2fa@claimondo.de'
-const PW = process.env.SMOKE_2FA_PASSWORD ?? 'Claimondo2026!'
+const PW = process.env.SMOKE_2FA_PASSWORD ?? ''
 
 const admin = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } })
 

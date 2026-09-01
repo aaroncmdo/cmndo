@@ -20,7 +20,7 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.staging.claimondo.d
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASS
 const SV_EMAIL = process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de'
-const SV_PASS = process.env.TEST_SV_PASSWORD ?? 'Test1234!'
+const SV_PASS = process.env.TEST_SV_PASSWORD ?? ''
 
 const isStaging = BASE.includes('staging.claimondo.de')
 

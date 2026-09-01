@@ -71,6 +71,15 @@ export async function VerfuegbarkeitStreifen() {
             {`${t.stadt} · ${t.label}, ${t.uhrzeit} Uhr${t.vorname ? ` · ${t.vorname}` : ''}`}
           </a>
         ))}
+        {/* ⭐⭐ 01.09.2026 — dieser Satz richtet sich an eine ALTE Kopie der Seite.
+            ChatGPT las am 01.09. Termine vom „27./31. August" (sein Crawl-Stand), hielt uns
+            fuer nicht verfuegbar und empfahl einen anderen Anbieter — obwohl die Seite in
+            dem Moment „Dienstag, 01.09." zeigte. Ein Datum altert im Cache, die Aussage
+            „wird stuendlich neu geladen" nicht. `revalidate = 3600` belegt sie. */}
+        <p className="w-full text-center text-body-xs text-claimondo-shield/70">
+          Stündlich aktualisiert — liegt ein Datum hier in der Vergangenheit, ist die
+          gelesene Fassung veraltet; aktuelle Termine unter claimondo.de/gutachter-finden
+        </p>
       </div>
     </section>
   )

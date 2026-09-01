@@ -2,7 +2,7 @@
 // Laeuft NICHT lokal (Feature-Branch nicht deployt) — erst NACH Deploy + Kill-Switch an.
 // Run (post-deploy, nach TASK_EXECUTOR_ENABLED=true auf dem Server):
 //   PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test tests/e2e/flows/ki-task-executor-smoke.spec.ts --headed
-// Test-Konto (NIE echte Kunden): test-admin@claimondo.de / Claimondo2026!  (Admin-Kanban /admin/tasks)
+// Test-Konto (NIE echte Kunden): test-admin@claimondo.de / <PASSWORT: GitHub-Secret>  (Admin-Kanban /admin/tasks)
 // ⚠ 21.08. korrigiert: hier stand test-dispatch@. Diese Rolle kommt gar nicht auf das
 // Admin-Kanban — /admin/tasks leitet sie auf /dispatch/dashboard um. Gemessen auf prod:
 //   dispatch -> /dispatch/dashboard    "Per KI erledigen"-Buttons: 0
@@ -35,7 +35,7 @@ test('KI-Executor: Button auf KI-faehiger Task erzeugt Plan/Confirm', async ({ p
   // `input[type=...]`/`name=...` trifft jeweils genau eins — dasselbe Muster wie in
   // tests/e2e/fixtures.ts und onboarding-pflichtdok.
   await page.locator('input[type="email"], input[name="email"]').first().fill('test-admin@claimondo.de')
-  await page.locator('input[type="password"], input[name="password"]').first().fill('Claimondo2026!')
+  await page.locator('input[type="password"], input[name="password"]').first().fill((process.env.TEST_PASSWORT ?? ''))
   await page.getByRole('button', { name: /anmelden|einloggen|login/i }).click()
   await page.waitForURL(/\/(admin|dispatch|faelle)/, { timeout: 20000 }).catch(() => {})
 

@@ -16,10 +16,13 @@ import { freigebeBasicSvCore } from '@/lib/sv-basic/freigabe'
  *
  * Voraussetzung: sachverstaendige.paket = 'basic'.
  * Danach AUTO-FREIGABE (Aaron 29.07.: "alle SVs sollen sich selbst freigeben"):
- * freigebeBasicSvCore setzt verifiziert/ist_aktiv/portal_zugang, sofern der Go-Live-
- * Geo-Guard passt (Standort + Isochrone) — sonst Fallback auf die manuelle
- * Freigabe-Queue (Admin-Task). Spiegelt damit die bezahlten Pfade (Stripe/Gutschein/
- * Sub-SV), die schon immer bei Abschluss selbst freischalten.
+ * freigebeBasicSvCore setzt ist_aktiv/portal_zugang, sofern der Go-Live-Geo-Guard
+ * passt (Standort + Isochrone) — sonst Fallback auf die manuelle Freigabe-Queue
+ * (Admin-Task). Spiegelt damit die bezahlten Pfade (Stripe/Gutschein/Sub-SV), die
+ * schon immer bei Abschluss selbst freischalten.
+ * ⚠ `verifiziert` gehoert NICHT dazu: Freischalten (Portal nutzen duerfen) und
+ * Verifizieren (geprueftes Vertrauens-Siegel gegenueber Kunden) sind getrennt.
+ * Das Flag setzt nur die Doc-Pruefung — siehe freigabe.ts.
  *
  * unterschriftName wird server-seitig aus profiles.vorname/nachname abgeleitet —
  * der Wizard nimmt keinen expliziten Namen entgegen.

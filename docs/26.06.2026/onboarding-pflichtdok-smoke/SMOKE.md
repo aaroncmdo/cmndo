@@ -93,7 +93,7 @@ CI=1 PLAYWRIGHT_BASE_URL=https://app.staging.claimondo.de \
   STAGING_BASIC_USER=aaroncmdo STAGING_BASIC_PASS='<staging-basic-pass>' \
   npx playwright test onboarding-pflichtdok --project=chromium --workers=1
 ```
-Voraussetzungen: staging erreichbar + Basic-Auth-Pass + Test-Accounts (Test1234! /
+Voraussetzungen: staging erreichbar + Basic-Auth-Pass + Test-Accounts (<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD> /
 TestKB2026!). `CI=1` unterdrückt den lokalen dev-webServer (trifft direkt staging).
 
 **Run-Ergebnis 26.06.2026 (gegen app.staging.claimondo.de): 4 passed / 1 skipped (1,2 min)**

@@ -172,7 +172,7 @@ export async function gotoAndShoot(page, url, label) {
  * @param {string} [baseUrl]
  * @returns {import('playwright').Page}
  */
-export async function loginAs(context, email, password = 'Test1234!', baseUrl = 'http://localhost:3000') {
+export async function loginAs(context, email, password = (process.env.TEST_PASSWORT ?? ''), baseUrl = 'http://localhost:3000') {
   const page = await context.newPage()
 
   await page.goto(`${baseUrl}/login`, { waitUntil: 'networkidle', timeout: 30000 })
