@@ -60,8 +60,10 @@ if (!URL || !ANON || !SERVICE) {
 
 const NOBODY_EMAIL = 'test-rls-nobody@claimondo.de'
 // Das Passwort stand hier im Klartext — im OEFFENTLICHEN Repo. Die Bereinigung #5797
-// hat es nicht erwischt, weil `check-secrets.mjs` nur die beiden BEKANNTEN Leak-Werte
-// sucht (`Claimondo2026!|Test1234!`); ein drittes Passwort ist fuer das Gate unsichtbar.
+// hat es nicht erwischt: `check-secrets.mjs` sucht die beiden am 31.08. bekannten
+// Leak-Werte namentlich, ein drittes Passwort ist fuer das Gate unsichtbar.
+// (Die Werte stehen hier bewusst NICHT — das Gate strippt keine Kommentare, eine
+//  Erklaerung mit dem Literal waere selbst ein Treffer. Beim ersten Anlauf passiert.)
 // Aufgefallen ist es erst, als die Konto-Rotation vom 31.08. den Wert entwertete und
 // dieser Check mit `Invalid login credentials` DREI PRs blockierte (#5813, #5808, #5784)
 // — ohne dass eine davon inhaltlich etwas damit zu tun hatte.
