@@ -897,7 +897,11 @@
     "eigene_versicherung",
     "netzwerk_owner_id",
     "sa_extern_bestaetigt_am",
-    "sa_extern_bestaetigt_von"
+    "sa_extern_bestaetigt_von",
+    "auswertung_unverbindlich",
+    "ist_testfall",
+    "source_channel",
+    "source_domain"
    ]
   },
   "client_error_log": {
@@ -2729,7 +2733,11 @@
     "unfallort_place_id",
     "gegner_versicherungsnummer",
     "fahrzeugklasse",
-    "wiederholung_erkannt_am"
+    "wiederholung_erkannt_am",
+    "unfall_zeitfenster",
+    "gutachten_status",
+    "telefon_ziffern",
+    "auswertung_unverbindlich"
    ]
   },
   "levelup_anreicherung": {
@@ -3685,7 +3693,8 @@
     "actions_last_seen_at",
     "kanzlei_id",
     "netzwerk_owner_id",
-    "netzwerk_owner_seit"
+    "netzwerk_owner_seit",
+    "telefon_ziffern"
    ]
   },
   "profiles_oauth_secrets": {
