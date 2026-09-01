@@ -2,7 +2,7 @@
 // Soll (Journey j03): die Schaden-Abtretung (SA) wird per Signatur bestätigt und konvertiert den Lead
 // zu einem Claim mit claims.sa_unterschrieben=true. Fahrbar über den WerkstattIntake-Signatur-Surface:
 // ein Lead mit werkstatt_intake_am kurzschliesst /flow/[token] direkt auf SaSignaturStep (page.tsx:189)
-// — Canvas (signature_pad) + Pflicht-Checkbox + "SA unterzeichnen". Ausgangszustand:
+// — Canvas (signature_pad) + Pflicht-Checkbox + "Beauftragung unterschreiben". Ausgangszustand:
 // scripts/smoke/sa-vollmacht-seed.mjs (deterministisch, self-cleaning).
 //
 // Die VOLLMACHT hat keinen Kunde-UI-Canvas (server-intern via LexDrive/confirmVollmacht → claims.
@@ -15,6 +15,7 @@ import { test, expect } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
+import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
 
 const SEED_PATH = path.resolve(__dirname, '../../../scripts/smoke/.sa-vollmacht-seed.json')
 const SEED: Record<string, string> = existsSync(SEED_PATH) ? JSON.parse(readFileSync(SEED_PATH, 'utf8')) : {}
@@ -45,7 +46,7 @@ test('SA-Signatur (WerkstattIntake): Lead → Claim mit sa_unterschrieben=true',
 
   // Signatur-Canvas zeichnen bis der Sign-Button aktiv wird (signature_pad lädt async → toPass-Loop,
   // exakt das in CI bewährte Muster aus reparatur-weg-e2e-smoke.spec.ts:73-86).
-  const sign = page.getByRole('button', { name: /SA unterzeichnen/i })
+  const sign = page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN })
   const canvas = page.locator('canvas').first()
   await expect(canvas, 'Signatur-Canvas').toBeVisible({ timeout: 10_000 })
   await expect(async () => {

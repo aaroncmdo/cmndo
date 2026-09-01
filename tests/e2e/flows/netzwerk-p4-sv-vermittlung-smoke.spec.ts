@@ -22,6 +22,7 @@
 import { execSync } from 'node:child_process'
 import { test, expect, type Page } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
 
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string
@@ -95,9 +96,9 @@ async function drawSignature(page: Page): Promise<boolean> {
 async function handleSaStep(page: Page): Promise<boolean> {
   // Zwei Render-Varianten: Wizard-SA-Step (echtes heading) + Fokus-Signatur (j03-Delta:
   // FokusSignaturClient rendert den Titel NICHT als heading-Role — Marker ist der
-  // "SA unterzeichnen"-CTA; Prod-Snapshot 04.08.).
+  // Vertrags-CTA ("Beauftragung unterschreiben"); Prod-Snapshot 04.08.).
   const heading = page.getByRole('heading', { name: /Beauftragung unterzeichnen|Sicherungsabtretung/i }).first()
-  const fokusCta = page.getByRole('button', { name: /SA unterzeichnen/i }).first()
+  const fokusCta = page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN }).first()
   const istSaStep =
     (await heading.isVisible().catch(() => false)) || (await fokusCta.isVisible().catch(() => false))
   if (!istSaStep) return false
@@ -245,9 +246,9 @@ test('Teil B — Kunde signiert SA in den bestehenden Claim: Effekte werden nach
   // an der Fokus-Signatur — keine Quali, keine Feststellung (der SV hat alles erfasst).
   // Hartes Soll-Assert VOR der Treiberschleife; die Schleife bedient danach nur noch den
   // SA-Step selbst (Checkboxen/Canvas/Absenden).
-  // Marker = Fokus-CTA "SA unterzeichnen" (die Fokus-Ansicht rendert den Titel nicht als
+  // Marker = Fokus-CTA "Beauftragung unterschreiben" (die Fokus-Ansicht rendert den Titel nicht als
   // heading-Role; disabled bis Checkboxen — toBeVisible reicht als Direkt-Start-Beweis).
-  await expect(page.getByRole('button', { name: /SA unterzeichnen/i }).first()).toBeVisible({
+  await expect(page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN }).first()).toBeVisible({
     timeout: 30_000,
   })
 
