@@ -31,7 +31,26 @@ export type DispatchResult = {
   detail?: string
 }
 
-function buildWhatsAppText(opts: {
+/**
+ * Die erste Nachricht, die JEDER Marketing-Lead bekommt — entsprechend sorgfaeltig formuliert.
+ *
+ * Frueher stand hier "Mit einem Klick legst du SA + Vollmacht ab". "SA" ist die
+ * Sicherungsabtretung; kein Kunde weiss das. Bei einer rechtlich bindenden Unterschrift
+ * ist eine Abkuerzung, die der Unterzeichnende nicht versteht, das falsche Mittel —
+ * deshalb beide Dokumente ausgeschrieben plus ein Satz, WOFUER sie sind.
+ *
+ * ⚠ Die Kostenaussage lautet bewusst "unser Service ist fuer dich kostenlos" und NICHT
+ * "du zahlst nichts". Der Unterschied ist nicht kosmetisch:
+ *   - Claimondo stellt dem Kunden nie etwas in Rechnung (geprueft 01.09.2026: in
+ *     `abrechnungen` existiert keine einzige Rechnung mit empfaenger_typ='kunde').
+ *     Diese Aussage ist damit fuer JEDEN Lead wahr.
+ *   - "Du zahlst nichts" waere pauschal FALSCH: nur 62,7 % der Claims laufen ueber
+ *     Haftpflicht (gegnerische VS zahlt). 14,5 % sind Selbstzahler, 10,8 % Kasko —
+ *     dort traegt der Kunde Gutachten bzw. Selbstbeteiligung. Diese Nachricht geht an
+ *     ALLE, also vor der Klaerung des Abrechnungswegs. Eine pauschale Zusage waere eine
+ *     irrefuehrende Angabe (§ 5 UWG).
+ */
+export function buildWhatsAppText(opts: {
   vorname: string | null
   flowUrl: string
 }): string {
@@ -39,10 +58,13 @@ function buildWhatsAppText(opts: {
   return [
     `${greet}, danke für deine Schadenmeldung bei Claimondo.`,
     '',
-    'Hier dein sicherer Login-Link (gültig 72 Stunden):',
+    'Hier ist dein persönlicher Link (gültig 72 Stunden):',
     opts.flowUrl,
     '',
-    'Mit einem Klick legst du SA + Vollmacht ab und kommst direkt in dein Portal.',
+    'Dort unterschreibst du Vollmacht und Sicherungsabtretung — damit dürfen wir den ' +
+      'Schaden für dich abwickeln. Danach siehst du in deinem Portal jederzeit, wie es weitergeht.',
+    '',
+    'Unser Service ist für dich kostenlos.',
   ].join('\n')
 }
 
