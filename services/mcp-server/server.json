@@ -3,7 +3,7 @@
   "name": "de.claimondo/sv-finder",
   "title": "Claimondo — Kfz-Gutachter finden & Termin buchen",
   "description": "Findet Kfz-Gutachter in Deutschland, zeigt freie Termine und bucht den Besichtigungstermin.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "websiteUrl": "https://claimondo.de",
   "icons": [
     {
