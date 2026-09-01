@@ -50,12 +50,13 @@ const db = createClient(url, key, { auth: { persistSession: false } })
 const argv = process.argv.slice(2)
 const apply = argv.includes('--apply')
 const modusBeweisbar = argv.includes('--beweisbar')
+const modusMarker = argv.includes('--marker')
 const modusZuruecksetzen = argv.includes('--zuruecksetzen')
 const fensterArg = argv.find((a) => a.startsWith('--fenster='))?.split('=')[1]
 
-if (!modusBeweisbar && !fensterArg && !modusZuruecksetzen) {
+if (!modusBeweisbar && !modusMarker && !fensterArg && !modusZuruecksetzen) {
   console.error(
-    'Kein Modus gewaehlt. Nutze --beweisbar, --fenster="VON,BIS" oder --zuruecksetzen.\n' +
+    'Kein Modus gewaehlt. Nutze --beweisbar, --marker, --fenster="VON,BIS" oder --zuruecksetzen.\n' +
       'Ohne --apply laeuft jeder Modus als Dry-Run.',
   )
   process.exit(1)
@@ -118,6 +119,36 @@ if (modusBeweisbar) {
     const lead = Array.isArray(t.leads) ? t.leads[0] : t.leads
     // Nur die Domain ausgeben — der Local-Part ist personenbezogen.
     console.log(`   · ${t.claim_nummer}  @${String(lead?.email ?? '').split('@')[1] ?? '?'}`)
+  }
+  if (treffer.length === 0) console.log('  Keine Kandidaten.')
+  else await setzeFlag(treffer.map((t) => t.id), true)
+}
+
+// ── Modus A2: Marker AM CLAIM (Seed-Konvention) ───────────────────────────────
+// Viele Seeds schreiben ihren Marker direkt in den Claim — `schadenort_adresse: MARKER`
+// (SMOKE-…) oder `fall_typ: 'SMOKE-LC-04'` (lifecycle-seed). Das ist genauso beweisbar wie
+// eine reservierte Domain: an einem Ort namens "SMOKE-AUSZAHLUNGSART-ERHEBUNG" verunfallt
+// niemand. Dieser Modus braucht KEINEN Lead — er greift auch bei Waisen.
+if (modusMarker) {
+  trenner('Modus A2 — Marker am Claim (schadenort_adresse / fall_typ)')
+  const { data: rows, error } = await db
+    .from('claims')
+    .select('id, claim_nummer, schadenort_adresse, fall_typ')
+    .eq('ist_testfall', false)
+  if (error) {
+    console.error('Read fehlgeschlagen:', error.message)
+    process.exit(1)
+  }
+  // Anker am Zeilenanfang: ein Schadenort, der zufaellig "test" enthaelt
+  // ("Testorfer Weg"), wird NICHT getroffen.
+  const MARKER_RE = /^(SMOKE|TEST|FIXTURE)/
+  const treffer = (rows ?? []).filter(
+    (r) => MARKER_RE.test(r.schadenort_adresse ?? '') || /^SMOKE/.test(r.fall_typ ?? ''),
+  )
+  console.log(`  ${rows?.length ?? 0} unmarkierte Claims geprueft.`)
+  for (const t of treffer) {
+    const grund = /^SMOKE/.test(t.fall_typ ?? '') ? `fall_typ=${t.fall_typ}` : 'Marker im Schadenort'
+    console.log(`   · ${t.claim_nummer}  ${grund}`)
   }
   if (treffer.length === 0) console.log('  Keine Kandidaten.')
   else await setzeFlag(treffer.map((t) => t.id), true)
