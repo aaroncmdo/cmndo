@@ -45,7 +45,7 @@ const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: f
 const TEST_PHONE = '+4915562740016'
 // Passwort muss zu den GitHub-Secrets TEST_ADMIN_PASSWORD / TEST_SV_PASSWORD
 // passen (siehe .env.example) — sonst fallen die E2E-Tests um.
-const TEST_PW = 'Test1234!'
+const TEST_PW = (process.env.TEST_PASSWORT ?? '')
 
 type TestUser = { email: string; rolle: string; vorname: string; nachname: string; userId?: string }
 

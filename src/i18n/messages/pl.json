@@ -419,7 +419,7 @@
       "agb_link": "OWU",
       "widerruf_link": "oraz pouczenie o odstąpieniu.",
       "submitting": "Przetwarzanie ...",
-      "cta_sign": "Podpisz SA",
+      "cta_sign": "Podpisz umowę",
       "error_fallback": "Błąd zlecenia",
       "volltext": {
         "s1_titel": "§1 Abtretungserklärung",
@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "Wypłata:",
         "aufMeinKonto": "Na moje konto",
         "direktWerkstatt": "Bezpośrednio do warsztatu",
-        "auszahlungFrage": "Dokąd ma trafić wypłata?"
+        "auszahlungFrage": "Dokąd ma trafić wypłata?",
+        "summeTitel": "Twoje roszczenie na podstawie opinii",
+        "summeVorbehalt": "To, ile ostatecznie zapłaci ubezpieczyciel, może się różnić — negocjujemy to za Ciebie."
       },
       "meinBetreuer": {
         "heading": "Mój opiekun klienta",

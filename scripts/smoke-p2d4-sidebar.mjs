@@ -31,7 +31,7 @@ page.on('pageerror', (e) => errs.push('PAGEERR: ' + e.message))
 try {
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded', timeout: 120000 })
   await page.fill('input[type="email"], input[name="email"], #email', 'test-dispatch@claimondo.de')
-  await page.fill('input[type="password"], input[name="password"], #password', 'Test1234!')
+  await page.fill('input[type="password"], input[name="password"], #password', (process.env.TEST_PASSWORT ?? ''))
   await page.click('button[type="submit"]')
   await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 60000 }).catch(() => {})
   console.log('after-login:', page.url())

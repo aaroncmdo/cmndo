@@ -1,6 +1,6 @@
 # SV-Portal — Architektur-Walkthrough
 
-Sachverständigen-Frontend für Claimondo. URL: `/gutachter/**`. Test-Login: `test-sv@claimondo.de` / `Test1234!`.
+Sachverständigen-Frontend für Claimondo. URL: `/gutachter/**`. Test-Login: `test-sv@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`.
 
 ## Layout
 

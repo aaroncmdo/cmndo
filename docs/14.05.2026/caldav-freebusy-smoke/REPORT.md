@@ -4,7 +4,7 @@
 
 - **URL:** `https://app.staging.claimondo.de`
 - **Basic-Auth:** `aaroncmdo / ClaimondoSuperuser123789!!`
-- **SV-Login:** `aaron.sprafke@claimondo.de / Test1234!` (Display-Name „Test-Aaron Test-Sprafke")
+- **SV-Login:** `aaron.sprafke@claimondo.de / <PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (Display-Name „Test-Aaron Test-Sprafke")
 - **iPhone-Setup:** Aaron hat heute auf seinem iPhone einen Termin in dem Kalender angelegt, der mit dem Test-Aaron-Account auf staging via CalDAV synchronisiert.
 - **Branch / PR:** [`kitta/caldav-freebusy-restore`](https://github.com/aaroncmdo/cmndo/pull/1147) (noch **nicht** auf staging deployed).
 

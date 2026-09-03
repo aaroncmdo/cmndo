@@ -148,7 +148,7 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
             className="rounded-ios-xl px-4 py-3 space-y-1"
           >
             <p className="text-sm font-semibold text-info-strong">{t('haftpflichtReassurance.titel')}</p>
-            <p className="text-body-xs text-info-strong">{t('haftpflichtReassurance.text')}</p>
+            <p className="text-body text-info-strong">{t('haftpflichtReassurance.text')}</p>
           </NoticeBox>
         )}
 
@@ -204,7 +204,7 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
       {(fallStatus === 'nachbesichtigung-laeuft' || fall.nachbesichtigung_status === 'angefordert') && (
         <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-2">
           <p className="text-sm font-semibold text-warning-strong">{t('nachbesichtigung.titel')}</p>
-          <p className="text-body-xs text-warning-strong">{t('nachbesichtigung.text')}</p>
+          <p className="text-body text-warning-strong">{t('nachbesichtigung.text')}</p>
           <Link
             href={`/kunde/nachbesichtigung/${vm.fallId}`}
             className="inline-flex items-center text-body-xs font-medium rounded-ios-md border border-warning/40 text-warning-strong px-3 py-1.5 hover:bg-warning-soft transition-colors"
@@ -217,24 +217,24 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-2">
           <p className="text-sm font-semibold text-warning-strong">{t('vsKuerzt.titel')}</p>
           {typeof fall.vs_kuerzung_grund === 'string' && fall.vs_kuerzung_grund && (
-            <div className="rounded-ios-md bg-white/60 border border-warning/30 p-2 text-body-xs text-warning-strong">
+            <div className="rounded-ios-md bg-white/60 border border-warning/30 p-2 text-body text-warning-strong">
               <strong className="block mb-0.5">{t('vsKuerzt.begruendung')}</strong>
               {fall.vs_kuerzung_grund as string}
             </div>
           )}
-          <p className="text-body-xs text-warning-strong">{t('vsKuerzt.hinweis')}</p>
+          <p className="text-body text-warning-strong">{t('vsKuerzt.hinweis')}</p>
         </NoticeBox>
       )}
       {(fallStatus === 'vs-abgelehnt' || fallStatus === 'abgelehnt') && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('vsAbgelehnt.titel')}</p>
-          <p className="text-body-xs text-danger-strong">{t('vsAbgelehnt.text')}</p>
+          <p className="text-body text-danger-strong">{t('vsAbgelehnt.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'klage' && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('klage.titel')}</p>
-          <p className="text-body-xs text-danger-strong">{t('klage.text')}</p>
+          <p className="text-body text-danger-strong">{t('klage.text')}</p>
         </NoticeBox>
       )}
       {/* Gap D/I (05.08.): stille Endzustände ohne Abschluss-Card. Ohne diese Boxen zeigt der
@@ -244,30 +244,30 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
       {fallStatus === 'termin_durchgefuehrt' && (
         <NoticeBox tone="info" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-info-strong">{t('terminDurchgefuehrt.titel')}</p>
-          <p className="text-body-xs text-info-strong">{t('terminDurchgefuehrt.text')}</p>
+          <p className="text-body text-info-strong">{t('terminDurchgefuehrt.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'an_externe_kanzlei_uebergeben' && (
         <NoticeBox tone="info" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-info-strong">{t('externeKanzlei.titel')}</p>
-          <p className="text-body-xs text-info-strong">{t('externeKanzlei.text')}</p>
+          <p className="text-body text-info-strong">{t('externeKanzlei.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'abgelehnt_final' && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('abgelehntFinal.titel')}</p>
-          <p className="text-body-xs text-danger-strong">{t('abgelehntFinal.text')}</p>
+          <p className="text-body text-danger-strong">{t('abgelehntFinal.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'verjaehrt' && (
         <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-warning-strong">{t('verjaehrt.titel')}</p>
-          <p className="text-body-xs text-warning-strong">{t('verjaehrt.text')}</p>
+          <p className="text-body text-warning-strong">{t('verjaehrt.text')}</p>
         </NoticeBox>
       )}
       {szenario === 'ruegefall' && (
         <NoticeBox tone="warning" className="rounded-ios-xl px-3 py-2">
-          <p className="text-body-xs text-warning-strong font-medium">{t('ruegefall.banner')}</p>
+          <p className="text-body text-warning-strong font-medium">{t('ruegefall.banner')}</p>
         </NoticeBox>
       )}
 

@@ -16,7 +16,7 @@ import { test, expect, type Page } from '@playwright/test'
 
 const APP = process.env.SMOKE_APP_URL ?? 'https://app.claimondo.de'
 const EMAIL = process.env.SMOKE_PHONE_LOGIN_EMAIL ?? 'test-dispatch@claimondo.de'
-const PW = process.env.SMOKE_PHONE_LOGIN_PASSWORD ?? 'Test1234!'
+const PW = process.env.SMOKE_PHONE_LOGIN_PASSWORD ?? ''
 const KONTO = process.env.SMOKE_PHONE_LOGIN_KONTO ?? '/dispatch/konto'
 
 test.use({ serviceWorkers: 'block' })

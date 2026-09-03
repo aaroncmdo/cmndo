@@ -7,8 +7,8 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { entferneKbTerminOut } from '@/lib/termine/kb-termin-sync'
 import { kannTerminFallVerwalten } from '@/lib/termine/kann-termin-verwalten'
+import { storniereTerminAlsKunde } from '@/lib/termine/storno-kunde'
 
 export async function POST(req: Request) {
   try {
@@ -64,71 +64,22 @@ export async function POST(req: Request) {
     }
     const kundenbetreuerId = auth.kundenbetreuerId
 
-    const grund = body.grund ? String(body.grund).slice(0, 500) : null
-
-    const { error: updErr } = await admin
-      .from('gutachter_termine')
-      .update({
-        status: 'abgesagt',
-        cancelled_at: new Date().toISOString(),
-        notiz_kunde: grund,
-      })
-      .eq('id', termin.id)
-    if (updErr) {
+    // Fachlogik geteilt mit /api/v1/termin-stornieren (Token-Weg fuer KI-Assistenten) —
+    // beide Wege muessen dieselben Nebenwirkungen ausloesen, siehe lib/termine/storno-kunde.ts.
+    const res = await storniereTerminAlsKunde(admin, {
+      terminId: termin.id,
+      grund: body.grund ?? null,
+      quelle: 'portal',
+      erstelltVonId: user.id,
+      kundenbetreuerId,
+      claimNummer: auth.claimNummer,
+    })
+    if (!res.ok) {
       return NextResponse.json(
-        { success: false, error: `Termin-Update fehlgeschlagen: ${updErr.message}` },
-        { status: 500 },
+        { success: false, error: res.error },
+        { status: res.code === 'db_fehler' ? 500 : 404 },
       )
     }
-
-    // SP2c: abgesagtes KB-Beratungs-Event aus Google + CalDAV entfernen. Fail-soft.
-    if (termin.typ === 'kb_beratung') await entferneKbTerminOut(termin.id)
-
-    const empfaengerRolle = termin.typ === 'kb_beratung' ? 'kundenbetreuer' : 'dispatch'
-    const fallNr = auth.claimNummer ?? effFallId.slice(0, 8)
-    const titel =
-      termin.typ === 'kb_beratung'
-        ? `Kunde hat Beratungstermin abgesagt (${fallNr})`
-        : `Kunde hat Besichtigungstermin abgesagt (${fallNr})`
-    const beschreibung = [
-      grund ? `Grund: ${grund}` : 'Kein Grund angegeben.',
-      termin.start_zeit ? `War geplant: ${new Date(termin.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}` : null,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    try {
-      // Ueber diesen Task erfaehrt das Team von der Absage. Das try faengt ihn nicht.
-      const { error: absageTaskFehler } = await admin.from('tasks').insert({
-        fall_id: effFallId,
-        titel,
-        beschreibung,
-        typ: 'termin_absage',
-        status: 'offen',
-        prioritaet: 'dringend',
-        empfaenger_rolle: empfaengerRolle,
-        empfaenger_user_id: empfaengerRolle === 'kundenbetreuer' ? kundenbetreuerId : null,
-        entity_type: 'termin',
-        entity_id: termin.id,
-        auto_erstellt: true,
-        erstellt_von_id: user.id,
-      })
-      if (absageTaskFehler) {
-        console.error(`[termin/absagen] Task NICHT erstellt (Fall ${effFallId}) — Absage bleibt unbemerkt:`, absageTaskFehler.message)
-      }
-    } catch (e) {
-      console.error('[termin/absagen] Task-Insert fehlgeschlagen:', e)
-    }
-
-    try {
-      await admin.from('timeline').insert({
-        fall_id: effFallId,
-        typ: 'termin',
-        titel: 'Kunde hat Termin abgesagt',
-        beschreibung,
-        erstellt_von: user.id,
-      })
-    } catch { /* non-critical */ }
 
     revalidatePath(`/kunde/faelle/${effFallId}`)
     revalidatePath('/kunde')

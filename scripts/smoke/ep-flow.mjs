@@ -16,6 +16,8 @@ const token = process.argv[2]
 if (!token) { console.error('Token fehlt'); process.exit(1) }
 const headed = process.argv.includes('--headed')
 const MAX = Number((process.argv.find((a) => a.startsWith('--max=')) || '--max=22').split('=')[1])
+// Wie lange ein Ladezustand ohne Weiter-Button Geduld bekommt, bevor er als Sackgasse gilt.
+const GEDULD_S = Number(process.env.EP_GEDULD_S || 75)
 
 const SHOTS = join(process.cwd(), 'scripts/smoke/.ep-walk')
 mkdirSync(SHOTS, { recursive: true })
@@ -85,7 +87,7 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
   await page.screenshot({ path: join(SHOTS, `flow-${String(schritt).padStart(2, '0')}.png`), fullPage: true }).catch(() => {})
 
   // ── Endzustand? (praezise: der Abschluss-Screen, nicht irgendein "abgeschlossen" im Text) ──
-  if (/Ihr Fall wurde angelegt|Wir haben alles|Vielen Dank für Ihren Auftrag|Fall-Nummer/i.test(l.body)) {
+  if (/(Ihr|Dein) Fall wurde angelegt|(Ihr|Dein) Fall wurde erfolgreich erstellt|Geschafft!|Wir haben alles|Vielen Dank für (Ihren|deinen) Auftrag|Fall-Nummer/i.test(l.body)) {
     console.log('\n>>> Endzustand erreicht.')
     break
   }
@@ -228,7 +230,31 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
         continue
       }
     }
-    const slot = page.locator('button').filter({ hasText: /\d{2}\.\d{2}\.,?\s*\d{1,2}:\d{2}\s*Uhr/ }).first()
+    const slots = page.locator('button').filter({ hasText: /\d{2}\.\d{2}\.,?\s*\d{1,2}:\d{2}\s*Uhr/ })
+    // EP_SV_NAME: gezielt den Slot EINES bestimmten Gutachters treffen statt des erstbesten.
+    // Noetig fuer den Terminpfad-Nachweis — ein interner Bucher darf nur beim Wegwerf-SV
+    // buchen (Test-SV-Guard), und der steht nicht zwingend an erster Stelle.
+    let slot = slots.first()
+    if (process.env.EP_SV_NAME) {
+      const idx = await page.evaluate((name) => {
+        const passt = (b) => /\d{2}\.\d{2}\.,?\s*\d{1,2}:\d{2}\s*Uhr/.test(b.innerText || '')
+        const btns = [...document.querySelectorAll('button')].filter(passt)
+        return btns.findIndex((b) => {
+          let el = b
+          for (let i = 0; i < 6 && el; i++) {
+            el = el.parentElement
+            if (el && (el.innerText || '').includes(name)) return true
+          }
+          return false
+        })
+      }, process.env.EP_SV_NAME)
+      if (idx >= 0) {
+        slot = slots.nth(idx)
+        console.log(`  → Slot von "${process.env.EP_SV_NAME}" gefunden (Index ${idx})`)
+      } else {
+        console.log(`  ⚠ "${process.env.EP_SV_NAME}" NICHT unter den Vorschlaegen — nehme den ersten Slot`)
+      }
+    }
     if (await slot.count()) {
       const t = (await slot.innerText()).trim().replace(/\s+/g, ' ')
       await slot.click()
@@ -249,8 +275,8 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
   if (/keine Werkstatt-Auswahl möglich/i.test(b)) {
     console.log('  🔴 REGEL-4 ROT: "Für diesen Vorgang ist keine Werkstatt-Auswahl möglich." — der Fix greift NICHT')
   }
-  if (/Wählen Sie Ihre Werkstatt/i.test(b)) {
-    const versuche = protokoll.filter((p) => /Wählen Sie Ihre Werkstatt/.test(p.titel)).length
+  if (/Wähle deine Werkstatt|Wählen Sie Ihre Werkstatt/i.test(b)) {
+    const versuche = protokoll.filter((p) => /Wähle deine Werkstatt|Wählen Sie Ihre Werkstatt/.test(p.titel)).length
     if (versuche >= 2) {
       const skip = page.getByRole('button', { name: /^Überspringen/i }).first()
       if (await skip.count()) {
@@ -262,10 +288,55 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
     }
   }
 
+  // ── Werkstatt-Wunschtermin: erst Tag, dann Uhrzeit, dann absenden ────────
+  // Der Absende-Button ist deaktiviert, solange beides fehlt — ohne diese Auswahl
+  // sieht der Schritt wie eine Sackgasse aus, obwohl "Überspringen" danebensteht.
+  if (/Wunschtermin vorschlagen/i.test(b)) {
+    const tag = page.locator('button').filter({ hasText: /^\s*(MO|DI|MI|DO|FR|SA)\s+\d{2}\.\d{2}\.\s*$/ }).nth(1)
+    if (await tag.count()) { await tag.click(); await page.waitForTimeout(700) }
+    const uhr = page.locator('button').filter({ hasText: /^\s*\d{2}:\d{2}\s*$/ }).first()
+    if (await uhr.count()) { await uhr.click(); await page.waitForTimeout(700) }
+    const senden = page.getByRole('button', { name: /^Wunschtermin vorschlagen$/i }).first()
+    if (await senden.count() && !(await senden.isDisabled().catch(() => true))) {
+      await senden.click()
+      console.log('  → Wunschtermin vorgeschlagen (Tag + Uhrzeit gewaehlt)')
+      await page.waitForTimeout(3500)
+      continue
+    }
+    console.log('  ⚠ BEFUND: "Wunschtermin vorschlagen" bleibt deaktiviert trotz Tag+Uhrzeit')
+  }
+
   // ── Weiter ───────────────────────────────────────────────────────────────
   const weiter = page.getByRole('button', { name: /^(Weiter|Absenden|Bestätigen|Fertig|Jetzt unterschreiben|Unterschreiben|SA unterzeichnen|Speichern|Auswählen|Termin bestätigen|Ohne Termin fortfahren|Termin lieber später vereinbaren|Diesen Gutachter beauftragen|Auftrag erteilen|Konto erstellen|Später)/i })
-  const nW = await weiter.count()
+  let nW = await weiter.count()
   if (!nW) {
+    // ⚠ Messfalle 2 (Regel 4): "haengt" und "noch nicht fertig" sehen identisch aus.
+    // Vor dem Abbruch GEDULD haben und die Textlaenge ueber die Zeit beobachten —
+    // sonst wird ein langsamer Ladezustand faelschlich als Sackgasse gemeldet.
+    const laedt = /Wir suchen|Einen Moment|Bitte warten|Wird verarbeitet|wird erstellt|wird geladen|wird geprüft|werden eingeloggt|schließen alles ab/i.test(b) || b.length < 220
+    if (laedt) {
+      console.log(`  ⏳ kein Weiter-Button, aber Ladezustand erkannt — warte bis zu ${GEDULD_S}s …`)
+      const t0 = Date.now()
+      let geloest = false
+      while ((Date.now() - t0) / 1000 < GEDULD_S) {
+        await page.waitForTimeout(5000)
+        nW = await weiter.count()
+        const jetzt = await page.evaluate(() => (document.body?.innerText || '').replace(/\s+/g, ' '))
+        if (nW || jetzt.slice(0, 200) !== b.slice(0, 200)) {
+          geloest = true
+          console.log(`  ⏳ … nach ${Math.round((Date.now() - t0) / 1000)}s geloest (Buttons: ${nW}, Laenge ${b.length}→${jetzt.length})`)
+          break
+        }
+      }
+      // ⚠ "kein Weiter-Button" ist am ABSCHLUSS der Normalfall, keine Sackgasse. Nur ein
+      // Zustand, der sich ueberhaupt NICHT bewegt, ist einer. (Eigener Fehlbefund 31.08.:
+      // der Endscreen wurde als Sackgasse gemeldet, weil nur auf nW geprueft wurde.)
+      if (!geloest) {
+        console.log(`  🔴 BEFUND Sackgasse: nach ${Math.round((Date.now() - t0) / 1000)}s unveraendert, kein Weiter, keine Meldung.`)
+        break
+      }
+      continue // Schritt neu bewerten — protokolliert den Folgezustand
+    }
     console.log('  ✖ kein Weiter-Button — Ende des fahrbaren Wegs.')
     break
   }
@@ -274,6 +345,10 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
     const btn = weiter.nth(i)
     if (await btn.isDisabled().catch(() => true)) continue
     const t = (await btn.innerText()).trim()
+    // ⚠ Der Kalender-Chevron im Wunschtermin-Schritt traegt fuer Hilfstechnik den Namen
+    // "Weiter" (naechste Woche), hat aber KEINEN sichtbaren Text. Ihn zu klicken blaettert
+    // nur den Kalender — der Walker lief dadurch dreimal in denselben Schritt.
+    if (!t) continue
     await btn.click()
     console.log(`  → geklickt: "${t}"`)
     geklickt = true

@@ -25,7 +25,7 @@ export SUPABASE_URL="https://paizkjajbuxxksdoycev.supabase.co"
 export SUPABASE_ANON_KEY="..."                  # aus .env.local
 export SMOKE_SV_EMAIL="test-sv@claimondo.de"
 export SMOKE_KUNDE_EMAIL="test-kunde@claimondo.de"
-export SMOKE_PASSWORD="Test1234!"
+export SMOKE_PASSWORD="<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>"
 ```
 
 Optional für gezielte Angriffe:

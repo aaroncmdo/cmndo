@@ -419,7 +419,7 @@
       "agb_link": "الشروط العامة",
       "widerruf_link": "وإشعار بحق الإلغاء.",
       "submitting": "جارٍ المعالجة ...",
-      "cta_sign": "توقيع Sicherungsabtretung",
+      "cta_sign": "توقيع الاتفاقية",
       "error_fallback": "خطأ في التكليف",
       "volltext": {
         "s1_titel": "§1 إعلان التنازل",
@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "الدفع:",
         "aufMeinKonto": "إلى حسابي",
         "direktWerkstatt": "مباشرةً إلى الورشة",
-        "auszahlungFrage": "إلى أين يجب توجيه الدفع؟"
+        "auszahlungFrage": "إلى أين يجب توجيه الدفع؟",
+        "summeTitel": "مطالبتك بناءً على التقرير",
+        "summeVorbehalt": "قد يختلف ما تدفعه شركة التأمين في النهاية — نحن نتفاوض على ذلك نيابة عنك."
       },
       "meinBetreuer": {
         "heading": "مسؤول حسابي",

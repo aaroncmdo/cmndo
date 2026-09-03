@@ -9,7 +9,7 @@
 //
 // ENV (alle Pflicht):
 //   STAGING_BASIC_USER  STAGING_BASIC_PASS
-//   TEST_KUNDE_EMAIL    TEST_KUNDE_PASSWORD      (default: test-kunde@claimondo.de / Test1234!)
+//   TEST_KUNDE_EMAIL    TEST_KUNDE_PASSWORD      (default: test-kunde@claimondo.de / <PASSWORT: GitHub-Secret>)
 //   TEST_SV_EMAIL       TEST_SV_PASSWORD
 //   TEST_ADMIN_EMAIL    TEST_ADMIN_PASSWORD
 //   TEST_DISPATCH_EMAIL TEST_DISPATCH_PASSWORD
@@ -22,7 +22,7 @@ const BASE = 'https://staging.claimondo.de'
 const BASIC_USER = process.env.STAGING_BASIC_USER || 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_PASS
 const SCREENSHOTS_DIR = 'docs/15.05.2026/cluster-fg-pr2b-screenshots'
-const PW_DEFAULT = 'Test1234!'
+const PW_DEFAULT = (process.env.TEST_PASSWORT ?? '')
 
 if (!BASIC_PASS) {
   console.error('❌ STAGING_BASIC_PASS fehlt')

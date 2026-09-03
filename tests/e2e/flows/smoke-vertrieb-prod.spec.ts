@@ -7,14 +7,14 @@ import fs from 'node:fs'
 //
 // Opt-in (NIE in CI): RUN_VERTRIEB_SMOKE=1 — laeuft echt gegen Prod.
 // Run:
-//   RUN_VERTRIEB_SMOKE=1 TEST_ADMIN_PASSWORD='Claimondo2026!' \
+//   RUN_VERTRIEB_SMOKE=1 TEST_ADMIN_PASSWORD=(process.env.TEST_PASSWORT ?? '') \
 //     npx playwright test tests/e2e/flows/smoke-vertrieb-prod.spec.ts \
 //     --project=chromium --reporter=list --workers=1
 
 const APP = 'https://app.claimondo.de'
 const CRED = {
   email: process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de',
-  pass: process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!',
+  pass: process.env.TEST_ADMIN_PASSWORD ?? '',
 }
 
 const OUT_DIR = path.join(process.cwd(), 'test-results', 'vertrieb-smoke')

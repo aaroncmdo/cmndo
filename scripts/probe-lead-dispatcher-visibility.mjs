@@ -36,7 +36,7 @@ if (!SUPABASE_URL || !SERVICE_KEY || !ANON_KEY) {
 }
 
 const DISPATCHER_EMAIL = 'test-dispatch@claimondo.de'
-const DISPATCHER_PASSWORD = 'Test1234!'
+const DISPATCHER_PASSWORD = (process.env.TEST_PASSWORT ?? '')
 
 const MARKER = `ProbeLead-${Date.now()}`
 const PROBE_LEAD = {

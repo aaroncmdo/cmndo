@@ -14,7 +14,7 @@
 - **Kein DDL** (Regel 2 n/a). Reuse bestehender Tabellen/Spalten.
 - **test-sv-guard-konform:** Stage-Claim-Leads tragen interne Email (`…@claimondo.de`) → `istInterneIdentitaet=true` → intern→Test-SV-Buchung erlaubt.
 - **Idempotenz:** 2. Lauf = alles `[skip]`/identisch, keine Duplikate.
-- **Passwort-Grandfathering:** funktionierende `Test1234!`-Accounts NICHT resetten (HIBP). test-sv-Passwort bereits `Claimondo-SV-Smoke-2026` (diese Session) — dokumentieren, nicht neu setzen.
+- **Passwort-Grandfathering:** funktionierende `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`-Accounts NICHT resetten (HIBP). test-sv-Passwort bereits `Claimondo-SV-Smoke-2026` (diese Session) — dokumentieren, nicht neu setzen.
 
 ### Verified schema facts (Prod 07.07. — verwende diese Werte verbatim)
 
@@ -272,7 +272,7 @@ import { SV_SACHVERSTAENDIGE_ID } from './ids'
 
 // Die 7 profiles-Rows existieren bereits (verifiziert). Kanonische Aufgabe:
 // test-sv entsperren + als aktiven, verifizierten Test-SV garantieren.
-// Passwörter: Grandfathering (Test1234! nicht resetten; test-sv bereits
+// Passwörter: Grandfathering (<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD> nicht resetten; test-sv bereits
 // 'Claimondo-SV-Smoke-2026'). Siehe README.
 export async function ensureAccounts(
   db: SupabaseClient, opts: { reporter: Reporter; dryRun?: boolean },
@@ -591,7 +591,7 @@ Und `await ensureC3(db, o)` in `ensureSeedGraph`.
 
 **Files:** Create `scripts/test-fixtures/README.md`.
 
-- [ ] **Step 1: Write `README.md`** — kanonischer Soll-Zustand (7 Accounts + IDs + Passwörter: `Test1234!` außer test-sv=`Claimondo-SV-Smoke-2026`), die 3 Stage-Claims (welche Rolle → welche CTA), Run/Dry-Run-Anleitung, Verweis SP2 (Golden-Path-Harness) + SP3 (Cleanup der alten `smoke-*.mjs`).
+- [ ] **Step 1: Write `README.md`** — kanonischer Soll-Zustand (7 Accounts + IDs + Passwörter: `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` außer test-sv=`Claimondo-SV-Smoke-2026`), die 3 Stage-Claims (welche Rolle → welche CTA), Run/Dry-Run-Anleitung, Verweis SP2 (Golden-Path-Harness) + SP3 (Cleanup der alten `smoke-*.mjs`).
 
 - [ ] **Step 2: Dry-run gegen Prod**
 

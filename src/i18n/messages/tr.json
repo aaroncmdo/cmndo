@@ -419,7 +419,7 @@
       "agb_link": "Genel Hüküm ve Koşullar'ı",
       "widerruf_link": "ve cayma hakkı bilgilendirmesini kabul ediyorum.",
       "submitting": "İşleniyor ...",
-      "cta_sign": "SA'yı imzalayın",
+      "cta_sign": "Sözleşmeyi imzala",
       "error_fallback": "Görevlendirmede hata",
       "volltext": {
         "s1_titel": "§1 Abtretungserklärung",
@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "Ödeme:",
         "aufMeinKonto": "Hesabıma",
         "direktWerkstatt": "Doğrudan servise",
-        "auszahlungFrage": "Ödeme nereye yapılsın?"
+        "auszahlungFrage": "Ödeme nereye yapılsın?",
+        "summeTitel": "Rapora göre talebiniz",
+        "summeVorbehalt": "Sigortanın sonunda ödeyeceği tutar farklı olabilir — bunu sizin için müzakere ediyoruz."
       },
       "meinBetreuer": {
         "heading": "Müşteri temsilcim",

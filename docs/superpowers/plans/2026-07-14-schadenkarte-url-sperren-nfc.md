@@ -1308,7 +1308,7 @@ gh pr create --base staging --title "feat(schadenkarte): NFC-Chip beschreiben (W
 
 - [ ] **Step 1: Automatisierbarer Teil (Playwright + DB)**
 
-Test-Flotte: `flotte.test@claimondo.de` / `Claimondo2026!`, Firma `dafc57ee-0d27-4d7e-8e1a-4a11edd6f713`.
+Test-Flotte: `flotte.test@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`, Firma `dafc57ee-0d27-4d7e-8e1a-4a11edd6f713`.
 
 ```
 1. /flotte/karten laden               → Karten-Liste rendert, Status lesbar

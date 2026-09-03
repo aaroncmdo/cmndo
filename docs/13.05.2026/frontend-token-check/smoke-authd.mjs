@@ -16,9 +16,9 @@ const BASE = process.env.BASE_URL ?? 'http://localhost:3010'
 const OUT = join(__dirname, 'smoke-screenshots-authd')
 
 const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de'
-const ADMIN_PASS = process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!'
+const ADMIN_PASS = process.env.TEST_ADMIN_PASSWORD ?? ''
 const SV_EMAIL = process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de'
-const SV_PASS = process.env.TEST_SV_PASSWORD ?? 'Test1234!'
+const SV_PASS = process.env.TEST_SV_PASSWORD ?? ''
 
 const ADMIN_ROUTES = [
   { path: '/admin', label: 'admin-dashboard' },

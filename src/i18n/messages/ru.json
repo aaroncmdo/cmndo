@@ -419,7 +419,7 @@
       "agb_link": "Общие условия",
       "widerruf_link": "и уведомление о праве отзыва.",
       "submitting": "Обрабатывается ...",
-      "cta_sign": "Подписать SA",
+      "cta_sign": "Подписать договор",
       "error_fallback": "Ошибка при оформлении поручения",
       "volltext": {
         "s1_titel": "§1 Аbtretungserklärung",
@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "Выплата:",
         "aufMeinKonto": "На мой счёт",
         "direktWerkstatt": "Напрямую в автосервис",
-        "auszahlungFrage": "Куда направить выплату?"
+        "auszahlungFrage": "Куда направить выплату?",
+        "summeTitel": "Ваше требование по заключению",
+        "summeVorbehalt": "Итоговая выплата страховой может отличаться — мы ведём переговоры за вас."
       },
       "meinBetreuer": {
         "heading": "Мой персональный менеджер",

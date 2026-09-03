@@ -54,7 +54,7 @@ test('Admin-Oberflaeche rendert samt Kennzahlen und Kampagnen-Formular', async (
     if (m.type() === 'error') fehler.push(`console: ${m.text()}`)
   })
 
-  await login(page, 'test-admin@claimondo.de', 'Claimondo2026!')
+  await login(page, 'test-admin@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   await page.goto(`${BASE}/admin/marketing/gewinnspiel`)
 
   // Die Seite faehrt vier Count-Queries, zwei Kontakt-Joins und erzeugt
@@ -68,7 +68,7 @@ test('Admin-Oberflaeche rendert samt Kennzahlen und Kampagnen-Formular', async (
 })
 
 test('Gewinnspiel ist ueber die Marketing-Kachel erreichbar (UI-Einstieg)', async ({ page }) => {
-  await login(page, 'test-admin@claimondo.de', 'Claimondo2026!')
+  await login(page, 'test-admin@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
   await page.goto(`${BASE}/admin/marketing`)
 
   // Audit-Punkt 2: ein Feature ohne sichtbaren Einstieg existiert praktisch nicht.

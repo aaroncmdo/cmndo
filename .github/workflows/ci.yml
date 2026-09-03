@@ -89,6 +89,15 @@ jobs:
       - name: Token-Audit
         run: npm run check:token-audit
 
+      # Secret-Gate (31.08.2026): blockt eingecheckte Zugangsdaten. Anlass war ein
+      # GitGuardian-Fund — verifiziert lieferte `test-admin@claimondo.de` mit dem im
+      # Repo lesbaren Passwort HTTP 200 gegen die prod-Auth-API. Das Repo ist PUBLIC,
+      # also konnte sich jeder als Admin auf prod anmelden. 181 Dateien trugen Klartext.
+      # Baseline ist NULL (kein Ratchet): ein Secret ist kein Schuldposten, den man
+      # abtraegt. Siehe docs/2026-08-31-secret-leak-postmortem.md.
+      - name: Secret-Gate
+        run: npm run check:secrets
+
       # use-server-Export-Guard (PR #4439-Nachwehe, 16.07.): 'use server'-Dateien duerfen NUR
       # async functions + type/interface-DEKLARATIONEN exportieren. Ein `export type { X }`-
       # RE-Export liess den Server-Actions-Loader crashen -> ALLE Actions der Datei 500ten
@@ -347,6 +356,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Das Nobody-Passwort stand bis 01.09. im Klartext im Script (siehe dort). Seit
+          # der Konto-Rotation vom 31.08. war es tot und blockierte drei fachfremde PRs.
+          # Das Secret existiert seit der Rotation — es fehlte nur diese Zeile.
+          TEST_RLS_NOBODY_PASSWORD: ${{ secrets.TEST_RLS_NOBODY_PASSWORD }}
 
       # Claims-Spalten-Cap (14.07.2026): SPALTEN-Schicht. Die beiden Checks oben pruefen, ob
       # jemand ZEILEN sieht, die er nicht darf — nie, ob er von einer erlaubten Zeile ZU VIELE
@@ -705,6 +718,19 @@ jobs:
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
           TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
           TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
+          # 01.09.: golden-path-deep faehrt kb/kunde/sv. Der Kunde-Login lief bis #5797 ueber
+          # den Klartext-Default in `_golden-path-lib.ts`; seit dessen (richtiger) Entfernung
+          # ist er '' -> invalid_credentials. Der Code liest TEST_KUNDE_*, das Secret heisst
+          # SMOKE_KUNDE_* — Namensuebersetzung an der Job-Grenze.
+          # ⚠ Wirkt erst, wenn das Secret erneuert ist: die Test-Konto-Passwoerter wurden am
+          # 31.08. rotiert, nachgezogen wurde nur TEST_SV_PASSWORD (Beleg: von 8 Test-Konten
+          # hat seither nur test-sv@ einen last_sign_in_at). TEST_KUNDE_EMAIL bewusst NICHT
+          # gesetzt — der Code-Default smoke-kunde@ ist korrekt.
+          TEST_KUNDE_PASSWORD: ${{ secrets.SMOKE_KUNDE_PASS }}
+          # ⚠ TEST_KB_PASSWORD hier BEWUSST NICHT — anders als im journey-gate steht oben
+          # TEST_KB_TOTP_SECRET. Mit Passwort kaeme der Login durch und liefe dann in den
+          # MFA-Zweig, obwohl test-kb@ 0 verifizierte Faktoren hat (auth.mfa_factors, 01.09.).
+          # Erst das TOTP-Secret hier entfernen, dann das Passwort ergaenzen — nicht umgekehrt.
           # 21.08.: TEST_SV_EMAIL/_PASSWORD BEWUSST NICHT MEHR durchgereicht — aus genau dem
           # Grund, der zwei Bloecke weiter unten schon fuer KB/Dispatch/Kanzlei steht: ein
           # unbesetztes Secret rendert als '' und ueberschreibt damit den (korrekten) Default.
@@ -907,7 +933,7 @@ jobs:
       #   phone-login-card-smoke    gruen,  3,8 s  (Telefon-Login-Karte im KontoSicherheitPanel)
       # Zusammen ~27 s — der Job hat seit dem Cap-Fix (#5422) reichlich Luft.
       #
-      # ⚠ Kein Secret fuer phone-login: der Spec faellt auf test-dispatch@ + `Test1234!`
+      # ⚠ Kein Secret fuer phone-login: der Spec faellt auf test-dispatch@ + `<PASSWORT: GitHub-Secret>`
       # zurueck, und genau das ist dort korrekt (die dokumentierte Ausnahme, s. #5442).
       # Ein durchgereichtes Secret mit veraltetem Wert wuerde den korrekten Default
       # ueberschreiben — deshalb bewusst NICHT gesetzt.
@@ -1029,9 +1055,9 @@ jobs:
           # Fehlt es, bleibt der Login aal1 -> skipIfAuthWall ueberspringt den Test (kein Fehler,
           # aber auch KEIN gruener Smoke). Nur die TOTP-Secrets durchreichen: die sind ECHTE no-ops
           # solange unbesetzt (undefined -> MFA-Skip). Passwoerter BEWUSST NICHT hier durchreichen —
-          # ein unbesetztes Secret rendert als '' und `?? 'Test1234!'` faengt '' NICHT ab, wuerde also
+          # ein unbesetztes Secret rendert als '' und `?? '<PASSWORT: GitHub-Secret>'` faengt '' NICHT ab, wuerde also
           # den Default ueberschreiben. KB/Dispatch/Admin nutzen so den grandfatherten Default
-          # 'Test1234!' (bzw. TEST_ADMIN_PASSWORD, das oben steht; TEST_SV_PASSWORD wurde am
+          # '<PASSWORT: GitHub-Secret>' (bzw. TEST_ADMIN_PASSWORD, das oben steht; TEST_SV_PASSWORD wurde am
           # 21.08. entfernt — s. Begruendung dort).
           # Setup (Secrets + Prod-Test-Accounts): docs/2026-07-14-regel4-e2e-totp-secrets-setup.md
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}

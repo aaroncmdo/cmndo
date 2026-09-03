@@ -6,7 +6,7 @@
 import { chromium } from 'playwright'
 
 const BASE = process.argv.find(a => a.startsWith('--base='))?.split('=')[1] ?? 'https://app.claimondo.de'
-const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
+const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? ''
 
 const browser = await chromium.launch()
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })

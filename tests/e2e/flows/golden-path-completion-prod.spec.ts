@@ -82,8 +82,8 @@ test('Manueller Abschluss via Panel — Claim bis fall_geschlossen', async ({ pa
   // Admin-Login → Fallakte → Endpoint-Register.
   await page.goto(`${APP}/login`, { waitUntil: 'domcontentloaded', timeout: 30_000 })
   await page.locator('input[type="email"]').first().fill(process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de')
-  // `Test1234!` gilt auf prod nur noch fuer test-dispatch@ — Messung s. _golden-path-lib.ts (ROLES).
-  await page.locator('input[type="password"]').first().fill(process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!')
+  // `<PASSWORT: GitHub-Secret>` gilt auf prod nur noch fuer test-dispatch@ — Messung s. _golden-path-lib.ts (ROLES).
+  await page.locator('input[type="password"]').first().fill(process.env.TEST_ADMIN_PASSWORD ?? '')
   await page.locator('button[type="submit"]').first().click()
   await page.waitForTimeout(5_000)
   await page.goto(`${APP}/faelle/${FALL}`, { waitUntil: 'domcontentloaded', timeout: 30_000 })

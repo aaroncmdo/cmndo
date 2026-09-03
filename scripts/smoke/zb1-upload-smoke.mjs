@@ -26,7 +26,7 @@ import { chromium } from 'playwright'
 const BASE = process.env.SMOKE_BASE_URL || 'https://app.claimondo.de'
 const CLAIM = 'fbc10002-0000-4000-8000-000000000002'   // scripts/test-fixtures/ids.ts CLAIMS.c2
 const MAIL = process.env.SMOKE_KUNDE_EMAIL || 'smoke-kunde@claimondo.de'
-const PASS = process.env.SMOKE_KUNDE_PASS || 'Claimondo2026!'
+const PASS = process.env.SMOKE_KUNDE_PASS || ''
 const GROSS = process.argv.includes('--gross')
 const FOTO = GROSS ? 'tests/fixtures/test-foto.jpg' : 'tests/fixtures/test-logo.png'
 

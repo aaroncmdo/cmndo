@@ -263,7 +263,7 @@
       "fahrzeugdaten": "Fahrzeugdaten",
       "zeugenaussage_titel": "Zeugenaussage hochladen",
       "zeugenaussage_hinweis": "Falls du eine schriftliche Zeugenaussage hast, lad sie hier hoch (Foto oder PDF).",
-      "heading": "Ein paar Angaben zu Ihrem Schaden",
+      "heading": "Ein paar Angaben zu deinem Schaden",
       "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.",
       "error_save": "Speichern fehlgeschlagen.",
       "vorerst_ueberspringen": "Vorerst überspringen"
@@ -284,13 +284,13 @@
     },
     "step0": {
       "heading": "Was ist passiert?",
-      "sub": "Beantworten Sie ein paar kurze Fragen zum Schaden — danach erfassen wir die Fotos und den Fahrzeugschein.",
+      "sub": "Beantworte ein paar kurze Fragen zum Schaden — danach erfassen wir die Fotos und den Fahrzeugschein.",
       "cta_start": "Jetzt starten",
       "dauer_hint": "Dauert ca. 3 Minuten"
     },
     "step1": {
       "heading": "Hergang des Unfalls",
-      "sub": "Erzählen Sie uns, was passiert ist — per Stimme oder per Eingabe.",
+      "sub": "Erzähl uns, was passiert ist — per Stimme oder per Eingabe.",
       "toggle_tippen": "Tippen",
       "toggle_voice": "Sprechen",
       "dsgvo_label": "Ich willige ein, dass Claimondo meine Angaben zur Schadensprüfung verarbeiten darf. Widerruf jederzeit möglich.",
@@ -301,20 +301,20 @@
         "unfall_zeit_label": "Uhrzeit (ungefähr)",
         "unfall_ort_label": "Unfallort",
         "unfall_ort_placeholder": "Stadt oder Straße eingeben",
-        "marke_label": "Marke Ihres Fahrzeugs",
+        "marke_label": "Marke deines Fahrzeugs",
         "marke_placeholder": "Marke wählen …",
         "modell_label": "Modell (optional)",
         "modell_placeholder": "z. B. A4, Golf 7, 3er",
         "schuldfrage_label": "Wer hat den Unfall verursacht?"
       },
       "errors": {
-        "hergang_required": "Bitte beschreiben Sie den Hergang.",
-        "hergang_too_short": "Die Beschreibung ist zu kurz — bitte ergänzen Sie ein paar Details.",
+        "hergang_required": "Bitte beschreib den Hergang.",
+        "hergang_too_short": "Die Beschreibung ist zu kurz — bitte ergänze ein paar Details.",
         "unfall_datum_required": "Bitte Unfalldatum angeben.",
         "unfall_datum_future": "Das Unfalldatum darf nicht in der Zukunft liegen.",
         "unfall_ort_required": "Bitte Unfallort angeben.",
         "marke_required": "Bitte Marke wählen.",
-        "schuldfrage_required": "Bitte wählen Sie, wer den Unfall verursacht hat.",
+        "schuldfrage_required": "Bitte wähle, wer den Unfall verursacht hat.",
         "dsgvo_required": "Ohne Einwilligung können wir den Fall leider nicht bearbeiten."
       },
       "hergang_options": {
@@ -332,7 +332,7 @@
         },
         "ich": {
           "label": "Ich selbst",
-          "description": "Dann läuft die Abwicklung über Ihre Kaskoversicherung — wir sind hier nicht die richtige Anlaufstelle."
+          "description": "Dann läuft die Abwicklung über deine Kaskoversicherung — wir sind hier nicht die richtige Anlaufstelle."
         },
         "teilschuld": {
           "label": "Beide — Teilschuld",
@@ -340,7 +340,7 @@
         },
         "unklar": {
           "label": "Noch unklar",
-          "description": "Kein Problem — wir klären die Schuldfrage zusammen mit Ihrem Anwalt."
+          "description": "Kein Problem — wir klären die Schuldfrage zusammen mit deinem Anwalt."
         }
       },
       "marken": {
@@ -373,19 +373,19 @@
       },
       "voice": {
         "heading": "Hergang einsprechen",
-        "idle_hint": "Tippen Sie auf das Mikrofon und erzählen Sie einfach, was passiert ist.",
+        "idle_hint": "Tipp auf das Mikrofon und erzähl einfach, was passiert ist.",
         "idle_example": "Beispiel: „Ich stand auf der Kreuzung an der roten Ampel. Von hinten kam ein weißer BMW und ist mir ins Heck gefahren.\"",
-        "recording": "Aufnahme läuft … sprechen Sie einfach drauflos.",
+        "recording": "Aufnahme läuft … sprich einfach drauflos.",
         "processing": "Text wird erstellt …",
-        "preview_hint": "Prüfen Sie den Text — Sie können ihn noch bearbeiten oder neu aufnehmen.",
+        "preview_hint": "Prüf den Text — du kannst ihn noch bearbeiten oder neu aufnehmen.",
         "record_again": "Neu aufnehmen",
         "switch_to_typing": "Lieber tippen",
-        "permission_denied": "Ohne Mikrofon-Freigabe funktioniert die Sprach-Eingabe leider nicht. Sie können jederzeit auf „Tippen\" wechseln."
+        "permission_denied": "Ohne Mikrofon-Freigabe funktioniert die Sprach-Eingabe leider nicht. Du kannst jederzeit auf „Tippen\" wechseln."
       }
     },
     "step2a": {
       "heading": "Fotos vom Schaden",
-      "sub": "Klicken Sie auf einen Bereich im Fahrzeug, um die passenden Fotos hochzuladen. Mindestens 3 Fotos sind erforderlich.",
+      "sub": "Klick auf einen Bereich im Fahrzeug, um die passenden Fotos hochzuladen. Mindestens 3 Fotos sind erforderlich.",
       "dropzone_label": "Fotos hier ablegen oder klicken",
       "dropzone_hint": "JPG, PNG oder WEBP · max. 10 MB",
       "min_hint": "Noch {count} Foto(s) bis zum nächsten Schritt",
@@ -403,11 +403,11 @@
     },
     "step2b": {
       "loading": {
-        "heading": "Wir analysieren Ihren Schaden …",
+        "heading": "Wir analysieren deinen Schaden …",
         "phase_1": "Fotos werden geprüft …",
         "phase_2": "KI schätzt Reparaturkosten …",
         "phase_3": "Wiederbeschaffungswert wird ermittelt …",
-        "trust_note": "Wir lesen Ihre Fotos nur einmal aus — die Daten bleiben bei uns und werden nicht weitergegeben.",
+        "trust_note": "Wir lesen deine Fotos nur einmal aus — die Daten bleiben bei uns und werden nicht weitergegeben.",
         "error_title": "Analyse fehlgeschlagen",
         "error_retry": "Erneut versuchen",
         "error_skip": "Ohne Vorschätzung weiter"
@@ -416,7 +416,7 @@
         "vision_title": "Erkannte Schäden",
         "dat_title": "Vorläufige Wertermittlung",
         "disclaimer": "Diese Einschätzung ist eine KI-basierte Vorschätzung und ersetzt kein Gutachten. Der verbindliche Wert wird vom Sachverständigen vor Ort ermittelt.",
-        "totalschaden_warning": "Hinweis: Die Reparaturkosten könnten den Wiederbeschaffungswert übersteigen — das wäre ein wirtschaftlicher Totalschaden. Ihr Gutachter klärt das vor Ort.",
+        "totalschaden_warning": "Hinweis: Die Reparaturkosten könnten den Wiederbeschaffungswert übersteigen — das wäre ein wirtschaftlicher Totalschaden. Dein Gutachter klärt das vor Ort.",
         "pdf_link": "Vorschätzung als PDF herunterladen",
         "weiter": "Weiter zu den Unfalldaten"
       }
@@ -427,7 +427,7 @@
       "fahrerflucht_label": "Fahrerflucht — der Unfallgegner hat sich unerlaubt entfernt",
       "auslandskennzeichen_label": "Auslandskennzeichen — das gegnerische Fahrzeug hatte ein ausländisches Kennzeichen",
       "fahrerflucht_hint": "Polizei-Aktenzeichen wird zur Weiterverarbeitung dringend benötigt.",
-      "auslandskennzeichen_hint": "Ausländisches Kennzeichen — geben Sie es so gut wie möglich ein.",
+      "auslandskennzeichen_hint": "Ausländisches Kennzeichen — gib es so gut wie möglich ein.",
       "gegner_name": "Name des Unfallgegners",
       "gegner_kennzeichen": "Kennzeichen",
       "gegner_versicherung": "Versicherung des Gegners",
@@ -441,13 +441,13 @@
     },
     "step3": {
       "heading": "Fahrzeugschein",
-      "sub": "Wir brauchen die Fahrzeugdaten aus Ihrem ZB1.",
+      "sub": "Wir brauchen die Fahrzeugdaten aus deinem ZB1.",
       "scan_heading": "Fahrzeugschein scannen",
       "scan_hint": "Wir brauchen nur die Vorderseite (ZB1). Felder A, B, E und 2.1/2.2 müssen gut lesbar sein.",
       "scan_camera_cta": "Mit Kamera scannen",
       "scan_upload_cta": "Datei hochladen",
       "manual_cta": "Ich habe keinen Fahrzeugschein zur Hand — manuell eingeben",
-      "ocr_loading_title": "Wir lesen Ihren Fahrzeugschein aus …",
+      "ocr_loading_title": "Wir lesen deinen Fahrzeugschein aus …",
       "ocr_loading_sub": "Das dauert normalerweise 5–10 Sekunden.",
       "ocr_success": "Fahrzeugschein erfolgreich ausgelesen.",
       "ocr_low_confidence": "Einige Felder wurden nicht sicher erkannt — bitte prüfen und ergänzen.",
@@ -462,10 +462,10 @@
     },
     "step4": {
       "heading": "Account erstellen",
-      "sub": "Zum Schluss brauchen wir noch Ihren Zugang — dann können Sie den Fall jederzeit einsehen.",
+      "sub": "Zum Schluss brauchen wir noch deinen Zugang — dann kannst du den Fall jederzeit einsehen.",
       "email_label": "E-Mail-Adresse",
       "email_placeholder": "max.mustermann@example.com",
-      "email_exists_hint": "Diese E-Mail ist bereits bei Claimondo registriert — melden Sie sich mit Ihrem Passwort an, dann wird der Fall Ihrem Account zugeordnet.",
+      "email_exists_hint": "Diese E-Mail ist bereits bei Claimondo registriert — meld dich mit deinem Passwort an, dann wird der Fall deinem Account zugeordnet.",
       "password_label": "Passwort",
       "password_hint": "Mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl.",
       "password_confirm_label": "Passwort wiederholen",
@@ -473,35 +473,35 @@
       "datenschutz_label": "Ich habe die Datenschutzerklärung gelesen und stimme zu.",
       "submit": "Account erstellen und Fall absenden",
       "submit_loading": "Account wird erstellt …",
-      "makler_intro": "Ihr Fall wird von {maklerName} betreut — unser Partner-Makler hat Sie an Claimondo empfohlen.",
-      "makler_explanation": "Wählen Sie, welche Informationen {maklerName} zur Bearbeitung erhalten soll. Sie können die Freigabe jederzeit in Ihrem Profil widerrufen.",
+      "makler_intro": "Dein Fall wird von {maklerName} betreut — unser Partner-Makler hat dich an Claimondo empfohlen.",
+      "makler_explanation": "Wähle, welche Informationen {maklerName} zur Bearbeitung erhalten soll. Du kannst die Freigabe jederzeit in deinem Profil widerrufen.",
       "consent_minimal_title": "Nur Statusmeldungen",
       "consent_minimal_desc": "{maklerName} erfährt nur, ob der Fall eröffnet, abgeschlossen oder abgebrochen wurde — keine Schadensdetails.",
       "consent_full_title": "Volle Einsicht",
-      "consent_full_desc": "{maklerName} kann Schadensdetails, Fotos und den Gutachten-Status einsehen, um Sie besser zu beraten.",
+      "consent_full_desc": "{maklerName} kann Schadensdetails, Fotos und den Gutachten-Status einsehen, um dich besser zu beraten.",
       "errors": {
-        "email_required": "Bitte geben Sie Ihre E-Mail an.",
+        "email_required": "Bitte gib deine E-Mail an.",
         "email_invalid": "Das ist keine gültige E-Mail-Adresse.",
-        "password_required": "Bitte wählen Sie ein Passwort.",
+        "password_required": "Bitte wähle ein Passwort.",
         "password_weak": "Das Passwort ist zu schwach — mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl.",
         "password_mismatch": "Die beiden Passwörter stimmen nicht überein.",
         "agb_required": "Ohne AGB-Zustimmung können wir den Fall nicht anlegen.",
-        "datenschutz_required": "Bitte stimmen Sie der Datenschutzerklärung zu."
+        "datenschutz_required": "Bitte stimme der Datenschutzerklärung zu."
       }
     },
     "abort": {
       "heading": "Bei Selbstverschulden sind wir nicht die richtige Anlaufstelle",
-      "explanation": "Wenn Sie den Unfall selbst verursacht haben, läuft die Schadenabwicklung über Ihre eigene Kaskoversicherung. Claimondo ist spezialisiert auf Haftpflicht-Schäden, bei denen der Gegner oder dessen Versicherung zahlt.",
-      "tip_1": "Melden Sie den Schaden Ihrer Kaskoversicherung so schnell wie möglich.",
-      "tip_2": "Dokumentieren Sie den Unfall mit Fotos und notieren Sie alle Details.",
-      "tip_3": "Holen Sie sich einen Kostenvoranschlag bei einer Werkstatt Ihres Vertrauens ein.",
-      "hotline_hint": "Unsicher ob es wirklich Selbstverschulden war? Rufen Sie uns an:",
+      "explanation": "Wenn du den Unfall selbst verursacht hast, läuft die Schadenabwicklung über deine eigene Kaskoversicherung. Claimondo ist spezialisiert auf Haftpflicht-Schäden, bei denen der Gegner oder dessen Versicherung zahlt.",
+      "tip_1": "Meld den Schaden deiner Kaskoversicherung so schnell wie möglich.",
+      "tip_2": "Dokumentiere den Unfall mit Fotos und notiere alle Details.",
+      "tip_3": "Hol dir einen Kostenvoranschlag bei einer Werkstatt deines Vertrauens ein.",
+      "hotline_hint": "Unsicher ob es wirklich Selbstverschulden war? Ruf uns an:",
       "back_home": "Zurück zur Startseite"
     },
     "step_summary": {
       "heading": "Hallo {name}!",
       "heading_ohne_name": "Hallo!",
-      "sub": "Bitte prüfen und korrigieren Sie Ihre Daten.",
+      "sub": "Bitte prüf und korrigier deine Daten.",
       "fields": {
         "vorname": "Vorname",
         "nachname": "Nachname",
@@ -549,43 +549,43 @@
       "datenschutz_text_suffix": "gelesen und stimme der Verarbeitung meiner Daten zu."
     },
     "step_gutachter": {
-      "heading": "Ihr persönlicher Gutachter",
-      "sub": "Dieser Sachverständige wird Ihren Schaden begutachten.",
-      "sv_label": "Ihr Sachverständiger",
-      "kontakt_hinweis": "Wird sich bei Ihnen melden",
+      "heading": "Dein persönlicher Gutachter",
+      "sub": "Dieser Sachverständige wird deinen Schaden begutachten.",
+      "sv_label": "Dein Sachverständiger",
+      "kontakt_hinweis": "Wird sich bei dir melden",
       "termin_label": "Termin reserviert",
       "termin_bestaetigt_label": "Termin bestätigt",
-      "wunschtermin_label": "Ihr Wunschtermin",
+      "wunschtermin_label": "Dein Wunschtermin",
       "wunschtermin_pending": "Wir bestätigen den genauen Termin in Kürze.",
       "besichtigungsort_label": "Besichtigungsort",
       "treffpunkt_label": "Treffpunkt: {treffpunkt}",
-      "kein_gutachter": "Ihren persönlichen Sachverständigen ordnen wir Ihnen im nächsten Schritt zu. Fahren Sie einfach fort.",
+      "kein_gutachter": "Deinen persönlichen Sachverständigen ordnen wir dir im nächsten Schritt zu. Fahr einfach fort.",
       "aendern_cta": "Anderen Termin oder Gutachter wählen",
-      "aendern_confirm": "Ihr aktueller Termin wird freigegeben und Sie wählen neu. Fortfahren?",
+      "aendern_confirm": "Dein aktueller Termin wird freigegeben und du wählst neu. Fortfahren?",
       "aendern_ja": "Ja, neu wählen",
       "aendern_laeuft": "Wird freigegeben …",
       "aendern_zurueck": "Doch behalten",
       "aendern_fehler": "Änderung fehlgeschlagen. Bitte erneut versuchen.",
-      "aendern_dispatch_hinweis": "Ihr Termin ist bereits bestätigt — wir rufen Sie kurz an, um ihn umzubuchen."
+      "aendern_dispatch_hinweis": "Dein Termin ist bereits bestätigt — wir rufen dich kurz an, um ihn umzubuchen."
     },
     "step_sa": {
       "sv_consent_text": "Ich stimme den Datenschutzbestimmungen und der Widerrufsbelehrung von {firma} zu.",
       "sv_consent_datenschutz_link": "Datenschutzbestimmungen ansehen",
       "sv_consent_widerruf_link": "Widerrufsbelehrung ansehen",
       "heading": "Beauftragung unterzeichnen",
-      "sub": "Mit Ihrer Unterschrift beauftragen Sie Claimondo mit der kostenlosen Abwicklung Ihres Schadens.",
+      "sub": "Mit deiner Unterschrift beauftragst du Claimondo mit der kostenlosen Abwicklung deines Schadens.",
       "summary_label": "Zusammenfassung:",
       "summary_text": "Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens. Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen der Sicherungsabtretung an den Sachverständigen abgetreten und von der gegnerischen Versicherung getragen.",
       "volltext_link": "Vollständige Sicherungsabtretung lesen",
       "popover_titel": "Sicherungsabtretung",
-      "unterschrift_label": "Ihre Unterschrift",
+      "unterschrift_label": "Deine Unterschrift",
       "unterschrift_placeholder": "Hier unterschreiben",
       "unterschrift_loeschen": "Unterschrift löschen",
       "checkbox_text": "Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung. Ich stimme den",
       "agb_link": "AGB",
       "widerruf_link": "und der Widerrufsbelehrung zu.",
       "submitting": "Wird verarbeitet ...",
-      "cta_sign": "SA unterzeichnen",
+      "cta_sign": "Beauftragung unterschreiben",
       "error_fallback": "Fehler bei der Beauftragung",
       "volltext": {
         "s1_titel": "1. Abtretungserklärung",
@@ -611,31 +611,31 @@
       }
     },
     "step_account": {
-      "termin_folgt": "Ihren Besichtigungstermin vereinbaren wir in Kürze persönlich mit Ihnen.",
+      "termin_folgt": "Deinen Besichtigungstermin vereinbaren wir in Kürze persönlich mit dir.",
       "heading": "Geschafft!",
-      "sub": "Ihr Fall wurde erfolgreich erstellt.",
-      "success_text": "Ihr Fall wurde erfolgreich erstellt. Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen.",
+      "sub": "Dein Fall wurde erfolgreich erstellt.",
+      "success_text": "Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei dir.",
       "lexdrive": {
-        "label": "Ihr juristischer Ansprechpartner",
-        "hinweis": "Unsere Partnerkanzlei. Sie wird sich in den nächsten Werktagen direkt bei Ihnen melden."
+        "label": "Dein juristischer Ansprechpartner",
+        "hinweis": "Unsere Partnerkanzlei — sie meldet sich in den nächsten Werktagen direkt bei dir."
       },
       "creating": "Einen Moment, wir schließen alles ab …",
-      "logging_in": "Sie werden eingeloggt …",
-      "fallback_email_hint": "Wir haben Ihnen die Zugangsdaten an {email} gesendet.",
+      "logging_in": "Du wirst eingeloggt …",
+      "fallback_email_hint": "Wir haben dir die Zugangsdaten an {email} gesendet.",
       "fallback_cta": "Zu meinem Portal",
       "error_fallback": "Konto konnte nicht erstellt werden"
     },
     "expired": {
       "heading": "Link abgelaufen",
-      "body": "Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link."
+      "body": "Dieser FlowLink ist nicht mehr gültig. Bitte kontaktiere deinen Berater für einen neuen Link."
     },
     "done": {
       "heading": "Geschafft!",
-      "body": "Ihre Schadenmeldung ist bereits eingegangen — wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen."
+      "body": "Deine Schadenmeldung ist bereits eingegangen — wir kümmern uns ab jetzt um alles und melden uns in Kürze bei dir."
     },
     "error": {
       "heading": "Etwas ist schiefgelaufen",
-      "body": "Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns.",
+      "body": "Bitte versuch es erneut. Falls das Problem weiterhin besteht, kontaktier uns.",
       "reload": "Seite neu laden"
     }
   },
@@ -1082,7 +1082,7 @@
       "submitButton": "Unterschriften absenden",
       "submitting": "Wird übermittelt …",
       "backButton": "Zurück",
-      "canvasLabel": "Ihre Unterschrift",
+      "canvasLabel": "Deine Unterschrift",
       "canvasPlaceholder": "Hier unterschreiben",
       "clearButton": "Löschen",
       "stepProgress": "{step} / 2",
@@ -1094,15 +1094,15 @@
     },
     "zb1": {
       "errorExpiredTitle": "Link abgelaufen",
-      "errorExpiredBody": "Dieser Upload-Link ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Ansprechpartner für einen neuen Link.",
+      "errorExpiredBody": "Dieser Upload-Link ist nicht mehr gültig. Bitte kontaktiere deinen Ansprechpartner für einen neuen Link.",
       "errorAlreadyTitle": "Foto bereits empfangen",
-      "errorAlreadyBody": "Wir haben Ihren Fahrzeugschein bereits erhalten. Falls Sie ein neues Foto schicken möchten, kontaktieren Sie bitte Ihren Ansprechpartner.",
+      "errorAlreadyBody": "Wir haben deinen Fahrzeugschein bereits erhalten. Falls du ein neues Foto schicken möchtest, kontaktier bitte deinen Ansprechpartner.",
       "errorInvalidTitle": "Link nicht gültig",
-      "errorInvalidBody": "Dieser Upload-Link ist ungültig. Bitte prüfen Sie die URL oder kontaktieren Sie Ihren Ansprechpartner.",
+      "errorInvalidBody": "Dieser Upload-Link ist ungültig. Bitte prüf die URL oder kontaktier deinen Ansprechpartner.",
       "pageSubtitle": "Fahrzeugschein-Upload",
       "greetingWithName": "Hallo {vorname}!",
       "greetingNoName": "Hallo und willkommen!",
-      "instructions": "Bitte fotografieren Sie Ihren <strong>Fahrzeugschein (Zulassungsbescheinigung Teil I, Vorderseite)</strong>. Wir lesen die Daten automatisch aus.",
+      "instructions": "Bitte fotografier deinen <strong>Fahrzeugschein (Zulassungsbescheinigung Teil I, Vorderseite)</strong>. Wir lesen die Daten automatisch aus.",
       "tipsTitle": "Tipps für gute Lesbarkeit:",
       "tip1": "Alle 4 Ecken des Dokuments sichtbar",
       "tip2": "Gutes Licht — keine Schatten",
@@ -1119,28 +1119,28 @@
       "uploadingTitle": "Wird hochgeladen ...",
       "uploadingSubtitle": "Daten werden ausgelesen — bitte warten",
       "successTitle": "Vielen Dank!",
-      "successBody": "Ihr Fahrzeugschein wurde empfangen. Ihr Ansprechpartner meldet sich in Kürze.",
+      "successBody": "Dein Fahrzeugschein wurde empfangen. Dein Ansprechpartner meldet sich in Kürze.",
       "ocrResultTitle": "Wir haben erkannt:",
       "ocrKennzeichen": "Kennzeichen: {value}",
       "ocrFahrzeug": "Fahrzeug: {value}",
       "ocrHalter": "Halter: {value}",
-      "closeHint": "Sie können diese Seite jetzt schließen.",
+      "closeHint": "Du kannst diese Seite jetzt schließen.",
       "errorTitle": "Hat nicht geklappt",
       "errorBodyFallback": "Daten konnten nicht ausgelesen werden.",
       "errorTip": "Tipp: gutes Licht, alle 4 Ecken sichtbar, scharf — bitte erneut versuchen.",
       "retryButton": "Erneut versuchen",
-      "privacyNote": "Ihre Daten werden verschlüsselt übertragen und nur für die Bearbeitung Ihres Schadens verwendet."
+      "privacyNote": "Deine Daten werden verschlüsselt übertragen und nur für die Bearbeitung deines Schadens verwendet."
     },
     "dokumente": {
       "alreadyCompleteTitle": "Vielen Dank!",
       "errorExpiredTitle": "Link abgelaufen",
-      "errorExpiredBody": "Dieser Upload-Link ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Ansprechpartner für einen neuen Link.",
+      "errorExpiredBody": "Dieser Upload-Link ist nicht mehr gültig. Bitte kontaktiere deinen Ansprechpartner für einen neuen Link.",
       "errorInvalidTitle": "Link nicht gültig",
-      "errorInvalidBody": "Dieser Upload-Link ist ungültig. Bitte prüfen Sie die URL oder kontaktieren Sie Ihren Ansprechpartner.",
+      "errorInvalidBody": "Dieser Upload-Link ist ungültig. Bitte prüf die URL oder kontaktier deinen Ansprechpartner.",
       "pageSubtitle": "Dokumenten-Upload",
       "greetingWithName": "Hallo {vorname}!",
       "greetingNoName": "Hallo und willkommen!",
-      "instructions": "Bitte laden Sie die folgenden Dokumente hoch. Sie können das einzeln erledigen — jedes Dokument wird sofort gespeichert.",
+      "instructions": "Bitte lade die folgenden Dokumente hoch. Du kannst das einzeln erledigen — jedes Dokument wird sofort gespeichert.",
       "progressLabel": "{uploaded} von {total} hochgeladen",
       "slotDoneLabel": "Empfangen — danke!",
       "cameraButton": "Fotografieren",
@@ -1158,9 +1158,9 @@
       "slotErrorFallback": "Upload fehlgeschlagen",
       "retryButton": "Erneut",
       "allDoneTitle": "Vielen Dank{vorname, select, empty{} other{, {vorname}}}!",
-      "allDoneBody": "Alle Dokumente sind angekommen. Ihr Ansprechpartner meldet sich in Kürze.",
-      "closeHint": "Sie können diese Seite jetzt schließen.",
-      "privacyNote": "Ihre Daten werden verschlüsselt übertragen und nur für die Bearbeitung Ihres Schadens verwendet.",
+      "allDoneBody": "Alle Dokumente sind angekommen. Dein Ansprechpartner meldet sich in Kürze.",
+      "closeHint": "Du kannst diese Seite jetzt schließen.",
+      "privacyNote": "Deine Daten werden verschlüsselt übertragen und nur für die Bearbeitung deines Schadens verwendet.",
       "slots": {
         "fahrzeugschein": "Fahrzeugschein",
         "polizeibericht": "Polizeibericht",
@@ -1174,12 +1174,12 @@
       },
       "hints": {
         "fahrzeugschein": "Zulassungsbescheinigung Teil I (Vorderseite). Alle 4 Ecken sichtbar, gutes Licht, scharf.",
-        "polizeibericht": "Der Zettel, den Sie nach dem Unfall von der Polizei bekommen haben.",
+        "polizeibericht": "Der Zettel, den du nach dem Unfall von der Polizei bekommen hast.",
         "unfallfotos": "Fotos vom Fahrzeugschaden — mehrere Ansichten willkommen (Front, Heck, Seiten, Detail). Je mehr Fotos, desto besser die Schadenbeschreibung.",
         "sonstiges": "Beliebiges Dokument zum Fall — z. B. Kaufvertrag, Rechnung, Foto.",
         "sachschaden_foto": "Fotos des beschädigten Gegenstands — mehrere Ansichten, gutes Licht.",
         "sachschaden_rechnung": "Reparaturrechnung oder Kostenvoranschlag für den beschädigten Gegenstand.",
-        "aerztliches_attest": "Ärztliche Bescheinigung über Ihre Verletzungen — Vorder- und Rückseite falls vorhanden.",
+        "aerztliches_attest": "Ärztliche Bescheinigung über deine Verletzungen — Vorder- und Rückseite falls vorhanden.",
         "diagnosebericht": "Ärztlicher Befundbericht oder Entlassungsbericht — alle Seiten hochladen.",
         "zeugenaussage": "Schriftliche Zeugenaussage oder Visitenkarte / Notizzettel mit Kontaktdaten."
       }
@@ -4588,7 +4588,7 @@
   "onboarding": {
     "steps": {
       "welcome": "Willkommen",
-      "fall": "Ihr Fall",
+      "fall": "Dein Fall",
       "termin": "Termin",
       "dokumente": "Dokumente",
       "fertig": "Fertig"
@@ -4596,9 +4596,9 @@
     "back": "Zurück",
     "welcome": {
       "title": "Willkommen bei Claimondo, {vorname}!",
-      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
+      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung deines Schadens. Dieser kurze Einstieg zeigt dir deine nächsten Schritte — dauert ca. 3 Minuten.",
       "scanTitle": "Schnellstart: Fahrzeugschein scannen",
-      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
+      "scanDescription": "Foto von deinem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart dir das spätere Tippen.",
       "fieldsRecognized": "{count} Felder erkannt",
       "labelFin": "FIN",
       "labelKennzeichen": "Kennzeichen",
@@ -4610,8 +4610,8 @@
       "cta": "Los geht's"
     },
     "fall": {
-      "title": "Ihr Schadenfall",
-      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
+      "title": "Dein Schadenfall",
+      "intro": "Wir haben deine Daten aus dem Telefonat bereits aufgenommen. Bitte prüf sie kurz und bestätige unten.",
       "fallNummer": "Fall-Nummer",
       "cardSchadensereignis": "Schadensereignis",
       "cardUmfang": "Schadens-Umfang",
@@ -4637,32 +4637,32 @@
       "rowVorOrt": "Vor Ort gewesen",
       "rowAktenzeichen": "Aktenzeichen",
       "valueJa": "ja",
-      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
+      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte ruf deinen Kundenbetreuer zurück — wir tragen Korrekturen für dich ein.",
       "cta": "Daten bestätigen und weiter"
     },
     "termin": {
-      "title": "Ihr Termin",
+      "title": "Dein Termin",
       "confirmed": "Termin verbindlich bestätigt",
       "svPrefix": "Sachverständiger",
-      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
-      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
+      "reminderHint": "Bitte trag dir den Termin in deinen Kalender ein. Wir erinnern dich zusätzlich 24 Stunden vorher per WhatsApp.",
+      "pending": "Wir suchen gerade einen passenden Sachverständigen für dich. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
       "uhrSuffix": "Uhr",
       "cta": "Weiter"
     },
     "dokumente": {
       "title": "Dokumente",
-      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
-      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
+      "intro": "Aus deinem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Du kannst jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
+      "none": "Keine Dokumente erforderlich — du bist fertig.",
       "preparing": "Fall wird vorbereitet — bitte einen Moment.",
       "cta": "Weiter",
       "alleSpaeter": "Alle später nachreichen",
       "speichern": "Wird gespeichert…"
     },
     "fertig": {
-      "readyTitle": "Sie sind startklar!",
-      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
+      "readyTitle": "Du bist startklar!",
+      "readyText": "Im Dashboard siehst du deinen Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
       "pendingTitle": "Alles klar",
-      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
+      "pendingText": "Bitte reich schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Du siehst den Hinweis oben in deinem Portal — ein Klick bringt dich direkt zurück in den Upload-Bereich.",
       "cta": "Zum Dashboard",
       "saving": "Moment…"
     }
@@ -4675,10 +4675,10 @@
         "wirdBestaetigt": "wird bestätigt"
       },
       "betreuerStrip": {
-        "labelKb": "Ihr Kundenbetreuer",
-        "labelSv": "Ihr Sachverständiger",
+        "labelKb": "Dein Kundenbetreuer",
+        "labelSv": "Dein Sachverständiger",
         "ansprechpartner": "Persönlicher Ansprechpartner",
-        "erstelltGutachten": "Erstellt Ihr Gutachten",
+        "erstelltGutachten": "Erstellt dein Gutachten",
         "teamFallback": "Claimondo Team",
         "svWirdZugewiesen": "Wird zugewiesen",
         "chatAria": "Chat mit {name} öffnen",
@@ -4686,8 +4686,8 @@
       },
       "meinGeld": {
         "heading": "Mein Geld",
-        "totalschadenBadge": "Ihr Fahrzeug ist ein Totalschaden",
-        "ihreForderung": "Ihre Forderung",
+        "totalschadenBadge": "Dein Fahrzeug ist ein Totalschaden",
+        "ihreForderung": "Deine Forderung",
         "beforeGutachten": "Beträge werden nach Gutachten-Erstellung angezeigt.",
         "ausGutachten": "Aus dem Gutachten",
         "vomGutachterGeprueft": "Vom Gutachter geprüft",
@@ -4695,15 +4695,17 @@
         "wiederbeschaffungswert": "Wiederbeschaffungswert",
         "abzglRestwert": "abzgl. Restwert",
         "minderwert": "Minderwert",
-        "auszahlungHinweis": "Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.",
+        "auszahlungHinweis": "Die tatsächliche Auszahlung siehst du nach der Regulierung.",
         "auszahlungLabel": "Auszahlung:",
         "aufMeinKonto": "Auf mein Konto",
         "direktWerkstatt": "Direkt an Werkstatt",
-        "auszahlungFrage": "Wohin soll die Auszahlung gehen?"
+        "auszahlungFrage": "Wohin soll die Auszahlung gehen?",
+        "summeTitel": "Deine Forderung aus dem Gutachten",
+        "summeVorbehalt": "Was die Versicherung am Ende zahlt, kann davon abweichen — wir verhandeln das für dich."
       },
       "meinBetreuer": {
         "heading": "Mein Betreuer",
-        "ansprechpartner": "Ihr persönlicher Ansprechpartner",
+        "ansprechpartner": "Dein persönlicher Ansprechpartner",
         "teamFallback": "Claimondo Team",
         "chatOeffnen": "Chat öffnen",
         "terminBuchen": "Termin buchen"
@@ -4724,7 +4726,7 @@
       },
       "gegenvorschlag": {
         "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
-        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
+        "uebermittelt": "Dein Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
         "titel": "Neuer Terminvorschlag vom Sachverständigen",
         "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
         "grund": "Grund: {grund}",
@@ -4732,21 +4734,21 @@
         "annehmen": "Vorschlag annehmen",
         "anderenVorschlagen": "Anderen Termin vorschlagen",
         "kalenderOeffnen": "Kalender des Gutachters öffnen",
-        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
+        "modalIntro": "Wähle einen für dich passenden Termin:",
         "begruendungPlatzhalter": "Begründung (optional)",
         "abbrechen": "Abbrechen",
         "wirdGesendet": "Wird gesendet...",
         "vorschlagSenden": "Vorschlag senden"
       },
       "terminVorschlag": {
-        "titel": "Ihr Gutachter hat einen Termin vorgeschlagen",
+        "titel": "Dein Gutachter hat einen Termin vorgeschlagen",
         "vorschlagText": "{svName} schlägt diesen Termin für die Besichtigung vor:"
       },
       "slotAuswahl": {
         "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
         "fehlerBestaetigen": "Fehler beim Bestätigen",
         "titel": "{svName} hat alternative Termine vorgeschlagen",
-        "intro": "Bitte wählen Sie einen der folgenden Termine:",
+        "intro": "Bitte wähle einen der folgenden Termine:",
         "waehlen": "Diesen Termin wählen →"
       },
       "detail": {
@@ -4755,29 +4757,29 @@
       },
       "nachbesichtigung": {
         "titel": "Nachbesichtigung läuft",
-        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
+        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Dein Fall wird fortgesetzt, sobald das Ergebnis vorliegt.",
         "termineVorschlagen": "Termine vorschlagen"
       },
       "vsKuerzt": {
         "titel": "Versicherung hat gekürzt",
         "begruendung": "Begründung der Versicherung:",
-        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Du musst nichts tun — wir melden uns bei Fortschritt."
       },
       "vsAbgelehnt": {
         "titel": "Versicherung hat abgelehnt",
         "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
       },
       "terminDurchgefuehrt": {
-        "titel": "Ihr Termin wurde durchgeführt",
-        "text": "Ihr Gutachtertermin ist erfolgt. Das Gutachten wird erstellt und Ihnen zugestellt, sobald es fertig ist."
+        "titel": "Dein Termin wurde durchgeführt",
+        "text": "Dein Gutachtertermin ist erfolgt. Das Gutachten wird erstellt und dir zugestellt, sobald es fertig ist."
       },
       "externeKanzlei": {
         "titel": "An eine Kanzlei übergeben",
-        "text": "Ihr Fall wird von einer Partnerkanzlei weiterbearbeitet. Sie übernimmt die Kommunikation mit der Versicherung und meldet sich bei Ihnen."
+        "text": "Dein Fall wird von einer Partnerkanzlei weiterbearbeitet. Die Kanzlei übernimmt die Kommunikation mit der Versicherung und meldet sich bei dir."
       },
       "abgelehntFinal": {
         "titel": "Fall abgeschlossen: abgelehnt",
-        "text": "Nach eingehender Prüfung konnten die Ansprüche nicht durchgesetzt werden. Bei Fragen wenden Sie sich gern an Ihren Betreuer."
+        "text": "Nach eingehender Prüfung konnten die Ansprüche nicht durchgesetzt werden. Bei Fragen wende dich gern an deinen Betreuer."
       },
       "verjaehrt": {
         "titel": "Fall verjährt",
@@ -4785,36 +4787,36 @@
       },
       "klage": {
         "titel": "Fall wird gerichtlich geklärt",
-        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+        "text": "Dein Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
       },
       "gutachtenWeiterleitung": {
         "titel": "Gutachten erhalten?",
-        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+        "text": "Du kannst dir das Gutachten auch per E-Mail an dich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
       },
       "ruegefall": {
         "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
       },
       "haftpflichtReassurance": {
-        "titel": "Unverschuldeter Unfall? Sie zahlen 0 €.",
-        "text": "Trifft die Schuld die andere Seite, übernimmt deren Kfz-Haftpflicht Ihren gesamten Schaden — Gutachten, Reparatur, Wertminderung und Anwalt (§ 249 BGB). Für Sie entsteht kein Eigenanteil."
+        "titel": "Unverschuldeter Unfall? Du zahlst 0 €.",
+        "text": "Trifft die Schuld die andere Seite, übernimmt deren Kfz-Haftpflicht deinen gesamten Schaden — Gutachten, Reparatur, Wertminderung und Anwalt (§ 249 BGB). Für dich entsteht kein Eigenanteil."
       },
       "fehler": {
         "titel": "Fehler beim Laden",
-        "text": "Bitte versuchen Sie es erneut."
+        "text": "Bitte versuche es erneut."
       },
       "kalender": {
         "sachverstaendiger": "Sachverständiger",
         "zurueck": "Zurück zum Fall",
         "keinSv": "Noch kein Sachverständiger zugewiesen.",
         "wunschTitel": "Wunschtermin für die Begutachtung",
-        "wunschIntro": "Wählen Sie einen Wunschtermin — wir suchen einen passenden Sachverständigen und bestätigen den Termin in Kürze.",
+        "wunschIntro": "Wähle einen Wunschtermin — wir suchen einen passenden Sachverständigen und bestätigen den Termin in Kürze.",
         "wunschSenden": "Wunschtermin senden",
         "wirdGesendet": "Wird gesendet …",
         "wunschGesendet": "Wunschtermin gesendet!",
-        "wunschHinweis": "Wir suchen einen passenden Sachverständigen und bestätigen Ihren Termin in Kürze.",
+        "wunschHinweis": "Wir suchen einen passenden Sachverständigen und bestätigen deinen Termin in Kürze.",
         "wunschFehler": "Der Wunschtermin konnte nicht gespeichert werden.",
         "titel": "Kalender von {svName}",
-        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
+        "intro": "Wähle einen freien Termin für deinen Fall {claimNummer}.",
         "gebucht": "Termin gebucht!",
         "tagWaehlen": "Tag wählen",
         "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
@@ -4823,16 +4825,16 @@
         "uhrSuffix": "Uhr",
         "wirdGebucht": "Wird gebucht...",
         "verbindlichBuchen": "Termin verbindlich buchen",
-        "buchungFehlgeschlagen": "Die Buchung ist fehlgeschlagen. Bitte versuchen Sie es erneut oder wenden Sie sich an uns.",
+        "buchungFehlgeschlagen": "Die Buchung ist fehlgeschlagen. Bitte versuche es erneut oder wende dich an uns.",
         "frei": "Frei",
         "belegt": "Belegt"
       },
       "liste": {
         "titel": "Meine Fälle",
         "leerTitel": "Noch kein Schadensfall",
-        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
+        "leerText": "Sobald du einen Schaden meldest, erscheint er hier mit Live-Status — du siehst jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
         "schadenMelden": "Schaden melden",
-        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+        "anzahl": "Du hast {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
       }
     },
     "termine": {
@@ -4898,16 +4900,16 @@
           "abgeschlossen": "Durchgeführt"
         },
         "besichtigungLaeuftTitle": "Besichtigung läuft",
-        "besichtigungLaeuftText": "Ihr Sachverständiger dokumentiert das Fahrzeug.",
+        "besichtigungLaeuftText": "Dein Sachverständiger dokumentiert das Fahrzeug.",
         "backLink": "Meine Termine",
         "gutachterTermin": "Gutachter-Termin",
         "uhrSuffix": "Uhr",
         "fallPrefix": "Fall",
         "svUnterwegs": "{name} ist unterwegs",
-        "svFallback": "Ihr Sachverständiger",
+        "svFallback": "Dein Sachverständiger",
         "etaMitMinuten": "Ankunft in ~{minuten} Min — Live-Karte öffnen",
         "etaOhneMinuten": "Live-Karte mit aktueller Position öffnen",
-        "svHeading": "Ihr Sachverständiger",
+        "svHeading": "Dein Sachverständiger",
         "verifiziert": "Verifiziert",
         "besichtigungsort": "Besichtigungsort",
         "karteTitle": "Karte zum Besichtigungsort",
@@ -4947,7 +4949,7 @@
         "sachverstaendigerLabel": "Sachverständiger:",
         "annehmenButton": "Termin annehmen",
         "anderenVorschlagenButton": "Anderen Termin vorschlagen",
-        "wartenText": "{svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht."
+        "wartenText": "{svVorname} wird sich auf den Weg machen. Du wirst benachrichtigt, sobald es losgeht."
       },
       "gegenvorschlag": {
         "zweiStundenFrueher": "2 Stunden früher",
@@ -4967,7 +4969,7 @@
         "positionWirdGeladen": "Position wird geladen...",
         "liveAnsichtAria": "Live-Ansicht öffnen",
         "liveAnsichtButton": "Live-Ansicht",
-        "rolle": "Ihr KFZ-Sachverständiger",
+        "rolle": "Dein KFZ-Sachverständiger",
         "etaMin": "{minuten} Min",
         "geschaetzteAnkunft": "geschätzte Ankunft"
       },
@@ -4983,16 +4985,16 @@
         "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
         "toastAnkunftBestaetigt": "Ankunft bestätigt",
         "toastTrackingBeendet": "Tracking beendet",
-        "amOrtTitel": "Sie sind am Termin-Ort",
-        "amOrtText": "Ihr Sachverständiger wurde informiert.",
-        "optInTitel": "Fahren Sie zum Besichtigungsort?",
-        "optInText": "Teilen Sie Ihre Position mit dem Sachverständigen, damit er Ihre Ankunft sieht. Tracking endet mit dem Termin.",
+        "amOrtTitel": "Du bist am Termin-Ort",
+        "amOrtText": "Dein Sachverständiger wurde informiert.",
+        "optInTitel": "Fährst du zum Besichtigungsort?",
+        "optInText": "Teile deine Position mit dem Sachverständigen, damit er deine Ankunft sieht. Tracking endet mit dem Termin.",
         "zielLabel": "Ziel:",
         "losfahrenButton": "Ich fahre jetzt los",
-        "unterwegsTitel": "Sie sind auf dem Weg",
+        "unterwegsTitel": "Du bist auf dem Weg",
         "ankunftIn": "Ankunft in ca. {minuten} Minuten",
         "positionWirdErmittelt": "Position wird ermittelt…",
-        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann Ihre Position nicht geteilt werden.",
+        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann deine Position nicht geteilt werden.",
         "abbrechenButton": "Abbrechen",
         "binDaButton": "Ich bin da"
       },
@@ -5001,12 +5003,12 @@
         "schliessenAria": "Live-Ansicht schließen",
         "eta": "ETA {minuten} Min",
         "positionWartet": "Position wartet…",
-        "sieLabel": "Sie",
+        "sieLabel": "Du",
         "amOrt": "am Ort",
         "trackingAus": "Tracking aus"
       },
       "liveMap": {
-        "kundeMarker": "Sie"
+        "kundeMarker": "Du"
       },
       "linkUngueltig": {
         "titel": "Link nicht mehr gültig",
@@ -5014,7 +5016,7 @@
       },
       "abgeschlossen": {
         "titel": "Termin abgeschlossen",
-        "text": "{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt."
+        "text": "{svName} war bei dir. Das Gutachten wird jetzt erstellt."
       },
       "fallback": {
         "gutachter": "Gutachter"
@@ -5042,20 +5044,20 @@
         "rolleKundenbetreuer": "Kundenbetreuer",
         "rolleAdmin": "Admin",
         "rolleDispatch": "Dispatch",
-        "fallbackName": "Ihr Betreuer",
+        "fallbackName": "Dein Betreuer",
         "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrBetreuer": "Ihr Betreuer",
+        "ihrBetreuer": "Dein Betreuer",
         "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "chatModalAria": "Chat mit Ihrem Betreuer",
+        "chatModalAria": "Chat mit deinem Betreuer",
         "chatSchliessenAria": "Chat schließen",
         "rueckruftermin": "Rückruftermin buchen",
         "videotermin": "Videotermin buchen",
         "chatPlaceholder": "Nachricht an deinen Betreuer …"
       },
       "svCard": {
-        "fallbackName": "Ihr Gutachter",
+        "fallbackName": "Dein Gutachter",
         "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrGutachter": "Ihr Gutachter",
+        "ihrGutachter": "Dein Gutachter",
         "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
         "sachverstaendiger": "Sachverständiger",
         "gruppenchat": "Gruppenchat",
@@ -5070,7 +5072,7 @@
       },
       "lexdriveCard": {
         "qrAnzeigenAria": "LexDrive QR-Code anzeigen",
-        "ihreKanzlei": "Ihre Kanzlei",
+        "ihreKanzlei": "Deine Kanzlei",
         "qrFuerKontakt": "QR-Code für Kontakt",
         "modalTitel": "LexDrive — Kontakt",
         "schliessenAria": "Schließen",
@@ -5091,10 +5093,10 @@
     "settings": {
       "home": {
         "greeting": "Hallo {vorname}",
-        "subtitle": "Hier sehen Sie den Stand Ihrer Fälle.",
+        "subtitle": "Hier siehst du den Stand deiner Fälle.",
         "fallbackVorname": "Kunde",
         "errorTitle": "Fehler beim Laden",
-        "errorBody": "Bitte versuchen Sie es erneut."
+        "errorBody": "Bitte versuche es erneut."
       },
       "profil": {
         "title": "Mein Profil",
@@ -5120,52 +5122,52 @@
         "backToProfil": "Profil",
         "title": "Einstellungen",
         "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.",
+        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse du wo erhalten möchtest.",
         "datenschutzTitle": "Datenschutz",
         "datenschutzDesc": "Account-Löschung nach DSGVO Art. 17."
       },
       "chat": {
         "title": "Chat",
-        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier mit Ihrem Kundenbetreuer und dem Gutachter chatten.",
+        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald dein Fall erstellt wurde, kannst du hier mit deinem Kundenbetreuer und dem Gutachter chatten.",
         "meinFall": "Mein Fall",
         "emptyHint": "Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
       },
       "onboardingDetails": {
         "keinFallTitle": "Kein Fall gefunden",
-        "keinFallBody": "Es ist kein Schadensfall mit Ihrem Account verknüpft. Bitte kontaktieren Sie uns.",
-        "eyebrow": "Ihr Fall wird vorbereitet",
+        "keinFallBody": "Es ist kein Schadensfall mit deinem Account verknüpft. Bitte kontaktiere uns.",
+        "eyebrow": "Dein Fall wird vorbereitet",
         "heading": "Nur noch wenige Angaben.",
         "skippedHint": "{skipped} von {total} Schritten wurden bereits ausgefüllt — entweder durch unseren Service-Mitarbeiter oder per Foto-Auswertung."
       },
       "nachbesichtigung": {
         "fehler": "Fehler",
         "successTitle": "Termin gewählt",
-        "successBody": "Ihr Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei Ihnen melden.",
+        "successBody": "Dein Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei dir melden.",
         "title": "Nachbesichtigung",
-        "intro": "Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.",
+        "intro": "Die Versicherung hat eine erneute Besichtigung deines Fahrzeugs angefordert. Bitte wähle einen Termin, an dem dein Fahrzeug zugänglich ist.",
         "terminLabel": "Gewünschter Termin",
         "saving": "Wird gespeichert...",
         "submit": "Termin bestätigen",
-        "footnote": "Der Versicherungsgutachter passt sich an Ihren gewählten Termin an."
+        "footnote": "Der Versicherungsgutachter passt sich an deinen gewählten Termin an."
       },
       "nachbesichtigungPicker": {
         "fallLabel": "Fall {nummer}",
         "title": "Nachbesichtigungs-Termin wählen",
-        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
+        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlage 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
         "bereitsTitle": "Termine bereits eingereicht",
-        "bereitsBody": "Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
+        "bereitsBody": "Deine Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
         "validateMin": "Mindestens 1 Termin mit Datum und Uhrzeit",
         "validateKonfrontation": "Bitte wählen, ob der Sachverständige dabei sein soll",
         "validateDuplikat": "Termine dürfen nicht doppelt sein",
         "toastSuccess": "Termine eingereicht — wir melden uns bei Fortschritt.",
         "toastError": "Einreichen fehlgeschlagen",
-        "vorschlaegeHeading": "Ihre Termin-Vorschläge",
+        "vorschlaegeHeading": "Deine Termin-Vorschläge",
         "datumLabel": "Datum",
         "uhrzeitLabel": "Uhrzeit",
         "entfernenAria": "Termin entfernen",
         "weitererTermin": "Weiteren Termin vorschlagen ({count}/{max})",
         "konfrontationFrage": "Soll unser Sachverständiger mit vor Ort sein?",
-        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für Sie.",
+        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für dich.",
         "konfrontationJa": "Ja, bitte mit Konfrontation",
         "konfrontationNein": "Nein, nur der VS-Gutachter",
         "submitting": "Wird eingereicht …",
@@ -5177,48 +5179,48 @@
     "statusLabel": "Status",
     "onboardingOffen": {
       "titel": "Onboarding abschließen",
-      "beschreibung": "Bitte vervollständigen Sie die noch offenen Angaben zu Ihrem Schadensfall. Ohne diese Daten kann Ihr Betreuer den Fall nicht weiter bearbeiten.",
+      "beschreibung": "Bitte vervollständige die noch offenen Angaben zu deinem Schadensfall. Ohne diese Daten kann dein Betreuer den Fall nicht weiter bearbeiten.",
       "cta": "Jetzt abschließen"
     },
     "datenAnKanzlei": {
       "titel": "Daten für die Kanzlei benötigt",
-      "beschreibung": "Die Partnerkanzlei wartet auf noch fehlende Angaben von Ihnen. Bitte öffnen Sie Ihren Fall und prüfen Sie die offenen Punkte.",
+      "beschreibung": "Die Partnerkanzlei wartet auf noch fehlende Angaben von dir. Bitte öffne deinen Fall und prüfe die offenen Punkte.",
       "cta": "Fall öffnen"
     },
     "terminVorOrt": {
-      "titel": "Ihr Besichtigungstermin läuft",
+      "titel": "Dein Besichtigungstermin läuft",
       "beschreibung": "Termin am {datum}. Der Gutachter ist entweder auf dem Weg oder bereits vor Ort."
     },
     "terminUnterwegs": {
-      "titel": "Ihr Besichtigungstermin steht bevor",
-      "beschreibung": "Termin am {datum}. Ihr Gutachter meldet sich kurz vor Eintreffen."
+      "titel": "Dein Besichtigungstermin steht bevor",
+      "beschreibung": "Termin am {datum}. Dein Gutachter meldet sich kurz vor Eintreffen."
     },
     "nachbesichtigungWaehlen": {
       "titel": "Nachbesichtigung: Termin wählen",
-      "beschreibung": "Die Versicherung fordert eine erneute Besichtigung Ihres Fahrzeugs. Bitte schlagen Sie 2–3 passende Termine vor.",
+      "beschreibung": "Die Versicherung fordert eine erneute Besichtigung deines Fahrzeugs. Bitte schlag 2–3 passende Termine vor.",
       "cta": "Termine vorschlagen"
     },
     "terminBestaetigen": {
       "titel": "Besichtigungstermin bestätigen",
-      "beschreibung": "Ihr Gutachter schlägt {datum} vor. Bitte bestätigen oder einen Gegenvorschlag machen.",
+      "beschreibung": "Dein Gutachter schlägt {datum} vor. Bitte bestätigen oder einen Gegenvorschlag machen.",
       "cta": "Termin öffnen"
     },
     "vollmachtUnterschreiben": {
       "titel": "Vollmacht unterschreiben",
-      "beschreibung": "Ihre Partnerkanzlei LexDrive schickt Ihnen die Vollmacht per WhatsApp. Bitte unterschreiben Sie sie dort — danach übernimmt LexDrive die Verhandlung mit der Versicherung.",
+      "beschreibung": "Deine Partnerkanzlei LexDrive schickt dir die Vollmacht per WhatsApp. Bitte unterschreib sie dort — danach übernimmt LexDrive die Verhandlung mit der Versicherung.",
       "cta": "Jetzt bestätigen"
     },
     "vsAntwortAbwarten": {
       "titel": "Wir warten auf die Versicherung",
-      "beschreibung": "Ihr Anschlussschreiben ist raus. Die Versicherung hat jetzt eine gesetzliche Frist zur Reaktion — wir melden uns, sobald wir eine Rückmeldung haben."
+      "beschreibung": "Dein Anschlussschreiben ist raus. Die Versicherung hat jetzt eine gesetzliche Frist zur Reaktion — wir melden uns, sobald wir eine Rückmeldung haben."
     },
     "fallAbgeschlossen": {
       "titel": "Fall abgeschlossen",
-      "beschreibung": "Ihr Schadensfall ist vollständig reguliert. Danke für Ihr Vertrauen!"
+      "beschreibung": "Dein Schadensfall ist vollständig reguliert. Danke für dein Vertrauen!"
     },
     "keinAktionsbedarf": {
       "titel": "Kein Handlungsbedarf",
-      "beschreibung": "Ihr Fall läuft planmäßig — wir melden uns, sobald etwas von Ihnen benötigt wird."
+      "beschreibung": "Dein Fall läuft planmäßig — wir melden uns, sobald etwas von dir benötigt wird."
     }
   },
   "fallKarte": {
@@ -5242,9 +5244,9 @@
   "kundeHero": {
     "willkommen": "Willkommen",
     "begruessung": "Hallo {vorname} — wie können wir helfen?",
-    "intro": "Wir kümmern uns um Ihren Unfallschaden — von der Begutachtung bis zur Auszahlung. Sie müssen nichts verwalten, wir halten Sie auf jedem Schritt informiert.",
+    "intro": "Wir kümmern uns um deinen Unfallschaden — von der Begutachtung bis zur Auszahlung. Du musst nichts verwalten, wir halten dich auf jedem Schritt informiert.",
     "schadenMelden": "Schaden melden",
-    "bereitsGemeldet": "Bereits gemeldet? Sie erhalten von uns einen Link per E-Mail oder SMS.",
+    "bereitsGemeldet": "Bereits gemeldet? Du erhältst von uns einen Link per E-Mail oder SMS.",
     "soLaeuftEs": "So läuft's bei uns",
     "schrittLabel": "Schritt {nummer}",
     "schritt1": "Schaden gemeldet",
@@ -5254,11 +5256,11 @@
     "schritt5": "Reguliert"
   },
   "svLive": {
-    "gutachterFallback": "Ihr Gutachter",
+    "gutachterFallback": "Dein Gutachter",
     "ueberarbeitungTitel": "Gutachten wird überarbeitet",
     "qcTitel": "Qualitätsprüfung & Kanzlei-Übergabe",
     "ueberarbeitungSub": "· Wir warten auf die korrigierte Version",
-    "qcSub": "· Ihr Gutachten wird geprüft",
+    "qcSub": "· Dein Gutachten wird geprüft",
     "gutachtenWirdErstellt": "Gutachten wird erstellt",
     "gutachtenWirdErstelltSub": "· {vorname} arbeitet daran",
     "svVorOrt": "{vorname} ist vor Ort",
@@ -5268,8 +5270,8 @@
   },
   "abschluss": {
     "badge": "Abgeschlossen",
-    "titel": "Ihr Fall {fallNummer} ist erledigt",
-    "untertitel": "Abgeschlossen am {datum} · Vielen Dank für Ihr Vertrauen.",
+    "titel": "Dein Fall {fallNummer} ist erledigt",
+    "untertitel": "Abgeschlossen am {datum} · Vielen Dank für dein Vertrauen.",
     "gutachtenPdf": "Gutachten (PDF)",
     "gutachtenNichtFreigegeben": "Gutachten-PDF noch nicht freigegeben",
     "gutachtenNv": "Gutachten (n.v.)",
@@ -5277,10 +5279,10 @@
     "bewerten": "Bewerten"
   },
   "auszahlung": {
-    "titel": "Ihre Auszahlung",
+    "titel": "Deine Auszahlung",
     "statusEingegangen": "Eingegangen",
     "statusAvisiert": "Avisiert",
-    "nettoBetrag": "Netto-Betrag (Ihr Anteil)",
+    "nettoBetrag": "Netto-Betrag (dein Anteil)",
     "eingang": "Eingang",
     "zahlungswegLabel": "Zahlungsweg",
     "zahlungsweg": {
@@ -5288,7 +5290,7 @@
       "werkstattDirekt": "Werkstatt-Direktzahlung",
       "scheck": "Scheck"
     },
-    "hinweis": "Dies ist Ihr Netto-Anteil nach Abzug von SV-Honorar und Selbstbehalt. Die Brutto-Regulierung sehen Sie in Ihrer Fall-Übersicht."
+    "hinweis": "Dies ist dein Netto-Anteil nach Abzug von SV-Honorar und Selbstbehalt. Die Brutto-Regulierung siehst du in deiner Fall-Übersicht."
   },
   "terminSection": {
     "headerSv": "SV-Termin",
@@ -5316,10 +5318,10 @@
     "linkKopiert": "Link kopiert!",
     "linkKopieren": "Link kopieren",
     "routeInMaps": "Route in Maps öffnen →",
-    "gutachterFallback": "Ihr Gutachter",
-    "betreuerFallback": "Ihr Betreuer",
-    "rolleSv": "Ihr Kfz-Sachverständiger",
-    "rolleKb": "Ihr Kundenbetreuer",
+    "gutachterFallback": "Dein Gutachter",
+    "betreuerFallback": "Dein Betreuer",
+    "rolleSv": "Dein Kfz-Sachverständiger",
+    "rolleKb": "Dein Kundenbetreuer",
     "kontaktFallback": "Kontakt",
     "anrufenAria": "{name} anrufen",
     "anrufen": "Anrufen",
@@ -5333,28 +5335,28 @@
     "absagen": "Absagen",
     "wirdAbgesagt": "Wird abgesagt…",
     "zumKalender": "Zum Kalender hinzufügen",
-    "absagenConfirm": "Sind Sie sicher, dass Sie den Termin absagen möchten? Ihr Betreuer wird informiert.",
+    "absagenConfirm": "Bist du sicher, dass du den Termin absagen möchtest? Dein Betreuer wird informiert.",
     "absagenFehler": "Fehler beim Absagen.",
     "netzwerkfehler": "Netzwerkfehler",
-    "abgesagtHinweis": "Termin abgesagt. Ihr Betreuer wurde informiert und meldet sich bei Ihnen.",
+    "abgesagtHinweis": "Termin abgesagt. Dein Betreuer wurde informiert und meldet sich bei dir.",
     "reschedule": {
       "titel": "Termin verschieben",
-      "subKb": "Ihr Betreuer meldet sich binnen 24 Stunden mit einem neuen Vorschlag.",
-      "subSv": "Ihr Gutachter-Koordinator meldet sich binnen 24 Stunden mit neuen Slots.",
-      "wunschLabel": "Ihr Wunsch-Zeitraum (optional)",
+      "subKb": "Dein Betreuer meldet sich binnen 24 Stunden mit einem neuen Vorschlag.",
+      "subSv": "Dein Gutachter-Koordinator meldet sich binnen 24 Stunden mit neuen Slots.",
+      "wunschLabel": "Dein Wunsch-Zeitraum (optional)",
       "wunschPlaceholder": "z. B. „nächste Woche vormittags\" oder „ab 21.04. nach 15 Uhr\"",
       "fehler": "Fehler beim Senden der Anfrage.",
       "netzwerkfehler": "Netzwerkfehler",
       "abbrechen": "Abbrechen",
       "wirdGesendet": "Wird gesendet…",
       "anfrageSenden": "Anfrage senden",
-      "erfolg": "Ihre Anfrage wurde weitergeleitet. Ihr Betreuer meldet sich in Kürze bei Ihnen.",
+      "erfolg": "Deine Anfrage wurde weitergeleitet. Dein Betreuer meldet sich in Kürze bei dir.",
       "schliessen": "Schließen"
     }
   },
   "terminVerschieben": {
     "modalTitel": "Termin verschieben",
-    "intro": "Wählen Sie einen der verfügbaren Vorschläge oder geben Sie einen eigenen Wunschtermin an.",
+    "intro": "Wähle einen der verfügbaren Vorschläge oder gib einen eigenen Wunschtermin an.",
     "verfuegbareTermine": "Verfügbare Termine",
     "sucheTermine": "Suche verfügbare Termine…",
     "keineVorschlaege": "Keine automatischen Vorschläge verfügbar — bitte Wunschtermin eingeben.",
@@ -5375,8 +5377,8 @@
   },
   "terminVerlegung": {
     "titel": "{sv} möchte den Termin verlegen",
-    "gutachterFallback": "Ihr Gutachter",
-    "beschreibung": "Bitte bestätigen Sie die Verlegung oder lehnen Sie ab — solange Sie nicht reagieren, bleibt der ursprüngliche Termin gültig.",
+    "gutachterFallback": "Dein Gutachter",
+    "beschreibung": "Bitte bestätige die Verlegung oder lehn sie ab — solange du nicht reagierst, bleibt der ursprüngliche Termin gültig.",
     "bisheriger": "Bisheriger Termin",
     "neuer": "Neuer Vorschlag",
     "uhrSuffix": " Uhr",
@@ -5384,20 +5386,20 @@
     "verlegungBestaetigen": "Verlegung bestätigen",
     "unbekannterFehler": "Unbekannter Fehler",
     "modalTitel": "Verlegung ablehnen",
-    "modalIntro": "Wenn Sie ablehnen, bleibt der ursprüngliche Termin am <b>{datum}</b> um <b>{uhrzeit} Uhr</b> bestehen.",
+    "modalIntro": "Wenn du ablehnst, bleibt der ursprüngliche Termin am <b>{datum}</b> um <b>{uhrzeit} Uhr</b> bestehen.",
     "ablehnenPlaceholder": "Grund (optional, wird dem Gutachter angezeigt)",
     "dochNicht": "Doch nicht",
     "wirdAbgelehnt": "Wird abgelehnt…",
     "jaAblehnen": "Ja, ablehnen"
   },
   "terminCheck": {
-    "gutachterFallback": "Ihr Gutachter",
+    "gutachterFallback": "Dein Gutachter",
     "fehler": "Es ist ein Fehler aufgetreten. Bitte erneut versuchen.",
     "erledigtJa": "Danke! Wir haben den Termin als durchgeführt vermerkt.",
-    "erledigtNein": "Danke für die Rückmeldung. Wir kümmern uns um einen neuen Termin und melden uns bei Ihnen.",
+    "erledigtNein": "Danke für die Rückmeldung. Wir kümmern uns um einen neuen Termin und melden uns bei dir.",
     "frage": "Kam {gutachter} zum Termin?",
-    "hinweisMitLabel": "Ihr Termin ({label}) ist vorbei. Bitte bestätigen Sie kurz — so können wir Ihren Fall richtig weiterbearbeiten.",
-    "hinweisOhneLabel": "Bitte bestätigen Sie kurz — so können wir Ihren Fall richtig weiterbearbeiten.",
+    "hinweisMitLabel": "Dein Termin ({label}) ist vorbei. Bitte bestätige kurz — so können wir deinen Fall richtig weiterbearbeiten.",
+    "hinweisOhneLabel": "Bitte bestätige kurz — so können wir deinen Fall richtig weiterbearbeiten.",
     "jaWarDa": "Ja, war da",
     "neinKamNicht": "Nein, kam nicht"
   },
@@ -5422,7 +5424,7 @@
     "videoCall": "Video-Call",
     "telefon": "Telefon",
     "ladeTermine": "Verfügbare Termine werden geladen…",
-    "keineTermine": "Aktuell sind keine Termine verfügbar. Bitte kontaktieren Sie uns direkt im Chat.",
+    "keineTermine": "Aktuell sind keine Termine verfügbar. Bitte kontaktiere uns direkt im Chat.",
     "tagWaehlen": "Tag wählen",
     "uhrzeitWaehlen": "Uhrzeit wählen",
     "zusammenfassungThema": "Thema",
@@ -5432,17 +5434,17 @@
     "uhrzeitDauer": "{uhrzeit} Uhr · 30 Minuten",
     "zusammenfassungKanal": "Kanal",
     "zusammenfassungBerater": "Berater",
-    "whatsappHinweis": "Sie erhalten eine WhatsApp-Bestätigung{videoLink, select, ja { mit dem Video-Link} other {}}.",
+    "whatsappHinweis": "Du erhältst eine WhatsApp-Bestätigung{videoLink, select, ja { mit dem Video-Link} other {}}.",
     "gebuchtTitel": "Termin gebucht!",
-    "gebuchtSub": "Sie erhalten in Kürze eine WhatsApp-Bestätigung.",
+    "gebuchtSub": "Du erhältst in Kürze eine WhatsApp-Bestätigung.",
     "abbrechen": "Abbrechen",
     "zurueck": "Zurück",
     "weiter": "Weiter",
     "terminBestaetigen": "Termin bestätigen"
   },
   "googleReview": {
-    "frage": "Wie war Ihr Termin mit {svName}?",
-    "sub": "Helfen Sie anderen Kunden mit einer kurzen Google-Bewertung.",
+    "frage": "Wie war dein Termin mit {svName}?",
+    "sub": "Hilf anderen Kunden mit einer kurzen Google-Bewertung.",
     "jetztBewerten": "Jetzt bewerten",
     "spaeter": "Später",
     "schliessen": "Schließen"
@@ -5507,12 +5509,12 @@
     "titel": "Meine Kanzlei",
     "vollmachtErteilt": "Vollmacht erteilt",
     "vollmachtAusstehend": "Vollmacht ausstehend",
-    "ansprechpartner": "Ihr juristischer Ansprechpartner",
+    "ansprechpartner": "Dein juristischer Ansprechpartner",
     "fachanwaltDefault": "Fachanwalt für Verkehrsrecht",
     "whatsappChat": "WhatsApp-Chat",
     "anrufen": "Anrufen",
     "whatsappIntro": "Hallo, ich habe eine Frage zu meinem Fall.",
-    "rechtsText": "Die Kanzlei bearbeitet Ihren Fall rechtlich, prüft Kürzungen durch die Versicherung und vertritt Sie notfalls vor Gericht. Sie erreichen die Kanzlei direkt über WhatsApp, Telefon oder E-Mail — eine Antwort kommt meist binnen 24 Stunden."
+    "rechtsText": "Die Kanzlei bearbeitet deinen Fall rechtlich, prüft Kürzungen durch die Versicherung und vertritt dich notfalls vor Gericht. Du erreichst die Kanzlei direkt über WhatsApp, Telefon oder E-Mail — eine Antwort kommt meist binnen 24 Stunden."
   },
   "bankdaten": {
     "bannerTitel": "Bankdaten für Auszahlung hinterlegen",
@@ -5534,8 +5536,8 @@
   "gutachtenWeiterleitung": {
     "trigger": "Gutachten per E-Mail zusenden",
     "modalTitel": "Gutachten per E-Mail zusenden",
-    "intro": "Sie erhalten einen geschützten Download-Link, der 48 Stunden gültig ist. Maximal 3 Anfragen pro Fall und Tag.",
-    "erfolg": "E-Mail wurde versendet. Bitte prüfen Sie auch den Spam-Ordner.",
+    "intro": "Du erhältst einen geschützten Download-Link, der 48 Stunden gültig ist. Maximal 3 Anfragen pro Fall und Tag.",
+    "erfolg": "E-Mail wurde versendet. Bitte prüf auch den Spam-Ordner.",
     "schliessen": "Schließen",
     "empfaengerEmail": "Empfänger-E-Mail",
     "emailPlaceholder": "ihre-email@beispiel.de",
@@ -5566,9 +5568,9 @@
     "abbrechen": "Abbrechen"
   },
   "orphanMatch": {
-    "erledigt": "Danke! Wir haben den früheren Vorgang Ihrem Konto zugeordnet.",
-    "frage": "Gehört ein früherer Vorgang zu Ihnen?",
-    "text": "Wir haben einen möglichen früheren Vorgang gefunden, der zu Ihnen gehören könnte. Möchten Sie ihn Ihrem Konto zuordnen?",
+    "erledigt": "Danke! Wir haben den früheren Vorgang deinem Konto zugeordnet.",
+    "frage": "Gehört ein früherer Vorgang zu dir?",
+    "text": "Wir haben einen möglichen früheren Vorgang gefunden, der zu dir gehören könnte. Möchtest du ihn deinem Konto zuordnen?",
     "jaDasBinIch": "Ja, das bin ich",
     "schliessen": "Schließen",
     "fehler": "Es ist ein Fehler aufgetreten. Bitte erneut versuchen."
@@ -5585,14 +5587,14 @@
     "optSonstigesLabel": "Sonstiges Dokument",
     "optSonstigesBeschreibung": "Alles andere",
     "titel": "Dokument hochladen",
-    "sub": "Machen Sie ein Foto oder laden Sie eine PDF hoch. Wir lesen die wichtigsten Angaben automatisch aus und Ihr Betreuer prüft die Daten.",
+    "sub": "Mach ein Foto oder lade eine PDF hoch. Wir lesen die wichtigsten Angaben automatisch aus und dein Betreuer prüft die Daten.",
     "dokumenttyp": "Dokumenttyp",
     "fotoOderDatei": "Foto aufnehmen / Datei wählen",
     "wirdAusgelesen": "Wird ausgelesen...",
-    "toastErfolg": "{label} hochgeladen — Ihr Betreuer prüft das Dokument.",
+    "toastErfolg": "{label} hochgeladen — dein Betreuer prüft das Dokument.",
     "fehlerUpload": "Upload fehlgeschlagen",
     "erfolgHochgeladen": "{label} erfolgreich hochgeladen",
-    "erfolgSub": "Ihr Betreuer prüft das Dokument. Sie sehen den Status in der Übersicht.",
+    "erfolgSub": "Dein Betreuer prüft das Dokument. Du siehst den Status in der Übersicht.",
     "formatHinweis": "PDF, JPG oder PNG. Max. 10 MB."
   },
   "kundenHeader": {
@@ -5602,10 +5604,10 @@
     "matching": {
       "ohne_termin_cta": "Ohne Termin fortfahren",
       "spaeter_link": "Termin lieber später vereinbaren",
-      "suche": "Wir suchen den passenden Gutachter für Sie …",
+      "suche": "Wir suchen den passenden Gutachter für dich …",
       "moment": "Einen Moment …",
-      "kein_match_heading": "Wir melden uns bei Ihnen",
-      "kein_match_body": "Für Ihren Standort konnten wir gerade keinen freien Gutachter-Termin finden. Unser Team meldet sich kurzfristig telefonisch bei Ihnen.",
+      "kein_match_heading": "Wir melden uns bei dir",
+      "kein_match_body": "Für deinen Standort konnten wir gerade keinen freien Gutachter-Termin finden. Unser Team meldet sich kurzfristig telefonisch bei dir.",
       "laden_fehler": "Beim Laden der Gutachter ist ein Fehler aufgetreten."
     },
     "errors": {
@@ -5616,7 +5618,7 @@
     "quali": {
       "gruss": "Hallo {vorname},",
       "frage": "Wer hat den Unfall verursacht?",
-      "hinweis": "Das hilft uns einzuschätzen, ob wir Ihren Schaden für Sie regulieren können.",
+      "hinweis": "Das hilft uns einzuschätzen, ob wir deinen Schaden für dich regulieren können.",
       "optionen": {
         "gegner": {
           "label": "Der Unfallgegner",
@@ -5633,8 +5635,8 @@
       }
     },
     "slot": {
-      "heading": "Ihr Gutachter-Termin",
-      "sub": "Wählen Sie einen passenden Termin — der erste Vorschlag ist Ihr bestpassender Gutachter.",
+      "heading": "Dein Gutachter-Termin",
+      "sub": "Wähle einen passenden Termin — der erste Vorschlag ist dein bestpassender Gutachter.",
       "empfohlen": "Empfohlen",
       "empfohlener_partner": "Empfohlener Partner",
       "partner": "Partner",
@@ -5644,13 +5646,13 @@
       "uhr_suffix": "Uhr"
     },
     "kasko": {
-      "heading": "Danke für Ihre Angaben",
-      "body": "Bei selbstverschuldeten Unfällen lassen sich die Gutachterkosten leider nicht über die gegnerische Haftpflichtversicherung regulieren — daher können wir Ihnen hier keinen kostenfreien Termin anbieten.",
-      "note": "Sollte sich die Schuldfrage noch ändern, melden Sie sich jederzeit gern wieder."
+      "heading": "Danke für deine Angaben",
+      "body": "Bei selbstverschuldeten Unfällen lassen sich die Gutachterkosten leider nicht über die gegnerische Haftpflichtversicherung regulieren — daher können wir dir hier keinen kostenfreien Termin anbieten.",
+      "note": "Sollte sich die Schuldfrage noch ändern, meld dich jederzeit gern wieder."
     },
     "zb1": {
       "titel": "Fahrzeugschein-Foto",
-      "hinweis_bereits": "Ihre Fahrzeugdaten liegen bereits vor — ein Foto ergänzt nur noch Fehlendes. Optional.",
+      "hinweis_bereits": "Deine Fahrzeugdaten liegen bereits vor — ein Foto ergänzt nur noch Fehlendes. Optional.",
       "hinweis_neu": "Foto hochladen — wir lesen Kennzeichen, Fahrzeug & Halter automatisch aus. Optional.",
       "uebernommen": "Fahrzeugdaten übernommen",
       "pruefen": "Ausgelesen — bitte prüfen & ggf. korrigieren:",
@@ -5669,7 +5671,7 @@
     },
     "polizeibericht": {
       "titel": "Polizeibericht",
-      "hinweis": "Sie gaben an, die Polizei war vor Ort. Laden Sie den Bericht hoch (Foto oder PDF) — optional, Sie können ihn auch später nachreichen.",
+      "hinweis": "Du hast angegeben, die Polizei war vor Ort. Lade den Bericht hoch (Foto oder PDF) — optional, du kannst ihn auch später nachreichen.",
       "liegt_vor": "Polizeibericht liegt vor",
       "neu_hochladen": "Neu hochladen",
       "hochladen": "Bericht hochladen",
@@ -5679,12 +5681,12 @@
       "fehler_upload": "Upload fehlgeschlagen."
     },
     "ort": {
-      "titel": "Wo sollen wir Ihr Fahrzeug begutachten?",
-      "hinweis": "Geben Sie den Besichtigungsort ein — dann zeigen wir Ihnen passende Gutachter-Termine in der Nähe.",
+      "titel": "Wo sollen wir dein Fahrzeug begutachten?",
+      "hinweis": "Gib den Besichtigungsort ein — dann zeigen wir dir passende Gutachter-Termine in der Nähe.",
       "placeholder": "Adresse des Besichtigungsorts",
       "speichern_laeuft": "Einen Moment, wir suchen passende Termine …",
       "fehler_speichern": "Adresse konnte nicht gespeichert werden.",
-      "vorschlag_label": "Steht Ihr Fahrzeug an der gemeldeten Unfallstelle?",
+      "vorschlag_label": "Steht dein Fahrzeug an der gemeldeten Unfallstelle?",
       "vorschlag_bestaetigen": "Ja, dort besichtigen",
       "vorschlag_oder": "Oder anderen Ort wählen:"
     }
