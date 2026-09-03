@@ -13,6 +13,15 @@ export const metadata: Metadata = {
 // Finaler, von LexDrive freigegebener Text (12.06.2026) — 1:1 eingebaut, KEINE
 // Entwurfs-/Review-Hinweise. Kein EU-OS-Plattform-Link (Plattform zum 20.07.2025
 // abgeschaltet) → nur die VSBG-Erklaerung.
+//
+// Aenderung 03.09.2026 (Aaron): Handelsregister nachgetragen — „Amtsgericht Koeln —
+// Eintragung in Vorbereitung" → „Amtsgericht Koeln, HRB 128389". Damit ist die
+// Firmierung erstmals in sich stimmig: der Text nannte die Gesellschaft schon
+// „UG (haftungsbeschraenkt)" ohne „i.G.", fuehrte die Eintragung aber als offen —
+// eine UG entsteht erst MIT der Eintragung (§ 11 Abs. 1 GmbHG analog).
+// ⚠ Die USt-IdNr. steht weiterhin auf „in Beantragung" (unten) — kein Wert vorhanden.
+// ⚠ Die Nummer gehoert der Kitta & Sprafke UG. Die Claimondo GmbH ist ein EIGENER
+// Rechtstraeger, weiterhin „i.G." und ohne Registernummer.
 export default function ImpressumPage() {
   const phoneHref = `tel:${SITE.phone.replace(/[^+\d]/g, '')}`
   return (
@@ -42,7 +51,12 @@ export default function ImpressumPage() {
         </p>
 
         <h2>Handelsregister</h2>
-        <p>Amtsgericht Köln — Eintragung in Vorbereitung</p>
+        {/* Bewusst EIN Template-Literal statt {court}, {number}: getrennte JSX-Kinder
+            rendert React als getrennte Textknoten und schiebt `<!-- -->`-Marker
+            dazwischen. Im Quelltext stuende dann „Amtsgericht Köln<!-- -->, <!-- -->HRB
+            128389" — fuer Menschen unsichtbar, fuer Crawler/LLMs unnoetiges Rauschen
+            auf genau der Seite, die die Entitaet belegen soll. */}
+        <p>{`${SITE.publisher.registerCourt}, ${SITE.publisher.registerNumber}`}</p>
 
         <h2>Umsatzsteuer-Identifikationsnummer</h2>
         <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: in Beantragung</p>

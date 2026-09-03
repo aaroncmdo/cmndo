@@ -33,6 +33,13 @@ export const SITE = {
     city: 'Köln',
     country: 'Deutschland',
     managingDirectors: 'Aaron Sprafke, Nicolas Kitta',
+    /** Handelsregister — Pflichtangabe nach § 5 Abs. 1 Nr. 4 DDG. Steht hier statt
+     *  als Literal im Impressum, weil die uebrigen Betreiber-Angaben (Anschrift,
+     *  Geschaeftsfuehrer) es auch tun. Gehoert zur Kitta & Sprafke UG — NICHT zur
+     *  Claimondo GmbH, die ein eigener Rechtstraeger mit eigenem Impressum ist
+     *  (src/content/legal/impressum.md). Aaron 03.09.2026. */
+    registerCourt: 'Amtsgericht Köln',
+    registerNumber: 'HRB 128389',
     /** Verifizierte, geclaimte Unternehmensprofile (Organization sameAs). Nur real
      *  existierende Profile — kein X/YouTube (nicht angelegt), kein claimondo.de. */
     sameAs: [
