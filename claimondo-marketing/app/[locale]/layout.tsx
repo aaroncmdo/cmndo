@@ -18,6 +18,7 @@ import { headers } from 'next/headers'
 import { isTrackingHost, isMarketingHost } from '@/lib/analytics/consent'
 import { ConsentManager } from '@/components/analytics/ConsentManager'
 import { ClarityInit } from '@/components/analytics/ClarityInit'
+import { OaiqInit } from '@/components/analytics/OaiqInit'
 import { PhoneClickTracker } from '@/components/analytics/PhoneClickTracker'
 import { ProSealWidget } from '@/components/shared/ProSealWidget'
 import { isLocale } from '@/i18n/locales'
@@ -245,6 +246,14 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={pickClientMessages(messages)}>
           {shouldShowConsent && <ConsentManager />}
           <ClarityInit />
+          {/* OAIQ-Pixel (OpenAI Ads): sammelt das `oppref` aus dem Anzeigenklick ein.
+              Bewusst im Root-Layout statt seitenweise — welche Landingpage eine Anzeige
+              morgen anspricht, weiss heute niemand, und eine seitenweise Einbindung
+              braeche in dem Moment still. Gate ist die CMP-Kategorie `ads` (nicht
+              `analytics` wie bei Clarity); ohne NEXT_PUBLIC_OAIQ_PIXEL_ID bleibt die
+              Komponente still. Conversions gehen NICHT von hier raus, sondern
+              serverseitig — siehe lib/analytics/oaiq-capi.ts. */}
+          <OaiqInit />
           {/* ProSeal laedt s.provenexpert.net im Besucher-Browser -> nur dort, wo auch
               ein CMP laeuft. Ohne CMP haette der Besucher keinen Weg zu widersprechen.
               Seit 13.08.2026 laeuft das CMP auf allen sechs Marketing-Hosts, das Siegel
