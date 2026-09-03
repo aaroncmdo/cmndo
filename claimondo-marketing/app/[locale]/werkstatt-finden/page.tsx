@@ -4,6 +4,7 @@ import { WerkstattFindenSection } from '@/components/werkstatt-finden/WerkstattF
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { opprefFuerEmbed } from '@/lib/analytics/oaiq-capi'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -55,6 +56,8 @@ export default async function WerkstattFindenPage({
     // Google-Ads-Click-IDs (Ad-Klick landet auf dieser Parent-URL) → an den Embed-iframe
     // weiterreichen, damit der Conversion-Linker im Container _gcl_aw schreibt.
     gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string
+    // OpenAI-Ads-Attribution: dasselbe Spiel wie die Click-IDs eine Zeile hoeher.
+    oppref?: string
     // Makler-/Partner-Promo-Code → Provision-Attribution am entstehenden Lead (Entry-Point-
     // Matrix-Audit E1.1); gleiches ?promo=-Muster wie Mini-Wizard/Rueckruf.
     promo?: string
@@ -62,6 +65,8 @@ export default async function WerkstattFindenPage({
 }) {
   const t = await getTranslations('werkstatt_finden')
   const sp = await searchParams
+  // URL-Parameter ODER __oppref-Cookie, beides nur mit Marketing-Einwilligung.
+  const oppref = await opprefFuerEmbed(sp.oppref)
 
   // Karte auf URL-Param vorzentrieren — ?lat&lng direkt, sonst ?plz / ?stadt server-seitig
   // via Mapbox geocoden. Kein Param -> null -> Embed nutzt NRW-Default + Geolocation.
@@ -105,6 +110,7 @@ export default async function WerkstattFindenPage({
         height="100dvh"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
+        oppref={oppref}
         promoCode={sp.promo?.trim() || undefined}
       />
       </main>

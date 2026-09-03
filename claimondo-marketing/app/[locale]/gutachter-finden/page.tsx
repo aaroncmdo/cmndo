@@ -7,6 +7,7 @@ import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IM
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { ladeUebersichtsTermine } from '@/lib/termine/naechster-termin'
+import { opprefFuerEmbed } from '@/lib/analytics/oaiq-capi'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -79,6 +80,8 @@ export default async function GutachterFindenPage({
     // AAR-956: Google-Ads-Click-IDs (Ad-Klick landet auf dieser Parent-URL) → an den
     // Embed-iframe weiterreichen, damit der Conversion-Linker im Container _gcl_aw schreibt.
     gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string
+    // OpenAI-Ads-Attribution: dasselbe Spiel wie die Click-IDs eine Zeile hoeher.
+    oppref?: string
     // GEO-Deep-Link: `?sv=<profiles.id>` — der Gutachter, den eine KI-Antwort bereits
     // genannt hat (aus `gutachter[].buchungs_url` der oeffentlichen Termin-API). Wird an
     // den Embed durchgereicht und dort NUR als Vorauswahl genutzt.
@@ -102,6 +105,8 @@ export default async function GutachterFindenPage({
 }) {
   const t = await getTranslations('gutachter_finden')
   const sp = await searchParams
+  // URL-Parameter ODER __oppref-Cookie, beides nur mit Marketing-Einwilligung.
+  const oppref = await opprefFuerEmbed(sp.oppref)
 
   // Karte auf URL-Param vorzentrieren — ?lat&lng direkt, sonst ?plz / ?stadt server-seitig
   // via Mapbox geocoden. Kein Param -> null -> Client nutzt NRW-Default + Geolocation.
@@ -176,6 +181,7 @@ export default async function GutachterFindenPage({
         height="100dvh"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
+        oppref={oppref}
         svId={sp.sv}
         slot={sp.slot}
         utmSource={sp.utm_source}

@@ -12416,6 +12416,7 @@ export type Database = {
           nachname: string | null
           notiz: string | null
           nutzungsausfall: boolean | null
+          oppref: string | null
           parkplatz_kamera: boolean | null
           personenschaden_flag: boolean | null
           polizei_aktenzeichen: string | null
@@ -12642,6 +12643,7 @@ export type Database = {
           nachname?: string | null
           notiz?: string | null
           nutzungsausfall?: boolean | null
+          oppref?: string | null
           parkplatz_kamera?: boolean | null
           personenschaden_flag?: boolean | null
           polizei_aktenzeichen?: string | null
@@ -12868,6 +12870,7 @@ export type Database = {
           nachname?: string | null
           notiz?: string | null
           nutzungsausfall?: boolean | null
+          oppref?: string | null
           parkplatz_kamera?: boolean | null
           personenschaden_flag?: boolean | null
           polizei_aktenzeichen?: string | null
