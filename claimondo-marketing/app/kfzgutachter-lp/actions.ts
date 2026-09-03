@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
+import { persistiereOppref } from '@/lib/analytics/oaiq-capi'
 
 // Lead-Server-Action für die kfzgutachter-Ads-Landeseite.
 // Schreibt zuerst eine anfragen-Zeile (Inbox/Audit), ruft dann atomic
@@ -130,6 +131,12 @@ export async function submitKfzgutachterLead(
       anfrageId: anfrage.id,
     }
   }
+
+  // OAIQ-Attribution festhalten, bevor irgendetwas anderes passiert: Das
+  // __oppref-Cookie lebt auf claimondo.de, die Terminbuchung laeuft cross-origin
+  // im iframe und die SA oft Tage spaeter — spaeter ist der Wert nicht mehr
+  // erreichbar. Ohne Anzeigenklick/Marketing-Consent ein No-op.
+  await persistiereOppref(String(leadId))
 
   // 4b. FlowLink erzeugen + dem MELDER schicken — sein Kanal zurück in den eigenen Vorgang.
   //     Bis 30.08.2026 fehlte das: der Lead entstand, das Team bekam eine WhatsApp, der Kunde
