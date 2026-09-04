@@ -8,6 +8,8 @@ import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { ladeUebersichtsTermine } from '@/lib/termine/naechster-termin'
 import { opprefFuerEmbed } from '@/lib/analytics/oaiq-capi'
+import { ClarityInitLP } from '@/components/analytics/ClarityInitLP'
+import { CLARITY_ID_ANZEIGEN_ZIELE } from '@/components/analytics/clarity-ids'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -177,6 +179,9 @@ export default async function GutachterFindenPage({
           FinderSprungPanel darunter. */}
       {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
       <main id="main-content" tabIndex={-1}>
+      {/* Eigenes Clarity-Projekt fuer die Anzeigen-Ziele. ClarityInit ueberspringt
+          diese Route via SKIP_ROUTES — sonst liefen zwei Projekte gleichzeitig. */}
+      <ClarityInitLP projectId={CLARITY_ID_ANZEIGEN_ZIELE} />
       <GutachterFindenSection
         height="100dvh"
         initialCenter={initialCenter}
