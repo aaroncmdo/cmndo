@@ -32,6 +32,29 @@ const ENDPOINT = 'https://bzr.openai.com/v1/events'
  */
 const SENDE_TIMEOUT_MS = 3000
 
+/** Fallback, wenn kein Referer lesbar ist (Cron/Hintergrund, spaetere Events). */
+const BASIS_URL = 'https://app.claimondo.de'
+
+/**
+ * Die Seite, auf der das Ereignis stattfand — Pflichtfeld der API
+ * (source_url_required_for_web).
+ *
+ * Hier greift der Fallback haeufiger als im Marketing-Build: Termin und
+ * Auftrag werden teils aus fire-and-forget-Bloecken gemeldet, in denen kein
+ * Request-Kontext mehr steht. Ein grober Wert ist besser als ein verworfenes
+ * Event — die Zuordnung traegt ohnehin der oppref.
+ */
+async function ermittleSourceUrl(): Promise<string> {
+  try {
+    const { headers } = await import('next/headers')
+    const referer = (await headers()).get('referer')
+    if (referer && /^https?:\/\//.test(referer)) return referer
+  } catch {
+    // kein Request-Kontext
+  }
+  return BASIS_URL
+}
+
 export type OaiqEventName = 'lead_created' | 'appointment_scheduled' | 'order_created'
 
 /**
@@ -53,7 +76,17 @@ export type OaiqPayloadInput = {
   eventName: OaiqEventName
   /** ISO-4217-Minor-Units (Cent). Nur bei `order_created` sinnvoll. */
   amountCents?: number
-  sourceUrl?: string
+  /**
+   * PFLICHT bei `action_source: 'web'` — die API lehnt das Event sonst ab:
+   * `{"code":"source_url_required_for_web"}`, HTTP 400.
+   *
+   * ⚠ Das war bis zum 04.09.2026 optional modelliert (so stand es in der
+   * Einbau-Vorlage) und wurde von KEINEM Aufrufer gesetzt. Jedes Event waere
+   * still verworfen worden. Aufgefallen ist es erst beim Probelauf gegen die
+   * echte API mit `validate_only` — kein Test und kein Typcheck haette es
+   * gefunden, weil die Form syntaktisch gueltig war.
+   */
+  sourceUrl: string
   /** Nur fuer Tests/Diagnose: laesst die API validieren, ohne ein Event zu buchen. */
   validateOnly?: boolean
 }
@@ -78,7 +111,9 @@ export function baueOaiqPayload(p: OaiqPayloadInput, jetztMs: number) {
       type: p.eventName,
       timestamp_ms: jetztMs,
       action_source: 'web',
-      ...(p.sourceUrl ? { source_url: p.sourceUrl } : {}),
+      // Unbedingt gesetzt, nicht bedingt: bei action_source 'web' ist das Feld
+      // Pflicht (source_url_required_for_web). Gegen die echte API geprueft.
+      source_url: p.sourceUrl,
       oppref: p.oppref,
       user: { obref: p.oppref },
       data: {
@@ -103,7 +138,9 @@ export function baueOaiqPayload(p: OaiqPayloadInput, jetztMs: number) {
  * `timestamp_ms` muss in den letzten 7 Tagen liegen — bei allen Aufrufern hier
  * ist das Ereignis gerade eben passiert, der Wert ist also immer frisch.
  */
-export async function sendOaiqEvent(p: Omit<OaiqPayloadInput, 'oppref'> & { oppref: string | null }): Promise<void> {
+export async function sendOaiqEvent(
+  p: Omit<OaiqPayloadInput, 'oppref' | 'sourceUrl'> & { oppref: string | null; sourceUrl?: string },
+): Promise<void> {
   const pixelId = process.env.NEXT_PUBLIC_OAIQ_PIXEL_ID
   const apiKey = process.env.OAIQ_API_KEY
   // Ohne oppref gibt es nichts zuzuordnen — das ist der Normalfall bei
@@ -115,6 +152,11 @@ export async function sendOaiqEvent(p: Omit<OaiqPayloadInput, 'oppref'> & { oppr
   // kein Anzeigefehler, sondern eine Uebermittlung ohne Rechtsgrundlage.
   if (await marketingWiderrufen()) return
 
+  // Quell-URL hier statt als Parameter — sie gehoert zum Request, nicht zur
+  // Fachlogik, und waere an jeder Aufrufstelle einzeln vergessbar. Ein
+  // fehlendes Pflichtfeld laesst die API das Event still verwerfen.
+  const sourceUrl = p.sourceUrl ?? (await ermittleSourceUrl())
+
   try {
     const res = await fetch(`${ENDPOINT}?pid=${encodeURIComponent(pixelId)}`, {
       method: 'POST',
@@ -122,7 +164,7 @@ export async function sendOaiqEvent(p: Omit<OaiqPayloadInput, 'oppref'> & { oppr
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(baueOaiqPayload({ ...p, oppref: p.oppref }, Date.now())),
+      body: JSON.stringify(baueOaiqPayload({ ...p, oppref: p.oppref, sourceUrl }, Date.now())),
       signal: AbortSignal.timeout(SENDE_TIMEOUT_MS),
     })
     if (!res.ok) {
