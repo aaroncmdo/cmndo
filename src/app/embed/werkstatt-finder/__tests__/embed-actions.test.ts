@@ -78,6 +78,17 @@ vi.mock('@/lib/storage/url', () => ({
   getStorageUrl: vi.fn(),
 }))
 
+// ─── Kasko-WB Phase 1: Mail / Rueckruf / Dispatch-Task (Seiteneffekte, hier nur beobachtet) ──
+vi.mock('@/lib/kasko-wb/notify-kunde-werkstattbindung', () => ({
+  notifyKundeWerkstattbindung: vi.fn(async () => ({ email: true })),
+}))
+vi.mock('@/lib/embed/reservierungs-rueckruf', () => ({
+  upsertReservierungsRueckruf: vi.fn(async () => ({ ok: true })),
+}))
+vi.mock('@/lib/tasks/create-task', () => ({
+  createLinkedTask: vi.fn(async () => ({ task_id: 'task-1' })),
+}))
+
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
 import { klassifiziereSchadenbeschreibung } from '@/lib/werkstatt/bedarf/schadenbeschreibung-gewerke'
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
@@ -87,6 +98,9 @@ import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { resolvePromoCodeToId } from '@/lib/makler/resolve-promo-code'
 import { getStorageUrl } from '@/lib/storage/url'
+import { notifyKundeWerkstattbindung } from '@/lib/kasko-wb/notify-kunde-werkstattbindung'
+import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
+import { createLinkedTask } from '@/lib/tasks/create-task'
 import {
   klassifiziereSchadenfotoEmbed,
   klassifiziereSchadenbeschreibungEmbed,
@@ -104,6 +118,9 @@ const mockBuildExtra = vi.mocked(buildWerkstattFinderLeadExtra)
 const mockEnsureFlowLink = vi.mocked(ensureCanonicalFlowLinkForLead)
 const mockResolvePromo = vi.mocked(resolvePromoCodeToId)
 const mockGetStorageUrl = vi.mocked(getStorageUrl)
+const mockNotifyWb = vi.mocked(notifyKundeWerkstattbindung)
+const mockRueckruf = vi.mocked(upsertReservierungsRueckruf)
+const mockCreateTask = vi.mocked(createLinkedTask)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -572,7 +589,7 @@ describe('erstelleWerkstattFinderLead', () => {
 describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', () => {
   const token = 'flow-token-bestand'
 
-  function setupTokenMocks(leadIdAusToken: string | null, updates: Array<Record<string, unknown>>) {
+  function setupTokenMocks(leadIdAusToken: string | null, updates: Array<Record<string, unknown>>, altGrund: string | null = null) {
     mockEnsureFlowLink.mockResolvedValue({ ok: true, token, wiederverwendet: true })
     mockCreateCase.mockResolvedValue({ ok: true, leadId: 'lead-NEU', claimId: null, flowLinkToken: null, deduped: false })
     mockFrom.mockImplementation((table: string) => {
@@ -584,18 +601,47 @@ describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', (
         }
       }
       if (table === 'leads') {
-        const chain = {
+        // Kasko-WB Phase 1 (Review W4): der Re-Entry liest disqualifiziert_grund_key (select/maybeSingle);
+        // `then` macht die Kette awaitbar wie ein PostgREST-Builder (update().eq() -> { error: null }).
+        const chain: Record<string, unknown> = {}
+        Object.assign(chain, {
           update: vi.fn((payload: Record<string, unknown>) => {
             updates.push(payload)
             return chain
           }),
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        }
-        return { update: chain.update, eq: chain.eq }
+          select: vi.fn(() => chain),
+          eq: vi.fn(() => chain),
+          maybeSingle: vi.fn().mockResolvedValue({ data: altGrund ? { disqualifiziert_grund_key: altGrund } : null }),
+          then: (res: (v: { error: null }) => unknown, rej?: (e: unknown) => unknown) => Promise.resolve({ error: null }).then(res, rej),
+        })
+        return chain
       }
       return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: null }) }
     })
   }
+
+  // Kasko-WB Phase 1 (Review W4): frueher gebunden disqualifiziert, jetzt Selbstzahler -> re-qualifiziert.
+  it('Re-Entry weg von Kasko hebt eine Werkstattbindungs-Disqualifikation auf (status=neu, Bindungsfelder leer)', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    setupTokenMocks('lead-bestand-77', updates, 'werkstattbindung')
+    mockBuildExtra.mockReturnValueOnce({})
+
+    const result = await erstelleWerkstattFinderLead({
+      email: 'kunde@example.com',
+      flowToken: 'tok-77',
+      schuldfrage: 'eigenverantwortung',
+      eigeneVersicherung: 'nein',
+    })
+
+    expect(result.ok).toBe(true)
+    expect(updates[0]).toMatchObject({
+      disqualifiziert: false,
+      disqualifiziert_grund_key: null,
+      status: 'neu',
+      freie_werkstattwahl: null,
+      eigene_kasko_tarif_id: null,
+    })
+  })
 
   it('gueltiger Token -> UPDATE des bestehenden Leads (kein createCase); null gestrippt, false bleibt', async () => {
     const updates: Array<Record<string, unknown>> = []
@@ -632,5 +678,65 @@ describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', (
     expect(result.ok).toBe(true)
     expect(mockCreateCase).toHaveBeenCalledOnce()
     expect(mockEnsureFlowLink.mock.calls[0][0]).toBe('lead-NEU')
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Kasko-WB Phase 1 (Review K1/W3): gebunden -> Disqualifikation + Mail + Rueckruf; unklar -> Dispatch-Task.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('erstelleWerkstattFinderLead — Kasko-Werkstattbindung', () => {
+  const gebunden = {
+    markeId: 'm1', markeName: 'HUK-COBURG', tarifId: 't1', tarifName: 'Classic SELECT', markerAntwort: null,
+    freieWerkstattwahl: false as const, quelle: 'tarif' as const, grund: 'tarif_mit_wb' as const,
+  }
+
+  function setup(updates: Array<Record<string, unknown>>) {
+    mockCreateCase.mockResolvedValue({ ok: true, leadId: 'lead-kasko', claimId: null, flowLinkToken: 'tok-kasko', deduped: false })
+    mockEnsureFlowLink.mockResolvedValue({ ok: true, token: 'tok-kasko', wiederverwendet: false })
+    mockBuildExtra.mockReturnValueOnce({})
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'leads') {
+        const chain = {
+          update: vi.fn((payload: Record<string, unknown>) => {
+            updates.push(payload)
+            return chain
+          }),
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }
+        return { update: chain.update, eq: chain.eq }
+      }
+      return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: null }) }
+    })
+  }
+
+  it('gebunden -> Lead disqualifiziert (werkstattbindung), Mail + Rueckruf angelegt, keine Dispatch-Task', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    setup(updates)
+
+    const result = await erstelleWerkstattFinderLead({ email: 'kunde@example.com', vorname: 'Anna', kaskoWb: gebunden })
+
+    expect(result.ok).toBe(true)
+    expect(updates.some((u) => u.disqualifiziert === true && u.disqualifiziert_grund_key === 'werkstattbindung' && u.status === 'disqualifiziert')).toBe(true)
+    expect(mockNotifyWb).toHaveBeenCalledOnce()
+    expect(mockNotifyWb.mock.calls[0][0].kunde).toMatchObject({ vorname: 'Anna', email: 'kunde@example.com' })
+    expect(mockRueckruf).toHaveBeenCalledWith(expect.objectContaining({ leadId: 'lead-kasko', vonKunde: true }))
+    expect(mockCreateTask).not.toHaveBeenCalled()
+  })
+
+  it('unbekannt -> Dispatch-Task kasko_werkstattbindung_klaeren, keine Disqualifikation, keine Mail', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    setup(updates)
+
+    const result = await erstelleWerkstattFinderLead({
+      email: 'kunde@example.com',
+      kaskoWb: { ...gebunden, tarifId: null, tarifName: null, markerAntwort: 'unbekannt', freieWerkstattwahl: null, quelle: 'unbekannt', grund: 'unbekannt' },
+    })
+
+    expect(result.ok).toBe(true)
+    expect(updates.some((u) => u.disqualifiziert === true)).toBe(false)
+    expect(mockCreateTask).toHaveBeenCalledWith(expect.objectContaining({ task_code: 'kasko_werkstattbindung_klaeren', entity_id: 'lead-kasko' }))
+    expect(mockNotifyWb).not.toHaveBeenCalled()
+    expect(mockRueckruf).not.toHaveBeenCalled()
   })
 })

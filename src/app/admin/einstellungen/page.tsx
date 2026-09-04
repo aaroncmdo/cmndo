@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, UsersIcon, Trash2Icon, SparklesIcon, CoinsIcon } from 'lucide-react'
+import { ShieldCheckIcon, FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, UsersIcon, Trash2Icon, SparklesIcon, CoinsIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 
 // Fix: /admin/einstellungen hatte keine page.tsx, nur Sub-Ordner → 404.
@@ -22,6 +22,14 @@ const SECTIONS = [
     icon: CoinsIcon,
     title: 'Anspruchsprüfer-Sätze',
     description: 'Nutzungsausfall-Klassensätze (A–L) und Anspruch-Parameter (Schwellen, Höchstdauern) verwalten.',
+    iconBg: 'bg-claimondo-ondo/10',
+    iconColor: 'text-claimondo-ondo',
+  },
+  {
+    href: '/admin/einstellungen/kasko-tarife',
+    icon: ShieldCheckIcon,
+    title: 'Kasko-Tarife (Werkstattbindung)',
+    description: 'Wissensbasis der Kasko-Versicherer: Werkstattbindungs-Status, Marker und Tarife (nur lesen; Pflege per Seed-Generator).',
     iconBg: 'bg-claimondo-ondo/10',
     iconColor: 'text-claimondo-ondo',
   },

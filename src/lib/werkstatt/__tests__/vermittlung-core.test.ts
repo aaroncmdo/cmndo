@@ -95,3 +95,18 @@ describe('pruefeWerkstattAuswahl — der Step wird bedienbar statt versteckt (28
     expect(pruefeWerkstattAuswahl({ ...frei, reparaturwunsch: null, reparatur_vermittlung_status: 'vermittelt' }).erlaubt).toBe(false)
   })
 })
+
+describe('brauchtWerkstattVermittlung — Kasko-Werkstattbindung', () => {
+  const offen = { reparaturwunsch: 'reparatur', reparatur_werkstatt_id: null, werkstatt_id: null, reparatur_vermittlung_status: 'offen' }
+  it('gebunden (false) -> keine Vermittlung', () => {
+    expect(brauchtWerkstattVermittlung({ ...offen, freie_werkstattwahl: false })).toBe(false)
+  })
+  it('frei (true) oder offen (null/undefined) -> wie bisher', () => {
+    expect(brauchtWerkstattVermittlung({ ...offen, freie_werkstattwahl: true })).toBe(true)
+    expect(brauchtWerkstattVermittlung({ ...offen, freie_werkstattwahl: null })).toBe(true)
+    expect(brauchtWerkstattVermittlung(offen)).toBe(true)
+  })
+  it('pruefeWerkstattAuswahl lehnt gebundene Auswahl ab, auch ohne reparaturwunsch', () => {
+    expect(pruefeWerkstattAuswahl({ ...offen, reparaturwunsch: null, freie_werkstattwahl: false }).erlaubt).toBe(false)
+  })
+})
