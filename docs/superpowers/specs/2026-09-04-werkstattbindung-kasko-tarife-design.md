@@ -30,6 +30,8 @@ Marketing/GEO (Ratgeber-Seite, Tarif-Check-Tool, 173 Stadtseiten, `llms.txt`, Ve
 autounfall-io-FAQ) = Phase 3; Admin-**Bearbeitung** der Tarife (Phase 1 nur Liste); i18n der neuen
 Flow-Texte (Phase 1 deutsch, wie der ersetzte Step); OCR des Versicherungsscheins.
 
+**Geparkt (Aaron 04.09.: „zu advanced, lassen wir weg"):** Schein-Upload mit Tarif-OCR · Soft-Gate bei „unbekannt" an der Reparaturfreigabe · Marke/Tarif im Makler-Drawer · Flotten-Police je Firma · juristische Prüfung der Sanktionstexte · Kontaktfelder für Marken ohne Rechtsträger · Sammlung der Freitext-Versicherer · i18n des neuen Steps · Werkstatt-Seite (Partnernetze als Matching-Kriterium, Kasko-Infokarte im Werkstatt-Portal, Policennummer, Kostenübernahme/Selbstbeteiligung, Vergütung vermittelter Kasko-Aufträge). Bleibt als Ideenliste für spätere Phasen, keine Zusage.
+
 ## 3 · Entscheidungen (Aaron 04.09.)
 
 | # | Entscheidung |
