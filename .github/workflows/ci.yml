@@ -962,6 +962,21 @@ jobs:
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          # phone-login-card-smoke.spec.ts:19 liest SMOKE_PHONE_LOGIN_PASSWORD mit Default
+          # `''`. Ohne Wert meldet sich der Spec mit leerem Passwort an, der Login bleibt auf
+          # /login stehen und der Test stirbt an `waitForURL: Timeout 20000ms` — was wie ein
+          # UI-Fehler aussieht, aber keiner ist.
+          #
+          # BEWUSST auf TEST_DISPATCH_PASSWORD gemappt statt ein eigenes Secret anzulegen:
+          # der Spec nutzt in Zeile 18 als Default genau `test-dispatch@claimondo.de`, und
+          # dieses Konto-Secret wird bei Rotationen gepflegt (zuletzt 31.08., dem
+          # Rotationsdatum). Ein 17. Variablenname fuer dasselbe Konto waere genau der
+          # Wildwuchs, an dem die Rotation vom 31.08. schon `SMOKE_DISPATCH_PASS` verloren
+          # hat — ein Konto, zwei Secrets, nur eines gepflegt.
+          #
+          # Die Email bleibt bewusst beim Default: so koennen Konto und Passwort nicht
+          # auseinanderlaufen.
+          SMOKE_PHONE_LOGIN_PASSWORD: ${{ secrets.TEST_DISPATCH_PASSWORD }}
 
       # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
       # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn
