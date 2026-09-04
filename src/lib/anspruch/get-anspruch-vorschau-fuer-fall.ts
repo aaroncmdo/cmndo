@@ -36,19 +36,25 @@ export async function getAnspruchVorschauFuerFall(
 
   // select('*') statt expliziter Spaltenliste: die schuld-Spalte (Migration 20260706085339) fehlt noch
   // in den generierten Typen; '*' umgeht die Select-String-Typpruefung, schuld wird unten defensiv gelesen.
-  const { data: sess } = await admin
+  //
+  // NICHT limit(1): der Foto-Check legt bei JEDEM Mount eine neue Session an (AnspruchWizard,
+  // useEffect mit leerem dep-array). Seit die Sessions ueber ?lead= mit dem Lead verknuepft
+  // werden, haengen an einem Lead also mehrere — und ein blosser Reload macht eine LEERE zur
+  // neuesten. Mit limit(1) haette sie die ausgefuellte verdeckt und die Vorschau waere wieder
+  // null gewesen, also genau der Zustand, den die Verknuepfung beheben soll.
+  // Daher: die neueste Session MIT Positionen gewinnt.
+  const { data: sessions } = await admin
     .from('anspruch_schaetzungen')
     .select('*')
     .eq('lead_id', leadId)
     .order('erstellt_am', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+    .limit(20)
+  const sess = (sessions ?? []).find(
+    (s) => Array.isArray(s.positionen) && (s.positionen as unknown[]).length > 0,
+  )
   if (!sess) return null
 
-  const positionen = Array.isArray(sess.positionen)
-    ? (sess.positionen as unknown as AnspruchPosition[])
-    : []
-  if (positionen.length === 0) return null
+  const positionen = sess.positionen as unknown as AnspruchPosition[]
 
   const summierbar = positionen.filter(
     (p) => !p.gedecktDurchGegner && p.minEur != null && p.maxEur != null,
