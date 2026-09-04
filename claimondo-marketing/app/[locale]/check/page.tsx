@@ -17,6 +17,8 @@ import {
   PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
+import { ClarityInitLP } from '@/components/analytics/ClarityInitLP'
+import { CLARITY_ID_ANZEIGEN_ZIELE } from '@/components/analytics/clarity-ids'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -48,6 +50,9 @@ export default async function CheckPage() {
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
+      {/* Eigenes Clarity-Projekt fuer die Anzeigen-Ziele. ClarityInit ueberspringt
+          diese Route via SKIP_ROUTES — sonst liefen zwei Projekte gleichzeitig. */}
+      <ClarityInitLP projectId={CLARITY_ID_ANZEIGEN_ZIELE} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
