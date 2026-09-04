@@ -26,7 +26,7 @@ export default function KaskoBindungCard({ claimId }: { claimId: string }) {
   if (!info) return null
   return (
     <Card p={5} radius="lg">
-      <KaskoBindungEndansicht info={info} kompakt onKorrigieren={() => setKorrigieren(true)} />
+      <KaskoBindungEndansicht info={info} kompakt anrede="du" onKorrigieren={() => setKorrigieren(true)} />
     </Card>
   )
 }

@@ -32,7 +32,7 @@ export default function KaskoTarifCard({ claimId }: { claimId: string }) {
         <ShieldCheckIcon className="h-5 w-5 text-claimondo-ondo" aria-hidden />
         <h2 className="text-heading-sm text-claimondo-navy">Dein Kasko-Tarif</h2>
       </div>
-      <KaskoTarifFrage kompakt onErgebnis={(auswahl) => void speichere(auswahl)} busy={busy} />
+      <KaskoTarifFrage kompakt anrede="du" onErgebnis={(auswahl) => void speichere(auswahl)} busy={busy} />
     </Card>
   )
 }
