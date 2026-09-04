@@ -1,6 +1,7 @@
 // Pure Logik für den Werkstatt-Finder-Wizard (Phase 2). Kein React — testbar isoliert.
 import type { Gewerk, Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
 import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
+import type { KaskoTarifAuswahl, WbErgebnis } from '@/lib/kasko-wb/types'
 
 // Aaron-Vorgabe: PKW/Transporter/LKW/Motorrad/Anhänger, Default PKW. Jeder grobe Typ mappt auf
 // eine REPRÄSENTATIVE EU-Klasse — leads.fahrzeugklasse speichert eu_klasse, die Engine löst die
@@ -34,6 +35,10 @@ export const HAEUFIGE_HERSTELLER = [
 // korrekt erheben statt Haftpflicht wegzuleiten (Aaron: Kunden behalten > wegschicken).
 export type Abrechnungswahl = 'haftpflicht' | 'kasko' | 'selbstzahler'
 
+// Kasko-WB Phase 1: Antwort der Tariffrage im Wizard-State (Client rechnet die Ableitung nur fuer die UI;
+// der Server leitet beim Speichern erneut ab — Trust-Boundary).
+export type KaskoWbWahl = KaskoTarifAuswahl & WbErgebnis
+
 export type WerkstattWizardState = {
   standort: { adresse: string; lat: number; lng: number } | null
   hersteller: string
@@ -42,6 +47,7 @@ export type WerkstattWizardState = {
   modell: string
   bedarf: Reparaturbedarf | null
   abrechnung: Abrechnungswahl | null
+  kaskoWb: KaskoWbWahl | null
 }
 
 export const WIZARD_INITIAL: WerkstattWizardState = {
@@ -52,6 +58,7 @@ export const WIZARD_INITIAL: WerkstattWizardState = {
   modell: '',
   bedarf: null,
   abrechnung: null,
+  kaskoWb: null,
 }
 
 export type WizardStep = 'standort' | 'fahrzeug' | 'schaden' | 'abrechnung' | 'kontakt'
@@ -68,7 +75,7 @@ export function kannWeiter(step: WizardStep, s: WerkstattWizardState): boolean {
     case 'schaden':
       return s.bedarf != null && s.bedarf.kategorien.length > 0
     case 'abrechnung':
-      return s.abrechnung != null
+      return s.abrechnung != null && (s.abrechnung !== 'kasko' || s.kaskoWb != null)
     case 'kontakt':
       return true
   }
