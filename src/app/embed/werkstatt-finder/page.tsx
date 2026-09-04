@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function WerkstattFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; plz?: string; token?: string; promo?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; plz?: string; token?: string; promo?: string; oppref?: string }>
 }) {
   const sp = await searchParams
   const lat = sp.lat ? Number(sp.lat) : undefined
@@ -29,6 +29,8 @@ export default async function WerkstattFinderEmbedPage({
   // E1.1 (Entry-Point-Matrix): Makler-/Partner-Promo-Code aus der Parent-URL (EmbedFinderSection
   // reicht ?promo= durch) -> Provision-Attribution am Lead. Server resolved Code->id (Format+aktiv).
   const promoCode = sp.promo?.trim() || undefined
+  // OpenAI-Ads-Kennung, von der Parent-Seite durch die iframe-Grenze gereicht.
+  const oppref = sp.oppref?.trim().slice(0, 300) || undefined
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -38,6 +40,7 @@ export default async function WerkstattFinderEmbedPage({
         initialLng={lng !== undefined && Number.isFinite(lng) ? lng : undefined}
         flowToken={flowToken}
         promoCode={promoCode}
+        oppref={oppref}
         initialPlz={plz}
       />
     </div>
