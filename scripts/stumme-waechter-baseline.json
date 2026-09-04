@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-31T10:58:50.751Z",
-  "count": 15,
+  "generatedAt": "2026-09-04T18:30:57.422Z",
+  "count": 16,
   "eintraege": [
     "tests/e2e/flows/2fa-hardening-smoke.spec.ts::RUN_2FA_SMOKE",
     "tests/e2e/flows/finder-wunschzeit-anfrage-prod.spec.ts::RUN_WUNSCHZEIT_SMOKE",
@@ -9,6 +9,7 @@
     "tests/e2e/flows/golden-path-finder-prod.spec.ts::RUN_GOLDEN_PATH_PROD",
     "tests/e2e/flows/golden-path-prod.spec.ts::RUN_GOLDEN_PATH_PROD",
     "tests/e2e/flows/kunde-schaden-melden-skizze-smoke.spec.ts::RUN_SKIZZE_SMOKE",
+    "tests/e2e/flows/kunde-termin-absage-smoke.spec.ts::RUN_TERMIN_ABSAGE_SMOKE",
     "tests/e2e/flows/kunde-termin-aufgabe-f3-smoke.spec.ts::RUN_F3_TERMIN_AUFGABE_SMOKE",
     "tests/e2e/flows/quali-gutachter-bindung-c1-smoke.spec.ts::RUN_C1_QUALI_SMOKE",
     "tests/e2e/flows/smoke-cmm65-kunde-realtime.spec.ts::RUN_CMM65_SMOKE",
