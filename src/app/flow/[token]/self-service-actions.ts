@@ -27,6 +27,12 @@ import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vors
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 import { spiegleQualiAufClaim } from '@/lib/leads/spiegle-quali-auf-claim'
+import { buildDisqualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
+import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
+import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
+import { notifyKundeWerkstattbindung } from '@/lib/kasko-wb/notify-kunde-werkstattbindung'
+import { createLinkedTask } from '@/lib/tasks/create-task'
+import type { Bindungsumfang, KaskoBindungsInfo, KaskoTarifAuswahl, WbStatus, WerkstattbindungQuelle } from '@/lib/kasko-wb/types'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -173,15 +179,8 @@ export async function speichereQualiFlow(
         // SP-B1: abrechnungsweg-Record (kasko). leads.abrechnungsweg type-lagged -> Cast unten.
         abrechnungsweg: outcome.abrechnungsweg,
         ...(freieWerkstattwahl !== undefined ? { freie_werkstattwahl: freieWerkstattwahl } : {}),
-        disqualifiziert: true,
-        disqualifiziert_am: nowIso,
-        // WS2 (Kasko-frei): Kasko-Werkstattbindung korrekt labeln statt pauschal 'eigenverschulden'.
-        disqualifiziert_grund_key: outcome.disqualifikationsGrundKey ?? 'eigenverschulden',
-        disqualifiziert_grund:
-          outcome.disqualifikationsGrundKey === 'werkstattbindung'
-            ? 'Kasko mit Werkstattbindung — Reparatur nur in der vom Versicherer vorgeschriebenen Werkstatt, keine Vermittlung moeglich (Self-Service-Quali)'
-            : 'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
-        status: 'disqualifiziert',
+        // WS2 (Kasko-frei): Grund korrekt labeln — Schreibsatz aus dem geteilten Helper (Embed nutzt ihn auch).
+        ...buildDisqualifikationPatch(outcome.disqualifikationsGrundKey ?? 'eigenverschulden', nowIso),
       } as never)
       .eq('id', leadId)
     if (updErr) return { ok: false, error: updErr.message }
@@ -231,6 +230,133 @@ export async function speichereQualiFlow(
 
   revalidatePath('/dispatch/leads')
   return { ok: true, ergebnis: 'weiter', abrechnungsweg: outcome.abrechnungsweg }
+}
+
+/**
+ * Kasko-WB Phase 1 (Spec §6): Versicherer + Tarif des Kunden speichern, Bindung ableiten und ueber den
+ * bestehenden Quali-Pfad entscheiden (frei -> Werkstatt-Strecke, gebunden -> Disqualifikation + Endseite +
+ * Mail, unbekannt -> durchlassen + Dispatch-Task). Der Client liefert nur IDs — Marke/Tarif werden hier
+ * aus der Wissensbasis nachgeladen (Trust-Boundary).
+ */
+export async function speichereKaskoTarifFlow(
+  token: string,
+  auswahl: KaskoTarifAuswahl,
+): Promise<
+  | { ok: true; ergebnis: 'weiter' | 'abbruch' | 'unklar'; freieWerkstattwahl: boolean | null; quelle: WerkstattbindungQuelle; info: KaskoBindungsInfo | null }
+  | { ok: false; error: string }
+> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  let wbStatus: WbStatus | null = null
+  let tarif: { hatWerkstattbindung: boolean; bindungsumfang: Bindungsumfang } | null = null
+  let markeName = auswahl.markeName?.trim() || null
+  let tarifName = auswahl.tarifName?.trim() || null
+  if (auswahl.markeId) {
+    const { data: m } = await admin.from('kasko_versicherer_marken').select('marke, wb_status').eq('id', auswahl.markeId).maybeSingle()
+    if (m) {
+      wbStatus = m.wb_status as WbStatus
+      markeName = m.marke as string
+    }
+  }
+  if (auswahl.tarifId) {
+    const { data: t } = await admin
+      .from('kasko_tarife')
+      .select('anzeigename, hat_werkstattbindung, bindungsumfang')
+      .eq('id', auswahl.tarifId)
+      .maybeSingle()
+    if (t) {
+      tarif = { hatWerkstattbindung: t.hat_werkstattbindung as boolean, bindungsumfang: t.bindungsumfang as Bindungsumfang }
+      tarifName = t.anzeigename as string
+    }
+  }
+  // Unfall-Flow = Karosserieschaden (Spec §3 Annahmen).
+  const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas: false })
+
+  // Review W2: ERST die Entscheidung ueber den bestehenden Quali-Pfad (Disqualifikation, Gutachter loesen,
+  // Reparaturwunsch, Spiegel), DANN Tariffelder + Herkunft. Scheitert der Quali-Pfad, bleibt
+  // werkstattbindung_quelle leer und der Step erscheint erneut — statt ohne Entscheidung zu verschwinden.
+  const quali = await speichereQualiFlow(token, 'eigenverantwortung', true, ergebnis.freieWerkstattwahl ?? undefined)
+  if (!quali.ok) return { ok: false, error: quali.error ?? 'Speichern fehlgeschlagen.' }
+
+  const tarifFelder: Record<string, unknown> = {
+    eigene_versicherung_marke_id: auswahl.markeId,
+    eigene_versicherung_name: markeName,
+    eigene_kasko_tarif_id: auswahl.tarifId,
+    eigene_kasko_tarif_name: tarifName,
+    werkstattbindung_quelle: ergebnis.quelle,
+  }
+  const { error: updErr } = await admin.from('leads').update(tarifFelder).eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  // Review W1: ein bereits konvertierter Claim bekommt die Antwort UEBERSCHREIBEND (spiegleQualiAufClaim fuellt nur
+  // leere Felder, und der Disqualifikations-Zweig von speichereQualiFlow spiegelt gar nicht) — sonst zeigt das Portal
+  // den Werkstatt-Finder, waehrend der Lead gebunden ist. Ohne Claim: 0 Zeilen, kein Fehler. Non-critical.
+  const { error: claimErr } = await admin
+    .from('claims')
+    .update({
+      ...tarifFelder,
+      ...(ergebnis.freieWerkstattwahl !== null ? { freie_werkstattwahl: ergebnis.freieWerkstattwahl } : {}),
+    } as never)
+    .eq('lead_id', leadId)
+  if (claimErr) console.error('[kasko-tarif] Claim-Nachzug fehlgeschlagen (non-critical):', claimErr.message)
+
+  if (ergebnis.freieWerkstattwahl === false) {
+    const infoRes = await ladeKaskoBindungsInfo(auswahl.markeId, auswahl.tarifId, markeName)
+    const info = infoRes.ok ? infoRes.info : null
+    if (info) {
+      // E6: Zusammenfassung per Mail — non-critical.
+      try {
+        const { data: lead } = await admin.from('leads').select('vorname, email').eq('id', leadId).maybeSingle()
+        await notifyKundeWerkstattbindung({ kunde: { vorname: (lead?.vorname as string | null) ?? null, email: (lead?.email as string | null) ?? null }, info })
+      } catch (err) {
+        console.error('[kasko-tarif] Bindungs-Mail fehlgeschlagen (non-critical):', err)
+      }
+    }
+    revalidatePath(`/flow/${token}`)
+    return { ok: true, ergebnis: 'abbruch', freieWerkstattwahl: false, quelle: ergebnis.quelle, info }
+  }
+
+  if (ergebnis.freieWerkstattwahl === null) {
+    // E3: durchlassen, der Dispatch klaert — non-critical.
+    try {
+      await createLinkedTask({
+        titel: 'Kasko: Werkstattbindung klären',
+        beschreibung: `Der Kunde konnte die Werkstattbindung seines Kasko-Tarifs nicht angeben (Versicherer: ${markeName ?? 'unbekannt'}). Vor der Reparaturfreigabe klären, ob der Tarif eine Partnerwerkstatt vorschreibt.`,
+        prioritaet: 'normal',
+        entity_type: 'lead',
+        entity_id: leadId,
+        empfaenger_rolle: 'dispatch',
+        task_code: 'kasko_werkstattbindung_klaeren',
+        trigger_event: 'kasko_tarif_unbekannt',
+        auto_erstellt: true,
+      })
+    } catch (err) {
+      console.error('[kasko-tarif] Dispatch-Task fehlgeschlagen (non-critical):', err)
+    }
+    revalidatePath(`/flow/${token}`)
+    return { ok: true, ergebnis: 'unklar', freieWerkstattwahl: null, quelle: ergebnis.quelle, info: null }
+  }
+
+  revalidatePath(`/flow/${token}`)
+  return { ok: true, ergebnis: 'weiter', freieWerkstattwahl: true, quelle: ergebnis.quelle, info: null }
+}
+
+/** Re-Visit eines bereits wegen Bindung disqualifizierten Leads: Endseite braucht die Info erneut. */
+export async function ladeKaskoBindungsInfoFuerFlow(
+  token: string,
+): Promise<{ ok: true; info: KaskoBindungsInfo } | { ok: false; error: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const { data: lead } = await admin
+    .from('leads')
+    .select('eigene_versicherung_marke_id, eigene_kasko_tarif_id, eigene_versicherung_name')
+    .eq('id', leadId)
+    .maybeSingle()
+  return ladeKaskoBindungsInfo(
+    (lead?.eigene_versicherung_marke_id as string | null) ?? null,
+    (lead?.eigene_kasko_tarif_id as string | null) ?? null,
+    (lead?.eigene_versicherung_name as string | null) ?? null,
+  )
 }
 
 /**

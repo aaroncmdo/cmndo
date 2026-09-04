@@ -206,6 +206,10 @@ export type KundeClaimViewModel = {
   flags: {
     abrechnungsweg: string | null
     istReparaturRoute: boolean
+    // Kasko-WB Phase 1: Tariffrage vor dem Finder; gebunden -> Info statt Finder.
+    kaskoBindungOffen: boolean
+    kaskoGebunden: boolean
+    kaskoTarifName: string | null
     bankdatenOffen: boolean
     gutachtenVerfuegbar: boolean
     reparaturFreigegeben: boolean
@@ -274,7 +278,7 @@ export async function getKundeClaimView(
       // Ausfall-Card + P4: Kanzlei-Ansprechpartner/Uebergabe + Werkstatt-Vermittlung-Gate).
       admin
         .from('claims')
-        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, operative_status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
+        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, operative_status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg, freie_werkstattwahl, werkstattbindung_quelle, eigene_versicherung_name, eigene_kasko_tarif_name')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
       // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
@@ -472,6 +476,7 @@ export async function getKundeClaimView(
     reparatur_werkstatt_id: reparaturWerkstattId,
     werkstatt_id: (claimExtra?.werkstatt_id as string | null) ?? null,
     reparatur_vermittlung_status: (claimExtra?.reparatur_vermittlung_status as string | null) ?? null,
+    freie_werkstattwahl: (claimExtra?.freie_werkstattwahl as boolean | null | undefined) ?? null,
   })
   const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, schlussrechnungUrl, svRechnungUrl, brauchtVermittlung }
 
@@ -701,6 +706,10 @@ export async function getKundeClaimView(
     flags: {
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),
+      // Kasko-WB Phase 1: Tariffrage vor dem Finder; gebunden -> Info statt Finder.
+      kaskoBindungOffen: abrechnungsweg === 'kasko' && (claimExtra?.freie_werkstattwahl ?? null) === null && (claimExtra?.werkstattbindung_quelle ?? null) === null && reparaturWerkstattId == null,
+      kaskoGebunden: abrechnungsweg === 'kasko' && claimExtra?.freie_werkstattwahl === false,
+      kaskoTarifName: (claimExtra?.eigene_kasko_tarif_name as string | null | undefined) ?? null,
       reparaturPhaseErreicht: reparaturPhaseOk,
       // bankdatenOffen == „Bankdaten-Banner ist in dieser Phase aktiv & noch nicht hinterlegt"
       // (istBankdatenPhase = kanonische Payout-Status-Liste, geteilt mit BankdatenBanner) — haelt
