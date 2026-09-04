@@ -102,6 +102,47 @@ export async function erzeugeUndSendeFlowLink(opts: {
 
   const kanal = versand.kanal === 'whatsapp' ? 'whatsapp' : 'email'
 
+  // Versand-State auf dem Link selbst buchen. Fehlte bisher komplett: der Link ging raus,
+  // `flow_links` behielt aber gesendet_am = NULL / gesendet_anzahl = 0. Gemessen prod 30.08.
+  // an f1c60121…: die WhatsApp mit genau diesem Link war um 20:12:44 `zugestellt`, der Link
+  // stand trotzdem als nie versendet — und um 20:13:13 als `geoeffnet`. Ein Link, der
+  // geoeffnet wurde, ohne je gesendet worden zu sein, ist ein innerer Widerspruch.
+  //
+  // Das ist kein Schoenheitsfehler: /dispatch/leads/[id] und die Konsultations-Ansicht lesen
+  // gesendet_am/-kanal/-anzahl, und wer Zustellprobleme darueber sucht, bekommt systematisch
+  // falsche Antworten ("nie versendet" statt "versendet, nicht bearbeitet").
+  //
+  // Verhalten bewusst identisch zu persistFlowLinkVersand (src/lib/start-link/): read-modify-
+  // write fuers Increment, gleiche drei Felder. NICHT importierbar — claimondo-marketing ist
+  // ein eigener Next-Build mit eigenem @/-Alias. Aendert sich dort die Semantik, hier nachziehen.
+  //
+  // ⚠ NUR wenn der Marker noch leer ist. Grund: PR #5792 setzt denselben Marker eine Ebene
+  // TIEFER, in dispatchMagicLink() — also in genau der Funktion, die oben aufgerufen wurde.
+  // Ohne diesen Guard zaehlten beide Ebenen, und ein einzelner Versand stuende als
+  // gesendet_anzahl = 2 in der Buchhaltung. Git meldet das nicht: die beiden Aenderungen
+  // liegen in verschiedenen Dateien, der Konflikt ist rein semantisch.
+  // Mit dem Guard ist die Reihenfolge der Merges egal — wer zuerst schreibt, gewinnt, der
+  // zweite sieht den gesetzten Marker und laesst ihn in Ruhe.
+  const { data: flVorher } = await admin
+    .from('flow_links')
+    .select('gesendet_am, gesendet_anzahl')
+    .eq('token', token)
+    .maybeSingle()
+
+  if (!flVorher?.gesendet_am) {
+    const { error: versandFehler } = await admin
+      .from('flow_links')
+      .update({
+        gesendet_am: new Date().toISOString(),
+        gesendet_kanal: kanal,
+        gesendet_anzahl: ((flVorher?.gesendet_anzahl as number | null) ?? 0) + 1,
+      })
+      .eq('token', token)
+    if (versandFehler) {
+      console.error('[flowlink-fuer-lead] Versand-State-Update fehlgeschlagen:', versandFehler.message)
+    }
+  }
+
   // Status nachziehen wie im Mini-Wizard. Ergebnis pruefen: supabase-js wirft nicht, und ein
   // stiller Fehlschlag hiesse, dass der Lead als unversendet gilt, obwohl der Kunde den Link hat.
   const { error: statusFehler } = await admin

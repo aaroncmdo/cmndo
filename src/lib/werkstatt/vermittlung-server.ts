@@ -42,7 +42,7 @@ export async function findReparaturWerkstaettenForTarget(
   if (input.target === 'lead') {
     const { data } = await admin
       .from('leads')
-      .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_plz, halter_plz, schadenskategorie')
+      .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_plz, unfallort_plz, halter_plz, schadenskategorie')
       .eq('id', input.id)
       .maybeSingle()
     const l = (data ?? null) as {
@@ -51,6 +51,7 @@ export async function findReparaturWerkstaettenForTarget(
       unfallort_lat: number | null
       unfallort_lng: number | null
       kunde_plz: string | null
+      unfallort_plz: string | null
       halter_plz: string | null
       schadenskategorie: string | null
     } | null
@@ -62,7 +63,12 @@ export async function findReparaturWerkstaettenForTarget(
         lat = l.unfallort_lat
         lng = l.unfallort_lng
       }
-      plz = l.kunde_plz ?? l.halter_plz ?? undefined
+      // unfallort_plz mit in die Kette: die Marketing-Formulare sortieren ihre Ortsangabe
+      // seit Mig 20260830215041 nach Format ein — eine echte PLZ landet dort (und beim
+      // /check-Weg zusaetzlich in unfallort_plz), ein Stadtname NICHT in kunde_plz.
+      // Bewusst nur PLZ-Felder: kunde_stadt/unfallort_ort waeren Ortsnamen, und diese
+      // Kette fuettert eine PLZ-Umkreissuche.
+      plz = l.kunde_plz ?? l.unfallort_plz ?? l.halter_plz ?? undefined
       kategorie = l.schadenskategorie
     }
   } else {

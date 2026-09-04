@@ -70,9 +70,19 @@ vi.mock('@/lib/intake/create-case', () => ({
   },
 }))
 
+// istTeamNummer MUSS mitgemockt werden: die Route ruft sie beim fromMe-Echo auf.
+// Bewusst die ECHTE Logik (Ziffern-Vergleich) statt eines Stubs — sonst wuerde der
+// Test gruen bleiben, egal was die Funktion tut, und die Team-Nummern-Ausnahme
+// waere nicht abgesichert.
+const TEAM_NUMMERN_TEST = ['+491633628571', '+4917620289514']
 vi.mock('@/lib/whatsapp/team-notify', () => ({
   notifyTeamWhatsApp: async (text: string) => {
     waTexte.push(text)
+  },
+  istTeamNummer: (phone: string | null | undefined) => {
+    if (!phone) return false
+    const ziffern = (s: string) => s.replace(/\D/g, '')
+    return TEAM_NUMMERN_TEST.map(ziffern).includes(ziffern(phone))
   },
 }))
 

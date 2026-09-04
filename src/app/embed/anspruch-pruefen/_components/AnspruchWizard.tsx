@@ -27,7 +27,13 @@ export function AnspruchWizard() {
 
   useEffect(() => {
     let aktiv = true
-    starteAnspruchSession().then((r) => { if (aktiv && r.ok) setSessionToken(r.sessionToken) })
+    // `?lead=<uuid>` setzt der /check-Funnel NACH dem Lead-Submit (AnspruchFotoCheckCta).
+    // Ohne ihn bleibt anspruch_schaetzungen.lead_id NULL und die fertige SV-Anzeige
+    // (getAnspruchVorschauFuerFall: claims.lead_id -> schaetzung.lead_id) bleibt leer —
+    // genau der Grund, warum auf prod 62 Schaetzungen existierten und 0 verknuepft waren.
+    // Serverseitig geprueft (UUID + Lead existiert), gleiches Muster wie `?schuld=`.
+    const lead = new URLSearchParams(window.location.search).get('lead')
+    starteAnspruchSession(lead).then((r) => { if (aktiv && r.ok) setSessionToken(r.sessionToken) })
     return () => { aktiv = false }
   }, [])
 
