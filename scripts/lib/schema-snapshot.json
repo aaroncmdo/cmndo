@@ -901,7 +901,12 @@
     "auswertung_unverbindlich",
     "ist_testfall",
     "source_channel",
-    "source_domain"
+    "source_domain",
+    "eigene_versicherung_marke_id",
+    "eigene_versicherung_name",
+    "eigene_kasko_tarif_id",
+    "eigene_kasko_tarif_name",
+    "werkstattbindung_quelle"
    ]
   },
   "client_error_log": {
@@ -2433,6 +2438,58 @@
     "created_at"
    ]
   },
+  "kasko_tarife": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "marke_id",
+    "linie",
+    "wb_zusatz",
+    "anzeigename",
+    "hat_werkstattbindung",
+    "bindungsumfang",
+    "verlaesslichkeit",
+    "reihenfolge",
+    "aktiv"
+   ]
+  },
+  "kasko_versicherer_marken": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "slug",
+    "marke",
+    "versicherung_id",
+    "wb_status",
+    "wb_marker",
+    "nicht_wb_marker",
+    "hinweis",
+    "varianten_hinweis",
+    "check24_vertrieb",
+    "quelle",
+    "stand",
+    "sortierung",
+    "aktiv",
+    "erstellt_am",
+    "aktualisiert_am"
+   ]
+  },
+  "kasko_wb_konditionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "key",
+    "marke_id",
+    "nachlass_text",
+    "sanktion_modell",
+    "sanktion_text",
+    "gilt_fuer",
+    "ausnahmen_text",
+    "partnernetz",
+    "akb_fundstelle",
+    "quelle"
+   ]
+  },
   "ki_gespraeche": {
    "kind": "t",
    "columns": [
@@ -2737,7 +2794,13 @@
     "unfall_zeitfenster",
     "gutachten_status",
     "telefon_ziffern",
-    "auswertung_unverbindlich"
+    "auswertung_unverbindlich",
+    "oppref",
+    "eigene_versicherung_marke_id",
+    "eigene_versicherung_name",
+    "eigene_kasko_tarif_id",
+    "eigene_kasko_tarif_name",
+    "werkstattbindung_quelle"
    ]
   },
   "levelup_anreicherung": {
