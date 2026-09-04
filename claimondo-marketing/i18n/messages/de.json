@@ -79,7 +79,7 @@
     "result_voll_heading": "Das steht Ihnen zu – 0 € Eigenkosten",
     "result_voll_sub": "Unverschuldet? Dann zahlt die gegnerische Versicherung. Nach §249 BGB werden Sie so gestellt, als wäre der Unfall nie passiert.",
     "result_quote_heading": "Sie haben Ansprüche – anteilig",
-    "result_quote_sub": "Bei Teilschuld wird Ihr Schaden anteilig nach Quote ersetzt (§254 BGB). Wir holen das Maximum für Sie heraus.",
+    "result_quote_sub": "Bei Teilschuld wird Ihr Schaden anteilig nach Quote ersetzt (§254 BGB). Unsere Partnerkanzlei holt das Maximum für Sie heraus.",
     "result_pruefen_heading": "Da ist oft mehr drin, als Sie denken",
     "result_pruefen_sub": "Die Schuldfrage ist häufig klarer als gedacht – wir klären sie mit Anwalt und sichern Ihre Ansprüche.",
     "result_kasko_heading": "Wir helfen auch bei eigener Schuld",
@@ -691,7 +691,7 @@
     "vorteile": {
       "title": "Vorteile – Versicherer-Kürzungen zurückgeholt",
       "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger Kfz-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
-      "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut BGH) holen wir zurück."
+      "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 %) holt unsere Partnerkanzlei zurück."
     },
     "faq": {
       "title": "FAQ Kfz-Schaden – BGH-belegte Antworten",
@@ -1293,13 +1293,13 @@
         },
         {
           "nr": 4,
-          "titel": "Wir treiben die Versicherung in Verzug",
+          "titel": "Unsere Partnerkanzlei setzt die Versicherung in Verzug",
           "text": "4-Wochen-Frist nach §286 BGB. Bei Kürzungs-Versuch: Anwalt schreibt am selben Tag zurück.",
           "href": "/gegnerische-versicherung-zahlt-nicht"
         },
         {
           "nr": 5,
-          "titel": "Wir zahlen Ihnen aus",
+          "titel": "Die Versicherung zahlt aus – Sie sehen es live",
           "text": "Ø 32 Tage von Schadensmeldung bis zur Auszahlung. Live im Portal verfolgbar.",
           "href": "/schadensreport-2026"
         }
@@ -1454,7 +1454,7 @@
           "versicherer": "HUK · LVM",
           "pruefdienstleister": "eigene Schadenabteilung",
           "kuerzung": "Komplette Verweigerung der SV-Kosten + Wiederbeschaffungswert",
-          "gegenargument": "SV-Risiko trägt die Versicherung. Anwalt klagt vor dem zuständigen Landgericht.",
+          "gegenargument": "SV-Risiko trägt die Versicherung. Unsere Partnerkanzlei klagt vor dem zuständigen Landgericht.",
           "bgh": "BGH VI ZR 280/22",
           "href": "/haftpflicht/sv-kosten"
         }
@@ -2242,11 +2242,11 @@
           },
           {
             "frage": "Was streichen Versicherungen am häufigsten?",
-            "antwort": "1. Stundenverrechnungssätze – der Stundenlohn der Werkstatt, gekürzt per Verweis auf eine billigere. 2. UPE-Aufschläge – der Zuschlag auf Original-Ersatzteile (trotz BGH VI ZR 65/18 erstattungsfähig). 3. Verbringungskosten – der Transport zum Lackierer (trotz BGH-Recht). 4. Beilackierung – das Angleichen der Nachbarteile, damit der Farbton stimmt (BGH VI ZR 174/24 aus 2025 gilt). 5. Sachverständigenkosten (\"überhöht\"). 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück."
+            "antwort": "1. Stundenverrechnungssätze – der Stundenlohn der Werkstatt, gekürzt per Verweis auf eine billigere. 2. UPE-Aufschläge – der Zuschlag auf Original-Ersatzteile (trotz BGH VI ZR 65/18 erstattungsfähig). 3. Verbringungskosten – der Transport zum Lackierer (trotz BGH-Recht). 4. Beilackierung – das Angleichen der Nachbarteile, damit der Farbton stimmt (BGH VI ZR 174/24 aus 2025 gilt). 5. Sachverständigenkosten (\"überhöht\"). 6. Wertminderung (wird oft komplett ignoriert). Unsere Partnerkanzlei kennt alle diese Positionen und fordert sie zurück."
           },
           {
             "frage": "HUK, LVM, AXA – macht das einen Unterschied?",
-            "antwort": "Ja. HUK-COBURG erklärt Gutachten systematisch als \"unbrauchbar\" und verweigert SV-Kosten. LVM geht gegen KI-gestützte Gutachten vor. AXA nutzt überregionale Restwertbörsen um den Restwert hochzurechnen (dagegen: BGH VI ZR 119/04 – regionaler Markt gilt). Unser Anwalt kennt die versicherungsspezifischen Taktiken und reagiert entsprechend."
+            "antwort": "Ja. HUK-COBURG erklärt Gutachten systematisch als \"unbrauchbar\" und verweigert SV-Kosten. LVM geht gegen KI-gestützte Gutachten vor. AXA nutzt überregionale Restwertbörsen um den Restwert hochzurechnen (dagegen: BGH VI ZR 119/04 – regionaler Markt gilt). Unsere Partnerkanzlei kennt die versicherungsspezifischen Taktiken und reagiert entsprechend."
           }
         ]
       },
@@ -2318,7 +2318,7 @@
           },
           {
             "frage": "Wann bekomme ich mein Geld?",
-            "antwort": "Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unser Anwalt – kürzt die Versicherung trotzdem, Klage. Bei Claimondo im Schnitt 32 Tage vom Unfall bis zur vollständigen Auszahlung, typisch zwischen Tag 30 und 60."
+            "antwort": "Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unsere Partnerkanzlei – kürzt die Versicherung trotzdem, Klage. Bei Claimondo im Schnitt 32 Tage vom Unfall bis zur vollständigen Auszahlung, typisch zwischen Tag 30 und 60."
           },
           {
             "frage": "Muss ich mein Auto vor der Begutachtung waschen oder reparieren?",
@@ -3453,7 +3453,7 @@
       },
       {
         "frage": "Was passiert wenn die Versicherung das Gutachten kürzt?",
-        "antwort": "Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagt unsere Kanzlei. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig."
+        "antwort": "Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unsere Partnerkanzlei schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagt unsere Kanzlei. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig."
       },
       {
         "frage": "Wann bekomme ich einen Mietwagen oder Nutzungsausfall?",

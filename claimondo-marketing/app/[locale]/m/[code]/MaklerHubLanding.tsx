@@ -182,7 +182,7 @@ export function MaklerHubLanding({
       {/* ─── Rechtswissen: BGH stützt Ihre Ansprüche ─── */}
       <BghAuthorityGrid
         headline="Ihre Rechte nach dem unverschuldeten Unfall"
-        subline="Der BGH stützt jeden dieser Ansprüche – Claimondo setzt sie für Sie durch."
+        subline="Der BGH stützt jeden dieser Ansprüche – unsere Partnerkanzlei setzt sie für Sie durch."
       />
 
       {/* ─── Service: was Claimondo für Sie übernimmt ─── */}

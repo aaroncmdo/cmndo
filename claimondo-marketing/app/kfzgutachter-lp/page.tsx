@@ -284,7 +284,7 @@ const WAS_WIR: { titel: string; text: string }[] = [
     text: 'Sobald das Gutachten erstellt ist, übernimmt unsere Partnerkanzlei die Kommunikation mit der gegnerischen Versicherung – vollständig und in Ihrem Namen.',
   },
   {
-    titel: 'Wir setzen alle Ansprüche durch',
+    titel: 'Unsere Partnerkanzlei setzt alle Ansprüche durch',
     text: 'Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld – auch wenn die Versicherung kürzt. Kürzungen holt unsere Kanzlei BGH-konform zurück.',
   },
   {
@@ -444,7 +444,7 @@ const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; ic
     schritt: 2,
     titel: 'Geld auf dem Konto',
     wert: 'Ø 32 Tage',
-    sub: 'Reparatur, Wertminderung, Nutzungsausfall – wir verhandeln, die Gegenseite zahlt.',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall – unsere Partnerkanzlei verhandelt, die Gegenseite zahlt.',
     icon: 'euro',
   },
   {

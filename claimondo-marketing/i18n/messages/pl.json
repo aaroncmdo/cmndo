@@ -79,7 +79,7 @@
     "result_voll_heading": "To Ci się należy — 0 € kosztów własnych",
     "result_voll_sub": "Wypadek nie z Twojej winy? Wtedy płaci ubezpieczyciel drugiej strony. Zgodnie z §249 BGB zostajesz postawiony w sytuacji, jakby do wypadku nigdy nie doszło.",
     "result_quote_heading": "Przysługują Ci roszczenia — proporcjonalnie",
-    "result_quote_sub": "Przy współwinie Twoja szkoda jest pokrywana proporcjonalnie do stopnia winy (§254 BGB). Wywalczymy dla Ciebie maksimum.",
+    "result_quote_sub": "Przy współwinie Twoja szkoda jest pokrywana proporcjonalnie do stopnia winy (§254 BGB). Nasza kancelaria partnerska wywalczy dla Ciebie maksimum.",
     "result_pruefen_heading": "Często da się uzyskać więcej, niż myślisz",
     "result_pruefen_sub": "Kwestia winy bywa jaśniejsza, niż się wydaje — wyjaśnimy ją wspólnie z prawnikiem i zabezpieczymy Twoje roszczenia.",
     "result_kasko_heading": "Pomagamy również przy własnej winie",
@@ -1140,13 +1140,13 @@
           "nr": 3
         },
         {
-          "titel": "Stawiamy ubezpieczenie w zwłoce",
+          "titel": "Nasza kancelaria partnerska stawia ubezpieczyciela w zwłoce",
           "text": "4-tygodniowy termin na podstawie §286 BGB. Przy próbie zaniżenia: adwokat odpowiada tego samego dnia.",
           "href": "/gegnerische-versicherung-zahlt-nicht",
           "nr": 4
         },
         {
-          "titel": "Wypłacamy należną kwotę",
+          "titel": "Ubezpieczyciel wypłaca – widzisz to na żywo",
           "text": "Ø 32 dni od zgłoszenia szkody do wypłaty. Postęp śledzony na bieżąco w portalu.",
           "href": "/schadensreport-2026",
           "nr": 5
@@ -1302,7 +1302,7 @@
           "versicherer": "HUK · LVM",
           "pruefdienstleister": "własny dział szkód",
           "kuerzung": "Całkowita odmowa pokrycia kosztów rzeczoznawcy + wartości odtworzeniowej",
-          "gegenargument": "Ryzyko kosztów rzeczoznawcy ponosi ubezpieczenie. Adwokat kieruje sprawę do właściwego sądu okręgowego.",
+          "gegenargument": "Ryzyko kosztów rzeczoznawcy ponosi ubezpieczenie. Nasza kancelaria partnerska kieruje sprawę do właściwego sądu okręgowego.",
           "bgh": "BGH VI ZR 280/22",
           "href": "/haftpflicht/sv-kosten"
         }
@@ -1769,11 +1769,11 @@
           },
           {
             "frage": "Jakie pozycje ubezpieczyciele najczęściej odcinają?",
-            "antwort": "1. Stawki roboczogodzin (odesłanie do tańszego warsztatu), 2. Narzuty UPE (mimo że podlegają zwrotowi zgodnie z BGH VI ZR 65/18), 3. Koszty transportu do lakierni (mimo prawa BGH), 4. Koszty lakierowania sąsiedniego (obowiązuje BGH VI ZR 174/24 z 2025), 5. Koszty rzeczoznawcy („zawyżone\"), 6. Utrata wartości (często całkowicie ignorowana). Nasz adwokat zna wszystkie te pozycje i dochodzi ich zwrotu."
+            "antwort": "1. Stawki roboczogodzin (odesłanie do tańszego warsztatu), 2. Narzuty UPE (mimo że podlegają zwrotowi zgodnie z BGH VI ZR 65/18), 3. Koszty transportu do lakierni (mimo prawa BGH), 4. Koszty lakierowania sąsiedniego (obowiązuje BGH VI ZR 174/24 z 2025), 5. Koszty rzeczoznawcy („zawyżone\"), 6. Utrata wartości (często całkowicie ignorowana). Nasza kancelaria partnerska zna wszystkie te pozycje i dochodzi ich zwrotu."
           },
           {
             "frage": "HUK, LVM, AXA — czy to robi różnicę?",
-            "antwort": "Tak. HUK-COBURG systematycznie uznaje ekspertyzy za „bezużyteczne\" i odmawia zwrotu kosztów rzeczoznawcy. LVM sprzeciwia się ekspertyzom opartym na AI. AXA korzysta z ponadregionalnych giełd wartości szczątkowej, aby zawyżyć wartość pozostałości (kontra: BGH VI ZR 119/04 — obowiązuje rynek regionalny). Nasz adwokat zna taktyki poszczególnych ubezpieczycieli i reaguje odpowiednio."
+            "antwort": "Tak. HUK-COBURG systematycznie uznaje ekspertyzy za „bezużyteczne\" i odmawia zwrotu kosztów rzeczoznawcy. LVM sprzeciwia się ekspertyzom opartym na AI. AXA korzysta z ponadregionalnych giełd wartości szczątkowej, aby zawyżyć wartość pozostałości (kontra: BGH VI ZR 119/04 — obowiązuje rynek regionalny). Nasza kancelaria partnerska zna taktyki poszczególnych ubezpieczycieli i reaguje odpowiednio."
           }
         ]
       },
@@ -1845,7 +1845,7 @@
           },
           {
             "frage": "Kiedy otrzymam pieniądze?",
-            "antwort": "Koszty naprawy ubezpieczyciel pokrywa zazwyczaj 4–8 tygodni po wpłynięciu ekspertyzy. Utrata wartości, wynajem auta i utrata możliwości użytkowania następują zwykle w tym samym terminie. Przy zwłoce lub obniżeniu kwoty nasz adwokat interweniuje pisemnie — jeśli ubezpieczyciel nadal ogranicza wypłatę, kierujemy sprawę do sądu. Krajowa średnia: 6–8 tygodni od wypadku do pełnej wypłaty."
+            "antwort": "Koszty naprawy ubezpieczyciel pokrywa zazwyczaj 4–8 tygodni po wpłynięciu ekspertyzy. Utrata wartości, wynajem auta i utrata możliwości użytkowania następują zwykle w tym samym terminie. Przy zwłoce lub obniżeniu kwoty nasza kancelaria partnerska interweniuje pisemnie — jeśli ubezpieczyciel nadal ogranicza wypłatę, kierujemy sprawę do sądu. Krajowa średnia: 6–8 tygodni od wypadku do pełnej wypłaty."
           },
           {
             "frage": "Czy muszę umyć lub naprawić samochód przed oględzinami?",
@@ -3034,7 +3034,7 @@
       },
       {
         "frage": "Co się dzieje, gdy ubezpieczenie zaniży kwotę z ekspertyzy?",
-        "antwort": "Ubezpieczenie często zaniża utratę wartości, narzuty UPE, koszty transportu do warsztatu lub honorarium rzeczoznawcy. Nasz adwokat odpowiada powołując się na odpowiednie wyroki BGH (VI ZR 65/18, VI ZR 174/24). Jeśli ubezpieczenie nadal zaniża — kancelaria kieruje sprawę do sądu. Koszty postępowania przy wygranej ponosi w całości strona przeciwna."
+        "antwort": "Ubezpieczenie często zaniża utratę wartości, narzuty UPE, koszty transportu do warsztatu lub honorarium rzeczoznawcy. Nasza kancelaria partnerska odpowiada powołując się na odpowiednie wyroki BGH (VI ZR 65/18, VI ZR 174/24). Jeśli ubezpieczenie nadal zaniża — kancelaria kieruje sprawę do sądu. Koszty postępowania przy wygranej ponosi w całości strona przeciwna."
       },
       {
         "frage": "Kiedy przysługuje mi wynajem auta lub utrata możliwości użytkowania?",
@@ -4094,7 +4094,7 @@
     "vorteile": {
       "title": "Korzyści — odzyskane potrącenia ubezpieczyciela",
       "description": "0 € udziału własnego przy niezawinionej kolizji (§249 BGB). Niezależny rzeczoznawca zamiast potrącenia przez serwis kontrolny. Proszę zobaczyć, co rzeczywiście Panu/Pani przysługuje.",
-      "og_description": "0 € udziału własnego przy niezawinionej kolizji wg §249 BGB. Niezależny rzeczoznawca, pełne roszczenie. Potrącenia serwisów kontrolnych (zwykle 30–40 % wg BGH) odzyskujemy."
+      "og_description": "0 € udziału własnego przy niezawinionej kolizji wg §249 BGB. Niezależny rzeczoznawca, pełne roszczenie. Potrącenia serwisów kontrolnych (zwykle 30–40 %) odzyskuje nasza kancelaria partnerska."
     },
     "faq": {
       "title": "FAQ szkoda Kfz — co warto wiedzieć (poparte BGH)",
