@@ -56,11 +56,14 @@ export default function DispatchGatesPanel({ values, lead }: { values: Vals; lea
 
   // Warn-Badges = die frueheren Hard-Gate-Disqualifikations-Fakten, jetzt nur Hinweis.
   const warnings: string[] = []
-  if (values.schuldfrage === 'eigenverantwortung')
-    warnings.push('Eigenverschulden — i.d.R. kein Haftpflicht-Anspruch. Prüfen / ggf. manuell disqualifizieren.')
   // Kasko-WB Phase 1: Bindungsstatus sichtbar machen (Scan: der Dispatcher sah den Grund nie).
   const kaskoTarif = [str(lead.eigene_versicherung_name), str(lead.eigene_kasko_tarif_name)].filter(Boolean).join(' · ')
   const istKasko = values.schuldfrage === 'eigenverantwortung' && str(lead.eigene_versicherung) === 'ja'
+  // Abnahme 04.09. (Prod-Lauf, Nebenbefund): ein Kasko-Kunde mit FREIER Werkstattwahl ist ein legitimer
+  // Reparaturkunde — die Eigenverschulden-Warnung ("ggf. manuell disqualifizieren") laedt dort zum falschen Klick ein.
+  const kaskoFrei = istKasko && lead.freie_werkstattwahl === true
+  if (values.schuldfrage === 'eigenverantwortung' && !kaskoFrei)
+    warnings.push('Eigenverschulden — i.d.R. kein Haftpflicht-Anspruch. Prüfen / ggf. manuell disqualifizieren.')
   if (istKasko && lead.freie_werkstattwahl === false)
     warnings.push(`Kasko mit Werkstattbindung${kaskoTarif ? ` (${kaskoTarif})` : ''} — keine Werkstatt-Vermittlung, der Versicherer benennt die Werkstatt.`)
   if (istKasko && lead.freie_werkstattwahl == null)
