@@ -12,7 +12,7 @@
  *
  * Die Pruefungen unten sind KEINE Kosmetik - jede faengt einen Fehler, der in
  * der Vorfassung real ausgeliefert wurde:
- *   - Seitenzahl        (die Fassung im Repo hatte 8 statt 4)
+ *   - Seitenzahl        (die Fassung im Repo hatte 8 statt 5)
  *   - Telefon-Links     (der Weg zum Kunden)
  *   - Web-Link          (war nur ueber einen unsichtbaren QR erreichbar)
  *   - Ueberlappungen    (Fuss auf Seite 4 lag uebereinander)
@@ -31,11 +31,15 @@ const QUELLE = join(wurzel, 'docs/unfallguide/unfallguide.html')
 const ZIEL = join(wurzel, 'claimondo-marketing/public/downloads/claimondo-unfallguide.pdf')
 
 const SOLL = {
-  seiten: 4,
+  seiten: 6,
   telefon: 'tel:+4915153608515',
-  telefonMin: 5,
+  telefonMin: 7,
   webLink: 'claimondo.de/gutachter-finden',
-  maxBytes: 900 * 1024,
+  // Zustellgewicht, keine willkuerliche Zahl: der Guide geht per Link und per
+  // Messenger raus. Bei 4 Seiten waren 900 kB die Grenze; mit 6 Seiten und dem
+  // Titelfoto sind rund 1 MB normal. Reisst es diese Grenze, ist meist ein Bild
+  // unkomprimiert hereingerutscht (so geschehen: PNG statt JPEG -> 2,5 MB).
+  maxBytes: 1200 * 1024,
 }
 
 /**
