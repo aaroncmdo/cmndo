@@ -26,10 +26,3 @@ export function leiteWerkstattbindungAb(i: WbAbleitungInput): WbErgebnis {
   if (i.markerAntwort === 'nein') return { freieWerkstattwahl: true, quelle: 'marker', grund: 'marker_verneint' }
   return { freieWerkstattwahl: null, quelle: 'unbekannt', grund: 'unbekannt' }
 }
-
-/** Kurztext fuer Badges/Logs. */
-export function wbErgebnisLabel(r: WbErgebnis): string {
-  if (r.freieWerkstattwahl === true) return 'freie Werkstattwahl'
-  if (r.freieWerkstattwahl === false) return 'Werkstattbindung'
-  return 'Werkstattbindung unklar'
-}

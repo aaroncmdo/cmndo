@@ -68,9 +68,13 @@ export function DispatchKaskoTarifField({ feld, leadId, lead }: { feld: Onboardi
         <VersichererSelect
           value={markeId}
           onChange={(id) => {
+            const neueMarke = marken.find((x) => x.id === id) ?? null
+            // Markenwechsel: die alte Bindung nicht mitschleppen — aus dem Marken-Status ableiten, sonst 'unbekannt'.
+            const b: Bindung = neueMarke?.wbStatus === 'keine' ? 'frei' : neueMarke?.wbStatus === 'standard' ? 'gebunden' : 'unbekannt'
             setMarkeId(id)
             setTarifId(null)
-            void persist({ markeId: id, tarifId: null, bindung })
+            setBindung(b)
+            void persist({ markeId: id, tarifId: null, bindung: b })
           }}
           versicherer={marken.map((m) => ({ id: m.id, name: m.marke }))}
           placeholder="Versicherer (Marke) wählen …"

@@ -707,7 +707,7 @@ export async function getKundeClaimView(
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),
       // Kasko-WB Phase 1: Tariffrage vor dem Finder; gebunden -> Info statt Finder.
-      kaskoBindungOffen: abrechnungsweg === 'kasko' && (claimExtra?.freie_werkstattwahl ?? null) === null && (claimExtra?.werkstattbindung_quelle ?? null) === null,
+      kaskoBindungOffen: abrechnungsweg === 'kasko' && (claimExtra?.freie_werkstattwahl ?? null) === null && (claimExtra?.werkstattbindung_quelle ?? null) === null && reparaturWerkstattId == null,
       kaskoGebunden: abrechnungsweg === 'kasko' && claimExtra?.freie_werkstattwahl === false,
       kaskoTarifName: (claimExtra?.eigene_kasko_tarif_name as string | null | undefined) ?? null,
       reparaturPhaseErreicht: reparaturPhaseOk,

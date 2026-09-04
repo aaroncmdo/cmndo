@@ -8,6 +8,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
+import { createLinkedTask } from '@/lib/tasks/create-task'
 import type { Bindungsumfang, KaskoBindungsInfo, KaskoTarifAuswahl, WbStatus } from '@/lib/kasko-wb/types'
 
 async function assertOwner(claimId: string): Promise<{ ok: true; leadId: string | null } | { ok: false; error: string }> {
@@ -55,6 +56,24 @@ export async function speichereKaskoTarifPortal(
     // Lead spiegeln (Reminder-Cron liest freie_werkstattwahl vom Lead) — non-critical.
     const { error: leadErr } = await svc.from('leads').update(patch as never).eq('id', owner.leadId)
     if (leadErr) console.error('[kasko-tarif-portal] Lead-Spiegel fehlgeschlagen (non-critical):', leadErr.message)
+  }
+  if (ergebnis.freieWerkstattwahl === null) {
+    // Review W3 (E3): „unser Team meldet sich" muss auch passieren — Dispatch-Aufgabe wie im FlowLink. Non-critical.
+    try {
+      await createLinkedTask({
+        titel: 'Kasko: Werkstattbindung klären',
+        beschreibung: `Der Kunde konnte die Werkstattbindung seines Kasko-Tarifs im Portal nicht angeben (Versicherer: ${markeName ?? 'unbekannt'}). Vor der Reparaturfreigabe klären, ob der Tarif eine Partnerwerkstatt vorschreibt.`,
+        prioritaet: 'normal',
+        ...(owner.leadId ? { entity_type: 'lead' as const, entity_id: owner.leadId } : {}),
+        claim_id: claimId,
+        empfaenger_rolle: 'dispatch',
+        task_code: 'kasko_werkstattbindung_klaeren',
+        trigger_event: 'kasko_tarif_unbekannt',
+        auto_erstellt: true,
+      })
+    } catch (err) {
+      console.error('[kasko-tarif-portal] Dispatch-Task (Bindung unklar) fehlgeschlagen (non-critical):', err)
+    }
   }
   revalidatePath(`/kunde/faelle/${claimId}`)
   return { ok: true, freieWerkstattwahl: ergebnis.freieWerkstattwahl }

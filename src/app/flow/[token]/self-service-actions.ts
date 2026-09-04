@@ -272,6 +272,12 @@ export async function speichereKaskoTarifFlow(
   // Unfall-Flow = Karosserieschaden (Spec §3 Annahmen).
   const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas: false })
 
+  // Review W2: ERST die Entscheidung ueber den bestehenden Quali-Pfad (Disqualifikation, Gutachter loesen,
+  // Reparaturwunsch, Spiegel), DANN Tariffelder + Herkunft. Scheitert der Quali-Pfad, bleibt
+  // werkstattbindung_quelle leer und der Step erscheint erneut — statt ohne Entscheidung zu verschwinden.
+  const quali = await speichereQualiFlow(token, 'eigenverantwortung', true, ergebnis.freieWerkstattwahl ?? undefined)
+  if (!quali.ok) return { ok: false, error: quali.error ?? 'Speichern fehlgeschlagen.' }
+
   const tarifFelder: Record<string, unknown> = {
     eigene_versicherung_marke_id: auswahl.markeId,
     eigene_versicherung_name: markeName,
@@ -281,12 +287,17 @@ export async function speichereKaskoTarifFlow(
   }
   const { error: updErr } = await admin.from('leads').update(tarifFelder).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
-  const spiegel = await spiegleQualiAufClaim(admin, leadId, tarifFelder)
-  if (!spiegel.ok) console.error('[kasko-tarif] Spiegeln auf den Claim fehlgeschlagen:', spiegel.error)
-
-  // Entscheidung ueber den bestehenden Quali-Pfad (Disqualifikation, Gutachter loesen, Reparaturwunsch, Spiegel).
-  const quali = await speichereQualiFlow(token, 'eigenverantwortung', true, ergebnis.freieWerkstattwahl ?? undefined)
-  if (!quali.ok) return { ok: false, error: quali.error ?? 'Speichern fehlgeschlagen.' }
+  // Review W1: ein bereits konvertierter Claim bekommt die Antwort UEBERSCHREIBEND (spiegleQualiAufClaim fuellt nur
+  // leere Felder, und der Disqualifikations-Zweig von speichereQualiFlow spiegelt gar nicht) — sonst zeigt das Portal
+  // den Werkstatt-Finder, waehrend der Lead gebunden ist. Ohne Claim: 0 Zeilen, kein Fehler. Non-critical.
+  const { error: claimErr } = await admin
+    .from('claims')
+    .update({
+      ...tarifFelder,
+      ...(ergebnis.freieWerkstattwahl !== null ? { freie_werkstattwahl: ergebnis.freieWerkstattwahl } : {}),
+    } as never)
+    .eq('lead_id', leadId)
+  if (claimErr) console.error('[kasko-tarif] Claim-Nachzug fehlgeschlagen (non-critical):', claimErr.message)
 
   if (ergebnis.freieWerkstattwahl === false) {
     const infoRes = await ladeKaskoBindungsInfo(auswahl.markeId, auswahl.tarifId, markeName)

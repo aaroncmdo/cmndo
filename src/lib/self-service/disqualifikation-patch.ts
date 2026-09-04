@@ -22,3 +22,18 @@ export function buildDisqualifikationPatch(grundKey: DisqualifikationsGrundKey, 
     status: 'disqualifiziert',
   }
 }
+
+/**
+ * Gegenstueck: Disqualifikation wegen Werkstattbindung aufheben (Review W4/W5) — Embed-Re-Entry ohne Bindung und
+ * Dispatcher-Override auf „frei"/„unbekannt". status zurueck auf 'neu' (lead_status-Enum), damit der Lead wieder in
+ * den Queues erscheint. Nur fuer disqualifiziert_grund_key='werkstattbindung' verwenden.
+ */
+export function buildReQualifikationPatch(): Record<string, unknown> {
+  return {
+    disqualifiziert: false,
+    disqualifiziert_am: null,
+    disqualifiziert_grund_key: null,
+    disqualifiziert_grund: null,
+    status: 'neu',
+  }
+}

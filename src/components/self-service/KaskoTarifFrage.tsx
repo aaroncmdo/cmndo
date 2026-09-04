@@ -66,6 +66,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
   }
 
   async function waehleMarke(id: string | null) {
+    if (busy) return
     setMarkeId(id)
     if (!id) return
     const m = marken.find((x) => x.id === id)
@@ -85,7 +86,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
   }
 
   function waehleTarif(t: KaskoTarif) {
-    if (!marke) return
+    if (!marke || busy) return
     abschluss(
       { markeId: marke.id, markeName: marke.marke, tarifId: t.id, tarifName: t.anzeigename, markerAntwort: null },
       leiteWerkstattbindungAb({
@@ -98,6 +99,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
   }
 
   function antworteMarker(antwort: MarkerAntwort) {
+    if (busy) return
     const auswahl: KaskoTarifAuswahl = {
       markeId: marke?.id ?? null,
       markeName: marke?.marke ?? (freitext.trim() || null),

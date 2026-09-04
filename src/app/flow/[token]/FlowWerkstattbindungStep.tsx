@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { KaskoTarifFrage } from '@/components/self-service/KaskoTarifFrage'
 import { KaskoBindungEndansicht } from '@/components/self-service/KaskoBindungEndansicht'
 import { KaskoUnklarHinweis } from '@/components/self-service/KaskoUnklarHinweis'
+import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import type { KaskoBindungsInfo, KaskoTarifAuswahl } from '@/lib/kasko-wb/types'
 import { fordereRueckrufAn, speichereKaskoTarifFlow } from './self-service-actions'
 
@@ -49,8 +50,9 @@ export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; o
     }
   }
 
-  if (phase === 'abbruch' && info) {
-    return <KaskoBindungEndansicht info={info} onRueckruf={() => fordereRueckrufAn(token)} />
+  if (phase === 'abbruch') {
+    // Info nicht ladbar -> generische Endseite, nie zurueck in die Frage.
+    return info ? <KaskoBindungEndansicht info={info} onRueckruf={() => fordereRueckrufAn(token)} /> : <KaskoEndansicht />
   }
   if (phase === 'unklar') {
     return <KaskoUnklarHinweis markeName={markeName} onWeiter={onWeiter} />

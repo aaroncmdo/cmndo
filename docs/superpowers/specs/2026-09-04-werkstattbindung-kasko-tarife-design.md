@@ -1,5 +1,7 @@
 # Werkstattbindung in Kasko-Tarifen — Design
 
+> **Status 04.09.2026:** Phase 1 implementiert auf `kitta/werkstattbindung-kasko-tarife` (Migrationen 20260904183044 / 184640 / 184929 auf prod), Whole-Branch-Review eingearbeitet, PR gegen `staging` offen. Regel-4-Smoke nach Deploy ausstehend.
+
 **Datum:** 04.09.2026 · **Status:** von Aaron freigegeben („dann gieß es in einen Plan", 04.09.; Empfehlungen
 E1–E7 aus dem Scan unverändert übernommen) · **Scan:** `docs/2026-09-03-werkstattbindung-kasko-tarife-scan.md`
 · **Quelle:** `werkstattbindung-kasko-tarife-2026.md` (CHECK24-Tarifliste 20.07.2026, 71 Marken, 538 Varianten)

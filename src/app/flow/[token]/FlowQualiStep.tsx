@@ -135,8 +135,9 @@ export function FlowQualiStep({
     void sende(value)
   }
 
-  if (phase === 'abbruch_bindung' && bindungInfo) {
-    return <KaskoBindungEndansicht info={bindungInfo} onRueckruf={() => fordereRueckrufAn(token)} />
+  if (phase === 'abbruch_bindung') {
+    // Info nicht ladbar -> generische Endseite, nie zurueck in die Schuldfrage.
+    return bindungInfo ? <KaskoBindungEndansicht info={bindungInfo} onRueckruf={() => fordereRueckrufAn(token)} /> : <KaskoEndansicht />
   }
   if (phase === 'unklar') {
     return <KaskoUnklarHinweis markeName={markeName} onWeiter={() => void nachQualiWeiter('eigenverantwortung', true, 'kasko', letzteBindung ?? undefined)} />

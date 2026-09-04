@@ -101,6 +101,8 @@ export type LeadData = {
   schuldfrage?: string | null
   disqualifiziert?: boolean | null
   disqualifiziert_grund_key?: string | null
+  freie_werkstattwahl?: boolean | null
+  werkstattbindung_quelle?: string | null
   // P4 UX: Vermittlung -> Logistik-Steps per Config-Bedingung ausgeblendet
   source_channel?: string | null
   // FlowLink-Review C: fiktiv-Szenario-Badge im Sticky-Header (Lead kommt via
@@ -604,11 +606,21 @@ export default function FlowWizardKfz({
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
-  // AAR-956 §3a + Kasko-WB Phase 1: bereits disqualifizierter Lead -> je nach Grund die passende Endseite.
+  // Kasko-WB Phase 1 (Review K1): wegen Werkstattbindung disqualifiziert -> IMMER die Bindungs-Endseite.
+  // Bewusst NICHT an istIncomplete gekoppelt: das kasko-Szenario hat keinen termin-Step, brauchtGutachter ist
+  // dort immer false — der Re-Visit (auch aus dem Embed-Finder) liefe sonst in die regulaere Kasko-Strecke.
+  if (lead.disqualifiziert && lead.disqualifiziert_grund_key === 'werkstattbindung') {
+    return (
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <FlowKaskoBindungGate token={token} />
+      </div>
+    )
+  }
+  // AAR-956 §3a: bereits disqualifizierter Lead (Eigenverschulden) -> Kasko-Endansicht, kein Termin, kein Crash.
   if (istIncomplete && lead.disqualifiziert) {
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-        {lead.disqualifiziert_grund_key === 'werkstattbindung' ? <FlowKaskoBindungGate token={token} /> : <KaskoEndansicht />}
+        <KaskoEndansicht />
       </div>
     )
   }

@@ -102,6 +102,12 @@ export function AbrechnungStep({
           Werkstatt; im nächsten Schritt können Sie einen Rückruf anfordern.
         </p>
       )}
+      {abrechnung === 'kasko' && kaskoWb?.freieWerkstattwahl === null && (
+        <p className="text-body-sm text-claimondo-navy/70">
+          Bitte prüfen Sie vor der Reparatur Ihren Versicherungsschein auf einen Werkstattbindungs-Zusatz – unser Team
+          meldet sich dazu bei Ihnen.
+        </p>
+      )}
     </div>
   )
 }

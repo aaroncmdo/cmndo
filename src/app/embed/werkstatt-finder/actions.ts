@@ -4,7 +4,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createCase } from '@/lib/intake/create-case'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import type { KaskoTarifAuswahl, WbErgebnis } from '@/lib/kasko-wb/types'
-import { buildDisqualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
+import { buildDisqualifikationPatch, buildReQualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
+import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
+import { createLinkedTask } from '@/lib/tasks/create-task'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
 import { notifyKundeWerkstattbindung } from '@/lib/kasko-wb/notify-kunde-werkstattbindung'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
@@ -252,6 +254,14 @@ export async function erstelleWerkstattFinderLead(
           freie_werkstattwahl: null,
         })
       }
+      // Review W4: war der Lead in einem frueheren Durchlauf wegen Werkstattbindung disqualifiziert und ist die
+      // neue Antwort nicht (mehr) gebunden -> re-qualifizieren, sonst haelt status='disqualifiziert' ihn aus den Queues.
+      if (payload.kaskoWb?.freieWerkstattwahl !== false) {
+        const { data: alt } = await admin.from('leads').select('disqualifiziert_grund_key').eq('id', bestehend).maybeSingle()
+        if ((alt as { disqualifiziert_grund_key?: string | null } | null)?.disqualifiziert_grund_key === 'werkstattbindung') {
+          Object.assign(update, buildReQualifikationPatch())
+        }
+      }
       if (payload.vorname?.trim()) update.vorname = payload.vorname.trim()
       if (payload.nachname?.trim()) update.nachname = payload.nachname.trim()
       if (payload.telefon?.trim()) update.telefon = payload.telefon.trim()
@@ -311,11 +321,37 @@ export async function erstelleWerkstattFinderLead(
     const nowIso = new Date().toISOString()
     const { error: dqErr } = await admin.from('leads').update(buildDisqualifikationPatch('werkstattbindung', nowIso) as never).eq('id', leadId)
     if (dqErr) console.error('[werkstatt-finder] Disqualifikation (Werkstattbindung) fehlgeschlagen (non-fatal):', dqErr.message)
+    // Review K1: der Kontakt-Schritt verspricht einen Rueckruf -> real anlegen (Dispatch-Queue /dispatch/rueckrufe).
+    try {
+      const rr = await upsertReservierungsRueckruf({ leadId, startIso: nowIso, vonKunde: true })
+      if (!rr.ok) console.error('[werkstatt-finder] Rueckruf (Werkstattbindung) fehlgeschlagen (non-fatal):', rr.error)
+    } catch (err) {
+      console.error('[werkstatt-finder] Rueckruf (Werkstattbindung) fehlgeschlagen (non-fatal):', err)
+    }
     try {
       const infoRes = await ladeKaskoBindungsInfo(payload.kaskoWb.markeId, payload.kaskoWb.tarifId, payload.kaskoWb.markeName)
       if (infoRes.ok) await notifyKundeWerkstattbindung({ kunde: { vorname: payload.vorname ?? null, email: payload.email }, info: infoRes.info })
     } catch (err) {
       console.error('[werkstatt-finder] Bindungs-Mail fehlgeschlagen (non-fatal):', err)
+    }
+  }
+
+  // Review W3 (E3): Bindung unklar -> Dispatch klaert VOR der Reparaturfreigabe (wie im FlowLink). Non-fatal.
+  if (payload.kaskoWb && payload.kaskoWb.freieWerkstattwahl === null && leadId) {
+    try {
+      await createLinkedTask({
+        titel: 'Kasko: Werkstattbindung klären',
+        beschreibung: `Der Kunde konnte die Werkstattbindung seines Kasko-Tarifs im Werkstatt-Finder nicht angeben (Versicherer: ${payload.kaskoWb.markeName ?? 'unbekannt'}). Vor der Reparaturfreigabe klären, ob der Tarif eine Partnerwerkstatt vorschreibt.`,
+        prioritaet: 'normal',
+        entity_type: 'lead',
+        entity_id: leadId,
+        empfaenger_rolle: 'dispatch',
+        task_code: 'kasko_werkstattbindung_klaeren',
+        trigger_event: 'kasko_tarif_unbekannt',
+        auto_erstellt: true,
+      })
+    } catch (err) {
+      console.error('[werkstatt-finder] Dispatch-Task (Bindung unklar) fehlgeschlagen (non-fatal):', err)
     }
   }
 

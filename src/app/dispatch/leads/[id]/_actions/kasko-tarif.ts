@@ -7,6 +7,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { buildReQualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
 import { requireRole } from '@/lib/auth/guards'
 
 export type KaskoTarifDispatchPatch = {
@@ -26,7 +27,16 @@ export async function speichereKaskoTarifDispatch(
   if (!guard.success) return { ok: false, error: guard.error }
   const admin = createAdminClient()
   const werte = { ...patch, werkstattbindung_quelle: 'dispatcher' }
-  const { error } = await admin.from('leads').update(werte as never).eq('id', leadId)
+  // Review W5: Override auf „frei"/„unbekannt" hebt eine Disqualifikation wegen Werkstattbindung auf (nur diese —
+  // ein manuell/anders disqualifizierter Lead bleibt es). Die Vermittlungssperre faellt damit ebenfalls.
+  let leadWerte: Record<string, unknown> = werte
+  if (patch.freie_werkstattwahl !== false) {
+    const { data: alt } = await admin.from('leads').select('disqualifiziert_grund_key').eq('id', leadId).maybeSingle()
+    if ((alt as { disqualifiziert_grund_key?: string | null } | null)?.disqualifiziert_grund_key === 'werkstattbindung') {
+      leadWerte = { ...werte, ...buildReQualifikationPatch() }
+    }
+  }
+  const { error } = await admin.from('leads').update(leadWerte as never).eq('id', leadId)
   if (error) return { ok: false, error: error.message }
   const { error: claimErr } = await admin.from('claims').update(werte as never).eq('lead_id', leadId)
   if (claimErr) return { ok: false, error: `Lead gespeichert, Claim nicht: ${claimErr.message}` }
