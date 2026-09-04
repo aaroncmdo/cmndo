@@ -27,6 +27,7 @@ export type LeadFuerKontext = {
   schadentyp?: string | null
   hat_vorschaeden?: boolean | null
   freie_werkstattwahl?: boolean | null
+  werkstattbindung_quelle?: string | null
 }
 
 /**
@@ -83,6 +84,9 @@ export function bauFlowKontext(lead: LeadFuerKontext, svHatTermin: boolean): Flo
     schadentyp: lead.schadentyp ?? null,
     hat_vorschaeden: lead.hat_vorschaeden ?? null,
     freie_werkstattwahl: lead.freie_werkstattwahl ?? null,
+    // Kasko-WB Phase 1: Step-Bedingung {"freie_werkstattwahl": null, "werkstattbindung_quelle": null} —
+    // nach 'unbekannt' (quelle gesetzt, Entscheidung offen) wird nicht erneut gefragt (Spec §4.3).
+    werkstattbindung_quelle: lead.werkstattbindung_quelle ?? null,
     fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
     besichtigungsort_adresse: lead.besichtigungsort_adresse ?? null,
     unfallort: lead.unfallort ?? null,
