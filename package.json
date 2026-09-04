@@ -40,6 +40,7 @@
     "check:silent-writes": "node scripts/check-silent-writes.mjs",
     "check:stadt-linknetz": "node scripts/check-stadt-linknetz.mjs",
     "check:status-registry": "node scripts/check-status-registry.mjs",
+    "check:stumme-waechter": "node scripts/check-stumme-waechter.mjs",
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
     "check:termin-bezug": "node scripts/check-termin-bezug.mjs",
     "check:termin-engine-contract": "node scripts/check-termin-engine-contract.mjs",

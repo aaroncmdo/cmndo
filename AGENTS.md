@@ -464,6 +464,55 @@ CI fährt `npm run check:e2e-toplevel-fs -- --ratchet`. Es blockt **NEUE** Verle
 
 Kontext: `BROADCAST-main-ci-e2e-red-feststellung-seed-crash` (Memory).
 
+# Stumme-Waechter-Gate (Ratchet)
+
+**Ein Test hinter `test.skip(!process.env.RUN_X, …)` darf nicht existieren, ohne dass
+irgendein Workflow `RUN_X` setzt.** Sonst laeuft er nie — und faellt trotzdem niemandem
+auf, weil er in der Statistik als **`skipped`** erscheint, nicht als `failed`. Ein stummer
+Waechter ist schlimmer als gar keiner: er steht in der Spec-Liste und suggeriert Abdeckung.
+
+**Gemessen 31.08.2026** am nightly: 4 failed, 165 passed — und **88 skipped**. Dahinter
+standen **15 stumme Waechter** fuer zentrale Flows:
+
+```
+golden-path-prod · golden-path-finder-prod · golden-path-completion-prod
+2fa-hardening · trusted-device            <- Sicherheit
+smoke-kundenfunnel-szenarien · quali-gutachter-bindung-c1
+kunde-schaden-melden-skizze · kunde-termin-aufgabe-f3
+werkstatt-haftpflicht-gate · vehicles-nachzug-b · finder-wunschzeit-anfrage
+smoke-orchestrator · smoke-cmm65-kunde-realtime · flag-drift-ad-hoc-doc-request
+```
+
+⚠ **Ein roter Ratchet heisst NICHT „Schalter in die `env:` eintragen und fertig".** Bei
+zweien der drei zuerst geprueften Kandidaten war die Lage schlimmer: `2fa-hardening` und
+`trusted-device` brauchen zusaetzlich `SMOKE_2FA_EMAIL`/`_PASSWORD`/`_TOTP_SECRET` — die
+existieren **nirgends** (weder `gh secret list` noch `.env.local`). Beim
+`golden-path-completion` ist der Fixture-Claim **geloescht** und die Tabelle `faelle`
+gibt es nicht mehr. Ein blosser Schalter-Flip haette drei ROTE Tests erzeugt.
+**Erst pruefen, ob der Test mit gesetztem Schalter gruen laeuft — dann eintragen.**
+
+CI faehrt `npm run check:stumme-waechter -- --ratchet`. Lokal (ohne Flag) `--warn`
+(exit 0, listet alle). Pure Logik: `scripts/lib/stumme-waechter-scan.mjs` (unit-getestet,
+19 Faelle).
+
+**Erfasst werden nur `RUN_*`-Schalter OHNE Fallback** — das ist die etablierte Konvention
+fuer Opt-in-Gates hier. Ein `process.env.X ?? 'wert'` zaehlt nie: der Test laeuft dann
+auch ohne gesetzte Variable. Genau daran unterscheiden sich die harmlosen
+`TEST_*_PASSWORD` (alle mit Fallback, die Rollen-Logins laufen) von den echten Gates.
+
+⚠ **Wortgrenze ist Pflicht** beim Abgleich gegen die Workflows: `RUN_CMM65_SMOKE` enthaelt
+`RUN_CMM`. Ein Teilstring-Vergleich meldet den Schalter faelschlich als gesetzt und
+**versteckt** damit einen Verstoss. Ebenso bricht ein `RUN_[A-Z_]+`-Muster an ZIFFERN ab —
+beides beim ersten Zaehlen passiert, beides ist als Unit-Test verankert.
+
+**Baseline = 15 grandfathered.** ⚠ Das ist eine **Pruefliste, keine Schuldenliste**: je
+Waechter ist eine echte Entscheidung faellig — reparieren (Secrets/Fixtures beschaffen)
+oder loeschen (wenn der Flow anderswo abgedeckt ist). Bewusst nur manuell lauffaehig →
+`// stumme-waechter-skip: <grund>` (Fall `smoke-cmm65-kunde-realtime`: steht zusaetzlich
+in `MANUELLE_LIVE_SMOKES` der `playwright.config.ts`).
+
+Befund/Kontext: `AUDIT-nightly-nur-fehler-react418-und-auth-lock` (Memory).
+
 # Flag-Drift-Gate (Ratchet)
 
 CHECK-invalide enum-Literale in Supabase-Writes/Filtern sind verboten — seit 22.07. **volle Abdeckung**: ALLE public ANY-ARRAY-enum-CHECKs (Status, Kanäle, Typen, Rollen, Kategorien, …), nicht mehr nur status-*benannte* (der alte conname-Filter deckte nur ~1/3 ab und verbarg den `nachrichten.kanal='system'`-Silent-Fail). Ein `.update({ status: 'geplant' })` auf `gutachter_termine` (wo `'geplant'` nicht im `gutachter_termine_status_check` steht) wird von Postgres **verworfen** → **stiller Fehlschlag**, den kein Build/tsc/anderer Ratchet fängt (belegt 05.07.: `geplant` in `slots.ts`, `kunde_storniert` in `kb-booking.ts` — beide Silent-Fail-Bugs). Ebenso Filter mit toten Werten (`.eq('status','durchgefuehrt')` matcht 0 Rows).
