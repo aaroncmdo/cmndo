@@ -126,7 +126,8 @@ Jede Aufgabe, die Aaron einer Session gibt, endet mit einer **Arbeitsabnahme**: 
 ```
 1. Auftrag            — Aarons Worte + seine Entscheidungen unterwegs
 2. Herangehensweise   — wie vorgegangen wurde und warum (Methode, Reihenfolge, Werkzeuge,
-                        Delegation/Modelle, Prüfprinzipien)
+                        Delegation/Modelle, Prüfprinzipien) + Pflichtfeld „Skills je Bereich"
+                        (Tabelle: Bereich · Skill · warum · bewusst NICHT benutzt, obwohl passend)
 3. Schritte           — chronologisch, jeder Schritt mit Ergebnis und Beleg (Commit, Migration,
                         Messung, Review)
 4. Ziel erreicht?     — je Teilziel aus Aarons Auftrag: erreicht / teilweise / offen, mit Grund
@@ -139,7 +140,9 @@ Jede Aufgabe, die Aaron einer Session gibt, endet mit einer **Arbeitsabnahme**: 
 10. Entscheidung      — Feld für Aaron: abgenommen / mit Auflagen / abgelehnt, Datum
 ```
 
-**Form und Zeitpunkt:** HTML-Artefakt (Link) plus Kurzfassung im Chat. Erstfassung beim Öffnen des PR, Aktualisierung nach dem Regel-4-Smoke. Aufgaben ohne PR (Audits, Analysen, Ops-Arbeit) bekommen den Bericht beim Abschluss. Der Marker in `memory/` verweist auf den Bericht.
+**Form und Zeitpunkt:** HTML-Artefakt (Link) plus Kurzfassung im Chat. Erstfassung beim Öffnen des PR, Aktualisierung nach dem Regel-4-Smoke. Aufgaben ohne PR (Audits, Analysen, Ops-Arbeit) bekommen den Bericht beim Abschluss.
+
+**Ablage — der eine Ort für alle Abnahmen:** `memory/abnahmen/<YYYY-MM-DD>-<slug>.md` nach `memory/abnahmen/_VORLAGE.md` (Abschnitte 1–11 füllt die ausführende Session, 12 die Abnahme-Session, 13 Aaron) plus eine Zeile im `memory/abnahmen/INDEX.md`, Status `zur Abnahme`. Bewusst außerhalb des Repos (öffentlich) und außerhalb jedes Branches. Die Abnahme-Session (Aaron-Mandat 04.09., `memory/FEEDBACK-abnahme-instanz-mandat-aaron.md`) prüft dort unabhängig gegen Originalziel, Nutzerstrom anonym und angemeldet, Herangehensweise und Skills — Bereiche mit angegebenem Skill wiederholt sie mit demselben Skill, fehlende Skills holt sie nach — und setzt Fehlendes um.
 
 **Verboten:**
 * Abschlussmeldung ohne Bericht; Bericht nur im Terminal-Scrollback.
