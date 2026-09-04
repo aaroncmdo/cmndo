@@ -23,7 +23,7 @@ import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createNotification } from '@/lib/notifications'
 import { getConsentedGaClientId, trackServerConversion } from '@/lib/analytics/ga4-conversions'
-import { persistiereOppref } from '@/lib/analytics/oaiq-capi'
+import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
 import { buildHashedUserData } from '@/lib/analytics/user-data-mp'
 
 type Result =
@@ -115,7 +115,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   // Terminbuchung laeuft cross-origin im iframe und die SA oft Tage spaeter —
   // spaeter ist der Wert nicht mehr erreichbar. Ohne Anzeigenklick oder ohne
   // Marketing-Consent ein No-op.
-  await persistiereOppref(lead.id)
+  await erfasseLeadAttribution(lead.id)
 
   // Compliance (UX-Audit #3): dsgvo_consent-Haken persistieren (war bisher nur validiert,
   // nie geloggt -> Art.-7-DSGVO-Nachweisbarkeit). Die Spalte leads.dsgvo_zustimmung_am wurde
