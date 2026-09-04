@@ -30,6 +30,9 @@ export function CheckFunnelClient() {
   const [step, setStep] = useState(0) // 0..2 Fragen, 3 = Ergebnis + Formular
   const [answers, setAnswers] = useState<Answers>({})
   const [submittedName, setSubmittedName] = useState<string | null>(null)
+  // Lead-ID des gerade angelegten Leads — nur fuer den Foto-Check-CTA in der Erfolgs-Ansicht,
+  // damit die Schaetzung am Vorgang landet (anspruch_schaetzungen.lead_id).
+  const [submittedLeadId, setSubmittedLeadId] = useState<string | null>(null)
   const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
   const startedRef = useRef(false)
@@ -108,6 +111,7 @@ export function CheckFunnelClient() {
         const name = String(fd.get('name') ?? '').trim()
         setError(null)
         setSubmittedName(name.split(/\s+/)[0] || '')
+        setSubmittedLeadId(res.leadId)
         // Enhanced Conversions: Form-Daten (gehasht via gtag) für besseres Ads-Matching.
         setUserData({ name, phone: String(fd.get('phone') ?? '') })
         // Conversion-Event (Task 2): Lead aus dem Anspruch-Check. Tier mitgeben
@@ -129,6 +133,7 @@ export function CheckFunnelClient() {
     setAnswers({})
     setStep(0)
     setSubmittedName(null)
+    setSubmittedLeadId(null)
     setError(null)
     startedRef.current = false
   }
@@ -152,6 +157,14 @@ export function CheckFunnelClient() {
           <Phone className="h-4 w-4" aria-hidden />
           {PHONE_DISPLAY}
         </a>
+        {/* Foto-Check ERST hier mit leadId: vor dem Submit existiert der Lead noch nicht,
+            und eine Schaetzung ohne lead_id erreicht den Sachverstaendigen nie
+            (getAnspruchVorschauFuerFall laeuft ueber claims.lead_id -> schaetzung.lead_id;
+            prod 30.08.: 62 Schaetzungen, 0 verknuepft). Der CTA im Ergebnis-Block bleibt
+            bestehen — er fuehrt weiterhin ohne Lead ins Tool. */}
+        {buildCheckResult(answers).showRanges ? (
+          <AnspruchFotoCheckCta schuld={answers.schuld} leadId={submittedLeadId} />
+        ) : null}
         <button type="button" onClick={restart} className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-[12px] text-claimondo-shield/70 underline-offset-2 hover:underline">
           <RotateCcw className="h-3 w-3" aria-hidden /> {t('restart')}
         </button>

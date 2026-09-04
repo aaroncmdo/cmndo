@@ -15,6 +15,31 @@ import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/t
 import { pruefeBelegungStrict } from '@/lib/termine/engine'
 import { ladeSvAssigneeName } from '@/lib/termine/termin-assignee-name'
 
+type OrtLeadRow = {
+  vorname: string | null
+  nachname: string | null
+  schadentyp: string | null
+  kunde_plz: string | null
+  kunde_stadt: string | null
+  unfallort_plz: string | null
+  unfallort_ort: string | null
+}
+
+/**
+ * Ortsangabe fuer die SV-Benachrichtigungen (Mitteilung + WhatsApp).
+ *
+ * Frueher stand hier allein kunde_plz. Seit die Marketing-Formulare ihre
+ * Ortsangabe nach FORMAT einsortieren (Mig 20260830215041 — ein Stadtname
+ * gehoert nicht in eine PLZ-Spalte, die drei Konsumenten als PLZ lesen), ist
+ * kunde_plz bei "Osnabrueck" leer und der Wert steht in kunde_stadt.
+ * Ohne diesen Fallback bekaeme der Sachverstaendige "—" statt der Stadt.
+ * PLZ zuerst (praeziser), dann Ortsname.
+ */
+function ortsangabe(l: OrtLeadRow | null): string | null {
+  if (!l) return null
+  return l.kunde_plz ?? l.unfallort_plz ?? l.kunde_stadt ?? l.unfallort_ort ?? null
+}
+
 /**
  * Sticky-SV-Lookup: hat dieser Lead bereits einen gewohnten SV? Match per
  * lead.kunde_id ODER per E-Mail/Telefon auf claim_parties. SV muss aktiv sein.
@@ -284,15 +309,15 @@ export async function reserveSvTerminForLead(
   try {
     const { data: leadData } = await supabase
       .from('leads')
-      .select('vorname, nachname, schadentyp, kunde_plz')
+      .select('vorname, nachname, schadentyp, kunde_plz, kunde_stadt, unfallort_plz, unfallort_ort')
       .eq('id', leadId)
       .single()
-    const l = leadData as { vorname: string | null; nachname: string | null; schadentyp: string | null; kunde_plz: string | null } | null
+    const l = leadData as OrtLeadRow | null
     const { createGutachterMitteilung } = await import('@/lib/mitteilungen')
     await createGutachterMitteilung(svId, 'neuer_auftrag', null, {
       kunde_name: l ? `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() : '—',
       schadentyp: l?.schadentyp ?? undefined,
-      adresse: l?.kunde_plz ?? undefined,
+      adresse: ortsangabe(l) ?? undefined,
       datum: startDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
       uhrzeit: startDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     })
@@ -320,15 +345,10 @@ export async function reserveSvTerminForLead(
     if (phone && profileId) {
       const { data: leadData } = await supabase
         .from('leads')
-        .select('vorname, nachname, schadentyp, kunde_plz')
+        .select('vorname, nachname, schadentyp, kunde_plz, kunde_stadt, unfallort_plz, unfallort_ort')
         .eq('id', leadId)
         .single()
-      const ld = leadData as {
-        vorname: string | null
-        nachname: string | null
-        schadentyp: string | null
-        kunde_plz: string | null
-      } | null
+      const ld = leadData as OrtLeadRow | null
       const kundeName = ld ? `${ld.vorname ?? ''} ${ld.nachname ?? ''}`.trim() || 'Kunde' : 'Kunde'
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
       const link = `${baseUrl}/gutachter/termine/${inserted.id}`
@@ -347,7 +367,7 @@ export async function reserveSvTerminForLead(
         `📋 Neuer Auftrag — Claimondo\n\n` +
         `Kunde: ${kundeName}\n` +
         `Schadentyp: ${ld?.schadentyp ?? 'unbekannt'}\n` +
-        `PLZ: ${ld?.kunde_plz ?? '—'}\n` +
+        `Ort: ${ortsangabe(ld) ?? '—'}\n` +
         `Termin: ${datumKurz} · ${uhrzeit} Uhr\n\n` +
         `Details + Navigation:\n${link}`
       const { sendNachricht } = await import('@/lib/whatsapp/send')

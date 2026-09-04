@@ -38,19 +38,26 @@ export async function matchInboundToFall(
   const suffix = normalized.slice(-9)
   if (!suffix) return { fallId: null, leadId: null, multipleCandidates: false, candidates: [] }
 
-  // Lead-Match + Kunden-Match parallel
+  // Lead-Match + Kunden-Match parallel.
+  //
+  // Verglichen wird gegen telefon_ziffern (generierte Nur-Ziffern-Spalte), NICHT gegen
+  // telefon: `suffix` ist bereits von allen Nicht-Ziffern befreit, die Spalte war es nicht.
+  // Ein `ilike '%775799941%'` auf dem Rohwert verfehlt jede Nummer, in der ein Trennzeichen
+  // mitten im Suffix steht — z.B. '+49 177 5799941' (Lead 5c39b0ac, prod 30.08.): 0 Treffer,
+  // obwohl es dieselbe Nummer ist. Die Spalte traegt beide Formate, `telefon` ist also kein
+  // Formatvertrag; erst wenn Nadel UND Heuhaufen normalisiert sind, ist der Vergleich gueltig.
   const [leadsRes, kundenRes] = await Promise.all([
     admin
       .from('leads')
       .select('id, konvertiert_zu_fall_id')
-      .ilike('telefon', `%${suffix}%`)
+      .like('telefon_ziffern', `%${suffix}%`)
       .order('created_at', { ascending: false })
       .limit(10),
     admin
       .from('profiles')
       .select('id')
       .eq('rolle', 'kunde')
-      .ilike('telefon', `%${suffix}%`)
+      .like('telefon_ziffern', `%${suffix}%`)
       .limit(5),
   ])
 

@@ -7,7 +7,7 @@ import { processInboundMedia, type InboundMediaFile } from '@/lib/inbound/proces
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { istPartnerNummer } from '@/lib/inbound/ist-partner-nummer'
 import { createCase } from '@/lib/intake/create-case'
-import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
+import { notifyTeamWhatsApp, istTeamNummer } from '@/lib/whatsapp/team-notify'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -96,8 +96,20 @@ export async function POST(request: Request) {
   // (dort auf operative_status repointed) ist hier obsolet — der Shared-Matcher
   // matchInboundToFall kapselt die (CMM-74-konforme) Fall-Auswahl. Ein einziger SSoT.
   const match = await matchInboundToFall(db, phone)
-  const fallId = match.fallId
-  let leadId = match.leadId
+
+  // Eine AUSGEHENDE Nachricht an eine TEAM-Nummer ist eine Benachrichtigung UEBER einen
+  // Vorgang — keine Nachricht IM Vorgang. Der Telefon-Match trifft hier zwangslaeufig den
+  // Lead des EMPFAENGERS: gemessen prod 30.08. 20:12 gingen zwei Team-WAs ueber Lead
+  // 5c39b0ac raus und landeten an den Leads 159eac57 ("Trst Namewn") und f34c09ce ("Aaron
+  // Sprafke") — genau den Leads, die die beiden Team-Nummern tragen. Zwei fremde Vorgaenge
+  // trugen damit Nachrichten, die nicht zu ihnen gehoeren.
+  //
+  // Der Bezug ist hier nicht reparierbar (welcher Lead gemeint war, steht nur im Fliesstext),
+  // aber KEIN Bezug ist richtiger als ein falscher. Betrifft nur das fromMe-Echo; echte
+  // Inbound-Nachrichten einer Team-Nummer behalten ihre Zuordnung.
+  const anTeamNummer = fromMe && istTeamNummer(phone)
+  const fallId = anTeamNummer ? null : match.fallId
+  let leadId = anTeamNummer ? null : match.leadId
 
   // ─── Erstkontakt von unbekannter Nummer ──────────────────────────────────
   // Weder Fall noch Lead: entweder ein Interessent, der zum ersten Mal schreibt,
