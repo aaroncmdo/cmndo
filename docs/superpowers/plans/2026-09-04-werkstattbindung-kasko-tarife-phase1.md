@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-04-werkstattbindung-kasko-tarife-design.md` · **Scan:** `docs/2026-09-03-werkstattbindung-kasko-tarife-scan.md`
 
+**Änderungen 04.09. (Gegenlesen der Nähte, Aaron-Rückfrage):** Task 11 liefert `quelle` mit · Task 12 Step 3b: Wizard-Neuberechnung kennt die Bindung (sonst Tarif-Step doppelt) · Task 14 Step 7b: Embed-Re-Entry leert alte Bindungswerte · Task 17: eigene Action schreibt Lead **und** Claim, setzt `eigene_versicherung='ja'`.
+
 ## Global Constraints
 
 - **Arbeitsort:** Worktree `.claude/worktrees/werkstattbindung-kasko-tarife`, Branch `kitta/werkstattbindung-kasko-tarife` (Basis `origin/staging`). NIEMALS im Haupt-Checkout arbeiten (963 Commits stale). PR gegen `staging`, nie auf `main` (AGENTS.md Regel 1).
@@ -42,7 +44,7 @@
 - `src/components/self-service/KaskoTarifFrage.tsx` · `KaskoBindungEndansicht.tsx` · `KaskoUnklarHinweis.tsx`
 - `src/app/flow/[token]/FlowKaskoBindungGate.tsx` — Re-Visit-Gate für bereits disqualifizierte Bindungs-Leads
 - `src/components/kunde/KaskoTarifCard.tsx` · `KaskoBindungCard.tsx` · `src/app/kunde/faelle/[id]/kasko-tarif-actions.ts`
-- `src/app/dispatch/leads/[id]/_v2/DispatchKaskoTarifField.tsx`
+- `src/app/dispatch/leads/[id]/_v2/DispatchKaskoTarifField.tsx` · `_actions/kasko-tarif.ts`
 - `src/app/admin/einstellungen/kasko-tarife/page.tsx` · `KaskoTarifeTable.tsx`
 
 **Geändert**
@@ -50,7 +52,7 @@
 - `src/lib/self-service/flow-kontext.ts` (+ `werkstattbindung_quelle`) · `src/lib/leads/spiegle-quali-auf-claim.ts` · `src/lib/leads/convert-lead-to-claim.ts`
 - `src/lib/werkstatt/vermittlung-core.ts` (`BedarfRow.freie_werkstattwahl`) · `vermittlung-server.ts` (Guard) · `src/lib/claims/kunde-claim-view.ts` (Flags) · `src/components/kunde/claim-view/GeldZone.tsx`
 - `src/app/embed/werkstatt-finder/_components/wizard-logic.ts` · `AbrechnungStep.tsx` · `WerkstattWizard.tsx` · `src/app/embed/werkstatt-finder/actions.ts` · `src/lib/werkstatt/embed-finder-core.ts`
-- `src/app/dispatch/leads/[id]/DispatchGatesPanel.tsx` · `_v2/dispatch-field-override-keys.ts` · `_v2/dispatch-field-overrides.tsx` · `_actions/stammdaten.ts`
+- `src/app/dispatch/leads/[id]/DispatchGatesPanel.tsx` · `_v2/dispatch-field-override-keys.ts` · `_v2/dispatch-field-overrides.tsx`
 - `src/lib/supabase/database.types.ts` (regeneriert) · `scripts/lib/schema-snapshot.json` (regeneriert)
 
 ---
@@ -1809,7 +1811,7 @@ Claude-Session: https://claude.ai/code/session_01639P4PEAjWuDGmsXV4bBrG"
 - Modify: `src/lib/self-service/flow-kontext.ts` + Test `src/lib/self-service/__tests__/flow-kontext.test.ts`
 
 **Interfaces:**
-- Produces: `speichereKaskoTarifFlow(token, auswahl): Promise<{ ok: true; ergebnis: 'weiter'|'abbruch'|'unklar'; freieWerkstattwahl: boolean|null; info: KaskoBindungsInfo|null } | { ok: false; error: string }>` und `ladeKaskoBindungsInfoFuerFlow(token)`; `buildWerkstattbindungEmailHtml`, `notifyKundeWerkstattbindung`.
+- Produces: `speichereKaskoTarifFlow(token, auswahl): Promise<{ ok: true; ergebnis: 'weiter'|'abbruch'|'unklar'; freieWerkstattwahl: boolean|null; quelle: WerkstattbindungQuelle; info: KaskoBindungsInfo|null } | { ok: false; error: string }>` und `ladeKaskoBindungsInfoFuerFlow(token)`; `buildWerkstattbindungEmailHtml`, `notifyKundeWerkstattbindung`.
 - Consumes: `resolveFlowLead`, `speichereQualiFlow`, `spiegleQualiAufClaim` (bestehend), `createLinkedTask` (`@/lib/tasks/create-task`), `leiteWerkstattbindungAb`, `ladeKaskoBindungsInfo`.
 
 - [ ] **Step 1: Mail-Test**
@@ -2000,7 +2002,7 @@ import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
 import { notifyKundeWerkstattbindung } from '@/lib/kasko-wb/notify-kunde-werkstattbindung'
 import { createLinkedTask } from '@/lib/tasks/create-task'
-import type { Bindungsumfang, KaskoBindungsInfo, KaskoTarifAuswahl, WbStatus } from '@/lib/kasko-wb/types'
+import type { Bindungsumfang, KaskoBindungsInfo, KaskoTarifAuswahl, WbStatus, WerkstattbindungQuelle } from '@/lib/kasko-wb/types'
 ```
 
 und nach `speichereQualiFlow` einfügen:
@@ -2016,7 +2018,7 @@ export async function speichereKaskoTarifFlow(
   token: string,
   auswahl: KaskoTarifAuswahl,
 ): Promise<
-  | { ok: true; ergebnis: 'weiter' | 'abbruch' | 'unklar'; freieWerkstattwahl: boolean | null; info: KaskoBindungsInfo | null }
+  | { ok: true; ergebnis: 'weiter' | 'abbruch' | 'unklar'; freieWerkstattwahl: boolean | null; quelle: WerkstattbindungQuelle; info: KaskoBindungsInfo | null }
   | { ok: false; error: string }
 > {
   const { admin, leadId, error } = await resolveFlowLead(token)
@@ -2076,7 +2078,7 @@ export async function speichereKaskoTarifFlow(
       }
     }
     revalidatePath(`/flow/${token}`)
-    return { ok: true, ergebnis: 'abbruch', freieWerkstattwahl: false, info }
+    return { ok: true, ergebnis: 'abbruch', freieWerkstattwahl: false, quelle: ergebnis.quelle, info }
   }
 
   if (ergebnis.freieWerkstattwahl === null) {
@@ -2097,11 +2099,11 @@ export async function speichereKaskoTarifFlow(
       console.error('[kasko-tarif] Dispatch-Task fehlgeschlagen (non-critical):', err)
     }
     revalidatePath(`/flow/${token}`)
-    return { ok: true, ergebnis: 'unklar', freieWerkstattwahl: null, info: null }
+    return { ok: true, ergebnis: 'unklar', freieWerkstattwahl: null, quelle: ergebnis.quelle, info: null }
   }
 
   revalidatePath(`/flow/${token}`)
-  return { ok: true, ergebnis: 'weiter', freieWerkstattwahl: true, info: null }
+  return { ok: true, ergebnis: 'weiter', freieWerkstattwahl: true, quelle: ergebnis.quelle, info: null }
 }
 
 /** Re-Visit eines bereits wegen Bindung disqualifizierten Leads: Endseite braucht die Info erneut. */
@@ -2243,6 +2245,14 @@ Phase-Typ erweitern:
 
 ```ts
 type Phase = 'frage' | 'versicherung' | 'werkstattbindung' | 'sende' | 'abbruch' | 'abbruch_bindung' | 'unklar' | 'selbstzahler' | 'fehler'
+// Kasko-WB Phase 1: die Bindungs-Antwort reist zur Step-Neuberechnung mit (siehe uebernimmSzenario).
+type Bindung = { freie_werkstattwahl: boolean | null; werkstattbindung_quelle: string | null }
+```
+
+Prop-Typ `onSzenario` erweitern:
+
+```ts
+  onSzenario?: (schuldfrage: string, ueberEigeneVersicherung: boolean | null, bindung?: Bindung) => void
 ```
 
 State ergänzen (neben `fehler`):
@@ -2250,12 +2260,18 @@ State ergänzen (neben `fehler`):
 ```ts
   const [bindungInfo, setBindungInfo] = useState<KaskoBindungsInfo | null>(null)
   const [markeName, setMarkeName] = useState<string | null>(null)
+  const [letzteBindung, setLetzteBindung] = useState<Bindung | null>(null)
 ```
 
 Aus `sende` den Weiter-Pfad ab `onSchuldfrage?.(schuldfrage)` in eine Funktion ziehen und von beiden Wegen nutzen — `sende` wird zu:
 
 ```ts
-  async function nachQualiWeiter(schuldfrage: string, ueberEigeneVersicherung: boolean | undefined, abrechnungsweg: string | null | undefined) {
+  async function nachQualiWeiter(
+    schuldfrage: string,
+    ueberEigeneVersicherung: boolean | undefined,
+    abrechnungsweg: string | null | undefined,
+    bindung?: Bindung,
+  ) {
     // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden.
     onSchuldfrage?.(schuldfrage)
     if (abrechnungsweg === 'selbstzahler' || abrechnungsweg === 'kasko') {
@@ -2267,11 +2283,11 @@ Aus `sende` den Weiter-Pfad ab `onSchuldfrage?.(schuldfrage)` in eine Funktion z
         return
       }
       onSelbstzahler?.(claimRes.claimId)
-      onSzenario?.(schuldfrage, ueberEigeneVersicherung ?? null)
+      onSzenario?.(schuldfrage, ueberEigeneVersicherung ?? null, bindung)
       return
     }
     if (onSzenario) {
-      onSzenario(schuldfrage, ueberEigeneVersicherung ?? null)
+      onSzenario(schuldfrage, ueberEigeneVersicherung ?? null, bindung)
       return
     }
     onWeiter()
@@ -2316,10 +2332,11 @@ Aus `sende` den Weiter-Pfad ab `onSchuldfrage?.(schuldfrage)` in eine Funktion z
         return
       }
       if (r.ergebnis === 'unklar') {
+        setLetzteBindung({ freie_werkstattwahl: null, werkstattbindung_quelle: r.quelle })
         setPhase('unklar')
         return
       }
-      await nachQualiWeiter('eigenverantwortung', true, 'kasko')
+      await nachQualiWeiter('eigenverantwortung', true, 'kasko', { freie_werkstattwahl: r.freieWerkstattwahl, werkstattbindung_quelle: r.quelle })
     } catch {
       setPhase('fehler')
       setFehler(t('errors.unerwartet'))
@@ -2334,7 +2351,7 @@ Render-Zweige: vor `if (phase === 'abbruch') return <KaskoEndansicht />` einfüg
     return <KaskoBindungEndansicht info={bindungInfo} onRueckruf={() => fordereRueckrufAn(token)} />
   }
   if (phase === 'unklar') {
-    return <KaskoUnklarHinweis markeName={markeName} onWeiter={() => void nachQualiWeiter('eigenverantwortung', true, 'kasko')} />
+    return <KaskoUnklarHinweis markeName={markeName} onWeiter={() => void nachQualiWeiter('eigenverantwortung', true, 'kasko', letzteBindung ?? undefined)} />
   }
 ```
 
@@ -2379,6 +2396,43 @@ export function FlowKaskoBindungGate({ token }: { token: string }) {
   if (!info) return <p className="text-body-sm text-claimondo-navy/60">Wird geladen …</p>
   return <KaskoBindungEndansicht info={info} onRueckruf={() => fordereRueckrufAn(token)} />
 }
+```
+
+- [ ] **Step 3b: Wizard-Neuberechnung kennt die Bindung** — in `src/app/flow/[token]/FlowWizardKfz.tsx` baut `uebernimmSzenario` (~Zeile 466) den Kontext aus dem beim Mount geladenen `lead`-Prop plus Schuldfrage/Kasko-Antwort. Die Bindungs-Antwort des Quali-Steps steht dort NICHT drin → mit der Step-Bedingung `{"freie_werkstattwahl": null, "werkstattbindung_quelle": null}` erschiene `werkstattbindung_check` direkt nach der Quali ein zweites Mal (heute schon latent mit der binären Frage). Signatur und Kontext erweitern:
+
+```ts
+  function uebernimmSzenario(
+    schuldfrage: string,
+    ueberEigeneVersicherung: boolean | null,
+    // Kasko-WB Phase 1: Antwort des Quali-Tarif-Steps — im stale lead-Prop nicht enthalten.
+    bindung?: { freie_werkstattwahl: boolean | null; werkstattbindung_quelle: string | null },
+  ) {
+    if (!flowConfig || flowConfig.szenarien.length === 0) {
+      setStepIndex((i) => i + 1) // ohne Config: Legacy-Pfad, einfach weiter
+      return
+    }
+    const kontext = bauFlowKontext(
+      {
+        ...(lead as unknown as LeadFuerKontext),
+        schuldfrage,
+        eigene_versicherung:
+          ueberEigeneVersicherung === true ? 'ja' : ueberEigeneVersicherung === false ? 'nein' : null,
+        ...(bindung ?? {}),
+      },
+      hatSvTermin === true,
+    )
+```
+
+(Rest der Funktion unverändert.) Test in `src/lib/self-service/__tests__/flow-szenarien.test.ts` ergänzen:
+
+```ts
+  it('Kasko: werkstattbindung_check verschwindet nach Antwort (true, false ODER quelle=unbekannt)', () => {
+    const steps = [{ szenario_id: 'kasko', step_id: 'werkstattbindung_check', reihenfolge: 3, bedingung: { freie_werkstattwahl: null, werkstattbindung_quelle: null }, erhebt_felder: [] }]
+    const base = { schuldfrage: 'eigenverantwortung', eigene_versicherung: 'ja' }
+    expect(berechneAktiveSteps(steps, 'kasko', { ...base, freie_werkstattwahl: null, werkstattbindung_quelle: null })).toEqual(['werkstattbindung_check'])
+    expect(berechneAktiveSteps(steps, 'kasko', { ...base, freie_werkstattwahl: true, werkstattbindung_quelle: 'tarif' })).toEqual([])
+    expect(berechneAktiveSteps(steps, 'kasko', { ...base, freie_werkstattwahl: null, werkstattbindung_quelle: 'unbekannt' })).toEqual([])
+  })
 ```
 
 - [ ] **Step 4: Wizard-Gate** — in `src/app/flow/[token]/FlowWizardKfz.tsx`: im `lead`-Prop-Typ neben `disqualifiziert?: boolean | null` ergänzen `disqualifiziert_grund_key?: string | null`; Import `import { FlowKaskoBindungGate } from './FlowKaskoBindungGate'`; den Block
@@ -2751,6 +2805,23 @@ import type { KaskoTarifAuswahl, WbErgebnis } from '@/lib/kasko-wb/types'
   }
 ```
 
+- [ ] **Step 7b: Re-Entry räumt alte Bindungswerte ab** — im Re-Entry-Zweig von `erstelleWerkstattFinderLead` (bestehender Lead über `flowToken`) werden `null`-Werte aus `extra` gestrippt. Wechselt der Kunde beim zweiten Durchlauf von Kasko auf Selbstzahler/Haftpflicht, blieben Tarif und `freie_werkstattwahl=false` stehen — ein Selbstzahler bekäme nie eine Werkstatt. Direkt nach der Strip-Schleife (`for (const [k, v] of Object.entries(extra)) …`) einfügen:
+
+```ts
+      // Kasko-WB Phase 1: weg von Kasko -> Tarif- und Bindungsfelder EXPLIZIT leeren (der Null-Strip oben
+      // liesse sie stehen; freie_werkstattwahl=false ohne Kasko sperrt die Werkstatt-Vermittlung).
+      if (payload.eigeneVersicherung !== 'ja') {
+        Object.assign(update, {
+          eigene_versicherung_marke_id: null,
+          eigene_versicherung_name: null,
+          eigene_kasko_tarif_id: null,
+          eigene_kasko_tarif_name: null,
+          werkstattbindung_quelle: null,
+          freie_werkstattwahl: null,
+        })
+      }
+```
+
 - [ ] **Step 8: Grün** — `./node_modules/.bin/vitest run src/app/embed src/lib/werkstatt && ./node_modules/.bin/tsc --noEmit && node scripts/check-use-server-exports.mjs && node scripts/check-component-set.mjs` → PASS.
 
 - [ ] **Step 9: Commit**
@@ -3032,18 +3103,50 @@ Claude-Session: https://claude.ai/code/session_01639P4PEAjWuDGmsXV4bBrG"
 
 **Files:**
 - Create: `src/app/dispatch/leads/[id]/_v2/DispatchKaskoTarifField.tsx`
-- Modify: `src/app/dispatch/leads/[id]/_v2/dispatch-field-override-keys.ts`, `_v2/dispatch-field-overrides.tsx`, `_actions/stammdaten.ts` (Allowlist)
+- Create: `src/app/dispatch/leads/[id]/_actions/kasko-tarif.ts`
+- Modify: `src/app/dispatch/leads/[id]/_v2/dispatch-field-override-keys.ts`, `_v2/dispatch-field-overrides.tsx`
 
 **Interfaces:**
 - `onboarding_felder`-Zeile `eigene_kasko_tarif` (Task 5) → Override rendert `DispatchKaskoTarifField`.
-- Schreibt via `saveStammdaten(leadId, {...})`: `eigene_versicherung_marke_id`, `eigene_versicherung_name`, `eigene_kasko_tarif_id`, `eigene_kasko_tarif_name`, `freie_werkstattwahl`, `werkstattbindung_quelle: 'dispatcher'`.
+- Schreibt via neuer Action `speichereKaskoTarifDispatch(leadId, patch)` (Lead **und** — falls konvertiert — Claim, überschreibend): `eigene_versicherung_marke_id`, `eigene_versicherung_name`, `eigene_kasko_tarif_id`, `eigene_kasko_tarif_name`, `freie_werkstattwahl`, `eigene_versicherung` (`'ja'` sobald eine Marke gewählt ist, sonst bleibt `eigenverantwortung` ohne Kasko-Antwort in der stillen Kante), `werkstattbindung_quelle: 'dispatcher'`. `saveStammdaten` bleibt unangetastet (kein Claim-Sync dort, die Klasse „Antwort im Lead, gelesen wird der Claim“).
 
-- [ ] **Step 1: Allowlist** — in `_actions/stammdaten.ts` in `STAMMDATEN_ALLOWED_FIELDS` ergänzen:
+- [ ] **Step 1: Server-Action mit Lead+Claim-Write** — neue Datei `src/app/dispatch/leads/[id]/_actions/kasko-tarif.ts` (Rollen-Guard exakt wie in `_actions/werkstatt-vermittlung.ts`: `grep -n "requireRole" "src/app/dispatch/leads/[id]/_actions/werkstatt-vermittlung.ts"` → denselben Import und Aufruf übernehmen):
 
 ```ts
-  // Kasko-WB Phase 1: Dispatcher-Override von Versicherer/Tarif/Bindung (DispatchKaskoTarifField)
-  'eigene_versicherung_marke_id', 'eigene_versicherung_name', 'eigene_kasko_tarif_id', 'eigene_kasko_tarif_name',
-  'freie_werkstattwahl', 'werkstattbindung_quelle',
+'use server'
+
+// Kasko-WB Phase 1 (Spec §7): Dispatcher korrigiert Versicherer/Tarif/Bindung. Schreibt Lead UND den
+// bereits konvertierten Claim (ueberschreibend) — spiegleQualiAufClaim fuellt nur leere Felder und
+// saveStammdaten kennt keinen Claim-Sync; beides liesse die Korrektur im Lead versanden, waehrend
+// Kunde/Werkstatt/SV den Claim lesen (Scan: "Antwort landet im Lead, gelesen wird der Claim").
+
+import { revalidatePath } from 'next/cache'
+import { createAdminClient } from '@/lib/supabase/admin'
+// requireRole-Import wie in ./werkstatt-vermittlung.ts
+
+export type KaskoTarifDispatchPatch = {
+  eigene_versicherung_marke_id: string | null
+  eigene_versicherung_name: string | null
+  eigene_kasko_tarif_id: string | null
+  eigene_kasko_tarif_name: string | null
+  freie_werkstattwahl: boolean | null
+  eigene_versicherung: 'ja' | 'nein' | null
+}
+
+export async function speichereKaskoTarifDispatch(
+  leadId: string,
+  patch: KaskoTarifDispatchPatch,
+): Promise<{ ok: boolean; error?: string }> {
+  await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
+  const admin = createAdminClient()
+  const werte = { ...patch, werkstattbindung_quelle: 'dispatcher' }
+  const { error } = await admin.from('leads').update(werte as never).eq('id', leadId)
+  if (error) return { ok: false, error: error.message }
+  const { error: claimErr } = await admin.from('claims').update(werte as never).eq('lead_id', leadId)
+  if (claimErr) return { ok: false, error: `Lead gespeichert, Claim nicht: ${claimErr.message}` }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { ok: true }
+}
 ```
 
 - [ ] **Step 2: Key registrieren** — in `dispatch-field-override-keys.ts` das Array um `'eigene_kasko_tarif',` ergänzen (Kommentar: `// Kasko-WB Phase 1: Versicherer/Tarif/Bindung als Rich-Feld`).
@@ -3061,7 +3164,7 @@ import { VersichererSelect } from '@/components/shared/VersichererSelect'
 import type { OnboardingFeld } from '@/components/onboarding/types'
 import { ladeKaskoMarken, ladeKaskoTarife } from '@/lib/kasko-wb/actions'
 import type { KaskoMarke, KaskoTarif } from '@/lib/kasko-wb/types'
-import { saveStammdaten } from '../_actions/stammdaten'
+import { speichereKaskoTarifDispatch } from '../_actions/kasko-tarif'
 import { OverrideFieldShell, type OverrideSaveStatus } from './OverrideFieldShell'
 
 type Bindung = 'frei' | 'gebunden' | 'unbekannt'
@@ -3092,15 +3195,16 @@ export function DispatchKaskoTarifField({ feld, leadId, lead }: { feld: Onboardi
     setStatus('saving')
     const m = marken.find((x) => x.id === next.markeId) ?? null
     const t = tarife.find((x) => x.id === next.tarifId) ?? null
-    const r = await saveStammdaten(leadId, {
+    const r = await speichereKaskoTarifDispatch(leadId, {
       eigene_versicherung_marke_id: next.markeId,
       eigene_versicherung_name: m?.marke ?? ((lead.eigene_versicherung_name as string | null) ?? null),
       eigene_kasko_tarif_id: next.tarifId,
       eigene_kasko_tarif_name: t?.anzeigename ?? null,
       freie_werkstattwahl: next.bindung === 'frei' ? true : next.bindung === 'gebunden' ? false : null,
-      werkstattbindung_quelle: 'dispatcher',
+      // Marke gewaehlt = der Kunde IST kaskoversichert; sonst bliebe eigenverantwortung ohne Antwort (stille Kante).
+      eigene_versicherung: next.markeId ? 'ja' : ((lead.eigene_versicherung as 'ja' | 'nein' | null) ?? null),
     })
-    setStatus(r.success ? 'saved' : 'error')
+    setStatus(r.ok ? 'saved' : 'error')
   }
 
   function waehleTarif(id: string | null) {
@@ -3181,7 +3285,7 @@ export function DispatchKaskoTarifField({ feld, leadId, lead }: { feld: Onboardi
 - [ ] **Step 6: Commit**
 
 ```bash
-git add "src/app/dispatch/leads/[id]/_v2/DispatchKaskoTarifField.tsx" "src/app/dispatch/leads/[id]/_v2/dispatch-field-override-keys.ts" "src/app/dispatch/leads/[id]/_v2/dispatch-field-overrides.tsx" "src/app/dispatch/leads/[id]/_actions/stammdaten.ts"
+git add "src/app/dispatch/leads/[id]/_v2/DispatchKaskoTarifField.tsx" "src/app/dispatch/leads/[id]/_v2/dispatch-field-override-keys.ts" "src/app/dispatch/leads/[id]/_v2/dispatch-field-overrides.tsx" "src/app/dispatch/leads/[id]/_actions/kasko-tarif.ts"
 git commit -m "feat(kasko-wb): Dispatcher-Feld fuer Versicherer, Tarif und Bindung (Override, quelle=dispatcher)
 
 Audit:
@@ -3190,8 +3294,8 @@ Audit:
 - Redundanz: VersichererSelect + Override-Muster (DispatchVersichererField)
 - Dead-Code: nichts
 - Spec: §7
-- Inkonsistenz: Allowlist erweitert, Umlaute
-- Regression: uebrige Overrides unveraendert (Record-Typ erzwingt Vollstaendigkeit)
+- Inkonsistenz: Result-Object, revalidatePath, Umlaute; Lead+Claim in EINER Action
+- Regression: uebrige Overrides unveraendert (Record-Typ erzwingt Vollstaendigkeit); saveStammdaten unangetastet
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01639P4PEAjWuDGmsXV4bBrG"
