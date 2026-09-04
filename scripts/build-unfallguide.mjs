@@ -18,9 +18,12 @@
  *   - Ueberlappungen    (Fuss auf Seite 4 lag uebereinander)
  *   - Fremdschriften    (Stern/Pfeil fielen auf Segoe UI zurueck)
  */
-// @playwright/test, nicht 'playwright': nur ersteres steht in der package.json.
-// Ein Import auf 'playwright' waere eine unlisted dependency und blockt check:knip.
-import { chromium } from '@playwright/test'
+// @playwright/test wird ERST IN bauen() geladen, nicht hier oben. Sonst kann
+// `--check` nicht laufen, ohne dass Playwright installiert ist - und ein Check,
+// der nicht startet, ist kein Check. (Selbst hereingelaufen: der Nachweislauf
+// fuer die Abnahme scheiterte genau daran.)
+// '@playwright/test' und nicht 'playwright': nur ersteres steht in der
+// package.json, ein Import auf 'playwright' waere unlisted und blockt check:knip.
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
@@ -87,6 +90,7 @@ function assetsPruefen() {
 async function bauen() {
   if (!existsSync(QUELLE)) throw new Error(`Quelle fehlt: ${QUELLE}`)
   assetsPruefen()
+  const { chromium } = await import('@playwright/test')
   const browser = await chromium.launch()
   try {
     const seite = await browser.newPage()
