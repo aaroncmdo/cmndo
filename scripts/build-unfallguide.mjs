@@ -23,7 +23,8 @@
 import { chromium } from '@playwright/test'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
-import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 
 const wurzel = join(dirname(fileURLToPath(import.meta.url)), '..')
 const QUELLE = join(wurzel, 'docs/unfallguide/unfallguide.html')
@@ -37,8 +38,51 @@ const SOLL = {
   maxBytes: 900 * 1024,
 }
 
+/**
+ * Jede lokal referenzierte Datei muss existieren. Ohne diese Pruefung wird aus
+ * einem verschobenen Logo still ein leerer Kasten: Chromium rendert ein fehlendes
+ * <img> ohne Fehler, und im fertigen PDF sieht das aus wie Absicht. Der Guide
+ * referenziert die Marke bewusst aus claimondo-marketing/public/, damit er der
+ * Marke folgt — dieser Preis dafuer ist die Pruefung hier.
+ */
+function assetsPruefen() {
+  const html = readFileSync(QUELLE, 'utf8')
+  const refs = [...html.matchAll(/\bsrc="([^"]+)"/g)]
+    .map((m) => m[1])
+    .filter((s) => !/^(https?:|data:|#)/.test(s))
+  const fehlend = refs.filter((r) => !existsSync(join(dirname(QUELLE), r)))
+  if (fehlend.length) {
+    throw new Error(
+      `Referenzierte Datei(en) fehlen — das PDF haette an dieser Stelle ein Loch:\n` +
+        fehlend.map((f) => `  - ${f}`).join('\n'),
+    )
+  }
+  console.log(`Assets   ${refs.length} referenziert, alle vorhanden`)
+
+  // titelbild.jpg ist aus dem Markenbild abgeleitet (PNG -> JPEG, sonst 2,5 MB).
+  // Aendert sich das Original, muss die Ableitung nachgezogen werden — sonst
+  // traegt der Guide still ein veraltetes Titelbild.
+  const herkunft = join(dirname(QUELLE), 'titelbild-quelle.txt')
+  if (existsSync(herkunft)) {
+    const erwartet = /^md5\s*:\s*([0-9a-f]{32})/m.exec(readFileSync(herkunft, 'utf8'))?.[1]
+    const original = join(wurzel, 'claimondo-marketing/public/brand/hero-unfall-frau.png')
+    if (erwartet && existsSync(original)) {
+      const ist = createHash('md5').update(readFileSync(original)).digest('hex')
+      if (ist !== erwartet) {
+        throw new Error(
+          'Das Markenbild brand/hero-unfall-frau.png hat sich geaendert — titelbild.jpg ' +
+            'ist veraltet.\n  neu ableiten und die md5 in titelbild-quelle.txt nachziehen.\n' +
+            `  erwartet ${erwartet}\n  ist      ${ist}`,
+        )
+      }
+      console.log('Titelbild aus dem Markenbild abgeleitet, md5 stimmt')
+    }
+  }
+}
+
 async function bauen() {
   if (!existsSync(QUELLE)) throw new Error(`Quelle fehlt: ${QUELLE}`)
+  assetsPruefen()
   const browser = await chromium.launch()
   try {
     const seite = await browser.newPage()

@@ -1,0 +1,10 @@
+titelbild.jpg ist eine ABGELEITETE Fassung - nicht von Hand bearbeiten.
+
+Quelle : claimondo-marketing/public/brand/hero-unfall-frau.png
+md5    : 8728c637a10290b10871c044cfcef784
+Erzeugt: PIL, JPEG q82, progressive, optimize
+
+Warum abgeleitet und nicht direkt referenziert: das Original ist ein PNG.
+Ein unkomprimiertes Foto treibt die PDF auf 2,5 MB - als JPEG sind es rund
+ein Zehntel davon. Das Build-Skript prueft die md5 der Quelle und meldet sich,
+wenn das Markenbild sich geaendert hat.

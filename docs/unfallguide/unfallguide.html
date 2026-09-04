@@ -9,15 +9,34 @@
   Ausgabe: claimondo-marketing/public/downloads/claimondo-unfallguide.pdf
 
   Regeln, die hier gelten und beim Bearbeiten nicht brechen duerfen:
-  1. KEINE Zeichen, die Montserrat nicht hat. Stern und Pfeil sind Inline-SVG.
+
+  1. ECHTE ASSETS, keine Nachbauten. Marke und Wortmarke werden direkt aus
+     claimondo-marketing/public/ REFERENZIERT, nicht nachgezeichnet — dann folgt
+     der Guide automatisch, wenn die Marke sich aendert. Die Icons sind
+     Original-Pfade aus lucide 1.8.0 (liegt als lucide-react im Projekt).
+     Das Titelbild ist die EINZIGE Ausnahme: titelbild.jpg ist aus
+     brand/hero-unfall-frau.png abgeleitet, weil das Original ein PNG ist und
+     ein unkomprimiertes Foto die PDF auf 2,5 MB treibt (siehe
+     titelbild-quelle.txt). Das Build-Skript prueft beides: dass jede
+     referenzierte Datei existiert, und dass das Markenbild sich nicht
+     unbemerkt geaendert hat.
+
+  2. KEINE Zeichen, die Montserrat nicht hat. Stern, Pfeil und Telefon sind SVG.
      Ein fehlendes Glyph faellt sonst still auf eine Systemschrift zurueck und
      das Dokument sieht auf jedem Rechner anders aus.
-  2. Der Fuss ist letztes Flex-Kind mit margin-top:auto, nie absolut positioniert.
+
+  3. Der Fuss ist letztes Flex-Kind mit margin-top:auto, nie absolut positioniert.
      Absolute Fuesse haben sich in der Vorfassung ueberlappt.
-  3. Der QR-Code steht in --navy. Ein heller QR ist nicht scanbar (Vorfassung:
+
+  4. Der QR-Code steht in --navy. Ein heller QR ist nicht scanbar (Vorfassung:
      #E4E9F1 auf Weiss = 1,2:1, von keinem Decoder lesbar).
-  4. Leistungsaussagen brauchen einen Beleg. Aussagen ueber den ANSPRUCH
-     (was zusteht) sind belegt durch das Gesetz und stehen frei.
+
+  5. BEWERTUNGEN SIND ECHT ODER SIE FEHLEN. Die drei Google-Rezensionen auf
+     Seite 2 stehen wortgleich auf der Marketing-Seite (GoogleReviewsStrip.tsx,
+     von Aaron am 18.05.2026 eingepflegt). Nie welche erfinden — UWG § 5.
+
+  6. Leistungsaussagen brauchen einen Beleg. Aussagen ueber den ANSPRUCH
+     (was zusteht) sind durch das Gesetz belegt und stehen frei.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,10 +55,10 @@
     --ink-leise:#6C7A94;
     --linie:#DDE3EE;
     --linie-zart:#E9EDF4;
-    /* Semantisch: Kosten und Gefahr auf Seite 3 */
+    /* Semantisch */
     --warn:#8A6320;
     --warn-flaeche:#FAF3E6;
-    --gut:#3D9970;
+    --stern:#E0A83C;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -53,19 +72,19 @@
 
   .seite{
     width:210mm;height:297mm;
-    padding:14mm 15mm 11mm;
+    padding:13mm 15mm 10mm;
     display:flex;flex-direction:column;
     background:var(--paper);
     page-break-after:always;position:relative;overflow:hidden;
   }
   .seite:last-child{page-break-after:auto}
 
-  /* ── Kopf ───────────────────────────────────────────── */
+  /* ── Kopf: echte Marke + echte Wortmarke ────────────── */
   .kopf{display:flex;justify-content:space-between;align-items:center;
         flex:0 0 auto;margin-bottom:6mm}
-  .logo{display:flex;align-items:center;gap:2.4mm}
-  .logo-zeichen{width:6.6mm;height:6.6mm;flex:0 0 auto}
-  .logo-wort{font-size:12.5pt;font-weight:600;letter-spacing:-.015em;color:var(--navy)}
+  .logo{display:flex;align-items:center;gap:2.6mm}
+  .logo img.marke{width:7mm;height:7mm;display:block}
+  .logo img.wort{height:4.2mm;display:block}
   .rubrik{font-size:7.2pt;font-weight:600;letter-spacing:.22em;
           text-transform:uppercase;color:var(--mid)}
 
@@ -73,13 +92,13 @@
   h1{font-size:31pt;font-weight:700;line-height:1.06;letter-spacing:-.028em;color:#fff}
   h1 .zweit{color:var(--light);display:block}
   h2{font-size:19.5pt;font-weight:700;line-height:1.14;letter-spacing:-.022em;
-     color:var(--navy);margin-bottom:4.5mm}
+     color:var(--navy);margin-bottom:3mm}
   h2 .zweit{color:var(--light)}
   h3{font-size:10.5pt;font-weight:600;color:var(--navy);margin:4mm 0 2.2mm}
 
   /* ── Fuss: letztes Flex-Kind, nie absolut ───────────── */
   .fuss{
-    flex:0 0 auto;margin-top:auto;padding-top:3.4mm;
+    flex:0 0 auto;margin-top:auto;padding-top:3.2mm;
     border-top:1px solid var(--linie-zart);
     display:flex;justify-content:space-between;align-items:flex-end;gap:6mm;
     font-size:7.2pt;color:var(--ink-leise);
@@ -91,16 +110,16 @@
   .cta{
     flex:0 0 auto;background:var(--navy);border-radius:3mm;
     text-decoration:none;color:inherit;
-    padding:5.2mm 6mm;margin-top:5mm;
+    padding:4.3mm 6mm;margin-top:3.4mm;
     display:flex;align-items:center;justify-content:space-between;gap:6mm;
   }
   .cta-text{flex:1 1 auto;min-width:0}
   .cta-t{display:block;font-size:11.4pt;font-weight:700;color:#fff;
-         letter-spacing:-.015em;margin-bottom:1.4mm}
+         letter-spacing:-.015em;margin-bottom:1.3mm}
   .cta-s{display:block;font-size:8.1pt;color:rgba(255,255,255,.74);line-height:1.45}
   .cta-pille{
     flex:0 0 auto;background:var(--light);border-radius:99mm;
-    padding:2.9mm 6.4mm;font-size:11.2pt;font-weight:700;color:var(--navy);
+    padding:2.8mm 6.2mm;font-size:11.2pt;font-weight:700;color:var(--navy);
     letter-spacing:-.01em;white-space:nowrap;text-decoration:none;
   }
 
@@ -110,66 +129,84 @@
   .titel-bild img{width:100%;height:100%;object-fit:cover;display:block}
   .titel-schleier{position:absolute;inset:0;
     background:linear-gradient(168deg,
-      rgba(13,27,62,.93) 0%, rgba(13,27,62,.80) 42%, rgba(13,27,62,.90) 100%);}
+      rgba(13,27,62,.93) 0%, rgba(13,27,62,.78) 42%, rgba(13,27,62,.92) 100%);}
   .titel-inhalt{position:relative;z-index:1;display:flex;flex-direction:column;
-                height:100%;padding:14mm 15mm 11mm}
+                height:100%;padding:13mm 15mm 10mm}
   .titel .rubrik{color:rgba(255,255,255,.55)}
-  .titel .logo-wort{color:#fff}
+  /* Die Wortmarke ist zweifarbig navy — auf dunklem Grund weiss ausknocken. */
+  .titel .logo img.wort{filter:brightness(0) invert(1)}
   .titel .fuss{border-top-color:rgba(255,255,255,.15);color:rgba(255,255,255,.55);
                margin-top:4mm}
   .titel .cta{margin-top:auto}
-  .titel .fuss .marke{color:var(--light);font-weight:600}
+  .titel .fuss .marke-text{color:var(--light);font-weight:600}
 
+  /* Versprechen: ohne Rahmen, mit Telefon statt Punkt */
   .versprechen{
-    align-self:flex-start;display:flex;align-items:center;gap:2.2mm;
-    background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);
-    border-radius:99mm;padding:2mm 4.4mm;margin-top:auto;margin-bottom:6mm;
-    font-size:8.2pt;font-weight:600;color:#fff;
+    align-self:flex-start;display:flex;align-items:center;gap:2.6mm;
+    margin-top:auto;margin-bottom:5.5mm;
+    font-size:9.2pt;font-weight:600;color:#fff;
   }
-  .punkt{width:1.9mm;height:1.9mm;border-radius:50%;background:var(--gut);flex:0 0 auto}
+  .versprechen svg{width:4.4mm;height:4.4mm;flex:0 0 auto;color:var(--light)}
   .anriss{font-size:10.4pt;line-height:1.62;color:rgba(255,255,255,.84);
           max-width:104mm;margin-top:5mm}
 
-  /* Kennzahlen: direkt unter dem Anriss statt am Seitenfuss.
-     Die Vorfassung liess hier 31 % der Seite leer. */
-  .zahlen{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:9mm}
+  .zahlen{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:8mm}
   .zahl{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.13);
-        border-radius:2.6mm;padding:5.6mm 5mm}
+        border-radius:2.6mm;padding:5.4mm 5mm}
   .zahl .v{display:flex;align-items:center;gap:1.8mm;
            font-size:16.5pt;font-weight:700;color:var(--light);
            letter-spacing:-.022em;margin-bottom:1.6mm}
+  .zahl .v svg{width:4.6mm;height:4.6mm;color:var(--stern)}
   .zahl .l{display:block;font-size:7.9pt;line-height:1.42;color:rgba(255,255,255,.72)}
 
   /* ═══ SEITE 2 — Ihr Recht ═══════════════════════════ */
-  .fliess{font-size:9.6pt;line-height:1.62;color:var(--ink);max-width:132mm}
+  .fliess{font-size:9.3pt;line-height:1.5;color:var(--ink);max-width:132mm}
   .fliess b{font-weight:600;color:var(--navy)}
 
-  .posten{display:flex;flex-direction:column;gap:1.5mm;margin-top:4mm}
+  .posten{display:flex;flex-direction:column;gap:1.1mm;margin-top:2.6mm}
   .posten-zeile{
     background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
-    padding:2.6mm 5mm;display:flex;align-items:center;justify-content:space-between;gap:6mm;
+    padding:1.9mm 5mm;display:flex;align-items:center;justify-content:space-between;gap:6mm;
   }
   .posten-was{flex:1 1 auto;min-width:0}
-  .posten-was b{display:block;font-size:9.6pt;font-weight:600;color:var(--navy);
-                margin-bottom:.9mm}
-  .posten-was span{display:block;font-size:8.2pt;color:var(--ink-leise);line-height:1.4}
-  .posten-betrag{flex:0 0 auto;font-size:10pt;font-weight:700;color:var(--navy);
+  .posten-was b{display:block;font-size:9.3pt;font-weight:600;color:var(--navy);
+                margin-bottom:.6mm}
+  .posten-was span{display:block;font-size:8pt;color:var(--ink-leise);line-height:1.36}
+  .posten-betrag{flex:0 0 auto;font-size:9.8pt;font-weight:700;color:var(--navy);
                  white-space:nowrap;font-variant-numeric:tabular-nums}
 
-  .hinweis{background:#fff;border:1px solid var(--linie-zart);border-left:2.4mm solid var(--light);
-           border-radius:2.4mm;padding:3.2mm 5mm;margin-top:3.2mm;
-           font-size:8.6pt;line-height:1.5;color:var(--ink)}
+  .hinweis{background:#fff;border:1px solid var(--linie-zart);
+           border-left:2.4mm solid var(--light);
+           border-radius:2.4mm;padding:2.3mm 5mm;margin-top:2.2mm;
+           font-size:8.3pt;line-height:1.4;color:var(--ink)}
   .hinweis b{font-weight:600;color:var(--navy)}
 
-  .saeulen{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4mm;margin-top:3.6mm}
-  .saeule{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;padding:3.6mm}
-  .saeule-zeichen{width:8.4mm;height:8.4mm;border-radius:2mm;background:var(--navy);
-                  display:flex;align-items:center;justify-content:center;margin-bottom:3mm}
-  .saeule b{display:block;font-size:9.2pt;font-weight:600;color:var(--navy);margin-bottom:1.4mm}
-  .saeule span{display:block;font-size:8pt;line-height:1.45;color:var(--ink-leise)}
+  .saeulen{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-top:2.6mm}
+  .saeule{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
+          padding:2.9mm;display:flex;flex-direction:column}
+  .saeule-zeichen{width:7.6mm;height:7.6mm;border-radius:2mm;background:var(--navy);
+                  display:flex;align-items:center;justify-content:center;margin-bottom:2.4mm}
+  .saeule-zeichen svg{width:4.2mm;height:4.2mm;color:#fff}
+  .saeule b{display:block;font-size:8.9pt;font-weight:600;color:var(--navy);margin-bottom:1mm}
+  .saeule span{display:block;font-size:7.8pt;line-height:1.4;color:var(--ink-leise)}
+  .saeule img.partner{height:5.6mm;width:auto;margin-top:auto;padding-top:2.2mm;
+                      align-self:flex-start;display:block}
+
+  /* Echte Google-Rezensionen — Quelle: GoogleReviewsStrip.tsx */
+  .stimmen{margin-top:2.6mm}
+  .stimmen-kopf{display:flex;align-items:center;gap:2.2mm;margin-bottom:1.8mm}
+  .stimmen-kopf svg.g{width:3.8mm;height:3.8mm;flex:0 0 auto}
+  .sterne{display:flex;gap:.4mm}
+  .sterne svg{width:2.9mm;height:2.9mm;color:var(--stern)}
+  .stimmen-kopf b{font-size:7.6pt;font-weight:600;color:var(--navy)}
+  .stimmen-reihe{display:grid;grid-template-columns:repeat(3,1fr);gap:3.2mm}
+  .stimme{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
+          padding:2.4mm 2.9mm}
+  .stimme p{font-size:7.5pt;line-height:1.4;color:var(--ink);margin-bottom:1.3mm}
+  .stimme cite{font-size:7.1pt;font-style:normal;color:var(--ink-leise)}
 
   /* ═══ SEITE 3 — Die Fallen ══════════════════════════ */
-  .fehler{display:flex;flex-direction:column;gap:1.8mm}
+  .fehler{display:flex;flex-direction:column;gap:1.6mm}
   .fehler-zeile{
     background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
     padding:2.4mm 5mm;display:flex;align-items:center;gap:4.4mm;
@@ -190,92 +227,127 @@
   .satz span{display:block;font-size:8.2pt;color:var(--ink-leise);line-height:1.42}
 
   /* ═══ SEITE 4 — Checkliste ══════════════════════════ */
-  .legende{display:flex;align-items:center;gap:2.2mm;flex-wrap:wrap;margin-bottom:3.4mm;
-           font-size:8pt;color:var(--ink-leise)}
+  .weiche{flex:0 0 auto;margin-bottom:1.5mm}
+  .weiche-frage{text-align:center;font-size:8.6pt;font-weight:600;
+                color:var(--navy);margin-bottom:1.2mm}
+  .weiche-arme{position:relative;display:grid;grid-template-columns:1fr 1fr;
+               gap:3mm;padding-top:2.8mm}
+  /* Die Klammer sitzt auf 25 % / 75 % - genau ueber den Mitten der beiden Kaesten. */
+  .weiche-arme::before{content:"";position:absolute;top:0;left:25%;right:25%;height:2.8mm;
+    border:1.1px solid var(--light);border-bottom:none;
+    border-top-left-radius:1.2mm;border-top-right-radius:1.2mm}
+  .arm{border-radius:2.4mm;padding:2.1mm 4mm;display:flex;flex-direction:column;gap:.9mm}
+  .arm--haft{background:var(--navy)}
+  .arm--kasko{background:#fff;border:1px solid var(--linie-zart)}
+  .arm-wer{font-size:6.6pt;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .arm--haft .arm-wer{color:var(--light)}
+  .arm--kasko .arm-wer{color:var(--warn)}
+  .arm-zeile{display:flex;align-items:baseline;gap:2.4mm;flex-wrap:wrap}
+  .arm-zeile b{font-size:11pt;font-weight:700;letter-spacing:-.015em}
+  .arm--haft .arm-zeile b{color:#fff}
+  .arm--kasko .arm-zeile b{color:var(--navy)}
+  .arm-was{font-size:7.4pt;line-height:1.3}
+  .arm--haft .arm-was{color:#B9CBE2}
+  .arm--kasko .arm-was{color:var(--ink-leise)}
+
+  .phase{display:flex;align-items:center;gap:3mm;margin:1.8mm 0 1.1mm}
+  .phase-zeit{background:var(--navy);color:#fff;border-radius:99mm;
+              padding:1.4mm 3.6mm;font-size:7.8pt;font-weight:700;white-space:nowrap}
+  .phase-wo{font-size:7.4pt;font-weight:600;letter-spacing:.16em;
+            text-transform:uppercase;color:var(--ink-leise)}
+
   .marke-chip{display:inline-block;border-radius:99mm;padding:1.1mm 3.2mm;
               font-size:6.9pt;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
   .m-immer{background:#E7ECF5;color:var(--mid)}
   .m-haft{background:var(--navy);color:#fff}
   .m-kasko{background:var(--warn-flaeche);color:var(--warn)}
 
-  .phase{display:flex;align-items:center;gap:3mm;margin:2.4mm 0 1.4mm}
-  .phase:first-of-type{margin-top:0}
-  .phase-zeit{background:var(--navy);color:#fff;border-radius:99mm;
-              padding:1.4mm 3.6mm;font-size:7.8pt;font-weight:700;white-space:nowrap}
-  .phase-wo{font-size:7.4pt;font-weight:600;letter-spacing:.16em;
-            text-transform:uppercase;color:var(--ink-leise)}
-
-  .schritte{display:flex;flex-direction:column;gap:1.2mm}
+  .schritte{display:flex;flex-direction:column;gap:1.1mm}
   .schritt{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
-           padding:1.7mm 4.4mm;display:flex;align-items:center;gap:3.4mm}
+           padding:1.3mm 4.4mm;display:flex;align-items:center;gap:3.4mm}
   .kaestchen{flex:0 0 auto;width:4.4mm;height:4.4mm;border:1.5px solid var(--light);
              border-radius:1mm;background:#fff}
-  .schritt-text{flex:1 1 auto;min-width:0;font-size:8.2pt;line-height:1.36;color:var(--ink)}
+  .schritt-text{flex:1 1 auto;min-width:0;font-size:8.2pt;line-height:1.34;color:var(--ink)}
   .schritt-text b{font-weight:600;color:var(--navy)}
   .schritt-marke{flex:0 0 auto}
   .schritt-knopf{flex:0 0 auto;display:inline-flex;align-items:center;gap:2mm;
                  background:var(--navy);color:#fff;border-radius:99mm;
-                 padding:2mm 4.2mm;font-size:8.4pt;font-weight:700;text-decoration:none;
+                 padding:1.9mm 4mm;font-size:8.2pt;font-weight:700;text-decoration:none;
                  white-space:nowrap}
+  .schritt-knopf svg{width:3mm;height:3mm;color:#fff}
 
-  .abschluss{display:flex;gap:3.4mm;margin-top:4mm;flex:0 0 auto}
+  .abschluss{display:flex;gap:3.2mm;margin-top:2.8mm;flex:0 0 auto}
   .abschluss .cta{flex:1 1 auto;margin-top:0}
-  .qr-karte{flex:0 0 auto;width:31mm;background:#fff;border:1px solid var(--linie);
-            border-radius:3mm;padding:3mm;display:flex;flex-direction:column;
-            align-items:center;justify-content:center;gap:2mm;text-decoration:none}
+  .qr-karte{flex:0 0 auto;width:30mm;background:#fff;border:1px solid var(--linie);
+            border-radius:3mm;padding:2.6mm;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;gap:1.8mm;text-decoration:none}
   .qr-karte img{width:100%;display:block}
-  .qr-karte span{font-size:7.2pt;font-weight:600;color:var(--navy);text-align:center}
+  .qr-karte span{font-size:7.1pt;font-weight:600;color:var(--navy);text-align:center}
 
-  .rechtshinweis{flex:0 0 auto;margin-top:3mm;font-size:7.2pt;line-height:1.45;
+  .rechtshinweis{flex:0 0 auto;margin-top:2.6mm;font-size:7.2pt;line-height:1.42;
                  color:var(--ink-leise);max-width:150mm}
 </style>
 </head>
 <body>
 
-<!-- Wiederverwendete Zeichen. Als SVG, damit keine Systemschrift einspringt. -->
+<!--
+  Wiederverwendete Zeichen. Alle Icon-Pfade sind ORIGINALE aus lucide 1.8.0
+  (liegt als lucide-react im Projekt, ISC-Lizenz) — nicht nachgezeichnet.
+  Der Google-G-Pfad stammt aus GoogleReviewsStrip.tsx.
+-->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-logo" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="12" fill="currentColor"/>
-    <circle cx="12" cy="12" r="4.6" fill="#fff"/>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>
   </symbol>
   <symbol id="i-stern" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M12 2.4l2.9 6.1 6.7.9-4.9 4.7 1.2 6.6-5.9-3.2-5.9 3.2 1.2-6.6L2.4 9.4l6.7-.9z"/>
+    <path fill="currentColor" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
   </symbol>
-  <symbol id="i-pfeil" viewBox="0 0 24 24">
-    <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
-          stroke-linejoin="round" d="M4 12h15M13 6l6 6-6 6"/>
+  <symbol id="i-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14M13 6l6 6-6 6"/>
   </symbol>
-  <symbol id="i-lupe" viewBox="0 0 24 24">
-    <path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"
-          d="M10.6 3.4a7.2 7.2 0 106.9 9.2M20.6 20.6l-4.8-4.8"/>
+  <symbol id="i-lupe" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>
   </symbol>
-  <symbol id="i-waage" viewBox="0 0 24 24">
-    <path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"
-          stroke-linejoin="round" d="M12 3.6v16.8M6.4 20.4h11.2M4 8.4h16M4 8.4L1.8 14h4.4zM20 8.4L17.8 14h4.4z"/>
+  <symbol id="i-waage" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/>
+    <path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/>
+    <path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>
   </symbol>
-  <symbol id="i-schild" viewBox="0 0 24 24">
-    <path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"
-          stroke-linejoin="round" d="M12 2.8l7.4 2.9v6.1c0 4.5-3.1 7.8-7.4 9.4-4.3-1.6-7.4-4.9-7.4-9.4V5.7z"/>
+  <symbol id="i-schluessel" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>
+  </symbol>
+  <symbol id="i-google" viewBox="0 0 24 24">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 01-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09a6.97 6.97 0 010-4.18V7.07H2.18A11 11 0 001 12c0 1.78.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z" fill="#EA4335"/>
   </symbol>
 </svg>
 
 <!-- ══════════════════ SEITE 1 · TITEL ══════════════════ -->
 <section class="seite titel">
   <div class="titel-bild">
-    <img src="hero.jpeg" alt="">
+    <img src="titelbild.jpg" alt="">
     <div class="titel-schleier"></div>
   </div>
 
   <div class="titel-inhalt">
     <div class="kopf">
-      <div class="logo">
-        <svg class="logo-zeichen" style="color:#fff"><use href="#i-logo"/></svg>
-        <span class="logo-wort">claimondo</span>
-      </div>
+      <span class="logo">
+        <img class="marke" src="../../claimondo-marketing/public/brand/logo-mark.svg" alt="">
+        <img class="wort" src="../../claimondo-marketing/public/claimondo-wortmarke.svg" alt="Claimondo">
+      </span>
       <span class="rubrik">Unfallguide</span>
     </div>
 
-    <span class="versprechen"><span class="punkt"></span>Rückruf in 15 Minuten · 8–20 Uhr</span>
+    <span class="versprechen">
+      <svg><use href="#i-phone"/></svg>Rückruf in 15 Minuten · 8–20 Uhr
+    </span>
 
     <h1>Unverschuldet im Unfall?<span class="zweit">Das steht Ihnen zu.</span></h1>
 
@@ -297,8 +369,8 @@
         <span class="l">statt Monate — wir treiben den Fall, statt zu warten</span>
       </div>
       <div class="zahl">
-        <span class="v">4,8 <svg width="13" height="13" style="color:var(--light)"><use href="#i-stern"/></svg></span>
-        <span class="l">bei ProvenExpert, aus 27 Bewertungen</span>
+        <span class="v">4,8 <svg><use href="#i-stern"/></svg></span>
+        <span class="l">bei ProvenExpert</span>
       </div>
     </div>
 
@@ -314,7 +386,7 @@
     <div class="fuss">
       <span>Ausgabe 2026</span>
       <span class="fuss-mitte"></span>
-      <span class="marke">claimondo.de</span>
+      <span class="marke-text">claimondo.de</span>
     </div>
   </div>
 </section>
@@ -322,10 +394,10 @@
 <!-- ══════════════════ SEITE 2 · IHR RECHT ══════════════════ -->
 <section class="seite">
   <div class="kopf">
-    <div class="logo">
-      <svg class="logo-zeichen" style="color:var(--navy)"><use href="#i-logo"/></svg>
-      <span class="logo-wort">claimondo</span>
-    </div>
+    <span class="logo">
+      <img class="marke" src="../../claimondo-marketing/public/brand/logo-mark.svg" alt="">
+      <img class="wort" src="../../claimondo-marketing/public/claimondo-wortmarke.svg" alt="Claimondo">
+    </span>
     <span class="rubrik">Ihr Recht</span>
   </div>
 
@@ -375,19 +447,45 @@
 
   <div class="saeulen">
     <div class="saeule">
-      <span class="saeule-zeichen"><svg width="17" height="17"><use href="#i-lupe"/></svg></span>
+      <span class="saeule-zeichen"><svg><use href="#i-lupe"/></svg></span>
       <b>Partnergutachter</b>
       <span>Unabhängig, in Ihrem Interesse — nicht in dem der Versicherung.</span>
     </div>
     <div class="saeule">
-      <span class="saeule-zeichen"><svg width="17" height="17"><use href="#i-waage"/></svg></span>
+      <span class="saeule-zeichen"><svg><use href="#i-waage"/></svg></span>
       <b>Partnerkanzlei</b>
       <span>Fachanwälte verhandeln. Sie müssen nicht selbst argumentieren.</span>
+      <img class="partner" src="../../kfz-gutachter-koeln/public/assets/brand/kanzlei-lexdrive-logo.png" alt="LexDrive">
     </div>
     <div class="saeule">
-      <span class="saeule-zeichen"><svg width="17" height="17"><use href="#i-schild"/></svg></span>
+      <span class="saeule-zeichen"><svg><use href="#i-schluessel"/></svg></span>
       <b>Werkstatt Ihrer Wahl</b>
       <span>Keine Bindung an Partnerbetriebe. Sie entscheiden.</span>
+    </div>
+  </div>
+
+  <div class="stimmen">
+    <div class="stimmen-kopf">
+      <svg class="g"><use href="#i-google"/></svg>
+      <span class="sterne">
+        <svg><use href="#i-stern"/></svg><svg><use href="#i-stern"/></svg><svg><use href="#i-stern"/></svg><svg><use href="#i-stern"/></svg><svg><use href="#i-stern"/></svg>
+      </span>
+      <b>Was Kundinnen und Kunden bei Google schreiben</b>
+    </div>
+    <div class="stimmen-reihe">
+      <div class="stimme">
+        <p>„Claimondo war von vorne bis hinten einfach nur super. Besonders gut hat mir
+        das Kundenportal gefallen und die Schnelligkeit der Abwicklung.“</p>
+        <cite>Vincent Heinen</cite>
+      </div>
+      <div class="stimme">
+        <p>„Top Service! Gut erreichbar, schnell und kompetent.“</p>
+        <cite>daniel bonn</cite>
+      </div>
+      <div class="stimme">
+        <p>„Vielen Dank für die hervorragende Abwicklung.“</p>
+        <cite>Daniel Bundesmann</cite>
+      </div>
     </div>
   </div>
 
@@ -403,17 +501,17 @@
   <div class="fuss">
     <span>Claimondo Unfallguide</span>
     <span class="fuss-mitte"></span>
-    <span class="zahl-seite zahl">2</span>
+    <span class="zahl">2</span>
   </div>
 </section>
 
 <!-- ══════════════════ SEITE 3 · DIE FALLEN ══════════════════ -->
 <section class="seite">
   <div class="kopf">
-    <div class="logo">
-      <svg class="logo-zeichen" style="color:var(--navy)"><use href="#i-logo"/></svg>
-      <span class="logo-wort">claimondo</span>
-    </div>
+    <span class="logo">
+      <img class="marke" src="../../claimondo-marketing/public/brand/logo-mark.svg" alt="">
+      <img class="wort" src="../../claimondo-marketing/public/claimondo-wortmarke.svg" alt="Claimondo">
+    </span>
     <span class="rubrik">Die Fallen</span>
   </div>
 
@@ -476,9 +574,7 @@
   <a class="cta" href="tel:+4915153608515">
     <span class="cta-text">
       <span class="cta-t">Bevor Sie zusagen: kurz anrufen.</span>
-      <span class="cta-s">Wir sagen Ihnen in fünf Minuten, ob das Angebot passt.
-      4,8 <svg width="8" height="8" style="color:var(--light)"><use href="#i-stern"/></svg>
-      bei ProvenExpert.</span>
+      <span class="cta-s">Wir sagen Ihnen in fünf Minuten, ob das Angebot passt.</span>
     </span>
     <span class="cta-pille">0151 5360 8515</span>
   </a>
@@ -493,21 +589,35 @@
 <!-- ══════════════════ SEITE 4 · ZUM ABHAKEN ══════════════════ -->
 <section class="seite">
   <div class="kopf">
-    <div class="logo">
-      <svg class="logo-zeichen" style="color:var(--navy)"><use href="#i-logo"/></svg>
-      <span class="logo-wort">claimondo</span>
-    </div>
+    <span class="logo">
+      <img class="marke" src="../../claimondo-marketing/public/brand/logo-mark.svg" alt="">
+      <img class="wort" src="../../claimondo-marketing/public/claimondo-wortmarke.svg" alt="Claimondo">
+    </span>
     <span class="rubrik">Zum Abhaken</span>
   </div>
 
   <h2>Ihre Checkliste. <span class="zweit">Schritt für Schritt.</span></h2>
 
-  <p class="legende">
-    <span class="marke-chip m-immer">Immer</span>
-    <span class="marke-chip m-haft">Haftpflicht</span>
-    <span class="marke-chip m-kasko">Kasko</span>
-    — drei Schritte hängen davon ab, wer den Unfall verursacht hat
-  </p>
+  <!--
+    Die Weiche ersetzt die fruehere Legendenzeile. Drei Schritte der Liste haengen
+    davon ab, wer den Unfall verursacht hat — vorher stand das in einem Halbsatz.
+    Ein Diagramm, keine Illustration (siehe designphilosophie.md).
+  -->
+  <div class="weiche">
+    <p class="weiche-frage">Wer hat den Unfall verursacht?</p>
+    <div class="weiche-arme">
+      <div class="arm arm--haft">
+        <span class="arm-wer">Die Gegenseite</span>
+        <span class="arm-zeile"><b>Haftpflicht</b>
+          <span class="arm-was">Direktanspruch gegen deren Versicherer · § 115 VVG</span></span>
+      </div>
+      <div class="arm arm--kasko">
+        <span class="arm-wer">Sie selbst</span>
+        <span class="arm-zeile"><b>Kasko</b>
+          <span class="arm-was">Eigene Police — mit Selbstbehalt und Rückstufung</span></span>
+      </div>
+    </div>
+  </div>
 
   <div class="phase">
     <span class="phase-zeit">Sofort</span><span class="phase-wo">Am Unfallort</span>
@@ -544,7 +654,7 @@
       Freie Wahl, bei klarer Haftung zahlt ihn die Gegenseite.</span>
       <span class="schritt-marke marke-chip m-haft">Haftpflicht</span>
       <a class="schritt-knopf" href="tel:+4915153608515">Anrufen
-        <svg width="9" height="9" style="color:#fff"><use href="#i-pfeil"/></svg></a></div>
+        <svg><use href="#i-pfeil"/></svg></a></div>
     <div class="schritt"><span class="kaestchen"></span>
       <span class="schritt-text"><b>Selbstbehalt und Rückstufung prüfen,</b> bevor Sie die
       eigene Kasko nutzen. Oft ist der Weg über die Gegenseite günstiger.</span>
@@ -577,7 +687,7 @@
     <a class="cta" href="tel:+4915153608515">
       <span class="cta-text">
         <span class="cta-t">Jetzt anrufen</span>
-        <span class="cta-s">0151 5360 8515 · Rückruf in 15 Minuten, 8–20 Uhr</span>
+        <span class="cta-s">Rückruf in 15 Minuten, 8–20 Uhr</span>
       </span>
       <span class="cta-pille">0151 5360 8515</span>
     </a>
