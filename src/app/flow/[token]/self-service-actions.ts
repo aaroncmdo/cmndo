@@ -26,6 +26,7 @@ import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vors
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 import { spiegleQualiAufClaim } from '@/lib/leads/spiegle-quali-auf-claim'
+import { buildDisqualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -172,15 +173,8 @@ export async function speichereQualiFlow(
         // SP-B1: abrechnungsweg-Record (kasko). leads.abrechnungsweg type-lagged -> Cast unten.
         abrechnungsweg: outcome.abrechnungsweg,
         ...(freieWerkstattwahl !== undefined ? { freie_werkstattwahl: freieWerkstattwahl } : {}),
-        disqualifiziert: true,
-        disqualifiziert_am: nowIso,
-        // WS2 (Kasko-frei): Kasko-Werkstattbindung korrekt labeln statt pauschal 'eigenverschulden'.
-        disqualifiziert_grund_key: outcome.disqualifikationsGrundKey ?? 'eigenverschulden',
-        disqualifiziert_grund:
-          outcome.disqualifikationsGrundKey === 'werkstattbindung'
-            ? 'Kasko mit Werkstattbindung — Reparatur nur in der vom Versicherer vorgeschriebenen Werkstatt, keine Vermittlung moeglich (Self-Service-Quali)'
-            : 'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
-        status: 'disqualifiziert',
+        // WS2 (Kasko-frei): Grund korrekt labeln — Schreibsatz aus dem geteilten Helper (Embed nutzt ihn auch).
+        ...buildDisqualifikationPatch(outcome.disqualifikationsGrundKey ?? 'eigenverschulden', nowIso),
       } as never)
       .eq('id', leadId)
     if (updErr) return { ok: false, error: updErr.message }
