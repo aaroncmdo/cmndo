@@ -23,6 +23,7 @@ import { sanitizeBedarf } from '@/lib/werkstatt/bedarf/sanitize'
 import { getStorageUrl } from '@/lib/storage/url'
 import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import type { Reparaturbedarf, Fit } from '@/lib/werkstatt/bedarf/types'
+import { sendOaiqEvent } from '@/lib/analytics/oaiq-capi'
 
 export type WerkstattFinderLeadPayload = {
   vorname?: string | null
@@ -53,6 +54,8 @@ export type WerkstattFinderLeadPayload = {
   // E1.1 (Entry-Point-Matrix-Audit): Makler-/Partner-Promo-Code aus ?promo= — wird server-
   // seitig via resolvePromoCodeToId (Format-Guard + aktiv-Gate) zu promotion_code_id aufgeloest.
   promoCode?: string | null
+  /** OpenAI-Ads-Kennung aus der Parent-URL (durch die iframe-Grenze gereicht). */
+  oppref?: string | null
 }
 
 // Re-export fuer den Client (damit er keine extra imports braucht)
@@ -215,6 +218,10 @@ export async function erstelleWerkstattFinderLead(
     kaskoWb: payload.kaskoWb ?? null,
   })
   if (gaClientId) (extra as Record<string, unknown>).ga_client_id = gaClientId
+  // OpenAI-Ads-Attribution — dieselbe Zeile eins hoeher, nur fuer das andere Werbenetz.
+  // Kommt als URL-Parameter durch die iframe-Grenze: das __oppref-Cookie gehoert
+  // claimondo.de und ist hier auf app.claimondo.de nicht lesbar.
+  if (payload.oppref) (extra as Record<string, unknown>).oppref = payload.oppref
   // E1.1: Promo-Attribution (Provision-Spur). resolver liefert nur fuer gueltige AKTIVE
   // MK-Codes eine id — Muell/inaktiv -> null -> Feld bleibt weg (auch im UPDATE-Pfad, der
   // null-Werte strippt: eine bestehende Attribution wird nie durch Re-Entry geloescht).
@@ -313,6 +320,15 @@ export async function erstelleWerkstattFinderLead(
       telefon: payload.telefon ?? null,
       email: payload.email,
     })
+
+    // OpenAI Ads: lead_created. Im selben Zweig wie die Team-Meldung — ein
+    // Re-Entry ueber denselben FlowLink ist kein zweiter Interessent und darf
+    // auch keine zweite Conversion sein.
+    // Nicht awaited: der Kunde wartet gerade auf sein Suchergebnis (Muster wie
+    // `void trackServerConversion(...)` im GA4-Pfad).
+    if (payload.oppref) {
+      void sendOaiqEvent({ oppref: payload.oppref, eventId: leadId, eventName: 'lead_created' })
+    }
   }
 
   // Kasko-WB Phase 1: gebundener Kunde -> Lead disqualifizieren (Grund werkstattbindung) + Zusammenfassungs-Mail (E6).

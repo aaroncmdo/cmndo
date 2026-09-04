@@ -2795,12 +2795,16 @@
     "gutachten_status",
     "telefon_ziffern",
     "auswertung_unverbindlich",
+<<<<<<< HEAD
     "oppref",
     "eigene_versicherung_marke_id",
     "eigene_versicherung_name",
     "eigene_kasko_tarif_id",
     "eigene_kasko_tarif_name",
     "werkstattbindung_quelle"
+=======
+    "oppref"
+>>>>>>> origin/staging
    ]
   },
   "levelup_anreicherung": {
