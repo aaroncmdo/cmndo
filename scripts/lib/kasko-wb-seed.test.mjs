@@ -91,6 +91,12 @@ describe('validateSeed', () => {
     expect(errs.some((e) => e.includes('wb_status'))).toBe(true)
     expect(errs.some((e) => e.includes('check24_vertrieb'))).toBe(true)
   })
+  it('tarife_explizit: ungueltiger umfang und gebundene Zeile bei keine werden gemeldet (Review Task 1)', () => {
+    const explizit = { ...huk, slug: 'x-explizit', tarife_explizit: [{ anzeigename: 'A', linie: 'A', wb_zusatz: null, wb: true, umfang: 'egal' }] }
+    expect(validateSeed({ ...data, marken: [explizit] }).some((e) => e.includes('umfang ungueltig'))).toBe(true)
+    const keineMitWb = { ...lvm, slug: 'y-keine', tarife_explizit: [{ anzeigename: 'B', linie: 'B', wb_zusatz: null, wb: true }] }
+    expect(validateSeed({ ...data, marken: [keineMitWb] }).some((e) => e.includes('keine mit WB-Zeile'))).toBe(true)
+  })
 })
 
 describe('sql', () => {

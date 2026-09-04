@@ -89,10 +89,18 @@ export function validateSeed(data) {
       if (!z.zusatz) errs.push(`${p} wb_zusatz ohne Text`)
       if (z.umfang && !UMFANG.has(z.umfang)) errs.push(`${p} umfang ungueltig: ${z.umfang}`)
     }
+    // Review Task 1: tarife_explizit umging die Enum-Pruefung — jede explizite Zeile wird einzeln geprueft.
+    for (const t of m.tarife_explizit ?? []) {
+      if (!t.linie || !t.anzeigename) errs.push(`${p} tarife_explizit ohne linie/anzeigename`)
+      if (typeof t.wb !== 'boolean') errs.push(`${p} tarife_explizit.wb muss boolean sein`)
+      if (t.umfang && !UMFANG.has(t.umfang)) errs.push(`${p} umfang ungueltig: ${t.umfang}`)
+      if (t.verlaesslichkeit && !VERLAESSLICHKEIT.has(t.verlaesslichkeit)) errs.push(`${p} verlaesslichkeit ungueltig: ${t.verlaesslichkeit}`)
+    }
     const rows = expandTarife(m)
 
     if (m.wb_status === 'optional' && (m.wb_marker ?? []).length === 0) errs.push(`${p} optional ohne wb_marker`)
-    if (m.wb_status === 'keine' && ((m.wb_zusaetze ?? []).length > 0 || (m.linien_nur_wb ?? []).length > 0)) errs.push(`${p} keine mit WB-Zeile`)
+    // keine = kein WB-Tarif: rohe Felder UND berechnete Zeilen pruefen (tarife_explizit).
+    if (m.wb_status === 'keine' && ((m.wb_zusaetze ?? []).length > 0 || (m.linien_nur_wb ?? []).length > 0 || rows.some((r) => r.hat_werkstattbindung))) errs.push(`${p} keine mit WB-Zeile`)
     if (m.wb_status === 'standard' && rows.some((r) => !r.hat_werkstattbindung)) errs.push(`${p} standard mit freier Zeile`)
     const anzeigen = new Set()
     for (const r of rows) {
