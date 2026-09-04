@@ -40,7 +40,7 @@ export function ConsentManager() {
           de: {
             consentModal: {
               title: 'Wir verwenden Cookies',
-              description: 'Wir nutzen Cookies fuer Statistik und Marketing. Notwendige Cookies sind immer aktiv. Du kannst frei waehlen und jederzeit widerrufen.',
+              description: 'Wir nutzen Cookies für Statistik und Marketing. Notwendige Cookies sind immer aktiv. Du kannst frei wählen und jederzeit widerrufen.',
               acceptAllBtn: 'Alle akzeptieren',
               acceptNecessaryBtn: 'Ablehnen',
               showPreferencesBtn: 'Einstellungen',
@@ -51,14 +51,17 @@ export function ConsentManager() {
               acceptNecessaryBtn: 'Ablehnen',
               savePreferencesBtn: 'Auswahl speichern',
               sections: [
-                { title: 'Notwendig', description: 'Fuer den Betrieb erforderlich.', linkedCategory: 'necessary' },
+                { title: 'Notwendig', description: 'Für den Betrieb erforderlich.', linkedCategory: 'necessary' },
                 // ProvenExpert stand hier, solange das ProSeal an dieser Kategorie hing.
                 // Seit 13.08.2026 laedt es unabhaengig vom CMP (Art. 6 Abs. 1 lit. f,
                 // Datenschutzerklaerung 9.6) — es hier weiter zu nennen, wuerde eine
                 // Steuerung vorspiegeln, die dieser Schalter nicht hat. Das waere
                 // schlimmer als gar kein Hinweis.
                 { title: 'Statistik', description: 'Google Analytics, Microsoft Clarity.', linkedCategory: 'analytics' },
-                { title: 'Marketing', description: 'Google Ads Conversion-Messung.', linkedCategory: 'ads' },
+                // OpenAI mitgenannt, seit der Measurement Pixel an dieser Kategorie haengt
+                // (04.09.2026). Wer hier zustimmt, soll wissen, wohin die Messung geht —
+                // ein Schalter, der mehr steuert als er benennt, ist keine Einwilligung.
+                { title: 'Marketing', description: 'Conversion-Messung für Google Ads und für Werbeanzeigen in ChatGPT (OpenAI).', linkedCategory: 'ads' },
               ],
             },
           },

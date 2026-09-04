@@ -54,6 +54,8 @@ export type WerkstattWizardProps = {
   flowToken?: string
   // E1.1: Makler-/Partner-Promo-Code (aus ?promo=) — absenden attribuiert ihn am Lead.
   promoCode?: string
+  /** OpenAI-Ads-Kennung aus der Parent-URL — nur durchgereicht. */
+  oppref?: string
 }
 
 export function WerkstattWizard({
@@ -66,6 +68,7 @@ export function WerkstattWizard({
   onSuche,
   flowToken,
   promoCode,
+  oppref,
 }: WerkstattWizardProps) {
   const [state, setState] = useState<WerkstattWizardState>(WIZARD_INITIAL)
   const [stepIdx, setStepIdx] = useState(0)
@@ -129,7 +132,8 @@ export function WerkstattWizard({
         nachname: nachname || null,
         email,
         telefon: telefon || null,
-        werkstattId: selectedId,
+        werkstattId: state.kaskoWb?.freieWerkstattwahl === false ? null : selectedId,
+        kaskoWb: state.kaskoWb,
         lat: state.standort?.lat ?? null,
         lng: state.standort?.lng ?? null,
         ort: state.standort?.adresse ?? null,
@@ -146,6 +150,7 @@ export function WerkstattWizard({
         eigeneVersicherung: abr?.eigeneVersicherung ?? null,
         flowToken: flowToken ?? null,
         promoCode: promoCode ?? null,
+        oppref: oppref ?? null,
       })
       if (res.ok) window.location.href = `/flow/${res.token}`
       else setFehler(res.error)
@@ -198,14 +203,21 @@ export function WerkstattWizard({
         </>
       )}
       {step === 'abrechnung' && (
-        <AbrechnungStep abrechnung={state.abrechnung} onChange={(w) => patch({ abrechnung: w })} />
+        <AbrechnungStep
+          abrechnung={state.abrechnung}
+          onChange={(w) => patch({ abrechnung: w })}
+          kaskoWb={state.kaskoWb}
+          onKaskoWb={(w) => patch({ kaskoWb: w })}
+        />
       )}
       {step === 'kontakt' && (
         <div className="flex flex-col gap-3">
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Ihre Kontaktdaten</h3>
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
-              Damit wir Ihre Werkstatt-Anfrage bestätigen können.
+              {state.kaskoWb?.freieWerkstattwahl === false
+                ? 'Wir vermitteln in diesem Fall keine Werkstatt. Hinterlassen Sie Ihre Kontaktdaten für einen Rückruf und eine Zusammenfassung per E-Mail.'
+                : 'Damit wir Ihre Werkstatt-Anfrage bestätigen können.'}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2">

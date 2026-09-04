@@ -204,20 +204,40 @@ $function$;
 --    ladeLeadErfassungLeadsFelder) -- ohne diese Zeilen waere die Spalte gefuellt,
 --    aber fuer den Dispatcher unsichtbar, also so tot wie der payload heute.
 --    audience='dispatcher': der Kunden-Flow bekommt KEINE neuen Fragen.
+-- ⚠ ABWEICHUNG vom applizierten Statement (01.09.2026, bei der Rekonstruktion des
+-- fehlenden Files): das Original adressierte die Phase per HARTER UUID
+-- ('6db3e915-e344-41b5-bb29-ca81172f96e3'). Auf prod trifft die zu, in einem
+-- Replay NICHT: onboarding_phasen entstehen dort per gen_random_uuid()
+-- (20260601194200_seed_lead_erfassung_phasen), bekommen also andere IDs. Der
+-- Fremdschluessel lief ins Leere -> MIGRATIONS_FAILED auf jedem Preview-Branch
+-- mit Migrations-Diff.
+--
+-- Statt der ID wird jetzt der FACHLICHE Schluessel adressiert (flow_key +
+-- phase_key), der in beiden Welten derselbe ist. Findet der Lookup nichts,
+-- fuegt der SELECT schlicht keine Zeile ein — kein Abbruch.
+--
+-- Die Wirkung auf prod ist unveraendert: dort ist die Migration laengst gelaufen
+-- und wird nie erneut ausgefuehrt. Das File beschreibt ab jetzt denselben
+-- Zielzustand auf einem Weg, der auch ohne die prod-IDs funktioniert.
 INSERT INTO public.onboarding_felder
   (phase_id, reihenfolge, feld_key, typ, label, hint, pflicht, optionen, db_target, audience, sektion)
-VALUES
-  ('6db3e915-e344-41b5-bb29-ca81172f96e3', 25, 'unfall_zeitfenster', 'segmented',
+SELECT p.id, v.reihenfolge, v.feld_key, v.typ, v.label, v.hint, v.pflicht,
+       v.optionen, v.db_target, v.audience, v.sektion
+FROM public.onboarding_phasen p
+CROSS JOIN (VALUES
+  (25, 'unfall_zeitfenster', 'segmented',
    'Unfall liegt zurück (Selbstauskunft)',
    'Aus der Anspruchsprüfung — Zeitraum, kein Datum.',
    false,
    '[{"label":"< 1 Woche","value":"unter_woche"},{"label":"1–4 Wochen","value":"bis_monat"},{"label":"> 1 Monat","value":"ueber_monat"}]'::jsonb,
    '{"tabelle":"leads","spalte":"unfall_zeitfenster"}'::jsonb,
    'dispatcher', 'unfall'),
-  ('6db3e915-e344-41b5-bb29-ca81172f96e3', 26, 'gutachten_status', 'segmented',
+  (26, 'gutachten_status', 'segmented',
    'Gutachten-Stand (Selbstauskunft)',
    'Aus der Anspruchsprüfung. „Gegner-VS schickt eigenen" ist zeitkritisch — der Kunde hat freie SV-Wahl.',
    false,
    '[{"label":"Noch keins","value":"nein"},{"label":"Gegner-VS schickt eigenen","value":"versicherung"},{"label":"Liegt vor","value":"ja"}]'::jsonb,
    '{"tabelle":"leads","spalte":"gutachten_status"}'::jsonb,
-   'dispatcher', 'unfall');
+   'dispatcher', 'unfall')
+) AS v(reihenfolge, feld_key, typ, label, hint, pflicht, optionen, db_target, audience, sektion)
+WHERE p.flow_key = 'lead-erfassung' AND p.phase_key = 'unfall';

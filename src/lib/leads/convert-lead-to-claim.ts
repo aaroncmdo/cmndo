@@ -31,6 +31,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { deriveAbrechnungsweg, istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
+import { istReservierteTestDomain } from '@/lib/testdaten/ist-test-email'
 import { ensureVehicleFromFin, createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
@@ -552,6 +553,16 @@ export async function convertLeadToClaim(
   // (kein Auto-qr_referral-Reparateur bei freier Wahl). Record-Cast wg. Type-Lag (Mig 20260713161645).
   ;(claimsInsert as Record<string, unknown>).freie_werkstattwahl =
     (lead.freie_werkstattwahl as boolean | null) ?? null
+  // Kasko-WB Phase 1: Herkunft + Kontext der Werkstattbindung Lead -> Claim (Spec §4.2). Record-Cast wie oben.
+  for (const feld of [
+    'eigene_versicherung_marke_id',
+    'eigene_versicherung_name',
+    'eigene_kasko_tarif_id',
+    'eigene_kasko_tarif_name',
+    'werkstattbindung_quelle',
+  ] as const) {
+    ;(claimsInsert as Record<string, unknown>)[feld] = (lead[feld] as string | null) ?? null
+  }
   // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
   ;(claimsInsert as Record<string, unknown>).schadenskategorie =
     (lead.schadenskategorie as string | null) ?? null
@@ -595,6 +606,25 @@ export async function convertLeadToClaim(
   ;(claimsInsert as Record<string, unknown>).interne_notizen = (lead.notiz as string | null) ?? null
   ;(claimsInsert as Record<string, unknown>).schadens_kind = (lead.schadens_art as string | null) ?? null
   ;(claimsInsert as Record<string, unknown>).schadenort_place_id = (lead.unfallort_place_id as string | null) ?? null
+  // Testdaten-Marker PERSISTIEREN (Mig 20260831222740) — der Claim ueberlebt seinen Lead.
+  // claims_lead_id_fkey ist ON DELETE SET NULL: ein Smoke-/Ops-Test-Cleanup loescht den
+  // Test-Lead und haengt den Claim damit ab. Email und Name — die einzigen Testmarker —
+  // verschwinden mit dem Lead, und der Claim ist von einem echten Kundenfall nicht mehr zu
+  // unterscheiden. Gemessen 31.08.: 26 von 57 Komplettservice-Claims ohne Lead, davon ~11 aus
+  // dem Ops-Test vom 11.08. (nur noch an der Minutentakt-Signatur erkennbar).
+  // Bewusst istReservierteTestDomain (RFC 2606) statt des breiteren istTestEmail: hier wuerde
+  // ein False-Positive einen ECHTEN Schadensfall aus den operativen Listen entfernen.
+  // Kein Record-Cast noetig: die Spalte ist in database.types.ts regeneriert (Regel 2 Schritt 6).
+  claimsInsert.ist_testfall = istReservierteTestDomain(lead.email as string | null)
+
+  // HERKUNFT persistieren (Mig 20260831225458) — dieselbe Ueberlegung wie eine Zeile weiter
+  // oben: leads.source_channel ist gut gepflegt (15 Kanaele/90 Tage), aber die Information
+  // lebte bisher NUR am Lead. Ohne diese Uebernahme laesst sich nach einer Lead-Loeschung
+  // (oder bei jeder claim-zentrierten Auswertung, lead_id IS NULL bei 26 von 57 Claims)
+  // nicht mehr sagen, welcher Kanal den FALL gebracht hat — bei laufenden Ads genau die
+  // Frage, die ueber das Budget entscheidet.
+  claimsInsert.source_channel = (lead.source_channel as string | null) ?? null
+  claimsInsert.source_domain = (lead.source_domain as string | null) ?? null
   // WS5b (Reduced-Repair): Reparatur-only-Claims (selbstzahler / kasko-freie Wahl) bekommen das
   // reduzierte Pflichtdok-Szenario (nur Fahrzeugschein statt vollmacht/gutachten/versicherer;
   // Fotos+KVA laufen ueber eigene Kunde-Cards). Haftpflicht bleibt szenario=null (Dispatch/SV

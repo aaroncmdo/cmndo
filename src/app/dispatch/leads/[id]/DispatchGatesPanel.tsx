@@ -58,6 +58,13 @@ export default function DispatchGatesPanel({ values, lead }: { values: Vals; lea
   const warnings: string[] = []
   if (values.schuldfrage === 'eigenverantwortung')
     warnings.push('Eigenverschulden — i.d.R. kein Haftpflicht-Anspruch. Prüfen / ggf. manuell disqualifizieren.')
+  // Kasko-WB Phase 1: Bindungsstatus sichtbar machen (Scan: der Dispatcher sah den Grund nie).
+  const kaskoTarif = [str(lead.eigene_versicherung_name), str(lead.eigene_kasko_tarif_name)].filter(Boolean).join(' · ')
+  const istKasko = values.schuldfrage === 'eigenverantwortung' && str(lead.eigene_versicherung) === 'ja'
+  if (istKasko && lead.freie_werkstattwahl === false)
+    warnings.push(`Kasko mit Werkstattbindung${kaskoTarif ? ` (${kaskoTarif})` : ''} — keine Werkstatt-Vermittlung, der Versicherer benennt die Werkstatt.`)
+  if (istKasko && lead.freie_werkstattwahl == null)
+    warnings.push(`Kasko — Werkstattbindung noch nicht geklärt${kaskoTarif ? ` (${kaskoTarif})` : ''}. Bitte Tarif erfassen oder mit dem Kunden klären.`)
   if (
     values.schaden_sichtbar === 'false' &&
     values.personenschaden_flag !== 'true' &&
@@ -77,6 +84,11 @@ export default function DispatchGatesPanel({ values, lead }: { values: Vals; lea
       {manuellDisqualifiziert && (
         <div className="rounded-ios-lg bg-danger-soft border border-danger/30 px-3 py-2 text-sm font-semibold text-danger-strong">
           Manuell disqualifiziert
+        </div>
+      )}
+      {lead.disqualifiziert === true && str(lead.disqualifiziert_grund_key) && (
+        <div className="rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2 text-sm text-warning-strong">
+          Disqualifiziert: {lead.disqualifiziert_grund_key === 'werkstattbindung' ? 'Kasko mit Werkstattbindung' : lead.disqualifiziert_grund_key === 'eigenverschulden' ? 'Eigenverschulden' : String(lead.disqualifiziert_grund_key)}
         </div>
       )}
 

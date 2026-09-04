@@ -58,6 +58,7 @@ import { bauFlowKontext, type LeadFuerKontext } from '@/lib/self-service/flow-ko
 import type { FlowConfig } from '@/lib/self-service/lade-flow-szenarien'
 import { FlowOrtStep } from './FlowOrtStep'
 import { FlowWerkstattbindungStep } from './FlowWerkstattbindungStep'
+import { FlowKaskoBindungGate } from './FlowKaskoBindungGate'
 import { FlowWerkstattAnzeige } from './FlowWerkstattAnzeige'
 import { FlowRueckrufStep } from './FlowRueckrufStep'
 
@@ -99,6 +100,9 @@ export type LeadData = {
   // AAR-956 §3a: Self-Service-Quali-State (steuert den incomplete-Pfad).
   schuldfrage?: string | null
   disqualifiziert?: boolean | null
+  disqualifiziert_grund_key?: string | null
+  freie_werkstattwahl?: boolean | null
+  werkstattbindung_quelle?: string | null
   // P4 UX: Vermittlung -> Logistik-Steps per Config-Bedingung ausgeblendet
   source_channel?: string | null
   // FlowLink-Review C: fiktiv-Szenario-Badge im Sticky-Header (Lead kommt via
@@ -463,7 +467,12 @@ export default function FlowWizardKfz({
    * einzeln: ein alter numerischer Index in einer neuen Sequenz ueberspringt oder wiederholt Steps
    * (die Stale-Index-Falle, die hier schon zweimal zugeschlagen hat).
    */
-  function uebernimmSzenario(schuldfrage: string, ueberEigeneVersicherung: boolean | null) {
+  function uebernimmSzenario(
+    schuldfrage: string,
+    ueberEigeneVersicherung: boolean | null,
+    // Kasko-WB Phase 1: Antwort des Quali-Tarif-Steps — im stale lead-Prop nicht enthalten.
+    bindung?: { freie_werkstattwahl: boolean | null; werkstattbindung_quelle: string | null },
+  ) {
     if (!flowConfig || flowConfig.szenarien.length === 0) {
       setStepIndex((i) => i + 1) // ohne Config: Legacy-Pfad, einfach weiter
       return
@@ -474,6 +483,7 @@ export default function FlowWizardKfz({
         schuldfrage,
         eigene_versicherung:
           ueberEigeneVersicherung === true ? 'ja' : ueberEigeneVersicherung === false ? 'nein' : null,
+        ...(bindung ?? {}),
       },
       hatSvTermin === true,
     )
@@ -596,8 +606,17 @@ export default function FlowWizardKfz({
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
-  // AAR-956 §3a: bereits disqualifizierter Lead (Eigenverschulden) → Kasko-
-  // Endansicht, kein Termin, kein Crash (auch bei Re-Visit des /flow-Links).
+  // Kasko-WB Phase 1 (Review K1): wegen Werkstattbindung disqualifiziert -> IMMER die Bindungs-Endseite.
+  // Bewusst NICHT an istIncomplete gekoppelt: das kasko-Szenario hat keinen termin-Step, brauchtGutachter ist
+  // dort immer false — der Re-Visit (auch aus dem Embed-Finder) liefe sonst in die regulaere Kasko-Strecke.
+  if (lead.disqualifiziert && lead.disqualifiziert_grund_key === 'werkstattbindung') {
+    return (
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <FlowKaskoBindungGate token={token} />
+      </div>
+    )
+  }
+  // AAR-956 §3a: bereits disqualifizierter Lead (Eigenverschulden) -> Kasko-Endansicht, kein Termin, kein Crash.
   if (istIncomplete && lead.disqualifiziert) {
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">

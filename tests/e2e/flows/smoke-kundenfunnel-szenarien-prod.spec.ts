@@ -32,6 +32,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { randomBytes } from 'node:crypto'
+import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
 
 const RUN = process.env.RUN_KUNDENFUNNEL_SMOKE === '1'
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
@@ -204,7 +205,7 @@ async function fahreFlowBisPortal(
   await page.getByRole('button', { name: opts.serviceRegex }).click()
   await paintCanvas(page)
   await checkAlleCheckboxen(page)
-  const saBtn = page.getByRole('button', { name: /SA unterzeichnen/i })
+  const saBtn = page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN })
   await expect(saBtn).toBeEnabled({ timeout: 10_000 })
   await saBtn.click()
 
@@ -225,8 +226,8 @@ async function fahreFlowBisPortal(
 //
 // Empirische Schrittfolge (09.08. auf prod durchgeklickt):
 //   selbstzahler: Quali -> Kasko-Weiche -> Schaden(skip) -> Werkstatt-Liste(skip) -> Account
-//   kasko:        Quali -> Kasko-Weiche -> Werkstattbindung#1 -> Schaden(skip)
-//                 -> Werkstattbindung#2 -> Werkstatt-Liste(skip) -> Account
+//   kasko:        Quali -> Kasko-Weiche -> Versicherer+Tarif (Kasko-WB Phase 1, 04.09.2026: LVM = kein
+//                 Werkstattbindungs-Tarif -> sofort frei) -> Schaden(skip) -> Werkstatt-Liste(skip) -> Account
 // Die beiden Werkstattbindungs-Gates sind unterschiedlich formuliert ("Sind Sie an eine Werkstatt
 // Ihrer Versicherung gebunden?" / "Dürfen Sie die Werkstatt frei wählen?"), bieten aber je genau
 // EINE Option mit "kann die Werkstatt frei wählen" (die Gegenoption lautet "...Versicherung
@@ -256,6 +257,15 @@ async function fahreFlowEigenverschulden(
       name: opts.kasko ? /Ja, ich habe eine Kaskoversicherung/i : /Nein, ich zahle die Reparatur selbst/i,
     })
     .click()
+
+  // Kasko-WB Phase 1 (04.09.2026): nach „Ja, Kasko" fragt der Flow Versicherer + Tarif (KaskoTarifFrage,
+  // Wissensbasis kasko_versicherer_marken). Der Driver waehlt LVM (wb_status='keine') -> sofort freie
+  // Werkstattwahl, keine Tarif-/Marker-Stufe, kein zweites Bindungs-Gate.
+  if (opts.kasko) {
+    await page.getByRole('button', { name: /Kaskoversicherung wählen/i }).click()
+    await page.getByPlaceholder('Versicherung suchen …').fill('LVM')
+    await page.getByRole('option', { name: /LVM/ }).first().click()
+  }
 
   // Zwischenstrecke: Werkstattbindungs-Gate(s) + optionale Schaden-Aufnahme. Max. 3 Runden
   // (2 Gates + 1 Schaden-Skip); bricht ab, sobald keiner der beiden Buttons mehr erscheint.
