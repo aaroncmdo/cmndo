@@ -21,7 +21,7 @@ export type KaskoTarifFrageProps = {
   schadenIstGlas?: boolean
 }
 
-type Stufe = 'laden' | 'marke' | 'freitext' | 'tarif' | 'marker'
+type Stufe = 'laden' | 'marke' | 'freitext' | 'tarif' | 'marker' | 'bestaetigen'
 
 const DISCLAIMER = 'Maßgeblich sind Ihr Versicherungsschein und Ihre Versicherungsbedingungen (AKB). Tarifstand: CHECK24-Liste vom 20.07.2026.'
 
@@ -38,6 +38,10 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
   const [freitext, setFreitext] = useState('')
   const [tarife, setTarife] = useState<KaskoTarif[]>([])
   const [ladeFehler, setLadeFehler] = useState<string | null>(null)
+  // Abnahme 04.09.: Vor der BINDENDEN Entscheidung (Disqualifikation + Mail + Endseite, kein Weg zurueck) einmal
+  // bestaetigen lassen — bei 408 teils gleichnamigen Tarifen („Classic" vs. „Classic SELECT") ist ein Fehlklick realistisch.
+  // Freie und unklare Antworten laufen ohne Zwischenschritt weiter.
+  const [pending, setPending] = useState<{ auswahl: KaskoTarifAuswahl; ergebnis: WbErgebnis; zurueck: Stufe } | null>(null)
 
   const marke = useMemo(() => marken.find((m) => m.id === markeId) ?? null, [marken, markeId])
   const h = kompakt ? 'text-body font-bold text-claimondo-navy' : 'text-2xl font-semibold text-claimondo-navy mb-2 text-center'
@@ -61,7 +65,12 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
     }
   }, [])
 
-  function abschluss(auswahl: KaskoTarifAuswahl, ergebnis: WbErgebnis) {
+  function abschluss(auswahl: KaskoTarifAuswahl, ergebnis: WbErgebnis, zurueck: Stufe = 'tarif') {
+    if (ergebnis.freieWerkstattwahl === false) {
+      setPending({ auswahl, ergebnis, zurueck })
+      setStufe('bestaetigen')
+      return
+    }
     onErgebnis(auswahl, ergebnis)
   }
 
@@ -73,7 +82,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
     if (!m) return
     const basis: KaskoTarifAuswahl = { markeId: m.id, markeName: m.marke, tarifId: null, tarifName: null, markerAntwort: null }
     if (m.wbStatus === 'keine' || m.wbStatus === 'standard') {
-      abschluss(basis, leiteWerkstattbindungAb({ wbStatus: m.wbStatus, tarif: null, markerAntwort: null, schadenIstGlas }))
+      abschluss(basis, leiteWerkstattbindungAb({ wbStatus: m.wbStatus, tarif: null, markerAntwort: null, schadenIstGlas }), 'marke')
       return
     }
     if (m.tarifAnzahl === 0) {
@@ -95,6 +104,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
         markerAntwort: null,
         schadenIstGlas,
       }),
+      'tarif',
     )
   }
 
@@ -107,7 +117,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
       tarifName: null,
       markerAntwort: antwort,
     }
-    abschluss(auswahl, leiteWerkstattbindungAb({ wbStatus: marke?.wbStatus ?? null, tarif: null, markerAntwort: antwort, schadenIstGlas }))
+    abschluss(auswahl, leiteWerkstattbindungAb({ wbStatus: marke?.wbStatus ?? null, tarif: null, markerAntwort: antwort, schadenIstGlas }), 'marker')
   }
 
   if (stufe === 'laden') {
@@ -201,6 +211,55 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
         <Button variant="bare" size="sm" onClick={() => setStufe('marker')} disabled={busy}>
           <span data-testid="kasko-tarif-unbekannt">Ich weiß es nicht / mein Tarif steht nicht dabei</span>
         </Button>
+        <p className="text-caption text-claimondo-navy/50">{DISCLAIMER}</p>
+      </div>
+    )
+  }
+
+  if (stufe === 'bestaetigen' && pending) {
+    const pnd = pending
+    const bezeichnung = [pnd.auswahl.markeName, pnd.auswahl.tarifName].filter(Boolean).join(' · ') || 'Werkstattbindung'
+    return (
+      <div className="flex flex-col gap-3" data-testid="kasko-tarif-frage">
+        <div>
+          <h2 className={h}>Bitte kurz bestätigen</h2>
+          <p className={p}>
+            Sie haben {pnd.auswahl.markeName ?? 'Ihre Versicherung'}
+            {pnd.auswahl.tarifName ? ` mit dem Tarif „${pnd.auswahl.tarifName}“` : ''} angegeben. Dieser Tarif enthält eine
+            Werkstattbindung: Ihre Versicherung benennt die Reparaturwerkstatt, wir können Ihnen dann keine Werkstatt vermitteln.
+          </p>
+        </div>
+        <Card p={4} radius="lg" accentColor="warning">
+          <span className="flex items-center justify-between gap-3">
+            <span className="text-body-sm font-semibold text-claimondo-navy">{bezeichnung}</span>
+            <Badge tone="warning" size="sm">Werkstattbindung</Badge>
+          </span>
+        </Card>
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="navy"
+            fullWidth
+            onClick={() => {
+              setPending(null)
+              onErgebnis(pnd.auswahl, pnd.ergebnis)
+            }}
+            disabled={busy}
+            loading={busy}
+          >
+            <span data-testid="kasko-bestaetigen-ja">Ja, das ist mein Tarif</span>
+          </Button>
+          <Button
+            variant="ghost"
+            fullWidth
+            onClick={() => {
+              setPending(null)
+              setStufe(pnd.zurueck)
+            }}
+            disabled={busy}
+          >
+            <span data-testid="kasko-bestaetigen-zurueck">Nein, zurück zur Auswahl</span>
+          </Button>
+        </div>
         <p className="text-caption text-claimondo-navy/50">{DISCLAIMER}</p>
       </div>
     )
