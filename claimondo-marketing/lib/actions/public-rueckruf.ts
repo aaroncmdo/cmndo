@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
-import { persistiereOppref } from '@/lib/analytics/oaiq-capi'
+import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
 import { revalidatePath } from 'next/cache'
 
 export type RueckrufInput = {
@@ -76,7 +76,7 @@ export async function erstelleOeffentlichenRueckruf(
   // `lead_created` ("a lead form is submitted OR contact is requested") — der Weg
   // ist also genauso attributionswuerdig wie ein ausgefuelltes Formular.
   // Ohne Anzeigenklick oder ohne Marketing-Consent ein No-op.
-  await persistiereOppref(lead.id)
+  await erfasseLeadAttribution(lead.id)
 
   // 3. admin_termine-Zeile — typ='rueckruf', status='offen'
   // start_zeit: konkreter Zeitpunkt aus Modal, sonst now() + 5min als Hint für ASAP

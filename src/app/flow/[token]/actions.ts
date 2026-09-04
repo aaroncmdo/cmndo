@@ -18,7 +18,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getStorageUrl, parseStorageUrl } from '@/lib/storage/url'
 import { storagePfadAusUrl } from '@/lib/dokumente/sync-lead-zu-pflicht'
-import { trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
+import { trackServerConversion, buildSaSignedEvent, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
+import { sendOaiqEvent } from '@/lib/analytics/oaiq-capi'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
@@ -1102,12 +1103,26 @@ export async function signSAandCreateFall(
     try {
       const saEvent = buildSaSignedEvent({ alreadySigned: saWasAlreadySigned, leadId, source: 'flow' })
       if (!saEvent) return
+      // oppref haengt am selben Read wie die ga_client_id — beide beantworten
+      // dieselbe Frage („welche Anzeige hat diesen Abschluss gebracht"), nur
+      // fuer verschiedene Werbenetze. Ein zweiter Roundtrip waere reine
+      // Verdopplung.
       const { data: gaRow } = await admin
         .from('leads')
-        .select('ga_client_id')
+        .select('ga_client_id, oppref')
         .eq('id', leadId)
         .maybeSingle()
       await trackServerConversion(gaRow?.ga_client_id ?? null, saEvent)
+      // OpenAI Ads: derselbe Uebergang false->true wie oben. Der Dedup-Guard
+      // liegt in `buildSaSignedEvent` (return oben) und gilt damit fuer beide
+      // Netze — sa_signed ist auf beiden Seiten das wertbasierte Bidding-Signal,
+      // eine Doppelzaehlung waere hier wie dort Budget-Fehlsteuerung.
+      await sendOaiqEvent({
+        oppref: (gaRow?.oppref as string | null) ?? null,
+        eventId: leadId,
+        eventName: 'order_created',
+        amountCents: SA_SIGNED_VALUE_EUR * 100, // OAIQ erwartet Minor-Units
+      })
     } catch {
       /* fire-and-forget */
     }

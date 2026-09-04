@@ -54,6 +54,8 @@ export type WerkstattWizardProps = {
   flowToken?: string
   // E1.1: Makler-/Partner-Promo-Code (aus ?promo=) — absenden attribuiert ihn am Lead.
   promoCode?: string
+  /** OpenAI-Ads-Kennung aus der Parent-URL — nur durchgereicht. */
+  oppref?: string
 }
 
 export function WerkstattWizard({
@@ -66,6 +68,7 @@ export function WerkstattWizard({
   onSuche,
   flowToken,
   promoCode,
+  oppref,
 }: WerkstattWizardProps) {
   const [state, setState] = useState<WerkstattWizardState>(WIZARD_INITIAL)
   const [stepIdx, setStepIdx] = useState(0)
@@ -146,6 +149,7 @@ export function WerkstattWizard({
         eigeneVersicherung: abr?.eigeneVersicherung ?? null,
         flowToken: flowToken ?? null,
         promoCode: promoCode ?? null,
+        oppref: oppref ?? null,
       })
       if (res.ok) window.location.href = `/flow/${res.token}`
       else setFehler(res.error)
