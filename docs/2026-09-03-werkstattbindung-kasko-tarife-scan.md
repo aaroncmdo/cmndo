@@ -29,9 +29,9 @@ Werkstatt-Vermittlung · Marketing) plus eigene Prod-Abfragen und Gegenlesen der
 4. **Die Abbruch-Seite bei Werkstattbindung zeigt den falschen Text.** `KaskoEndansicht` spricht von
    „Gutachterkosten … nicht über die gegnerische Haftpflicht … kein kostenfreier Termin" — das ist der
    Eigenverschulden-Text. Für „Ihre Versicherung schreibt die Werkstatt vor" gibt es keinen eigenen Text.
-5. **`versicherungen` (97 Zeilen) sind Rechtsträger, CHECK24 nennt Vertriebsmarken.** 50 Marken passen
+5. **`versicherungen` (97 Zeilen) sind Rechtsträger, CHECK24 nennt Vertriebsmarken.** 48 Marken passen
    1:1, 5 treffen zwei Rechtsträger (HUK, BGV, Provinzial, BarmeniaGothaer, Helvetia Baloise), 3 sind
-   Aliase, **13 fehlen ganz** (AdmiralDirekt, Autosan, AvD, BavariaDirekt, BavariaProtect, Dialog,
+   Aliase, **15 fehlen** (12 ganz: AdmiralDirekt, Autosan, AvD, BavariaDirekt, BavariaProtect, Dialog,
    Inshared, Janitos, Neodigital, Prokundo, VÖDAG, Volkswagen Autoversicherung; dazu Barmenia Direkt,
    EUROPA-go, rhion.digital als Marken mit vorhandenem Rechtsträger).
 6. **Der `versicherungen`-Seed ist nicht replay-fähig:** nur 55 der 97 Zeilen stehen in der Git-Historie
@@ -469,7 +469,7 @@ Legende: ✓ Rechtsträger vorhanden · ✓² zwei Rechtsträger passen · ~ Ali
 | 70 | WWK | WWK Allgemeine Versicherung AG | ✓ |
 | 71 | Zurich | Zurich Insurance plc | ✓ |
 
-**Bilanz:** 50 ✓ · 5 ✓² · 3 ~ · 13 ✗ (davon 3 Marken mit vorhandenem Rechtsträger).
+**Bilanz:** 48 ✓ · 5 ✓² · 3 ~ · 15 ✗ (davon 3 Marken mit vorhandenem Rechtsträger).
 **Schluss:** Eine eigene Marken-Ebene ist nötig; die Tarif-Wissensbasis darf nicht 1:1 an `versicherungen`
 hängen. Der Link Marke → Rechtsträger ist optional und dient dem Zugriff auf Schaden-Hotline/-Email.
 
