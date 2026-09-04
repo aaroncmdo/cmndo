@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache'
 import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
 import { createLinkedTask } from '@/lib/tasks/create-task'
+import { buildReQualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
 import type { Bindungsumfang, KaskoBindungsInfo, KaskoTarifAuswahl, WbStatus } from '@/lib/kasko-wb/types'
 
 async function assertOwner(claimId: string): Promise<{ ok: true; leadId: string | null } | { ok: false; error: string }> {
@@ -54,7 +55,15 @@ export async function speichereKaskoTarifPortal(
   if (error) return { ok: false, error: error.message }
   if (owner.leadId) {
     // Lead spiegeln (Reminder-Cron liest freie_werkstattwahl vom Lead) — non-critical.
-    const { error: leadErr } = await svc.from('leads').update(patch as never).eq('id', owner.leadId)
+    // Abnahme 04.09.: Korrektur nach frueherer Bindung hebt eine Werkstattbindungs-Disqualifikation des Leads auf.
+    let leadPatch: Record<string, unknown> = patch
+    if (ergebnis.freieWerkstattwahl !== false) {
+      const { data: alt } = await svc.from('leads').select('disqualifiziert_grund_key').eq('id', owner.leadId).maybeSingle()
+      if ((alt as { disqualifiziert_grund_key?: string | null } | null)?.disqualifiziert_grund_key === 'werkstattbindung') {
+        leadPatch = { ...patch, ...buildReQualifikationPatch() }
+      }
+    }
+    const { error: leadErr } = await svc.from('leads').update(leadPatch as never).eq('id', owner.leadId)
     if (leadErr) console.error('[kasko-tarif-portal] Lead-Spiegel fehlgeschlagen (non-critical):', leadErr.message)
   }
   if (ergebnis.freieWerkstattwahl === null) {

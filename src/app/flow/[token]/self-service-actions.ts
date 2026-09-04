@@ -27,7 +27,7 @@ import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vors
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 import { spiegleQualiAufClaim } from '@/lib/leads/spiegle-quali-auf-claim'
-import { buildDisqualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
+import { buildDisqualifikationPatch, buildReQualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
 import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
 import { notifyKundeWerkstattbindung } from '@/lib/kasko-wb/notify-kunde-werkstattbindung'
@@ -286,7 +286,16 @@ export async function speichereKaskoTarifFlow(
     eigene_kasko_tarif_name: tarifName,
     werkstattbindung_quelle: ergebnis.quelle,
   }
-  const { error: updErr } = await admin.from('leads').update(tarifFelder).eq('id', leadId)
+  // Abnahme 04.09.: Korrektur nach frueherer Bindung ("Angaben korrigieren") — frei/unbekannt hebt eine
+  // Werkstattbindungs-Disqualifikation wieder auf (speichereQualiFlow disqualifiziert nur, re-qualifiziert nie).
+  let leadPatch: Record<string, unknown> = tarifFelder
+  if (ergebnis.freieWerkstattwahl !== false) {
+    const { data: alt } = await admin.from('leads').select('disqualifiziert_grund_key').eq('id', leadId).maybeSingle()
+    if ((alt as { disqualifiziert_grund_key?: string | null } | null)?.disqualifiziert_grund_key === 'werkstattbindung') {
+      leadPatch = { ...tarifFelder, ...buildReQualifikationPatch() }
+    }
+  }
+  const { error: updErr } = await admin.from('leads').update(leadPatch).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
   // Review W1: ein bereits konvertierter Claim bekommt die Antwort UEBERSCHREIBEND (spiegleQualiAufClaim fuellt nur
   // leere Felder, und der Disqualifikations-Zweig von speichereQualiFlow spiegelt gar nicht) — sonst zeigt das Portal

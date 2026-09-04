@@ -52,7 +52,18 @@ export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; o
 
   if (phase === 'abbruch') {
     // Info nicht ladbar -> generische Endseite, nie zurueck in die Frage.
-    return info ? <KaskoBindungEndansicht info={info} onRueckruf={() => fordereRueckrufAn(token)} /> : <KaskoEndansicht />
+    return info ? (
+      <KaskoBindungEndansicht
+        info={info}
+        onRueckruf={() => fordereRueckrufAn(token)}
+        onKorrigieren={() => {
+          setInfo(null)
+          setPhase('frage')
+        }}
+      />
+    ) : (
+      <KaskoEndansicht />
+    )
   }
   if (phase === 'unklar') {
     return <KaskoUnklarHinweis markeName={markeName} onWeiter={onWeiter} />

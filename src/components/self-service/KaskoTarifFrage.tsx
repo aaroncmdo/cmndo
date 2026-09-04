@@ -225,8 +225,9 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
           <h2 className={h}>Bitte kurz bestätigen</h2>
           <p className={p}>
             Sie haben {pnd.auswahl.markeName ?? 'Ihre Versicherung'}
-            {pnd.auswahl.tarifName ? ` mit dem Tarif „${pnd.auswahl.tarifName}“` : ''} angegeben. Dieser Tarif enthält eine
-            Werkstattbindung: Ihre Versicherung benennt die Reparaturwerkstatt, wir können Ihnen dann keine Werkstatt vermitteln.
+            {pnd.auswahl.tarifName ? ` mit dem Tarif „${pnd.auswahl.tarifName}“` : ''} angegeben. Wenn das stimmt, vermitteln wir
+            Ihnen keine Werkstatt, denn Ihre Versicherung benennt sie. Sie bekommen von uns eine E-Mail mit den nächsten Schritten.
+            Im Zweifel gilt, was auf Ihrem Versicherungsschein steht.
           </p>
         </div>
         <Card p={4} radius="lg" accentColor="warning">

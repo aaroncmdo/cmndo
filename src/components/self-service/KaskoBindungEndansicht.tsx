@@ -12,10 +12,13 @@ import type { KaskoBindungsInfo } from '@/lib/kasko-wb/types'
 export function KaskoBindungEndansicht({
   info,
   onRueckruf,
+  onKorrigieren,
   kompakt = false,
 }: {
   info: KaskoBindungsInfo
   onRueckruf?: () => Promise<{ ok: boolean; error?: string }>
+  /** Abnahme 04.09.: Weg zurueck in die Tariffrage (Fehlklick, spaetere Korrektur nach Blick in den Schein). */
+  onKorrigieren?: () => void
   kompakt?: boolean
 }) {
   const [rueckruf, setRueckruf] = useState<'offen' | 'sendet' | 'fertig' | 'fehler'>('offen')
@@ -80,6 +83,11 @@ export function KaskoBindungEndansicht({
         </Button>
       )}
       {rueckruf === 'fertig' && <p className="text-body-sm text-success-strong">Danke – wir rufen Sie zurück.</p>}
+      {onKorrigieren && (
+        <Button variant="bare" size="sm" onClick={onKorrigieren}>
+          <span data-testid="kasko-bindung-korrigieren">Angaben korrigieren – ich habe einen anderen Tarif</span>
+        </Button>
+      )}
       {fehler && <p className="text-body-sm text-danger">{fehler}</p>}
 
       <p className="text-caption text-claimondo-navy/50">
