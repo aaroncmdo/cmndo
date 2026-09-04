@@ -60,6 +60,12 @@ jobs:
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_CLARITY_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_ID }}
+          # OpenAI-Ads-Pixel-ID. Wird hier NICHT fuer ein Browser-Pixel gebraucht
+          # (die App laedt keines), sondern weil `sendOaiqEvent` sie als Guard
+          # liest — ohne sie bleiben `appointment_scheduled` und `order_created`
+          # still aus. NEXT_PUBLIC_* wird beim BUILD eingebacken, ein spaeteres
+          # Nachtragen in der Laufzeit-Env wirkt nicht.
+          NEXT_PUBLIC_OAIQ_PIXEL_ID: 4AqqBAz94xuaFjid19QTnZ
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Artefakt packen
