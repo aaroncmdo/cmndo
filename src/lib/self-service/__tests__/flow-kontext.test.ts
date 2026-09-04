@@ -58,6 +58,11 @@ describe('bauFlowKontext', () => {
   it('quali_offen=false: unklar (Teilschuld) laeuft in den Rueckruf, nicht in die VS-Frage', () => {
     expect(bauFlowKontext({ schuldfrage: 'unklar' }, false).quali_offen).toBe(false)
   })
+
+  it('werkstattbindung_quelle wird roh durchgereicht (Step-Bedingung Kasko)', () => {
+    expect(bauFlowKontext({ werkstattbindung_quelle: 'unbekannt' }, false).werkstattbindung_quelle).toBe('unbekannt')
+    expect(bauFlowKontext({}, false).werkstattbindung_quelle).toBeNull()
+  })
 })
 
 describe('bauFlowKontext — Rohspalten fuer erhebt_felder', () => {

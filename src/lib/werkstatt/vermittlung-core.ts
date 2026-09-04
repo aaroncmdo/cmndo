@@ -13,6 +13,8 @@ export type BedarfRow = {
   reparatur_werkstatt_id?: string | null
   werkstatt_id?: string | null
   reparatur_vermittlung_status?: string | null
+  /** Kasko-WB Phase 1: false = Versicherer benennt die Werkstatt -> wir vermitteln NICHT. */
+  freie_werkstattwahl?: boolean | null
 }
 
 /**
@@ -25,6 +27,7 @@ export type BedarfRow = {
  */
 export function brauchtWerkstattVermittlung(row: BedarfRow): boolean {
   return (
+    row.freie_werkstattwahl !== false &&
     (row.reparaturwunsch === 'reparatur' || row.reparaturwunsch === 'fiktiv') &&
     row.reparatur_werkstatt_id == null &&
     row.werkstatt_id == null &&

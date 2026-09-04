@@ -3,6 +3,7 @@
 // kanonischen buildZuweisungPatch (Reparateur-Slot, quelle='embed') — NIE werkstatt_id.
 import { istInterneEmail } from '@/lib/testdaten/interne-identitaet'
 import { buildZuweisungPatch } from '@/lib/werkstatt/vermittlung-core'
+import type { KaskoTarifAuswahl, WbErgebnis } from '@/lib/kasko-wb/types'
 
 export type WerkstattFinderLeadInput = {
   werkstattId: string | null
@@ -21,6 +22,8 @@ export type WerkstattFinderLeadInput = {
   // 'gegner' (unverschuldet) -> haftpflicht; 'eigenverantwortung' + eigeneVersicherung -> kasko/selbstzahler.
   schuldfrage?: 'eigenverantwortung' | 'gegner' | null
   eigeneVersicherung?: 'ja' | 'nein' | null
+  /** Kasko-WB Phase 1: Antwort der Tariffrage (nur bei eigeneVersicherung='ja'). */
+  kaskoWb?: (KaskoTarifAuswahl & WbErgebnis) | null
 }
 
 /**
@@ -63,10 +66,18 @@ export function buildWerkstattFinderLeadExtra(input: WerkstattFinderLeadInput): 
     extra.schuldfrage = input.schuldfrage
     extra.eigene_versicherung = input.eigeneVersicherung
   }
-  if (input.werkstattId && darfWerkstattZuweisen(input.kundeEmail, input.werkstattEmail)) {
-    Object.assign(extra, buildZuweisungPatch(input.werkstattId, null, 'embed'), {
-      reparaturwunsch: 'reparatur',
-    })
+  const gebunden = input.kaskoWb?.freieWerkstattwahl === false
+  if (input.kaskoWb) {
+    extra.eigene_versicherung_marke_id = input.kaskoWb.markeId
+    extra.eigene_versicherung_name = input.kaskoWb.markeName
+    extra.eigene_kasko_tarif_id = input.kaskoWb.tarifId
+    extra.eigene_kasko_tarif_name = input.kaskoWb.tarifName
+    extra.werkstattbindung_quelle = input.kaskoWb.quelle
+    if (input.kaskoWb.freieWerkstattwahl !== null) extra.freie_werkstattwahl = input.kaskoWb.freieWerkstattwahl
+  }
+  // Umgehung (a) aus dem Scan: gebundener Kasko-Kunde bekommt KEINE Werkstatt zugewiesen.
+  if (!gebunden && input.werkstattId && darfWerkstattZuweisen(input.kundeEmail, input.werkstattEmail)) {
+    Object.assign(extra, buildZuweisungPatch(input.werkstattId, null, 'embed'), { reparaturwunsch: 'reparatur' })
   }
   return extra
 }

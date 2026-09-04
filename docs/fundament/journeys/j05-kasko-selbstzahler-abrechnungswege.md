@@ -28,7 +28,11 @@ SV-/Regulierungs-Kette läuft (Haftpflicht → J1) oder der reduzierte Reparatur
 ## Varianten / Abzweige
 
 - **Gegner dominiert:** auch mit eigener Vollkasko ist es Haftpflicht, wenn der Gegner schuld ist (§249 — der Kunde soll nicht die eigene VS belasten).
-- **Kasko mit freier Werkstattwahl** (`freieWerkstattwahl !== false`) → Werkstatt-Reparatur-Weg (J4). **Kasko-gebunden** (`===false`) → im Quali disqualifiziert, keine Werkstatt-Vermittlung.
+- **Kasko: Versicherer + Tarif (Delta 04.09.2026, Kasko-WB Phase 1).** Nach „Ja, Kasko" nennt der Kunde seine Versicherung (Wissensbasis `kasko_versicherer_marken`, 72 Marken) und — bei Marken mit wählbarer Bindung — seinen Tarif vom Versicherungsschein; kennt er ihn nicht, fragt der Flow nach dem Marker im Tarifnamen („SELECT", „mit Werkstattbonus" …). Daraus wird `freie_werkstattwahl` abgeleitet (`werkstattbindung_quelle` = tarif | marker | unbekannt).
+  - **frei** (`true`) → Werkstatt-Reparatur-Weg (J4) wie bisher.
+  - **gebunden** (`false`) → ehrliche Endseite (Tarif, Sanktion, Versicherer-Hotline, Rückruf) + Zusammenfassungs-Mail; Lead disqualifiziert (`werkstattbindung`), **keine** Werkstatt-Vermittlung — auch nicht über Embed-Finder, Portal, QR-Trigger oder Dispatch (Server-Guard).
+  - **unbekannt** (`null`) → Hinweis „Schein prüfen", der Kunde läuft in die Werkstatt-Strecke, Dispatch bekommt die Aufgabe „Kasko: Werkstattbindung klären".
+  - Der Dispatcher sieht Tarif/Bindung im Lead und kann sie korrigieren (Lead **und** Claim); ein Override auf frei/unbekannt hebt die Disqualifikation auf.
 - **Selbstzahler** = Reparatur-only (`istReparaturOnly`): kein SV, kein Gutachten, keine Regulierung.
 - **Weg offen** → der Flow stellt die fehlende Frage nach, statt zu raten.
 

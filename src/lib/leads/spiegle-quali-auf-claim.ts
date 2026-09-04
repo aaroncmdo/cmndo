@@ -35,6 +35,12 @@ export const QUALI_FELDER = [
   'reparaturwunsch',
   'eigene_versicherung',
   'freie_werkstattwahl',
+  // Kasko-WB Phase 1 (Mig 3): identische Spalten/Typen auf leads und claims, CHECK auf werkstattbindung_quelle byte-gleich.
+  'eigene_versicherung_marke_id',
+  'eigene_versicherung_name',
+  'eigene_kasko_tarif_id',
+  'eigene_kasko_tarif_name',
+  'werkstattbindung_quelle',
 ] as const
 
 export type QualiFeld = (typeof QUALI_FELDER)[number]

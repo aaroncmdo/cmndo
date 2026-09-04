@@ -207,6 +207,18 @@ export async function assignReparaturWerkstatt(
     }
   }
 
+  // Kasko-WB Phase 1 (Spec §6): gebundener Kunde -> keine Zuweisung, egal wer sie versucht (Dispatch/KB/SV/Kunde).
+  {
+    const zielTabelle = input.target === 'lead' ? 'leads' : 'claims'
+    const { data: ziel } = await admin.from(zielTabelle).select('freie_werkstattwahl').eq('id', input.id).maybeSingle()
+    if ((ziel as { freie_werkstattwahl?: boolean | null } | null)?.freie_werkstattwahl === false) {
+      return {
+        ok: false,
+        error: 'Kasko mit Werkstattbindung — der Versicherer benennt die Werkstatt. Eine Vermittlung ist hier nicht möglich.',
+      }
+    }
+  }
+
   const table = input.target === 'lead' ? 'leads' : 'claims'
   const patch = buildZuweisungPatch(input.werkstattId, input.actorUserId, input.quelle)
   const { error } = await admin.from(table).update(patch as never).eq('id', input.id)

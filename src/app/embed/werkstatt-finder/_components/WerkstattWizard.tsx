@@ -132,7 +132,8 @@ export function WerkstattWizard({
         nachname: nachname || null,
         email,
         telefon: telefon || null,
-        werkstattId: selectedId,
+        werkstattId: state.kaskoWb?.freieWerkstattwahl === false ? null : selectedId,
+        kaskoWb: state.kaskoWb,
         lat: state.standort?.lat ?? null,
         lng: state.standort?.lng ?? null,
         ort: state.standort?.adresse ?? null,
@@ -202,14 +203,21 @@ export function WerkstattWizard({
         </>
       )}
       {step === 'abrechnung' && (
-        <AbrechnungStep abrechnung={state.abrechnung} onChange={(w) => patch({ abrechnung: w })} />
+        <AbrechnungStep
+          abrechnung={state.abrechnung}
+          onChange={(w) => patch({ abrechnung: w })}
+          kaskoWb={state.kaskoWb}
+          onKaskoWb={(w) => patch({ kaskoWb: w })}
+        />
       )}
       {step === 'kontakt' && (
         <div className="flex flex-col gap-3">
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Ihre Kontaktdaten</h3>
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
-              Damit wir Ihre Werkstatt-Anfrage bestätigen können.
+              {state.kaskoWb?.freieWerkstattwahl === false
+                ? 'Wir vermitteln in diesem Fall keine Werkstatt. Hinterlassen Sie Ihre Kontaktdaten für einen Rückruf und eine Zusammenfassung per E-Mail.'
+                : 'Damit wir Ihre Werkstatt-Anfrage bestätigen können.'}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2">

@@ -553,6 +553,16 @@ export async function convertLeadToClaim(
   // (kein Auto-qr_referral-Reparateur bei freier Wahl). Record-Cast wg. Type-Lag (Mig 20260713161645).
   ;(claimsInsert as Record<string, unknown>).freie_werkstattwahl =
     (lead.freie_werkstattwahl as boolean | null) ?? null
+  // Kasko-WB Phase 1: Herkunft + Kontext der Werkstattbindung Lead -> Claim (Spec §4.2). Record-Cast wie oben.
+  for (const feld of [
+    'eigene_versicherung_marke_id',
+    'eigene_versicherung_name',
+    'eigene_kasko_tarif_id',
+    'eigene_kasko_tarif_name',
+    'werkstattbindung_quelle',
+  ] as const) {
+    ;(claimsInsert as Record<string, unknown>)[feld] = (lead[feld] as string | null) ?? null
+  }
   // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
   ;(claimsInsert as Record<string, unknown>).schadenskategorie =
     (lead.schadenskategorie as string | null) ?? null
