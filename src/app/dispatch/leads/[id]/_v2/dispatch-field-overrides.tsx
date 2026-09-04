@@ -15,6 +15,7 @@ import type { DispatchOverrideKey } from './dispatch-field-override-keys'
 import { DispatchVersichererField } from './DispatchVersichererField'
 import { DispatchPlaceField } from './DispatchPlaceField'
 import { DispatchKennzeichenField } from './DispatchKennzeichenField'
+import { DispatchKaskoTarifField } from './DispatchKaskoTarifField'
 
 // Kontext den die Dispatcher-Rich-Felder brauchen (von DispatchLeadForm gereicht).
 export type DispatchFieldCtx = {
@@ -69,6 +70,8 @@ const OVERRIDES: Record<DispatchOverrideKey, (feld: OnboardingFeld, ctx: Dispatc
   kunde_strasse: (feld, ctx) => (
     <DispatchPlaceField feld={feld} leadId={ctx.leadId} lead={ctx.lead} target="kunde" />
   ),
+  // Kasko-WB Phase 1: Versicherer/Tarif/Bindung als Rich-Feld (nur bei schuldfrage=eigenverantwortung, siehe onboarding_felder).
+  eigene_kasko_tarif: (feld, ctx) => <DispatchKaskoTarifField feld={feld} leadId={ctx.leadId} lead={ctx.lead} />,
 }
 
 export function renderDispatchFieldOverride(feld: OnboardingFeld, ctx: DispatchFieldCtx): ReactNode | null {
