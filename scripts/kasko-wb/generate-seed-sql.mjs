@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildSeedSql, validateSeed } from '../lib/kasko-wb-seed.mjs'
+import { buildSeedSql, expandTarife, validateSeed } from '../lib/kasko-wb-seed.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const STAND = process.argv[2] ?? '2026-07-20'
@@ -21,5 +21,6 @@ if (errs.length) {
 const sql = buildSeedSql(data)
 writeFileSync(out, sql, 'utf8')
 const tarife = data.marken.reduce((n, m) => n + (m.linien?.length ?? 0), 0)
-console.log(`✓ ${data.marken.length} Marken, ${sql.split('INSERT INTO public.kasko_tarife').length - 1} Tarifzeilen -> ${out}`)
+const tarifZeilen = data.marken.reduce((n, m) => n + expandTarife(m).length, 0)
+console.log(`✓ ${data.marken.length} Marken, ${tarifZeilen} Tarifzeilen -> ${out}`)
 console.log(`  (Linien: ${tarife}; Konditionen: ${data.marken.filter((m) => m.konditionen).length} + Default)`)

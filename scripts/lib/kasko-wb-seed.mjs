@@ -105,19 +105,15 @@ export function validateSeed(data) {
   return errs
 }
 
-function konditionenInsert(key, markeSlug, k) {
-  const markeExpr = markeSlug ? `(SELECT id FROM public.kasko_versicherer_marken WHERE slug = ${sqlLit(markeSlug)})` : 'NULL'
-  return `INSERT INTO public.kasko_wb_konditionen
-  (key, marke_id, nachlass_text, sanktion_modell, sanktion_text, gilt_fuer, ausnahmen_text, partnernetz, akb_fundstelle, quelle)
-VALUES (${sqlLit(key)}, ${markeExpr}, ${sqlLit(k.nachlass_text)}, ${sqlLit(k.sanktion_modell)}, ${sqlLit(k.sanktion_text)},
-  ${sqlLit(k.gilt_fuer)}, ${sqlLit(k.ausnahmen_text)}, ${sqlLit(k.partnernetz)}, ${sqlLit(k.akb_fundstelle)}, ${sqlLit(k.quelle)})
-ON CONFLICT (key) DO UPDATE SET marke_id = EXCLUDED.marke_id, nachlass_text = EXCLUDED.nachlass_text,
-  sanktion_modell = EXCLUDED.sanktion_modell, sanktion_text = EXCLUDED.sanktion_text, gilt_fuer = EXCLUDED.gilt_fuer,
-  ausnahmen_text = EXCLUDED.ausnahmen_text, partnernetz = EXCLUDED.partnernetz, akb_fundstelle = EXCLUDED.akb_fundstelle,
-  quelle = EXCLUDED.quelle;`
+function konditionenZeile(key, markeSlug, k) {
+  return `  (${sqlLit(key)}, ${sqlLit(markeSlug)}, ${sqlLit(k.nachlass_text)}, ${sqlLit(k.sanktion_modell)}, ${sqlLit(k.sanktion_text)}, ${sqlLit(k.gilt_fuer)}, ${sqlLit(k.ausnahmen_text)}, ${sqlLit(k.partnernetz)}, ${sqlLit(k.akb_fundstelle)}, ${sqlLit(k.quelle)})`
 }
 
-/** Vollstaendiges, idempotentes Seed-SQL. */
+/**
+ * Vollstaendiges, idempotentes Seed-SQL — kompakt: EINE Anweisung je Tabelle mit VALUES-Liste
+ * (statt einer je Zeile), damit die Migration durch das Supabase-Plugin passt (349 KB -> ~70 KB).
+ * Reihenfolge: Marken -> Rechtstraeger-Backfill -> Tarife -> Konditionen (Tarife/Konditionen joinen per slug).
+ */
 export function buildSeedSql(data) {
   const errs = validateSeed(data)
   if (errs.length) throw new Error(`Seed ungueltig:\n${errs.join('\n')}`)
@@ -125,33 +121,58 @@ export function buildSeedSql(data) {
   out.push(`-- GENERIERT von scripts/kasko-wb/generate-seed-sql.mjs aus scripts/kasko-wb/wissensbasis-${data.stand}.json`)
   out.push(`-- Quelle: ${data.quelle}. Idempotent (Upserts), keine UUIDs, Rechtstraeger-FK per Name (versicherungen-Seed ist nicht versioniert).`)
   out.push('')
-  data.marken.forEach((m, idx) => {
-    out.push(`-- ${m.marke}`)
-    out.push(`INSERT INTO public.kasko_versicherer_marken
+
+  out.push(`-- 1) Marken (${data.marken.length})
+INSERT INTO public.kasko_versicherer_marken
   (slug, marke, wb_status, wb_marker, nicht_wb_marker, hinweis, varianten_hinweis, check24_vertrieb, quelle, stand, sortierung)
-VALUES (${sqlLit(m.slug)}, ${sqlLit(m.marke)}, ${sqlLit(m.wb_status)}, ${sqlTextArray(m.wb_marker)}, ${sqlTextArray(m.nicht_wb_marker)},
-  ${sqlLit(m.hinweis)}, ${sqlLit(m.varianten_hinweis)}, ${sqlLit(m.check24_vertrieb)}, ${sqlLit(data.quelle)}, ${sqlLit(data.stand)}::date, ${(idx + 1) * 10})
+SELECT v.slug, v.marke, v.wb_status, v.wb_marker, v.nicht_wb_marker, v.hinweis, v.varianten_hinweis, v.check24_vertrieb,
+  ${sqlLit(data.quelle)}, ${sqlLit(data.stand)}::date, v.sortierung
+FROM (VALUES
+${data.marken.map((m, idx) => `  (${sqlLit(m.slug)}, ${sqlLit(m.marke)}, ${sqlLit(m.wb_status)}, ${sqlTextArray(m.wb_marker)}, ${sqlTextArray(m.nicht_wb_marker)}, ${sqlLit(m.hinweis)}, ${sqlLit(m.varianten_hinweis)}, ${sqlLit(m.check24_vertrieb)}, ${(idx + 1) * 10})`).join(',\n')}
+) AS v(slug, marke, wb_status, wb_marker, nicht_wb_marker, hinweis, varianten_hinweis, check24_vertrieb, sortierung)
 ON CONFLICT (slug) DO UPDATE SET marke = EXCLUDED.marke, wb_status = EXCLUDED.wb_status, wb_marker = EXCLUDED.wb_marker,
   nicht_wb_marker = EXCLUDED.nicht_wb_marker, hinweis = EXCLUDED.hinweis, varianten_hinweis = EXCLUDED.varianten_hinweis,
   check24_vertrieb = EXCLUDED.check24_vertrieb, quelle = EXCLUDED.quelle, stand = EXCLUDED.stand, sortierung = EXCLUDED.sortierung,
   aktualisiert_am = now();`)
-    if (m.versicherung_name) {
-      out.push(`UPDATE public.kasko_versicherer_marken m SET versicherung_id = v.id
-FROM public.versicherungen v WHERE m.slug = ${sqlLit(m.slug)} AND v.name = ${sqlLit(m.versicherung_name)} AND m.versicherung_id IS NULL;`)
-    }
-    for (const t of expandTarife(m)) {
-      out.push(`INSERT INTO public.kasko_tarife (marke_id, linie, wb_zusatz, anzeigename, hat_werkstattbindung, bindungsumfang, verlaesslichkeit, reihenfolge)
-SELECT m.id, ${sqlLit(t.linie)}, ${sqlLit(t.wb_zusatz)}, ${sqlLit(t.anzeigename)}, ${t.hat_werkstattbindung}, ${sqlLit(t.bindungsumfang)}, ${sqlLit(t.verlaesslichkeit)}, ${t.reihenfolge}
-FROM public.kasko_versicherer_marken m WHERE m.slug = ${sqlLit(m.slug)}
+  out.push('')
+
+  const mitTraeger = data.marken.filter((m) => m.versicherung_name)
+  out.push(`-- 2) Rechtstraeger-Backfill per Name (${mitTraeger.length}; nur wenn noch leer)
+UPDATE public.kasko_versicherer_marken m SET versicherung_id = v.id
+FROM (VALUES
+${mitTraeger.map((m) => `  (${sqlLit(m.slug)}, ${sqlLit(m.versicherung_name)})`).join(',\n')}
+) AS x(slug, versicherung_name)
+JOIN public.versicherungen v ON v.name = x.versicherung_name
+WHERE m.slug = x.slug AND m.versicherung_id IS NULL;`)
+  out.push('')
+
+  const tarife = data.marken.flatMap((m) => expandTarife(m).map((t) => ({ slug: m.slug, ...t })))
+  out.push(`-- 3) Tarife (${tarife.length} Zeilen; Spalten: slug, linie, wb_zusatz, anzeigename, hat_werkstattbindung, bindungsumfang, verlaesslichkeit, reihenfolge)
+INSERT INTO public.kasko_tarife (marke_id, linie, wb_zusatz, anzeigename, hat_werkstattbindung, bindungsumfang, verlaesslichkeit, reihenfolge)
+SELECT m.id, t.linie, t.wb_zusatz, t.anzeigename, t.hat_werkstattbindung, t.bindungsumfang, t.verlaesslichkeit, t.reihenfolge
+FROM (VALUES
+${tarife.map((t) => `  (${sqlLit(t.slug)}, ${sqlLit(t.linie)}, ${sqlLit(t.wb_zusatz)}, ${sqlLit(t.anzeigename)}, ${t.hat_werkstattbindung}, ${sqlLit(t.bindungsumfang)}, ${sqlLit(t.verlaesslichkeit)}, ${t.reihenfolge})`).join(',\n')}
+) AS t(slug, linie, wb_zusatz, anzeigename, hat_werkstattbindung, bindungsumfang, verlaesslichkeit, reihenfolge)
+JOIN public.kasko_versicherer_marken m ON m.slug = t.slug
 ON CONFLICT (marke_id, anzeigename) DO UPDATE SET linie = EXCLUDED.linie, wb_zusatz = EXCLUDED.wb_zusatz,
   hat_werkstattbindung = EXCLUDED.hat_werkstattbindung, bindungsumfang = EXCLUDED.bindungsumfang,
   verlaesslichkeit = EXCLUDED.verlaesslichkeit, reihenfolge = EXCLUDED.reihenfolge, aktiv = true;`)
-    }
-    if (m.konditionen) out.push(konditionenInsert(m.slug, m.slug, m.konditionen))
-    out.push('')
-  })
-  out.push('-- Default-Konditionen (GDV-Muster) fuer alle Marken ohne belegte Werte')
-  out.push(konditionenInsert('__default__', null, data.default_konditionen))
+  out.push('')
+
+  const konditionen = [konditionenZeile('__default__', null, data.default_konditionen)]
+  for (const m of data.marken) if (m.konditionen) konditionen.push(konditionenZeile(m.slug, m.slug, m.konditionen))
+  out.push(`-- 4) Konditionen (${konditionen.length}; key=__default__ mit slug NULL = GDV-Muster fuer alle Marken ohne belegte Werte)
+INSERT INTO public.kasko_wb_konditionen
+  (key, marke_id, nachlass_text, sanktion_modell, sanktion_text, gilt_fuer, ausnahmen_text, partnernetz, akb_fundstelle, quelle)
+SELECT k.key, m.id, k.nachlass_text, k.sanktion_modell, k.sanktion_text, k.gilt_fuer, k.ausnahmen_text, k.partnernetz, k.akb_fundstelle, k.quelle
+FROM (VALUES
+${konditionen.join(',\n')}
+) AS k(key, slug, nachlass_text, sanktion_modell, sanktion_text, gilt_fuer, ausnahmen_text, partnernetz, akb_fundstelle, quelle)
+LEFT JOIN public.kasko_versicherer_marken m ON m.slug = k.slug
+ON CONFLICT (key) DO UPDATE SET marke_id = EXCLUDED.marke_id, nachlass_text = EXCLUDED.nachlass_text,
+  sanktion_modell = EXCLUDED.sanktion_modell, sanktion_text = EXCLUDED.sanktion_text, gilt_fuer = EXCLUDED.gilt_fuer,
+  ausnahmen_text = EXCLUDED.ausnahmen_text, partnernetz = EXCLUDED.partnernetz, akb_fundstelle = EXCLUDED.akb_fundstelle,
+  quelle = EXCLUDED.quelle;`)
   out.push('')
   return out.join('\n')
 }
