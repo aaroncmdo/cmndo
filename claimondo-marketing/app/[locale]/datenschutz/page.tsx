@@ -423,6 +423,7 @@ export default function DatenschutzPage() {
                 ['ElevenLabs Inc.', 'Sprachsynthese (Text-to-Speech, keine personenbezogenen Inhalte)', 'USA', 'AVV + SCCs'],
                 ['Functional Software Inc. (Sentry)', 'Fehler- und Performance-Monitoring', 'USA', 'AVV + SCCs'],
                 ['Microsoft Ireland Operations Ltd. (Clarity)', 'Session-Analyse (Heatmaps/Recording)', 'EU/USA', 'AVV + SCCs'],
+                ['OpenAI Ireland Limited', 'Conversion-Messung für Werbeanzeigen in ChatGPT', 'EU/USA', 'AVV + SCCs'],
                 ['Salesforce.com EMEA', 'CRM und Fallverwaltung (Partnerkanzlei)', 'EU', 'AVV + SCCs'],
               ]}
             />
@@ -447,7 +448,7 @@ export default function DatenschutzPage() {
             <p>
               Eine Übermittlung Ihrer Daten in Länder außerhalb der EU/des EWR (Drittländer) findet
               derzeit an folgende Anbieter in den USA statt: Twilio, Google, Meta, Resend, Mapbox,
-              Anthropic, ElevenLabs, Sentry, Microsoft (Clarity), Cesium sowie Stripe (über die Sub-Auftragsverarbeiterin Stripe
+              Anthropic, ElevenLabs, Sentry, Microsoft (Clarity), OpenAI, Cesium sowie Stripe (über die Sub-Auftragsverarbeiterin Stripe
               Inc.) und über Aircall an Amazon Web Services (AWS, USA) und Microsoft Corporation
               (USA) als Sub-Auftragsverarbeiter. Diese Anbieter sind nach dem EU-US Data Privacy Framework
               zertifiziert oder wir haben mit ihnen Standardvertragsklauseln (SCCs) gemäß Art. 46
@@ -674,6 +675,47 @@ export default function DatenschutzPage() {
                 Weitere Informationen finden Sie in der Datenschutzerklärung von Matelso unter{' '}
                 <a href="https://www.matelso.com/datenschutz" target="_blank" rel="noopener noreferrer" className={linkCls}>
                   matelso.com/datenschutz
+                </a>
+                .
+              </p>
+
+              <H3>10.6 OpenAI Ads (Werbeanzeigen in ChatGPT)</H3>
+              <p>
+                Wir schalten Werbeanzeigen innerhalb von ChatGPT und messen deren Erfolg mit dem
+                Measurement Pixel der OpenAI Ireland Limited, 1st Floor, The Liffey Trust Centre,
+                117–126 Sheriff Street Upper, Dublin 1, Irland. Klicken Sie auf eine unserer
+                Anzeigen, hängt OpenAI der Ziel-URL eine pseudonyme Kennung an. Diese Kennung wird
+                in einem First-Party-Cookie (<code>__oppref</code>) auf Ihrem Endgerät gespeichert,
+                damit wir nachvollziehen können, ob aus einem Anzeigenklick eine Anfrage entstanden
+                ist.
+              </p>
+              <p>
+                <span className="font-semibold text-claimondo-navy">Verarbeitete Daten:</span> Senden
+                Sie anschließend eine Anfrage ab, buchen einen Gutachtertermin oder erteilen uns
+                einen Auftrag, übermitteln wir von unserem Server aus ein Ereignis an OpenAI.
+                Übertragen werden dabei ausschließlich die genannte Kennung, die Art des Ereignisses,
+                ein Zeitstempel, die Adresse der Seite, auf der das Ereignis stattfand, und – beim
+                Auftrag – ein pauschaler Wert. Ihr Name, Ihre Kontaktdaten und Angaben zu Ihrem
+                Schadenfall werden dabei nicht an OpenAI übermittelt. Die dem Pixel technisch
+                mögliche automatische Erkennung von Kundendaten im Browser („Automatic Advanced
+                Matching") ist in unserem Werbekonto deaktiviert.
+              </p>
+              <p>
+                <span className="font-semibold text-claimondo-navy">Rechtsgrundlage:</span> Ihre
+                Einwilligung (Art. 6 Abs. 1 lit. a DSGVO i. V. m. § 25 Abs. 1 TDDDG,
+                Cookie-Kategorie „Marketing"). Ohne Ihre Einwilligung wird das Pixel nicht geladen
+                und es werden keine Ereignisse übermittelt; einen erteilten Widerruf setzen wir
+                unmittelbar um. Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft
+                über unser Consent-Banner widerrufen.
+              </p>
+              <p>
+                <span className="font-semibold text-claimondo-navy">Drittlandübermittlung:</span> Die
+                Übermittlung in die USA erfolgt auf Basis von Standardvertragsklauseln (SCCs) gemäß
+                Art. 46 Abs. 2 lit. c DSGVO bzw. einer Zertifizierung nach dem EU-US Data Privacy
+                Framework. Weitere Informationen finden Sie in der Datenschutzerklärung von OpenAI
+                unter{' '}
+                <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className={linkCls}>
+                  openai.com/policies/privacy-policy
                 </a>
                 .
               </p>
