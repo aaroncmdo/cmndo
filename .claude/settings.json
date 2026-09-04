@@ -21,6 +21,12 @@
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/sync-haupt-checkout.mjs",
+            "timeout": 40,
+            "statusMessage": "Haupt-Checkout nachziehen..."
+          },
+          {
+            "type": "command",
             "command": "node .claude/hooks/load-memory-digest.mjs",
             "timeout": 15,
             "statusMessage": "Lade relevante Memory-Eintraege..."
