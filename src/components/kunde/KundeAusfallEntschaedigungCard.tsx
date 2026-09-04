@@ -197,7 +197,7 @@ export default async function KundeAusfallEntschaedigungCard({
     // die Datenlage und liess den Kunden glauben, es sei gar nichts bekannt.
     // Jetzt: die bekannte Zahl nennen, nur das wirklich Fehlende offenlassen.
     return (
-      <section className="rounded-2xl border border-dashed border-claimondo-border bg-claimondo-bg p-5 space-y-2 text-xs text-claimondo-ondo">
+      <section className="rounded-2xl border border-dashed border-claimondo-border bg-claimondo-bg p-5 space-y-2 text-body-sm text-claimondo-ondo">
         <header className="flex items-center gap-2">
           <EuroIcon className="w-4 h-4 text-claimondo-shield" />
           <h3 className="text-sm font-semibold text-claimondo-navy">

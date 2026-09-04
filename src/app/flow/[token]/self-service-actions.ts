@@ -18,6 +18,7 @@ import { cancelOffeneTermineFuerBezug } from '@/lib/termine/cancel-offene-termin
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
+import { sendOaiqEvent, ladeOpprefFuerLead } from '@/lib/analytics/oaiq-capi'
 import { resolveWunschterminIso } from './wunschtermin'
 import { assignReparaturWerkstatt } from '@/lib/werkstatt/vermittlung-server'
 import { pruefeWerkstattAuswahl, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
@@ -342,14 +343,14 @@ export async function erzeugeSelbstzahlerClaim(
         const { sendEmail } = await import('@/lib/email/google/client')
         await sendEmail({
           to: kundenEmail,
-          subject: 'Ihr Fall bei Claimondo ist angelegt',
+          subject: 'Dein Fall bei Claimondo ist angelegt',
           html: `<div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; line-height: 1.5;">
   <p>${anrede}</p>
-  <p>Ihr Fall wurde erfolgreich angelegt. Über den folgenden Link kommen Sie jederzeit zurück zu Ihrem Vorgang — auch wenn Sie den Browser-Tab schließen:</p>
+  <p>Dein Fall wurde erfolgreich angelegt. Über den folgenden Link kommst du jederzeit zurück zu deinem Vorgang — auch wenn du den Browser-Tab schließt:</p>
   <p style="margin: 20px 0;"><a href="${flowUrl}" style="background: #4573A2; color: #ffffff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: bold;">Zu meinem Vorgang</a></p>
   <p style="font-size: 13px; color: #555;">Oder direkt: <a href="${flowUrl}">${flowUrl}</a></p>
-  <p>Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen.</p>
-  <p>Mit freundlichen Grüßen<br>Ihr Claimondo-Team</p>
+  <p>Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei dir.</p>
+  <p>Mit freundlichen Grüßen<br>Dein Claimondo-Team</p>
 </div>`,
         })
       }
@@ -605,11 +606,27 @@ export async function bucheTerminFlow(
     kanal: 'vor_ort',
   })
   if (res.ok && res.kind === 'gebucht') {
+    // OpenAI Ads: `appointment_scheduled`. Fire-and-forget wie die uebrigen
+    // Tracking-Aufrufe (VPS-PM2, kein Cold-Kill) — der Kunde soll nicht auf
+    // einen Werbe-Call warten.
+    //
+    // eventId = leadId, NICHT terminId: verlegt der Kunde spaeter (aendereTerminFlow
+    // fuehrt zurueck hierher), ist das dieselbe Terminvereinbarung und keine zweite
+    // Conversion. Ueber die stabile ID dedupliziert OpenAI das weg; mit der terminId
+    // wuerde jede Verlegung als neuer Abschluss zaehlen.
+    void (async () => {
+      try {
+        const oppref = await ladeOpprefFuerLead(admin, leadId)
+        await sendOaiqEvent({ oppref, eventId: leadId, eventName: 'appointment_scheduled' })
+      } catch {
+        /* fire-and-forget */
+      }
+    })()
     revalidatePath('/dispatch/leads')
     return { ok: true, terminId: res.terminId }
   }
   if (!res.ok && res.code === 'belegt') {
-    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wählen Sie einen anderen.' }
+    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wähle einen anderen.' }
   }
   return { ok: false, error: (!res.ok && res.error) || 'Termin konnte nicht reserviert werden.' }
 }
@@ -688,7 +705,7 @@ export async function speichereBesichtigungsortFlow(
   wunschterminLokal?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   if (!ort || typeof ort.lat !== 'number' || typeof ort.lng !== 'number') {
-    return { ok: false, error: 'Bitte wählen Sie eine Adresse aus den Vorschlägen.' }
+    return { ok: false, error: 'Bitte wähle eine Adresse aus den Vorschlägen.' }
   }
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
@@ -803,7 +820,7 @@ export async function waehleWerkstattFlow(
   // nicht angebotene durchgelassen). Beide gehen daher über findWerkstattVorschlaegeFuer.
   const angeboten = await findWerkstattVorschlaegeFuer({ target: 'lead', id: leadId, nurEchte: true })
   if (!angeboten.some((w) => w.id === werkstattId)) {
-    return { ok: false, error: 'Bitte wählen Sie eine der angebotenen Werkstätten.' }
+    return { ok: false, error: 'Bitte wähle eine der angebotenen Werkstätten.' }
   }
 
   const res = await assignReparaturWerkstatt({

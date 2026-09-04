@@ -61,6 +61,13 @@ jobs:
           # Marketing-spezifisch (oeffentliche IDs, wie im manuellen Deploy hardcoded):
           NEXT_PUBLIC_APP_URL: https://claimondo.de
           NEXT_PUBLIC_GA4_ID: G-9YF2W9ZP2S
+          # OpenAI-Ads-Pixel. MUSS hier stehen und nicht in der Laufzeit-Env
+          # unten: NEXT_PUBLIC_* wird beim BUILD in den Bundle gebacken. Genau
+          # das fehlte — der Pixel war deployed, die ID nicht im Bundle, und er
+          # lud nie (gemessen 04.09.2026: 0 Requests an OpenAI trotz Consent,
+          # waehrend die Anzeigen liefen). Ein `pm2 restart --update-env` haette
+          # daran nichts geaendert.
+          NEXT_PUBLIC_OAIQ_PIXEL_ID: 4AqqBAz94xuaFjid19QTnZ
 
       - name: Artefakt packen (standalone-Inhalt)
         working-directory: claimondo-marketing
@@ -106,11 +113,17 @@ jobs:
                        RESEND_API_KEY RESEND_FROM BAILEYS_BASE_URL BAILEYS_AUTH_TOKEN \
                        NEXT_PUBLIC_IMAGIN_CUSTOMER IMAGIN_SECRET GOOGLE_PLACES_API_KEY \
                        PROVENEXPERT_API_USER PROVENEXPERT_API_KEY \
-                       START_LINK_HMAC_SECRET CANONICAL_FLOWLINK_ENABLED; do
+                       START_LINK_HMAC_SECRET CANONICAL_FLOWLINK_ENABLED \
+                       OAIQ_API_KEY; do
                 grep "^${k}=" /etc/claimondo/.env.local || true
               done
               echo "NEXT_PUBLIC_APP_URL=https://claimondo.de"
               echo "NEXT_PUBLIC_GA4_ID=G-9YF2W9ZP2S"
+              # ⚠ WIRKUNGSLOS fuer den Client: NEXT_PUBLIC_* ist zu diesem
+              # Zeitpunkt laengst in den Bundle gebacken (s. Build-Env oben, die
+              # aus secrets.NEXT_PUBLIC_CLARITY_ID kommt). Gemessen 04.09.2026
+              # laeuft im Browser `wqfzu7t76q`, NICHT der Wert dieser Zeile.
+              # Steht nur noch da, falls serverseitiger Code die Variable liest.
               echo "NEXT_PUBLIC_CLARITY_ID=wtz8c2161v"
               echo "PROMO_IP_SALT=$(openssl rand -hex 16)"
             } > /etc/claimondo-marketing/.env.local

@@ -759,6 +759,85 @@ export function formatCaseStatus(r: CaseStatusResult): string {
   return [`# Bearbeitungsstand`, '', `**Status:** ${r.status}`, r.hinweis ? `\n${r.hinweis}` : ''].filter(Boolean).join('\n')
 }
 
+// --- Termin absagen (Write, token-autorisiert) -------------------------------
+// Wrappt POST /api/v1/termin-stornieren. Gleiche Vertrauensgrenze wie der Fall-Status:
+// der Kunde nennt sein EIGENES Token aus dem WhatsApp-FlowLink.
+//
+// WARUM DIESES TOOL: ein Kunde, der seinen Termin nicht schafft, hat sonst zwei Wege —
+// sich im Portal einloggen oder den Gutachter direkt anrufen. Der zweite fuehrt aus
+// unserem System heraus: wir erfahren die Absage nicht, der Slot bleibt blockiert, und
+// der naechste Kontakt laeuft am Vermittler vorbei. Absagen zu koennen haelt den Vorgang
+// bei uns — auch wenn der Termin platzt.
+
+export type StornoResult = { ok: boolean; storniert: boolean; warGeplant: string | null; hinweis: string }
+
+/** Sagt den laufenden Termin per FlowLink-Token ab. 404 (unbekanntes Token / kein
+ *  laufender Termin) -> {@link ClaimondoApiError} mit freundlicher Meldung. */
+export async function stornoTermin(
+  token: string,
+  grund: string | undefined,
+  apiBase: string = DEFAULT_API_BASE,
+): Promise<StornoResult> {
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/termin-stornieren`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json', 'user-agent': MCP_USER_AGENT },
+      body: JSON.stringify({ token, ...(grund ? { grund } : {}) }),
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(`Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`)
+    }
+    throw new ClaimondoApiError(`Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`)
+  } finally {
+    clearTimeout(timer)
+  }
+  const data = (await res.json().catch(() => ({}))) as {
+    ok?: boolean
+    storniert?: boolean
+    war_geplant?: string | null
+    hinweis?: string
+    error?: string
+  }
+  if (!res.ok || data.ok === false) {
+    if (res.status === 429) throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten und erneut versuchen.', 429)
+    if (res.status === 404) {
+      throw new ClaimondoApiError(
+        'Kein laufender Termin zu dieser Referenz gefunden. Bitte lass dir vom Kunden die Fall-Referenz aus seinem persönlichen Claimondo-Link (per WhatsApp erhalten) nennen.',
+        404,
+      )
+    }
+    throw new ClaimondoApiError(data.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return {
+    ok: true,
+    storniert: data.storniert ?? true,
+    warGeplant: data.war_geplant ?? null,
+    hinweis: data.hinweis ?? '',
+  }
+}
+
+/** Menschenlesbarer Markdown-Report fuer die Absage. */
+export function formatStorno(r: StornoResult): string {
+  const wann = r.warGeplant
+    ? new Date(r.warGeplant).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'full', timeStyle: 'short' })
+    : null
+  return [
+    r.storniert ? '# Termin abgesagt' : '# Termin war bereits abgesagt',
+    '',
+    wann ? `**War geplant:** ${wann} Uhr` : null,
+    wann ? '' : null,
+    r.hinweis,
+  ]
+    .filter((z) => z !== null)
+    .join('\n')
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Werkstatt-Suche (claimondo_finde_werkstatt)

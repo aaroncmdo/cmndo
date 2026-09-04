@@ -18,7 +18,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getStorageUrl, parseStorageUrl } from '@/lib/storage/url'
 import { storagePfadAusUrl } from '@/lib/dokumente/sync-lead-zu-pflicht'
-import { trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
+import { trackServerConversion, buildSaSignedEvent, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
+import { sendOaiqEvent } from '@/lib/analytics/oaiq-capi'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
@@ -346,7 +347,7 @@ export async function createKundeAccount(
   telefon: string | null
 ): Promise<CreateKundeAccountResult> {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { success: false, error: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' }
+    return { success: false, error: 'Bitte gib eine gültige E-Mail-Adresse ein.' }
   }
   if (!fallId) return { success: false, error: 'Fall-ID fehlt.' }
   if (!flowToken) return { success: false, error: 'Nicht autorisiert.' }
@@ -388,7 +389,7 @@ export async function createKundeAccount(
       // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
       return {
         success: false,
-        error: 'Konto konnte nicht erstellt werden (interner Konflikt). Bitte kontaktieren Sie uns.',
+        error: 'Konto konnte nicht erstellt werden (interner Konflikt). Bitte kontaktiere uns.',
       }
     }
 
@@ -423,7 +424,7 @@ export async function createKundeAccount(
       console.error('[createKundeAccount] createUser fehlgeschlagen:', authError)
       return {
         success: false,
-        error: 'Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+        error: 'Konto konnte nicht erstellt werden. Bitte versuche es erneut oder kontaktiere uns.',
       }
     }
 
@@ -437,7 +438,7 @@ export async function createKundeAccount(
     console.error('[createKundeAccount] unerwarteter Fehler:', err)
     return {
       success: false,
-      error: 'Konto konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+      error: 'Konto konnte nicht erstellt werden. Bitte versuche es erneut oder kontaktiere uns.',
     }
   }
 }
@@ -476,14 +477,14 @@ async function finalizeKundeSetup(
     try {
       const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
       const credsText = [
-        '🔐 Ihre Claimondo-Zugangsdaten',
+        '🔐 Deine Claimondo-Zugangsdaten',
         '',
         `E-Mail: ${email}`,
         `Passwort: ${password}`,
         '',
         `Login: ${base}/login`,
         '',
-        'Bitte ändern Sie Ihr Passwort beim ersten Login. Ihr Claimondo-Team',
+        'Bitte ändere dein Passwort beim ersten Login. Dein Claimondo-Team',
       ].join('\n')
       const r = await sendWhatsAppText(telefon, credsText)
       if (!r.ok) console.error('[D] Login-Daten-WA fehlgeschlagen:', r.code, r.error)
@@ -1102,12 +1103,26 @@ export async function signSAandCreateFall(
     try {
       const saEvent = buildSaSignedEvent({ alreadySigned: saWasAlreadySigned, leadId, source: 'flow' })
       if (!saEvent) return
+      // oppref haengt am selben Read wie die ga_client_id — beide beantworten
+      // dieselbe Frage („welche Anzeige hat diesen Abschluss gebracht"), nur
+      // fuer verschiedene Werbenetze. Ein zweiter Roundtrip waere reine
+      // Verdopplung.
       const { data: gaRow } = await admin
         .from('leads')
-        .select('ga_client_id')
+        .select('ga_client_id, oppref')
         .eq('id', leadId)
         .maybeSingle()
       await trackServerConversion(gaRow?.ga_client_id ?? null, saEvent)
+      // OpenAI Ads: derselbe Uebergang false->true wie oben. Der Dedup-Guard
+      // liegt in `buildSaSignedEvent` (return oben) und gilt damit fuer beide
+      // Netze — sa_signed ist auf beiden Seiten das wertbasierte Bidding-Signal,
+      // eine Doppelzaehlung waere hier wie dort Budget-Fehlsteuerung.
+      await sendOaiqEvent({
+        oppref: (gaRow?.oppref as string | null) ?? null,
+        eventId: leadId,
+        eventName: 'order_created',
+        amountCents: SA_SIGNED_VALUE_EUR * 100, // OAIQ erwartet Minor-Units
+      })
     } catch {
       /* fire-and-forget */
     }
@@ -1471,15 +1486,27 @@ export async function signSAandCreateFall(
   // Der Termin bleibt ein eigener Zweck (T4 `termin_bestaetigt`) — hier steht nur der
   // neutrale Satz „Zu Ihrem Gutachter-Termin melden wir uns", der in beiden Fällen
   // stimmt (reserviert wie noch offen) und keine Fallunterscheidung braucht.
+  // ⚠ Das Ergebnis wird GEPRUEFT, nicht verworfen (31.08.): hier stand ein `catch { /* */ }`.
+  // Diese Nachricht ist die einzige Bestaetigung, die der Kunde nach dem Unterschreiben der
+  // Sicherungsabtretung bekommt — ein stiller Fehlschlag ist genau der Fall, den niemand
+  // bemerkt. `sendFallCommunication` wirft nicht, es liefert `{ sent, reason }`; ohne diese
+  // Pruefung sind „zugestellt" und „kein Empfaenger" nicht unterscheidbar.
   try {
     const { sendFallCommunication } = await import('@/lib/communications/send-fall')
     // '2' würde sonst auf regulierung_betrag zeigen; '3' ist der Portal-Link.
     const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/faelle/${fall.id}`
-    await sendFallCommunication(fall.id, 'fall_eroeffnet', {
+    const res = await sendFallCommunication(fall.id, 'fall_eroeffnet', {
       '2': fallNummer,
       '3': portalUrl,
     })
-  } catch { /* */ }
+    if (!res.sent) {
+      console.error(
+        `[signSAandCreateFall] Auftragsbestaetigung 'fall_eroeffnet' NICHT zugestellt (Fall ${fall.id}, ${fallNummer}): ${res.reason ?? 'unbekannt'}`,
+      )
+    }
+  } catch (err) {
+    console.error(`[signSAandCreateFall] Auftragsbestaetigung 'fall_eroeffnet' warf (Fall ${fall.id}):`, err)
+  }
 
   // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)
   if (lead.gutachter_termin) {
@@ -1586,7 +1613,7 @@ export async function signSAandCreateFall(
           | { vorname: string | null }
           | null
       }
-      const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
+      const svName = (profile?.vorname ?? '').trim() || 'deinem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')
@@ -1604,8 +1631,13 @@ export async function signSAandCreateFall(
     }
   }
 
-  // 11. Benachrichtigung
-  try { await notifyNeuerFall(fall.id) } catch { /* */ }
+  // 11. Benachrichtigung — Fehler wird geloggt statt verschluckt (31.08.): schlaegt sie
+  // still fehl, erfaehrt das Team von einem frisch beauftragten Fall gar nichts.
+  try {
+    await notifyNeuerFall(fall.id)
+  } catch (err) {
+    console.error(`[signSAandCreateFall] notifyNeuerFall fehlgeschlagen (Fall ${fall.id}):`, err)
+  }
 
   // 12. AAR-127: Welcome-Mail wird jetzt aus createKundeAccount mit Magic-Link
   // + Zugangsdaten verschickt, nicht mehr hier. Der SA-Step und createKundeAccount

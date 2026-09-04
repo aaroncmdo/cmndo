@@ -72,7 +72,7 @@ export default function BankdatenBanner({
         </div>
         <div>
           <p className="text-sm font-semibold text-warning-strong">{t('bannerTitel')}</p>
-          <p className="text-xs text-warning mt-0.5">{t('bannerSub')}</p>
+          <p className="text-body-sm text-warning mt-0.5">{t('bannerSub')}</p>
         </div>
       </button>
     )

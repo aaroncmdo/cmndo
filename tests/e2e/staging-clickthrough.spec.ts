@@ -46,7 +46,7 @@ test.describe('Staging Clickthrough', () => {
     page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`))
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`[console] ${m.text()}`) })
 
-    await loginApp(page, 'test-admin@claimondo.de', 'Test1234!')
+    await loginApp(page, 'test-admin@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
     await shoot(page, '01-admin-landing.png')
 
     await page.goto(`${BASE}/dispatch/dashboard`)
@@ -100,7 +100,7 @@ test.describe('Staging Clickthrough', () => {
     page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`))
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`[console] ${m.text()}`) })
 
-    await loginApp(page, 'aaron.sprafke@claimondo.de', 'Test1234!')
+    await loginApp(page, 'aaron.sprafke@claimondo.de', (process.env.TEST_PASSWORT ?? ''))
     await shoot(page, '09-sv-landing.png')
 
     await page.goto(`${BASE}/gutachter/heute`)

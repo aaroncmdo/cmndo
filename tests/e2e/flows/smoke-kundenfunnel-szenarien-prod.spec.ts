@@ -32,6 +32,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { randomBytes } from 'node:crypto'
+import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
 
 const RUN = process.env.RUN_KUNDENFUNNEL_SMOKE === '1'
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
@@ -204,7 +205,7 @@ async function fahreFlowBisPortal(
   await page.getByRole('button', { name: opts.serviceRegex }).click()
   await paintCanvas(page)
   await checkAlleCheckboxen(page)
-  const saBtn = page.getByRole('button', { name: /SA unterzeichnen/i })
+  const saBtn = page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN })
   await expect(saBtn).toBeEnabled({ timeout: 10_000 })
   await saBtn.click()
 
@@ -435,8 +436,12 @@ test.describe('Kundenfunnel-Szenarien (Prod, gated RUN_KUNDENFUNNEL_SMOKE)', () 
         await expect(page.getByRole('heading', { name: /Willkommen bei Claimondo/i })).toBeVisible({
           timeout: 20_000,
         })
-        await expect(page.getByText(/Ihr Gutachter/i).first()).toBeVisible()
-        await expect(page.getByText(/Ihr Betreuer|Kundenbetreuer/i).first()).toBeVisible()
+        // Anrede-tolerant: die Aussage ist "Gutachter-/Betreuer-Karte ist sichtbar",
+        // nicht "sie heisst genau so". Die Kundensicht ist am 31.08. auf "du"
+        // umgestellt worden (Aaron-Entscheidung) — waere hier "Ihr" fest verdrahtet,
+        // haette derselbe unveraenderte Bildschirm den Test rot gemacht.
+        await expect(page.getByText(/(Dein|Ihr) Gutachter/i).first()).toBeVisible()
+        await expect(page.getByText(/(Dein|Ihr) Betreuer|Kundenbetreuer/i).first()).toBeVisible()
       }
     })
   }

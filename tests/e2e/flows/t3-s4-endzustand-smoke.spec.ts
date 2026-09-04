@@ -9,7 +9,7 @@
 // Lauf: CI=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test t3-s4-endzustand-smoke
 import { test, expect, type Page } from '@playwright/test'
 
-const ADMIN = { email: 'test-admin@claimondo.de', pw: 'Claimondo2026!' }
+const ADMIN = { email: 'test-admin@claimondo.de', pw: (process.env.TEST_PASSWORT ?? '') }
 const TEST_CLAIM_ID = '7601328e-1a14-4ccb-8c8e-29d1e0c4fd2d' // verwaister ersterfassung-Test-Claim (kunde=null)
 
 async function login(page: Page) {

@@ -23,7 +23,7 @@ const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 
 // Credentials kommen aus _golden-path-lib (die Quelle), hier nur die Erwartungen je Rolle.
 // Vorher stand hier eine eigene Kopie — und genau die driftete: sie trug noch
-// `test-kunde@` (Konto seit dem Golive-Cleanup geloescht) und `Test1234!` fuer
+// `test-kunde@` (Konto seit dem Golive-Cleanup geloescht) und `<PASSWORT: GitHub-Secret>` fuer
 // admin/kb/kunde (auf prod nur noch bei test-dispatch@ gueltig). Die Messung, die das
 // belegt, steht im Kommentar an ROLES in _golden-path-lib.ts.
 const ROLES = {

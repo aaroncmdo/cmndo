@@ -37,7 +37,22 @@ if (!URL || !SERVICE) {
 }
 
 const EMAIL = 'smoke-enroll@claimondo.de'
-const PW = process.env.SMOKE_ENROLL_PASSWORD ?? 'Claimondo2026!'
+const PW = process.env.SMOKE_ENROLL_PASSWORD ?? ''
+
+// Ohne Passwort NICHT weiterlaufen. Seit der Klartext-Bereinigung (#5797) ist der
+// Fallback leer statt hartkodiert — und ein leeres `password` ginge ungeprueft in
+// createUser/updateUserById. Beide Aufrufe lasen ihren Fehler bisher nicht aus, das
+// Script meldete also „Passwort neu gesetzt", ohne dass eines gesetzt wurde. Genau
+// diese Kombination (leeres Secret + stiller Auth-Write) macht aus einem fehlenden
+// Secret einen beschaedigten Account.
+if (!PW) {
+  console.error(
+    'Fehlend: SMOKE_ENROLL_PASSWORD. Ohne Passwort wuerde dieses Script dem Konto ' +
+      'smoke-enroll@ ein LEERES Passwort zuweisen — Abbruch. In CI als GitHub-Secret ' +
+      'hinterlegen und im Workflow durchreichen, lokal in .env.local setzen.',
+  )
+  process.exit(1)
+}
 const admin = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } })
 
 let userId
@@ -57,7 +72,14 @@ if (created?.user) {
     process.exit(1)
   }
   userId = prof.id
-  await admin.auth.admin.updateUserById(userId, { password: PW })
+  // Fehler auslesen: `updateUserById` wirft nicht. Ohne die Pruefung meldete das
+  // Script auch dann Erfolg, wenn GoTrue das Passwort abgelehnt hat — und der
+  // nachfolgende Smoke scheitert dann am Login statt an der Ursache.
+  const { error: pwErr } = await admin.auth.admin.updateUserById(userId, { password: PW })
+  if (pwErr) {
+    console.error(`[reset] Passwort konnte nicht gesetzt werden: ${pwErr.message}`)
+    process.exit(1)
+  }
   console.log(`[reset] existierender User ${userId} (Passwort neu gesetzt)`)
 }
 

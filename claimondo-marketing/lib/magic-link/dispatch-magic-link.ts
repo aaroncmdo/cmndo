@@ -31,7 +31,26 @@ export type DispatchResult = {
   detail?: string
 }
 
-function buildWhatsAppText(opts: {
+/**
+ * Die erste Nachricht, die JEDER Marketing-Lead bekommt — entsprechend sorgfaeltig formuliert.
+ *
+ * Frueher stand hier "Mit einem Klick legst du SA + Vollmacht ab". "SA" ist die
+ * Sicherungsabtretung; kein Kunde weiss das. Bei einer rechtlich bindenden Unterschrift
+ * ist eine Abkuerzung, die der Unterzeichnende nicht versteht, das falsche Mittel —
+ * deshalb beide Dokumente ausgeschrieben plus ein Satz, WOFUER sie sind.
+ *
+ * ⚠ Die Kostenaussage lautet bewusst "unser Service ist fuer dich kostenlos" und NICHT
+ * "du zahlst nichts". Der Unterschied ist nicht kosmetisch:
+ *   - Claimondo stellt dem Kunden nie etwas in Rechnung (geprueft 01.09.2026: in
+ *     `abrechnungen` existiert keine einzige Rechnung mit empfaenger_typ='kunde').
+ *     Diese Aussage ist damit fuer JEDEN Lead wahr.
+ *   - "Du zahlst nichts" waere pauschal FALSCH: nur 62,7 % der Claims laufen ueber
+ *     Haftpflicht (gegnerische VS zahlt). 14,5 % sind Selbstzahler, 10,8 % Kasko —
+ *     dort traegt der Kunde Gutachten bzw. Selbstbeteiligung. Diese Nachricht geht an
+ *     ALLE, also vor der Klaerung des Abrechnungswegs. Eine pauschale Zusage waere eine
+ *     irrefuehrende Angabe (§ 5 UWG).
+ */
+export function buildWhatsAppText(opts: {
   vorname: string | null
   flowUrl: string
 }): string {
@@ -39,11 +58,72 @@ function buildWhatsAppText(opts: {
   return [
     `${greet}, danke für deine Schadenmeldung bei Claimondo.`,
     '',
-    'Hier dein sicherer Login-Link (gültig 72 Stunden):',
+    'Hier ist dein persönlicher Link (gültig 72 Stunden):',
     opts.flowUrl,
     '',
-    'Mit einem Klick legst du SA + Vollmacht ab und kommst direkt in dein Portal.',
+    'Dort unterschreibst du Vollmacht und Sicherungsabtretung — damit dürfen wir den ' +
+      'Schaden für dich abwickeln. Danach siehst du in deinem Portal jederzeit, wie es weitergeht.',
+    '',
+    'Unser Service ist für dich kostenlos.',
   ].join('\n')
+}
+
+// Versand-State auf flow_links persistieren — dieselben drei Marker, die der
+// App-Pfad schreibt (src/lib/start-link/persist-flowlink-versand.ts).
+//
+// Warum das hier sitzt und nicht bei den Aufrufern: KEINER der sieben
+// Marketing-Versandpfade (home-lead-action, check, kfzgutachter-lp ×2,
+// schaden-melden, mini-wizard, flowlink-fuer-lead) hat `gesendet_am` je gesetzt.
+// Diese Funktion ist die einzige Stelle, die weiss, OB und ueber WELCHEN Kanal
+// zugestellt wurde — hier gesetzt, gilt es fuer alle Aufrufer zugleich.
+//
+// ⭐ Was der fehlende Marker gekostet hat (31.08.2026): Bei der Frage
+// "hat der Kunde von gestern seinen Link bekommen?" stand in `flow_links`
+// gesendet_am = NULL, gesendet_anzahl = 0 — was wie ein stiller Fehlschlag
+// aussah und fast als Ausfall gemeldet worden waere. Tatsaechlich WAR die
+// WhatsApp raus (Beleg: `leads.status='flow-gesendet'` wird nur nach
+// `versand.sent` gesetzt, plus eine timeline-Zeile "Magic-Link versendet").
+// Der Marker war nie falsch — er wurde nur nie geschrieben. Ein Feld, das ein
+// Pfad nie fuellt, ist als Messgroesse schlimmer als gar keins: es sieht aus
+// wie eine Antwort.
+//
+// NICHT fire-and-forget: der Marker IST das Messinstrument. Fehler werden
+// geloggt, brechen aber nichts — der Versand ist zu diesem Zeitpunkt bereits
+// passiert und darf an einem DB-Fehler nicht scheitern.
+async function persistiereVersandState(
+  flowUrl: string,
+  kanal: 'whatsapp' | 'email',
+): Promise<void> {
+  // Der Token kommt aus der URL, die tatsaechlich verschickt wurde — nicht ueber
+  // die leadId nachgeschlagen: bei mehreren Links pro Lead traefe das den falschen.
+  const token = flowUrl.split('/flow/')[1]?.split(/[?#]/)[0]
+  if (!token) {
+    console.error('[dispatchMagicLink] Kein Token in flowUrl — Versand-Marker nicht gesetzt')
+    return
+  }
+  try {
+    const admin = createAdminClient()
+    // Read-modify-write fuers Increment: Sends auf EINEN Link sind nicht
+    // nebenlaeufig (1 Lead = 1 Link), der Race ist vernachlaessigbar.
+    const { data } = await admin
+      .from('flow_links')
+      .select('gesendet_anzahl')
+      .eq('token', token)
+      .maybeSingle()
+    const { error } = await admin
+      .from('flow_links')
+      .update({
+        gesendet_am: new Date().toISOString(),
+        gesendet_kanal: kanal,
+        gesendet_anzahl: ((data?.gesendet_anzahl as number | null) ?? 0) + 1,
+      })
+      .eq('token', token)
+    if (error) {
+      console.error('[dispatchMagicLink] Versand-Marker nicht gesetzt:', error.message)
+    }
+  } catch (err) {
+    console.error('[dispatchMagicLink] Versand-Marker:', (err as Error).message)
+  }
 }
 
 // flowlink_sent-Conversion (fire-and-forget). client_id aus dem Lead (nur
@@ -87,6 +167,7 @@ export async function dispatchMagicLink(opts: {
       buildWhatsAppText({ vorname: opts.vorname, flowUrl: opts.flowUrl }),
     )
     if (sent.ok) {
+      await persistiereVersandState(opts.flowUrl, 'whatsapp')
       void fireFlowlinkSentConversion(opts.leadId)
       return {
         kanal: 'whatsapp',
@@ -100,6 +181,7 @@ export async function dispatchMagicLink(opts: {
   // Schritt 3: Email-Fallback (existierendes Template aus AAR-902)
   const email = await sendMiniWizardMagicLink(opts.leadId, opts.flowUrl)
   if (email.success) {
+    await persistiereVersandState(opts.flowUrl, 'email')
     void fireFlowlinkSentConversion(opts.leadId)
     return { kanal: 'email', sent: true }
   }

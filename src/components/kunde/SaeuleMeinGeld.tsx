@@ -47,6 +47,26 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
 
   const gefordert = schadens_hoehe_netto ?? 0
   const showGefordert = !!schadens_hoehe_netto
+
+  // Forderungssumme aus dem Gutachten. Rechenregel wie im Datei-Kopf beschrieben:
+  //   Totalschaden  = Wiederbeschaffungswert − Restwert + Minderwert
+  //   Reparaturfall = Reparaturkosten brutto + Minderwert
+  // `null`, solange die Hauptposition fehlt — lieber keine Zahl als eine halbe.
+  //
+  // Bewusst selbst gerechnet: `v_gutachten_werte.gesamt_schadensbetrag` existiert,
+  // ist auf prod aber in 81 von 82 Zeilen leer (gemessen 31.08.) und wird hier gar
+  // nicht durchgereicht. Wird das Feld später verlässlich gefüllt, ist es die
+  // autoritativere Quelle — dann diese Berechnung durch den Wert ersetzen.
+  const gw = gutachtenWerte
+  const summe: number | null = !gw?.ocr_processed_at
+    ? null
+    : totalschaden
+      ? gw.wiederbeschaffungswert !== null
+        ? gw.wiederbeschaffungswert - (gw.restwert ?? 0) + (gw.minderwert ?? 0)
+        : null
+      : gw.reparaturkosten_brutto !== null
+        ? gw.reparaturkosten_brutto + (gw.minderwert ?? 0)
+        : null
   // B4-slice-1b: 'in_kommunikation_vs'/'abgelehnt' ergaenzt. Vor dem endzustand-Write-Flip trug
   // der Cursor in dieser Phase 'regulierung' — ohne die zwei Werte verschwaende die Zahlungsweg-
   // Wahl genau dann, wenn sie gebraucht wird (VS-Verhandlung / Nachforderung laeuft).
@@ -124,10 +144,32 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
                 <span className="text-claimondo-navy font-medium">+ {fmt(gutachtenWerte.minderwert)}</span>
               </div>
             )}
+
+            {/* Kundenseite-Audit 30.08.: Hier standen zwei Posten mit „+", aber
+                keine Summe — „Die ausgezahlte Summe sehen Sie nach der
+                Regulierung". Der Kunde will genau diese Zahl: „Sein Job ist
+                herauszufinden, was ihm zusteht" (PRODUCT.md).
+                Aaron-Entscheidung 31.08.: Summe zeigen, MIT Vorbehalt — die
+                Zahl ist die Forderung aus dem Gutachten, keine Zusage über die
+                Auszahlung (deshalb war sie nach dem Brutto-Leak-Fix AAR-558
+                ganz weggefallen). Die Rechenregel stand schon im Datei-Kopf. */}
+            {summe !== null && (
+              <div className="border-t border-claimondo-border pt-2 mt-2 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-claimondo-navy">
+                    {t('summeTitel')}
+                  </span>
+                  <span className="text-sm font-semibold text-claimondo-navy tabular-nums">
+                    {fmt(summe)}
+                  </span>
+                </div>
+                <p className="text-body-sm text-claimondo-ondo">{t('summeVorbehalt')}</p>
+              </div>
+            )}
           </div>
         )}
 
-        <p className="text-[11px] text-claimondo-ondo">
+        <p className="text-body-sm text-claimondo-ondo">
           {t('auszahlungHinweis')}
         </p>
       </div>

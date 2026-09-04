@@ -89,6 +89,15 @@ jobs:
       - name: Token-Audit
         run: npm run check:token-audit
 
+      # Secret-Gate (31.08.2026): blockt eingecheckte Zugangsdaten. Anlass war ein
+      # GitGuardian-Fund — verifiziert lieferte `test-admin@claimondo.de` mit dem im
+      # Repo lesbaren Passwort HTTP 200 gegen die prod-Auth-API. Das Repo ist PUBLIC,
+      # also konnte sich jeder als Admin auf prod anmelden. 181 Dateien trugen Klartext.
+      # Baseline ist NULL (kein Ratchet): ein Secret ist kein Schuldposten, den man
+      # abtraegt. Siehe docs/2026-08-31-secret-leak-postmortem.md.
+      - name: Secret-Gate
+        run: npm run check:secrets
+
       # use-server-Export-Guard (PR #4439-Nachwehe, 16.07.): 'use server'-Dateien duerfen NUR
       # async functions + type/interface-DEKLARATIONEN exportieren. Ein `export type { X }`-
       # RE-Export liess den Server-Actions-Loader crashen -> ALLE Actions der Datei 500ten
@@ -355,6 +364,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Das Nobody-Passwort stand bis 01.09. im Klartext im Script (siehe dort). Seit
+          # der Konto-Rotation vom 31.08. war es tot und blockierte drei fachfremde PRs.
+          # Das Secret existiert seit der Rotation — es fehlte nur diese Zeile.
+          TEST_RLS_NOBODY_PASSWORD: ${{ secrets.TEST_RLS_NOBODY_PASSWORD }}
 
       # Claims-Spalten-Cap (14.07.2026): SPALTEN-Schicht. Die beiden Checks oben pruefen, ob
       # jemand ZEILEN sieht, die er nicht darf — nie, ob er von einer erlaubten Zeile ZU VIELE
@@ -713,6 +726,19 @@ jobs:
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
           TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
           TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
+          # 01.09.: golden-path-deep faehrt kb/kunde/sv. Der Kunde-Login lief bis #5797 ueber
+          # den Klartext-Default in `_golden-path-lib.ts`; seit dessen (richtiger) Entfernung
+          # ist er '' -> invalid_credentials. Der Code liest TEST_KUNDE_*, das Secret heisst
+          # SMOKE_KUNDE_* — Namensuebersetzung an der Job-Grenze.
+          # ⚠ Wirkt erst, wenn das Secret erneuert ist: die Test-Konto-Passwoerter wurden am
+          # 31.08. rotiert, nachgezogen wurde nur TEST_SV_PASSWORD (Beleg: von 8 Test-Konten
+          # hat seither nur test-sv@ einen last_sign_in_at). TEST_KUNDE_EMAIL bewusst NICHT
+          # gesetzt — der Code-Default smoke-kunde@ ist korrekt.
+          TEST_KUNDE_PASSWORD: ${{ secrets.SMOKE_KUNDE_PASS }}
+          # ⚠ TEST_KB_PASSWORD hier BEWUSST NICHT — anders als im journey-gate steht oben
+          # TEST_KB_TOTP_SECRET. Mit Passwort kaeme der Login durch und liefe dann in den
+          # MFA-Zweig, obwohl test-kb@ 0 verifizierte Faktoren hat (auth.mfa_factors, 01.09.).
+          # Erst das TOTP-Secret hier entfernen, dann das Passwort ergaenzen — nicht umgekehrt.
           # 21.08.: TEST_SV_EMAIL/_PASSWORD BEWUSST NICHT MEHR durchgereicht — aus genau dem
           # Grund, der zwei Bloecke weiter unten schon fuer KB/Dispatch/Kanzlei steht: ein
           # unbesetztes Secret rendert als '' und ueberschreibt damit den (korrekten) Default.
@@ -752,16 +778,29 @@ jobs:
       # + wird danach beim Login 2FA-gechallenged. Konto-isoliert (smoke-enroll@claimondo.de, kein
       # Comms/Booking). Der Seed-Step setzt das Konto VOR dem Lauf faktorfrei zurueck (stateful self-reset
       # je Lauf; Seed liest process.env-first, .env.local nur lokal). RUN_2FA_ENROLL_SMOKE gatet den Spec.
+      # SMOKE_ENROLL_PASSWORD wird an BEIDEN Steps gebraucht: der Seed schreibt das
+      # Passwort auf das Konto (scripts/seed-smoke-enroll.mjs:40), der Spec meldet sich
+      # damit an (tests/e2e/flows/2fa-enroll-smoke.spec.ts:24). `journey-gate.yml` setzt
+      # es auf WORKFLOW-Ebene, dort genuegte eine Zeile — ci.yml hat kein `env:` oberhalb
+      # von `jobs:`, hier braucht es beide.
+      #
+      # Genau daran haengt der e2e-Job auf main seit dem 01.09.: #5797 hat den
+      # Klartext-Default richtigerweise entfernt, die Durchreichung wurde aber nur im
+      # journey-gate nachgezogen. Der Seed bricht seither laut ab ("Fehlend:
+      # SMOKE_ENROLL_PASSWORD") statt dem Konto still ein LEERES Passwort zu setzen —
+      # der Guard tut also was er soll, es fehlte nur diese Verdrahtung.
       - name: Seed 2FA-Enroll-Fixture (J8)
         run: node scripts/seed-smoke-enroll.mjs
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SMOKE_ENROLL_PASSWORD: ${{ secrets.SMOKE_ENROLL_PASSWORD }}
       - name: Fundament Journey-Smoke J8 (2FA-Enroll)
         run: npx playwright test 2fa-enroll-smoke --project=chromium --workers=1 --reporter=line
         env:
           RUN_2FA_ENROLL_SMOKE: '1'
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          SMOKE_ENROLL_PASSWORD: ${{ secrets.SMOKE_ENROLL_PASSWORD }}
 
       # Fundament Journey-Suite J5 (Kasko/Selbstzahler-Reparatur-Phase) — die interne Fallakte eines
       # Kasko-Claims mit gesetzter Werkstatt zeigt die Reparatur-Lane (Stepper "Terminfindung"), NICHT
@@ -915,7 +954,7 @@ jobs:
       #   phone-login-card-smoke    gruen,  3,8 s  (Telefon-Login-Karte im KontoSicherheitPanel)
       # Zusammen ~27 s — der Job hat seit dem Cap-Fix (#5422) reichlich Luft.
       #
-      # ⚠ Kein Secret fuer phone-login: der Spec faellt auf test-dispatch@ + `Test1234!`
+      # ⚠ Kein Secret fuer phone-login: der Spec faellt auf test-dispatch@ + `<PASSWORT: GitHub-Secret>`
       # zurueck, und genau das ist dort korrekt (die dokumentierte Ausnahme, s. #5442).
       # Ein durchgereichtes Secret mit veraltetem Wert wuerde den korrekten Default
       # ueberschreiben — deshalb bewusst NICHT gesetzt.
@@ -931,6 +970,21 @@ jobs:
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          # phone-login-card-smoke.spec.ts:19 liest SMOKE_PHONE_LOGIN_PASSWORD mit Default
+          # `''`. Ohne Wert meldet sich der Spec mit leerem Passwort an, der Login bleibt auf
+          # /login stehen und der Test stirbt an `waitForURL: Timeout 20000ms` — was wie ein
+          # UI-Fehler aussieht, aber keiner ist.
+          #
+          # BEWUSST auf TEST_DISPATCH_PASSWORD gemappt statt ein eigenes Secret anzulegen:
+          # der Spec nutzt in Zeile 18 als Default genau `test-dispatch@claimondo.de`, und
+          # dieses Konto-Secret wird bei Rotationen gepflegt (zuletzt 31.08., dem
+          # Rotationsdatum). Ein 17. Variablenname fuer dasselbe Konto waere genau der
+          # Wildwuchs, an dem die Rotation vom 31.08. schon `SMOKE_DISPATCH_PASS` verloren
+          # hat — ein Konto, zwei Secrets, nur eines gepflegt.
+          #
+          # Die Email bleibt bewusst beim Default: so koennen Konto und Passwort nicht
+          # auseinanderlaufen.
+          SMOKE_PHONE_LOGIN_PASSWORD: ${{ secrets.TEST_DISPATCH_PASSWORD }}
 
       # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
       # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn
@@ -1037,9 +1091,9 @@ jobs:
           # Fehlt es, bleibt der Login aal1 -> skipIfAuthWall ueberspringt den Test (kein Fehler,
           # aber auch KEIN gruener Smoke). Nur die TOTP-Secrets durchreichen: die sind ECHTE no-ops
           # solange unbesetzt (undefined -> MFA-Skip). Passwoerter BEWUSST NICHT hier durchreichen —
-          # ein unbesetztes Secret rendert als '' und `?? 'Test1234!'` faengt '' NICHT ab, wuerde also
+          # ein unbesetztes Secret rendert als '' und `?? '<PASSWORT: GitHub-Secret>'` faengt '' NICHT ab, wuerde also
           # den Default ueberschreiben. KB/Dispatch/Admin nutzen so den grandfatherten Default
-          # 'Test1234!' (bzw. TEST_ADMIN_PASSWORD, das oben steht; TEST_SV_PASSWORD wurde am
+          # '<PASSWORT: GitHub-Secret>' (bzw. TEST_ADMIN_PASSWORD, das oben steht; TEST_SV_PASSWORD wurde am
           # 21.08. entfernt — s. Begruendung dort).
           # Setup (Secrets + Prod-Test-Accounts): docs/2026-07-14-regel4-e2e-totp-secrets-setup.md
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}

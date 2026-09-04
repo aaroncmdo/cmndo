@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -3845,6 +3845,7 @@ export type Database = {
           abtretung_signiert_am: string | null
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
+          auswertung_unverbindlich: Json | null
           auszahlung_zahlungsweg: string | null
           bankdaten_hinterlegt_am: string | null
           bedarf_confidence: number | null
@@ -3908,6 +3909,7 @@ export type Database = {
           id: string
           interne_notizen: string | null
           ist_aktiv: boolean | null
+          ist_testfall: boolean
           kanzlei_abrechnung_id: string | null
           kanzlei_ansprechpartner_email: string | null
           kanzlei_ansprechpartner_name: string | null
@@ -4001,6 +4003,8 @@ export type Database = {
           schlussabrechnung_am: string | null
           schuldfrage: string | null
           service_typ: string
+          source_channel: string | null
+          source_domain: string | null
           spezifikation: string | null
           sprache: string | null
           status_changed_at: string | null
@@ -4053,6 +4057,7 @@ export type Database = {
           abtretung_signiert_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           auszahlung_zahlungsweg?: string | null
           bankdaten_hinterlegt_am?: string | null
           bedarf_confidence?: number | null
@@ -4118,6 +4123,7 @@ export type Database = {
           id?: string
           interne_notizen?: string | null
           ist_aktiv?: boolean | null
+          ist_testfall?: boolean
           kanzlei_abrechnung_id?: string | null
           kanzlei_ansprechpartner_email?: string | null
           kanzlei_ansprechpartner_name?: string | null
@@ -4211,6 +4217,8 @@ export type Database = {
           schlussabrechnung_am?: string | null
           schuldfrage?: string | null
           service_typ?: string
+          source_channel?: string | null
+          source_domain?: string | null
           spezifikation?: string | null
           sprache?: string | null
           status_changed_at?: string | null
@@ -4263,6 +4271,7 @@ export type Database = {
           abtretung_signiert_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           auszahlung_zahlungsweg?: string | null
           bankdaten_hinterlegt_am?: string | null
           bedarf_confidence?: number | null
@@ -4328,6 +4337,7 @@ export type Database = {
           id?: string
           interne_notizen?: string | null
           ist_aktiv?: boolean | null
+          ist_testfall?: boolean
           kanzlei_abrechnung_id?: string | null
           kanzlei_ansprechpartner_email?: string | null
           kanzlei_ansprechpartner_name?: string | null
@@ -4421,6 +4431,8 @@ export type Database = {
           schlussabrechnung_am?: string | null
           schuldfrage?: string | null
           service_typ?: string
+          source_channel?: string | null
+          source_domain?: string | null
           spezifikation?: string | null
           sprache?: string | null
           status_changed_at?: string | null
@@ -12286,6 +12298,7 @@ export type Database = {
           anruf_versuche: number | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
           auslandskennzeichen: boolean | null
+          auswertung_unverbindlich: Json | null
           bedarf_confidence: number | null
           bedarf_ermittelt_am: string | null
           bedarf_kategorien: string[] | null
@@ -12353,6 +12366,7 @@ export type Database = {
           gespraech_dauer_sekunden: number | null
           gespraech_gestartet_am: string | null
           gewerbe_flag: boolean | null
+          gutachten_status: string | null
           gutachter_termin: string | null
           halter_email: string | null
           halter_geburtsdatum: string | null
@@ -12402,6 +12416,7 @@ export type Database = {
           nachname: string | null
           notiz: string | null
           nutzungsausfall: boolean | null
+          oppref: string | null
           parkplatz_kamera: boolean | null
           personenschaden_flag: boolean | null
           polizei_aktenzeichen: string | null
@@ -12448,10 +12463,12 @@ export type Database = {
           sprache: string | null
           status: Database["public"]["Enums"]["lead_status"]
           telefon: string | null
+          telefon_ziffern: string | null
           timeline: Json | null
           tsn: string | null
           unfall_konstellation: string | null
           unfall_uhrzeit: string | null
+          unfall_zeitfenster: string | null
           unfalldatum: string | null
           unfallhergang: string | null
           unfallort: string | null
@@ -12508,6 +12525,7 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           bedarf_confidence?: number | null
           bedarf_ermittelt_am?: string | null
           bedarf_kategorien?: string[] | null
@@ -12575,6 +12593,7 @@ export type Database = {
           gespraech_dauer_sekunden?: number | null
           gespraech_gestartet_am?: string | null
           gewerbe_flag?: boolean | null
+          gutachten_status?: string | null
           gutachter_termin?: string | null
           halter_email?: string | null
           halter_geburtsdatum?: string | null
@@ -12624,6 +12643,7 @@ export type Database = {
           nachname?: string | null
           notiz?: string | null
           nutzungsausfall?: boolean | null
+          oppref?: string | null
           parkplatz_kamera?: boolean | null
           personenschaden_flag?: boolean | null
           polizei_aktenzeichen?: string | null
@@ -12670,10 +12690,12 @@ export type Database = {
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           telefon?: string | null
+          telefon_ziffern?: string | null
           timeline?: Json | null
           tsn?: string | null
           unfall_konstellation?: string | null
           unfall_uhrzeit?: string | null
+          unfall_zeitfenster?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
           unfallort?: string | null
@@ -12730,6 +12752,7 @@ export type Database = {
           anruf_versuche?: number | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
+          auswertung_unverbindlich?: Json | null
           bedarf_confidence?: number | null
           bedarf_ermittelt_am?: string | null
           bedarf_kategorien?: string[] | null
@@ -12797,6 +12820,7 @@ export type Database = {
           gespraech_dauer_sekunden?: number | null
           gespraech_gestartet_am?: string | null
           gewerbe_flag?: boolean | null
+          gutachten_status?: string | null
           gutachter_termin?: string | null
           halter_email?: string | null
           halter_geburtsdatum?: string | null
@@ -12846,6 +12870,7 @@ export type Database = {
           nachname?: string | null
           notiz?: string | null
           nutzungsausfall?: boolean | null
+          oppref?: string | null
           parkplatz_kamera?: boolean | null
           personenschaden_flag?: boolean | null
           polizei_aktenzeichen?: string | null
@@ -12892,10 +12917,12 @@ export type Database = {
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           telefon?: string | null
+          telefon_ziffern?: string | null
           timeline?: Json | null
           tsn?: string | null
           unfall_konstellation?: string | null
           unfall_uhrzeit?: string | null
+          unfall_zeitfenster?: string | null
           unfalldatum?: string | null
           unfallhergang?: string | null
           unfallort?: string | null
@@ -17328,6 +17355,7 @@ export type Database = {
           sprache: string | null
           sv_paket: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon: string | null
+          telefon_ziffern: string | null
           titel: string | null
           twilio_nummer_provisioned_am: string | null
           twilio_phone_sid: string | null
@@ -17386,6 +17414,7 @@ export type Database = {
           sprache?: string | null
           sv_paket?: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon?: string | null
+          telefon_ziffern?: string | null
           titel?: string | null
           twilio_nummer_provisioned_am?: string | null
           twilio_phone_sid?: string | null
@@ -17444,6 +17473,7 @@ export type Database = {
           sprache?: string | null
           sv_paket?: Database["public"]["Enums"]["sv_paket_typ"] | null
           telefon?: string | null
+          telefon_ziffern?: string | null
           titel?: string | null
           twilio_nummer_provisioned_am?: string | null
           twilio_phone_sid?: string | null
@@ -27516,6 +27546,7 @@ export type Database = {
         Args: { p_termin_id: string }
         Returns: boolean
       }
+      can_view_claim: { Args: { p_claim_id: string }; Returns: boolean }
       check_gfa_rate_limit: { Args: { p_ip_hash: string }; Returns: boolean }
       claim_sichtbar_fuer_aktuellen_user: {
         Args: { p_claim_id: string }

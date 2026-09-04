@@ -12,6 +12,7 @@
 
 import { union } from '@turf/union'
 import { parseIsochrone } from '@/lib/dispatch/isochrone-parse'
+import { vereinfacheRing } from './vereinfache-polygon'
 
 type LngLat = [number, number]
 
@@ -66,8 +67,17 @@ export function unionIsochrones(
         ? (ring as LngLat[])
         : ([...ring, ring[0]] as LngLat[])
 
+    // Vereinfachen VOR der Vereinigung, aus zwei Gruenden:
+    //  1. Der Payload schrumpft — er landet als JSON im HTML des Embed-Finders.
+    //  2. `union` wird schneller und numerisch ruhiger, weil es mit einem
+    //     Bruchteil der Stuetzpunkte arbeitet.
+    // Die Toleranz liegt unter einem Bildschirmpixel jeder sinnvollen
+    // Zoom-Stufe; entartet ein Ring, gibt vereinfacheRing ihn unveraendert
+    // zurueck (siehe dort).
+    const schlank = vereinfacheRing(closed)
+
     try {
-      const feature = makePolygonFeature(closed)
+      const feature = makePolygonFeature(schlank)
       validFeatures.push(feature)
     } catch {
       // Polygon-Konstruktion schlaegt fehl (z.B. degeneriert) -> ueberspringen

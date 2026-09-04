@@ -419,7 +419,7 @@
       "agb_link": "T&Cs",
       "widerruf_link": "and the right-of-withdrawal notice.",
       "submitting": "Processing ...",
-      "cta_sign": "Sign SA",
+      "cta_sign": "Sign the agreement",
       "error_fallback": "Error during engagement",
       "volltext": {
         "s1_titel": "1. Assignment declaration",
@@ -4644,7 +4644,9 @@
         "auszahlungLabel": "Payout:",
         "aufMeinKonto": "To my account",
         "direktWerkstatt": "Directly to the workshop",
-        "auszahlungFrage": "Where should the payout go?"
+        "auszahlungFrage": "Where should the payout go?",
+        "summeTitel": "Your claim based on the report",
+        "summeVorbehalt": "What the insurer ultimately pays may differ — we'll negotiate that for you."
       },
       "meinBetreuer": {
         "heading": "My account manager",

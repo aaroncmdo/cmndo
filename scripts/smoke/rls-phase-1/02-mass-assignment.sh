@@ -13,7 +13,7 @@ set -u
 : "${SUPABASE_URL:?SUPABASE_URL muss gesetzt sein}"
 : "${SUPABASE_ANON_KEY:?SUPABASE_ANON_KEY muss gesetzt sein}"
 : "${SMOKE_SV_EMAIL:=test-sv@claimondo.de}"
-: "${SMOKE_PASSWORD:=Test1234!}"
+: "${SMOKE_PASSWORD:=<PASSWORT: GitHub-Secret>}"
 
 echo "=== Smoke #2 — Mass-Assignment sachverstaendige.verifiziert ==="
 echo "Target: $SUPABASE_URL"

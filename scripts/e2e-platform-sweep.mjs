@@ -44,7 +44,7 @@ function zeitstempel() {
 const ROLLEN_ROUTEN = {
   admin: {
     email: 'test-admin@claimondo.de',
-    password: 'Test1234!',
+    password: (process.env.TEST_PASSWORT ?? ''),
     routen: [
       '/admin',
       '/admin/faelle',
@@ -59,7 +59,7 @@ const ROLLEN_ROUTEN = {
   },
   dispatch: {
     email: 'test-dispatch@claimondo.de',
-    password: 'Test1234!',
+    password: (process.env.TEST_PASSWORT ?? ''),
     routen: [
       '/dispatch',
       '/dispatch/dashboard',
@@ -70,7 +70,7 @@ const ROLLEN_ROUTEN = {
   },
   sv: {
     email: 'test-sv@claimondo.de',
-    password: 'Test1234!',
+    password: (process.env.TEST_PASSWORT ?? ''),
     routen: [
       '/gutachter',
       '/gutachter/heute',
@@ -86,7 +86,7 @@ const ROLLEN_ROUTEN = {
   },
   kunde: {
     email: 'test-kunde@claimondo.de',
-    password: 'Test1234!',
+    password: (process.env.TEST_PASSWORT ?? ''),
     routen: [
       '/kunde',
       '/kunde/faelle',
@@ -95,7 +95,7 @@ const ROLLEN_ROUTEN = {
   },
   kb: {
     email: 'test-kb@claimondo.de',
-    password: 'Test1234!',
+    password: (process.env.TEST_PASSWORT ?? ''),
     routen: [
       '/admin',
       '/admin/faelle',

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import fs from 'node:fs'
+import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
 
 // AAR-907 Staging-Vollstaendig-Smoke: ab Startseite bis Account angelegt
 // auf https://staging.claimondo.de mit nginx-Basic-Auth.
@@ -183,7 +184,7 @@ test('Lokal Vollstaendig: ab /flow/[token] bis Account-Anlage', async ({ page })
   await page.waitForTimeout(2_000)
   await shot(page, '08-lokal-flow-step3-sa')
 
-  // Step 3: SA-Pad + Akzeptanz + SA unterzeichnen
+  // Step 3: SA-Pad + Akzeptanz + Vertrags-CTA ("Beauftragung unterschreiben", frueher "SA unterzeichnen")
   await paintCanvas(page)
   for (const cb of await page.locator('input[type="checkbox"]:not(:checked)').all()) {
     if (await cb.isVisible().catch(() => false)) {
@@ -192,7 +193,7 @@ test('Lokal Vollstaendig: ab /flow/[token] bis Account-Anlage', async ({ page })
   }
   await page.waitForTimeout(500)
   await shot(page, '09-lokal-flow-sa-signed')
-  await page.getByRole('button', { name: /sa unterzeichnen/i }).click()
+  await page.getByRole('button', { name: CTA_SA_UNTERSCHREIBEN }).click()
 
   // Gap-3-Fix: warten auf den Account-Step ODER auf /kunde-Redirect.
   // signSAandCreateFall + createKundeAccount koennen 10-20s dauern.

@@ -106,7 +106,9 @@ if (vErr) fail('vehicle insert: ' + vErr.message)
 const { error: bErr } = await db.from('flotten_fahrzeuge').insert({ firma_id: FIRMA_ID, vehicle_id: veh.id })
 if (bErr) fail('bind insert: ' + bErr.message)
 const { data: claim, error: cErr } = await db.from('claims')
-  .insert({ vehicle_id: veh.id, kundenbetreuer_id: kb.id, created_via: 'manuell_admin', schadentag: '2026-07-16' })
+  // ist_testfall (Mig 20260831222740): direkter Insert -> die Ableitung aus der Lead-Domain
+  // in convert-lead-to-claim.ts greift hier nicht. Dieser Claim hat gar keinen Lead.
+  .insert({ vehicle_id: veh.id, kundenbetreuer_id: kb.id, created_via: 'manuell_admin', schadentag: '2026-07-16', ist_testfall: true })
   .select('id').single()
 if (cErr) fail('claim insert: ' + cErr.message + ' (NOT-NULL-Spalte? -> Insert erweitern)')
 ok(`Test-Claim ${claim.id.slice(0, 8)} mit Flotten-Vehicle ${veh.id.slice(0, 8)}`)
@@ -125,7 +127,7 @@ const page = await (await browser.newContext({ viewport: { width: 1400, height: 
 try {
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
   await page.locator('input[type="email"]').fill('test-admin@claimondo.de')
-  await page.locator('input[type="password"]').fill('Claimondo2026!')
+  await page.locator('input[type="password"]').fill((process.env.TEST_PASSWORT ?? ''))
   await page.locator('button[type="submit"]').first().click()
   await page.waitForURL((u) => !String(u).includes('/login'), { timeout: 30000 })
   ok('Admin-Login')

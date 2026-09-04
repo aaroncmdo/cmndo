@@ -45,7 +45,7 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
 const DISPATCHER_EMAIL = 'test-dispatch@claimondo.de'
-const DISPATCHER_PASSWORD = 'Test1234!'
+const DISPATCHER_PASSWORD = (process.env.TEST_PASSWORT ?? '')
 
 const RUN_TS = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
 // Output unter docs/probe-runs/ — gitignored (siehe .gitignore).

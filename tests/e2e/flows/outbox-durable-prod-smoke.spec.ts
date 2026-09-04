@@ -32,7 +32,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 //
 //   Der Weg ist trotzdem hier festgehalten, weil er zu 90 % erschlossen ist und beim
 //   naechsten Anlauf Stunden spart:
-//     • Login: `test-dispatch@claimondo.de` / `Test1234!` (⚠ NICHT smoke-admin — dessen
+//     • Login: `test-dispatch@claimondo.de` / `<PASSWORT: GitHub-Secret>` (⚠ NICHT smoke-admin — dessen
 //       im Memory notiertes Passwort ist auf prod ungueltig, 13.08. verifiziert)
 //     • Trigger: Button „Videotermin buchen" in der Fallakte `/faelle/<claimId>`
 //     • ⚠ Das Formular ist INLINE, kein Modal — und die Seite traegt Dutzende weiterer
@@ -56,7 +56,7 @@ const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 // ungueltig ("E-Mail oder Passwort ist falsch", verifiziert 13.08.). test-dispatch
 // kommt an dieselbe Fallakte und darf Termine anlegen.
 const ADMIN_EMAIL = process.env.SMOKE_ADMIN_EMAIL ?? 'test-dispatch@claimondo.de'
-const ADMIN_PW = process.env.SMOKE_ADMIN_PW ?? 'Test1234!'
+const ADMIN_PW = process.env.SMOKE_ADMIN_PW ?? ''
 // Etablierter Smoke-Claim: smoke-kunde@claimondo.de, telefon = NULL, Status ersterfassung.
 const CLAIM_ID = process.env.SMOKE_CLAIM_ID ?? 'c963ce36-5ba0-4d9a-9897-6ceb7bd0d976'
 

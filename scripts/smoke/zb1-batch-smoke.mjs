@@ -54,8 +54,8 @@ const db = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_
 // ── Konstanten ────────────────────────────────────────────────────────────────
 const BASE = 'https://app.claimondo.de'
 const FIRMA_ID = 'dafc57ee-0d27-4d7e-8e1a-4a11edd6f713' // Test-Flotte GmbH (Smoke)
-const FLOTTE_LOGIN = { email: 'flotte.test@claimondo.de', pw: 'Claimondo2026!' }
-const ADMIN_LOGIN = { email: 'test-admin@claimondo.de', pw: 'Claimondo2026!' }
+const FLOTTE_LOGIN = { email: 'flotte.test@claimondo.de', pw: (process.env.TEST_PASSWORT ?? '') }
+const ADMIN_LOGIN = { email: 'test-admin@claimondo.de', pw: (process.env.TEST_PASSWORT ?? '') }
 const FIN1 = 'WSMKE000000000901' // Flow 1 + 3 (17 Zeichen, kein I/O/Q)
 const FIN2 = 'WSMKE000000000902' // Flow 2 (Admin)
 const KZ1 = 'B-ZB 901'

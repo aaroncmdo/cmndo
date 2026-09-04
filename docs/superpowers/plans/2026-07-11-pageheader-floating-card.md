@@ -541,7 +541,7 @@ Expected: alle **0 neue** Verstöße (grün). Bei Fund: fixen (Card-Werte gehör
 Run: `npx vitest run`
 Expected: alle grün (inkl. `PageHeader.test.tsx`).
 
-- [ ] **Step 4: Playwright-Smoke-Spec schreiben** — `tests/e2e/flows/pageheader-floating-card.spec.ts` (Muster: bestehende `tests/e2e/flows/*.spec.ts`, z.B. `werkstatt-finder-smoke.spec.ts`; `// Run:`-Header). Login via Test-Konto (Admin: `nicolas.kitta@claimondo.de` / `Claimondo2026!`; Rollen: `test-{dispatch,makler,kunde}@claimondo.de` / `Test1234!`). Pro repräsentativer Seite asserten:
+- [ ] **Step 4: Playwright-Smoke-Spec schreiben** — `tests/e2e/flows/pageheader-floating-card.spec.ts` (Muster: bestehende `tests/e2e/flows/*.spec.ts`, z.B. `werkstatt-finder-smoke.spec.ts`; `// Run:`-Header). Login via Test-Konto (Admin: `nicolas.kitta@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`; Rollen: `test-{dispatch,makler,kunde}@claimondo.de` / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`). Pro repräsentativer Seite asserten:
   - Header-Container trägt `[data-page-header-card]` (Klasse `page-header-card`) — **außer** Auth/Login: dort `[data-page-header]` **ohne** `page-header-card`.
   - **Kein** `bg-white border-b border-claimondo-border`-Band mehr um `[data-page-header]`.
   - Seite lädt ohne Console-Error.

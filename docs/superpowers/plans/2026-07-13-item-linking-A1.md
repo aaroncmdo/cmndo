@@ -200,7 +200,7 @@ No central `routeForKontext` change: each surface already computes its role-corr
 - [ ] `npx vitest run src/components/shared/ClickableItemRow.test.ts` + all new source-guards → green.
 - [ ] `npm run check:component-set -- --ratchet`, `npm run check:token-audit`, `npm run check:knip -- --ratchet` → `0 neu`.
 - [ ] Regression grep: `rg "ClickableItemRow|ClickableTr" src/` → confirm consumers wired; confirm no `href="#"` dead links remain in touched surfaces.
-- [ ] **Prod Playwright smoke** (mandate; `PLAYWRIGHT_BASE_URL=https://app.claimondo.de`, test accounts `test-*@claimondo.de`/`Test1234!` or `aaron.sprafke`/`Test1234!`): for ≥2 roles, open a task list → click a task item → land on the correct entity detail; click an inline control (status select / action button) → it acts and does NOT navigate. Document results.
+- [ ] **Prod Playwright smoke** (mandate; `PLAYWRIGHT_BASE_URL=https://app.claimondo.de`, test accounts `test-*@claimondo.de`/`<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` or `aaron.sprafke`/`<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>`): for ≥2 roles, open a task list → click a task item → land on the correct entity detail; click an inline control (status select / action button) → it acts and does NOT navigate. Document results.
 - [ ] Session-Abschluss-Checkliste: `git status` clean, `git stash list` empty, all commits pushed.
 - [ ] Open PR → `staging`. Body ends with the Claude Code footer + the 7-Punkte-Audit summary.
 

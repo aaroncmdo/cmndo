@@ -70,7 +70,7 @@ ladeEnv()
 const BASE = 'https://app.staging.claimondo.de'
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER || process.env.STAGING_BASIC_USER || 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASS || process.env.STAGING_BASIC_PASS || 'ClaimondoSuperuser123789!!'
-const TEST_PASS = 'Test1234!'
+const TEST_PASS = (process.env.TEST_PASSWORT ?? '')
 const OUT_DIR = join(PROJECT_ROOT, 'docs', '17.05.2026', 'cmm44-spa2-pr2-smoke')
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''

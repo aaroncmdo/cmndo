@@ -109,7 +109,7 @@ npm ci                    # eigenes reales node_modules — tsc/vitest/build/nex
   Smoke neu einloggen — wiederholte Logins triggern transientes Supabase-Auth-Rate-Limit; Diagnose:
   anon-`signInWithPassword`-node-Probe = Timeout/429, DB-Service-Key bleibt ok). `waitForURL(u=>!/login/)`
   großzügig (90 s) wegen Cold-Dev-Compile. Test-User: `test-admin@` / `test-kunde@` / `test-sv@claimondo.de`
-  / `Test1234!` (2FA off). **localhost-Smoke geht** (proxy.ts macht auf localhost nur updateSession).
+  / `<PASSWORT — siehe GitHub-Secret TEST_*_PASSWORD>` (2FA off). **localhost-Smoke geht** (proxy.ts macht auf localhost nur updateSession).
   **Admin darf in Kanzlei-Portal** (`requirePortalAccess(['kanzlei','admin'])`), **NICHT** ins Makler-Portal
   (`['makler']`). Service-Reads (z.B. v_claim_phase für Listen) brauchen `SUPABASE_SERVICE_ROLE_KEY`.
 

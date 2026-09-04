@@ -32,6 +32,7 @@ import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
+import { sendOaiqEvent } from '@/lib/analytics/oaiq-capi'
 
 export type EmbedBuchungInput = {
   vorname: string
@@ -322,6 +323,8 @@ export async function reserviereEmbedTermin(input: {
   utmSource?: string | null
   /** Schuldfrage aus dem Deeplink (`gegner`|`unklar`) — spart den Quali-Schritt im FlowLink. */
   schuldfrage?: string | null
+  /** OpenAI-Ads-Kennung aus der Parent-URL (durch die iframe-Grenze gereicht). */
+  oppref?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -404,6 +407,29 @@ export async function reserviereEmbedTermin(input: {
       }
     } catch (err) {
       console.error('[reserviereEmbedTermin] promotion_code_id setzen fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    }
+  }
+
+  // OpenAI-Ads-Attribution. Der Wert kommt als URL-Parameter durch die iframe-Grenze
+  // (EmbedFinderSection reicht ihn durch) — das __oppref-Cookie gehoert claimondo.de
+  // und ist hier auf app.claimondo.de nicht lesbar. Ohne diesen Block entstuende der
+  // GROESSTE Lead-Kanal komplett ohne Zuordnung.
+  //
+  // Der gespeicherte Wert traegt danach die spaeteren Ereignisse: Termin und SA
+  // passieren im FlowLink, oft Tage spaeter, und lesen ihn aus `leads.oppref`.
+  if (leadId && input.oppref) {
+    try {
+      const { error: opprefFehler } = await createAdminClient()
+        .from('leads').update({ oppref: input.oppref }).eq('id', leadId)
+      if (opprefFehler) {
+        console.error(`[reserviereEmbedTermin] oppref nicht gesetzt (Lead ${leadId}) — Anzeigen-Zuordnung fehlt:`, opprefFehler.message)
+      }
+      // Nicht awaited: der Kunde wartet gerade auf seine Terminbestaetigung und
+      // soll das nicht an der Antwortzeit eines Werbeservers tun (Muster wie
+      // `void trackServerConversion(...)` im GA4-Pfad).
+      void sendOaiqEvent({ oppref: input.oppref, eventId: leadId, eventName: 'lead_created' })
+    } catch (err) {
+      console.error('[reserviereEmbedTermin] oppref setzen fehlgeschlagen (nicht kritisch):', (err as Error).message)
     }
   }
 
