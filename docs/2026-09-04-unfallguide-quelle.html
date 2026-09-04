@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Claimondo Unfallguide</title>
+<style>
+  @page { size: A4; margin: 0; }
+
+  :root {
+    --navy: #0D1B3E;
+    --mid: #4573A2;
+    --light: #7BA3CC;
+    --paper: #FCFDFE;
+    --ink: #1A2438;
+    --grau: #616C82;
+    --leise: #97A2B5;
+    --linie: #DCE3ED;
+    --akzent: #B08348;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); color: var(--ink); background: #fff; -webkit-font-smoothing: antialiased; }
+
+  .seite {
+    width: 210mm; height: 297mm;
+    padding: 22mm 20mm 16mm;
+    position: relative;
+    background: var(--paper);
+    page-break-after: always;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .seite:last-child { page-break-after: auto; }
+
+  /* ---------- Kopf- und Fußmarken ---------- */
+  .marke {
+    position: absolute; top: 11mm; left: 20mm; right: 20mm;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 6.6pt; letter-spacing: 0.16em; text-transform: uppercase; color: var(--leise);
+  }
+  .fuss {
+    position: absolute; bottom: 9mm; left: 20mm; right: 20mm;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 6.6pt; letter-spacing: 0.1em; color: var(--leise);
+    border-top: 0.4pt solid var(--linie); padding-top: 2.5mm;
+  }
+  .fuss b { color: var(--mid); font-weight: 600; letter-spacing: 0.14em; }
+
+  /* ---------- Typografie ---------- */
+  .kapitel {
+    font-size: 7.2pt; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--mid); margin-bottom: 5mm;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: 30pt; line-height: 1.1; letter-spacing: -0.015em;
+    color: var(--navy); margin-bottom: 5mm;
+  }
+  h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: 19pt; line-height: 1.16; letter-spacing: -0.012em;
+    color: var(--navy); margin-bottom: 3mm;
+  }
+  .lead { font-size: 10pt; line-height: 1.55; color: var(--grau); max-width: 128mm; }
+  p { font-size: 8.8pt; line-height: 1.58; color: var(--grau); }
+  strong { color: var(--navy); font-weight: 600; }
+
+  /* ---------- Titelseite ---------- */
+  .titel { background: var(--navy); color: var(--paper); justify-content: space-between; }
+  /* Das Foto trägt die Situation, nicht die Aussage: Es sitzt hinter einem
+     tiefen Verlauf, damit die Typografie führt. Ruhe vor Dramatik. */
+  .titel-bild {
+    position: absolute; inset: 0; z-index: 1;
+    background-image: url("file:///C:/Users/AARONS~1/AppData/Local/Temp/claude/C--Users-Aaron-Sprafke-stampit-app-stampit-app-claimondo-v2/8ffc3513-f114-438e-a3a8-4922de8943b1/hero-unfall-frau.jpg");
+    background-size: cover; background-position: 62% 42%;
+  }
+  .titel-schleier {
+    position: absolute; inset: 0; z-index: 2;
+    background:
+      linear-gradient(180deg,
+        rgba(13,27,62,0.97) 0%,
+        rgba(13,27,62,0.90) 34%,
+        rgba(13,27,62,0.62) 56%,
+        rgba(13,27,62,0.93) 78%,
+        rgba(13,27,62,0.99) 100%);
+  }
+  .wortmarke {
+    font-family: var(--serif); font-size: 9pt; letter-spacing: 0.02em;
+    text-transform: none; color: rgba(252,253,254,0.8);
+  }
+  .titel .marke, .titel .fuss { color: rgba(252,253,254,0.42); border-color: rgba(252,253,254,0.16); }
+  .titel h1 { color: var(--paper); font-size: 38pt; line-height: 1.06; }
+  .titel .lead { color: rgba(252,253,254,0.72); font-size: 10.5pt; max-width: 118mm; }
+  .titel-oben { padding-top: 14mm; }
+  .titel-strich { width: 26mm; height: 2pt; background: var(--light); margin: 0 0 9mm; }
+
+  .zahlreihe { display: flex; gap: 0; border-top: 0.5pt solid rgba(252,253,254,0.2); }
+  .zr { flex: 1; padding: 5mm 4mm 0 0; }
+  .zr .z {
+    font-family: var(--serif); font-size: 21pt; color: var(--light);
+    display: block; line-height: 1; margin-bottom: 1.6mm;
+  }
+  .zr .b { font-size: 7pt; line-height: 1.42; color: rgba(252,253,254,0.6); }
+
+  /* ---------- Inhaltsblöcke ---------- */
+  .inhalt { flex: 1; display: flex; flex-direction: column; }
+  .abstand { flex: 1; }
+
+  .phase { margin-bottom: 7mm; }
+  .phase-kopf { display: flex; align-items: baseline; gap: 3.5mm; margin-bottom: 3mm; }
+  .phase-zeit {
+    font-family: var(--serif); font-size: 15pt; color: var(--navy);
+    min-width: 26mm; letter-spacing: -0.01em;
+  }
+  .phase-titel { font-size: 8pt; letter-spacing: 0.15em; text-transform: uppercase; color: var(--mid); }
+  .punkte { list-style: none; border-top: 0.4pt solid var(--linie); }
+  .punkte li {
+    display: flex; gap: 3.5mm; padding: 2.4mm 0;
+    border-bottom: 0.4pt solid var(--linie);
+    font-size: 8.6pt; line-height: 1.45; color: var(--grau);
+  }
+  .punkte .kasten {
+    width: 3mm; height: 3mm; border: 0.5pt solid var(--light);
+    flex-shrink: 0; margin-top: 1.1mm;
+  }
+  .punkte b { color: var(--navy); font-weight: 600; }
+
+  /* ---------- Fehler-Liste ---------- */
+  .fehler { border-top: 0.5pt solid var(--navy); }
+  .fehler-z {
+    display: flex; gap: 5mm; padding: 4.2mm 0;
+    border-bottom: 0.4pt solid var(--linie);
+  }
+  .fehler-n {
+    font-family: var(--serif); font-size: 15pt; color: var(--light);
+    min-width: 9mm; line-height: 1;
+  }
+  .fehler-t { flex: 1; }
+  .fehler-t b { display: block; font-size: 9.4pt; color: var(--navy); margin-bottom: 1.2mm; font-weight: 600; }
+  .fehler-t span { font-size: 8.2pt; line-height: 1.5; color: var(--grau); display: block; }
+  .fehler-p {
+    font-family: var(--serif); font-size: 10pt; color: var(--akzent);
+    min-width: 26mm; text-align: right; line-height: 1.3;
+  }
+
+  /* ---------- Anspruchstabelle ---------- */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 6.8pt; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--leise); text-align: left; font-weight: 600;
+    padding-bottom: 2.5mm; border-bottom: 0.6pt solid var(--navy);
+  }
+  th.r, td.r { text-align: right; }
+  td {
+    padding: 3.4mm 0; border-bottom: 0.4pt solid var(--linie);
+    font-size: 8.5pt; line-height: 1.42; color: var(--grau); vertical-align: top;
+  }
+  td b { color: var(--navy); font-weight: 600; display: block; margin-bottom: 0.8mm; font-size: 9pt; }
+  td.betrag { font-family: var(--serif); font-size: 11pt; color: var(--navy); white-space: nowrap; }
+  td .par { font-size: 7pt; color: var(--leise); letter-spacing: 0.03em; }
+
+  /* ---------- Zitat / Versicherer ---------- */
+  .satz-z { border-top: 0.5pt solid var(--navy); }
+  .satz {
+    padding: 4.4mm 0; border-bottom: 0.4pt solid var(--linie);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 7mm;
+  }
+  .satz .sagt {
+    font-family: var(--serif); font-size: 10pt; line-height: 1.4;
+    color: var(--navy); font-style: italic;
+  }
+  .satz .sagt::before { content: "„"; color: var(--light); }
+  .satz .sagt::after { content: "\201C"; color: var(--light); }
+  .satz .stimmt { font-size: 8.2pt; line-height: 1.5; color: var(--grau); }
+  .satz .stimmt b { display: block; font-size: 6.8pt; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--mid); margin-bottom: 1.4mm; font-weight: 600; }
+
+  /* ---------- Merksatz ---------- */
+  .merk {
+    background: var(--navy); color: var(--paper);
+    padding: 7mm 8mm; margin: 6mm 0 0;
+  }
+  .merk .k {
+    font-size: 6.8pt; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--light); display: block; margin-bottom: 2.5mm;
+  }
+  .merk .s {
+    font-family: var(--serif); font-size: 13pt; line-height: 1.35;
+    color: var(--paper); max-width: 130mm;
+  }
+
+  /* ---------- Schlussseite ---------- */
+  .schluss { background: var(--navy); color: var(--paper); justify-content: space-between; }
+  .schluss .marke, .schluss .fuss { color: rgba(252,253,254,0.42); border-color: rgba(252,253,254,0.16); }
+  .schluss h2 { color: var(--paper); font-size: 24pt; }
+  .schluss p { color: rgba(252,253,254,0.74); font-size: 9.4pt; line-height: 1.6; max-width: 118mm; }
+  .schritte { display: flex; gap: 0; margin: 9mm 0 0; border-top: 0.5pt solid rgba(252,253,254,0.2); }
+  .schritt { flex: 1; padding: 5mm 5mm 0 0; }
+  .schritt .n {
+    font-family: var(--serif); font-size: 12pt; color: var(--light);
+    display: block; margin-bottom: 2mm;
+  }
+  .schritt .t { font-size: 8pt; line-height: 1.45; color: rgba(252,253,254,0.72); }
+  .kosten-note {
+    border: 0.5pt solid rgba(252,253,254,0.24); padding: 5mm 6mm; margin-top: 8mm;
+  }
+  .kosten-note .s { font-family: var(--serif); font-size: 11pt; color: var(--paper); line-height: 1.4; }
+  .kosten-note .u { font-size: 7.6pt; color: rgba(252,253,254,0.6); margin-top: 2.5mm; line-height: 1.5; }
+
+  /* ---------- Handlungsleiste ---------- */
+  .handeln { display: flex; gap: 4mm; margin-top: 7mm; align-items: stretch; }
+  .cta {
+    flex: 1; background: var(--light); color: var(--navy);
+    padding: 5.5mm 6mm; text-decoration: none;
+    display: flex; flex-direction: column; justify-content: center; position: relative;
+  }
+  .cta-t { font-family: var(--serif); font-size: 14pt; line-height: 1.1; display: block; }
+  .cta-u { font-size: 7.6pt; color: rgba(13,27,62,0.72); margin-top: 1.8mm; display: block; }
+  .cta-p {
+    position: absolute; right: 6mm; top: 50%; transform: translateY(-50%);
+    font-size: 15pt; color: rgba(13,27,62,0.55);
+  }
+  .qr {
+    width: 34mm; flex-shrink: 0; text-decoration: none;
+    border: 0.5pt solid rgba(252,253,254,0.24);
+    display: flex; align-items: center; gap: 3mm; padding: 3mm 3.5mm;
+  }
+  .qr-bild { width: 19mm; height: 19mm; flex-shrink: 0; display: block; }
+  .qr-bild svg { width: 100%; height: 100%; display: block; }
+  .qr-t { font-size: 6.6pt; line-height: 1.35; color: rgba(252,253,254,0.6); }
+
+  .tel {
+    display: flex; align-items: baseline; gap: 3mm;
+    margin-top: 4mm; text-decoration: none;
+    border-top: 0.5pt solid rgba(252,253,254,0.18); padding-top: 4mm;
+  }
+  .tel-k { font-size: 7.6pt; color: rgba(252,253,254,0.55); letter-spacing: 0.04em; }
+  .tel-n { font-family: var(--serif); font-size: 12pt; color: var(--light); }
+
+  /* Der Berater als schmales Band: ein Gesicht am Ende, kein Werbeauftritt. */
+  .berater {
+    display: flex; align-items: stretch; gap: 0;
+    border: 0.5pt solid rgba(252,253,254,0.2); margin-top: 8mm;
+  }
+  .berater-bild {
+    width: 52mm; flex-shrink: 0;
+    background-image: url("file:///C:/Users/AARONS~1/AppData/Local/Temp/claude/C--Users-Aaron-Sprafke-stampit-app-stampit-app-claimondo-v2/8ffc3513-f114-438e-a3a8-4922de8943b1/team-headset.jpg");
+    background-size: cover; background-position: 38% 34%;
+    filter: saturate(0.82) contrast(1.02);
+  }
+  .berater-text { padding: 6mm 7mm; display: flex; flex-direction: column; justify-content: center; }
+  .berater-text .k {
+    font-size: 6.8pt; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--light); display: block; margin-bottom: 2.5mm;
+  }
+  .berater-text .s {
+    font-family: var(--serif); font-size: 11pt; line-height: 1.42;
+    color: var(--paper); max-width: 84mm;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 1 · TITEL ============ -->
+<section class="seite titel">
+  <div class="titel-bild"></div>
+  <div class="titel-schleier"></div>
+
+  <div class="marke" style="z-index:3"><span class="wortmarke">claimondo</span><span>Unfallguide</span></div>
+
+  <div class="titel-oben" style="position:relative;z-index:3">
+    <div class="titel-strich"></div>
+    <h1>Was jetzt<br>zu tun ist.</h1>
+    <p class="lead">
+      Nach einem unverschuldeten Unfall stehen Ihnen mehr Ansprüche zu, als die
+      meisten geltend machen. Dieser Leitfaden zeigt, welche — und welche sechs
+      Fehler sie kosten.
+    </p>
+  </div>
+
+  <div class="zahlreihe" style="position:relative;z-index:3">
+    <div class="zr"><span class="z">40–60 %</span><span class="b">unter dem berechtigten Betrag liegen Erstangebote der Versicherer</span></div>
+    <div class="zr"><span class="z">4 Wochen</span><span class="b">angemessene Prüfzeit — danach Verzug mit Zinsen</span></div>
+    <div class="zr"><span class="z">3 Jahre</span><span class="b">Verjährung, bei Personenschäden bis zu 30</span></div>
+    <div class="zr"><span class="z">0 €</span><span class="b">Ihr Anteil bei klarer Haftung der Gegenseite</span></div>
+  </div>
+
+  <div class="fuss" style="z-index:3"><span>Ausgabe 2026</span><span><b>claimondo.de</b></span></div>
+</section>
+
+<!-- ============ 2 · DIE ERSTEN STUNDEN ============ -->
+<section class="seite">
+  <div class="marke"><span>Kapitel 1</span><span>Sofort</span></div>
+  <div class="inhalt">
+    <p class="kapitel">Kapitel 1</p>
+    <h2>Die ersten Stunden</h2>
+    <p class="lead" style="margin-bottom:9mm">
+      Was hier versäumt wird, lässt sich später kaum nachholen. Drei Zeitfenster,
+      abzuhaken.
+    </p>
+
+    <div class="phase">
+      <div class="phase-kopf"><span class="phase-zeit">Sofort</span><span class="phase-titel">Am Unfallort</span></div>
+      <ul class="punkte">
+        <li><span class="kasten"></span><span><b>Absichern.</b> Warnblinker, Warndreieck, Verletzte versorgen.</span></li>
+        <li><span class="kasten"></span><span><b>Polizei rufen (110)</b> bei Personenschäden, Schäden über etwa 750 €, Streit über den Hergang oder Fluchtverdacht.</span></li>
+        <li><span class="kasten"></span><span><b>Fotografieren.</b> Schäden, Endposition beider Fahrzeuge, Bremsspuren, Lichtverhältnisse, Kennzeichen, Fahrzeugschein der Gegenseite.</span></li>
+        <li><span class="kasten"></span><span><b>Zeugen notieren.</b> Namen und Telefonnummern — später sind sie nicht mehr auffindbar.</span></li>
+        <li><span class="kasten"></span><span><b>Personalien tauschen</b> und die Schadennummer der Gegenseite notieren.</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-kopf"><span class="phase-zeit">24 Std.</span><span class="phase-titel">Am selben Tag</span></div>
+      <ul class="punkte">
+        <li><span class="kasten"></span><span><b>Zum Arzt</b> — auch wenn nichts wehtut. Adrenalin überdeckt Schmerz; Nackenbeschwerden zeigen sich oft erst nach sechs bis 24 Stunden.</span></li>
+        <li><span class="kasten"></span><span><b>Eigenen Gutachter beauftragen.</b> Sie dürfen ihn frei wählen. Bei klarer Haftung zahlt ihn die Gegenseite.</span></li>
+        <li><span class="kasten"></span><span><b>Schaden der eigenen Versicherung melden</b> — melden heißt nicht abwickeln.</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-kopf"><span class="phase-zeit">7 Tage</span><span class="phase-titel">In der ersten Woche</span></div>
+      <ul class="punkte">
+        <li><span class="kasten"></span><span><b>Polizeibericht anfordern.</b></span></li>
+        <li><span class="kasten"></span><span><b>Beschwerden täglich notieren</b> — ein einfaches Tagebuch genügt und trägt später weit.</span></li>
+        <li><span class="kasten"></span><span><b>Anwalt einschalten.</b> Bei klarer Haftung trägt auch diese Kosten die Gegenseite.</span></li>
+      </ul>
+    </div>
+
+    <div class="abstand"></div>
+    <div class="merk">
+      <span class="k">Die wichtigste Regel</span>
+      <p class="s">Sagen Sie am Unfallort nichts zur Schuldfrage — auch kein
+      beschwichtigendes „Tut mir leid". Wer sich vor Ort festlegt, verliert
+      Verhandlungsspielraum, den er später braucht.</p>
+    </div>
+  </div>
+  <div class="fuss"><span>Claimondo Unfallguide</span><span>2</span></div>
+</section>
+
+<!-- ============ 3 · HAFTPFLICHT ODER KASKO ============ -->
+<section class="seite">
+  <div class="marke"><span>Kapitel 2</span><span>Die Weiche</span></div>
+  <div class="inhalt">
+    <p class="kapitel">Kapitel 2</p>
+    <h2>Haftpflicht oder Kasko</h2>
+    <p class="lead" style="margin-bottom:8mm">
+      Diese Entscheidung fällt einmal — und bestimmt alles Weitere. Sie wird
+      oft in den ersten Stunden falsch getroffen.
+    </p>
+
+    <svg viewBox="0 0 620 300" style="width:100%;height:auto;margin-bottom:7mm">
+      <defs>
+        <marker id="p" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 z" fill="#7BA3CC"/>
+        </marker>
+      </defs>
+      <rect x="205" y="4" width="210" height="40" fill="none" stroke="#0D1B3E" stroke-width="1"/>
+      <text x="310" y="21" text-anchor="middle" font-family="Georgia,serif" font-size="13" fill="#0D1B3E">Wer hat den Unfall verursacht?</text>
+      <text x="310" y="35" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="9" fill="#97A2B5">Die einzige Frage, die zuerst zählt</text>
+
+      <line x1="310" y1="44" x2="310" y2="66" stroke="#DCE3ED" stroke-width="1"/>
+      <line x1="150" y1="66" x2="470" y2="66" stroke="#DCE3ED" stroke-width="1"/>
+      <line x1="150" y1="66" x2="150" y2="88" stroke="#DCE3ED" stroke-width="1" marker-end="url(#p)"/>
+      <line x1="470" y1="66" x2="470" y2="88" stroke="#DCE3ED" stroke-width="1" marker-end="url(#p)"/>
+
+      <rect x="30" y="96" width="240" height="86" fill="#0D1B3E"/>
+      <text x="46" y="120" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="1.6" fill="#7BA3CC">DIE GEGENSEITE</text>
+      <text x="46" y="142" font-family="Georgia,serif" font-size="17" fill="#FCFDFE">Haftpflicht</text>
+      <text x="46" y="161" font-family="Segoe UI,sans-serif" font-size="9.5" fill="rgba(252,253,254,0.72)">Direktanspruch gegen deren</text>
+      <text x="46" y="174" font-family="Segoe UI,sans-serif" font-size="9.5" fill="rgba(252,253,254,0.72)">Versicherer — § 115 VVG</text>
+
+      <rect x="350" y="96" width="240" height="86" fill="none" stroke="#DCE3ED" stroke-width="1"/>
+      <text x="366" y="120" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="1.6" fill="#4573A2">SIE SELBST</text>
+      <text x="366" y="142" font-family="Georgia,serif" font-size="17" fill="#0D1B3E">Kasko</text>
+      <text x="366" y="161" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#616C82">Eigene Police — mit Selbstbehalt</text>
+      <text x="366" y="174" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#616C82">und Rückstufung</text>
+
+      <text x="46" y="214" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#616C82">Gutachter, Anwalt, Mietwagen,</text>
+      <text x="46" y="228" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#616C82">Nutzungsausfall, Wertminderung —</text>
+      <text x="46" y="242" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#0D1B3E" font-weight="600">alles trägt die Gegenseite.</text>
+      <text x="46" y="262" font-family="Georgia,serif" font-size="19" fill="#0D1B3E">0 €</text>
+      <text x="46" y="278" font-family="Segoe UI,sans-serif" font-size="9" fill="#97A2B5">Eigenanteil für Sie</text>
+
+      <text x="366" y="214" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#616C82">Selbstbehalt plus Rückstufung in</text>
+      <text x="366" y="228" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#616C82">der Schadenfreiheitsklasse —</text>
+      <text x="366" y="242" font-family="Segoe UI,sans-serif" font-size="9.5" fill="#0D1B3E" font-weight="600">über Jahre spürbar.</text>
+      <text x="366" y="262" font-family="Georgia,serif" font-size="19" fill="#B08348">3.000–8.000 €</text>
+      <text x="366" y="278" font-family="Segoe UI,sans-serif" font-size="9" fill="#97A2B5">Mehrprämie über die Folgejahre</text>
+    </svg>
+
+    <p style="max-width:150mm">
+      <strong>Die Kasko ist bei fremdem Verschulden fast immer der teurere Weg.</strong>
+      Sie wirkt bequem, weil sie schnell zahlt — die Rückstufung kostet über die
+      Folgejahre aber typischerweise ein Vielfaches des Schadens. Nur wenn die
+      Gegenseite die Haftung bestreitet und die Regulierung stockt, kann die eigene
+      Kasko vorstrecken und sich das Geld später zurückholen. Auch dann bleibt der
+      Direktanspruch bestehen.
+    </p>
+  </div>
+  <div class="fuss"><span>Claimondo Unfallguide</span><span>3</span></div>
+</section>
+
+<!-- ============ 4 · DIE SECHS FEHLER ============ -->
+<section class="seite">
+  <div class="marke"><span>Kapitel 3</span><span>Fallen</span></div>
+  <div class="inhalt">
+    <p class="kapitel">Kapitel 3</p>
+    <h2>Die sechs teuersten Fehler</h2>
+    <p class="lead" style="margin-bottom:8mm">
+      Jeder einzelne wird täglich gemacht — und keiner davon fällt sofort auf.
+    </p>
+
+    <div class="fehler">
+      <div class="fehler-z">
+        <span class="fehler-n">1</span>
+        <span class="fehler-t">
+          <b>Schuld am Unfallort einräumen</b>
+          <span>Ein „Tut mir leid" wirkt höflich und kann später als Anerkenntnis
+          ausgelegt werden. Zur Schuldfrage sagt man vor Ort nichts.</span>
+        </span>
+        <span class="fehler-p">bis zur<br>vollen Summe</span>
+      </div>
+      <div class="fehler-z">
+        <span class="fehler-n">2</span>
+        <span class="fehler-t">
+          <b>Den Gutachter der Gegenseite akzeptieren</b>
+          <span>Er wird von dem bezahlt, der möglichst wenig zahlen will. Sie dürfen
+          Ihren eigenen frei wählen — bei klarer Haftung auf Kosten der Gegenseite.</span>
+        </span>
+        <span class="fehler-p">300–1.200 €<br>plus Folgen</span>
+      </div>
+      <div class="fehler-z">
+        <span class="fehler-n">3</span>
+        <span class="fehler-t">
+          <b>Über die eigene Kasko abrechnen</b>
+          <span>Schnell erledigt, teuer bezahlt: Die Rückstufung wirkt über Jahre
+          nach — bei fremdem Verschulden völlig unnötig.</span>
+        </span>
+        <span class="fehler-p">3.000–8.000 €</span>
+      </div>
+      <div class="fehler-z">
+        <span class="fehler-n">4</span>
+        <span class="fehler-t">
+          <b>Das erste Angebot annehmen</b>
+          <span>Erstangebote liegen statistisch deutlich unter dem berechtigten
+          Betrag. Wer unterschreibt, verzichtet auf den Rest — oft auch auf Spätfolgen.</span>
+        </span>
+        <span class="fehler-p">40–60 %<br>des Anspruchs</span>
+      </div>
+      <div class="fehler-z">
+        <span class="fehler-n">5</span>
+        <span class="fehler-t">
+          <b>Reparieren, bevor der Schaden dokumentiert ist</b>
+          <span>Nach der Reparatur lässt sich der Zustand nicht mehr beweisen.
+          Wertminderung und Nutzungsausfall sind dann kaum durchsetzbar.</span>
+        </span>
+        <span class="fehler-p">200–5.000 €</span>
+      </div>
+      <div class="fehler-z">
+        <span class="fehler-n">6</span>
+        <span class="fehler-t">
+          <b>Ohne Anwalt verhandeln</b>
+          <span>Bei klarer Haftung zahlt die Gegenseite auch den Anwalt. Wer darauf
+          verzichtet, spart nichts — er verhandelt nur allein gegen eine Rechtsabteilung.</span>
+        </span>
+        <span class="fehler-p">Sie sparen<br>nichts</span>
+      </div>
+    </div>
+  </div>
+  <div class="fuss"><span>Claimondo Unfallguide</span><span>4</span></div>
+</section>
+
+<!-- ============ 5 · WAS IHNEN ZUSTEHT ============ -->
+<section class="seite">
+  <div class="marke"><span>Kapitel 4</span><span>Ansprüche</span></div>
+  <div class="inhalt">
+    <p class="kapitel">Kapitel 4</p>
+    <h2>Was Ihnen zusteht</h2>
+    <p class="lead" style="margin-bottom:8mm">
+      Bei unverschuldetem Unfall. Die Beträge sind typische Spannen — der genaue
+      Wert hängt vom Fahrzeug und vom Schaden ab.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th style="width:44%">Position</th><th style="width:32%">Grundlage</th><th class="r">Typisch</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Reparatur oder Wiederbeschaffung</b>Fachwerkstatt Ihrer Wahl, keine Bindung an Partnerbetriebe</td>
+          <td><span class="par">§ 249 BGB</span></td>
+          <td class="r betrag">voll</td>
+        </tr>
+        <tr>
+          <td><b>Sachverständiger</b>Frei wählbar. Das Gutachten gehört Ihnen, nicht der Versicherung</td>
+          <td><span class="par">§ 249 BGB · BGH VI ZR 67/06</span></td>
+          <td class="r betrag">300–1.200 €</td>
+        </tr>
+        <tr>
+          <td><b>Anwalt</b>Eigenständige Schadensposition — kein Kostenrisiko für Sie</td>
+          <td><span class="par">BGH VI ZR 235/13</span></td>
+          <td class="r betrag">voll</td>
+        </tr>
+        <tr>
+          <td><b>Nutzungsausfall</b>Pauschale pro Tag, wenn Sie keinen Mietwagen nehmen</td>
+          <td><span class="par">Sanden-Danner-Tabelle</span></td>
+          <td class="r betrag">27–175 €<span style="font-size:7.4pt;color:#97A2B5"> / Tag</span></td>
+        </tr>
+        <tr>
+          <td><b>Mietwagen</b>Alternativ zum Nutzungsausfall, eine Klasse unter dem eigenen Wagen</td>
+          <td><span class="par">§ 249 BGB · Normaltarif</span></td>
+          <td class="r betrag">voll</td>
+        </tr>
+        <tr>
+          <td><b>Wertminderung</b>Ihr Auto ist nach der Reparatur weniger wert — das wird ersetzt</td>
+          <td><span class="par">§ 249 BGB</span></td>
+          <td class="r betrag">200–5.000 €</td>
+        </tr>
+        <tr>
+          <td><b>Schmerzensgeld</b>Bei Verletzungen, auch bei leichten Nackenbeschwerden</td>
+          <td><span class="par">§ 253 BGB</span></td>
+          <td class="r betrag">je nach<br>Verletzung</td>
+        </tr>
+        <tr>
+          <td><b>Verdienstausfall &amp; Haushaltsführung</b>Wenn Sie nicht arbeiten oder den Haushalt nicht führen können</td>
+          <td><span class="par">§ 252 BGB</span></td>
+          <td class="r betrag">je nach<br>Ausfall</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="abstand"></div>
+    <div class="merk">
+      <span class="k">Häufig übersehen</span>
+      <p class="s">Nutzungsausfall und Wertminderung werden am seltensten geltend
+      gemacht — und machen zusammen oft mehr aus als die halbe Reparatursumme.</p>
+    </div>
+  </div>
+  <div class="fuss"><span>Claimondo Unfallguide</span><span>5</span></div>
+</section>
+
+<!-- ============ 6 · WENN DIE VERSICHERUNG ANRUFT ============ -->
+<section class="seite">
+  <div class="marke"><span>Kapitel 5</span><span>Gespräch</span></div>
+  <div class="inhalt">
+    <p class="kapitel">Kapitel 5</p>
+    <h2>Wenn die Versicherung anruft</h2>
+    <p class="lead" style="margin-bottom:8mm">
+      Diese Sätze fallen fast wörtlich. Sie sind nicht gelogen — sie sind
+      unvollständig.
+    </p>
+
+    <div class="satz-z">
+      <div class="satz">
+        <span class="sagt">Wir schicken Ihnen unseren Gutachter, das geht schneller.</span>
+        <span class="stimmt"><b>Was fehlt</b>Sie haben freie Gutachterwahl. Bei
+        klarer Haftung zahlt die Gegenseite auch Ihren eigenen Sachverständigen —
+        der in Ihrem Interesse begutachtet, nicht in ihrem.</span>
+      </div>
+      <div class="satz">
+        <span class="sagt">Bei unserer Partnerwerkstatt geht es günstiger.</span>
+        <span class="stimmt"><b>Was fehlt</b>Günstiger für wen? Sie dürfen die
+        Werkstatt frei wählen. Eine Bindung an Partnerbetriebe müssen Sie nicht
+        akzeptieren.</span>
+      </div>
+      <div class="satz">
+        <span class="sagt">Bei diesem Fahrzeugalter gibt es keine Wertminderung.</span>
+        <span class="stimmt"><b>Was fehlt</b>Eine feste Altersgrenze gibt es nicht.
+        Ob Wertminderung anfällt, entscheidet der Sachverständige — nicht die
+        Versicherung.</span>
+      </div>
+      <div class="satz">
+        <span class="sagt">Unterschreiben Sie einfach hier, dann ist es erledigt.</span>
+        <span class="stimmt"><b>Was fehlt</b>Eine Abfindungserklärung beendet den
+        Fall endgültig. Ohne ausdrücklichen Vorbehalt sind auch Spätfolgen
+        abgegolten — die bei Nackenverletzungen erst Wochen später auftreten.</span>
+      </div>
+      <div class="satz">
+        <span class="sagt">Einen Anwalt brauchen Sie dafür nicht.</span>
+        <span class="stimmt"><b>Was fehlt</b>Bei klarer Haftung zahlt die Gegenseite
+        den Anwalt. Der Rat, auf ihn zu verzichten, kommt von der Partei, die
+        gegenüber sitzt.</span>
+      </div>
+    </div>
+
+    <div class="abstand"></div>
+    <div class="merk">
+      <span class="k">Ein Satz genügt</span>
+      <p class="s">„Ich lasse das prüfen und melde mich." Sie müssen am Telefon
+      nichts entscheiden — und nichts unterschreiben.</p>
+    </div>
+  </div>
+  <div class="fuss"><span>Claimondo Unfallguide</span><span>6</span></div>
+</section>
+
+<!-- ============ 7 · FRISTEN ============ -->
+<section class="seite">
+  <div class="marke"><span>Kapitel 6</span><span>Fristen</span></div>
+  <div class="inhalt">
+    <p class="kapitel">Kapitel 6</p>
+    <h2>Wann die Zeit gegen Sie arbeitet</h2>
+    <p class="lead" style="margin-bottom:10mm">
+      Zeit arbeitet nach einem Unfall selten für Sie. Diese vier Marken sollten
+      Sie kennen.
+    </p>
+
+    <svg viewBox="0 0 620 210" style="width:100%;height:auto">
+      <line x1="30" y1="52" x2="590" y2="52" stroke="#DCE3ED" stroke-width="1"/>
+
+      <circle cx="30" cy="52" r="4" fill="#0D1B3E"/>
+      <text x="30" y="38" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="1.4" fill="#4573A2">TAG 0</text>
+      <text x="30" y="78" font-family="Georgia,serif" font-size="14" fill="#0D1B3E">Unfall</text>
+      <text x="30" y="95" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">Beweise sichern, Arzt</text>
+      <text x="30" y="108" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">aufsuchen, Gutachter</text>
+      <text x="30" y="121" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">beauftragen.</text>
+
+      <circle cx="196" cy="52" r="4" fill="#4573A2"/>
+      <text x="196" y="38" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="1.4" fill="#4573A2">NACH 4 WOCHEN</text>
+      <text x="196" y="78" font-family="Georgia,serif" font-size="14" fill="#0D1B3E">Verzug</text>
+      <text x="196" y="95" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">Die Prüfzeit ist um.</text>
+      <text x="196" y="108" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">Ab jetzt laufen Zinsen,</text>
+      <text x="196" y="121" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">und Anwaltskosten sind</text>
+      <text x="196" y="134" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">erstattungsfähig.</text>
+
+      <circle cx="378" cy="52" r="4" fill="#7BA3CC"/>
+      <text x="378" y="38" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="1.4" fill="#4573A2">NACH 3 JAHREN</text>
+      <text x="378" y="78" font-family="Georgia,serif" font-size="14" fill="#0D1B3E">Verjährung</text>
+      <text x="378" y="95" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">Sachschäden verfallen</text>
+      <text x="378" y="108" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">zum Jahresende des</text>
+      <text x="378" y="121" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">dritten Jahres.</text>
+
+      <circle cx="545" cy="52" r="4" fill="#B08348"/>
+      <text x="545" y="38" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="1.4" fill="#B08348">BIS 30 JAHRE</text>
+      <text x="545" y="78" font-family="Georgia,serif" font-size="14" fill="#0D1B3E">Spätfolgen</text>
+      <text x="545" y="95" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">Bei Personenschäden</text>
+      <text x="545" y="108" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">deutlich länger — sofern</text>
+      <text x="545" y="121" font-family="Segoe UI,sans-serif" font-size="8.5" fill="#616C82">nichts abgefunden wurde.</text>
+    </svg>
+
+    <div class="abstand"></div>
+    <p style="max-width:150mm">
+      <strong>Die vier Wochen sind die wichtigste Marke.</strong> Solange die
+      Versicherung prüft, ist Warten normal. Danach befindet sie sich im Verzug —
+      und ab diesem Punkt kostet Verzögerung sie Geld statt Sie Nerven. Wer das
+      weiß, verhandelt anders.
+    </p>
+
+    <div class="merk">
+      <span class="k">Vorsicht bei Abfindungen</span>
+      <p class="s">Eine Abfindungserklärung beendet den Fall endgültig. Nackenbeschwerden
+      zeigen sich oft erst Wochen später — ohne ausdrücklichen Vorbehalt sind sie
+      dann mit abgegolten.</p>
+    </div>
+  </div>
+  <div class="fuss"><span>Claimondo Unfallguide</span><span>7</span></div>
+</section>
+
+<!-- ============ 8 · CLAIMONDO ============ -->
+<section class="seite schluss">
+  <div class="marke"><span>Claimondo</span><span>Kostenlos für Sie</span></div>
+
+  <div style="padding-top:16mm">
+    <div class="titel-strich"></div>
+    <h2>Ab hier<br>übernehmen wir.</h2>
+    <p style="margin-top:5mm">
+      Claimondo übernimmt die Abwicklung: unabhängiger Gutachter, Werkstatt Ihrer
+      Wahl, Anwalt bei Bedarf. Sie melden den Schaden — den Rest koordinieren wir.
+    </p>
+
+    <div class="schritte">
+      <div class="schritt">
+        <span class="n">01</span>
+        <span class="t">Schaden melden — online in wenigen Minuten, von zu Hause aus.</span>
+      </div>
+      <div class="schritt">
+        <span class="n">02</span>
+        <span class="t">Gutachter und Werkstatt aussuchen. Termine buchen Sie selbst.</span>
+      </div>
+      <div class="schritt">
+        <span class="n">03</span>
+        <span class="t">Wir koordinieren die Abwicklung mit der gegnerischen Versicherung.</span>
+      </div>
+    </div>
+
+    <div class="kosten-note">
+      <p class="s">Für Sie ist das kostenlos. Bei einem unverschuldeten Unfall trägt
+      die gegnerische Versicherung sowohl das Gutachten als auch unsere Leistung.</p>
+      <p class="u">Claimondo verdient nie am Kunden. Bei Kasko- oder selbstverschuldeten
+      Schäden sagen wir Ihnen vorher, was auf Sie zukommt.</p>
+    </div>
+
+    <!-- Klickbar im PDF: Playwright uebernimmt <a href> als echten Verweis.
+         Der QR-Code bedient den Papierfall, der Button den Bildschirmfall. -->
+    <div class="handeln">
+      <a class="cta" href="https://claimondo.de/gutachter-finden?utm_source=unfallguide&amp;utm_medium=pdf&amp;utm_campaign=leadmagnet">
+        <span class="cta-t">Gutachter finden</span>
+        <span class="cta-u">claimondo.de — in zwei Minuten, ohne Anruf</span>
+        <span class="cta-p">→</span>
+      </a>
+      <a class="qr" href="https://claimondo.de/gutachter-finden?utm_source=unfallguide&amp;utm_medium=pdf&amp;utm_campaign=leadmagnet">
+        <span class="qr-bild"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" shape-rendering="crispEdges"><path stroke="#FCFDFE" d="M0 0.5h7m1 0h1m3 0h1m1 0h1m1 0h2m1 0h5m1 0h1m2 0h2m1 0h2m1 0h7M0 1.5h1m5 0h1m1 0h4m6 0h1m3 0h3m3 0h3m3 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m2 0h1m1 0h3m2 0h2m1 0h2m1 0h1m1 0h3m3 0h3m1 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m4 0h1m1 0h1m1 0h3m1 0h1m4 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m2 0h3m5 0h1m1 0h1m4 0h6m1 0h1m2 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m2 0h1m1 0h3m1 0h2m1 0h3m3 0h1m1 0h1m1 0h2m1 0h1m2 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h4m5 0h1m5 0h2m3 0h3M0 8.5h1m1 0h2m1 0h3m3 0h1m1 0h1m3 0h5m4 0h1m1 0h4m2 0h1m2 0h1m1 0h2M0 9.5h6m2 0h1m2 0h2m2 0h7m1 0h1m1 0h1m2 0h1m1 0h7m1 0h3M4 10.5h5m2 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h1m4 0h3m7 0h2M1 11.5h1m1 0h1m5 0h4m2 0h2m2 0h2m1 0h5m3 0h1m1 0h3m1 0h1m2 0h1M2 12.5h1m1 0h3m2 0h1m3 0h1m3 0h1m2 0h1m1 0h2m2 0h1m2 0h1m1 0h2m4 0h3M0 13.5h1m1 0h1m1 0h2m1 0h1m5 0h1m3 0h1m2 0h1m3 0h1m2 0h3m1 0h2m1 0h1m2 0h2m1 0h1M0 14.5h3m2 0h9m1 0h1m2 0h3m1 0h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h1m1 0h2M0 15.5h1m2 0h3m1 0h1m7 0h1m2 0h1m2 0h1m5 0h2m1 0h3m1 0h2m1 0h1m1 0h1M0 16.5h2m1 0h2m1 0h3m1 0h4m1 0h1m2 0h1m2 0h5m4 0h2m4 0h1m2 0h2M1 17.5h1m5 0h1m2 0h1m1 0h3m5 0h4m1 0h1m1 0h1m1 0h1m2 0h2m1 0h1m2 0h2M0 18.5h1m2 0h4m2 0h2m1 0h1m1 0h2m2 0h1m3 0h1m4 0h2m7 0h1M0 19.5h1m1 0h1m2 0h1m2 0h1m1 0h1m1 0h1m1 0h2m1 0h3m1 0h1m1 0h2m3 0h2m1 0h1m2 0h2m1 0h2M2 20.5h2m2 0h4m1 0h1m1 0h1m1 0h1m3 0h2m2 0h2m1 0h2m1 0h3m1 0h2m1 0h3M0 21.5h5m2 0h2m2 0h2m2 0h1m3 0h3m1 0h1m1 0h1m2 0h9m2 0h2M1 22.5h1m1 0h1m2 0h1m1 0h2m1 0h1m1 0h1m1 0h3m4 0h4m2 0h3m1 0h2m1 0h1m1 0h3M3 23.5h1m1 0h1m1 0h1m2 0h1m3 0h2m2 0h3m2 0h3m6 0h1m1 0h1m4 0h1M1 24.5h1m1 0h4m1 0h2m3 0h1m1 0h3m1 0h2m2 0h5m1 0h1m1 0h1m6 0h2M0 25.5h6m2 0h4m1 0h3m1 0h1m1 0h1m5 0h4m2 0h2m1 0h1m2 0h2m1 0h1M0 26.5h2m1 0h1m2 0h3m2 0h2m1 0h2m1 0h6m1 0h1m1 0h1m2 0h4m2 0h1m1 0h1m1 0h2M3 27.5h1m3 0h1m1 0h1m1 0h1m1 0h4m1 0h6m2 0h2m2 0h3m2 0h3m2 0h1M0 28.5h2m2 0h6m1 0h1m1 0h3m2 0h1m1 0h3m2 0h1m1 0h1m3 0h3m1 0h3m1 0h2M1 29.5h2m5 0h1m1 0h1m1 0h2m1 0h3m1 0h2m1 0h3m1 0h2m1 0h2m1 0h1M0 30.5h1m2 0h5m7 0h1m3 0h1m1 0h2m1 0h1m2 0h2m3 0h3m2 0h1M4 31.5h1m3 0h3m3 0h1m2 0h3m4 0h1m4 0h3m2 0h2m1 0h3M1 32.5h4m1 0h5m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h1m1 0h7m1 0h1m1 0h1M8 33.5h4m1 0h2m2 0h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m3 0h1m3 0h2m1 0h2M0 34.5h7m1 0h1m1 0h2m1 0h4m1 0h1m1 0h1m2 0h3m2 0h5m1 0h1m1 0h2m1 0h1M0 35.5h1m5 0h1m1 0h1m1 0h6m1 0h1m2 0h1m3 0h4m2 0h3m3 0h1m2 0h1M0 36.5h1m1 0h3m1 0h1m2 0h2m1 0h1m3 0h1m3 0h2m2 0h3m1 0h2m2 0h8M0 37.5h1m1 0h3m1 0h1m1 0h2m5 0h2m2 0h4m1 0h1m1 0h4m1 0h2m3 0h2m2 0h1M0 38.5h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h3m2 0h3m8 0h1m3 0h2M0 39.5h1m5 0h1m2 0h3m1 0h1m1 0h1m1 0h2m1 0h5m3 0h1m3 0h3m1 0h2m1 0h1M0 40.5h7m1 0h4m2 0h2m2 0h1m1 0h4m1 0h1m1 0h1m2 0h4m3 0h1m1 0h1"/></svg></span>
+        <span class="qr-t">Kamera<br>drauf halten</span>
+      </a>
+    </div>
+
+    <a class="tel" href="tel:+4915153608515">
+      <span class="tel-k">Lieber sprechen?</span>
+      <span class="tel-n">0151 5360 8515</span>
+    </a>
+  </div>
+
+  <div>
+    <div class="berater">
+      <div class="berater-bild"></div>
+      <div class="berater-text">
+        <span class="k">Ihr Rückruf</span>
+        <p class="s">Ein Mensch, kein Formular. Wir melden uns telefonisch und klären
+        Ihre Fragen — kostenlos und unverbindlich.</p>
+      </div>
+    </div>
+
+    <p style="font-size:7.6pt;color:rgba(252,253,254,0.5);line-height:1.55;max-width:150mm;margin-top:7mm">
+      Dieser Leitfaden ersetzt keine Rechtsberatung im Einzelfall. Die genannten
+      Beträge sind typische Spannen aus der Praxis und keine Zusicherung. Stand 2026.
+    </p>
+  </div>
+
+  <div class="fuss"><span>claimondo.de</span><span>8</span></div>
+</section>
+
+</body>
+</html>
