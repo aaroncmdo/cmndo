@@ -2737,7 +2737,8 @@
     "unfall_zeitfenster",
     "gutachten_status",
     "telefon_ziffern",
-    "auswertung_unverbindlich"
+    "auswertung_unverbindlich",
+    "oppref"
    ]
   },
   "levelup_anreicherung": {
