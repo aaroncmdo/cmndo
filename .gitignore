@@ -123,6 +123,8 @@ docs/**/smoke-screenshots-authd/
 !.claude/skills/regel4-smoke/
 !.claude/skills/journey-verifikation/
 !.claude/skills/release-drain/
+# 2026-09-05: Pflicht-Skill zu Regel 6 (Soll-Blatt vor dem Bau). Echte Dateien, kein Symlink.
+!.claude/skills/operatives-soll/
 
 # 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
 docs/PICS-private/
