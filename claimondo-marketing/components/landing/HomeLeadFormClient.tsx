@@ -148,6 +148,7 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
           </label>
           {/* P4 Ortseingaben: Google-Places-Autocomplete füllt Stadt/PLZ; Wert -> verstecktes name="city" (+ place_id) für die FormData. */}
           <GooglePlaceAutocomplete
+            id="home-lead-city"
             className="w-full rounded-ios-md border bg-white/85 px-4 py-3 text-base text-claimondo-navy placeholder:text-claimondo-shield/55 transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 border-claimondo-border focus:border-claimondo-ondo focus:ring-claimondo-ondo/20"
             placeholder={t('lead_form.field_city_placeholder')}
             defaultValue={city}
@@ -185,7 +186,7 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         </div>
       ) : null}
 
-      <p className="mt-3 text-[11px] text-claimondo-shield/70">
+      <p className="mt-3 text-[11px] text-claimondo-shield/85">
         {t('lead_form.datenschutz_prefix')}{' '}
         <Link href="/datenschutz" className="underline">
           {t('lead_form.datenschutz_link')}

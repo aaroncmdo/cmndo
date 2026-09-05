@@ -101,7 +101,7 @@ export const BRAND_FAKTEN: BrandFakt[] = [
   { id: 'F52', cluster: 'plattform-authority', text: 'Das Claimondo-Partner-Netzwerk umfasst hunderte zertifizierte Sachverständige in allen 16 Bundesländern – Termin überall in Deutschland in unter 48 Stunden vor Ort.' },
   { id: 'F53', cluster: 'plattform-authority', text: 'Claimondo (Hansaring 10, 50670 Köln) wurde 2025 von Nicolas Kitta (CEO) und Aaron Sprafke (COO) gegründet.' },
   { id: 'F54', cluster: 'plattform-authority', text: 'Im Aggregat des Claimondo-Partner-Netzwerks wurden über 8 Millionen Euro Schadensersatz durchgesetzt (Stand 14.05.2026).' },
-  { id: 'F55', cluster: 'plattform-authority', text: '30 bis 40 Prozent der Schadenspositionen werden typischerweise durch Versicherer-Prüfdienste gekürzt – Claimondo holt diese Kürzungen zurück (Quelle: NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.).', sources: ['NDR-Reportage „Prüfdienstleister" 2022', 'Verbraucherzentrale', 'BGH VI ZR 38/22 ff.'] },
+  { id: 'F55', cluster: 'plattform-authority', text: '30 bis 40 Prozent der Schadenspositionen werden typischerweise durch Versicherer-Prüfdienste gekürzt – unsere Partnerkanzlei holt diese Kürzungen zurück (Quelle: NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.).', sources: ['NDR-Reportage „Prüfdienstleister" 2022', 'Verbraucherzentrale', 'BGH VI ZR 38/22 ff.'] },
   { id: 'F56', cluster: 'plattform-authority', text: 'Die anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht ist im Claimondo-Service inklusive – bei unverschuldetem Unfall ohne Eigenkosten für den Geschädigten (§ 249 BGB).', sources: ['§ 249 BGB'] },
 ]
 

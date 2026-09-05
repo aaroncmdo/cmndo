@@ -41,6 +41,7 @@ export type PlaceResult = {
 const ENTPRELLUNG_MS = 320
 
 export default function GooglePlaceAutocomplete({
+  id,
   defaultValue,
   types,
   placeholder,
@@ -55,6 +56,8 @@ export default function GooglePlaceAutocomplete({
   /** AAR-956: Autocomplete-Typ. Default ['address'] (Mapbox); ['establishment'] = Google-Business-Suche. */
   types?: string[]
   placeholder?: string
+  /** Design-Aufnahme 05.09.2026: id fuer <label htmlFor> — vorher hatte das Ortsfeld keinen zugeordneten Namen. */
+  id?: string
   onSelect: (result: PlaceResult) => void
   onBlur?: (currentValue: string) => void
   onChange?: (currentValue: string) => void
@@ -197,6 +200,7 @@ export default function GooglePlaceAutocomplete({
   return (
     <div className="relative">
       <input
+        id={id}
         ref={inputRef}
         type="text"
         value={value}

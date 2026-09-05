@@ -8,7 +8,7 @@ export function ReportButton({ commentId, isLoggedIn }: { commentId: string; isL
   const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
 
-  if (done) return <span className="shrink-0 text-[0.7rem] text-claimondo-shield/60">Gemeldet – danke.</span>
+  if (done) return <span className="shrink-0 text-[0.7rem] text-claimondo-shield/75">Gemeldet – danke.</span>
 
   return (
     <span className="shrink-0 text-[0.7rem]">

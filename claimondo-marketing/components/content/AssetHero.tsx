@@ -46,7 +46,7 @@ export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastM
           ))}
         </ul>
       )}
-      <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[0.8125rem] text-claimondo-shield/60">
+      <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[0.8125rem] text-claimondo-shield/75">
         {dateValid && (
           <>
             <time dateTime={lastModified.toISOString().slice(0, 10)}>

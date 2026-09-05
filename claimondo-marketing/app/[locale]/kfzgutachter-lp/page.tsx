@@ -282,7 +282,7 @@ const WAS_WIR: { titel: string; text: string }[] = [
     text: 'Sobald das Gutachten erstellt ist, übernimmt unsere Partnerkanzlei die Kommunikation mit der gegnerischen Versicherung – vollständig und in Ihrem Namen.',
   },
   {
-    titel: 'Wir setzen alle Ansprüche durch',
+    titel: 'Unsere Partnerkanzlei setzt alle Ansprüche durch',
     text: 'Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld – auch wenn die Versicherung kürzt. Kürzungen holt unsere Kanzlei BGH-konform zurück.',
   },
   {
@@ -542,7 +542,7 @@ function NrwStandorte() {
           ))}
         </ol>
 
-        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/60 sm:mt-7">
+        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/75 sm:mt-7">
           Ø 32 Tage und 100+ Sachverständige: aggregierte Auswertung aller über
           das Claimondo-Partner-Netzwerk vermittelten Fälle. Stand 05/2026.
         </p>

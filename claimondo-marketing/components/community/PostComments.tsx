@@ -156,7 +156,7 @@ function CommentItem({
             <span className="text-xs font-semibold text-claimondo-navy">{comment.authorDisplay}</span>
             {comment.rang && <PartnerRangPille tier={comment.rang} />}
           </span>
-          <span className="shrink-0 text-[0.65rem] text-claimondo-shield/50">
+          <span className="shrink-0 text-[0.65rem] text-claimondo-shield/75">
             {new Date(comment.createdAt).toLocaleDateString('de-DE')}
           </span>
         </div>
@@ -168,19 +168,19 @@ function CommentItem({
             <button
               type="button"
               onClick={() => setShowReply(true)}
-              className="text-[0.7rem] text-claimondo-shield/60 underline-offset-2 hover:text-claimondo-shield hover:underline"
+              className="text-[0.7rem] text-claimondo-shield/75 underline-offset-2 hover:text-claimondo-shield hover:underline"
             >
               Antworten
             </button>
           )}
           {reported ? (
-            <span className="text-[0.7rem] text-claimondo-shield/50">Gemeldet – danke.</span>
+            <span className="text-[0.7rem] text-claimondo-shield/75">Gemeldet – danke.</span>
           ) : (
             <button
               type="button"
               onClick={reportItem}
               disabled={pending}
-              className="text-[0.7rem] text-claimondo-shield/50 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
+              className="text-[0.7rem] text-claimondo-shield/75 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
             >
               Melden
             </button>
@@ -226,7 +226,7 @@ function CommentItem({
                   <span className="text-xs font-semibold text-claimondo-navy">{r.authorDisplay}</span>
                   {r.rang && <PartnerRangPille tier={r.rang} />}
                 </span>
-                <span className="shrink-0 text-[0.65rem] text-claimondo-shield/50">
+                <span className="shrink-0 text-[0.65rem] text-claimondo-shield/75">
                   {new Date(r.createdAt).toLocaleDateString('de-DE')}
                 </span>
               </div>
@@ -311,7 +311,7 @@ export function PostComments({
             placeholder="Kommentar schreiben …"
             className={input}
           />
-          <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/60">
+          <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/75">
             Dein Kommentar erscheint <span className="font-medium">öffentlich</span> in der Community.
           </p>
           {error && <p className="text-[0.75rem] text-danger-strong">{error}</p>}
@@ -323,7 +323,7 @@ export function PostComments({
 
       {/* Thread */}
       {top.length === 0 ? (
-        <p className="text-xs text-claimondo-shield/60">Noch keine Kommentare – schreib den ersten.</p>
+        <p className="text-xs text-claimondo-shield/75">Noch keine Kommentare – schreib den ersten.</p>
       ) : (
         <ul className="space-y-2">
           {top.map((c) => (

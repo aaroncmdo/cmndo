@@ -63,7 +63,7 @@ export async function VerfuegbarkeitStreifen() {
           <a
             key={t.stadt}
             href={t.buchungsUrl}
-            className="text-body-sm text-claimondo-navy transition-colors hover:text-claimondo-ondo"
+            className="inline-block py-1 text-body-sm text-claimondo-navy transition-colors hover:text-claimondo-ondo"
           >
             {/* EIN Textknoten, und MIT Uhrzeit — siehe Kopfkommentar. Die drei frueheren
                 <span>-Fragmente zerfielen beim Text-Strippen, und ohne Zeit ist „Freitag,

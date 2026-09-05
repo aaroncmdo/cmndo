@@ -188,7 +188,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
                   <p className="text-[0.9375rem] leading-relaxed text-claimondo-shield">{detail.sentiment.davForsa}</p>
                 </div>
               )}
-              <p className="mt-4 text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/60">
+              <p className="mt-4 text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/75">
                 Häufige Kritikpunkte (dokumentierte Einzelfälle)
               </p>
               <ul className="mt-2 space-y-1.5">
@@ -200,7 +200,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
                 ))}
               </ul>
               {(detail.sentiment.trustpilot || detail.sentiment.google) && (
-                <p className="mt-3 text-xs text-claimondo-shield/60">
+                <p className="mt-3 text-xs text-claimondo-shield/75">
                   Zitierte Drittquellen{detail.sentiment.scoreStand ? ` (Stand ${detail.sentiment.scoreStand})` : ''}:{' '}
                   {detail.sentiment.trustpilot && `Trustpilot ${detail.sentiment.trustpilot.toLocaleString('de-DE')}/5`}
                   {detail.sentiment.trustpilot && detail.sentiment.google && ' · '}

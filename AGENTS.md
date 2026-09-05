@@ -1,7 +1,7 @@
 <!-- BEGIN:claimondo-hard-rules -->
 # Harte Regeln (Niemals brechen)
 
-Diese drei Regeln sind nicht verhandelbar. Jede Session, jeder Commit, jede Migration muss sie einhalten. Sie entstanden aus konkreten Incidents — siehe Session-Referenzen.
+Diese Regeln sind nicht verhandelbar. Jede Session, jeder Commit, jede Migration muss sie einhalten. Sie entstanden aus konkreten Incidents — siehe Session-Referenzen.
 
 ## Regel 1 — Nie direkt auf `main` pushen
 
@@ -111,6 +111,49 @@ Begründung „Soll zuerst" (Schritt 1, Aaron-Regel 27.07., verankert 11.08.): E
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
+## Regel 5 — Kein Abschluss ohne Arbeitsabnahme und Bericht an Aaron
+
+Jede Aufgabe, die Aaron einer Session gibt, endet mit einer **Arbeitsabnahme**: Die Session schreibt einen **Abnahmebericht**, Aaron bekommt ihn (Link im Chat, bei PRs zusätzlich im PR-Body), und die **Abnahme-Entscheidung liegt bei Aaron**. „Fertig" ist eine Aufgabe erst mit vorliegendem Bericht — nicht mit grünem Build, offenem PR oder Merge.
+
+**Die Abnahme prüft das Ziel, nicht die Task-Liste.** Drei Fragen, ehrlich beantwortet:
+
+1. **Ist erreicht, was Aaron ursprünglich wollte?** Gegen seine Formulierung am Anfang prüfen, nicht gegen den Plan, der daraus wurde. Wo der Plan das Ziel verengt, verschoben oder in spätere Phasen geschnitten hat, steht das ausdrücklich im Bericht.
+2. **Funktioniert es für den Nutzerstrom?** Der ganze Weg über alle Eingänge und Rollen (Kunde, Werkstatt, Dispatch, SV, Admin) auf der deployten Umgebung — nicht nur die neue Funktion im Unit-Test. Regel 4 liefert diesen Nachweis; ohne ihn ist die Abnahme „offen", nie „erledigt".
+3. **Was wurde gemacht, und wie?** Die **Herangehensweise** (Methode, Reihenfolge, Werkzeuge, wer/welches Modell was getan hat, warum so) und die **Schritte** lückenlos und nachvollziehbar: Änderungen, Migrationen, Entscheidungen unterwegs, gefundene und behobene Fehler — auch die eigenen.
+
+**Strukturell, auf allen Seiten, end-to-end (Aaron 05.09.2026).** Die Abnahme prüft nie die neue Funktion isoliert, sondern den ganzen Lauf über alle Seiten, Portale und Rollen und über alle Eingänge — als **Matrix Eingänge × Rollen** — bis zum **Folgezustand in der Datenbank und in der Nachbar-Sicht** (was sehen Werkstatt, Dispatcher, Sachverständiger und Kunde danach?). Ausdrücklich auch die Eingänge, an denen der Zustand schon **vorbelegt** ankommt: der Dispatcher legt an, ein Webhook oder die API schreibt, der Kunde kommt über einen alten Link zurück (Re-Visit). Auslöser war Aarons Frage, ob die Kasko-Tariffrage auch greift, wenn ein Kunde „anders" in den FlowLink kommt als über die Quali. Die Matrix ist Pflichtabschnitt 6 in `memory/abnahmen/_VORLAGE.md`.
+
+**Pflichtinhalt des Berichts** (in dieser Reihenfolge):
+
+```
+1. Auftrag            — Aarons Worte + seine Entscheidungen unterwegs
+2. Herangehensweise   — wie vorgegangen wurde und warum (Methode, Reihenfolge, Werkzeuge,
+                        Delegation/Modelle, Prüfprinzipien) + Pflichtfeld „Skills je Bereich"
+                        (Tabelle: Bereich · Skill · warum · bewusst NICHT benutzt, obwohl passend)
+3. Schritte           — chronologisch, jeder Schritt mit Ergebnis und Beleg (Commit, Migration,
+                        Messung, Review)
+4. Ziel erreicht?     — je Teilziel aus Aarons Auftrag: erreicht / teilweise / offen, mit Grund
+5. Geliefert          — je Baustein mit dem Nachweis, WIE geprüft („verdrahtet" ≠ „gelaufen")
+6. Nachweise          — tsc, Tests, Build, Ratchets, CI, Migrationen (Version + Datei), Review,
+                        Regel-4-Smoke als Soll → Ist; Zahlen immer mit Quelle
+7. Abweichungen       — vom Plan/Spec, jede mit Grund; Fehler, die im Plan/Spec selbst steckten
+8. Offen              — nicht geliefert und warum, Follow-ups, Risiken
+9. Abnahmekriterien   — Checkliste, die Aaron selbst klicken kann (operatives Soll)
+10. Entscheidung      — Feld für Aaron: abgenommen / mit Auflagen / abgelehnt, Datum
+```
+
+**Form und Zeitpunkt:** HTML-Artefakt (Link) plus Kurzfassung im Chat. Erstfassung beim Öffnen des PR, Aktualisierung nach dem Regel-4-Smoke. Aufgaben ohne PR (Audits, Analysen, Ops-Arbeit) bekommen den Bericht beim Abschluss.
+
+**Ablage — der eine Ort für alle Abnahmen:** `memory/abnahmen/<YYYY-MM-DD>-<slug>.md` nach `memory/abnahmen/_VORLAGE.md` (Abschnitte 1–11 füllt die ausführende Session, 12 die Abnahme-Session, 13 Aaron) plus eine Zeile im `memory/abnahmen/INDEX.md`, Status `zur Abnahme`. Bewusst außerhalb des Repos (öffentlich) und außerhalb jedes Branches. Die Abnahme-Session (Aaron-Mandat 04.09., `memory/FEEDBACK-abnahme-instanz-mandat-aaron.md`) prüft dort unabhängig gegen Originalziel, Nutzerstrom anonym und angemeldet, Herangehensweise und Skills — Bereiche mit angegebenem Skill wiederholt sie mit demselben Skill, fehlende Skills holt sie nach — und setzt Fehlendes um.
+
+**Verboten:**
+* Abschlussmeldung ohne Bericht; Bericht nur im Terminal-Scrollback.
+* „erledigt" für etwas, das gebaut, aber nicht auf der deployten Umgebung durch den Nutzerstrom gelaufen ist.
+* Nachweise, die aus dem Code gelesen statt gemessen wurden; Zahlen ohne Quelle.
+* Das ursprüngliche Ziel stillschweigend durch den Plan ersetzen.
+
+Begründung: Aaron 04.09.2026 (Werkstattbindung Phase 1, PR #5857). Abschlussmeldungen lasen sich wiederholt wie „fertig", während offen war, ob das ursprüngliche Ziel erreicht und der Nutzerstrom wirklich gelaufen war (vgl. Regel 4 und den Kundenfluss-Audit vom 30.08.: vier eigene Fehlbefunde, zweimal das Werkzeug statt des Produkts gemessen). Ein Bericht, der die drei Fragen beantworten muss, macht die Lücke zwischen „gebaut" und „funktioniert" sichtbar, bevor Aaron sie im Betrieb findet — und gibt ihm die Entscheidung zurück, statt sie der Session zu überlassen.
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.

@@ -121,13 +121,13 @@ export default function Page() {
                     <p className="mt-1 text-sm text-claimondo-shield/70">{v.base.mutterkonzern}</p>
                     <dl className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
                       <div>
-                        <dt className="text-claimondo-shield/60">Marktanteil</dt>
+                        <dt className="text-claimondo-shield/75">Marktanteil</dt>
                         <dd className="font-bold text-claimondo-navy">
                           ca. {v.base.marktanteilPct.toLocaleString('de-DE')} %
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-claimondo-shield/60">BaFin-Quote 2024</dt>
+                        <dt className="text-claimondo-shield/75">BaFin-Quote 2024</dt>
                         <dd
                           className={`inline-flex items-center gap-1 font-bold ${
                             ueberSchnitt ? 'text-red-600' : 'text-claimondo-navy'

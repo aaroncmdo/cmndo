@@ -65,7 +65,7 @@ export function KontaktwegeBox({
           <div className="flex items-start gap-2.5">
             <Phone className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
             <div>
-              <dt className="text-claimondo-shield/60">Schaden-Hotline (24/7)</dt>
+              <dt className="text-claimondo-shield/75">Schaden-Hotline (24/7)</dt>
               <dd>
                 <a href={telHref(hotline247)} className="font-semibold text-claimondo-navy hover:underline">
                   {hotline247}
@@ -78,7 +78,7 @@ export function KontaktwegeBox({
           <div className="flex items-start gap-2.5">
             <Phone className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
             <div>
-              <dt className="text-claimondo-shield/60">Aus dem Ausland</dt>
+              <dt className="text-claimondo-shield/75">Aus dem Ausland</dt>
               <dd>
                 <a href={telHref(hotlineAusland)} className="font-semibold text-claimondo-navy hover:underline">
                   {hotlineAusland}
@@ -90,7 +90,7 @@ export function KontaktwegeBox({
         <div className="flex items-start gap-2.5">
           <Globe className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
           <div>
-            <dt className="text-claimondo-shield/60">Online-Schadensmeldung</dt>
+            <dt className="text-claimondo-shield/75">Online-Schadensmeldung</dt>
             <dd>
               <a
                 href={schadenUrl}
@@ -107,7 +107,7 @@ export function KontaktwegeBox({
           <div className="flex items-start gap-2.5">
             <Mail className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
             <div>
-              <dt className="text-claimondo-shield/60">E-Mail</dt>
+              <dt className="text-claimondo-shield/75">E-Mail</dt>
               <dd>
                 <a href={`mailto:${email}`} className="font-semibold text-claimondo-navy hover:underline">
                   {email}
@@ -119,7 +119,7 @@ export function KontaktwegeBox({
         <div className="flex items-start gap-2.5">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
           <div>
-            <dt className="text-claimondo-shield/60">Postanschrift Schaden</dt>
+            <dt className="text-claimondo-shield/75">Postanschrift Schaden</dt>
             <dd className="font-medium text-claimondo-navy">{postanschrift}</dd>
           </div>
         </div>

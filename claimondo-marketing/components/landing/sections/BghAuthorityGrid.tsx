@@ -44,7 +44,7 @@ export function BghAuthorityGrid({
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
             Höchstrichterliche Rechtsprechung von 1992 bis 2025 – Werkstattrisiko, UPE,
             Beilackierung, Wertminderung und 130%-Regel sind seit Jahren BGH-fest.
-            {subline ?? ' Versicherer kürzen trotzdem. Wir holen es zurück.'}
+            {subline ?? ' Versicherer kürzen trotzdem. Unsere Partnerkanzlei holt es zurück.'}
           </p>
         </div>
         <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">

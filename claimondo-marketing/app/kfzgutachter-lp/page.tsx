@@ -284,7 +284,7 @@ const WAS_WIR: { titel: string; text: string }[] = [
     text: 'Sobald das Gutachten erstellt ist, übernimmt unsere Partnerkanzlei die Kommunikation mit der gegnerischen Versicherung – vollständig und in Ihrem Namen.',
   },
   {
-    titel: 'Wir setzen alle Ansprüche durch',
+    titel: 'Unsere Partnerkanzlei setzt alle Ansprüche durch',
     text: 'Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld – auch wenn die Versicherung kürzt. Kürzungen holt unsere Kanzlei BGH-konform zurück.',
   },
   {
@@ -444,7 +444,7 @@ const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; ic
     schritt: 2,
     titel: 'Geld auf dem Konto',
     wert: 'Ø 32 Tage',
-    sub: 'Reparatur, Wertminderung, Nutzungsausfall – wir verhandeln, die Gegenseite zahlt.',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall – unsere Partnerkanzlei verhandelt, die Gegenseite zahlt.',
     icon: 'euro',
   },
   {
@@ -524,7 +524,7 @@ function NrwStandorte() {
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-claimondo-light-blue/12 text-claimondo-ondo">
                   <NrwStepIcon kind={s.icon} />
                 </span>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-claimondo-ondo/70">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-claimondo-shield">
                   Schritt {s.schritt}
                 </span>
               </div>
@@ -544,7 +544,7 @@ function NrwStandorte() {
           ))}
         </ol>
 
-        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/60 sm:mt-7">
+        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/75 sm:mt-7">
           Ø 32 Tage und 100+ Sachverständige: aggregierte Auswertung aller über
           das Claimondo-Partner-Netzwerk vermittelten Fälle. Stand 05/2026.
         </p>
