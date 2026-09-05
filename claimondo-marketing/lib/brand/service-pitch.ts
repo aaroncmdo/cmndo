@@ -58,7 +58,7 @@ export const SERVICE_REALITY_BULLETS: ServiceRealityBullet[] = [
   { label: 'Ihr Fall. Immer in der Tasche.', Icon: Smartphone },
   { label: 'Ein Berater. Eine Nummer. Immer dieselbe.', Icon: User },
   { label: 'Sie sehen jeden Brief, jeden Anruf, jeden Cent.', Icon: FileText },
-  { label: '32 Tage statt 4 Monate. Im Schnitt.', Icon: Clock },
+  { label: 'Termin in unter 48 Stunden. Der Gutachter kommt zu Ihnen.', Icon: Clock },
   { label: '0 € für Sie. (§ 249 BGB).', Icon: Wallet },
 ]
 
@@ -95,9 +95,9 @@ export const SERVICE_REALITY_CARDS_DETAILED: ServiceRealityCard[] = [
     body: 'Null Papier. Für uns nicht, für Sie nicht. Was anderswo ein Briefumschlag ist, ist bei uns ein Tap.',
   },
   {
-    label: '32 Tage statt 4 Monate.',
+    label: 'Termin in unter 48 Stunden.',
     Icon: Clock,
-    body: 'Branchen-Durchschnitt: 4–6 Monate. Bei uns: 32 Tage. Weil disponiert statt vermittelt – und alles digital.',
+    body: 'Der Gutachter kommt zu Ihnen, nicht Sie zu ihm. Danach läuft die Regulierung im Schnitt in 32 Tagen (Stand 14.05.2026) – jeden Schritt sehen Sie in Ihrer Fallakte.',
   },
 ]
 

@@ -78,7 +78,7 @@ export default async function SchadenMeldenPage({
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-balance text-base text-claimondo-ondo sm:text-lg">
             Drei kurze Fragen, dann kommt Ihr sicherer Link per WhatsApp oder E-Mail.
-            Den Gutachter-Termin und die Vollmacht erledigen Sie direkt dort, den Rest übernehmen wir.
+            Dort wählen Sie den Gutachter-Termin und unterschreiben die Vollmacht – alles Weitere koordinieren wir.
           </p>
         </div>
       </section>
@@ -97,8 +97,7 @@ export default async function SchadenMeldenPage({
         <div className="mx-auto max-w-2xl px-4 sm:px-6">
           <div className="flex flex-col items-center gap-3 rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
             <p className="text-sm text-claimondo-shield">
-              Keine Zeit für das Formular? Lassen Sie sich von einem Berater zurückrufen,
-              meist innerhalb von 15 Minuten.
+              Keine Zeit für das Formular? Ein Berater ruft Sie zurück, meist in 15 Minuten.
             </p>
             <BeratungVereinbarenButton quelle={rueckrufQuelle} label="Rückruf anfordern" />
           </div>
