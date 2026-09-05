@@ -11,6 +11,65 @@ Begründung: Session vom 19.04.2026 — Commits `572cbea` (AAR-582) und `65a876b
 
 Bei Unfall: `git revert` + neuer Branch + PR.
 
+### 1a — Merge nach `staging`: die Lane darf selbst, unter fünf Bedingungen
+
+**Aaron 05.09.2026:** „von mir aus können die das weiter nach staging mergen. Das ist für mich kein
+Thema, aber wir müssen halt gucken, dass auf gar keinen Fall irgendwelche Trampeleien passieren."
+
+Eine Lane merged ihren eigenen PR nach `staging` — sie muss **nicht** auf die Drain-Session warten.
+Damit entfällt aber deren Gate 1 als Serialisierungspunkt: vorher merged genau ein Akteur nach
+`staging`, jetzt mehrere gleichzeitig. Die folgenden fünf Bedingungen ersetzen, was dieser eine
+Akteur vorher garantiert hat. Sie sind nicht optional.
+
+**L1 — Base ist `staging`, niemals `main`.** Ein PR mit Base `main` zieht beim Merge die bewusst
+divergente Release-Historie nach `staging` und kann dort Arbeit zurückdrehen. (Klasse belegt:
+`BROADCAST-pr-base-von-main-statt-staging`.)
+
+**L2 — `build` und `vitest` grün auf dem Kopf, der wirklich gemergt wird**, PR non-draft. Nicht auf
+einem älteren Commit derselben PR.
+
+**L3 — `staging` wird nie force-gepusht, nie rewritten.** Eine Drain-Runde liest den `staging`-Tree,
+öffnet einen Release-PR und merged ihn ~10 Minuten später. Wird `staging` dazwischen umgeschrieben,
+transportiert die Runde etwas, das niemand geprüft hat.
+
+**L4 — Migration per MCP appliziert? Dann liegt das File im SELBEN PR.** Regel 2 Schritt 4, ohne
+Aufschub. Das ist die teuerste Trampel-Achse überhaupt: die DDL wirkt sofort auf der **gemeinsamen**
+prod-Datenbank, während das File fehlt — jeder Preview-Replay und jedes `db reset` jeder anderen
+Lane erbt dann einen Stand, den kein Repo herstellen kann. Am 05.09. binnen 40 Minuten zweimal
+passiert (`20260905185823`, `20260905185921`); gefunden hat es nicht die CI, sondern erst der Drain.
+
+**L5 — Regel 4 bleibt bei der Lane.** Der Drain beweist den Transport, nicht das Feature. Wer merged,
+schuldet weiterhin den Prod-Nachweis der eigenen Änderung.
+
+### 1b — Was die Drain-Session dafür zusätzlich prüft
+
+Weil mehrere Lanes gleichzeitig nach `staging` mergen, gilt vor **jeder** Runde:
+
+**D1 — CI-Erfolg auf genau dem `staging`-Kopf, der transportiert wird** — nicht „neulich grün". Zwei
+PRs, je einzeln grün, können in ihrer **Kombination** rot sein; diese Kombination existiert erst nach
+dem zweiten Merge.
+
+**D2 — `staging`-SHA bei Rundenbeginn protokollieren, vor dem Merge prüfen, dass er noch Vorfahr von
+`origin/staging` ist** (`git merge-base --is-ancestor`). Schlägt das fehl, wurde `staging`
+umgeschrieben (L3 verletzt) → Runde abbrechen, nicht mergen.
+
+**D3 — Kollisionsprobe, und jede Löschung bis zum verursachenden PR zurückverfolgen.**
+`git diff --name-only --diff-filter=D origin/main origin/staging` muss leer sein — oder jede Zeile
+darin ist als Absicht der besitzenden Lane belegt, samt Nachweis, dass nichts mehr darauf verweist.
+(Erstmals angeschlagen in R470: `docs/unfallguide/hero.jpeg`, gewollt ersetzt durch `titelbild.jpg`.)
+
+**D4 — Migration-File-Parität ist Teil von Gate 2 und blockt die Runde.**
+`npm run check:migration-files -- --ratchet` muss vor dem Reparent `exit 0` liefern. Eine neue
+getrackte Migration ohne File im Repo hält die Runde an.
+⚠ Dieses Gate steht **bewusst beim Drain und nicht in der CI**: die Drift entsteht außerhalb eines
+PRs, ein CI-Ratchet würde unbeteiligte Lanes rot färben (Begründung des Autors im ci.yml-Kommentar,
+unverändert gültig). Beim Drain ist der Radius genau eine Runde, und der Drain darf sie selbst
+schließen: Statement aus `schema_migrations.statements` holen, File 1:1 schreiben, **per md5 gegen
+beide `\n`-Varianten** gegenprüfen, committen (Aaron 05.09.: „zieh du einfach die Migration noch
+nach"). Vorbild: Commit `7f9d06a64`.
+
+**D5 — `main` steht beim Merge noch exakt auf dem protokollierten Parent.** Sonst abbrechen.
+
 ## Regel 2 — DDL nur über das Supabase-Plugin (MCP), nie über CLI oder raw SQL
 
 Schema-Änderungen (ADD/DROP/ALTER COLUMN, CREATE/DROP TABLE, CREATE TRIGGER, CREATE FUNCTION, RLS-Policies usw.) ausschließlich über das **Supabase-Plugin** (`mcp__plugin_supabase_supabase__apply_migration`). **Nicht** über die supabase-CLI (`db push`) — die macht in unserem Multi-Worktree-Setup wiederkehrend Auth-/Link-/Drift-Ärger (Worktrees sind nicht linked, kein Token im `.env.local`). Entscheidung Aaron 2026-05-28: **immer das Plugin.**

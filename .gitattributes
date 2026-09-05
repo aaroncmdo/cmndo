@@ -9,3 +9,10 @@
 # "nicht mehr aktuell", obwohl nichts driftet. Am 16.08. reproduziert: ein Pruef-
 # werkzeug, das immer rot ist, wird ignoriert. Deshalb auf LF festgenagelt.
 src/lib/lokalinhalt/staedte-stammdaten.json text eol=lf
+
+# Migrations-SQL immer LF im Arbeitsverzeichnis. Regel 2 Schritt 4 und AGENTS.md 1b/D4 schreiben
+# vor, eine nachgezogene Migration per md5 gegen schema_migrations.statements zu pruefen. Mit
+# autocrlf liefert eine KORREKTE Datei auf Windows eine abweichende Pruefsumme — die Gefahr ist
+# nicht der Fehlalarm, sondern dass jemand daraufhin eine richtige Datei "repariert".
+# Die Blobs im Repo sind ohnehin LF; das hier steuert nur den Checkout.
+*.sql text eol=lf
