@@ -249,14 +249,15 @@ test.afterAll(async () => {
   const { data: leads } = await sb.from('leads').select('id').eq('email', IDENT.email)
   const ids = (leads ?? []).map((l) => (l as { id: string }).id)
   if (ids.length === 0) return
+  // `benachrichtigungen` fehlt hier bewusst: die Zeilen haengen nur ueber den
+  // `link`-String am Lead, ein Match darauf waere unscharf. Sie verschwinden ohnehin
+  // aus der Liste, sobald der Lead weg ist.
   for (const [tabelle, spalte] of [
     ['admin_termine', 'lead_id'],
     ['timeline', 'lead_id'],
     ['flow_links', 'lead_id'],
     ['email_log', 'lead_id'],
-    ['benachrichtigungen', 'link'],
   ] as const) {
-    if (tabelle === 'benachrichtigungen') continue // link-Match ist unsicher, per Hand
     const { error } = await sb.from(tabelle).delete().in(spalte, ids)
     if (error) console.error(`[cleanup] ${tabelle}: ${error.message}`)
   }
