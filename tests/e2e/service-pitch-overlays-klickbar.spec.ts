@@ -109,7 +109,13 @@ test.describe('/check 390x844', () => {
   })
 })
 
+// Breiten aus der Prod-Messung vom 05.09.: das ProvenExpert-Siegel verdeckte Felder auf
+// 768, 1280 und (auf der Stadtseite) 1440; mobil traf es die LP. Seit dem Wechsel auf
+// `pointer-events: none` (globals.css) ist es ueberall sichtbar und faengt keine Klicks —
+// deshalb pruefen wir jetzt die ganze Reihe, nicht nur die zwei Laptop-Klassen.
 for (const vp of [
+  { name: 'mobil 390x844', width: 390, height: 844 },
+  { name: 'tablet 768x1024', width: 768, height: 1024 },
   { name: 'laptop 1280x720', width: 1280, height: 720 },
   { name: 'desktop 1440x900', width: 1440, height: 900 },
 ]) {
