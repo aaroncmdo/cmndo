@@ -434,7 +434,7 @@ export function ScrollPopoverClient({
         <DialogPrimitive.Popup className="fixed left-1/2 top-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-ios-lg border border-white/60 bg-white/95 p-5 shadow-glass-card outline-none backdrop-blur-md duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 sm:max-w-md sm:p-7">
           <DialogPrimitive.Close
             aria-label="Schließen"
-            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/60 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
+            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/75 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
           >
             <X className="h-4 w-4" aria-hidden />
           </DialogPrimitive.Close>
@@ -893,7 +893,7 @@ function StandortStep({
       </label>
       <div className="relative">
         <MapPin
-          className="pointer-events-none absolute left-3 top-[1.1rem] h-4 w-4 -translate-y-1/2 text-claimondo-shield/60"
+          className="pointer-events-none absolute left-3 top-[1.1rem] h-4 w-4 -translate-y-1/2 text-claimondo-shield/75"
           aria-hidden
         />
         <input

@@ -153,7 +153,7 @@ export function WarumCardsClient() {
             type="button"
             onClick={() => setActive(null)}
             aria-label="Schließen"
-            className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/60 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
+            className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/75 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>

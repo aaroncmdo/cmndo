@@ -191,7 +191,7 @@ export default function AblaufPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl font-black text-claimondo-border">{STEP_NRS[i]}</span>
+                    <span className="text-3xl font-black text-claimondo-shield/55">{STEP_NRS[i]}</span>
                     <div>
                       <h2 className="text-xl font-extrabold text-claimondo-navy">{schritt.titel}</h2>
                       <div className="mt-0.5 text-xs font-semibold text-claimondo-ondo">{schritt.dauer}</div>

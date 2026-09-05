@@ -193,7 +193,7 @@ export function CheckFunnelClient() {
             {t('step_of', { current: step + 1, total: QUESTIONS.length })}
           </p>
           <h2 className="mt-2 text-xl font-bold text-claimondo-navy sm:text-2xl">{QUESTIONS[step].label}</h2>
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-3" data-sticky-bar-avoid>
             {QUESTIONS[step].options.map((opt) => (
               <button
                 key={opt.value}

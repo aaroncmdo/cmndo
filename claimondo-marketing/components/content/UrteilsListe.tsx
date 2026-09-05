@@ -44,7 +44,7 @@ export function UrteilsListe({ urteile }: Props) {
               <Scale className="h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
               {u.az}
             </div>
-            <div className="mt-0.5 text-xs text-claimondo-shield/60">
+            <div className="mt-0.5 text-xs text-claimondo-shield/75">
               {u.gericht} · {formatDatum(u.datum)}
             </div>
             <p className="mt-2 text-[0.9375rem] font-semibold text-claimondo-navy">{u.streitthema}</p>

@@ -524,7 +524,7 @@ function NrwStandorte() {
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-claimondo-light-blue/12 text-claimondo-ondo">
                   <NrwStepIcon kind={s.icon} />
                 </span>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-claimondo-ondo/70">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-claimondo-shield">
                   Schritt {s.schritt}
                 </span>
               </div>
@@ -544,7 +544,7 @@ function NrwStandorte() {
           ))}
         </ol>
 
-        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/60 sm:mt-7">
+        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/75 sm:mt-7">
           Ø 32 Tage und 100+ Sachverständige: aggregierte Auswertung aller über
           das Claimondo-Partner-Netzwerk vermittelten Fälle. Stand 05/2026.
         </p>

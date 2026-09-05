@@ -168,7 +168,7 @@ export function FinderSprungPanel({ staedte, ratgeber, labels, termine }: Props)
                 </p>
                 {laender.map((land) => (
                   <div key={land} className="mb-4 last:mb-0">
-                    <p className="mb-1 text-body-xs font-bold uppercase tracking-[0.1em] text-claimondo-shield/50">
+                    <p className="mb-1 text-body-xs font-bold uppercase tracking-[0.1em] text-claimondo-shield/75">
                       {land}
                     </p>
                     <ul>

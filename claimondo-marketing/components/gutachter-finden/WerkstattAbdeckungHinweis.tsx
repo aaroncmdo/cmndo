@@ -52,7 +52,7 @@ export async function WerkstattAbdeckungHinweis({ stadt }: { stadt: string }) {
       {/* EIN Textknoten — sonst setzt React einen `<!-- -->`-Trenner zwischen Satz und
           URL und ein Extraktor kann beides auseinanderreissen. Siehe die ausfuehrliche
           Begruendung in NaechsterTerminHinweis.tsx. */}
-      <p className="mt-3 break-all text-body-xs text-claimondo-shield/60">
+      <p className="mt-3 break-all text-body-xs text-claimondo-shield/75">
         {`Werkstatt-Finder: ${w.finderUrl}`}
       </p>
       <a
