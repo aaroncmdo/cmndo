@@ -117,8 +117,11 @@ test.describe('Kasko E6-Mail: Zustellung durch Resend belegt (Regel-4-Nachweis o
         {
           timeout: 240_000,
           message:
-            'Kein terminaler Zustellstatus. Entweder ist der Resend-Webhook nicht deployed, oder das ' +
-            'Webhook-Ziel im Resend-Dashboard zeigt nicht auf /api/webhooks/resend.',
+            'Kein terminaler Zustellstatus. Drei moegliche Ursachen, in dieser Reihenfolge pruefen: ' +
+            '(1) der Webhook-Code ist noch nicht auf prod deployed; ' +
+            '(2) das Webhook-Ziel im Resend-Dashboard zeigt nicht auf /api/webhooks/resend; ' +
+            '(3) der Endpunkt im Dashboard hat email.delivered/bounced/complained NICHT abonniert. ' +
+            'Belegt ist bisher nur, dass delivered und clicked ankommen (cold_mail_sends).',
         },
       )
       .toBe(true)
