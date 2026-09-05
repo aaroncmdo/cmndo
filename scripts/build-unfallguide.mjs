@@ -12,33 +12,85 @@
  *
  * Die Pruefungen unten sind KEINE Kosmetik - jede faengt einen Fehler, der in
  * der Vorfassung real ausgeliefert wurde:
- *   - Seitenzahl        (die Fassung im Repo hatte 8 statt 4)
+ *   - Seitenzahl        (die Fassung im Repo hatte 8 statt 5)
  *   - Telefon-Links     (der Weg zum Kunden)
  *   - Web-Link          (war nur ueber einen unsichtbaren QR erreichbar)
  *   - Ueberlappungen    (Fuss auf Seite 4 lag uebereinander)
  *   - Fremdschriften    (Stern/Pfeil fielen auf Segoe UI zurueck)
  */
-// @playwright/test, nicht 'playwright': nur ersteres steht in der package.json.
-// Ein Import auf 'playwright' waere eine unlisted dependency und blockt check:knip.
-import { chromium } from '@playwright/test'
+// @playwright/test wird ERST IN bauen() geladen, nicht hier oben. Sonst kann
+// `--check` nicht laufen, ohne dass Playwright installiert ist - und ein Check,
+// der nicht startet, ist kein Check. (Selbst hereingelaufen: der Nachweislauf
+// fuer die Abnahme scheiterte genau daran.)
+// '@playwright/test' und nicht 'playwright': nur ersteres steht in der
+// package.json, ein Import auf 'playwright' waere unlisted und blockt check:knip.
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
-import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 
 const wurzel = join(dirname(fileURLToPath(import.meta.url)), '..')
 const QUELLE = join(wurzel, 'docs/unfallguide/unfallguide.html')
 const ZIEL = join(wurzel, 'claimondo-marketing/public/downloads/claimondo-unfallguide.pdf')
 
 const SOLL = {
-  seiten: 4,
+  seiten: 6,
   telefon: 'tel:+4915153608515',
-  telefonMin: 5,
+  telefonMin: 7,
   webLink: 'claimondo.de/gutachter-finden',
-  maxBytes: 900 * 1024,
+  // Zustellgewicht, keine willkuerliche Zahl: der Guide geht per Link und per
+  // Messenger raus. Bei 4 Seiten waren 900 kB die Grenze; mit 6 Seiten und dem
+  // Titelfoto sind rund 1 MB normal. Reisst es diese Grenze, ist meist ein Bild
+  // unkomprimiert hereingerutscht (so geschehen: PNG statt JPEG -> 2,5 MB).
+  maxBytes: 1200 * 1024,
+}
+
+/**
+ * Jede lokal referenzierte Datei muss existieren. Ohne diese Pruefung wird aus
+ * einem verschobenen Logo still ein leerer Kasten: Chromium rendert ein fehlendes
+ * <img> ohne Fehler, und im fertigen PDF sieht das aus wie Absicht. Der Guide
+ * referenziert die Marke bewusst aus claimondo-marketing/public/, damit er der
+ * Marke folgt — dieser Preis dafuer ist die Pruefung hier.
+ */
+function assetsPruefen() {
+  const html = readFileSync(QUELLE, 'utf8')
+  const refs = [...html.matchAll(/\bsrc="([^"]+)"/g)]
+    .map((m) => m[1])
+    .filter((s) => !/^(https?:|data:|#)/.test(s))
+  const fehlend = refs.filter((r) => !existsSync(join(dirname(QUELLE), r)))
+  if (fehlend.length) {
+    throw new Error(
+      `Referenzierte Datei(en) fehlen — das PDF haette an dieser Stelle ein Loch:\n` +
+        fehlend.map((f) => `  - ${f}`).join('\n'),
+    )
+  }
+  console.log(`Assets   ${refs.length} referenziert, alle vorhanden`)
+
+  // titelbild.jpg ist aus dem Markenbild abgeleitet (PNG -> JPEG, sonst 2,5 MB).
+  // Aendert sich das Original, muss die Ableitung nachgezogen werden — sonst
+  // traegt der Guide still ein veraltetes Titelbild.
+  const herkunft = join(dirname(QUELLE), 'titelbild-quelle.txt')
+  if (existsSync(herkunft)) {
+    const erwartet = /^md5\s*:\s*([0-9a-f]{32})/m.exec(readFileSync(herkunft, 'utf8'))?.[1]
+    const original = join(wurzel, 'claimondo-marketing/public/brand/hero-unfall-frau.png')
+    if (erwartet && existsSync(original)) {
+      const ist = createHash('md5').update(readFileSync(original)).digest('hex')
+      if (ist !== erwartet) {
+        throw new Error(
+          'Das Markenbild brand/hero-unfall-frau.png hat sich geaendert — titelbild.jpg ' +
+            'ist veraltet.\n  neu ableiten und die md5 in titelbild-quelle.txt nachziehen.\n' +
+            `  erwartet ${erwartet}\n  ist      ${ist}`,
+        )
+      }
+      console.log('Titelbild aus dem Markenbild abgeleitet, md5 stimmt')
+    }
+  }
 }
 
 async function bauen() {
   if (!existsSync(QUELLE)) throw new Error(`Quelle fehlt: ${QUELLE}`)
+  assetsPruefen()
+  const { chromium } = await import('@playwright/test')
   const browser = await chromium.launch()
   try {
     const seite = await browser.newPage()

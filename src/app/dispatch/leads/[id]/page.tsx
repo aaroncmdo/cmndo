@@ -17,6 +17,7 @@ import LeadTerminGutachterBanner from './_components/LeadTerminGutachterBanner'
 import { deriveLeadWorkflowState } from './_lib/deriveLeadWorkflowState'
 import LeadWorkflowPanel from './_components/LeadWorkflowPanel'
 import LeadNachrichtenPanel from './_components/LeadNachrichtenPanel'
+import LeadVerlaufPanel from './_components/LeadVerlaufPanel'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 import { evaluateKatalogRule } from '@/lib/dokumente/ruleEvaluator'
@@ -209,6 +210,15 @@ export default async function DispatchLeadDetail({
           kein eigener Arbeitsschritt. */}
       <div className="mt-4">
         <LeadNachrichtenPanel leadId={id} />
+      </div>
+      {/* Aktivitaetsspur — erster Leser von timeline.lead_id. Unter den
+          Nachrichten: der Verlauf ist Kontext, kein Arbeitsschritt. */}
+      <div className="mt-4">
+        <LeadVerlaufPanel
+          leadId={id}
+          leadErstelltAm={(lead.created_at as string | null) ?? null}
+          sourceChannel={(lead.source_channel as string | null) ?? null}
+        />
       </div>
     </>
   )

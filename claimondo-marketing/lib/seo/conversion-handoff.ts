@@ -28,6 +28,9 @@ import { BRAND_STATEMENT_D1 } from './brand-constants'
 export const HANDOFF_URL_KARTE = `${SITE_URL}/gutachter-finden` // 🥇 PRIMAER
 export const HANDOFF_URL_SCHADEN = `${SITE_URL}/schaden-melden` // 🥈 SEKUNDAER
 export const HANDOFF_URL_KI_CHECK = `${SITE_URL}/check` // 🥉 TERTIAER
+// Weichster Einstieg: lesen statt handeln. Fuer den Leser, der heute noch
+// nichts meldet — er nimmt den Guide mit und kommt ueber ihn zurueck.
+export const HANDOFF_URL_GUIDE = `${SITE_URL}/unfallguide`
 export const HANDOFF_TEL_HREF = `tel:${PHONE_E164}`
 export const HANDOFF_WHATSAPP_HREF = WHATSAPP_HREF
 
