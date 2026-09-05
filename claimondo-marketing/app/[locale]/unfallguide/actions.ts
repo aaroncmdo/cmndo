@@ -252,7 +252,7 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
   // Willkommensnachricht: WhatsApp mit Link, sonst E-Mail MIT PDF-Anhang.
   // Der Guide ist zu diesem Zeitpunkt schon auf der Seite geliefert; die
   // Nachricht ist die Zugabe, nicht die Bedingung. NON-FATAL.
-  const kanal = await sendeWillkommen({
+  const willkommen = await sendeWillkommen({
     leadId: String(leadId),
     telefon: parsed.data.telefon,
     email,
@@ -260,6 +260,30 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
     flowUrl,
     zusage: fenster.text,
   })
+  const kanal = willkommen.kanal
+
+  // DIE NACHRICHT GEHOERT IN DEN NACHRICHTENVERLAUF, nicht nur ins Postfach.
+  // Die Lead-Detailseite im Dispatch hat ein Nachrichten-Panel, das `nachrichten`
+  // nach `lead_id` liest. Ohne diese Zeile sieht der Dispatcher zwar den
+  // Verlaufseintrag "Willkommensnachricht versendet", aber nicht, WAS drinstand —
+  // er kann also nicht daran anknuepfen, wenn er gleich anruft.
+  // `kanal` und `status` sind gegen den CHECK von `nachrichten` geprueft
+  // (whatsapp/email bzw. gesendet). NON-FATAL: der Lead und der Versand stehen schon.
+  if (kanal !== 'nicht_versendet') {
+    const { error: nErr } = await sb.from('nachrichten').insert({
+      lead_id: String(leadId),
+      kanal,
+      richtung: 'outbound',
+      status: 'gesendet',
+      sender_rolle: 'system',
+      is_system: true,
+      nachricht: willkommen.text,
+      hat_anhang: willkommen.hatAnhang,
+      empfaenger_kontakt: willkommen.empfaenger,
+      template_key: 'unfallguide_willkommen',
+    })
+    if (nErr) console.error('[unfallguide] Nachrichtenverlauf:', nErr.message)
+  }
   {
     const { error: tlErr } = await sb.from('timeline').insert({
       lead_id: String(leadId),
@@ -405,6 +429,18 @@ function rueckrufFenster(): { text: string; startZeit: Date } {
   }
 }
 
+/**
+ * Was tatsaechlich rausging. Nicht nur der Kanal: der Wortlaut wird gebraucht, damit
+ * die Nachricht auch im Nachrichtenverlauf des Leads steht und nicht nur im Postfach
+ * des Kunden.
+ */
+type WillkommenErgebnis = {
+  kanal: 'whatsapp' | 'email' | 'nicht_versendet'
+  text: string
+  empfaenger: string | null
+  hatAnhang: boolean
+}
+
 async function sendeWillkommen(opts: {
   leadId: string
   telefon: string
@@ -413,7 +449,7 @@ async function sendeWillkommen(opts: {
   flowUrl: string | null
   /** Wortlaut aus rueckrufFenster() — derselbe, der im Rueckruf-Auftrag steht. */
   zusage: string
-}): Promise<'whatsapp' | 'email' | 'nicht_versendet'> {
+}): Promise<WillkommenErgebnis> {
   const anrede = opts.vorname ? `Guten Tag ${opts.vorname},` : 'Guten Tag,'
   const zusage = opts.zusage
   const guideUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}${GUIDE_PFAD}`
@@ -433,7 +469,9 @@ async function sendeWillkommen(opts: {
         'Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.',
       ].join('\n')
       const r = await sendWhatsAppText(opts.telefon, text)
-      if (r.ok) return 'whatsapp'
+      if (r.ok) {
+        return { kanal: 'whatsapp', text, empfaenger: opts.telefon, hatAnhang: false }
+      }
       console.error('[unfallguide] WhatsApp-Willkommen:', r.error)
     }
   } catch (err) {
@@ -441,27 +479,30 @@ async function sendeWillkommen(opts: {
   }
 
   // E-Mail mit Anhang
-  if (!opts.email) return 'nicht_versendet'
+  if (!opts.email) return { kanal: 'nicht_versendet', text: '', empfaenger: null, hatAnhang: false }
   try {
     const pdf = await readFile(join(process.cwd(), 'public', GUIDE_PFAD))
     const flowZeile = opts.flowUrl
       ? `<p>Wenn Sie schon weiter sind und den Schaden direkt melden möchten: <a href="${opts.flowUrl}">${opts.flowUrl}</a></p>`
       : ''
+    // Einmal gebaut, zweimal gebraucht: als Mail-Text und als Eintrag im
+    // Nachrichtenverlauf. Was der Kunde liest, steht damit auch beim Team.
+    const mailText = `${anrede}\n\nim Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}${
+      opts.flowUrl ? `\n\nWenn Sie schon weiter sind: ${opts.flowUrl}` : ''
+    }\n\nDer Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.\n\nClaimondo · 0151 5360 8515`
     await sendEmail({
       to: opts.email,
       leadId: opts.leadId,
       subject: 'Ihr Unfallguide von Claimondo',
-      text: `${anrede}\n\nim Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}${
-        opts.flowUrl ? `\n\nWenn Sie schon weiter sind: ${opts.flowUrl}` : ''
-      }\n\nDer Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.\n\nClaimondo · 0151 5360 8515`,
+      text: mailText,
       html: `<p>${anrede}</p><p>im Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}</p>${flowZeile}<p>Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.</p><p>Claimondo · <a href="tel:+4915153608515">0151 5360 8515</a></p>`,
       attachments: [
         { filename: 'Claimondo-Unfallguide.pdf', content: pdf, contentType: 'application/pdf' },
       ],
     })
-    return 'email'
+    return { kanal: 'email', text: mailText, empfaenger: opts.email, hatAnhang: true }
   } catch (err) {
     console.error('[unfallguide] E-Mail-Willkommen fehlgeschlagen:', (err as Error).message)
-    return 'nicht_versendet'
+    return { kanal: 'nicht_versendet', text: '', empfaenger: null, hatAnhang: false }
   }
 }
