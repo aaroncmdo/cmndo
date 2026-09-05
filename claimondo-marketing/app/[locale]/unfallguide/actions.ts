@@ -6,6 +6,11 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
+import { isWhatsAppAvailable } from '@/lib/whatsapp/availability'
+import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { sendEmail } from '@/lib/email/google/client'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 // Konstante und Typen liegen in constants.ts: aus einem 'use server'-Modul
 // duerfen nur async-Funktionen exportiert werden (AGENTS.md, AAR-664).
 import { GUIDE_PFAD, type GuideLeadFeld, type GuideLeadErgebnis } from './constants'
@@ -153,18 +158,59 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
     if (tlErr) console.error('[unfallguide] Timeline-Eintrag:', tlErr.message)
   }
 
-  // FlowLink: sein Weg zurueck in den eigenen Vorgang. NON-FATAL — der Lead
-  // steht bereits, ein Versand-Fehler darf ihn nicht kippen.
+  // FlowLink NUR ERZEUGEN, nicht ueber den Helfer versenden. Dessen Nachricht
+  // lautet "danke fuer deine Schadenmeldung ... dort unterschreibst du Vollmacht
+  // und Sicherungsabtretung" — und duzt. Wer einen Guide angefordert hat, hat
+  // keinen Schaden gemeldet, und der Guide siezt. Zwei Brueche in der ersten
+  // Nachricht, genau die Sorte, die der Plan als "Du oder Sie?" offen liess.
+  // Mit `telefon: null` liefert der Helfer den Token, ohne zu senden (nachgelesen:
+  // er kehrt vor dem Versand zurueck). Die Willkommensnachricht unten traegt den
+  // Link dann zurueckhaltend mit — "wenn Sie schon weiter sind".
+  const vorname = parsed.data.name.trim().split(/\s+/)[0] ?? null
+  let flowUrl: string | null = null
   try {
     const fl = await erzeugeUndSendeFlowLink({
       leadId: String(leadId),
-      telefon: parsed.data.telefon,
-      vorname: parsed.data.name.trim().split(/\s+/)[0] ?? null,
+      telefon: null,
+      vorname,
       quelle: 'Unfallguide',
     })
-    if (!fl.ok) console.error('[unfallguide] FlowLink:', fl.error)
+    if (fl.ok && fl.token && process.env.NEXT_PUBLIC_APP_URL) {
+      flowUrl = `${process.env.NEXT_PUBLIC_APP_URL}/flow/${fl.token}`
+    } else if (!fl.ok) {
+      console.error('[unfallguide] FlowLink:', fl.error)
+    }
   } catch (err) {
-    console.error('[unfallguide] FlowLink-Versand fehlgeschlagen:', (err as Error).message)
+    console.error('[unfallguide] FlowLink-Erzeugung fehlgeschlagen:', (err as Error).message)
+  }
+
+  // Willkommensnachricht: WhatsApp mit Link, sonst E-Mail MIT PDF-Anhang.
+  // Der Guide ist zu diesem Zeitpunkt schon auf der Seite geliefert; die
+  // Nachricht ist die Zugabe, nicht die Bedingung. NON-FATAL.
+  const kanal = await sendeWillkommen({
+    leadId: String(leadId),
+    telefon: parsed.data.telefon,
+    email,
+    vorname,
+    flowUrl,
+  })
+  {
+    const { error: tlErr } = await sb.from('timeline').insert({
+      lead_id: String(leadId),
+      typ: 'system',
+      titel:
+        kanal === 'nicht_versendet'
+          ? 'Willkommensnachricht NICHT versendet'
+          : `Willkommensnachricht per ${kanal === 'whatsapp' ? 'WhatsApp' : 'E-Mail'} versendet`,
+      beschreibung:
+        kanal === 'whatsapp'
+          ? `An ${parsed.data.telefon}: Guide-Link${flowUrl ? ' + FlowLink' : ''}, Rückruf angekündigt.`
+          : kanal === 'email'
+            ? `An ${email}: Guide als PDF-Anhang${flowUrl ? ' + FlowLink' : ''}, Rückruf angekündigt.`
+            : 'Kein WhatsApp erreichbar und keine E-Mail angegeben. Der Guide wurde auf der Seite angezeigt.',
+      metadata: { quelle: QUELLE, kanal, flowlink: Boolean(flowUrl) },
+    })
+    if (tlErr) console.error('[unfallguide] Timeline-Eintrag (Willkommen):', tlErr.message)
   }
 
   // Team-Benachrichtigung. Ohne sie waere das hier die naechste stumme
@@ -208,4 +254,84 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
   })
 
   return { ok: true, guidePfad: GUIDE_PFAD }
+}
+
+// ─── Willkommensnachricht ───────────────────────────────────────────────────
+//
+// Reihenfolge: WhatsApp, wenn die Nummer dort erreichbar ist; sonst E-Mail,
+// wenn eine angegeben wurde; sonst nichts (der Guide liegt ohnehin auf der Seite).
+// Der Rueckruf wird TAGESZEITABHAENGIG angekuendigt: "in 15 Minuten" um 22 Uhr
+// ist ein Versprechen, das an dem Abend niemand haelt.
+//
+// WhatsApp bekommt den LINK, E-Mail bekommt die DATEI: der Baileys-/send-
+// Endpunkt sendet Text; der E-Mail-Client kann Anhaenge. Das ist keine
+// Notloesung — der Link ist messbar und austauschbar, die Datei liegt im Postfach.
+
+function rueckrufZusage(): string {
+  const stunde = Number(
+    new Intl.DateTimeFormat('de-DE', { hour: 'numeric', hour12: false, timeZone: 'Europe/Berlin' })
+      .format(new Date()),
+  )
+  return stunde >= 8 && stunde < 20
+    ? 'Wir rufen Sie in der Regel innerhalb von 15 Minuten zurück.'
+    : 'Wir rufen Sie morgen ab 8 Uhr zurück.'
+}
+
+async function sendeWillkommen(opts: {
+  leadId: string
+  telefon: string
+  email: string | null
+  vorname: string | null
+  flowUrl: string | null
+}): Promise<'whatsapp' | 'email' | 'nicht_versendet'> {
+  const anrede = opts.vorname ? `Guten Tag ${opts.vorname},` : 'Guten Tag,'
+  const zusage = rueckrufZusage()
+  const guideUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}${GUIDE_PFAD}`
+
+  // WhatsApp
+  try {
+    if (await isWhatsAppAvailable('lead', opts.leadId, opts.telefon)) {
+      const text = [
+        `${anrede} hier ist Ihr Unfallguide von Claimondo:`,
+        guideUrl,
+        '',
+        zusage,
+        ...(opts.flowUrl
+          ? ['', 'Wenn Sie schon weiter sind und den Schaden direkt melden möchten:', opts.flowUrl]
+          : []),
+        '',
+        'Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.',
+      ].join('\n')
+      const r = await sendWhatsAppText(opts.telefon, text)
+      if (r.ok) return 'whatsapp'
+      console.error('[unfallguide] WhatsApp-Willkommen:', r.error)
+    }
+  } catch (err) {
+    console.error('[unfallguide] WhatsApp-Willkommen fehlgeschlagen:', (err as Error).message)
+  }
+
+  // E-Mail mit Anhang
+  if (!opts.email) return 'nicht_versendet'
+  try {
+    const pdf = await readFile(join(process.cwd(), 'public', GUIDE_PFAD))
+    const flowZeile = opts.flowUrl
+      ? `<p>Wenn Sie schon weiter sind und den Schaden direkt melden möchten: <a href="${opts.flowUrl}">${opts.flowUrl}</a></p>`
+      : ''
+    await sendEmail({
+      to: opts.email,
+      leadId: opts.leadId,
+      subject: 'Ihr Unfallguide von Claimondo',
+      text: `${anrede}\n\nim Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}${
+        opts.flowUrl ? `\n\nWenn Sie schon weiter sind: ${opts.flowUrl}` : ''
+      }\n\nDer Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.\n\nClaimondo · 0151 5360 8515`,
+      html: `<p>${anrede}</p><p>im Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}</p>${flowZeile}<p>Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.</p><p>Claimondo · <a href="tel:+4915153608515">0151 5360 8515</a></p>`,
+      attachments: [
+        { filename: 'Claimondo-Unfallguide.pdf', content: pdf, contentType: 'application/pdf' },
+      ],
+    })
+    return 'email'
+  } catch (err) {
+    console.error('[unfallguide] E-Mail-Willkommen fehlgeschlagen:', (err as Error).message)
+    return 'nicht_versendet'
+  }
 }
