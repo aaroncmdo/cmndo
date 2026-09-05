@@ -183,6 +183,28 @@ const spec = {
               'NUR bei schuldfrage=selbst auswerten: besteht eine Vollkasko? Davon haengt der ganze Weg ab — mit Vollkasko reguliert die eigene Versicherung (abzueglich Selbstbeteiligung), ohne zahlt der Halter selbst. Ohne diesen Parameter liefert die Antwort ausdruecklich die Aufforderung nachzufragen; NICHT raten.',
             schema: { type: 'string', enum: ['ja', 'nein'] },
           },
+          {
+            name: 'werkstattbindung',
+            in: 'query',
+            required: false,
+            description:
+              'NUR bei schuldfrage=selbst und Vollkasko: enthaelt der Kasko-Tarif eine Werkstattbindung (die Versicherung benennt die Werkstatt)? Ohne diesen Parameter — und ohne versicherer/tarif — liefert die Antwort bei Kasko die Aufforderung, den Versicherungsschein zu pruefen; NICHT raten.',
+            schema: { type: 'string', enum: ['ja', 'nein'] },
+          },
+          {
+            name: 'versicherer',
+            in: 'query',
+            required: false,
+            description: 'Name der Kaskoversicherung (z. B. HUK-COBURG). Die API schlaegt die Werkstattbindung in der Tarifliste nach (CHECK24, Stand 20.07.2026, 72 Marken).',
+            schema: { type: 'string' },
+          },
+          {
+            name: 'tarif',
+            in: 'query',
+            required: false,
+            description: 'Tarifname vom Versicherungsschein (z. B. Classic SELECT). Nur zusammen mit versicherer. Bei Mehrdeutigkeit nennt die Antwort Kandidaten.',
+            schema: { type: 'string' },
+          },
         ],
         responses: {
           '200': {
@@ -190,6 +212,24 @@ const spec = {
               'Strukturierter Anspruchskatalog + naechster Schritt. Das Feld `abrechnungsweg` nennt den anzubietenden Weg: haftpflicht (Gegner zahlt -> Gutachter zuerst), kasko (eigene Vollkasko -> Werkstatt zuerst), selbstzahler (kein Schutz -> Kostenvoranschlag), null (Frage offen -> nachfragen).',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/PruefeAnspruchResponse' } } },
           },
+          '429': { description: 'Rate-Limit überschritten (60/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+        },
+      },
+    },
+    '/api/v1/kasko-werkstattbindung': {
+      get: {
+        operationId: 'kaskoWerkstattbindung',
+        summary: 'Werkstattbindung eines Kasko-Tarifs nachschlagen (Tarifliste)',
+        description:
+          'Beantwortet „Mein Kasko-Tarif heisst X — darf ich zu meiner Werkstatt?“ aus der Claimondo-Tarifliste (CHECK24-Kfz-Tarife Stand 20.07.2026 plus HDI: 72 Marken, 408 Tarife). Liefert werkstattbindung ja/nein/unbekannt, Sanktion bei freier Wahl, Ausnahmen, Partnernetz und Schaden-Hotline. Bei mehrdeutigem Versicherer oder Tarif: Kandidaten + unbekannt — nie geraten. Read-only, anonym.',
+        parameters: [
+          { name: 'versicherer', in: 'query', required: true, description: 'Name oder Slug der Kaskoversicherung (z. B. HUK-COBURG, huk24, Allianz Direct).', schema: { type: 'string' } },
+          { name: 'tarif', in: 'query', required: false, description: 'Tarifname vom Versicherungsschein (z. B. Classic SELECT). Ohne Tarif bei Marken mit optionaler Bindung: unbekannt + Kandidatenliste.', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'Bindungs-Befund.', content: { 'application/json': { schema: { $ref: '#/components/schemas/KaskoWerkstattbindungResponse' } } } },
+          '400': { description: 'versicherer fehlt.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '404': { description: 'Versicherer nicht in der Tarifliste (Antwort enthaelt einen Hinweis zur Schein-Pruefung).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
           '429': { description: 'Rate-Limit überschritten (60/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
         },
       },
@@ -508,6 +548,14 @@ const spec = {
             description:
               'WELCHEN Weg Sie anbieten muessen. haftpflicht = Gegner zahlt, Gutachter zuerst (findeGutachterTermine). kasko = eigene Vollkasko, WERKSTATT zuerst (findeWerkstaetten), Gutachten optional. selbstzahler = kein Schutz, Kostenvoranschlag der Werkstatt. null = Frage offen -> nachfragen (bei schuldfrage=selbst fehlt dann der vollkasko-Parameter).',
           },
+          werkstattbindung: {
+            type: 'string',
+            nullable: true,
+            enum: ['ja', 'nein', 'unbekannt', null],
+            description:
+              'Nur bei abrechnungsweg=kasko gesetzt. ja = die Versicherung benennt die Werkstatt (KEINEN Werkstatt-Finder empfehlen), nein = freie Werkstattwahl, unbekannt = Versicherungsschein pruefen oder versicherer/tarif nachschlagen lassen.',
+          },
+          kasko_tarif: { nullable: true, allOf: [{ $ref: '#/components/schemas/KaskoTarifBefund' }], description: 'Befund aus der Tarifliste, wenn versicherer (und tarif) uebergeben wurden.' },
           eigenkosten: { type: 'string' },
           finanzierung: {
             type: 'string',
@@ -524,6 +572,38 @@ const spec = {
           hinweis: { type: 'string' },
         },
         required: ['schuldfrage', 'anspruchslage', 'eigenkosten', 'ansprueche', 'naechster_schritt'],
+      },
+      KaskoTarifBefund: {
+        type: 'object',
+        properties: {
+          versicherer: { type: 'string' },
+          tarif: { type: 'string', nullable: true },
+          werkstattbindung: { type: 'string', enum: ['ja', 'nein', 'unbekannt'] },
+          bindungsumfang: { type: 'string', nullable: true, description: 'keine / voll / nur_glas / unklar' },
+          verlaesslichkeit: { type: 'string', nullable: true, description: 'belegt / abgeleitet / nicht_belegt — bei abgeleitet/nicht_belegt den Schein pruefen lassen.' },
+          kandidaten: { type: 'array', items: { type: 'string' }, description: 'Moegliche Marken bzw. Tarife bei Mehrdeutigkeit — dem Nutzer zur Auswahl vorlegen.' },
+          stand: { type: 'string', nullable: true, description: 'Stand der Tarifliste (ISO-Datum).' },
+        },
+        required: ['versicherer', 'werkstattbindung', 'kandidaten'],
+      },
+      KaskoWerkstattbindungResponse: {
+        type: 'object',
+        properties: {
+          versicherer: { type: 'string' },
+          tarif: { type: 'string', nullable: true },
+          werkstattbindung: { type: 'string', enum: ['ja', 'nein', 'unbekannt'] },
+          bindungsumfang: { type: 'string', nullable: true },
+          verlaesslichkeit: { type: 'string', nullable: true },
+          sanktion: { type: 'string', nullable: true, description: 'Was bei freier Werkstattwahl trotz Bindung droht (nur bei werkstattbindung=ja).' },
+          ausnahmen: { type: 'string', nullable: true, description: 'Faelle mit freier Wahl trotz Bindung (z. B. Glas, Liegenbleiber im Ausland).' },
+          partnernetz: { type: 'string', nullable: true },
+          hotline: { type: 'string', nullable: true, description: 'Schaden-Hotline des Versicherers (oeffentlich).' },
+          kandidaten: { type: 'array', items: { type: 'string' } },
+          naechster_schritt: { type: 'string' },
+          hinweis: { type: 'string' },
+          nutzungshinweis: { type: 'string' },
+        },
+        required: ['versicherer', 'werkstattbindung', 'kandidaten', 'naechster_schritt', 'hinweis'],
       },
       DecodeBriefRequest: {
         type: 'object',

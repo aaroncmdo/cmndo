@@ -65,3 +65,42 @@ test('GET /pruefe-anspruch liefert das Feld `finanzierung`', async ({ request })
     'die API sagt „0 € fuer Sie", aber nicht wer stattdessen zahlt',
   ).toMatch(FINANZIERUNG)
 })
+
+// ─── Kasko-WB Phase 2 (05.09.2026): die Berater-API kennt die Werkstattbindung ───────────────────────
+test('pruefe-anspruch: Kasko + Werkstattbindung empfiehlt keinen Werkstatt-Finder', async ({ request }) => {
+  const res = await request.get(`${APP}/api/v1/pruefe-anspruch?schuldfrage=selbst&vollkasko=ja&werkstattbindung=ja`)
+  expect(res.status()).toBe(200)
+  const j = (await res.json()) as { abrechnungsweg?: string | null; werkstattbindung?: string | null; naechster_schritt?: string }
+  expect(j.abrechnungsweg, 'Gegenprobe — ohne kasko ist der Rest wertlos').toBe('kasko')
+  expect(j.werkstattbindung).toBe('ja')
+  expect(j.naechster_schritt ?? '').toContain('benennt die Werkstatt')
+  expect(j.naechster_schritt ?? '', 'gebundener Tarif darf keinen Werkstatt-Finder empfehlen').not.toContain('werkstatt-finden')
+})
+
+test('pruefe-anspruch: Tarifliste-Lookup HUK-COBURG / Classic SELECT = gebunden', async ({ request }) => {
+  const res = await request.get(
+    `${APP}/api/v1/pruefe-anspruch?schuldfrage=selbst&vollkasko=ja&versicherer=HUK-COBURG&tarif=Classic%20SELECT`,
+  )
+  expect(res.status()).toBe(200)
+  const j = (await res.json()) as { werkstattbindung?: string | null; kasko_tarif?: { versicherer?: string; tarif?: string | null } | null }
+  expect(j.kasko_tarif?.versicherer).toBe('HUK-COBURG')
+  expect(j.kasko_tarif?.tarif).toBe('Classic SELECT')
+  expect(j.werkstattbindung).toBe('ja')
+})
+
+test('kasko-werkstattbindung: mehrdeutiger Versicherer -> Kandidaten, nie geraten', async ({ request }) => {
+  const res = await request.get(`${APP}/api/v1/kasko-werkstattbindung?versicherer=HUK`)
+  expect(res.status()).toBe(200)
+  const j = (await res.json()) as { werkstattbindung?: string; kandidaten?: string[] }
+  expect(j.werkstattbindung).toBe('unbekannt')
+  expect((j.kandidaten ?? []).length, 'HUK trifft HUK-COBURG und HUK24').toBeGreaterThan(1)
+})
+
+test('kasko-werkstattbindung: LVM = freie Werkstattwahl, unbekannter Versicherer = 404 mit Hinweis', async ({ request }) => {
+  const frei = await request.get(`${APP}/api/v1/kasko-werkstattbindung?versicherer=LVM`)
+  expect(frei.status()).toBe(200)
+  expect(((await frei.json()) as { werkstattbindung?: string }).werkstattbindung).toBe('nein')
+  const fremd = await request.get(`${APP}/api/v1/kasko-werkstattbindung?versicherer=Gibtsnicht`)
+  expect(fremd.status()).toBe(404)
+  expect(((await fremd.json()) as { hinweis?: string }).hinweis ?? '').toContain('Versicherungsschein')
+})
