@@ -55,11 +55,9 @@ Jede Ja-Antwort ist eine Zeile in Abschnitt 6 der Abnahme-Datei.
 
 Stabile Fixture-IDs: `scripts/test-fixtures/ids.ts`. Passwörter **nie** ins Repo (öffentlich).
 
-## Zeilenform für Abschnitt 6
+## Zeilenform
 
-```
-| Eingang / Rolle | betroffen? | Sicht (muss / darf ändern / darf nicht) | DB-Voraussetzung (geprüft wie, wann) | geprüft wie (UI-Klick, Playwright, Konto) | Ergebnis |
-```
+Die Spalten stehen in Abschnitt 6 der Vorlage `memory/abnahmen/_VORLAGE.md` — hier nicht wiederholt.
 
 Beispiel Kasko-Werkstattbindung (04.09., nach der Abnahme 11 Zellen): FlowLink gebunden / frei / unklar /
 Freitext · FlowLink **vorbelegt** (Lead kommt schon als Kasko an, ohne Quali) · Re-Visit · Embed gebunden

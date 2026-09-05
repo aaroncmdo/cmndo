@@ -1,8 +1,10 @@
 # Regelwerk-Review 05.09.2026 — Regel 6 „Soll-Blatt vor dem Bau" + Skill `operatives-soll`
 
-> **Status:** Entwurf zur Entscheidung (Aaron). Nichts hiervon ist umgesetzt — keine Änderung an
-> `AGENTS.md`, an den Skills oder an der Abnahme-Vorlage. Die drei offenen PRs #5863 (Regel 5),
-> #5867 (Skills + Abnahme-Spec) und #5864 (Kasko-Fix) gehören anderen Sessions und bleiben unberührt.
+> **Status:** Aaron 05.09.2026, 12:40: „Der operative Soll Skill ist auf jeden Fall Pflicht für jede Session
+> und auch jede Aufgabe, die ich stelle." → **umgesetzt in PR #5870** (Regel 6 in `AGENTS.md`, Skill
+> `operatives-soll` mit zwei Referenzdateien, `.gitignore`-Whitelist, Skill-Radar-Trigger, PR-Template;
+> Abnahme-Vorlage/Register im Memory ergänzt). Offen bleiben die Entscheidungen E2–E5 (§8) und Stufe 2 (§5.5).
+> Das Dokument darunter ist der Review-Stand vor der Entscheidung.
 > **Session:** f566a4ef · Haupt-Checkout `main` (nur gelesen) · gegengeprüft gegen `origin/staging`.
 
 ## 0 · Kurzfassung
@@ -308,6 +310,25 @@ nachgeschlagen.
 * **REFACTOR:** Lücken (z. B. „Matrix aus dem Kopf") mit Gegenbeispiel ins Common-Mistakes.
 * Positivkontrolle (Regel 4 Messfalle 5): ein Auftrag **ohne** Nutzerimpact (reines Script) muss zum
   dreizeiligen Blatt führen, nicht zur vollen Matrix — sonst ist der Skill ein Alarm ins tote Postfach.
+
+**Ergebnis (05.09., zwei Subagenten, Auftrag „Polizei-Frage im FlowLink, sichtbar für Dispatch + SV"):**
+
+| | RED (ohne Skill) | GREEN (mit Skill) |
+|---|---|---|
+| Erster Arbeitsschritt | Code-Lektüre (`feststellung-steps.ts`, Grep nach `polizei`) — wörtlich: „Mein Reflex ist Code-Bestandsaufnahme ZUERST" | Aarons Worte wörtlich (Abschnitt 1), dann Warum |
+| Soll | als Schritt 3, nach dem Code | Abschnitt 1c mit 19 Schrittzeilen je Rolle, Folgezustand, Journey-Bezug J1/J2/J10 |
+| Warum | fehlt | Abschnitt 1b vorhanden |
+| Eingänge × Rollen | 3 Sichten (Kunde, Dispatch, SV) | 29 Matrix-Zeilen aus dem Register, inkl. vorbelegt, Re-Visit, Override; dabei gefunden: Embed-Platzhalter `false` als Vorbelegungs-Falle |
+| Sicht-Matrix | keine Negativ-Zellen | 12 Rollen mit muss / darf ändern / darf nicht sehen, Pflichtzellen anonym + `test-rls-nobody@`; Entscheidung „kundensichtbar" vor der Grant-Migration getroffen |
+| DB-Voraussetzungen | teilweise (Grant, CHECK, View — aus AGENTS.md-Prägung) | 15 Zeilen mit Lese-Kommando je Achse |
+| Abnahmekriterien | fehlen | Abschnitt 10 vorhanden, Kurzfassung an Aaron ≤ 10 Zeilen |
+| Versuchung zum Abkürzen | — | zweimal berichtet (nur 4 Eingänge listen; „Grant wird schon da sein") — beide Male hat der Regeltext gehalten |
+
+Der RED-Lauf war nicht „schlecht": AGENTS.md prägt bereits Grant/CHECK/Row-Check-Denken. Was fehlte, war die
+**Reihenfolge** (Code vor Soll) und die **Vollständigkeit** (3 Sichten statt 29 Zellen) — genau die beiden
+Achsen von Regel 6. Rückmeldungen des GREEN-Laufs eingearbeitet: Grenze „Code für Bezeichner ja, für das
+Soll nein" (Schritt 3) · Bestand-Grep vor dem Soll · Doppelungen zwischen SKILL.md, `eingaenge-rollen.md`
+und Vorlage entfernt · Migrations-Reihenfolge (Config sofort, Code nach Deploy) im Skill (Schritt 6).
 
 ## 8 · Entscheidungen für Aaron
 

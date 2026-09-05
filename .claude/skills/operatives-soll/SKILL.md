@@ -51,13 +51,18 @@ Je Schritt den **Folgezustand** benennen: Was sieht die Nachbar-Rolle danach? We
 (Zeile in `docs/fundament/notification-matrix.md`)? Was steht in der DB?
 Berührt die Änderung J1–J10 → das ist der Journey-Delta (AGENTS.md D1) in `docs/fundament/journeys/`.
 
+**Bestand nachschlagen, nicht raten — und die Grenze kennen:** Gibt es das Feld oder den Zustand schon unter
+anderem Namen (`polizei_vor_ort` ist nicht „gemeldet")? Code und Schema liest man hier für **Bezeichner,
+Views, Grants** — nie für das Soll. Was der Nutzer erleben soll, kommt aus der Fachlogik; wie es heißt und
+wo es liegt, aus dem Repo.
+
 ### 4 · Eingänge × Rollen aus dem Register (Abschnitt 6)
-**Nicht aus dem Gedächtnis.** Liste in `eingaenge-rollen.md` (neben diesem Skill) durchgehen; Quelle
-sind `docs/fundament/entry-points.md` + `entry-points-flowlink.md`. Je Eingang drei Fragen:
-*Entsteht der Zustand hier? Kommt er hier schon vorbelegt an (Dispatch legt an, Webhook, API, Cron)?
-Gibt es einen Re-Visit desselben Links?* Jede Ja-Antwort ist eine Matrix-Zeile. Dazu je Rolle, die den
-Zustand liest oder ändert, eine Zeile — inklusive Override durch eine interne Rolle (wirkt auf Lead
-**und** Claim **und** Kundensicht).
+**Nicht aus dem Gedächtnis.** Liste in `eingaenge-rollen.md` (neben diesem Skill) durchgehen — dort stehen
+die drei Fragen je Eingang; Quelle sind `docs/fundament/entry-points.md` + `entry-points-flowlink.md`.
+Jede Ja-Antwort ist eine Zeile in Abschnitt 6 der Vorlage. Dazu je Rolle, die den Zustand liest oder
+ändert, eine Zeile — inklusive Override durch eine interne Rolle (wirkt auf Lead **und** Claim **und**
+Kundensicht). Die Versuchung, nur die vier „interessanten" Eingänge zu listen, ist der Normalfall; genau
+beim Durchgehen der langweiligen fällt die Vorbelegungs-Falle auf (Embed-Platzhalter `false`).
 
 ### 5 · Sicht-Matrix (Abschnitt 6a)
 Je Rolle: **MUSS sehen** · **DARF ändern** · **DARF NICHT sehen**. Pflichtzellen: `anonym` und
@@ -73,6 +78,8 @@ Je Matrix-Zelle: Was muss in prod wahr sein, damit sie funktioniert? Achsen und 
 Publication · Bucket · Edge Function · pg_cron · Build-Env · `publicPaths` · Outbox · Intake-
 Nachwirkungen. **Vor dem Bau lesen** (MCP `execute_sql`, nur READ), nicht annehmen. Was fehlt, wird
 Teil des Auftrags (Migration über `apply_migration`, Regel 2) — nicht Annahme, nicht Follow-up.
+**Reihenfolge ins Blatt:** eine Config- oder DDL-Zeile wirkt sofort, Code erst nach dem Deploy — die
+Spalte „Folge" in 6b sagt, was zuerst passieren muss.
 
 ### 7 · Skills je Bereich (Abschnitt 2)
 Tabelle **jetzt**: Bereich · Skill · warum · geprüfte Alternative. „Gibt es einen besseren?" heißt
@@ -104,15 +111,17 @@ Geld bewegt, echte Kunden-Comms auslöst oder löscht.
 
 ## Common Mistakes
 
-| Fehler | Warum er kostet | Beleg |
-|---|---|---|
-| Soll aus dem Code gelesen | Tautologie: „Code tut, was Code tut" | AGENTS.md Regel 4, Begründung „Soll zuerst" |
-| Matrix aus dem Kopf | Eingänge fehlen, bis jemand fragt | Kasko 9 → 11 Zellen |
-| „sieht" ohne „sieht nicht" | Lecks und leere Sichten bleiben beide unentdeckt | KB 28/81 leer · 4 Spalten ohne Grant |
-| DB-Voraussetzung angenommen | Listener ohne Publication feuert nie, Bucket fehlt, 307 ohne `publicPaths` | 4 stille Brüche 03.09. |
-| Werkzeug statt Produkt gemessen | interner Test-Lead bekommt nie Kunden-WhatsApp — das ist kein Befund | `audit-kundenfluss-laeuft-durch-16-befunde` |
-| Leer = „gibt es nicht" | PostgREST liefert 1.000 Zeilen, MCP sieht `v_claim_*` leer | `BROADCAST-leer-an-einer-stelle-ist-kein-existiert-nicht` |
-| Bezeichner geraten | vier geratene Spaltennamen, vier tote Queries | `FEEDBACK-bezeichner-werden-nachgeschlagen-nie-geraten` |
+| Fehler | Warum er kostet |
+|---|---|
+| Soll aus dem Code gelesen | Tautologie: „Code tut, was Code tut" (Regel 4, Begründung „Soll zuerst") |
+| Matrix aus dem Kopf | Eingänge fehlen, bis jemand fragt (Kasko: erst nach Nachfrage vollständig) |
+| „sieht" ohne „sieht nicht" | Lecks und leere Sichten bleiben beide unentdeckt |
+| DB-Voraussetzung angenommen | Listener ohne Publication feuert nie, Bucket fehlt, 307 ohne `publicPaths` |
+| Werkzeug statt Produkt gemessen | ein interner Test-Lead bekommt nie Kunden-WhatsApp — das ist kein Befund |
+| Leer = „gibt es nicht" | PostgREST liefert 1.000 Zeilen, MCP sieht `v_claim_*` leer |
+| Bezeichner geraten | geratene Spaltennamen sind tote Queries — nachschlagen (`information_schema.columns`) |
+
+Belege mit Zahlen stehen einmal in AGENTS.md Regel 6 (Begründung) und im Design-Doc — hier bewusst nicht wiederholt.
 
 ## Verwandt
 
