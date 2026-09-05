@@ -718,6 +718,10 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           RUN_GOLDEN_PATH_DEEP: '1'
+          # Abnahme-Inbox (docs/abnahme-inbox.md): Kunden-Mails per IMAP nachweisen. Fehlt das Secret,
+          # skippt kasko-e6-mail-abnahme-inbox.spec.ts sauber statt die Collection zu sprengen.
+          ABNAHME_INBOX_USER: ${{ secrets.ABNAHME_INBOX_USER }}
+          ABNAHME_INBOX_PASS: ${{ secrets.ABNAHME_INBOX_PASS }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -1082,6 +1086,10 @@ jobs:
           # interne Rollen (2FA-Wand -> skip statt fail). Der flache golden-path-prod bleibt
           # bewusst aus (eigene ROLES=totes test-kunde@, kein skipIfAuthWall -> wuerde failen).
           RUN_GOLDEN_PATH_DEEP: '1'
+          # Abnahme-Inbox (docs/abnahme-inbox.md): Kunden-Mails per IMAP nachweisen. Fehlt das Secret,
+          # skippt kasko-e6-mail-abnahme-inbox.spec.ts sauber statt die Collection zu sprengen.
+          ABNAHME_INBOX_USER: ${{ secrets.ABNAHME_INBOX_USER }}
+          ABNAHME_INBOX_PASS: ${{ secrets.ABNAHME_INBOX_PASS }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
