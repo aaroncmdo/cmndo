@@ -100,8 +100,23 @@ async function seedeLeadUndFlowLink(db: SupabaseClient, email: string): Promise<
 }
 
 // /flow bis zur Tariffrage: Consent -> "Ich selbst" -> "Ja, Kasko".
+async function gotoFlow(page: Page, token: string): Promise<void> {
+  const url = `${APP}/flow/${token}`
+  for (let versuch = 0; versuch < 3; versuch++) {
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded' })
+      return
+    } catch (err) {
+      // net::ERR_ABORTED = der Aufruf wurde von einer sofortigen Weiterleitung abgebrochen (Lauf 5, Lauf 15c).
+      if (versuch === 2 || !String(err).includes('ERR_ABORTED')) throw err
+      await page.waitForLoadState('networkidle').catch(() => {})
+      await page.waitForTimeout(1_000)
+    }
+  }
+}
+
 async function flowBisTariffrage(page: Page, token: string): Promise<void> {
-  await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+  await gotoFlow(page, token)
   await checkAlleCheckboxen(page)
   await page.getByRole('button', { name: /^weiter/i }).first().click()
   await page.getByRole('button', { name: /^Ich selbst/i }).click()
@@ -312,7 +327,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
       .toBeGreaterThan(0)
 
     // Re-Visit: Endseite, nicht die Frage, nicht der Gutachter-Text
-    await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+    await gotoFlow(page, token)
     await expect(page.getByText('Wird geladen …')).toHaveCount(0, { timeout: 30_000 })
     await expect(endseite).toBeVisible({ timeout: 30_000 })
     await expect(page.getByText(/HUK-COBURG · Tarif „Classic SELECT“/)).toBeVisible({ timeout: 30_000 })
@@ -477,7 +492,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await shot(page, 't3-03-weiter')
 
     // Re-Visit: die Tariffrage darf NICHT erneut kommen (Step-Bedingung quelle != null)
-    await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+    await gotoFlow(page, token)
     await page.waitForLoadState('networkidle').catch(() => {})
     await page.waitForTimeout(4_000)
     await expect(page.getByRole('heading', { name: /Bei welcher Versicherung/i })).toHaveCount(0)
@@ -769,7 +784,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     if (error) throw new Error(`Vorbelegung fehlgeschlagen: ${error.message}`)
     console.log(`[T14 ${v.name}] Vorbelegung:`, JSON.stringify(v.vorbelegung), '· Lead vorher:', JSON.stringify(await leadZeile(db, leadId)))
 
-    await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+    await gotoFlow(page, token)
     await checkAlleCheckboxen(page).catch(() => {})
     await page.getByRole('button', { name: /^weiter/i }).first().click({ timeout: 10_000 }).catch(() => {})
     // Keine Schuldfrage, keine Kasko-Weiche. Das Szenario kasko zeigt vorher andere Steps (Lauf 7: „Was für ein
@@ -820,7 +835,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
       expect(lead.freie_werkstattwahl).toBe(false)
       expect(lead.disqualifiziert_grund_key).toBe('werkstattbindung')
       // Re-Visit: keine Werkstatt-Strecke erreichbar
-      await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+      await gotoFlow(page, token)
       await expect(page.getByText('Wird geladen …')).toHaveCount(0, { timeout: 30_000 })
       await expect(endseite).toBeVisible({ timeout: 30_000 })
       await expect(werkstattListe).toHaveCount(0)
@@ -978,7 +993,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await page.getByTestId('kasko-bestaetigen-ja').or(page.getByRole('button', { name: /Ja, das ist mein Tarif/i })).first().click()
     await expect.poll(async () => (await leadZeile(db, leadId))?.disqualifiziert_grund_key, { timeout: 30_000 }).toBe('werkstattbindung')
     // Re-Visit -> Gate -> korrigieren
-    await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+    await gotoFlow(page, token)
     await expect(page.getByText('Wird geladen …')).toHaveCount(0, { timeout: 30_000 })
     await page.getByTestId('kasko-bindung-korrigieren').or(page.getByRole('button', { name: /Angaben korrigieren/i })).first().click()
     await expect(page.getByRole('heading', { name: /Bei welcher Versicherung/i })).toBeVisible({ timeout: 30_000 })
@@ -1069,7 +1084,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await expect(endseite).toBeVisible({ timeout: 30_000 })
     await expect.poll(async () => (await leadZeile(db, leadId))?.freie_werkstattwahl, { timeout: 30_000 }).toBe(false)
     // Re-Visit -> Gate -> korrigieren -> „Ich weiß es nicht" -> Marker „kann ich gerade nicht prüfen"
-    await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+    await gotoFlow(page, token)
     await expect(page.getByText('Wird geladen …')).toHaveCount(0, { timeout: 30_000 })
     await page.getByTestId('kasko-bindung-korrigieren').or(page.getByRole('button', { name: /Angaben korrigieren/i })).first().click()
     await waehleMarke(page, 'HUK-COBURG')
@@ -1138,10 +1153,18 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     expect(lead!.status, 'konvertierter Lead wird auf umgewandelt re-qualifiziert').toBe('umgewandelt')
     await page.waitForLoadState('networkidle').catch(() => {})
     await expect(page.getByText(/Kasko-Tarif enthält eine Werkstattbindung/i)).toHaveCount(0, { timeout: 30_000 })
-    const unklar = await page.getByTestId('kasko-unklar-hinweis').count()
-    const finder = await page.getByRole('heading', { name: /Werkstatt finden/i }).count()
-    console.log('[T18] Portal nach Korrektur unbekannt — Unklar-Hinweis:', unklar, '· Finder-Überschrift:', finder)
+    // Soll (E3): „unbekannt" wird durchgelassen — der Kunde muss die Werkstatt-Strecke sehen. Auf den
+    // Folgezustand WARTEN (der Portal-Refresh kommt nach dem Toast), nicht sofort zaehlen.
+    const finder = page.getByRole('heading', { name: /Werkstatt finden/i }).first()
+    const holding = page.getByText(/Werkstatt wird vermittelt|kümmern uns um|Vermittlung läuft/i).first()
+    const toast = page.getByText(/prüfe deinen Versicherungsschein/i).first()
+    const toastGesehen = await toast.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true).catch(() => false)
+    const finderDa = await finder.waitFor({ state: 'visible', timeout: 30_000 }).then(() => true).catch(() => false)
+    const holdingDa = finderDa ? false : await holding.isVisible().catch(() => false)
+    const dauerhaft = await page.getByTestId('kasko-unklar-hinweis').count()
+    console.log('[T18] Portal nach Korrektur unbekannt — Toast gesehen:', toastGesehen, '· Finder:', finderDa, '· Holding-Card:', holdingDa, '· dauerhafter Unklar-Hinweis:', dauerhaft)
     await shot(page, 't18-02-portal-nach-korrektur-unbekannt')
+    expect(finderDa, 'unbekannt wird durchgelassen (E3): Werkstatt-Finder sichtbar').toBe(true)
   })
 
   // ── T8 · Admin (angemeldet): Wissensbasis-Liste ──
