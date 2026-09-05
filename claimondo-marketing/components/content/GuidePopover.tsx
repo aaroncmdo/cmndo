@@ -36,6 +36,38 @@ const ABLEHNUNG_KEY = 'claimondo:guide-popover:abgelehnt-bis'
 const ERLEDIGT_KEY = 'claimondo:guide-popover:erledigt'
 const RUHE_TAGE = 30
 
+// Ansprache je Themencluster des Artikels. Ein Gegenwert, der zum gerade
+// gelesenen Thema passt, konvertiert erfahrungsgemaess ein Vielfaches eines
+// allgemeinen (lead-magnets: "content upgrades 2-5x"). Variiert wird NUR dort,
+// wo der Guide wirklich eine passende Seite hat — die Zeilen spiegeln den
+// Guide-Inhalt, sie behaupten nichts Neues. Alle anderen Cluster (H1, H2, H7)
+// bekommen die allgemeine Ansprache.
+const ANSPRACHE: Record<string, { titel: string; text: string; band: string }> = {
+  // Schadenspositionen — 21 Artikel, Guide-Seiten 2 + 5
+  H3: {
+    titel: 'Nutzungsausfall und Wertminderung werden am seltensten geltend gemacht.',
+    text: 'Seite 2 des Guides listet jede Position mit typischer Spanne, Seite 5 die drei Wege beim Totalschaden. Kostenlos, sofort hier.',
+    band: 'Jede Schadensposition mit Betrag.',
+  },
+  // Standard-Unfall-Szenarien — 12 Artikel, Guide-Seite 4
+  H6: {
+    titel: 'Am Unfallort entscheidet sich, was Sie später bekommen.',
+    text: 'Die Checkliste auf Seite 4: sofort, am selben Tag, in der ersten Woche. Kostenlos, sofort hier.',
+    band: 'Die Checkliste zum Abhaken.',
+  },
+  // Fristen — 5 Artikel, Guide-Seite 6
+  H4: {
+    titel: 'Fast jede Abrechnung kommt zuerst gekürzt zurück.',
+    text: 'Seite 6 nimmt den vier häufigsten Textbausteinen der Versicherer die Wirkung. Kostenlos, sofort hier.',
+    band: 'Was gegen Kürzungen hilft.',
+  },
+}
+const ALLGEMEIN = {
+  titel: 'Die meisten fordern weniger, als ihnen zusteht.',
+  text: 'Sechs Seiten mit allem, was Sie verlangen können. Kostenlos, und Sie bekommen ihn sofort hier.',
+  band: 'Sechs Seiten, was Ihnen zusteht.',
+}
+
 function track(name: string, params?: Record<string, unknown>): void {
   if (typeof window === 'undefined' || !window.gtag) return
   window.gtag('event', name, { source: 'guide-popover', ...params })
@@ -57,8 +89,11 @@ function darfZeigen(): boolean {
 export function GuidePopover({
   artikelSelector = 'article',
   mobilBand = true,
+  cluster,
 }: {
   artikelSelector?: string
+  /** Themencluster des Artikels (H1–H7). Steuert die Ansprache, siehe ANSPRACHE. */
+  cluster?: string | null
   /**
    * Das Mobil-Band ist `fixed bottom-0`. Seiten, die bereits eine feste Leiste am
    * unteren Rand tragen (StickyCallBar auf den Ratgeber-Artikeln: `fixed bottom-4`),
@@ -98,12 +133,12 @@ export function GuidePopover({
         /* Speicher blockiert: dann eben nur fuer diesen Seitenaufruf gemerkt. */
       }
       setOffen(true)
-      track('guide_popover_eingeblendet', { gelesen_prozent: Math.round(gelesen * 100) })
+      track('guide_popover_eingeblendet', { gelesen_prozent: Math.round(gelesen * 100), cluster: cluster ?? 'allgemein' })
     }
 
     window.addEventListener('scroll', pruefe, { passive: true })
     return () => window.removeEventListener('scroll', pruefe)
-  }, [artikelSelector])
+  }, [artikelSelector, cluster])
 
   const schliessen = (grund: 'weggeklickt' | 'erledigt') => {
     setOffen(false)
@@ -117,6 +152,7 @@ export function GuidePopover({
   }
 
   const guidePfad = ergebnis?.ok ? ergebnis.guidePfad : (ergebnis?.guidePfad ?? null)
+  const ansprache = (cluster && ANSPRACHE[cluster]) || ALLGEMEIN
 
   return (
     <>
@@ -130,7 +166,7 @@ export function GuidePopover({
           <div className="flex items-center gap-3">
             <p className="min-w-0 flex-1 text-sm leading-snug text-white">
               <span className="font-semibold">Unfallguide, kostenlos.</span>{' '}
-              <span className="text-white/70">Sechs Seiten, was Ihnen zusteht.</span>
+              <span className="text-white/70">{ansprache.band}</span>
             </p>
             <Link
               href="/unfallguide"
@@ -214,11 +250,10 @@ export function GuidePopover({
                 }}
               >
                 <DialogPrimitive.Title className="max-w-sm font-heading text-xl font-bold leading-snug text-claimondo-navy">
-                  Die meisten fordern weniger, als ihnen zusteht.
+                  {ansprache.titel}
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Description className="mt-2 text-base leading-relaxed text-slate-600">
-                  Sechs Seiten mit allem, was Sie verlangen können. Kostenlos, und Sie bekommen ihn
-                  sofort hier.
+                  {ansprache.text}
                 </DialogPrimitive.Description>
 
                 <div className="mt-5 space-y-3">

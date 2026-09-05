@@ -129,7 +129,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           (fixed bottom-4); zwei feste Leisten am unteren Rand wuerden sich
           gegenseitig verdecken. Auf Mobil fuehren Anker-Block und Fusszeile
           zum Guide. */}
-      <GuidePopover mobilBand={false} />
+      <GuidePopover mobilBand={false} cluster={a.cluster ?? null} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>
