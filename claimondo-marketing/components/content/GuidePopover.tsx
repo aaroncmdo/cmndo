@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import Link from 'next/link'
 import { X, Download, Check, ArrowRight } from 'lucide-react'
@@ -68,6 +68,24 @@ const ALLGEMEIN = {
   band: 'Sechs Seiten, was Ihnen zusteht.',
 }
 
+// Ist das ein Desktop-Schirm? Als externer Store statt useState+useEffect: der Wert
+// steht damit schon beim ERSTEN Client-Render fest (kein Aufblitzen), und die
+// react-hooks-Regel gegen setState im Effect wird nicht verletzt. SSR-Schnappschuss
+// ist `false` — auf dem Server gibt es keinen Schirm, und "kein Dialog" ist die
+// sichere Annahme.
+const DESKTOP = '(min-width: 768px)'   // deckungsgleich mit Tailwinds `md:`
+
+function desktopAbonnieren(melden: () => void): () => void {
+  if (typeof window === 'undefined') return () => {}
+  const mq = window.matchMedia(DESKTOP)
+  mq.addEventListener('change', melden)
+  return () => mq.removeEventListener('change', melden)
+}
+
+function desktopLesen(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia(DESKTOP).matches
+}
+
 function track(name: string, params?: Record<string, unknown>): void {
   if (typeof window === 'undefined' || !window.gtag) return
   window.gtag('event', name, { source: 'guide-popover', ...params })
@@ -103,6 +121,7 @@ export function GuidePopover({
    */
   mobilBand?: boolean
 }) {
+  const istDesktop = useSyncExternalStore(desktopAbonnieren, desktopLesen, () => false)
   const [offen, setOffen] = useState(false)
   const [ergebnis, setErgebnis] = useState<GuideLeadErgebnis | null>(null)
   const [laeuft, starte] = useTransition()
@@ -125,6 +144,15 @@ export function GuidePopover({
       const box = artikel.getBoundingClientRect()
       const gelesen = -box.top / Math.max(artikel.offsetHeight, 1)
       if (!runter || gelesen < TRIGGER_ANTEIL) return
+
+      // ⚠ AUF MOBIL NICHT OEFFNEN. Frueher entschied allein das CSS (`hidden md:block`)
+      // darueber, ob man den Dialog SIEHT — montiert wurde er trotzdem. Der
+      // Portal-Container traegt diese Klassen nicht und legte sich als
+      // bildschirmfuellendes, unsichtbares `fixed`-Element ueber den Artikel: jeder
+      // Klick auf den Text landete dort. Gefunden im ersten echten Prod-Smoke
+      // (390x844, pointer-events: auto, ueber der H1). Live gelesen statt aus dem
+      // Store, damit eine Groessenaenderung waehrend des Lesens sofort zaehlt.
+      if (!window.matchMedia(DESKTOP).matches) return
 
       window.removeEventListener('scroll', pruefe)
       try {
@@ -188,7 +216,12 @@ export function GuidePopover({
         </div>
       )}
 
-      {/* ── Desktop: Modal mit zwei Feldern ────────────────────────── */}
+      {/* ── Desktop: Modal mit zwei Feldern ──────────────────────────
+          `istDesktop` statt nur CSS: sonst montiert der Portal auf Mobil einen
+          unsichtbaren Vollbild-Layer, der die Klicks des Lesers frisst. Zweiter
+          Riegel neben der Pruefung im Ausloeser — der Dialog darf auf Mobil weder
+          geoeffnet NOCH montiert werden. */}
+      {istDesktop && (
       <DialogPrimitive.Root
         open={offen}
         onOpenChange={(o) => {
@@ -331,6 +364,7 @@ export function GuidePopover({
           </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+      )}
     </>
   )
 }
