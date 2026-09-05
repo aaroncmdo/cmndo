@@ -1,6 +1,15 @@
 # Abnahme-Inbox: Kunden-Mails im Prod-Smoke nachweisen
 
-**Entscheidung Aaron, 05.09.2026.** Ein Postfach `abnahme@claimondo.de` im Google Workspace empfängt die Mails, die Smokes und Abnahmen auslösen. Damit wird die letzte Lücke im Regel-4-Nachweis geschlossen: Bis dahin war keine einzige Kunden-Mail belegbar.
+**Entscheidung Aaron, 05.09.2026.** Ein Postfach empfängt die Mails, die Smokes und Abnahmen auslösen. Damit wird die letzte Lücke im Regel-4-Nachweis geschlossen: Bis dahin war keine einzige Kunden-Mail belegbar.
+
+**Zwei Postfächer sind zugelassen — du wählst eines:**
+
+| Adresse | wann | Aufwand |
+|---|---|---|
+| `abnahme@claimondo.de` | wenn Test-Mails getrennt liegen sollen | neues Konto im Workspace anlegen |
+| `noreply@claimondo.de` | wenn kein neues Konto entstehen soll | nur App-Passwort für das bestehende Konto |
+
+`noreply@` ist zugleich die Absenderadresse (`RESEND_FROM`). Absender und Empfänger sind dann dieselbe Adresse. Das ist unkritisch, weil der Versand über Resend läuft: Die Mail kommt von außen und durchläuft den normalen Empfang. Bleibt die INBOX wider Erwarten leer, hilft `ABNAHME_INBOX_MAILBOX="[Gmail]/Alle Nachrichten"` — die Specs bleiben unverändert.
 
 ## Warum es das braucht
 
@@ -10,27 +19,29 @@ Der prozessweite Schalter `SIDE_EFFECT_MODE=test-recipient` hilft auf prod nicht
 
 ## Was gilt
 
-* **Zustellbar, aber intern.** `abnahme@claimondo.de` und jede Plus-Adresse `abnahme+<tag>@claimondo.de` werden zugestellt (`istAbnahmeInbox` in `nurZustellbareEmpfaenger`). Für die Lead-Identität bleibt die Adresse intern: Der Matching-Guard behandelt den Lead als Test, kein echter Sachverständiger wird gebucht oder benachrichtigt.
+* **Zustellbar, aber intern.** `abnahme@`, `noreply@` und deren Plus-Adressen (`…+<tag>@claimondo.de`) werden zugestellt (`istAbnahmeInbox` in `nurZustellbareEmpfaenger`). Für die Lead-Identität bleiben sie intern: Der Matching-Guard behandelt den Lead als Test, kein echter Sachverständiger wird gebucht oder benachrichtigt.
 * **Ein Postfach, viele Läufe.** Google liefert `abnahme+e6-kasko-1725000000@` in dasselbe Postfach. Der Tag identifiziert den Lauf; Specs suchen nach genau dieser Adresse.
-* **Nur dieses eine Postfach.** Keine weiteren `@claimondo.de`-Adressen freischalten. Wer eine zweite Test-Inbox braucht, erweitert `istAbnahmeInbox` bewusst und dokumentiert es hier.
+* **Nur diese beiden Postfächer.** Keine weiteren `@claimondo.de`-Adressen freischalten. Wer eine dritte Test-Inbox braucht, erweitert `istAbnahmeInbox` bewusst und dokumentiert es hier. `abnahmeleitung@` oder `noreply-alt@` sind ausdrücklich nicht erfasst (Test deckt das ab).
 * **Zugangsdaten nie ins Repo.** Das Repo ist öffentlich. `ABNAHME_INBOX_USER` und `ABNAHME_INBOX_PASS` stehen nur in `.env.local` und in den GitHub-Secrets.
 
 ## Einrichtung (einmalig, Aaron)
 
-1. Im Google Workspace das Postfach `abnahme@claimondo.de` anlegen (eigener Nutzer, nicht nur Alias: IMAP braucht ein Login).
+1. Postfach wählen: entweder `abnahme@claimondo.de` neu anlegen (eigener Nutzer, nicht nur Alias — IMAP braucht ein Login) oder das bestehende `noreply@claimondo.de` nutzen.
 2. Für diesen Nutzer die Bestätigung in zwei Schritten aktivieren, dann unter „Sicherheit → App-Passwörter" ein App-Passwort für „Mail" erzeugen (16 Zeichen).
 3. In Gmail-Einstellungen des Postfachs IMAP aktivieren (Workspace-Standard ist an).
 4. Lokal in `.env.local` eintragen (nicht committen):
 
    ```
-   ABNAHME_INBOX_USER=abnahme@claimondo.de
+   ABNAHME_INBOX_USER=abnahme@claimondo.de     # oder noreply@claimondo.de
    ABNAHME_INBOX_PASS=<App-Passwort>
+   # optional, falls die INBOX leer bleibt:
+   # ABNAHME_INBOX_MAILBOX=[Gmail]/Alle Nachrichten
    ```
 
 5. Für den nächtlichen e2e-Job als Secrets setzen:
 
    ```
-   gh secret set ABNAHME_INBOX_USER --body "abnahme@claimondo.de"
+   gh secret set ABNAHME_INBOX_USER --body "abnahme@claimondo.de"   # oder noreply@claimondo.de
    gh secret set ABNAHME_INBOX_PASS --body "<App-Passwort>"
    ```
 
@@ -43,7 +54,7 @@ import { abnahmeAdresse, abnahmeInboxKonfiguriert, warteAufMail, zaehleMails } f
 
 test.skip(!abnahmeInboxKonfiguriert(), 'ABNAHME_INBOX_* nicht gesetzt')
 
-const email = abnahmeAdresse(`mein-lauf-${Date.now()}`)     // abnahme+mein-lauf-…@claimondo.de
+const email = abnahmeAdresse(`mein-lauf-${Date.now()}`)     // <postfach>+mein-lauf-…@claimondo.de
 const seit = new Date(Date.now() - 2 * 60_000)
 // … Lead mit dieser Email seeden, UI fahren …
 const mail = await warteAufMail({ an: email, betreffEnthaelt: 'Werkstattbindung', seit, timeoutMs: 180_000 })

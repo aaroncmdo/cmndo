@@ -22,6 +22,17 @@ import { ImapFlow } from 'imapflow'
 import { simpleParser } from 'mailparser'
 
 export const ABNAHME_INBOX_DOMAIN = 'claimondo.de'
+/**
+ * Welches Postfach die Specs adressieren: 'abnahme' (eigenes Konto) oder 'noreply' (die Absenderadresse,
+ * Aarons Alternative ohne neues Konto). Kommt aus ABNAHME_INBOX_USER — der lokale Teil VOR dem Plus.
+ * Fehlt die Variable, bleibt 'abnahme' (nur fuer Fehlermeldungen relevant, ohne Zugangsdaten skippen Specs).
+ */
+function inboxLocal(): string {
+  const user = (process.env.ABNAHME_INBOX_USER ?? '').trim().toLowerCase()
+  const at = user.lastIndexOf('@')
+  const local = at > 0 ? user.slice(0, at) : ''
+  return local === 'noreply' ? 'noreply' : 'abnahme'
+}
 
 export type AbnahmeMail = {
   uid: number
@@ -43,7 +54,10 @@ export type MailSuche = {
   seit?: Date
 }
 
-/** abnahme+<tag>@claimondo.de — der Tag markiert den Lauf (nur a-z, 0-9, Bindestrich; max. 40 Zeichen). */
+/**
+ * <postfach>+<tag>@claimondo.de — der Tag markiert den Lauf (nur a-z, 0-9, Bindestrich; max. 40 Zeichen).
+ * Das Postfach folgt ABNAHME_INBOX_USER, damit dieselbe Spec mit abnahme@ und mit noreply@ laeuft.
+ */
 export function abnahmeAdresse(tag: string): string {
   const sauber = tag
     .toLowerCase()
@@ -51,7 +65,7 @@ export function abnahmeAdresse(tag: string): string {
     .replace(/^-+|-+$/g, '')
     .slice(0, 40)
   if (!sauber) throw new Error('abnahmeAdresse: leerer Tag')
-  return `abnahme+${sauber}@${ABNAHME_INBOX_DOMAIN}`
+  return `${inboxLocal()}+${sauber}@${ABNAHME_INBOX_DOMAIN}`
 }
 
 export function abnahmeInboxKonfiguriert(): boolean {
@@ -77,7 +91,9 @@ async function mitInbox<T>(fn: (suche: (s: MailSuche) => Promise<AbnahmeMail[]>)
   })
   await client.connect()
   try {
-    const lock = await client.getMailboxLock('INBOX')
+    // Ordner konfigurierbar: bleibt die INBOX leer (Filter, „an mich selbst"), auf
+    // ABNAHME_INBOX_MAILBOX='[Gmail]/Alle Nachrichten' umstellen, ohne die Specs anzufassen.
+    const lock = await client.getMailboxLock(process.env.ABNAHME_INBOX_MAILBOX || 'INBOX')
     try {
       return await fn((s) => sucheInVerbindung(client, s))
     } finally {
