@@ -59,8 +59,20 @@ darin ist als Absicht der besitzenden Lane belegt, samt Nachweis, dass nichts me
 (Erstmals angeschlagen in R470: `docs/unfallguide/hero.jpeg`, gewollt ersetzt durch `titelbild.jpg`.)
 
 **D4 — Migration-File-Parität ist Teil von Gate 2 und blockt die Runde.**
-`npm run check:migration-files -- --ratchet` muss vor dem Reparent `exit 0` liefern. Eine neue
-getrackte Migration ohne File im Repo hält die Runde an.
+`npm run check:migration-files -- --ratchet` muss vor dem Reparent die **Summenzeile mit `0 neu`**
+zeigen — z. B. `1267 getrackt, 1265 Files, 2 ohne File (Baseline 2), 0 neu`. Eine neue getrackte
+Migration ohne File im Repo hält die Runde an.
+
+⚠ **Verlangt wird die Zeile, nicht nur `exit 0`** — und der Lauf gehört **ohne** Ausgabe-Umleitung
+gefahren. Ein abgestürzter Check liefert ebenfalls einen Exit ≠ 0 und sieht damit aus wie ein Fund.
+Am 06.09.2026 genau so passiert: `exit 1` kam nicht von einer verwaisten Migration, sondern von
+`ERR_MODULE_NOT_FOUND` — im **Haupt-Checkout** fehlt `@supabase/supabase-js`, weil dort keine
+Abhängigkeiten installiert sind. Der Lauf war nach `/dev/null` geleitet, also war genau die Zeile
+unterdrückt, die es gesagt hätte. Fail-closed ist richtig, die falsche **Diagnose** ist der Schaden:
+sie schickt die nächste Session auf die Suche nach einer Migration, die es nicht gibt.
+→ Den Check in einem Worktree mit `node_modules` fahren, `--env-file` per **absolutem** Pfad auf die
+`.env.local` des Haupt-Checkouts zeigen lassen, und die Ausgabe lesen. Grundsatz: **ein Positiv
+verlangen, nicht die Abwesenheit eines Negativs.**
 ⚠ Dieses Gate steht **bewusst beim Drain und nicht in der CI**: die Drift entsteht außerhalb eines
 PRs, ein CI-Ratchet würde unbeteiligte Lanes rot färben (Begründung des Autors im ci.yml-Kommentar,
 unverändert gültig). Beim Drain ist der Radius genau eine Runde, und der Drain darf sie selbst
@@ -380,7 +392,9 @@ Verfassungsprinzip „Kein Feature ohne Reise" (Fundament §1, Prinzip 10): oper
 
 1. **Soll zuerst (Journey-Delta VOR dem Bau).** Das neue/geänderte Soll-Verhalten wird als Journey-Abschnitt geschrieben — im **selben PR**, bevor der Code steht. Neue Journey → neue Datei im Pflichtformat (Fundament §A1); Änderung → Delta in der bestehenden Journey. Kein Feature-Code ohne vorher aufgeschriebene Soll-Erwartung.
 2. **Journey-Spec nachziehen.** Der zugehörige Journey-Smoke (`tests/e2e/…`, Schrittnummer als Kommentar → Traceability Spec ↔ Journey) wird auf das neue Soll aktualisiert; neue nicht-automatisierbare Schritte als `test.skip` mit Begründung + Journey-Referenz (nie stillschweigend weglassen).
-3. **Journey-Smoke grün VOR Merge.** Nachweis über den Prod-Smoke-Weg (Regel 4: Kommando + Output im PR) VOR dem Merge; der CI-Journey-Step (`e2e`-Job) läuft **post-merge** gegen prod und ist die Dauer-Absicherung (einmal grün → nie wieder rot gemergt). Rot → nicht mergen.
+3. **Journey-Smoke grün VOR Merge.** Nachweis über den Prod-Smoke-Weg (Regel 4: Kommando + Output im PR) VOR dem Merge. Rot → nicht mergen.
+
+   ⚠ **Der `e2e`-Job ist NICHT die Absicherung des einzelnen Merges.** Hier stand bis 05.09.2026, er laufe „post-merge gegen prod". Das stimmt nicht mehr (und die Umstellung war bewusst, siehe Kommentar bei `on:` in `ci.yml`): der Job trägt `if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'` und läuft damit **nachts um 03:30 UTC** gegen `https://app.claimondo.de` — **nicht** beim Push auf `main`. Zwischen einem Merge und dem nächsten Nachtlauf liegen bis zu 24 Stunden ohne Journey-Beweis. Wer ihn sofort braucht: `gh workflow run CI --ref main` (genau dafür ist der manuelle Trigger da). Die Nacht-Suite ist die **Dauer**-Absicherung, der Regel-4-Smoke bleibt der Nachweis **dieser** Änderung — sie ersetzen einander nicht.
 
 **Verhältnis zu Regel 4:** Regel 4 (Prod-Smoke nach Deploy) bleibt der Abschluss-Beweis für **jeden** verhaltensrelevanten PR. D1 zieht für **Journey-berührende Feature-Arbeit** den Beweis nach vorn (Soll + grüner Journey-Smoke als Merge-Voraussetzung) und macht damit „OFFEN: Regel-4" für die abgedeckten Journeys zur strukturellen Ausnahme statt zur Dauerschuld.
 
