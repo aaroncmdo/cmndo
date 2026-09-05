@@ -102,6 +102,11 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
                 </Link>
               </li>
               <li>
+                <Link href="/unfallguide" className="transition-colors hover:text-white">
+                  {t('product.unfallguide')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/ersteinschaetzung" className="transition-colors hover:text-white">
                   {t('product.einschaetzung')}
                 </Link>

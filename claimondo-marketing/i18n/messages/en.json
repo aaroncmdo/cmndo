@@ -204,7 +204,8 @@
         "melden": "Report damage",
         "einschaetzung": "First estimate",
         "beratung": "Request consultation",
-        "was_kostet": "What does it cost?"
+        "was_kostet": "What does it cost?",
+        "unfallguide": "Accident guide"
       },
       "partner": {
         "heading": "Partners",
@@ -4038,7 +4039,8 @@
       "cs_ki_tail": "— three photos and a short description are enough.",
       "cs_report_mid": "with a callback in under 15 minutes:",
       "cs_report_tail": "— no sign-up, 3 fields.",
-      "cs_phone_hours": "(Mon–Fri 08:00–20:00, Sat & Sun 09:00–18:00)"
+      "cs_phone_hours": "(Mon–Fri 08:00–20:00, Sat & Sun 09:00–18:00)",
+      "read_guide": "Read the accident guide"
     },
     "cluster": {
       "heading": "Choose your topic",

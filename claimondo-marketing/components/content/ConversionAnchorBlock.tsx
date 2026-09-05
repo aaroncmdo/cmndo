@@ -2,6 +2,7 @@ import {
   HANDOFF_URL_KARTE,
   HANDOFF_URL_SCHADEN,
   HANDOFF_URL_KI_CHECK,
+  HANDOFF_URL_GUIDE,
 } from '@/lib/seo/conversion-handoff'
 import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
@@ -15,6 +16,7 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const KARTE_PATH = new URL(HANDOFF_URL_KARTE).pathname
 const SCHADEN_PATH = new URL(HANDOFF_URL_SCHADEN).pathname
 const KI_PATH = new URL(HANDOFF_URL_KI_CHECK).pathname
+const GUIDE_PATH = new URL(HANDOFF_URL_GUIDE).pathname
 const TEL_HREF = `tel:${PHONE_E164}`
 const showUrl = (u: string) => u.replace(/^https?:\/\//, '')
 
@@ -79,6 +81,10 @@ function Spoke() {
         <li>
           → {t('anchor.find_sv')}:{' '}
           <a href={KARTE_PATH} className={primaryLink}>{showUrl(HANDOFF_URL_KARTE)}</a>
+        </li>
+        <li>
+          → {t('anchor.read_guide')}:{' '}
+          <a href={GUIDE_PATH} className={secondaryLink}>{showUrl(HANDOFF_URL_GUIDE)}</a>
         </li>
         <li>
           → {t('anchor.phone')}:{' '}

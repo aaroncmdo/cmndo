@@ -204,7 +204,8 @@
         "melden": "Zgłoś szkodę",
         "einschaetzung": "Wstępna ocena",
         "beratung": "Zapytaj o konsultację",
-        "was_kostet": "Ile to kosztuje?"
+        "was_kostet": "Ile to kosztuje?",
+        "unfallguide": "Poradnik po wypadku"
       },
       "partner": {
         "heading": "Partnerzy",
@@ -4038,7 +4039,8 @@
       "cs_ki_tail": "— wystarczą trzy zdjęcia i krótki opis.",
       "cs_report_mid": "z oddzwonieniem w czasie poniżej 15 minut:",
       "cs_report_tail": "— bez rejestracji, 3 pola.",
-      "cs_phone_hours": "(pon.–pt. 08–20, sob. i niedz. 09–18)"
+      "cs_phone_hours": "(pon.–pt. 08–20, sob. i niedz. 09–18)",
+      "read_guide": "Przeczytaj poradnik po wypadku"
     },
     "cluster": {
       "heading": "Wybierz swój temat",
