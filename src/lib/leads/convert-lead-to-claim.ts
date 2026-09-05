@@ -596,6 +596,10 @@ export async function convertLeadToClaim(
   ;(claimsInsert as Record<string, unknown>).schuldfrage = (lead.schuldfrage as string | null) ?? null
   ;(claimsInsert as Record<string, unknown>).eigene_versicherung =
     (lead.eigene_versicherung as string | null) ?? null
+  // Kasko-WB Phase 2 (D2): die unverbindliche Selbst-Auswertung aus dem /check-Quiz reist mit — der Spalten-
+  // Kommentar auf claims versprach das seit dem 30.08., der Konverter tat es nie (Scan 05.09.: 0 Treffer).
+  ;(claimsInsert as Record<string, unknown>).auswertung_unverbindlich =
+    (lead as Record<string, unknown>).auswertung_unverbindlich ?? null
   // Convert-Mapping (Aaron 14.07.) — Record-Cast wg. Type-Lag (Spalten additiv via #4238):
   //   F2: interne_notizen = Dispatcher-Notiz (leads.notiz) — wird vom AI-Briefing gelesen
   //       (briefing-prompt.ts); bisher verwaist (nie nach claims gemappt).
