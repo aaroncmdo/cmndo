@@ -2,7 +2,12 @@ titelbild.jpg ist eine ABGELEITETE Fassung - nicht von Hand bearbeiten.
 
 Quelle : claimondo-marketing/public/brand/hero-unfall-frau.png
 md5    : 8728c637a10290b10871c044cfcef784
-Erzeugt: PIL, JPEG q82, progressive, optimize
+Erzeugt: PIL, GaussianBlur radius=6, dann JPEG q82, progressive, optimize
+
+Der Weichzeichner ist Absicht (Aaron 05.09.2026): das Bild liegt als vollflaechiger
+Hintergrund unter Logo, Ueberschrift und Kennzahlen. Weich gezeichnet tritt es
+zurueck und der Text darauf liest sich ruhiger. Nebeneffekt: die JPEG-Datei wird
+KLEINER (195 kB -> 89 kB), weil die hohen Frequenzen fehlen.
 
 Warum abgeleitet und nicht direkt referenziert: das Original ist ein PNG.
 Ein unkomprimiertes Foto treibt die PDF auf 2,5 MB - als JPEG sind es rund

@@ -314,6 +314,9 @@
   .weg span b{color:inherit;font-weight:600}
 
   .doppel{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+  /* Absatz direkt NACH einem Block (.doppel/.kuerzungen) klebt sonst am Raster —
+     auf Seite 5 fiel es nie auf, weil dort immer eine h3 folgt. */
+  .fliess.nachsatz{margin-top:3.4mm}
   .doppel h3{margin-top:2.4mm}
   .doppel .fliess{font-size:8.3pt;line-height:1.4;max-width:none}
 
@@ -876,7 +879,7 @@
       <img class="marke" src="../../claimondo-marketing/public/brand/logo-mark.svg" alt="">
       <img class="wort" src="../../claimondo-marketing/public/claimondo-wortmarke.svg" alt="Claimondo">
     </span>
-    <span class="rubrik">Wenn gekürzt wird</span>
+    <span class="rubrik">Kürzungen &amp; Auszahlung</span>
   </div>
 
   <h2>Fast jede Abrechnung <span class="zweit">kommt zuerst gekürzt zurück.</span></h2>
@@ -909,11 +912,41 @@
     </div>
   </div>
 
+  <h3>Auszahlen lassen oder reparieren? Sie entscheiden.</h3>
+  <p class="fliess">Sie müssen nicht reparieren, um Geld zu bekommen. Beide Wege sind
+  zulässig — die Wahl liegt bei Ihnen, nicht bei der Versicherung. Sie führen nur zu
+  unterschiedlichen Beträgen.</p>
+
+  <div class="doppel">
+    <div>
+      <h3>Auszahlen lassen — „fiktiv“</h3>
+      <p class="fliess">Grundlage ist das <b>Gutachten</b>, nicht eine Werkstattrechnung.
+      Ausgezahlt wird der kalkulierte Betrag, aber <b>ohne die 19 % Mehrwertsteuer</b>.
+      Danach sind Sie frei: reparieren lassen, selbst reparieren oder den Schaden lassen
+      und das Geld behalten. Sinnvoll, wenn Sie das Auto ohnehin abgeben, wenn der Schaden
+      Sie nicht stört — oder wenn Sie ihn selbst beheben können.</p>
+    </div>
+    <div>
+      <h3>Reparieren lassen — „konkret“</h3>
+      <p class="fliess">Grundlage ist die <b>Werkstattrechnung</b>. Dann kommen die
+      <b>19 % Mehrwertsteuer</b> dazu und die tatsächlich gezahlten Stundensätze statt der
+      kalkulierten. Bei 15.000 € Reparaturkosten sind das rund <b>2.400 €</b>, die es bei
+      Auszahlung nicht gibt — und der Schaden ist danach wirklich behoben.</p>
+    </div>
+  </div>
+
+  <p class="fliess nachsatz"><b>Was dabei am häufigsten übersehen wird:</b> Wer sich auszahlen lässt
+  <b>und</b> zusätzlich Nutzungsausfall oder die 130-%-Regel geltend macht, muss belegen,
+  dass tatsächlich fachgerecht repariert wurde — die Versicherung sieht sonst keinen
+  Reparaturzeitraum. Dafür genügt eine <b>Reparaturbestätigung</b>: eine kurze
+  Nachbesichtigung durch den Sachverständigen, keine Werkstattrechnung. Fotos reichen
+  nicht. Die Kosten gehören zur Rechtsverfolgung und werden erstattet.</p>
+
   <a class="cta" href="tel:+4915153608515">
     <span class="cta-text">
-      <span class="cta-t">Brief von der Versicherung bekommen?</span>
-      <span class="cta-s">Lesen Sie ihn uns kurz vor, bevor Sie antworten. Ein eigenes
-      Gutachten zahlt bei klarer Haftung die Gegenseite.</span>
+      <span class="cta-t">Brief bekommen — oder unsicher, welcher Weg sich lohnt?</span>
+      <span class="cta-s">Lesen Sie uns den Brief kurz vor, bevor Sie antworten. Und wenn
+      Sie zwischen Auszahlung und Reparatur schwanken, rechnen wir beides mit Ihnen durch.</span>
     </span>
     <span class="cta-pille">0151 5360 8515</span>
   </a>
