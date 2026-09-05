@@ -36,10 +36,12 @@ import { GUIDE_PFAD, type GuideLeadFeld, type GuideLeadErgebnis } from './consta
 //    § 7 UWG verlangt fuer Werbeanrufe bei Verbrauchern eine vorherige
 //    ausdrueckliche Einwilligung. Dass der Nutzer den Rueckruf selbst
 //    anfordert, spricht dafuer — festgehalten werden muss es trotzdem.
-//    ACHTUNG: `anfragen.dsgvo_zustimmung_am` existiert, aber der RPC traegt
-//    ihn NICHT nach `leads` (gegen prod geprueft). Der Nachweis lebt also in
-//    der Anfrage-Zeile, nicht am Lead. Wer das am Lead braucht, muss den RPC
-//    erweitern — bewusst nicht in diesem PR.
+//    Der Nachweis steht an ZWEI Stellen: auf der `anfragen`-Zeile (dort setzt
+//    ihn dieser Code beim Insert) und am Lead. Letzteres ist noetig, weil der
+//    RPC `convert_anfrage_zu_lead` den Wert NICHT weitertraegt (gegen prod
+//    geprueft) — gesucht wird er aber auf `leads.dsgvo_zustimmung_am`. Statt
+//    den RPC zu erweitern (er hat andere Aufrufer) setzt die Action ihn direkt
+//    nach der Konversion nach.
 //
 // 3. DIE AUSLIEFERUNG HAENGT NICHT AM VERSAND. Der Guide erscheint direkt
 //    nach dem Absenden auf der Seite. FlowLink und Rueckruf kommen dazu, aber
@@ -88,6 +90,9 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
 
   const sb = createServiceClient()
   const email = parsed.data.email?.trim() || null
+  // Einmal bestimmt, dreifach genutzt: Timeline-Eintrag, Rueckruf-Auftrag und
+  // Willkommensnachricht sagen damit garantiert dasselbe.
+  const fenster = rueckrufFenster()
 
   const { data: anfrage, error: anfrageFehler } = await sb
     .from('anfragen')
@@ -139,6 +144,66 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
   // Ohne Anzeigenklick oder Marketing-Consent ein No-op.
   await erfasseLeadAttribution(String(leadId))
 
+  // EINWILLIGUNG AUCH AM LEAD. Sie steht bereits auf der `anfragen`-Zeile, aber der
+  // RPC traegt sie nicht weiter — und gesucht/gezaehlt wird der Nachweis (§ 7 UWG,
+  // Art. 7 DSGVO) auf `leads.dsgvo_zustimmung_am` (Spalte kam mit Migration
+  // 20260704113818). Ohne diese Zeile haette ein Guide-Lead die Einwilligung, ohne
+  // dass sie dort steht, wo jemand sie sucht.
+  // `as never`: die generierten Marketing-Typen kennen die Spalte am leads-Block noch
+  // nicht (Type-Lag; Haus-Muster aus create-lead-from-mini-wizard.ts).
+  // ⚠ Anders als dort wird der Fehler hier GELESEN — `leads` ist eine kritische
+  // Tabelle, und ein try/catch um supabase-js faengt nichts (es wirft nicht).
+  {
+    const { error: consentErr } = await sb
+      .from('leads')
+      .update({ dsgvo_zustimmung_am: new Date().toISOString() } as never)
+      .eq('id', String(leadId))
+    if (consentErr) console.error('[unfallguide] dsgvo_zustimmung_am am Lead:', consentErr.message)
+  }
+
+  // RUECKRUF-AUFTRAG. Landeseite, Guide und Willkommensnachricht versprechen einen
+  // Rueckruf — bis hierhin entstand daraus KEIN Arbeitsanker, nur Benachrichtigungen.
+  // Eine Benachrichtigung verschwindet, eine Aufgabe bleibt liegen, bis jemand sie
+  // erledigt. Muster und Spaltenwahl aus `erstelleOeffentlichenRueckruf`
+  // (typ='rueckruf', status='offen' — beide Werte stehen so im CHECK von admin_termine).
+  // `erstellt_von` ist Pflichtspalte, einen eingeloggten Nutzer gibt es hier nicht ->
+  // erster Dispatch-Account, ersatzweise ein Admin.
+  try {
+    const { data: kandidaten, error: profErr } = await sb
+      .from('profiles')
+      .select('id, rolle')
+      .in('rolle', ['dispatch', 'admin'])
+      .limit(20)
+    if (profErr) console.error('[unfallguide] Traeger-Lookup:', profErr.message)
+    const traeger = kandidaten?.find((k) => k.rolle === 'dispatch') ?? kandidaten?.[0] ?? null
+
+    if (!traeger) {
+      console.error('[unfallguide] Kein Dispatch-/Admin-Profil — Rückruf-Auftrag NICHT angelegt')
+    } else {
+      const { error: terminErr } = await sb.from('admin_termine').insert({
+        typ: 'rueckruf',
+        status: 'offen',
+        titel: `Rückruf: ${parsed.data.name}`,
+        beschreibung: [
+          `Tel: ${parsed.data.telefon}`,
+          email ? `E-Mail: ${email}` : null,
+          'Quelle: Unfallguide (claimondo.de/unfallguide)',
+          `Zugesagt: ${fenster.text}`,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+        start_zeit: fenster.startZeit.toISOString(),
+        end_zeit: new Date(fenster.startZeit.getTime() + 30 * 60_000).toISOString(),
+        lead_id: String(leadId),
+        erstellt_von: traeger.id as string,
+        erinnerung_min_vorher: 10,
+      })
+      if (terminErr) console.error('[unfallguide] Rückruf-Auftrag:', terminErr.message)
+    }
+  } catch (err) {
+    console.error('[unfallguide] Rückruf-Auftrag fehlgeschlagen:', (err as Error).message)
+  }
+
   // Erster Eintrag der Aktivitaetsspur. `timeline.lead_id` hat sechs Schreiber
   // (SA-Unterschrift, Dokumente, FlowLink-Versand, Reminder, Notizen) und seit
   // dieser Lane einen Leser: LeadVerlaufPanel auf der Dispatch-Seite. Ohne diese
@@ -150,7 +215,7 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
       lead_id: String(leadId),
       typ: 'system',
       titel: 'Unfallguide angefordert',
-      beschreibung: `Über claimondo.de/unfallguide. Rückruf zugesagt (8–20 Uhr).${
+      beschreibung: `Über claimondo.de/unfallguide. ${fenster.text}${
         email ? ' E-Mail angegeben.' : ' Keine E-Mail angegeben.'
       }${utm.utm_source ? ` Quelle: ${utm.utm_source}${utm.utm_campaign ? ` / ${utm.utm_campaign}` : ''}.` : ''}`,
       metadata: { quelle: QUELLE, gegenwert: 'unfallguide', utm },
@@ -193,6 +258,7 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
     email,
     vorname,
     flowUrl,
+    zusage: fenster.text,
   })
   {
     const { error: tlErr } = await sb.from('timeline').insert({
@@ -267,14 +333,36 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
 // Endpunkt sendet Text; der E-Mail-Client kann Anhaenge. Das ist keine
 // Notloesung — der Link ist messbar und austauschbar, die Datei liegt im Postfach.
 
-function rueckrufZusage(): string {
-  const stunde = Number(
-    new Intl.DateTimeFormat('de-DE', { hour: 'numeric', hour12: false, timeZone: 'Europe/Berlin' })
-      .format(new Date()),
-  )
-  return stunde >= 8 && stunde < 20
-    ? 'Wir rufen Sie in der Regel innerhalb von 15 Minuten zurück.'
-    : 'Wir rufen Sie morgen ab 8 Uhr zurück.'
+/**
+ * Wann rufen wir zurueck — als Text FUER DEN KUNDEN und als Zeitpunkt FUER DEN
+ * AUFTRAG. Bewusst EINE Funktion: die Nachricht, die der Kunde liest, und der
+ * Termin, den das Team sieht, duerfen nicht auseinanderlaufen.
+ */
+function rueckrufFenster(): { text: string; startZeit: Date } {
+  const jetzt = new Date()
+  const teile = new Intl.DateTimeFormat('de-DE', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+    timeZone: 'Europe/Berlin',
+  }).formatToParts(jetzt)
+  const stunde = Number(teile.find((t) => t.type === 'hour')?.value ?? '12') % 24
+  const minute = Number(teile.find((t) => t.type === 'minute')?.value ?? '0')
+
+  if (stunde >= 8 && stunde < 20) {
+    return {
+      text: 'Wir rufen Sie in der Regel innerhalb von 15 Minuten zurück.',
+      startZeit: new Date(jetzt.getTime() + 15 * 60_000),
+    }
+  }
+  // Ausserhalb der Zeit: der naechste Morgen um 8. Gerechnet wird als DIFFERENZ in
+  // Minuten, nicht ueber ein konstruiertes Datum — letzteres braeuchte eine
+  // Zeitzonen-Bibliothek und ginge an der Sommerzeit-Grenze schief.
+  const stundenBis8 = stunde >= 20 ? 24 - stunde + 8 : 8 - stunde
+  return {
+    text: 'Wir rufen Sie morgen ab 8 Uhr zurück.',
+    startZeit: new Date(jetzt.getTime() + (stundenBis8 * 60 - minute) * 60_000),
+  }
 }
 
 async function sendeWillkommen(opts: {
@@ -283,9 +371,11 @@ async function sendeWillkommen(opts: {
   email: string | null
   vorname: string | null
   flowUrl: string | null
+  /** Wortlaut aus rueckrufFenster() — derselbe, der im Rueckruf-Auftrag steht. */
+  zusage: string
 }): Promise<'whatsapp' | 'email' | 'nicht_versendet'> {
   const anrede = opts.vorname ? `Guten Tag ${opts.vorname},` : 'Guten Tag,'
-  const zusage = rueckrufZusage()
+  const zusage = opts.zusage
   const guideUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}${GUIDE_PFAD}`
 
   // WhatsApp

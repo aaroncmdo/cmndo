@@ -334,3 +334,72 @@ export function GuidePopover({
     </>
   )
 }
+
+/**
+ * DER EINSTIEG AUF DEM HANDY — als Karte IM TEXTFLUSS, nicht als Overlay.
+ *
+ * Warum es sie braucht: das Modal oben ist `md:block`, also Desktop-only
+ * (Interstitial-Risiko auf den SEO-Seiten), und das Mobil-Band ist auf genau
+ * diesen Artikelseiten abgeschaltet, weil es mit der StickyCallBar um dieselbe
+ * Bildschirmkante konkurriert. Damit hatte die mobile Mehrheit der Leser aus dem
+ * Artikel heraus GAR KEINEN Weg zum Guide — nur Anker-Block und Fusszeile.
+ *
+ * Warum diese Form: eine Karte im Fluss hat keine feste Position, kollidiert
+ * also mit nichts, und sie verdeckt keinen Inhalt — das Interstitial-Kriterium
+ * greift nicht. Sie wird geklickt statt eingeblendet; ein klick-ausgeloester
+ * Einstieg ist Selbstauswahl und konvertiert erfahrungsgemaess deutlich besser
+ * als ein aufgedraengtes Formular (lead-magnets/popup-cro).
+ *
+ * Warum ein Link statt eines Formulars: /unfallguide traegt den vollen Pitch
+ * (Inhalt, Kostenfrage, Stimmen, Fragen) und liefert den Guide sofort nach dem
+ * Absenden. Das Mobil-Band geht denselben Weg — eine zweite Formular-Kopie
+ * waere Duplikat ohne Gewinn.
+ *
+ * `guide_inline_gesehen` feuert einmal beim Sichtbarwerden. Ohne diesen Nenner
+ * gaebe es spaeter nur Klicks, aber keine Rate.
+ */
+export function GuideInlineCta({ cluster }: { cluster?: string | null }) {
+  const ansprache = (cluster && ANSPRACHE[cluster]) || ALLGEMEIN
+  const karte = useRef<HTMLElement | null>(null)
+  const gemeldet = useRef(false)
+
+  useEffect(() => {
+    const el = karte.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const beobachter = new IntersectionObserver(
+      (eintraege) => {
+        if (gemeldet.current || !eintraege.some((e) => e.isIntersecting)) return
+        gemeldet.current = true
+        track('guide_inline_gesehen', { cluster: cluster ?? 'allgemein' })
+        beobachter.disconnect()
+      },
+      { threshold: 0.5 },
+    )
+    beobachter.observe(el)
+    return () => beobachter.disconnect()
+  }, [cluster])
+
+  return (
+    <aside
+      ref={karte}
+      aria-label="Unfallguide"
+      className="mt-10 rounded-2xl border border-claimondo-border bg-claimondo-bg p-5 md:hidden"
+    >
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-claimondo-ondo">
+        Kostenlos · PDF, 6 Seiten
+      </p>
+      <p className="mt-2 font-heading text-lg font-bold leading-snug text-claimondo-navy">
+        {ansprache.titel}
+      </p>
+      <p className="mt-2 text-sm leading-relaxed text-slate-600">{ansprache.band}</p>
+      <Link
+        href="/unfallguide"
+        onClick={() => track('guide_inline_geklickt', { cluster: cluster ?? 'allgemein' })}
+        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-claimondo-navy px-6 text-base font-semibold text-white"
+      >
+        <Download className="h-5 w-5" aria-hidden />
+        Unfallguide ansehen
+      </Link>
+    </aside>
+  )
+}
