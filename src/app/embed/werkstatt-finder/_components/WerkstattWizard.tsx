@@ -252,7 +252,8 @@ export function WerkstattWizard({
             autoComplete="tel"
             className="rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy focus:border-claimondo-ondo focus:outline-none"
           />
-          {rows.length > 0 && (
+          {/* Abnahme 04.09. (t5-03): gebundener Kasko-Kunde bekommt KEINE Werkstattliste/Karte — die Auswahl wuerde serverseitig verworfen. */}
+          {rows.length > 0 && state.kaskoWb?.freieWerkstattwahl !== false && (
             <WerkstattFinder
               werkstaetten={rows}
               onSelect={onSelectWerkstatt}
@@ -262,7 +263,7 @@ export function WerkstattWizard({
               scrollToSelected
             />
           )}
-          {zeigeUmkreisLeerHinweis({ hatGesucht, loading, anzahlTreffer: rows.length }) && (
+          {state.kaskoWb?.freieWerkstattwahl !== false && zeigeUmkreisLeerHinweis({ hatGesucht, loading, anzahlTreffer: rows.length }) && (
             <UmkreisLeerHinweis />
           )}
           {fehler && <p className="text-body-sm text-danger-strong">{fehler}</p>}
@@ -284,7 +285,7 @@ export function WerkstattWizard({
         )}
         {step === 'kontakt' ? (
           <Button onClick={absenden} loading={pending} variant="navy">
-            {selectedId ? 'Werkstatt anfragen' : 'Anfrage absenden'}
+            {state.kaskoWb?.freieWerkstattwahl === false ? 'Rückruf anfordern' : selectedId ? 'Werkstatt anfragen' : 'Anfrage absenden'}
           </Button>
         ) : (
           <Button onClick={weiter} disabled={!kannWeiter(step, state)} variant="navy">

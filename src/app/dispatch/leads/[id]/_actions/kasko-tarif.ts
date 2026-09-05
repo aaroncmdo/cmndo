@@ -8,6 +8,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildReQualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
+import { leseKaskoAltStand } from '@/lib/kasko-wb/persistenz'
 import { requireRole } from '@/lib/auth/guards'
 
 export type KaskoTarifDispatchPatch = {
@@ -31,9 +32,16 @@ export async function speichereKaskoTarifDispatch(
   // ein manuell/anders disqualifizierter Lead bleibt es). Die Vermittlungssperre faellt damit ebenfalls.
   let leadWerte: Record<string, unknown> = werte
   if (patch.freie_werkstattwahl !== false) {
-    const { data: alt } = await admin.from('leads').select('disqualifiziert_grund_key').eq('id', leadId).maybeSingle()
-    if ((alt as { disqualifiziert_grund_key?: string | null } | null)?.disqualifiziert_grund_key === 'werkstattbindung') {
-      leadWerte = { ...werte, ...buildReQualifikationPatch() }
+    // Review #5864 (Befund 7): Read-Fehler nicht verschlucken; konvertierter Lead -> 'umgewandelt' statt 'neu'.
+    const { data: altRow, error: altErr } = await admin
+      .from('leads')
+      .select('disqualifiziert_grund_key, konvertiert_zu_claim_id, konvertiert_zu_fall_id')
+      .eq('id', leadId)
+      .maybeSingle()
+    if (altErr) return { ok: false, error: altErr.message }
+    const alt = leseKaskoAltStand(altRow)
+    if (alt && alt.disqualifiziertGrundKey === 'werkstattbindung') {
+      leadWerte = { ...werte, ...buildReQualifikationPatch({ konvertiert: alt.konvertiert }) }
     }
   }
   const { error } = await admin.from('leads').update(leadWerte as never).eq('id', leadId)

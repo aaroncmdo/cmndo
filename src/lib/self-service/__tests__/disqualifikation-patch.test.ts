@@ -28,4 +28,8 @@ describe('buildReQualifikationPatch', () => {
       status: 'neu',
     })
   })
+  it('konvertierter Lead: status=umgewandelt statt neu (laufender Vorgang taucht nicht als neuer Lead auf)', () => {
+    expect(buildReQualifikationPatch({ konvertiert: true }).status).toBe('umgewandelt')
+    expect(buildReQualifikationPatch({ konvertiert: false }).status).toBe('neu')
+  })
 })
