@@ -134,6 +134,25 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
   // Ohne Anzeigenklick oder Marketing-Consent ein No-op.
   await erfasseLeadAttribution(String(leadId))
 
+  // Erster Eintrag der Aktivitaetsspur. `timeline.lead_id` hat sechs Schreiber
+  // (SA-Unterschrift, Dokumente, FlowLink-Versand, Reminder, Notizen) und seit
+  // dieser Lane einen Leser: LeadVerlaufPanel auf der Dispatch-Seite. Ohne diese
+  // Zeile begaenne die Spur eines Guide-Leads erst beim naechsten Ereignis, und
+  // niemand saehe, WIE er hereinkam. `typ: 'system'` ist die Konvention aller
+  // 53 bestehenden Lead-Eintraege. Non-fatal: der Lead steht bereits.
+  {
+    const { error: tlErr } = await sb.from('timeline').insert({
+      lead_id: String(leadId),
+      typ: 'system',
+      titel: 'Unfallguide angefordert',
+      beschreibung: `Über claimondo.de/unfallguide. Rückruf zugesagt (8–20 Uhr).${
+        email ? ' E-Mail angegeben.' : ' Keine E-Mail angegeben.'
+      }${utm.utm_source ? ` Quelle: ${utm.utm_source}${utm.utm_campaign ? ` / ${utm.utm_campaign}` : ''}.` : ''}`,
+      metadata: { quelle: QUELLE, gegenwert: 'unfallguide', utm },
+    })
+    if (tlErr) console.error('[unfallguide] Timeline-Eintrag:', tlErr.message)
+  }
+
   // FlowLink: sein Weg zurueck in den eigenen Vorgang. NON-FATAL — der Lead
   // steht bereits, ein Versand-Fehler darf ihn nicht kippen.
   try {

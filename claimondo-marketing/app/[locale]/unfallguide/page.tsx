@@ -9,6 +9,7 @@ import {
 } from '@/lib/seo/jsonld'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { GuideFormClient } from './GuideFormClient'
+import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 
 // Landeseite fuer den Unfallguide. Anders als kfzgutachter-lp (noindex,
 // Subdomain, reiner Anzeigen-Traffic) ist diese Seite INDEXIERBAR und liegt
@@ -130,6 +131,14 @@ export default async function UnfallguidePage() {
           { name: 'Unfallguide', url: `${SITE_URL}/unfallguide` },
         ]),
       )}
+
+      {/* Die Seite und der Guide sind deutsch, die Route liegt unter [locale].
+          Auf en/pl/tr/ru/ar sagt der Banner das ehrlich, statt einen englischen
+          Leser kommentarlos auf deutschen Text laufen zu lassen — dasselbe
+          Muster wie bei den Fachartikeln. Auf de verbirgt er sich selbst. */}
+      <div className="mx-auto max-w-6xl px-5 pt-6 sm:px-8">
+        <MdxLanguageBanner />
+      </div>
 
       {/* ── Kopf: Navy traegt das obere Drittel. Der Guide liegt als Objekt
              daneben, nicht als Symbol darunter. ─────────────────────────── */}
