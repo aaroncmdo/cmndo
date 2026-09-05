@@ -183,6 +183,22 @@ ihn nicht; Memory `audit-kundenfluss-laeuft-durch-16-befunde`).
 **Am DB-Zustand messen, nicht am Toast.** `sonner`-Toasts sind beim Auslesen oft schon weg.
 `expect.poll` auf Zeilenzahl/Status; Text höchstens als Zusatz.
 
+**`pointer-events: none` ist nicht „verdeckt".** Wer per `elementFromPoint` prüft, ob ein Ziel
+erreichbar ist, misst nur, *welches* Element am Punkt liegt — nicht, ob das *Ziel selbst* Zeiger-
+Ereignisse empfängt. Ein bewusst durchlässiges Overlay (`pointer-events: none`, oft plus
+`opacity: 0`) wird dann systematisch als Blocker gemeldet, und zwar umso öfter, je sauberer die
+Seite gebaut ist. Gemessen 05.09. auf `/check` mobil: 4 „verdeckte" Ziele, alle vier Teile einer
+Kontaktleiste mit `pointer-events: none`; der echte Blocker war längst behoben. **Gegenprobe, die
+entscheidet:** `locator.click({ trial: true })` — fährt alle Actionability-Checks, klickt aber nicht
+(kein `tel:`-Aufruf, kein Lead). Sagt sie „klickbar", ist die Geometrie-Meldung ein Artefakt.
+
+**Nach einem Deploy nicht sofort messen.** Prod ist minutenlang träge, nachdem ein Release
+durchgelaufen ist. Gemessen 05.09.: dieselben sechs Tests brauchten auf staging 40 Sekunden, 15
+Minuten nach dem Prod-Deploy 6 Minuten, und einer lief in den 300-s-Test-Timeout. Die Einzel-
+Wiederholung war nach 13 Sekunden grün. **Ein roter Lauf in diesem Fenster ist erst nach einer
+Wiederholung ein Befund** — und ein Timeout beim Warten auf ein Element, das nachweislich in
+`origin/main` liegt, ist fast nie das Produkt.
+
 **`has-text` matcht Substring UND case-insensitiv.** Die gefährlichste, weil sie nicht in
 einen Timeout läuft, sondern **plausibel den falschen Pfad nimmt**: `button:has-text("Ich")`
 traf „Die Schuldfrage ist noch n·**ich**·t eindeutig geklärt" statt „Ich selbst" — und die
