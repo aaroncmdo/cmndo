@@ -334,34 +334,74 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
 // Notloesung — der Link ist messbar und austauschbar, die Datei liegt im Postfach.
 
 /**
+ * Erreichbarkeit — BELEGT, nicht geschaetzt: die Zeiten stehen als
+ * `openingHoursSpecification` in `lib/seo/jsonld.ts` und gehen von dort als
+ * strukturierte Daten an Google. Index = getDay()-Konvention (0 = Sonntag).
+ *
+ * ⚠ Vorher rechnete diese Datei mit 8-20 an JEDEM Tag. Am Wochenende war das
+ * falsch in beide Richtungen: Samstag 08:30 wurde "in 15 Minuten" zugesagt,
+ * obwohl erst ab 9 jemand da ist, und Sonntag 19:00 ebenso, obwohl um 18 Uhr
+ * Schluss ist. Ein Versprechen, das an dem Tag niemand halten kann.
+ */
+const ERREICHBAR: Record<number, { von: number; bis: number }> = {
+  0: { von: 9, bis: 18 }, // Sonntag
+  1: { von: 8, bis: 20 },
+  2: { von: 8, bis: 20 },
+  3: { von: 8, bis: 20 },
+  4: { von: 8, bis: 20 },
+  5: { von: 8, bis: 20 },
+  6: { von: 9, bis: 18 }, // Samstag
+}
+
+const WOCHENTAG_INDEX: Record<string, number> = {
+  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+}
+
+/**
  * Wann rufen wir zurueck — als Text FUER DEN KUNDEN und als Zeitpunkt FUER DEN
  * AUFTRAG. Bewusst EINE Funktion: die Nachricht, die der Kunde liest, und der
  * Termin, den das Team sieht, duerfen nicht auseinanderlaufen.
+ *
+ * Gerechnet wird durchgehend als DIFFERENZ in Minuten auf `Date.now()`, nie ueber
+ * ein konstruiertes Datum — letzteres braeuchte eine Zeitzonen-Bibliothek und
+ * ginge an der Sommerzeit-Grenze schief.
  */
 function rueckrufFenster(): { text: string; startZeit: Date } {
   const jetzt = new Date()
-  const teile = new Intl.DateTimeFormat('de-DE', {
+  // `en-US` fuer den Wochentag: die Kuerzel sind stabil (Mon/Tue/...), waehrend
+  // die deutschen je nach ICU-Version mit oder ohne Punkt kommen.
+  const teile = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
     hour: 'numeric',
     minute: 'numeric',
     hour12: false,
     timeZone: 'Europe/Berlin',
   }).formatToParts(jetzt)
+  const tag = WOCHENTAG_INDEX[teile.find((t) => t.type === 'weekday')?.value ?? 'Mon'] ?? 1
   const stunde = Number(teile.find((t) => t.type === 'hour')?.value ?? '12') % 24
   const minute = Number(teile.find((t) => t.type === 'minute')?.value ?? '0')
+  const jetztMin = stunde * 60 + minute
 
-  if (stunde >= 8 && stunde < 20) {
+  const heute = ERREICHBAR[tag]
+  if (jetztMin >= heute.von * 60 && jetztMin < heute.bis * 60) {
     return {
       text: 'Wir rufen Sie in der Regel innerhalb von 15 Minuten zurück.',
       startZeit: new Date(jetzt.getTime() + 15 * 60_000),
     }
   }
-  // Ausserhalb der Zeit: der naechste Morgen um 8. Gerechnet wird als DIFFERENZ in
-  // Minuten, nicht ueber ein konstruiertes Datum — letzteres braeuchte eine
-  // Zeitzonen-Bibliothek und ginge an der Sommerzeit-Grenze schief.
-  const stundenBis8 = stunde >= 20 ? 24 - stunde + 8 : 8 - stunde
+
+  // Vor der Oeffnung: heute noch. Nach dem Schluss: naechster Tag, dessen
+  // Oeffnungszeit sich vom heutigen unterscheiden kann (Fr 21 Uhr -> Sa ab 9).
+  if (jetztMin < heute.von * 60) {
+    return {
+      text: `Wir rufen Sie heute ab ${heute.von} Uhr zurück.`,
+      startZeit: new Date(jetzt.getTime() + (heute.von * 60 - jetztMin) * 60_000),
+    }
+  }
+  const morgen = ERREICHBAR[(tag + 1) % 7]
   return {
-    text: 'Wir rufen Sie morgen ab 8 Uhr zurück.',
-    startZeit: new Date(jetzt.getTime() + (stundenBis8 * 60 - minute) * 60_000),
+    text: `Wir rufen Sie morgen ab ${morgen.von} Uhr zurück.`,
+    startZeit: new Date(jetzt.getTime() + (24 * 60 - jetztMin + morgen.von * 60) * 60_000),
   }
 }
 
