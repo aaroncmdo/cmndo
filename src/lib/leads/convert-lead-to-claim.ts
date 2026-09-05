@@ -553,9 +553,27 @@ export async function convertLeadToClaim(
   // (kein Auto-qr_referral-Reparateur bei freier Wahl). Record-Cast wg. Type-Lag (Mig 20260713161645).
   ;(claimsInsert as Record<string, unknown>).freie_werkstattwahl =
     (lead.freie_werkstattwahl as boolean | null) ?? null
+  // Kasko-WB Phase 1: Herkunft + Kontext der Werkstattbindung Lead -> Claim (Spec §4.2). Record-Cast wie oben.
+  for (const feld of [
+    'eigene_versicherung_marke_id',
+    'eigene_versicherung_name',
+    'eigene_kasko_tarif_id',
+    'eigene_kasko_tarif_name',
+    'werkstattbindung_quelle',
+  ] as const) {
+    ;(claimsInsert as Record<string, unknown>)[feld] = (lead[feld] as string | null) ?? null
+  }
   // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
   ;(claimsInsert as Record<string, unknown>).schadenskategorie =
     (lead.schadenskategorie as string | null) ?? null
+  // Quelle B: unverbindliche Auswertung (Anspruchspruefung) Lead -> Claim durchreichen.
+  // Ohne diese Zeile endet sie am Lead, und alle Fall-Ansichten lesen den Claim —
+  // dieselbe Klasse, die schuldfrage schon einmal getroffen hat (spiegle-quali-auf-claim).
+  // KEIN Betrag: das Objekt traegt tier + Zeitpunkt + Quelle + Rohantworten, die im
+  // Frontend gezeigten EUR-Spannen sind statisch und werden bewusst nicht persistiert.
+  // Record-Cast wg. Type-Lag (Mig 20260830230040).
+  ;(claimsInsert as Record<string, unknown>).auswertung_unverbindlich =
+    (lead as Record<string, unknown>).auswertung_unverbindlich ?? null
   // SP-B1: Abrechnungsweg (haftpflicht/kasko/selbstzahler) Lead -> Claim (SSoT). Record-Cast wg. Type-Lag.
   // WS1b (Reduced-Repair-Aktivierung): traegt der Lead keinen Weg (die meisten Nicht-/flow-
   // Entstehungspfade leiten nicht ab), am Konversionspunkt aus schuldfrage + eigene_versicherung

@@ -1,0 +1,2192 @@
+{
+  "quelle": "CHECK24 Kfz-Versicherungstarife, Stand 20.07.2026 (71 Marken) + HDI (Broschüre); Auswertung 03.09.2026",
+  "stand": "2026-07-20",
+  "default_konditionen": {
+    "nachlass_text": "marktüblich 10–20 % auf den Kaskobeitrag",
+    "sanktion_modell": "kuerzung_80",
+    "sanktion_text": "Bis zur Reparatur in der vom Versicherer benannten Werkstatt wird die Erstattung auf 80 % der marktüblich kalkulierten Reparaturkosten begrenzt, mindestens mit einer zusätzlichen Selbstbeteiligung von 100 € (GDV-Muster-AKB A.2.5.2.5.2).",
+    "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+    "ausnahmen_text": "Haftpflichtschaden Dritter · Totalschaden · Reparatur im Ausland · keine erreichbare Partnerwerkstatt",
+    "partnernetz": "jeweiliges Partnernetz (häufig Innovation Group, HUK-Netz, DEKRA)",
+    "akb_fundstelle": "GDV-Muster-AKB A.2.5.2.5.1 / A.2.5.2.5.2",
+    "quelle": "GDV-Muster-AKB; CHECK24"
+  },
+  "marken": [
+    {
+      "slug": "adac-autoversicherung",
+      "marke": "ADAC Autoversicherung",
+      "versicherung_name": "ADAC Autoversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbonus"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbonus"
+      ],
+      "nicht_wb_marker": [
+        "(Mitglieder)"
+      ],
+      "linien": [
+        "Basis",
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Der Zusatz „(Mitglieder)“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "20 %",
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung bei Reparatur außerhalb des Partnernetzes (Höhe laut AKB).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · für Leasing und Neuwagen nicht empfohlen",
+        "partnernetz": "zertifizierte Partnerwerkstätten; Ersatzfahrzeug max. 7 Tage",
+        "akb_fundstelle": null,
+        "quelle": "adac.de (Magazin Werkstattbindung)"
+      }
+    },
+    {
+      "slug": "admiraldirekt",
+      "marke": "AdmiralDirekt",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbonus"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbonus"
+      ],
+      "nicht_wb_marker": [
+        "CHECK24-Sonderrabatt",
+        "Junge Fahrer",
+        "mit Vorkasse"
+      ],
+      "linien": [
+        "Basis",
+        "Komfort",
+        "Komfort smart",
+        "Premium",
+        "Premium smart"
+      ],
+      "linien_ohne_wb": [
+        "Basis mit Vorkasse"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": "Vertriebsmarke (Risikoträger Itzehoer); kein eigener Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": "Zusätze wie „CHECK24-Sonderrabatt“ oder „Junge Fahrer“ ändern nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "aig-europe",
+      "marke": "AIG Europe",
+      "versicherung_name": "Chartis Europe S.A.",
+      "wb_status": "keine",
+      "wb_zusaetze": [],
+      "wb_marker": [],
+      "nicht_wb_marker": [],
+      "linien": [],
+      "linien_ohne_wb": [
+        "AIG Europe (Einzeltarif)"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": "Kein Werkstattbindungs-Tarif im Angebot. Rechtsträger in den Stammdaten unter dem Altnamen Chartis Europe S.A.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "allianz",
+      "marke": "Allianz",
+      "versicherung_name": "Allianz Versicherungs-AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "WerkstattBonus"
+        }
+      ],
+      "wb_marker": [
+        "WerkstattBonus"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": {
+        "nachlass_text": "20 %",
+        "sanktion_modell": "kuerzung_80",
+        "sanktion_text": "Kürzung der Erstattung auf 80 % bei Reparatur außerhalb des Partnernetzes.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas (Voraussetzung TK oder VK)",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · Ausland",
+        "partnernetz": "TÜV-/DEKRA-zertifizierte Allianz-Partnerwerkstätten; Glas: Carglass, Euromaster, junited, Wintec; Hol-/Bringservice, Reinigung, Ersatzwagen",
+        "akb_fundstelle": "Allianz-AKB WerkstattBonus",
+        "quelle": "allianz.de/auto/kfz-versicherung/werkstattbindung"
+      }
+    },
+    {
+      "slug": "allianz-direct",
+      "marke": "Allianz Direct",
+      "versicherung_name": "Allianz Direct",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "Vorkasse"
+      ],
+      "linien": [
+        "DIRECT",
+        "DIRECT Plus"
+      ],
+      "linien_ohne_wb": [
+        "DIRECT Vorkasse"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung bei Reparatur außerhalb des Partnernetzes (Höhe laut AKB).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "Allianz-Netz",
+        "akb_fundstelle": null,
+        "quelle": "CHECK24"
+      }
+    },
+    {
+      "slug": "alte-leipziger",
+      "marke": "Alte Leipziger",
+      "versicherung_name": "Alte Leipziger Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Classic",
+        "Comfort"
+      ],
+      "linien_ohne_wb": [
+        "Compact"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "autosan",
+      "marke": "Autosan",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Serie",
+        "Komfort"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "avd",
+      "marke": "AvD",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "(Mitglieder)"
+      ],
+      "linien": [
+        "Komfort",
+        "Plus",
+        "Select"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "„Select“ ist bei AvD ein Linienname, kein Werkstattbindungs-Marker (anders als bei HUK).",
+      "varianten_hinweis": "Der Zusatz „(Mitglieder)“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "axa",
+      "marke": "AXA",
+      "versicherung_name": "AXA Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [
+        "mit Extraschutz"
+      ],
+      "linien": [
+        "easy mobil online S",
+        "easy mobil online S Plus",
+        "easy mobil online M",
+        "easy mobil online L"
+      ],
+      "linien_ohne_wb": [
+        "easy mobil online",
+        "easy mobil online mit Extraschutz"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "„attraktiver Nachlass“ (Höhe nicht belegt)",
+        "sanktion_modell": "kuerzung_80",
+        "sanktion_text": "Karosserie/Lack: Kürzung auf 80 %; Glas: zusätzliche Selbstbeteiligung von 300 €.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "ca. 3.000 DEKRA-geprüfte Partner; Glas über Innovation Group, riparo",
+        "akb_fundstelle": "AXA-AKB Werkstattservice",
+        "quelle": "axa.de; jdcnews.de"
+      }
+    },
+    {
+      "slug": "barmenia-direkt",
+      "marke": "Barmenia Direkt",
+      "versicherung_name": "Barmenia Allgemeine Versicherungs-AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis-Schutz",
+        "Top-Schutz",
+        "Premium-Schutz",
+        "Premium Plus-Schutz"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "barmeniagothaer",
+      "marke": "BarmeniaGothaer",
+      "versicherung_name": "Gothaer Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Privat",
+        "Privat Top-Schutz",
+        "Privat Premium-Schutz"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Zweiter Rechtsträger: Barmenia Allgemeine Versicherungs-AG.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung bei Reparatur außerhalb des Partnernetzes (Höhe laut AKB).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "„Die Partnerwerkstatt“ (HUK-Netz)",
+        "akb_fundstelle": null,
+        "quelle": "CHECK24; handwerk-magazin.de"
+      }
+    },
+    {
+      "slug": "bavariadirekt",
+      "marke": "BavariaDirekt",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "Elektro Paket",
+        "Youngtimer",
+        "Vorkasse"
+      ],
+      "linien": [
+        "Komfort S online",
+        "Komfort M online",
+        "Komfort M Plus online",
+        "Komfort L online"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Zusätze „Elektro Paket“, „Youngtimer“ oder „Vorkasse“ ändern nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_80",
+        "sanktion_text": "Kürzung auf 80 %, mindestens 100 € zusätzliche Selbstbeteiligung (AKB Stand 30.09.2015); bei fiktiver Abrechnung laut LG Hildesheim 3 S 12/20 unwirksam.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "Partnernetz",
+        "akb_fundstelle": "A.2.5.2.5.1 / A.2.5.2.5.2",
+        "quelle": "bavariadirekt.de (AKB-PDF); von-boehn.de"
+      }
+    },
+    {
+      "slug": "bavariaprotect",
+      "marke": "BavariaProtect",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "Elektro Paket"
+      ],
+      "linien": [
+        "Komfort S online",
+        "Komfort M online",
+        "Komfort M Plus online",
+        "Komfort L online"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Der Zusatz „Elektro Paket“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_80",
+        "sanktion_text": "Kürzung auf 80 %, mindestens 100 € zusätzliche Selbstbeteiligung (AKB-Systematik BavariaDirekt).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "Partnernetz",
+        "akb_fundstelle": "A.2.5.2.5.1 / A.2.5.2.5.2",
+        "quelle": "bavariadirekt.de (AKB-PDF)"
+      }
+    },
+    {
+      "slug": "bgv",
+      "marke": "BGV / Badische Versicherungen",
+      "versicherung_name": "Badischer Gemeinde-Versicherungs-Verband",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Schadenservice Plus"
+        }
+      ],
+      "wb_marker": [
+        "mit Schadenservice Plus"
+      ],
+      "nicht_wb_marker": [
+        "Elektro Plus"
+      ],
+      "linien": [
+        "Basis",
+        "Klassik",
+        "Exklusiv"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "verlaesslichkeit_default": "abgeleitet",
+      "hinweis": "Bindungscharakter aus der Bezeichnung abgeleitet – AKB prüfen. Zweiter Rechtsträger: Badische Allgemeine Versicherung AG.",
+      "varianten_hinweis": "Der Zusatz „Elektro Plus“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "concordia",
+      "marke": "Concordia",
+      "versicherung_name": "Concordia Versicherungs-Gesellschaft a.G.",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Partner"
+        }
+      ],
+      "wb_marker": [
+        "Partner"
+      ],
+      "nicht_wb_marker": [
+        "VollkaskoPlus",
+        "oecodrive"
+      ],
+      "linien": [
+        "Premium",
+        "Premium VollkaskoPlus"
+      ],
+      "linien_ohne_wb": [
+        "Classic",
+        "Premium oecodrive",
+        "Premium VollkaskoPlus oecodrive"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "cosmosdirekt",
+      "marke": "CosmosDirekt",
+      "versicherung_name": "Cosmos Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "inkl. Verkehrsrechtsschutz"
+      ],
+      "linien": [
+        "Basis",
+        "Comfort"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Basis: frühere Recherche nannte die Werkstattbindung im Basis als Pflicht; CHECK24 listet Basis auch ohne – AKB prüfen.",
+      "varianten_hinweis": "Der Zusatz „inkl. Verkehrsrechtsschutz“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "deckelung",
+        "sanktion_text": "Erstattung nur bis zur Höhe der Kosten, die in der Partnerwerkstatt angefallen wären.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "DEKRA-Netz (Generali/Cosmos)",
+        "akb_fundstelle": null,
+        "quelle": "cosmosdirekt.de; CHECK24"
+      }
+    },
+    {
+      "slug": "da-direkt",
+      "marke": "DA Direkt",
+      "versicherung_name": "DA Deutsche Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort Smart",
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [
+        "Komfort Plus"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "dbv",
+      "marke": "DBV",
+      "versicherung_name": "DBV Deutsche Beamten-Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "mobil kompakt Online",
+        "mobil komfort Online",
+        "mobil komfort Premium Online"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "AXA-Gruppe (Systematik wie AXA Werkstattservice).",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "„attraktiver Nachlass“ (Höhe nicht belegt)",
+        "sanktion_modell": "kuerzung_80",
+        "sanktion_text": "Karosserie/Lack: Kürzung auf 80 %; Glas: zusätzliche Selbstbeteiligung von 300 € (AXA-Systematik).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "ca. 3.000 DEKRA-geprüfte Partner; Glas über Innovation Group, riparo",
+        "akb_fundstelle": "AXA-AKB Werkstattservice",
+        "quelle": "axa.de; jdcnews.de"
+      }
+    },
+    {
+      "slug": "debeka",
+      "marke": "Debeka",
+      "versicherung_name": "Debeka Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Unfallreparatur-Service"
+        }
+      ],
+      "wb_marker": [
+        "mit Unfallreparatur-Service"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Comfort",
+        "Comfort Plus"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung bei Reparatur außerhalb des Partnernetzes (Höhe laut AKB).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "„Die Partnerwerkstatt“ (HUK-Netz)",
+        "akb_fundstelle": null,
+        "quelle": "CHECK24; handwerk-magazin.de"
+      }
+    },
+    {
+      "slug": "devk",
+      "marke": "DEVK",
+      "versicherung_name": "DEVK Allgemeine Versicherungs-AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Kasko-Mobil"
+        }
+      ],
+      "wb_marker": [
+        "Kasko-Mobil"
+      ],
+      "nicht_wb_marker": [
+        "ACV Mitglieder",
+        "Vorkasse"
+      ],
+      "linien": [
+        "Basis-Schutz",
+        "Komfort-Schutz",
+        "Premium-Schutz",
+        "DEVK Eisenbahn Basis",
+        "DEVK Eisenbahn Komfort",
+        "DEVK Eisenbahn Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Zusätze „ACV Mitglieder“ oder „Vorkasse“ ändern nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "bis 20 % (Werbung; Website laut Recherche „bis 13 %“ – Stand prüfen)",
+        "sanktion_modell": "kuerzung_85",
+        "sanktion_text": "Kürzung um 15 %, mindestens 300 € zusätzliche Selbstbeteiligung.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · bestimmte Hersteller-/Leasingfahrzeuge ausgeschlossen",
+        "partnernetz": "über 4.000 Partnerbetriebe (ca. 70 % markengebunden); Glas: A.T.U., Carglass, junited, Wintec, Nobleglass; Hol-/Bringservice, Ersatzfahrzeug",
+        "akb_fundstelle": "DEVK-AKB Kasko-Mobil",
+        "quelle": "devk.de; sdrive-gutachter.de"
+      }
+    },
+    {
+      "slug": "dialog",
+      "marke": "Dialog",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "WerkstattservicePLUS"
+        }
+      ],
+      "wb_marker": [
+        "WerkstattservicePLUS"
+      ],
+      "nicht_wb_marker": [
+        "VollkaskoPLUS"
+      ],
+      "linien": [
+        "Premium",
+        "Premium VollkaskoPLUS"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Generali-Gruppe; kein eigener Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "die-bayerische",
+      "marke": "Die Bayerische",
+      "versicherung_name": "Bayerische Beamten Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [
+        "E-Drive"
+      ],
+      "linien": [
+        "Smart",
+        "Komfort",
+        "Prestige"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Der Zusatz „E-Drive“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "die-continentale",
+      "marke": "Die Continentale",
+      "versicherung_name": "Continentale Sachversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Sorglos-Kasko"
+        }
+      ],
+      "wb_marker": [
+        "Sorglos-Kasko"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "die-lippische",
+      "marke": "Die Lippische",
+      "versicherung_name": "Lippische Landesbrandversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "AutoBasis",
+        "AutoPlus"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "ergo",
+      "marke": "ERGO",
+      "versicherung_name": "ERGO Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbonus"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbonus"
+      ],
+      "nicht_wb_marker": [
+        "Wertschutz24",
+        "Wertschutz36",
+        "ErsatzfahrzeugPlus"
+      ],
+      "linien": [
+        "Smart",
+        "Best"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Zusätze „mit Wertschutz24/36“ oder „ErsatzfahrzeugPlus“ ändern nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "10 %",
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung; der Selbstbeteiligungs-Vorteil entfällt.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "ERGO Premium-Partnerwerkstätten",
+        "akb_fundstelle": null,
+        "quelle": "ergo.de; CHECK24"
+      }
+    },
+    {
+      "slug": "europa",
+      "marke": "Europa",
+      "versicherung_name": "EUROPA Sachversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Spar-Kasko"
+        }
+      ],
+      "wb_marker": [
+        "Spar-Kasko"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "europa-go",
+      "marke": "EUROPA-go",
+      "versicherung_name": "EUROPA Sachversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Spar-Kasko"
+        }
+      ],
+      "wb_marker": [
+        "Spar-Kasko"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Online-Marke der EUROPA.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "fahrlehrerversicherung",
+      "marke": "Fahrlehrerversicherung",
+      "versicherung_name": "Fahrlehrerversicherung VaG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "B-Tarif Basis",
+        "B-Tarif Komfort",
+        "B-Tarif Premium",
+        "P-Tarif Basis",
+        "P-Tarif Komfort",
+        "P-Tarif Premium",
+        "X-Tarif Basis",
+        "X-Tarif Komfort",
+        "X-Tarif Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "feuersozietaet",
+      "marke": "Feuersozietät",
+      "versicherung_name": "Feuersozietät Berlin Brandenburg Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Vario",
+        "Vario Kasko-Plus",
+        "Vario Kasko-Plus mit Elektro/Hybrid"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "VKB-Gruppe.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "generali",
+      "marke": "Generali",
+      "versicherung_name": "Generali Deutschland Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Optimal"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "gvv-direkt",
+      "marke": "GVV Direkt",
+      "versicherung_name": "GVV-Privatversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstatt Direkt"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstatt Direkt"
+      ],
+      "nicht_wb_marker": [
+        "Kasko PLUS"
+      ],
+      "linien": [
+        "Classic",
+        "Classic Kasko PLUS"
+      ],
+      "linien_ohne_wb": [
+        "Basis"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "hansemerkur",
+      "marke": "HanseMerkur",
+      "versicherung_name": "HanseMerkur Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Drive Easy",
+        "Drive Best"
+      ],
+      "linien_ohne_wb": [
+        "Drive Smart"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "helvetia-baloise",
+      "marke": "Helvetia Baloise",
+      "versicherung_name": "Helvetia Schweizerische Versicherungsgesellschaft AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "All-in"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Zweiter Rechtsträger: Baloise Sachversicherung AG Deutschland.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "huk-coburg",
+      "marke": "HUK-COBURG",
+      "versicherung_name": "HUK-COBURG-Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "SELECT"
+        }
+      ],
+      "wb_marker": [
+        "SELECT",
+        "Kasko SELECT"
+      ],
+      "nicht_wb_marker": [
+        "Kasko PLUS"
+      ],
+      "linien": [
+        "Basis",
+        "Classic",
+        "Classic Kasko PLUS"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Zweiter Rechtsträger: HUK-COBURG Haftpflicht-Unterstützungs-Kasse (öffentlicher Dienst).",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": {
+        "nachlass_text": "bis 20 %",
+        "sanktion_modell": "vollverweigerung",
+        "sanktion_text": "Altverträge: Kürzung auf 85 %. Verträge ab 2014: Die Erstattung kann vollständig verweigert werden (laut Fachpresse und Anwaltsberichten – am konkreten AKB-Stand prüfen); gilt auch bei fiktiver Abrechnung.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · Notfall im Ausland",
+        "partnernetz": "„Die Partnerwerkstatt“, über 1.800 Betriebe (DEKRA-geprüft); Glas: Carglass",
+        "akb_fundstelle": "HUK-AKB Kasko SELECT (versionsabhängig)",
+        "quelle": "huk.de; kfz-betrieb (Vogel); Versicherungsbote"
+      }
+    },
+    {
+      "slug": "huk24",
+      "marke": "HUK24",
+      "versicherung_name": "HUK24 AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "SELECT"
+        }
+      ],
+      "wb_marker": [
+        "SELECT",
+        "Kasko SELECT"
+      ],
+      "nicht_wb_marker": [
+        "Kasko PLUS"
+      ],
+      "linien": [
+        "Basis",
+        "Classic",
+        "Classic Kasko PLUS"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": {
+        "nachlass_text": "bis 20 %",
+        "sanktion_modell": "vollverweigerung",
+        "sanktion_text": "Altverträge: Kürzung auf 85 %. Verträge ab 2014: Die Erstattung kann vollständig verweigert werden (laut Fachpresse und Anwaltsberichten – am konkreten AKB-Stand prüfen); gilt auch bei fiktiver Abrechnung.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · Notfall im Ausland",
+        "partnernetz": "„Die Partnerwerkstatt“, über 1.800 Betriebe (DEKRA-geprüft); Glas: Carglass",
+        "akb_fundstelle": "HUK-AKB Kasko SELECT (versionsabhängig)",
+        "quelle": "huk.de; kfz-betrieb (Vogel); Versicherungsbote"
+      }
+    },
+    {
+      "slug": "inshared",
+      "marke": "Inshared",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Kfz-Versicherung",
+        "Kfz-Versicherung mit Auslandsschadenschutz"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Achmea-Gruppe; kein eigener Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "itzehoer",
+      "marke": "Itzehoer",
+      "versicherung_name": "Itzehoer Versicherung Brandgilde von 1691 VVaG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbonus"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbonus"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Comfort Drive",
+        "TopDrive"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "janitos",
+      "marke": "Janitos",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstatt-Management"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstatt-Management"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Compact",
+        "Advanced"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "HDI-Gruppe; kein eigener Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "kravag",
+      "marke": "KRAVAG",
+      "versicherung_name": "KRAVAG-ALLGEMEINE Versicherungs-AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice",
+          "umfang": "voll"
+        },
+        {
+          "zusatz": "Glas",
+          "umfang": "nur_glas",
+          "verlaesslichkeit": "nicht_belegt"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice",
+        "Glas"
+      ],
+      "nicht_wb_marker": [
+        "Kasko Spezial",
+        "BleibMobil"
+      ],
+      "linien": [
+        "KfzPolice Kompakt",
+        "KfzPolice Kompakt BleibMobil",
+        "KfzPolice Exklusiv",
+        "KfzPolice Exklusiv BleibMobil",
+        "KfzPolice Exklusiv Kasko Spezial"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "„Glas“-Varianten vermutlich reine Glas-Bindung – nicht belegt, AKB prüfen. „Kasko Spezial“ und „BleibMobil“ sind keine Bindungs-Marker.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_85",
+        "sanktion_text": "Glas: Kürzung auf 85 % bei Reparatur außerhalb des Netzes; übrige Schäden nicht belegt.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "R+V-Partnernetz (Innovation Group)",
+        "akb_fundstelle": null,
+        "quelle": "CHECK24; autoglaser.de"
+      }
+    },
+    {
+      "slug": "lvm",
+      "marke": "LVM",
+      "versicherung_name": "LVM Landwirtschaftlicher Versicherungsverein Münster a.G.",
+      "wb_status": "keine",
+      "wb_zusaetze": [],
+      "wb_marker": [],
+      "nicht_wb_marker": [
+        "mit LVM-SchadenService"
+      ],
+      "linien": [],
+      "linien_ohne_wb": [
+        "AutoPlus",
+        "AutoPlus mit LVM-SchadenService"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": "„mit LVM-SchadenService“ ist ein Steuerungsangebot, keine belegte vertragliche Bindung; LVM wirbt mit freier Werkstattwahl.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "keine",
+        "sanktion_text": "Keine Werkstattbindung. Der LVM-SchadenService ist eine freiwillige Steuerung in eine Partnerwerkstatt (Abholung, Ersatzwagen, Reinigung).",
+        "gilt_fuer": null,
+        "ausnahmen_text": null,
+        "partnernetz": "LVM-Partnerwerkstätten (Steuerungsquote über 25 %, 2021)",
+        "akb_fundstelle": null,
+        "quelle": "lvm.de; schaden.news 06.07.2022"
+      }
+    },
+    {
+      "slug": "mannheimer",
+      "marke": "Mannheimer",
+      "versicherung_name": "Mannheimer Versicherung AG",
+      "wb_status": "keine",
+      "wb_zusaetze": [],
+      "wb_marker": [],
+      "nicht_wb_marker": [],
+      "linien": [],
+      "linien_ohne_wb": [
+        "Maximos"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": "Kein Werkstattbindungs-Tarif im Angebot.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "mecklenburgische",
+      "marke": "Mecklenburgische",
+      "versicherung_name": "Mecklenburgische Versicherungs-Gesellschaft a.G.",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Partnerkasko"
+        }
+      ],
+      "wb_marker": [
+        "mit Partnerkasko"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Grunddeckung",
+        "Komfortdeckung"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "muenchener-verein",
+      "marke": "Münchener Verein",
+      "versicherung_name": "Münchener Verein Allgemeine Versicherungs-AG",
+      "wb_status": "keine",
+      "wb_zusaetze": [],
+      "wb_marker": [],
+      "nicht_wb_marker": [],
+      "linien": [],
+      "linien_ohne_wb": [
+        "Münchener Verein (Einzeltarif)"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": "Kein Werkstattbindungs-Tarif im Angebot.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "neodigital",
+      "marke": "Neodigital",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "NEO M",
+        "NEO L",
+        "NEO Select"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "„NEO Select“ ist ein Linienname, kein Werkstattbindungs-Marker. Kein Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "oeffentliche-braunschweig",
+      "marke": "Öffentliche Braunschweig",
+      "versicherung_name": "Öffentliche Versicherung Braunschweig",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice Plus"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice Plus"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "oeffentliche-oldenburg",
+      "marke": "Öffentliche Oldenburg",
+      "versicherung_name": "Öffentliche Versicherung Oldenburg",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [
+        "Basis"
+      ],
+      "hinweis": "Basis ist nur als Werkstattbindungs-Variante gelistet.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "oesa",
+      "marke": "ÖSA",
+      "versicherung_name": "Öffentliche Feuerversicherung Sachsen-Anhalt",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "prokundo",
+      "marke": "Prokundo",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstatt-Service"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstatt-Service"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "EASY",
+        "COMFORT",
+        "BEST"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Kein Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "provinzial",
+      "marke": "Provinzial",
+      "versicherung_name": "Provinzial Rheinland Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "AutoBasis",
+        "AutoPlus",
+        "Provinzial",
+        "Plus-Paket Haftpflicht",
+        "Plus-Paket Kasko",
+        "Plus-Paket Kasko und Haftpflicht"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Zweiter Rechtsträger: Westfälische Provinzial Versicherung AG.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "provinzial-nord",
+      "marke": "Provinzial Nord",
+      "versicherung_name": "Provinzial Nord Brandkasse AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "Plus-Paket"
+      ],
+      "linien": [
+        "Provinzial Nord"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Zusätze „Plus-Paket Kfz-Haftpflicht/Kasko“ ändern nichts an der Werkstattwahl.",
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "r-plus-v",
+      "marke": "R+V",
+      "versicherung_name": "R+V Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [
+        "Kasko Spezial"
+      ],
+      "linien": [
+        "KfzPolice classic",
+        "KfzPolice comfort",
+        "KfzPolice premium",
+        "KfzPolice premium Kasko Spezial"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "„Kasko Spezial“ ist KEIN Bindungs-Marker – existiert mit und ohne Werkstattservice.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": {
+        "nachlass_text": null,
+        "sanktion_modell": "kuerzung_85",
+        "sanktion_text": "Glas: Kürzung auf 85 % bei Reparatur außerhalb des Netzes; übrige Schäden nicht belegt.",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "R+V-Partnernetz (Innovation Group)",
+        "akb_fundstelle": null,
+        "quelle": "CHECK24; autoglaser.de"
+      }
+    },
+    {
+      "slug": "rheinland",
+      "marke": "RheinLand",
+      "versicherung_name": "Rheinland Versicherungs AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Standard",
+        "Plus",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "rhion-digital",
+      "marke": "rhion.digital",
+      "versicherung_name": "Rheinland Versicherungs AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Standard",
+        "Plus",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Digitalmarke der RheinLand.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "saarland",
+      "marke": "Saarland",
+      "versicherung_name": "Saarland Feuerversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstatt Service"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstatt Service"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Vario",
+        "Vario Kasko-Plus"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "VKB-Gruppe.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "signal-iduna",
+      "marke": "Signal Iduna",
+      "versicherung_name": "Signal Iduna Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Sorglos Kasko",
+          "umfang": "voll"
+        },
+        {
+          "zusatz": "Sorglos Kasko Glas",
+          "umfang": "nur_glas"
+        }
+      ],
+      "wb_marker": [
+        "Sorglos Kasko",
+        "Sorglos Kasko Glas"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Zwei Stufen: „Sorglos Kasko“ = Vollbindung, „Sorglos Kasko Glas“ = nur Glasschäden (Leasing-Variante).",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "bis 15 %; Sorglos Kasko Glas bis 5 %",
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung bei Reparatur außerhalb des Partnernetzes (Höhe laut AKB).",
+        "gilt_fuer": "Sorglos Kasko: Vollkasko und Teilkasko inkl. Glas; Sorglos Kasko Glas: nur Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · für Leasing wird die Glas-Variante angeboten",
+        "partnernetz": "Signal-Iduna-Partnerwerkstätten",
+        "akb_fundstelle": null,
+        "quelle": "signal-iduna.de; asscompact.de"
+      }
+    },
+    {
+      "slug": "sparkassen-direkt",
+      "marke": "Sparkassen Direkt",
+      "versicherung_name": "Sparkassen DirektVersicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [
+        "Mobil",
+        "Vorkasse",
+        "(Sparkassenkunden)"
+      ],
+      "linien": [
+        "AutoBasis",
+        "AutoBasis Mobil",
+        "AutoPlusProtect",
+        "AutoPlusProtect Mobil",
+        "AutoPremium",
+        "AutoPremium Mobil"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Vorkasse-Varianten ohne Werkstattbindung.",
+      "varianten_hinweis": "Zusätze „(Sparkassenkunden)“ oder „Vorkasse“ ändern nichts an der Werkstattwahl; „Mobil“ ist der Schutzbrief.",
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "sv-sachsen",
+      "marke": "SV Sachsen",
+      "versicherung_name": "Sparkassen-Versicherung Sachsen",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstatt-Management"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstatt-Management"
+      ],
+      "nicht_wb_marker": [
+        "KaskoPlus"
+      ],
+      "linien": [
+        "Kfz-Versicherung",
+        "Kfz-Versicherung KaskoPlus"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "sv-sparkassenversicherung",
+      "marke": "SV SparkassenVersicherung",
+      "versicherung_name": "SV Sparkassen-Versicherung Holding AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [
+        "Top-Schutz"
+      ],
+      "linien": [
+        "Kfz-Versicherung",
+        "Kfz-Versicherung Top-Schutz"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Stammdaten-Eintrag ist die Holding.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "universa",
+      "marke": "uniVersa",
+      "versicherung_name": "UniVersa Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstatt-Service"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstatt-Service"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "FLEXXdrive"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "versicherungskammer-bayern",
+      "marke": "Versicherungskammer Bayern",
+      "versicherung_name": "Versicherungskammer Bayern",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [
+        "KaskoPLUS"
+      ],
+      "linien": [
+        "Vario",
+        "Vario KaskoPLUS"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "verti",
+      "marke": "Verti",
+      "versicherung_name": "Verti Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Kasko Clever"
+        }
+      ],
+      "wb_marker": [
+        "Kasko Clever"
+      ],
+      "nicht_wb_marker": [
+        "Nix-Passiert",
+        "Vorkasse"
+      ],
+      "linien": [
+        "Basis",
+        "Pur",
+        "Klassik",
+        "Premium",
+        "PlusBONUS"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Zusätze „Nix-Passiert“ oder „Vorkasse“ ändern nichts an der Werkstattwahl.",
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "bis 15 %",
+        "sanktion_modell": "deckelung",
+        "sanktion_text": "Erstattung nur bis zur Höhe der Kosten der nächstgelegenen Partnerwerkstatt.",
+        "gilt_fuer": "Vollkasko und Teilkasko (Glas ohne Hol-/Bringservice)",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "Verti/MAPFRE-Netz",
+        "akb_fundstelle": null,
+        "quelle": "verti.de; CHECK24"
+      }
+    },
+    {
+      "slug": "vgh",
+      "marke": "VGH",
+      "versicherung_name": "VGH Landschaftliche Brandkasse Hannover",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Komfort",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "vhv",
+      "marke": "VHV",
+      "versicherung_name": "VHV Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Schadenservice PLUS mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "Schadenservice PLUS mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [
+        "EXKLUSIV",
+        "mit gesetzlicher Mindestdeckung"
+      ],
+      "linien": [
+        "Klassik-Garant 2.0",
+        "Klassik-Garant 2.0 EXKLUSIV"
+      ],
+      "linien_ohne_wb": [
+        "Klassik-Garant 2.0 mit gesetzlicher Mindestdeckung"
+      ],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "15 %",
+        "sanktion_modell": "unbekannt",
+        "sanktion_text": "Kürzung bei Reparatur außerhalb des Netzes laut AKB (Höhe öffentlich nicht belegt).",
+        "gilt_fuer": "Vollkasko und Teilkasko inkl. Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter",
+        "partnernetz": "zertifizierte VHV-Partnerwerkstätten, Reparatur nach Herstellervorgaben; Zuweisung nur über die VHV-Steuerung",
+        "akb_fundstelle": "VHV-AKB Werkstattbindung",
+        "quelle": "vhv.de/auto-versicherung/ratgeber/werkstattbindung"
+      }
+    },
+    {
+      "slug": "voedag",
+      "marke": "VÖDAG",
+      "versicherung_name": null,
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Sorglos Kasko",
+          "umfang": "voll"
+        },
+        {
+          "zusatz": "Sorglos Kasko Glas",
+          "umfang": "nur_glas"
+        }
+      ],
+      "wb_marker": [
+        "Sorglos Kasko",
+        "Sorglos Kasko Glas"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Tarifsystematik identisch mit Signal Iduna. Kein Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": {
+        "nachlass_text": "bis 15 %; Sorglos Kasko Glas bis 5 %",
+        "sanktion_modell": "kuerzung_unbestimmt",
+        "sanktion_text": "Kürzung der Erstattung bei Reparatur außerhalb des Partnernetzes (Höhe laut AKB).",
+        "gilt_fuer": "Sorglos Kasko: Vollkasko und Teilkasko inkl. Glas; Sorglos Kasko Glas: nur Glas",
+        "ausnahmen_text": "Haftpflichtschaden Dritter · für Leasing wird die Glas-Variante angeboten",
+        "partnernetz": "Signal-Iduna-Partnerwerkstätten",
+        "akb_fundstelle": null,
+        "quelle": "signal-iduna.de; asscompact.de"
+      }
+    },
+    {
+      "slug": "volkswagen-autoversicherung",
+      "marke": "Volkswagen Autoversicherung",
+      "versicherung_name": null,
+      "wb_status": "standard",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [
+        "Basis",
+        "Optimal",
+        "Premium"
+      ],
+      "hinweis": "Alle gelisteten Tarife ausschließlich als Werkstattbindungs-Varianten. Kein Rechtsträger in den Stammdaten.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "volkswohl-bund",
+      "marke": "Volkswohl-Bund",
+      "versicherung_name": "VOLKSWOHL-BUND Sachversicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattservice"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattservice"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Komfort",
+        "KomfortPlus"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "vrk",
+      "marke": "VRK",
+      "versicherung_name": "Bruderhilfe Sachversicherung AG im Raum der Kirchen",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Select"
+        }
+      ],
+      "wb_marker": [
+        "Select"
+      ],
+      "nicht_wb_marker": [
+        "Kasko Plus"
+      ],
+      "linien": [],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "tarife_explizit": [
+        {
+          "anzeigename": "Basis",
+          "linie": "Basis",
+          "wb_zusatz": null,
+          "wb": false
+        },
+        {
+          "anzeigename": "Basis Select",
+          "linie": "Basis",
+          "wb_zusatz": "Select",
+          "wb": true
+        },
+        {
+          "anzeigename": "Classic",
+          "linie": "Classic",
+          "wb_zusatz": null,
+          "wb": false
+        },
+        {
+          "anzeigename": "Classic Select",
+          "linie": "Classic",
+          "wb_zusatz": "Select",
+          "wb": true
+        },
+        {
+          "anzeigename": "Classic Kasko Plus",
+          "linie": "Classic Kasko Plus",
+          "wb_zusatz": null,
+          "wb": false
+        },
+        {
+          "anzeigename": "Classic Select Kasko Plus",
+          "linie": "Classic Kasko Plus",
+          "wb_zusatz": "Select",
+          "wb": true
+        }
+      ],
+      "hinweis": "HUK-Systematik (Versicherer im Raum der Kirchen).",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "wgv",
+      "marke": "WGV",
+      "versicherung_name": "WGV-Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "Kasko SELECT"
+        }
+      ],
+      "wb_marker": [
+        "Kasko SELECT"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Optimal",
+        "Beamten Basis",
+        "Beamten Optimal"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "P",
+      "konditionen": null
+    },
+    {
+      "slug": "wuerttembergische",
+      "marke": "Württembergische",
+      "versicherung_name": "Württembergische Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Schadenservice+"
+        }
+      ],
+      "wb_marker": [
+        "mit Schadenservice+"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "KompaktSchutz",
+        "PremiumSchutz"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "verlaesslichkeit_default": "abgeleitet",
+      "hinweis": "Bindungscharakter aus der Bezeichnung abgeleitet – AKB prüfen.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "wwk",
+      "marke": "WWK",
+      "versicherung_name": "WWK Allgemeine Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattmanagement"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattmanagement"
+      ],
+      "nicht_wb_marker": [
+        "XtraSchutz"
+      ],
+      "linien": [
+        "KFZ Basis",
+        "KFZ plus"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": "Der Zusatz „mit XtraSchutz“ ändert nichts an der Werkstattwahl.",
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "zurich",
+      "marke": "Zurich",
+      "versicherung_name": "Zurich Insurance plc",
+      "wb_status": "optional",
+      "wb_zusaetze": [
+        {
+          "zusatz": "mit Werkstattbindung"
+        }
+      ],
+      "wb_marker": [
+        "mit Werkstattbindung"
+      ],
+      "nicht_wb_marker": [],
+      "linien": [
+        "Basis",
+        "Top",
+        "Premium"
+      ],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": null,
+      "varianten_hinweis": null,
+      "check24_vertrieb": "L",
+      "konditionen": null
+    },
+    {
+      "slug": "hdi",
+      "marke": "HDI",
+      "versicherung_name": "HDI Versicherung AG",
+      "wb_status": "optional",
+      "wb_zusaetze": [],
+      "wb_marker": [
+        "Werkstattbindung",
+        "Partnerwerkstatt"
+      ],
+      "nicht_wb_marker": [
+        "Freie Werkstattwahl (nur für private Pkw)"
+      ],
+      "linien": [],
+      "linien_ohne_wb": [],
+      "linien_nur_wb": [],
+      "hinweis": "Nicht in der CHECK24-Liste. Werkstattbindungs-Baustein laut HDI-Broschüre vorhanden (Bezeichnung und Nachlass nicht belegt); Alternative „Freie Werkstattwahl (nur für private Pkw)“ = keine Bindung. Ohne Tarifliste – Rückfrage am Versicherungsschein.",
+      "varianten_hinweis": null,
+      "check24_vertrieb": null,
+      "konditionen": {
+        "nachlass_text": "„Sie sparen dabei“ (Höhe nicht belegt)",
+        "sanktion_modell": "unbekannt",
+        "sanktion_text": "Kürzung bei Reparatur außerhalb des Netzes laut AKB (Höhe öffentlich nicht belegt).",
+        "gilt_fuer": "Kaskofall",
+        "ausnahmen_text": "Alternative „Freie Werkstattwahl (nur für private Pkw)“ = keine Bindung",
+        "partnernetz": "zertifizierte HDI-Partnerwerkstätten, Herstellergarantie bleibt erhalten",
+        "akb_fundstelle": null,
+        "quelle": "HDI-Broschüre Mobilität/Auto (hdi.de/kfz)"
+      }
+    }
+  ]
+}

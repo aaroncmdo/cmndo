@@ -3869,7 +3869,11 @@ export type Database = {
           dokumente_reminder_whatsapp_letzte_sendung: string | null
           dokumente_vollstaendig_am_phase: string | null
           dokumente_vollstaendig_fuer_phase: string | null
+          eigene_kasko_tarif_id: string | null
+          eigene_kasko_tarif_name: string | null
           eigene_versicherung: string | null
+          eigene_versicherung_marke_id: string | null
+          eigene_versicherung_name: string | null
           endzustand_gesetzt_am: string | null
           endzustand_gesetzt_durch_user_id: string | null
           endzustand_grund: string | null
@@ -4041,6 +4045,7 @@ export type Database = {
           vs_ablehnungs_grund: string | null
           werkstatt_id: string | null
           werkstatt_seit_datum: string | null
+          werkstattbindung_quelle: string | null
           zahlungsweg: string | null
           zb1_status: string | null
           zeugen_kontakte: Json | null
@@ -4083,7 +4088,11 @@ export type Database = {
           dokumente_reminder_whatsapp_letzte_sendung?: string | null
           dokumente_vollstaendig_am_phase?: string | null
           dokumente_vollstaendig_fuer_phase?: string | null
+          eigene_kasko_tarif_id?: string | null
+          eigene_kasko_tarif_name?: string | null
           eigene_versicherung?: string | null
+          eigene_versicherung_marke_id?: string | null
+          eigene_versicherung_name?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
@@ -4255,6 +4264,7 @@ export type Database = {
           vs_ablehnungs_grund?: string | null
           werkstatt_id?: string | null
           werkstatt_seit_datum?: string | null
+          werkstattbindung_quelle?: string | null
           zahlungsweg?: string | null
           zb1_status?: string | null
           zeugen_kontakte?: Json | null
@@ -4297,7 +4307,11 @@ export type Database = {
           dokumente_reminder_whatsapp_letzte_sendung?: string | null
           dokumente_vollstaendig_am_phase?: string | null
           dokumente_vollstaendig_fuer_phase?: string | null
+          eigene_kasko_tarif_id?: string | null
+          eigene_kasko_tarif_name?: string | null
           eigene_versicherung?: string | null
+          eigene_versicherung_marke_id?: string | null
+          eigene_versicherung_name?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
@@ -4469,6 +4483,7 @@ export type Database = {
           vs_ablehnungs_grund?: string | null
           werkstatt_id?: string | null
           werkstatt_seit_datum?: string | null
+          werkstattbindung_quelle?: string | null
           zahlungsweg?: string | null
           zb1_status?: string | null
           zeugen_kontakte?: Json | null
@@ -4480,6 +4495,20 @@ export type Database = {
             columns: ["created_by_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_eigene_kasko_tarif_id_fkey"
+            columns: ["eigene_kasko_tarif_id"]
+            isOneToOne: false
+            referencedRelation: "kasko_tarife"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_eigene_versicherung_marke_id_fkey"
+            columns: ["eigene_versicherung_marke_id"]
+            isOneToOne: false
+            referencedRelation: "kasko_versicherer_marken"
             referencedColumns: ["id"]
           },
           {
@@ -11696,6 +11725,168 @@ export type Database = {
         }
         Relationships: []
       }
+      kasko_tarife: {
+        Row: {
+          aktiv: boolean
+          anzeigename: string
+          bindungsumfang: string
+          hat_werkstattbindung: boolean
+          id: string
+          linie: string
+          marke_id: string
+          reihenfolge: number
+          verlaesslichkeit: string
+          wb_zusatz: string | null
+        }
+        Insert: {
+          aktiv?: boolean
+          anzeigename: string
+          bindungsumfang?: string
+          hat_werkstattbindung: boolean
+          id?: string
+          linie: string
+          marke_id: string
+          reihenfolge?: number
+          verlaesslichkeit?: string
+          wb_zusatz?: string | null
+        }
+        Update: {
+          aktiv?: boolean
+          anzeigename?: string
+          bindungsumfang?: string
+          hat_werkstattbindung?: boolean
+          id?: string
+          linie?: string
+          marke_id?: string
+          reihenfolge?: number
+          verlaesslichkeit?: string
+          wb_zusatz?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kasko_tarife_marke_id_fkey"
+            columns: ["marke_id"]
+            isOneToOne: false
+            referencedRelation: "kasko_versicherer_marken"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kasko_versicherer_marken: {
+        Row: {
+          aktiv: boolean
+          aktualisiert_am: string
+          check24_vertrieb: string | null
+          erstellt_am: string
+          hinweis: string | null
+          id: string
+          marke: string
+          nicht_wb_marker: string[]
+          quelle: string
+          slug: string
+          sortierung: number
+          stand: string
+          varianten_hinweis: string | null
+          versicherung_id: string | null
+          wb_marker: string[]
+          wb_status: string
+        }
+        Insert: {
+          aktiv?: boolean
+          aktualisiert_am?: string
+          check24_vertrieb?: string | null
+          erstellt_am?: string
+          hinweis?: string | null
+          id?: string
+          marke: string
+          nicht_wb_marker?: string[]
+          quelle: string
+          slug: string
+          sortierung?: number
+          stand: string
+          varianten_hinweis?: string | null
+          versicherung_id?: string | null
+          wb_marker?: string[]
+          wb_status: string
+        }
+        Update: {
+          aktiv?: boolean
+          aktualisiert_am?: string
+          check24_vertrieb?: string | null
+          erstellt_am?: string
+          hinweis?: string | null
+          id?: string
+          marke?: string
+          nicht_wb_marker?: string[]
+          quelle?: string
+          slug?: string
+          sortierung?: number
+          stand?: string
+          varianten_hinweis?: string | null
+          versicherung_id?: string | null
+          wb_marker?: string[]
+          wb_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kasko_versicherer_marken_versicherung_id_fkey"
+            columns: ["versicherung_id"]
+            isOneToOne: false
+            referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kasko_wb_konditionen: {
+        Row: {
+          akb_fundstelle: string | null
+          ausnahmen_text: string | null
+          gilt_fuer: string | null
+          id: string
+          key: string
+          marke_id: string | null
+          nachlass_text: string | null
+          partnernetz: string | null
+          quelle: string | null
+          sanktion_modell: string
+          sanktion_text: string | null
+        }
+        Insert: {
+          akb_fundstelle?: string | null
+          ausnahmen_text?: string | null
+          gilt_fuer?: string | null
+          id?: string
+          key: string
+          marke_id?: string | null
+          nachlass_text?: string | null
+          partnernetz?: string | null
+          quelle?: string | null
+          sanktion_modell?: string
+          sanktion_text?: string | null
+        }
+        Update: {
+          akb_fundstelle?: string | null
+          ausnahmen_text?: string | null
+          gilt_fuer?: string | null
+          id?: string
+          key?: string
+          marke_id?: string | null
+          nachlass_text?: string | null
+          partnernetz?: string | null
+          quelle?: string | null
+          sanktion_modell?: string
+          sanktion_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kasko_wb_konditionen_marke_id_fkey"
+            columns: ["marke_id"]
+            isOneToOne: true
+            referencedRelation: "kasko_versicherer_marken"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ki_gespraeche: {
         Row: {
           claim_id: string | null
@@ -12320,8 +12511,12 @@ export type Database = {
           disqualifiziert_grund_key: string | null
           disqualifiziert_notiz: string | null
           dsgvo_zustimmung_am: string | null
+          eigene_kasko_tarif_id: string | null
+          eigene_kasko_tarif_name: string | null
           eigene_policennr: string | null
           eigene_versicherung: string | null
+          eigene_versicherung_marke_id: string | null
+          eigene_versicherung_name: string | null
           email: string | null
           erstzulassung: string | null
           fahrerflucht: boolean | null
@@ -12416,6 +12611,7 @@ export type Database = {
           nachname: string | null
           notiz: string | null
           nutzungsausfall: boolean | null
+          oppref: string | null
           parkplatz_kamera: boolean | null
           personenschaden_flag: boolean | null
           polizei_aktenzeichen: string | null
@@ -12495,6 +12691,7 @@ export type Database = {
           werkstatt_intake_am: string | null
           werkstatt_intake_von: string | null
           werkstatt_seit_datum: string | null
+          werkstattbindung_quelle: string | null
           whatsapp_geprueft_am: string | null
           whatsapp_verfuegbar: boolean | null
           wiederholung_erkannt_am: string | null
@@ -12546,8 +12743,12 @@ export type Database = {
           disqualifiziert_grund_key?: string | null
           disqualifiziert_notiz?: string | null
           dsgvo_zustimmung_am?: string | null
+          eigene_kasko_tarif_id?: string | null
+          eigene_kasko_tarif_name?: string | null
           eigene_policennr?: string | null
           eigene_versicherung?: string | null
+          eigene_versicherung_marke_id?: string | null
+          eigene_versicherung_name?: string | null
           email?: string | null
           erstzulassung?: string | null
           fahrerflucht?: boolean | null
@@ -12642,6 +12843,7 @@ export type Database = {
           nachname?: string | null
           notiz?: string | null
           nutzungsausfall?: boolean | null
+          oppref?: string | null
           parkplatz_kamera?: boolean | null
           personenschaden_flag?: boolean | null
           polizei_aktenzeichen?: string | null
@@ -12721,6 +12923,7 @@ export type Database = {
           werkstatt_intake_am?: string | null
           werkstatt_intake_von?: string | null
           werkstatt_seit_datum?: string | null
+          werkstattbindung_quelle?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
           wiederholung_erkannt_am?: string | null
@@ -12772,8 +12975,12 @@ export type Database = {
           disqualifiziert_grund_key?: string | null
           disqualifiziert_notiz?: string | null
           dsgvo_zustimmung_am?: string | null
+          eigene_kasko_tarif_id?: string | null
+          eigene_kasko_tarif_name?: string | null
           eigene_policennr?: string | null
           eigene_versicherung?: string | null
+          eigene_versicherung_marke_id?: string | null
+          eigene_versicherung_name?: string | null
           email?: string | null
           erstzulassung?: string | null
           fahrerflucht?: boolean | null
@@ -12868,6 +13075,7 @@ export type Database = {
           nachname?: string | null
           notiz?: string | null
           nutzungsausfall?: boolean | null
+          oppref?: string | null
           parkplatz_kamera?: boolean | null
           personenschaden_flag?: boolean | null
           polizei_aktenzeichen?: string | null
@@ -12947,6 +13155,7 @@ export type Database = {
           werkstatt_intake_am?: string | null
           werkstatt_intake_von?: string | null
           werkstatt_seit_datum?: string | null
+          werkstattbindung_quelle?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
           wiederholung_erkannt_am?: string | null
@@ -12971,6 +13180,20 @@ export type Database = {
           zugewiesen_an?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_eigene_kasko_tarif_id_fkey"
+            columns: ["eigene_kasko_tarif_id"]
+            isOneToOne: false
+            referencedRelation: "kasko_tarife"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_eigene_versicherung_marke_id_fkey"
+            columns: ["eigene_versicherung_marke_id"]
+            isOneToOne: false
+            referencedRelation: "kasko_versicherer_marken"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_gegner_versicherung_id_fkey"
             columns: ["gegner_versicherung_id"]
@@ -28023,12 +28246,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -28052,11 +28275,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -28077,11 +28300,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -28102,11 +28325,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -28119,11 +28342,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

@@ -19,6 +19,7 @@ import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
 import { EigentuemerTypPanel } from './EigentuemerTypPanel'
 import { DispatchGrueneKartePanel } from './DispatchGrueneKartePanel'
+import { leseAuswertung } from '@/lib/anspruch/auswertung-unverbindlich'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -33,6 +34,10 @@ function zeugenKontakteAus(lead: Record<string, unknown>): ZeugenKontakt[] {
   const raw = lead.zeugen_kontakte
   return Array.isArray(raw) ? (raw as ZeugenKontakt[]) : []
 }
+
+// Quelle B — Anzeige der unverbindlichen Selbst-Auswertung.
+// Labels + Parsing liegen in @/lib/anspruch/auswertung-unverbindlich, weil die
+// SV-Fallakten-Karte dieselben braucht (eine Quelle statt zweier Label-Maps).
 
 // Record<DispatchSectionPanelKey, …> erzwingt: Map-Keys == Liste im keys-Modul.
 const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) => ReactNode[]> = {
@@ -66,6 +71,38 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
           leadId={ctx.leadId}
           initialAngefragtAm={(ctx.lead.gegner_versicherung_anfrage_datum as string | null) ?? null}
         />,
+      )
+    }
+    // Quelle B: die unverbindliche Selbst-Auswertung aus der Anspruchsprüfung.
+    // Read-only wie das Werkstatt-KVA-Panel — was hier steht, sind drei Klicks des
+    // Kunden, kein Gutachten. Der Hinweis MUSS mitlaufen (Auftrag: "in jeder Ansicht,
+    // die den Wert zeigt, muss erkennbar bleiben, dass er unverbindlich ist").
+    // Bewusst OHNE Eurobetrag: die im Funnel gezeigten Spannen sind statisch.
+    // Conditional-render: ohne Auswertung erscheint gar nichts.
+    const auswertung = leseAuswertung(ctx.lead.auswertung_unverbindlich)
+    if (auswertung) {
+      panels.push(
+        <SectionCard
+          key="auswertung-unverbindlich"
+          title="Selbst-Einschätzung des Kunden (unverbindlich)"
+          subtitle="Aus der Anspruchsprüfung — drei angeklickte Antworten, kein Gutachten und keine Zusage"
+        >
+          <p className="text-body font-semibold text-claimondo-navy">{auswertung.tierLabel}</p>
+          {auswertung.antwortZeilen.length > 0 ? (
+            <ul className="mt-2 space-y-1">
+              {auswertung.antwortZeilen.map((z) => (
+                <li key={z} className="text-body-sm text-claimondo-shield">
+                  {z}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {auswertung.erstelltAm ? (
+            <p className="text-caption text-claimondo-ondo/70 mt-2">
+              Angegeben am {auswertung.erstelltAm} — eine Einschätzung von damals, nicht von heute
+            </p>
+          ) : null}
+        </SectionCard>,
       )
     }
     return panels

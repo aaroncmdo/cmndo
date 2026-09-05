@@ -85,6 +85,14 @@ describe('matcheSzenario', () => {
 })
 
 describe('berechneAktiveSteps', () => {
+  it('Kasko: werkstattbindung_check verschwindet nach Antwort (true, false ODER quelle=unbekannt)', () => {
+    const steps = [{ szenario_id: 'kasko', step_id: 'werkstattbindung_check', reihenfolge: 3, bedingung: { freie_werkstattwahl: null, werkstattbindung_quelle: null }, erhebt_felder: [] }]
+    const base = { schuldfrage: 'eigenverantwortung', eigene_versicherung: 'ja' }
+    expect(berechneAktiveSteps(steps, 'kasko', { ...base, freie_werkstattwahl: null, werkstattbindung_quelle: null })).toEqual(['werkstattbindung_check'])
+    expect(berechneAktiveSteps(steps, 'kasko', { ...base, freie_werkstattwahl: true, werkstattbindung_quelle: 'tarif' })).toEqual([])
+    expect(berechneAktiveSteps(steps, 'kasko', { ...base, freie_werkstattwahl: null, werkstattbindung_quelle: 'unbekannt' })).toEqual([])
+  })
+
   it('Haftpflicht ohne alles -> volle Sequenz inkl. beider Ort-Abfragen', () => {
     const steps = berechneAktiveSteps(STEPS, 'haftpflicht', {
       unfallhergang: null, besichtigungsort_effektiv: null, sv_id: null,

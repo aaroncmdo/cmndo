@@ -256,6 +256,14 @@ jobs:
       - name: E2E-Toplevel-FS-Ratchet
         run: npm run check:e2e-toplevel-fs -- --ratchet
 
+      # Ein Test hinter `test.skip(!process.env.RUN_X, …)` laeuft nur, wenn RUN_X gesetzt
+      # wird. Steht der Schalter in KEINEM Workflow, meldet sich der Waechter nie — und
+      # faellt trotzdem niemandem auf, weil er als `skipped` zaehlt statt als `failed`.
+      # Gemessen 31.08.: 15 solcher Waechter, darunter golden-path, 2fa-hardening und
+      # trusted-device. Siehe AGENTS.md §Stumme-Waechter-Gate.
+      - name: Stumme-Waechter-Ratchet
+        run: npm run check:stumme-waechter -- --ratchet
+
       # Query-Drift-Bremse (Ratchet): blockt NEUE Queries auf nicht-existente Spalten —
       # Filter-/Order-Params (.order('created_at') auf flow_links/auftraege), insert/update-
       # Keys (pflichtdokumente.datei_url) und top-level select-Spalten — gg. database.types.ts
@@ -770,16 +778,29 @@ jobs:
       # + wird danach beim Login 2FA-gechallenged. Konto-isoliert (smoke-enroll@claimondo.de, kein
       # Comms/Booking). Der Seed-Step setzt das Konto VOR dem Lauf faktorfrei zurueck (stateful self-reset
       # je Lauf; Seed liest process.env-first, .env.local nur lokal). RUN_2FA_ENROLL_SMOKE gatet den Spec.
+      # SMOKE_ENROLL_PASSWORD wird an BEIDEN Steps gebraucht: der Seed schreibt das
+      # Passwort auf das Konto (scripts/seed-smoke-enroll.mjs:40), der Spec meldet sich
+      # damit an (tests/e2e/flows/2fa-enroll-smoke.spec.ts:24). `journey-gate.yml` setzt
+      # es auf WORKFLOW-Ebene, dort genuegte eine Zeile — ci.yml hat kein `env:` oberhalb
+      # von `jobs:`, hier braucht es beide.
+      #
+      # Genau daran haengt der e2e-Job auf main seit dem 01.09.: #5797 hat den
+      # Klartext-Default richtigerweise entfernt, die Durchreichung wurde aber nur im
+      # journey-gate nachgezogen. Der Seed bricht seither laut ab ("Fehlend:
+      # SMOKE_ENROLL_PASSWORD") statt dem Konto still ein LEERES Passwort zu setzen —
+      # der Guard tut also was er soll, es fehlte nur diese Verdrahtung.
       - name: Seed 2FA-Enroll-Fixture (J8)
         run: node scripts/seed-smoke-enroll.mjs
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SMOKE_ENROLL_PASSWORD: ${{ secrets.SMOKE_ENROLL_PASSWORD }}
       - name: Fundament Journey-Smoke J8 (2FA-Enroll)
         run: npx playwright test 2fa-enroll-smoke --project=chromium --workers=1 --reporter=line
         env:
           RUN_2FA_ENROLL_SMOKE: '1'
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          SMOKE_ENROLL_PASSWORD: ${{ secrets.SMOKE_ENROLL_PASSWORD }}
 
       # Fundament Journey-Suite J5 (Kasko/Selbstzahler-Reparatur-Phase) — die interne Fallakte eines
       # Kasko-Claims mit gesetzter Werkstatt zeigt die Reparatur-Lane (Stepper "Terminfindung"), NICHT
@@ -949,6 +970,21 @@ jobs:
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          # phone-login-card-smoke.spec.ts:19 liest SMOKE_PHONE_LOGIN_PASSWORD mit Default
+          # `''`. Ohne Wert meldet sich der Spec mit leerem Passwort an, der Login bleibt auf
+          # /login stehen und der Test stirbt an `waitForURL: Timeout 20000ms` — was wie ein
+          # UI-Fehler aussieht, aber keiner ist.
+          #
+          # BEWUSST auf TEST_DISPATCH_PASSWORD gemappt statt ein eigenes Secret anzulegen:
+          # der Spec nutzt in Zeile 18 als Default genau `test-dispatch@claimondo.de`, und
+          # dieses Konto-Secret wird bei Rotationen gepflegt (zuletzt 31.08., dem
+          # Rotationsdatum). Ein 17. Variablenname fuer dasselbe Konto waere genau der
+          # Wildwuchs, an dem die Rotation vom 31.08. schon `SMOKE_DISPATCH_PASS` verloren
+          # hat — ein Konto, zwei Secrets, nur eines gepflegt.
+          #
+          # Die Email bleibt bewusst beim Default: so koennen Konto und Passwort nicht
+          # auseinanderlaufen.
+          SMOKE_PHONE_LOGIN_PASSWORD: ${{ secrets.TEST_DISPATCH_PASSWORD }}
 
       # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
       # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn

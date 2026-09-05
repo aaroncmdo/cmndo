@@ -8,6 +8,9 @@
 // Vorher fehlte die Haftpflicht-Karte -> ein unverschuldeter Kunde musste sich falsch einordnen.
 import { Scale, ShieldCheck, Wallet } from 'lucide-react'
 import type { Abrechnungswahl } from './wizard-logic'
+import { KaskoTarifFrage } from '@/components/self-service/KaskoTarifFrage'
+import { Badge } from '@/components/primitives'
+import type { KaskoWbWahl } from './wizard-logic'
 
 const OPTIONEN: { wert: Abrechnungswahl; label: string; hint: string; icon: typeof ShieldCheck }[] = [
   {
@@ -33,9 +36,13 @@ const OPTIONEN: { wert: Abrechnungswahl; label: string; hint: string; icon: type
 export function AbrechnungStep({
   abrechnung,
   onChange,
+  kaskoWb,
+  onKaskoWb,
 }: {
   abrechnung: Abrechnungswahl | null
   onChange: (w: Abrechnungswahl) => void
+  kaskoWb: KaskoWbWahl | null
+  onKaskoWb: (w: KaskoWbWahl | null) => void
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -53,7 +60,7 @@ export function AbrechnungStep({
             <button
               key={wert}
               type="button"
-              onClick={() => onChange(wert)}
+              onClick={() => { onChange(wert); if (wert !== 'kasko') onKaskoWb(null) }}
               aria-pressed={aktiv}
               className={`flex items-start gap-3 rounded-ios-lg border p-4 text-left transition ${
                 aktiv
@@ -73,6 +80,34 @@ export function AbrechnungStep({
         })}
       </div>
 
+      {abrechnung === 'kasko' && !kaskoWb && (
+        <div className="rounded-ios-lg border border-claimondo-border bg-white p-4">
+          <KaskoTarifFrage kompakt onErgebnis={(auswahl, ergebnis) => onKaskoWb({ ...auswahl, ...ergebnis })} />
+        </div>
+      )}
+      {abrechnung === 'kasko' && kaskoWb && (
+        <div className="flex items-center justify-between gap-3 rounded-ios-lg border border-claimondo-border bg-white p-4">
+          <span className="text-body-sm text-claimondo-navy">
+            {[kaskoWb.markeName, kaskoWb.tarifName].filter(Boolean).join(' · ') || 'Kasko-Tarif'}
+          </span>
+          {kaskoWb.freieWerkstattwahl === true && <Badge tone="success" size="sm">freie Werkstattwahl</Badge>}
+          {kaskoWb.freieWerkstattwahl === false && <Badge tone="warning" size="sm">Werkstattbindung</Badge>}
+          {kaskoWb.freieWerkstattwahl === null && <Badge tone="info" size="sm">Bindung unklar</Badge>}
+          <button type="button" className="text-caption text-claimondo-ondo underline" onClick={() => onKaskoWb(null)}>ändern</button>
+        </div>
+      )}
+      {abrechnung === 'kasko' && kaskoWb?.freieWerkstattwahl === false && (
+        <p className="text-body-sm text-warning-strong">
+          Ihr Tarif enthält eine Werkstattbindung – Ihre Versicherung benennt die Werkstatt. Wir vermitteln deshalb keine
+          Werkstatt; im nächsten Schritt können Sie einen Rückruf anfordern.
+        </p>
+      )}
+      {abrechnung === 'kasko' && kaskoWb?.freieWerkstattwahl === null && (
+        <p className="text-body-sm text-claimondo-navy/70">
+          Bitte prüfen Sie vor der Reparatur Ihren Versicherungsschein auf einen Werkstattbindungs-Zusatz – unser Team
+          meldet sich dazu bei Ihnen.
+        </p>
+      )}
     </div>
   )
 }

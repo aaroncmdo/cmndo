@@ -1,0 +1,2 @@
+QR-Inhalt (Regenerierung: scripts/build-unfallguide.mjs --qr):
+https://claimondo.de/gutachter-finden?utm_source=unfallguide&utm_medium=pdf&utm_campaign=leadmagnet

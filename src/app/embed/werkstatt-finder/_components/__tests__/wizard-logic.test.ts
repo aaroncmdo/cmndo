@@ -102,3 +102,14 @@ describe('zeigeUmkreisLeerHinweis', () => {
     expect(zeigeUmkreisLeerHinweis({ hatGesucht: true, loading: false, anzahlTreffer: 3 })).toBe(false)
   })
 })
+
+describe('kannWeiter(abrechnung) — Kasko braucht die Tarifantwort', () => {
+  const basis = { ...WIZARD_INITIAL, abrechnung: 'kasko' as const }
+  it('kasko ohne Antwort -> false; mit Antwort -> true', () => {
+    expect(kannWeiter('abrechnung', basis)).toBe(false)
+    expect(kannWeiter('abrechnung', { ...basis, kaskoWb: { markeId: 'm', markeName: 'HUK', tarifId: null, tarifName: null, markerAntwort: 'nein', freieWerkstattwahl: true, quelle: 'marker', grund: 'marker_verneint' } })).toBe(true)
+  })
+  it('haftpflicht/selbstzahler brauchen keine Tarifantwort', () => {
+    expect(kannWeiter('abrechnung', { ...WIZARD_INITIAL, abrechnung: 'selbstzahler' })).toBe(true)
+  })
+})

@@ -120,6 +120,7 @@ export function FinderWizard({
   vorauswahlSvId = null,
   vorauswahlSlotStart = null,
   utmSource = null,
+  oppref = null,
   vorauswahlAdresse = null,
   vorauswahlSvName = null,
   vorauswahlSchadenart = null,
@@ -152,6 +153,8 @@ export function FinderWizard({
   /** `utm_source` der Einstiegs-URL — ChatGPT haengt `chatgpt.com` selbst an. Wird bis
    *  auf die Anfrage durchgereicht, damit sichtbar wird, WELCHE KI den Kunden schickte. */
   utmSource?: string | null
+  /** OpenAI-Ads-Kennung aus der Parent-URL — nur durchgereicht. */
+  oppref?: string | null
   /**
    * GEO-Deep-Link (`?adresse=…&lat=…&lng=…`): der Standort des Fahrzeugs, den die KI im
    * Gespraech bereits erfragt hat.
@@ -454,6 +457,7 @@ export function FinderWizard({
         // Nachhinein nicht von einem normalen Website-Besuch zu unterscheiden.
         viaDeeplink: !!vorauswahlSvId,
         utmSource,
+        oppref,
         // Aus dem Chat uebernommen (`?schuldfrage=`) — erspart dem Kunden den
         // Quali-Schritt im FlowLink. Null, wenn die KI nichts mitgab.
         schuldfrage: vorauswahlSchuldfrage,

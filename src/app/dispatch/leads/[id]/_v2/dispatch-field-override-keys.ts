@@ -13,6 +13,8 @@ export const DISPATCH_FIELD_OVERRIDE_KEYS = [
   'kennzeichen',
   // P4-D kunde-Geocoding: Kundenadresse als Place-Autocomplete (füllt strasse/plz/stadt + lat/lng).
   'kunde_strasse',
+  // Kasko-WB Phase 1: Versicherer/Tarif/Bindung als Rich-Feld
+  'eigene_kasko_tarif',
 ] as const
 export type DispatchOverrideKey = (typeof DISPATCH_FIELD_OVERRIDE_KEYS)[number]
 
