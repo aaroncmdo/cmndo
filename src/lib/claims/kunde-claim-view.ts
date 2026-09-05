@@ -209,6 +209,8 @@ export type KundeClaimViewModel = {
     // Kasko-WB Phase 1: Tariffrage vor dem Finder; gebunden -> Info statt Finder.
     kaskoBindungOffen: boolean
     kaskoGebunden: boolean
+    /** Kasko-WB Phase 2: Bindung ungeklaert (Kunde konnte nicht pruefen) — Pruef-Card, Finder bleibt (E3). */
+    kaskoBindungUngeklaert: boolean
     kaskoTarifName: string | null
     bankdatenOffen: boolean
     gutachtenVerfuegbar: boolean
@@ -709,6 +711,11 @@ export async function getKundeClaimView(
       // Kasko-WB Phase 1: Tariffrage vor dem Finder; gebunden -> Info statt Finder.
       kaskoBindungOffen: abrechnungsweg === 'kasko' && (claimExtra?.freie_werkstattwahl ?? null) === null && (claimExtra?.werkstattbindung_quelle ?? null) === null && reparaturWerkstattId == null,
       kaskoGebunden: abrechnungsweg === 'kasko' && claimExtra?.freie_werkstattwahl === false,
+      kaskoBindungUngeklaert:
+        abrechnungsweg === 'kasko' &&
+        (claimExtra?.freie_werkstattwahl ?? null) === null &&
+        claimExtra?.werkstattbindung_quelle === 'unbekannt' &&
+        reparaturWerkstattId == null,
       kaskoTarifName: (claimExtra?.eigene_kasko_tarif_name as string | null | undefined) ?? null,
       reparaturPhaseErreicht: reparaturPhaseOk,
       // bankdatenOffen == „Bankdaten-Banner ist in dieser Phase aktiv & noch nicht hinterlegt"
