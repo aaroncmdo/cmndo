@@ -76,9 +76,29 @@ verlangen, nicht die Abwesenheit eines Negativs.**
 ⚠ Dieses Gate steht **bewusst beim Drain und nicht in der CI**: die Drift entsteht außerhalb eines
 PRs, ein CI-Ratchet würde unbeteiligte Lanes rot färben (Begründung des Autors im ci.yml-Kommentar,
 unverändert gültig). Beim Drain ist der Radius genau eine Runde, und der Drain darf sie selbst
-schließen: Statement aus `schema_migrations.statements` holen, File 1:1 schreiben, **per md5 gegen
-beide `\n`-Varianten** gegenprüfen, committen (Aaron 05.09.: „zieh du einfach die Migration noch
-nach"). Vorbild: Commit `7f9d06a64`.
+schließen (Aaron 05.09.: „zieh du einfach die Migration noch nach").
+
+**Behebungs-Reihenfolge — erst suchen, dann erst rekonstruieren:**
+
+1. **Urheber-PR suchen.** `gh pr list --state open --search "<version>"` **und**
+   `git log --all --diff-filter=A -- 'supabase/migrations/<version>_*'`. Existiert die Datei in
+   irgendeinem Ref, wird **nicht** rekonstruiert — eine zweite Fassung erzeugt einen add/add-Konflikt
+   am selben Pfad (belegt 19.08., #5412 gegen #5415). Dann gilt Punkt 3.
+2. **Kein Urheber gefunden** → Statement aus `schema_migrations.statements` holen, File 1:1 schreiben,
+   **per md5 gegen beide `\n`-Varianten am committeten Blob** gegenprüfen, committen. Vorbild: `7f9d06a64`.
+3. **Urheber-PR existiert** → auf ihn warten. Zieht er sich hin, gilt die Ausnahme:
+
+⚠ **D4 blockt NICHT, wenn die Lücke älter als die Runde ist und nachweislich in Arbeit.** Die drei
+Bedingungen müssen alle drei gelten und im Release-PR belegt sein: (a) die Migration wurde **vor** dem
+transportierten `staging`-Kopf appliziert, (b) die Runde verschlechtert die Lücke um nichts, (c) die
+Dateien liegen bereits in einem offenen PR. Dann fährt die Runde, die Ausnahme steht **offen** im
+Release-PR, und die Lücke wird mit der **nächsten** Runde geschlossen.
+
+Begründung (06.09.2026, erster echter Auslöser): D4 hätte einen **Hotfix für eine seit Stunden tote
+Landeseite** aufgehalten — wegen zweier Migrations-Files einer fremden Lane, die schon in #5900 lagen.
+Blockieren hätte die Replay-Integrität um keinen Deut verbessert und den Kundenpfad länger kaputt
+gelassen. **Eine Regel, die einen Prod-Hotfix aufhält, ohne dafür etwas zu schützen, wird umgangen
+statt befolgt** — deshalb steht die Ausnahme geschrieben und nicht im Ermessen.
 
 **D5 — `main` steht beim Merge noch exakt auf dem protokollierten Parent.** Sonst abbrechen.
 
