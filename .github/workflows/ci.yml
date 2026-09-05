@@ -165,6 +165,14 @@ jobs:
       - name: Client-Timezone-Ratchet
         run: npm run check:client-timezone -- --ratchet
 
+      # Copy-Lint-Gate: RDG-Rollentrennung in nutzersichtbaren Marketing-Texten (hart, Baseline 0:
+      # "wir verhandeln/setzen durch/holen zurueck", "unser Anwalt", Verb-Reihung nach Komma) plus
+      # Umlaut-Ersatz in UI-Strings als Ratchet gegen scripts/copy-lint-baseline.json. Der Scanner
+      # existierte seit #5862, war aber nie verdrahtet (stummer Waechter). Seit #5876 auch die
+      # Bildtexte der Serie "Aus der Patsche" (Generator). Siehe AGENTS.md Copy-Lint-Gate.
+      - name: Copy-Lint-Ratchet
+        run: npm run check:copy-lint -- --ratchet
+
       # Cron-Auth-Gate: `authHeader !== `Bearer ${process.env.CRON_SECRET}`` sieht wie ein
       # Gate aus, ist aber keins — fehlt die Variable, ergibt der Ausdruck "Bearer undefined",
       # und genau dieser Header kommt durch. Richtig ist `assertCronAuth` (fail-closed).

@@ -15,6 +15,7 @@
     "check:claims-column-grants": "node --env-file=.env.local scripts/check-claims-column-grants.mjs",
     "check:client-timezone": "node scripts/check-client-timezone.mjs",
     "check:component-set": "node scripts/check-component-set.mjs",
+    "check:copy-lint": "node scripts/check-copy-lint.mjs",
     "check:cron-auth": "node scripts/check-cron-auth.mjs",
     "check:e2e-toplevel-fs": "node scripts/check-e2e-toplevel-fs.mjs",
     "check:fixed-overlay": "node scripts/check-fixed-overlay-safearea.mjs",
