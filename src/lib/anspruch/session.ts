@@ -125,8 +125,3 @@ export async function speicherePositionen(
   if (error) console.error('[anspruch/session] speicherePositionen failed:', error.message)
 }
 
-export async function promoteSessionAufLead(sessionToken: string, leadId: string): Promise<void> {
-  const db = createAdminClient()
-  const { error } = await db.from('anspruch_schaetzungen').update({ lead_id: leadId }).eq('session_token', sessionToken)
-  if (error) console.error('[anspruch/session] promoteSessionAufLead failed:', error.message)
-}
