@@ -124,10 +124,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
         <SpokeCtaBand />
       </main>
-      {/* Guide-Angebot bei 15 % Artikeltext. Auf Mobil bewusst ein Band statt
-          eines Overlays — die Ratgeber-Seiten sind die SEO-Flaeche, und Google
-          wertet verdeckenden Inhalt auf Mobilgeraeten ab. */}
-      <GuidePopover />
+      {/* Guide-Angebot bei 15 % Artikeltext — nur das Desktop-Modal. Das
+          Mobil-Band ist hier AUS: die Seite traegt schon die StickyCallBar
+          (fixed bottom-4); zwei feste Leisten am unteren Rand wuerden sich
+          gegenseitig verdecken. Auf Mobil fuehren Anker-Block und Fusszeile
+          zum Guide. */}
+      <GuidePopover mobilBand={false} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>

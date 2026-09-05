@@ -1482,6 +1482,10 @@
     "gutachter": "Rzeczoznawca",
     "ratgeber_menu": [
       {
+        "href": "/unfallguide",
+        "label": "Poradnik po wypadku (PDF)"
+      },
+      {
         "href": "/kfz-haftpflicht-schaden",
         "label": "Pozycje szkody"
       },

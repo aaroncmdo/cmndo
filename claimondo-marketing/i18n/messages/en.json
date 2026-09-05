@@ -1482,6 +1482,10 @@
     "gutachter": "Expert",
     "ratgeber_menu": [
       {
+        "href": "/unfallguide",
+        "label": "Accident guide (PDF)"
+      },
+      {
         "href": "/motor-liability-claim",
         "label": "Claim Items"
       },

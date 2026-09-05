@@ -54,7 +54,20 @@ function darfZeigen(): boolean {
   return true
 }
 
-export function GuidePopover({ artikelSelector = 'article' }: { artikelSelector?: string }) {
+export function GuidePopover({
+  artikelSelector = 'article',
+  mobilBand = true,
+}: {
+  artikelSelector?: string
+  /**
+   * Das Mobil-Band ist `fixed bottom-0`. Seiten, die bereits eine feste Leiste am
+   * unteren Rand tragen (StickyCallBar auf den Ratgeber-Artikeln: `fixed bottom-4`),
+   * schalten es ab — zwei Overlays uebereinander fressen sich gegenseitig die
+   * Klicks (Fixed-Overlay-Klasse, zweimal real passiert). Der Guide bleibt dort
+   * ueber Anker-Block und Fusszeile erreichbar.
+   */
+  mobilBand?: boolean
+}) {
   const [offen, setOffen] = useState(false)
   const [ergebnis, setErgebnis] = useState<GuideLeadErgebnis | null>(null)
   const [laeuft, starte] = useTransition()
@@ -108,7 +121,7 @@ export function GuidePopover({ artikelSelector = 'article' }: { artikelSelector?
   return (
     <>
       {/* ── Mobil: Band, kein Overlay ──────────────────────────────── */}
-      {offen && (
+      {offen && mobilBand && (
         <div
           role="region"
           aria-label="Unfallguide"

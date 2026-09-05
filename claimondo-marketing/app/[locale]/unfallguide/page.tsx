@@ -10,6 +10,8 @@ import {
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { GuideFormClient } from './GuideFormClient'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
+import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { LandingFooter } from '@/components/landing/LandingFooter'
 
 // Landeseite fuer den Unfallguide. Anders als kfzgutachter-lp (noindex,
 // Subdomain, reiner Anzeigen-Traffic) ist diese Seite INDEXIERBAR und liegt
@@ -131,6 +133,12 @@ export default async function UnfallguidePage() {
           { name: 'Unfallguide', url: `${SITE_URL}/unfallguide` },
         ]),
       )}
+
+      {/* Topbar und Fusszeile werden in dieser App JE SEITE gemountet, nicht im
+          Layout. Ohne sie stand die Seite ohne Navigation und ohne Rechtslinks da —
+          und die Fusszeile, die auf den Guide verweist, fehlte ausgerechnet auf
+          seiner eigenen Seite. */}
+      <LandingTopbar authenticatedUser={null} />
 
       {/* Die Seite und der Guide sind deutsch, die Route liegt unter [locale].
           Auf en/pl/tr/ru/ar sagt der Banner das ehrlich, statt einen englischen
@@ -285,6 +293,8 @@ export default async function UnfallguidePage() {
           <p className="mt-4 text-sm text-white/60">Erreichbar von 8 bis 20 Uhr</p>
         </div>
       </section>
+
+      <LandingFooter />
     </>
   )
 }

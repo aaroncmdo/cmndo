@@ -1635,6 +1635,10 @@
     "gutachter": "Gutachter",
     "ratgeber_menu": [
       {
+        "href": "/unfallguide",
+        "label": "Unfallguide (PDF)"
+      },
+      {
         "href": "/kfz-haftpflicht-schaden",
         "label": "Schadenspositionen"
       },

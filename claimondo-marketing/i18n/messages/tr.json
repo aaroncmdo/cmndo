@@ -1482,6 +1482,10 @@
     "gutachter": "Bilirkişi",
     "ratgeber_menu": [
       {
+        "href": "/unfallguide",
+        "label": "Kaza rehberi (PDF)"
+      },
+      {
         "href": "/kfz-haftpflicht-schaden",
         "label": "Hasar Kalemleri"
       },

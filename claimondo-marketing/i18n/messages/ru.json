@@ -1482,6 +1482,10 @@
     "gutachter": "Эксперт",
     "ratgeber_menu": [
       {
+        "href": "/unfallguide",
+        "label": "Руководство по ДТП (PDF)"
+      },
+      {
         "href": "/kfz-haftpflicht-schaden",
         "label": "Статьи возмещения"
       },

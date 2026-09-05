@@ -1482,6 +1482,10 @@
     "gutachter": "خبير",
     "ratgeber_menu": [
       {
+        "href": "/unfallguide",
+        "label": "دليل الحوادث (PDF)"
+      },
+      {
         "href": "/kfz-haftpflicht-schaden",
         "label": "بنود الأضرار"
       },
