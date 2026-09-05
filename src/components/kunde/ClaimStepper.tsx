@@ -58,11 +58,16 @@ export type StepperNotice = {
 
 export default function ClaimStepper({
   lifecycle,
+  topSlot,
   bottomSlot,
   notices,
   terminInfo,
 }: {
   lifecycle: ClaimLifecycle
+  /** Banner ÜBER den Phasen — für Entscheidungen, die der Kunde jetzt treffen soll
+   *  (Kanzlei-Wahl). Bewusst oben: der `bottomSlot` ist die Termin-/Verlegungs-Zone,
+   *  eine Handlungsaufforderung dort unten geht neben dem Termin-Block unter. */
+  topSlot?: React.ReactNode
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
    *  abgelöst, bleibt für Rückwärtskompatibilität. */
   bottomSlot?: React.ReactNode
@@ -89,6 +94,9 @@ export default function ClaimStepper({
 
   return (
     <div className={outerCls}>
+      {/* Entscheidungs-Banner ÜBER den Phasen — der Kunde sieht zuerst, was von ihm
+          erwartet wird, dann wo er steht. */}
+      {topSlot}
       <div className="px-4 sm:px-6 py-4 space-y-3">
       <div className="flex items-center w-full">
         {phasen.map((key, i) => {
