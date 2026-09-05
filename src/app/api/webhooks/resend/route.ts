@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { mapResendEvent, sollStatusUebernehmen, verifyResendSignatur } from '@/lib/cold-mail/webhook'
+import { mapResendEventFuerEmailLog, sollEmailLogStatusUebernehmen } from '@/lib/email/zustellstatus'
 
 // Cold-Mailer S3 — Resend-Webhook: Zustell-/Oeffnungs-/Klick-/Bounce-Tracking.
 //
@@ -9,6 +10,15 @@ import { mapResendEvent, sollStatusUebernehmen, verifyResendSignatur } from '@/l
 //
 // Ohne diese Route sind die Sequenz-Bedingungen 'wenn_geoeffnet'/'wenn_nicht_geoeffnet'
 // blind — die Engine kann sie, aber niemand wuerde je 'geoeffnet' setzen.
+//
+// ZWEITER KONSUMENT seit 05.09.2026 — TRANSAKTIONALE Mails (email_log):
+// Bis dahin antwortete die Route auf jedes Ereignis ohne cold_mail_send mit 'kein_cold_mail_send' und
+// warf es weg. Gemessen auf prod: 542 Mails aus 30 Tagen standen auf 'sent', KEINE auf zugestellt —
+// ein Bounce an eine falsche Kundenadresse war unsichtbar, und kein Prod-Smoke konnte belegen, dass
+// eine Kunden-Mail ankommt. Die Ereignisse lagen die ganze Zeit an: cold_mail_sends traegt
+// 'zugestellt'/'geklickt', der Webhook lief also nachweislich.
+// Der Resend-API-Schluessel ist KEIN Ersatz — er ist auf Senden beschraenkt (HTTP 401
+// "This API key is restricted to only send emails" auf jedem Lese-Endpunkt).
 
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +80,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Lookup fehlgeschlagen' }, { status: 500 })
   }
   if (!send) {
-    return NextResponse.json({ ok: true, ignoriert: 'kein_cold_mail_send' })
+    // Kein Cold-Mail-Send -> transaktionale Mail. Status in email_log nachtragen (Match ueber die
+    // Resend-Message-ID, die sendEmail dort speichert). Kein Treffer = fremde Mail derselben Domain.
+    const logStatus = mapResendEventFuerEmailLog(payload.type ?? '')
+    if (!logStatus) return NextResponse.json({ ok: true, ignoriert: 'kein_cold_mail_send' })
+
+    const { data: log, error: logErr } = await db
+      .from('email_log')
+      .select('id, status')
+      .eq('message_id', messageId)
+      // message_id traegt keinen Unique-Constraint (idx_email_log_message_id ist bewusst nicht
+      // UNIQUE). Ohne limit(1) wuerde maybeSingle() bei zwei Treffern einen FEHLER liefern -> 500 ->
+      // Svix retryt ewig. Der juengste Eintrag ist der richtige.
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (logErr) {
+      console.error('[resend-webhook] email_log-Lookup fehlgeschlagen:', logErr)
+      return NextResponse.json({ error: 'Lookup fehlgeschlagen' }, { status: 500 })
+    }
+    if (!log) return NextResponse.json({ ok: true, ignoriert: 'kein_email_log_eintrag' })
+
+    if (!sollEmailLogStatusUebernehmen(log.status as string | null, logStatus)) {
+      return NextResponse.json({ ok: true, ignoriert: 'status_nicht_hoeher', status: log.status })
+    }
+    const { error: updErr } = await db.from('email_log').update({ status: logStatus }).eq('id', log.id)
+    if (updErr) {
+      console.error('[resend-webhook] email_log-Update fehlgeschlagen:', updErr)
+      return NextResponse.json({ error: 'Update fehlgeschlagen' }, { status: 500 })
+    }
+    return NextResponse.json({ ok: true, quelle: 'email_log', status: logStatus })
   }
 
   // Nur aufwaerts -> out-of-order-Events und Svix-Retries koennen nichts kaputtmachen.

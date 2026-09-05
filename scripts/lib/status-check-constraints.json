@@ -344,6 +344,14 @@
       "teilweise",
       "unbekannt"
     ],
+    "claims.werkstattbindung_quelle": [
+      "dispatcher",
+      "dokument",
+      "kunde",
+      "marker",
+      "tarif",
+      "unbekannt"
+    ],
     "cold_mail_enrollments.status": [
       "aktiv",
       "bounced",
@@ -477,6 +485,8 @@
     ],
     "email_log.status": [
       "bounced",
+      "complained",
+      "delivered",
       "failed",
       "pending",
       "sent"
@@ -865,6 +875,36 @@
       "portal_lexdrive",
       "post"
     ],
+    "kasko_tarife.bindungsumfang": [
+      "keine",
+      "nur_glas",
+      "unklar",
+      "voll"
+    ],
+    "kasko_tarife.verlaesslichkeit": [
+      "abgeleitet",
+      "belegt",
+      "nicht_belegt"
+    ],
+    "kasko_versicherer_marken.check24_vertrieb": [
+      "L",
+      "P"
+    ],
+    "kasko_versicherer_marken.wb_status": [
+      "keine",
+      "optional",
+      "standard"
+    ],
+    "kasko_wb_konditionen.sanktion_modell": [
+      "deckelung",
+      "keine",
+      "kuerzung_80",
+      "kuerzung_85",
+      "kuerzung_unbestimmt",
+      "sonder_sb",
+      "unbekannt",
+      "vollverweigerung"
+    ],
     "ki_gespraeche.rolle": [
       "admin",
       "kunde",
@@ -973,10 +1013,16 @@
     ],
     "leads.schadentyp": [
       "auffahrunfall",
+      "diebstahl",
+      "glas",
+      "hagel",
+      "marder",
       "parkplatz",
       "sonstiges",
       "spurwechsel",
-      "vorfahrtsverletzung"
+      "sturm",
+      "vorfahrtsverletzung",
+      "wild"
     ],
     "leads.schuldfrage": [
       "eigenverantwortung",
@@ -1008,6 +1054,14 @@
       "landstrasse",
       "parkluecke",
       "sonstiges"
+    ],
+    "leads.werkstattbindung_quelle": [
+      "dispatcher",
+      "dokument",
+      "kunde",
+      "marker",
+      "tarif",
+      "unbekannt"
     ],
     "leads.zb1_status": [
       "abgelehnt",
