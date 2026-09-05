@@ -205,7 +205,8 @@
         "melden": "Schaden melden",
         "einschaetzung": "Ersteinschätzung",
         "beratung": "Beratung anfragen",
-        "was_kostet": "Was kostet das?"
+        "was_kostet": "Was kostet das?",
+        "unfallguide": "Unfallguide"
       },
       "partner": {
         "heading": "Partner",
@@ -614,7 +615,8 @@
       "cs_ki_tail": "– drei Fotos und eine kurze Beschreibung reichen.",
       "cs_report_mid": "mit Rückruf in unter 15 Minuten:",
       "cs_report_tail": "– ohne Anmeldung, 3 Felder.",
-      "cs_phone_hours": "(Mo–Fr 08–20, Sa+So 09–18 Uhr)"
+      "cs_phone_hours": "(Mo–Fr 08–20, Sa+So 09–18 Uhr)",
+      "read_guide": "Unfallguide lesen"
     },
     "cluster": {
       "heading": "Wähle dein Thema",
@@ -1633,6 +1635,10 @@
     "ratgeber": "Ratgeber",
     "gutachter": "Gutachter",
     "ratgeber_menu": [
+      {
+        "href": "/unfallguide",
+        "label": "Unfallguide (PDF)"
+      },
       {
         "href": "/kfz-haftpflicht-schaden",
         "label": "Schadenspositionen"

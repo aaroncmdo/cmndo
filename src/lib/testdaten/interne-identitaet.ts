@@ -89,17 +89,23 @@ export function istOperativerEmpfaenger(email: string | null | undefined): boole
 // selben Postfach und markiert den Lauf. Die IDENTITAET bleibt intern (@claimondo.de -> Matching-Guard, kein
 // echter SV erreichbar) — nur die ZUSTELLUNG ist erlaubt. Specs: tests/e2e/lib/abnahme-inbox.ts,
 // Einrichtung/Betrieb: docs/abnahme-inbox.md.
-const ABNAHME_INBOX_LOCAL = 'abnahme'
+//
+// ZWEI erlaubte Postfaecher (Aaron 05.09.2026): 'abnahme' als eigenes Konto ODER 'noreply' — die Adresse, die
+// ohnehin als Absender dient (RESEND_FROM). Wer kein neues Konto anlegen will, nutzt noreply@ und braucht nur
+// dessen App-Passwort. ⚠ Bei noreply@ ist Absender = Empfaenger; der Versand laeuft ueber Resend, die Mail
+// kommt also von aussen und durchlaeuft den normalen Empfang (kein Gmail-internes „an mich selbst").
+// Bleibt die INBOX trotzdem leer, auf '[Gmail]/Alle Nachrichten' umstellen (ABNAHME_INBOX_MAILBOX).
+const ABNAHME_INBOX_LOCALS = ['abnahme', 'noreply'] as const
 const ABNAHME_INBOX_DOMAIN = 'claimondo.de'
 
-/** true fuer abnahme@claimondo.de und abnahme+<tag>@claimondo.de (case-insensitiv). */
+/** true fuer abnahme@/noreply@claimondo.de und deren Plus-Adressen (case-insensitiv). */
 export function istAbnahmeInbox(email: string | null | undefined): boolean {
   if (!email) return false
   const e = email.trim().toLowerCase()
   const at = e.lastIndexOf('@')
   if (at < 0 || e.slice(at + 1) !== ABNAHME_INBOX_DOMAIN) return false
   const local = e.slice(0, at)
-  return local === ABNAHME_INBOX_LOCAL || local.startsWith(`${ABNAHME_INBOX_LOCAL}+`)
+  return ABNAHME_INBOX_LOCALS.some((l) => local === l || local.startsWith(`${l}+`))
 }
 
 /**

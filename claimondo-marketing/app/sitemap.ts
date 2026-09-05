@@ -84,6 +84,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: { languages: langAlternates('/gewinnspiel') },
     },
     {
+      // Der Unfallguide-Gegenwert. Setzt index/follow und ist das Ziel fuer
+      // Anzeigen, Artikel-Anker und Fusszeile — gehoert also angemeldet.
+      // Die Zeile daneben erklaert, warum das kein Selbstlaeufer ist: eine
+      // handgepflegte Liste vergisst neue Seiten still.
+      url: `${SITE_URL}/unfallguide`,
+      lastModified: getRouteLastUpdated('/unfallguide'),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+      alternates: { languages: langAlternates('/unfallguide') },
+    },
+    {
       // Pendant zu /gutachter-finden, war bis 20.08. nicht angemeldet: die
       // Seite liefert 200, setzt `robots: index, follow` und ein Canonical auf
       // sich selbst — sie WILL indexiert werden, stand aber in keiner Sitemap.

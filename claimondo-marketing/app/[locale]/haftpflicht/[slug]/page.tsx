@@ -18,6 +18,7 @@ import { VrBaitBlock } from '@/components/content/VrBaitBlock'
 import { FAQ_STEMS_MAPPING } from '@/data/faq-stems-mapping'
 import { VR_BAIT_MAPPING } from '@/data/vr-bait-mapping'
 import { CitationBox } from '@/components/content/CitationBox'
+import { GuidePopover, GuideInlineCta } from '@/components/content/GuidePopover'
 import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
@@ -106,6 +107,11 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             <MarkdownRenderer body={cleaned} pageHasOwnH1 />
             <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
             <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
+            {/* Mobiler Einstieg zum Guide. Steht IM Artikel (kein Overlay), weil
+                das Modal Desktop-only ist und das Mobil-Band hier mit der
+                StickyCallBar kollidieren wuerde. `md:hidden` — auf Desktop
+                uebernehmen Modal und Anker-Block. */}
+            <GuideInlineCta cluster={a.cluster ?? null} />
             <ConversionAnchorBlock variant="spoke" />
             <InlineCheckCta />
             <RelatedAssets current={a} />
@@ -123,6 +129,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
         <SpokeCtaBand />
       </main>
+      {/* Guide-Angebot bei 15 % Artikeltext — nur das Desktop-Modal. Das
+          Mobil-Band ist hier AUS: die Seite traegt schon die StickyCallBar
+          (fixed bottom-4); zwei feste Leisten am unteren Rand wuerden sich
+          gegenseitig verdecken. Auf Mobil fuehren Anker-Block und Fusszeile
+          zum Guide. */}
+      <GuidePopover mobilBand={false} cluster={a.cluster ?? null} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>
