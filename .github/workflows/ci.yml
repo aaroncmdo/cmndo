@@ -726,6 +726,8 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           RUN_GOLDEN_PATH_DEEP: '1'
+          # Kasko-WB Phase 2: Check-Quiz (Marketing, nur prod) -> Kasko-Lead -> FlowLink. Laeuft nur gegen prod.
+          RUN_CHECK_QUIZ_SMOKE: '1'
           # Abnahme-Inbox (docs/abnahme-inbox.md): Kunden-Mails per IMAP nachweisen. Fehlt das Secret,
           # skippt kasko-e6-mail-abnahme-inbox.spec.ts sauber statt die Collection zu sprengen.
           ABNAHME_INBOX_USER: ${{ secrets.ABNAHME_INBOX_USER }}
@@ -1094,6 +1096,8 @@ jobs:
           # interne Rollen (2FA-Wand -> skip statt fail). Der flache golden-path-prod bleibt
           # bewusst aus (eigene ROLES=totes test-kunde@, kein skipIfAuthWall -> wuerde failen).
           RUN_GOLDEN_PATH_DEEP: '1'
+          # Kasko-WB Phase 2: Check-Quiz (Marketing, nur prod) -> Kasko-Lead -> FlowLink. Laeuft nur gegen prod.
+          RUN_CHECK_QUIZ_SMOKE: '1'
           # Abnahme-Inbox (docs/abnahme-inbox.md): Kunden-Mails per IMAP nachweisen. Fehlt das Secret,
           # skippt kasko-e6-mail-abnahme-inbox.spec.ts sauber statt die Collection zu sprengen.
           ABNAHME_INBOX_USER: ${{ secrets.ABNAHME_INBOX_USER }}

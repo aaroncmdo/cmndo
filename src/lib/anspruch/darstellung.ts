@@ -80,7 +80,17 @@ export function schuldBotschaft(schuld: Schuldform): SchuldBotschaft {
   }
   return {
     titel: 'Regulierung über Ihre Kasko',
-    beleg: 'Ohne Vollkasko tragen Sie den Schaden selbst. Nutzungsausfall, Anwalt und Gutachter übernimmt die Kasko in der Regel nicht.',
+    // Kasko-WB Phase 2 (D6): vorher widersprach sich der Zweig selbst — die Positionen darueber setzten die
+    // Vollkasko voraus, die Botschaft verneinte sie. Beides in einem Satz, sauber getrennt.
+    beleg:
+      'Mit Vollkasko reguliert Ihre Versicherung den Fahrzeugschaden abzüglich Selbstbeteiligung; ohne tragen Sie den Schaden selbst. Nutzungsausfall, Anwalt und Gutachter übernimmt die Kasko in der Regel nicht.',
     ton: 'warnung',
   }
 }
+
+/**
+ * Kasko-WB Phase 2 (D6): Das Foto-Tool fragt bewusst NICHT nach Versicherer/Tarif (das tut der FlowLink,
+ * Phase 1). Der Hinweis schliesst die Luecke, dass ein gebundener Tarif die Werkstatt vorschreibt.
+ */
+export const KASKO_WERKSTATTBINDUNG_HINWEIS =
+  'Bitte prüfen Sie vor der Reparatur Ihren Versicherungsschein auf einen Werkstattbindungs-Zusatz (z. B. „Werkstattbindung“, „Werkstattbonus“, „SELECT“). Steht dort einer, benennt Ihre Versicherung die Werkstatt.'

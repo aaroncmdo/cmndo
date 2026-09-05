@@ -21,7 +21,7 @@ export async function DoksTermineZone({ vm }: { vm: KundeClaimViewModel }) {
   const { doks } = vm
 
   return (
-    <div className="space-y-4">
+    <div id="doks-termine" className="space-y-4">
       {/* Pflichtdokumente — waehrend QC (Besichtigung/Gutachten, nicht freigegeben) ausgeblendet. */}
       {!doks.qcLaeuft && (
         <PflichtdokumenteSection

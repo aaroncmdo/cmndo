@@ -249,8 +249,8 @@ export function CheckFunnelClient() {
             </div>
           ) : null}
 
-          {/* Foto-Check-Verkettung: prominenter Upgrade-Pfad, nur bei echtem Anspruch */}
-          {result.showRanges ? <AnspruchFotoCheckCta schuld={answers.schuld} /> : null}
+          {/* Foto-Check-Verkettung: ueberall, wo das Tool die Schuld vorbelegen kann (voll/quote/kasko) */}
+          {result.showFotoCta ? <AnspruchFotoCheckCta schuld={answers.schuld} /> : null}
 
           {/* Dynamische Hinweise */}
           {result.insightKeys.length > 0 ? (

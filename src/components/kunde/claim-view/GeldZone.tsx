@@ -26,6 +26,7 @@ import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import WerkstattVermittlungHoldingCard from '@/components/kunde/WerkstattVermittlungHoldingCard'
 import KaskoTarifCard from '@/components/kunde/KaskoTarifCard'
 import KaskoBindungCard from '@/components/kunde/KaskoBindungCard'
+import KaskoPruefungCard from '@/components/kunde/KaskoPruefungCard'
 import { saveBankdaten, updateZahlungsweg } from '@/app/kunde/faelle/[id]/actions'
 
 export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
@@ -53,6 +54,8 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
       {/* Kasko-WB Phase 1: erst Tariffrage, dann Finder; gebunden -> Info, keine Vermittlung. */}
       {flags.kaskoBindungOffen && flags.reparaturPhaseErreicht && <KaskoTarifCard claimId={vm.claimId} />}
       {flags.kaskoGebunden && <KaskoBindungCard claimId={vm.claimId} />}
+      {/* Kasko-WB Phase 2 (Soll-Blatt 05.09.): Bindung ungeklaert -> dauerhafte Pruef-Card ueber dem Finder. */}
+      {flags.kaskoBindungUngeklaert && flags.reparaturPhaseErreicht && <KaskoPruefungCard claimId={vm.claimId} />}
       {!flags.kaskoBindungOffen && werkstatt.brauchtVermittlung && flags.reparaturPhaseErreicht && <WerkstattFinderCard claimId={vm.claimId} />}
       {/* Werkstatt-Card — bei hinterlegter Werkstatt (+ Reparaturtermin-Status). */}
       {werkstatt.data && <WerkstattCard claimId={vm.claimId} werkstatt={werkstatt.data} termin={werkstatt.reparaturTermin} />}
