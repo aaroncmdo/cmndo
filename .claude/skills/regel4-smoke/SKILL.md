@@ -176,6 +176,15 @@ traf „Die Schuldfrage ist noch n·**ich**·t eindeutig geklärt" statt „Ich 
 Schlussfolgerung wäre „der Fix ist kaputt" gewesen, bei korrektem Code. Nimm den vollen
 Optionstitel oder `getByRole('button', { name: /^Ich selbst/ })`.
 
+**Ein generischer Button-Text ist kein Zustands-Detektor.** Am 05.09. sollte
+`getByRole('button', { name: /^überspringen$/ })` die Werkstatt-Liste erkennen — er traf den
+„Überspringen"-Link im Fahrzeugschein-Foto-Widget der Feststellung (Sub-Step 6 von 9). Daraus
+wurde fast ein Befund „Kasko-Lead bekommt Werkstatt ohne Tariffrage", inklusive Fix-Auftrag an
+die Lane. Ein Zustand wird an dem erkannt, was es **nur dort** gibt (die „Auswählen"-Buttons der
+Werkstattkarten, mehrere), nie an „Weiter"/„Überspringen"/„Zurück". Und **vor jeder Meldung den
+Screenshot vom Erkennungszeitpunkt ansehen** — er zeigte Feststellung 6/9 und den
+Fortschrittsindikator mit dem angeblich fehlenden Step als Kreis 3 von 5.
+
 **`button[type="submit"]`.first() klickt ABMELDEN.** Der Logout in der Portal-Navigation ist
 ein Server-Action-Form und steht im DOM **vor** dem Seiteninhalt. Gilt für jedes Portal mit
 Nav. Richtig: `.filter({ hasText: 'Schaden melden' })` — und danach `count()` loggen.
@@ -197,6 +206,13 @@ skippt, und das Cleanup hat den Zustand schon gelöscht (05.09., zweimal).
 oder Login navigiert die App noch selbst; ein sofortiges `goto` auf die Fallakte wird
 abgebrochen. `waitForLoadState('networkidle')` davor, und den `goto` einmal wiederholen.
 Kein Produktfehler — derselbe Schritt war in den Läufen davor grün.
+
+**Playwright leert `test-results/` bei jedem Lauf.** Eigene Messscripte, extrahierte Assets und
+Belege, die dort liegen, sind nach dem nächsten `playwright test` weg — am 05.09. verschwand so eine
+komplette Unfallguide-Messung samt Screenshots. Belege in den Session-Scratchpad; Scripte dort mit
+`createRequire('<worktree>/package.json')` auf `@playwright/test` zugreifen lassen, ein ESM-`import`
+aus dem Scratchpad findet das Paket nicht. Fehler-Screenshots (`test-failed-1.png`) sofort
+wegkopieren, bevor der nächste Lauf startet.
 
 **Portale liegen in Tabs.** Die Dispatch-Lead-Seite zeigt Kontakt · Schaden · Unfall · Fahrzeug ·
 Schuld · … — ein Feld aus der Sektion `schuld` existiert erst nach dem Klick auf den Tab.
