@@ -32,6 +32,15 @@ export type AbnahmeMail = {
   messageId: string | null
   text: string
   html: string
+  /**
+   * Anhaenge der Mail. `simpleParser` liest sie ohnehin — sie wurden bisher nur
+   * verworfen. Gebraucht fuer Nachweise der Sorte „das PDF ist WIRKLICH im Postfach",
+   * nicht nur „die Mail gilt als versendet": der Anhang wird zur Laufzeit aus dem
+   * `public/`-Ordner des Standalone-Servers gelesen, und genau dort kann er fehlen,
+   * ohne dass Log oder Statuscode es zeigen.
+   * `bytes` ist die dekodierte Groesse, nicht die Base64-Laenge.
+   */
+  anhaenge: { dateiname: string; typ: string; bytes: number }[]
 }
 
 export type MailSuche = {
@@ -115,6 +124,11 @@ async function sucheInVerbindung(client: ImapFlow, suche: MailSuche): Promise<Ab
       messageId: msg.envelope?.messageId ?? null,
       text: parsed?.text ?? '',
       html: typeof parsed?.html === 'string' ? parsed.html : '',
+      anhaenge: (parsed?.attachments ?? []).map((a) => ({
+        dateiname: a.filename ?? '',
+        typ: a.contentType ?? '',
+        bytes: a.size ?? a.content?.length ?? 0,
+      })),
     })
   }
   treffer.sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0))
