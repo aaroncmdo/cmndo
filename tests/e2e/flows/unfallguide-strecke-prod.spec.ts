@@ -23,9 +23,12 @@
 //   Telefon +491511000xxx — nicht vergeben und NICHT bei WhatsApp registriert. Die
 //   Verfuegbarkeitspruefung schlaegt damit fehl, es geht KEINE WhatsApp raus, der
 //   E-Mail-Weg greift. E-Mail epsweep-…@claimondo.de.
-//   ⚠ Die Marketing-App hat KEINE Send-Isolation (anders als src/): diese E-Mail geht
-//   WIRKLICH an das interne Postfach. Das ist gewollt — nur so ist der PDF-Anhang
-//   nachweisbar. Es geht nichts an echte Kunden.
+//   Als E-Mail dient die ABNAHME-INBOX (`abnahme+<lauf>@claimondo.de`, #5874): das eine
+//   interne Postfach, das bewusst zustellbar ist und per IMAP gelesen werden kann. Damit
+//   ist der PDF-Anhang WIRKLICH nachweisbar — nicht nur „die Mail gilt als versendet".
+//   Das ist der Unterschied, der zaehlt: der Anhang wird zur Laufzeit aus dem
+//   `public/`-Ordner des Standalone-Servers gelesen und kann genau dort fehlen, ohne dass
+//   Log oder Statuscode es zeigen. Es geht nichts an echte Kunden.
 //
 // Aufruf (nie in CI):
 //   RUN_UNFALLGUIDE_SMOKE=1 CI=1 npx playwright test unfallguide-strecke-prod \
@@ -34,6 +37,7 @@
 
 import { test, expect } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { abnahmeAdresse, abnahmeInboxKonfiguriert, warteAufMail } from '../lib/abnahme-inbox'
 
 test.skip(
   !process.env.RUN_UNFALLGUIDE_SMOKE,
@@ -48,9 +52,12 @@ const GUIDE_PFAD = '/downloads/claimondo-unfallguide.pdf'
 const STEMPEL = Date.now().toString(36)
 const IDENT = {
   name: `Epsweep Guide${STEMPEL.slice(-4).toUpperCase()}`,
-  email: `epsweep-guide-${STEMPEL}@claimondo.de`,
+  email: abnahmeAdresse(`guide-${STEMPEL}`),
   telefon: `+491511000${100 + Math.floor(Math.random() * 900)}`,
 }
+// Vor dem Absenden gemerkt: der Feinfilter der Inbox-Suche braucht einen Startpunkt,
+// sonst findet ein zweiter Lauf die Mail des ersten.
+const LAUF_START = new Date(Date.now() - 60_000)
 
 function db(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -161,12 +168,39 @@ test('Landeseite: Gegenwert zuerst, Guide sofort, und der Vorgang entsteht volls
     'Der FlowLink darf NICHT ueber den Schadenmeldungs-Text versendet worden sein',
   ).toBeFalsy()
 
-  // Die Willkommens-E-Mail mit dem PDF im Anhang.
+  // Die Willkommens-E-Mail: erst das Protokoll, dann das Postfach.
   const { data: mails } = await sb!
     .from('email_log')
     .select('status, betreff, empfaenger')
     .eq('lead_id', leadId)
   expect((mails ?? []).length, 'Die Willkommens-E-Mail muss protokolliert sein').toBeGreaterThan(0)
+
+  // ⭐ DER EIGENTLICHE NACHWEIS: das PDF liegt im Postfach, nicht nur im Log.
+  // „versendet" und „angekommen mit Anhang" sind zwei Aussagen — die zweite ist die,
+  // an der die Strecke haengt, und sie kann still scheitern (der Anhang wird zur
+  // Laufzeit aus public/ des Standalone-Servers gelesen).
+  if (!abnahmeInboxKonfiguriert()) {
+    console.warn(
+      '[unfallguide-smoke] ABNAHME_INBOX_USER/_PASS fehlen — der PDF-Anhang ist damit ' +
+        'AUSDRUECKLICH NICHT NACHGEWIESEN, nur der email_log-Eintrag.',
+    )
+  } else {
+    const mail = await warteAufMail({
+      an: IDENT.email,
+      betreffEnthaelt: 'Unfallguide',
+      seit: LAUF_START,
+      timeoutMs: 180_000,
+    })
+    const anhang = mail.anhaenge.find((a) => a.typ.toLowerCase().includes('pdf'))
+    expect(
+      anhang,
+      `Die Willkommens-Mail muss den Guide anhaengen. Gefunden: ${JSON.stringify(mail.anhaenge)}`,
+    ).toBeTruthy()
+    expect(
+      anhang!.bytes,
+      `Der Anhang darf keine leere Datei sein (${anhang?.bytes} Bytes)`,
+    ).toBeGreaterThan(300_000)
+  }
 })
 
 test('Ratgeber-Artikel mobil: Karte im Textfluss, Anruf-Leiste bleibt klickbar', async ({
