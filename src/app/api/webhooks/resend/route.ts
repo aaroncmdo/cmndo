@@ -99,6 +99,11 @@ export async function POST(request: Request) {
       console.error('[resend-webhook] email_log-Lookup fehlgeschlagen:', logErr)
       return NextResponse.json({ error: 'Lookup fehlgeschlagen' }, { status: 500 })
     }
+    // Kein Treffer -> 200, kein Retry. Der haeufige Fall ist eine fremde Mail derselben Domain.
+    // BEWUSST in Kauf genommen: Traefe ein 'delivered' ein, BEVOR sendEmail die Zeile geschrieben hat,
+    // ginge dieses eine Ereignis verloren. Ein Fehlercode wuerde Svix zwar zur Wiederholung bewegen —
+    // aber eben auch fuer jede fremde Mail, tagelang. Das Risiko ist klein (die Zeile entsteht direkt
+    // nach dem Senden, die Zustellmeldung braucht laenger) und der Preis der Alternative hoch.
     if (!log) return NextResponse.json({ ok: true, ignoriert: 'kein_email_log_eintrag' })
 
     if (!sollEmailLogStatusUebernehmen(log.status as string | null, logStatus)) {
