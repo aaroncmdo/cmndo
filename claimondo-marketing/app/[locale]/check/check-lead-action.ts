@@ -7,6 +7,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 import { resolveMaklerByPromoCode } from '@/lib/makler/resolve-promo'
+import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
 
 // Lead-Server-Action für die interaktive Anspruchs-Prüfung (/check).
 // Spiegelt submitHomeLead (components/landing/home-lead-action.ts): anfragen-Zeile
@@ -127,6 +128,12 @@ export async function submitCheckLead(
       anfrageId: anfrage.id,
     }
   }
+
+  // OAIQ-Attribution festhalten, bevor irgendetwas anderes passiert: Das
+  // __oppref-Cookie lebt auf claimondo.de, die Terminbuchung laeuft cross-origin
+  // im iframe und die SA oft Tage spaeter — spaeter ist der Wert nicht mehr
+  // erreichbar. Ohne Anzeigenklick/Marketing-Consent ein No-op.
+  await erfasseLeadAttribution(String(leadId))
 
   // FlowLink erzeugen + dem MELDER schicken — sein Kanal zurück in den eigenen Vorgang.
   // Bis 30.08.2026 fehlte das: der Lead entstand, das Team bekam eine WhatsApp, der Kunde

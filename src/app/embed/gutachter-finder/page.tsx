@@ -38,6 +38,8 @@ export default async function GutachterFinderEmbedPage({
     slot?: string
     /** `utm_source` der Einstiegs-URL (z.B. `chatgpt.com`) — reine Attribution. */
     utm_source?: string
+    /** OpenAI-Ads-Kennung, von der Parent-Seite durch die iframe-Grenze gereicht. */
+    oppref?: string
     /** GEO-Deep-Link: Standort des Fahrzeugs, den die KI im Gespraech erfragt hat.
      *  Nur zusammen mit lat/lng wirksam (die Marketing-Seite geocodet ihn dort). */
     adresse?: string
@@ -96,6 +98,8 @@ export default async function GutachterFinderEmbedPage({
   // vertraut und nie in eine Query gegeben. Laenge gekappt wie in der Anfrage-Spalte
   // (utm_* max 150), damit ein absurd langer Parameter nicht bis zum Insert durchlaeuft.
   const utmSource = typeof sp.utm_source === 'string' ? sp.utm_source.slice(0, 150) : undefined
+  // Reine Attribution wie utmSource: wird gespeichert, nie als Steuerwert gelesen.
+  const oppref = typeof sp.oppref === 'string' ? sp.oppref.slice(0, 300) : undefined
 
   // Standort aus dem Deeplink: nur gueltig MIT Koordinaten — der Wizard braucht lat/lng
   // fuers Matching, ein blosser Textwert waere fuer die Engine wertlos. Laenge gekappt,
@@ -180,6 +184,7 @@ export default async function GutachterFinderEmbedPage({
             vorauswahlSvId={vorauswahlSv}
             vorauswahlSlotStart={vorauswahlSlot}
             utmSource={utmSource}
+            oppref={oppref}
             vorauswahlAdresse={vorauswahlAdresse}
             vorauswahlSvName={vorauswahlSvName}
             vorauswahlSchadenart={vorauswahlSchadenart}

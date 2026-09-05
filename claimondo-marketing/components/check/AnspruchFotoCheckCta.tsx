@@ -23,12 +23,18 @@ const SCHULD_ZU_TOOL: Record<Schuld, string | undefined> = {
  * quantitativen Foto-Wert-Check. Reicht die Attribution ueber den
  * Domain-Wechsel durch (buildFotoCheckUrl).
  */
-export function AnspruchFotoCheckCta({ schuld }: { schuld?: Schuld }) {
+export function AnspruchFotoCheckCta({ schuld, leadId }: { schuld?: Schuld; leadId?: string | null }) {
   const t = useTranslations('check')
   const toolSchuld = schuld ? SCHULD_ZU_TOOL[schuld] : undefined
+  // `lead` nur gesetzt, wenn der Lead schon existiert (Erfolgs-Ansicht nach dem Submit).
+  // Das Foto-Tool schreibt ihn auf anspruch_schaetzungen.lead_id — ohne ihn bleibt die
+  // Schaetzung fuer den SV unsichtbar (prod 30.08.: 62 Schaetzungen, 0 verknuepft).
+  const extra: Record<string, string | undefined> = {}
+  if (toolSchuld) extra.schuld = toolSchuld
+  if (leadId) extra.lead = leadId
   const href =
     typeof window !== 'undefined'
-      ? buildFotoCheckUrl(EMBED_ORIGIN, window.location.search, toolSchuld ? { schuld: toolSchuld } : undefined)
+      ? buildFotoCheckUrl(EMBED_ORIGIN, window.location.search, Object.keys(extra).length > 0 ? extra : undefined)
       : `${EMBED_ORIGIN}/embed/anspruch-pruefen`
 
   return (

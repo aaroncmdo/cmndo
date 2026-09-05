@@ -50,11 +50,31 @@ export function parseConsent(cookieValue: string | null | undefined): ConsentSta
   } catch { return { statistics: false, marketing: false } }
 }
 
+/** Client: das cc_cookie lesen und in beide Kategorien aufloesen. */
+function readConsentCookie(): ConsentState {
+  if (typeof document === 'undefined') return { statistics: false, marketing: false }
+  const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'))
+  return parseConsent(m?.[1])
+}
+
 /** Client: hat der User statistics (analytics) freigegeben? */
 export function hasTrackingConsent(): boolean {
-  if (typeof document === 'undefined') return false
-  const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'))
-  return parseConsent(m?.[1]).statistics
+  return readConsentCookie().statistics
+}
+
+/**
+ * Client: hat der User marketing (ads) freigegeben?
+ *
+ * Getrennt von hasTrackingConsent, weil das CMP zwei Kategorien fuehrt und ein
+ * WERBE-Pixel unter `ads` gehoert, nicht unter `analytics`. Wer nur Statistik
+ * erlaubt hat, darf kein Ads-Pixel geladen bekommen — sonst ist die Auswahl im
+ * Banner folgenlos und das Opt-out steht nur auf dem Papier.
+ *
+ * Erster Consumer: OaiqInit (OpenAI Ads). Clarity bleibt bewusst bei
+ * hasTrackingConsent — Session-Analyse ist Statistik, kein Werbe-Tracking.
+ */
+export function hasMarketingConsent(): boolean {
+  return readConsentCookie().marketing
 }
 
 /** Kategorie-State -> GCM-v2-Update-Payload. */

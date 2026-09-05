@@ -89,6 +89,21 @@ export type EmbedFinderSectionProps = {
    * gegen die CHECK-Schnittmenge; hier wird sie nur durchgereicht.
    */
   schuldfrage?: string
+  /**
+   * OpenAI-Ads-Attribution (`oppref`) — dieselbe Aufgabe wie `clickIds` fuer Google.
+   *
+   * WARUM EIGENS DURCHGEREICHT: Das `__oppref`-Cookie gehoert zu claimondo.de, der
+   * Embed laeuft cross-origin auf app.claimondo.de und sieht es nicht. Ohne diese
+   * Zeile entstehen Embed-Leads ohne jede Zuordnung — und das ist nicht der Randfall,
+   * sondern der GROESSTE Lead-Kanal (gemessen 03.09.2026: 43 Leads ueber den nativen
+   * Finder gegen 6 ueber den Mini-Wizard). Die Anzeigen saehen dann so aus, als
+   * brachten sie fast nichts.
+   *
+   * Der Wert wird server-seitig ermittelt (Prop statt document.cookie im Render):
+   * ein erst nach der Hydration ergaenzter Parameter wuerde die iframe-`src` aendern
+   * und den Finder neu laden — mitten in der Eingabe des Kunden.
+   */
+  oppref?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -112,6 +127,7 @@ export function EmbedFinderSection({
   adresse,
   schadenart,
   schuldfrage,
+  oppref,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -144,6 +160,10 @@ export function EmbedFinderSection({
   // Wertelisten — ein unbekannter Wert faellt dort still weg.
   if (schadenart) params.set('schadenart', schadenart.slice(0, 60))
   if (schuldfrage) params.set('schuldfrage', schuldfrage.slice(0, 30))
+  // OpenAI-Ads-Attribution — das Gegenstueck zu den Google-Click-IDs oben. Der Wert
+  // ist eine undurchsichtige Kennung von OpenAI, deshalb grosszuegig begrenzt statt
+  // auf ein Format geprueft: eine zu enge Pruefung wuerde ihn still verwerfen.
+  if (oppref) params.set('oppref', oppref.slice(0, 300))
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 

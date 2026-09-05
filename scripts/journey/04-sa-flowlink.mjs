@@ -279,6 +279,9 @@ export async function runPhase4(prevResult = {}) {
         schadenart: 'haftpflicht',
         status: 'dispatch_done',
         created_via: 'lead_konvertierung',
+        // Testdaten-Marker (Mig 20260831222740) — direkter Insert, die Ableitung in
+        // convert-lead-to-claim.ts greift hier nicht.
+        ist_testfall: true,
       }).select('id, status').single()
       claim = newClaim
     }

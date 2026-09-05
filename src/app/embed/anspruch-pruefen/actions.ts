@@ -33,8 +33,10 @@ Schaetze Reparaturkosten als realistische BRUTTO-Spanne (deutsche Werkstattpreis
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_BYTES = 10 * 1024 * 1024
 
-export async function starteAnspruchSession() {
-  return erstelleSession()
+/** `leadId` (optional, aus `?lead=`) verknuepft die Schaetzung sofort mit dem /check-Lead —
+ *  Voraussetzung dafuer, dass die Vorschaetzung beim SV ankommt. Validierung in erstelleSession. */
+export async function starteAnspruchSession(leadId?: string | null) {
+  return erstelleSession(leadId ?? null)
 }
 
 export async function ladeSchadenfoto(

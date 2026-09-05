@@ -21,13 +21,40 @@ import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
+import { KanzleiWahlBanner } from '@/components/kunde/KanzleiWahlBanner'
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 import { RegulierungsVerlaufCard } from './RegulierungsVerlaufCard'
 
 export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
   const t = await getTranslations('kunde.fall')
   const format = await getFormatter()
-  const { fall, status, lifecycle } = vm
+  const { fall, status, lifecycle, kanzlei } = vm
+
+  // Kanzlei-Wahl (Aaron 31.08.): der Ort, den KanzleiPfadCard seit CMM-32 verspricht
+  // („lebt jetzt im lila Top-Banner des ClaimSteppers") und der nie gebaut wurde — der
+  // einzige Consumer des Modals verschwand mit AAR-904 (alter 4-Step-Wizard, -5000 LOC).
+  //
+  // Gefragt wird, wenn ALLE drei zutreffen:
+  //   1. Komplettservice — nur dort ist überhaupt eine Kanzlei vorgesehen
+  //   2. noch keine Antwort ('nicht_gefragt' | 'noch_unentschieden' | null). 'nicht_gefragt'
+  //      MUSS dabei sein: 11 Claims tragen ihn (ein Wechsel des service_typ auf 'komplett' zog
+  //      kanzlei_wunsch nicht nach), und genau die wurden nie gefragt.
+  //   3. noch nicht an die Kanzlei übergeben — danach ist die Wahl gegenstandslos
+  //
+  // ⭐ BEWUSST OHNE Gutachten-Bedingung. Der erste Entwurf verlangte ein fertiges Gutachten
+  // (der Modal-Text sagt „Dein Gutachten ist da"). Nachgemessen auf prod (31.08.):
+  //     Komplettservice 56 → Frage offen 9 → davon mit Gutachten 1 → nach Übergabe-Filter 0.
+  // Das Banner hätte NIEMAND gesehen — derselbe Fehler, den es behebt. Ursache: die meisten
+  // Claims erreichen das Gutachten nie (21 hängen in `ersterfassung`). Aarons ursprünglicher
+  // Ablauf saß denn auch im 4-Step-Wizard, also FRÜH (`lead_konvertierung`), nicht danach.
+  // Ohne die Bedingung erreicht es die 9 offenen Fälle.
+  const kanzleiFrageOffen =
+    lifecycle.serviceTyp === 'komplett' &&
+    (kanzlei.wunsch === null || kanzlei.wunsch === 'nicht_gefragt' || kanzlei.wunsch === 'noch_unentschieden') &&
+    !kanzlei.uebergebenAm
+  // Der Modal-/Banner-Text folgt dem Zustand: liegt das Gutachten vor, ist „Dein Gutachten ist
+  // da" richtig — sonst die neutrale Formulierung. Beide Phasen kennt das Modal seit AAR-841.
+  const kanzleiPhase = status.gutachtenUrl ? 'phase_4_re_frage' : 'lead_konvertierung'
   const fallStatus = (fall.status as string | null) ?? ''
   const svName = vm.team.sv?.name ?? null
   const sv = status.svTermin
@@ -86,6 +113,11 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         <ClaimStepper
           lifecycle={lifecycle}
           terminInfo={terminInfo}
+          topSlot={
+            kanzleiFrageOffen ? (
+              <KanzleiWahlBanner claimId={vm.claimId} phase={kanzleiPhase} />
+            ) : undefined
+          }
           bottomSlot={
             status.verlegung ? (
               <TerminVerlegungBanner
@@ -116,7 +148,7 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
             className="rounded-ios-xl px-4 py-3 space-y-1"
           >
             <p className="text-sm font-semibold text-info-strong">{t('haftpflichtReassurance.titel')}</p>
-            <p className="text-body-xs text-info-strong">{t('haftpflichtReassurance.text')}</p>
+            <p className="text-body text-info-strong">{t('haftpflichtReassurance.text')}</p>
           </NoticeBox>
         )}
 
@@ -172,7 +204,7 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
       {(fallStatus === 'nachbesichtigung-laeuft' || fall.nachbesichtigung_status === 'angefordert') && (
         <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-2">
           <p className="text-sm font-semibold text-warning-strong">{t('nachbesichtigung.titel')}</p>
-          <p className="text-body-xs text-warning-strong">{t('nachbesichtigung.text')}</p>
+          <p className="text-body text-warning-strong">{t('nachbesichtigung.text')}</p>
           <Link
             href={`/kunde/nachbesichtigung/${vm.fallId}`}
             className="inline-flex items-center text-body-xs font-medium rounded-ios-md border border-warning/40 text-warning-strong px-3 py-1.5 hover:bg-warning-soft transition-colors"
@@ -185,24 +217,24 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-2">
           <p className="text-sm font-semibold text-warning-strong">{t('vsKuerzt.titel')}</p>
           {typeof fall.vs_kuerzung_grund === 'string' && fall.vs_kuerzung_grund && (
-            <div className="rounded-ios-md bg-white/60 border border-warning/30 p-2 text-body-xs text-warning-strong">
+            <div className="rounded-ios-md bg-white/60 border border-warning/30 p-2 text-body text-warning-strong">
               <strong className="block mb-0.5">{t('vsKuerzt.begruendung')}</strong>
               {fall.vs_kuerzung_grund as string}
             </div>
           )}
-          <p className="text-body-xs text-warning-strong">{t('vsKuerzt.hinweis')}</p>
+          <p className="text-body text-warning-strong">{t('vsKuerzt.hinweis')}</p>
         </NoticeBox>
       )}
       {(fallStatus === 'vs-abgelehnt' || fallStatus === 'abgelehnt') && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('vsAbgelehnt.titel')}</p>
-          <p className="text-body-xs text-danger-strong">{t('vsAbgelehnt.text')}</p>
+          <p className="text-body text-danger-strong">{t('vsAbgelehnt.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'klage' && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('klage.titel')}</p>
-          <p className="text-body-xs text-danger-strong">{t('klage.text')}</p>
+          <p className="text-body text-danger-strong">{t('klage.text')}</p>
         </NoticeBox>
       )}
       {/* Gap D/I (05.08.): stille Endzustände ohne Abschluss-Card. Ohne diese Boxen zeigt der
@@ -212,30 +244,30 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
       {fallStatus === 'termin_durchgefuehrt' && (
         <NoticeBox tone="info" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-info-strong">{t('terminDurchgefuehrt.titel')}</p>
-          <p className="text-body-xs text-info-strong">{t('terminDurchgefuehrt.text')}</p>
+          <p className="text-body text-info-strong">{t('terminDurchgefuehrt.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'an_externe_kanzlei_uebergeben' && (
         <NoticeBox tone="info" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-info-strong">{t('externeKanzlei.titel')}</p>
-          <p className="text-body-xs text-info-strong">{t('externeKanzlei.text')}</p>
+          <p className="text-body text-info-strong">{t('externeKanzlei.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'abgelehnt_final' && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('abgelehntFinal.titel')}</p>
-          <p className="text-body-xs text-danger-strong">{t('abgelehntFinal.text')}</p>
+          <p className="text-body text-danger-strong">{t('abgelehntFinal.text')}</p>
         </NoticeBox>
       )}
       {fallStatus === 'verjaehrt' && (
         <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-warning-strong">{t('verjaehrt.titel')}</p>
-          <p className="text-body-xs text-warning-strong">{t('verjaehrt.text')}</p>
+          <p className="text-body text-warning-strong">{t('verjaehrt.text')}</p>
         </NoticeBox>
       )}
       {szenario === 'ruegefall' && (
         <NoticeBox tone="warning" className="rounded-ios-xl px-3 py-2">
-          <p className="text-body-xs text-warning-strong font-medium">{t('ruegefall.banner')}</p>
+          <p className="text-body text-warning-strong font-medium">{t('ruegefall.banner')}</p>
         </NoticeBox>
       )}
 

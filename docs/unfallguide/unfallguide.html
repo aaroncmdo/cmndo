@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Claimondo Unfallguide — Das steht Ihnen zu</title>
+<!--
+  QUELLE des Claimondo-Unfallguides (4 Seiten, A4).
+  Bauen:  node scripts/build-unfallguide.mjs
+  Ausgabe: claimondo-marketing/public/downloads/claimondo-unfallguide.pdf
+
+  Regeln, die hier gelten und beim Bearbeiten nicht brechen duerfen:
+  1. KEINE Zeichen, die Montserrat nicht hat. Stern und Pfeil sind Inline-SVG.
+     Ein fehlendes Glyph faellt sonst still auf eine Systemschrift zurueck und
+     das Dokument sieht auf jedem Rechner anders aus.
+  2. Der Fuss ist letztes Flex-Kind mit margin-top:auto, nie absolut positioniert.
+     Absolute Fuesse haben sich in der Vorfassung ueberlappt.
+  3. Der QR-Code steht in --navy. Ein heller QR ist nicht scanbar (Vorfassung:
+     #E4E9F1 auf Weiss = 1,2:1, von keinem Decoder lesbar).
+  4. Leistungsaussagen brauchen einen Beleg. Aussagen ueber den ANSPRUCH
+     (was zusteht) sind belegt durch das Gesetz und stehen frei.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+  @page { size: A4; margin: 0; }
+
+  :root{
+    /* Marke - unveraendert aus dem Claimondo-Schema */
+    --navy:#0D1B3E;
+    --mid:#4573A2;
+    --light:#7BA3CC;
+    --paper:#F7F8FB;
+    /* Abgeleitet: Lesetoene aus --navy aufgehellt. Bewusst KEINE fremden Graus. */
+    --ink:#26324D;
+    --ink-leise:#6C7A94;
+    --linie:#DDE3EE;
+    --linie-zart:#E9EDF4;
+    /* Semantisch: Kosten und Gefahr auf Seite 3 */
+    --warn:#8A6320;
+    --warn-flaeche:#FAF3E6;
+    --gut:#3D9970;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{
+    font-family:"Montserrat",system-ui,sans-serif;
+    color:var(--ink);background:#fff;
+    -webkit-font-smoothing:antialiased;
+    font-size:9.4pt;line-height:1.5;
+  }
+
+  .seite{
+    width:210mm;height:297mm;
+    padding:14mm 15mm 11mm;
+    display:flex;flex-direction:column;
+    background:var(--paper);
+    page-break-after:always;position:relative;overflow:hidden;
+  }
+  .seite:last-child{page-break-after:auto}
+
+  /* ── Kopf ───────────────────────────────────────────── */
+  .kopf{display:flex;justify-content:space-between;align-items:center;
+        flex:0 0 auto;margin-bottom:6mm}
+  .logo{display:flex;align-items:center;gap:2.4mm}
+  .logo-zeichen{width:6.6mm;height:6.6mm;flex:0 0 auto}
+  .logo-wort{font-size:12.5pt;font-weight:600;letter-spacing:-.015em;color:var(--navy)}
+  .rubrik{font-size:7.2pt;font-weight:600;letter-spacing:.22em;
+          text-transform:uppercase;color:var(--mid)}
+
+  /* ── Ueberschriften ─────────────────────────────────── */
+  h1{font-size:31pt;font-weight:700;line-height:1.06;letter-spacing:-.028em;color:#fff}
+  h1 .zweit{color:var(--light);display:block}
+  h2{font-size:19.5pt;font-weight:700;line-height:1.14;letter-spacing:-.022em;
+     color:var(--navy);margin-bottom:4.5mm}
+  h2 .zweit{color:var(--light)}
+  h3{font-size:10.5pt;font-weight:600;color:var(--navy);margin:4mm 0 2.2mm}
+
+  /* ── Fuss: letztes Flex-Kind, nie absolut ───────────── */
+  .fuss{
+    flex:0 0 auto;margin-top:auto;padding-top:3.4mm;
+    border-top:1px solid var(--linie-zart);
+    display:flex;justify-content:space-between;align-items:flex-end;gap:6mm;
+    font-size:7.2pt;color:var(--ink-leise);
+  }
+  .fuss .zahl{font-weight:600;color:var(--mid);font-variant-numeric:tabular-nums}
+  .fuss-mitte{text-align:center;flex:1 1 auto;line-height:1.45}
+
+  /* ── CTA-Banner: auf ALLEN vier Seiten identisch ────── */
+  .cta{
+    flex:0 0 auto;background:var(--navy);border-radius:3mm;
+    text-decoration:none;color:inherit;
+    padding:5.2mm 6mm;margin-top:5mm;
+    display:flex;align-items:center;justify-content:space-between;gap:6mm;
+  }
+  .cta-text{flex:1 1 auto;min-width:0}
+  .cta-t{display:block;font-size:11.4pt;font-weight:700;color:#fff;
+         letter-spacing:-.015em;margin-bottom:1.4mm}
+  .cta-s{display:block;font-size:8.1pt;color:rgba(255,255,255,.74);line-height:1.45}
+  .cta-pille{
+    flex:0 0 auto;background:var(--light);border-radius:99mm;
+    padding:2.9mm 6.4mm;font-size:11.2pt;font-weight:700;color:var(--navy);
+    letter-spacing:-.01em;white-space:nowrap;text-decoration:none;
+  }
+
+  /* ═══ SEITE 1 — Titel ═══════════════════════════════ */
+  .titel{padding:0;background:var(--navy)}
+  .titel-bild{position:absolute;inset:0;z-index:0}
+  .titel-bild img{width:100%;height:100%;object-fit:cover;display:block}
+  .titel-schleier{position:absolute;inset:0;
+    background:linear-gradient(168deg,
+      rgba(13,27,62,.93) 0%, rgba(13,27,62,.80) 42%, rgba(13,27,62,.90) 100%);}
+  .titel-inhalt{position:relative;z-index:1;display:flex;flex-direction:column;
+                height:100%;padding:14mm 15mm 11mm}
+  .titel .rubrik{color:rgba(255,255,255,.55)}
+  .titel .logo-wort{color:#fff}
+  .titel .fuss{border-top-color:rgba(255,255,255,.15);color:rgba(255,255,255,.55);
+               margin-top:4mm}
+  .titel .cta{margin-top:auto}
+  .titel .fuss .marke{color:var(--light);font-weight:600}
+
+  .versprechen{
+    align-self:flex-start;display:flex;align-items:center;gap:2.2mm;
+    background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);
+    border-radius:99mm;padding:2mm 4.4mm;margin-top:auto;margin-bottom:6mm;
+    font-size:8.2pt;font-weight:600;color:#fff;
+  }
+  .punkt{width:1.9mm;height:1.9mm;border-radius:50%;background:var(--gut);flex:0 0 auto}
+  .anriss{font-size:10.4pt;line-height:1.62;color:rgba(255,255,255,.84);
+          max-width:104mm;margin-top:5mm}
+
+  /* Kennzahlen: direkt unter dem Anriss statt am Seitenfuss.
+     Die Vorfassung liess hier 31 % der Seite leer. */
+  .zahlen{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:9mm}
+  .zahl{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.13);
+        border-radius:2.6mm;padding:5.6mm 5mm}
+  .zahl .v{display:flex;align-items:center;gap:1.8mm;
+           font-size:16.5pt;font-weight:700;color:var(--light);
+           letter-spacing:-.022em;margin-bottom:1.6mm}
+  .zahl .l{display:block;font-size:7.9pt;line-height:1.42;color:rgba(255,255,255,.72)}
+
+  /* ═══ SEITE 2 — Ihr Recht ═══════════════════════════ */
+  .fliess{font-size:9.6pt;line-height:1.62;color:var(--ink);max-width:132mm}
+  .fliess b{font-weight:600;color:var(--navy)}
+
+  .posten{display:flex;flex-direction:column;gap:1.5mm;margin-top:4mm}
+  .posten-zeile{
+    background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
+    padding:2.6mm 5mm;display:flex;align-items:center;justify-content:space-between;gap:6mm;
+  }
+  .posten-was{flex:1 1 auto;min-width:0}
+  .posten-was b{display:block;font-size:9.6pt;font-weight:600;color:var(--navy);
+                margin-bottom:.9mm}
+  .posten-was span{display:block;font-size:8.2pt;color:var(--ink-leise);line-height:1.4}
+  .posten-betrag{flex:0 0 auto;font-size:10pt;font-weight:700;color:var(--navy);
+                 white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  .hinweis{background:#fff;border:1px solid var(--linie-zart);border-left:2.4mm solid var(--light);
+           border-radius:2.4mm;padding:3.2mm 5mm;margin-top:3.2mm;
+           font-size:8.6pt;line-height:1.5;color:var(--ink)}
+  .hinweis b{font-weight:600;color:var(--navy)}
+
+  .saeulen{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4mm;margin-top:3.6mm}
+  .saeule{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;padding:3.6mm}
+  .saeule-zeichen{width:8.4mm;height:8.4mm;border-radius:2mm;background:var(--navy);
+                  display:flex;align-items:center;justify-content:center;margin-bottom:3mm}
+  .saeule b{display:block;font-size:9.2pt;font-weight:600;color:var(--navy);margin-bottom:1.4mm}
+  .saeule span{display:block;font-size:8pt;line-height:1.45;color:var(--ink-leise)}
+
+  /* ═══ SEITE 3 — Die Fallen ══════════════════════════ */
+  .fehler{display:flex;flex-direction:column;gap:1.8mm}
+  .fehler-zeile{
+    background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
+    padding:2.4mm 5mm;display:flex;align-items:center;gap:4.4mm;
+  }
+  .fehler-nr{flex:0 0 auto;width:7.4mm;height:7.4mm;border-radius:50%;
+             background:var(--navy);color:#fff;font-size:8.6pt;font-weight:700;
+             display:flex;align-items:center;justify-content:center}
+  .fehler-was{flex:1 1 auto;min-width:0}
+  .fehler-was b{display:block;font-size:9.4pt;font-weight:600;color:var(--navy);margin-bottom:.8mm}
+  .fehler-was span{display:block;font-size:8.2pt;color:var(--ink-leise);line-height:1.4}
+  .fehler-preis{flex:0 0 auto;width:27mm;text-align:center;
+                background:var(--warn-flaeche);border-radius:1.8mm;padding:2.2mm 1.6mm;
+                font-size:8.4pt;font-weight:700;color:var(--warn);line-height:1.28}
+
+  .saetze{display:flex;flex-direction:column;gap:1.3mm;margin-top:2.2mm}
+  .satz{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;padding:2.3mm 5mm}
+  .satz b{display:block;font-size:8.9pt;font-weight:600;color:var(--navy);margin-bottom:.7mm}
+  .satz span{display:block;font-size:8.2pt;color:var(--ink-leise);line-height:1.42}
+
+  /* ═══ SEITE 4 — Checkliste ══════════════════════════ */
+  .legende{display:flex;align-items:center;gap:2.2mm;flex-wrap:wrap;margin-bottom:3.4mm;
+           font-size:8pt;color:var(--ink-leise)}
+  .marke-chip{display:inline-block;border-radius:99mm;padding:1.1mm 3.2mm;
+              font-size:6.9pt;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+  .m-immer{background:#E7ECF5;color:var(--mid)}
+  .m-haft{background:var(--navy);color:#fff}
+  .m-kasko{background:var(--warn-flaeche);color:var(--warn)}
+
+  .phase{display:flex;align-items:center;gap:3mm;margin:2.4mm 0 1.4mm}
+  .phase:first-of-type{margin-top:0}
+  .phase-zeit{background:var(--navy);color:#fff;border-radius:99mm;
+              padding:1.4mm 3.6mm;font-size:7.8pt;font-weight:700;white-space:nowrap}
+  .phase-wo{font-size:7.4pt;font-weight:600;letter-spacing:.16em;
+            text-transform:uppercase;color:var(--ink-leise)}
+
+  .schritte{display:flex;flex-direction:column;gap:1.2mm}
+  .schritt{background:#fff;border:1px solid var(--linie-zart);border-radius:2.4mm;
+           padding:1.7mm 4.4mm;display:flex;align-items:center;gap:3.4mm}
+  .kaestchen{flex:0 0 auto;width:4.4mm;height:4.4mm;border:1.5px solid var(--light);
+             border-radius:1mm;background:#fff}
+  .schritt-text{flex:1 1 auto;min-width:0;font-size:8.2pt;line-height:1.36;color:var(--ink)}
+  .schritt-text b{font-weight:600;color:var(--navy)}
+  .schritt-marke{flex:0 0 auto}
+  .schritt-knopf{flex:0 0 auto;display:inline-flex;align-items:center;gap:2mm;
+                 background:var(--navy);color:#fff;border-radius:99mm;
+                 padding:2mm 4.2mm;font-size:8.4pt;font-weight:700;text-decoration:none;
+                 white-space:nowrap}
+
+  .abschluss{display:flex;gap:3.4mm;margin-top:4mm;flex:0 0 auto}
+  .abschluss .cta{flex:1 1 auto;margin-top:0}
+  .qr-karte{flex:0 0 auto;width:31mm;background:#fff;border:1px solid var(--linie);
+            border-radius:3mm;padding:3mm;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;gap:2mm;text-decoration:none}
+  .qr-karte img{width:100%;display:block}
+  .qr-karte span{font-size:7.2pt;font-weight:600;color:var(--navy);text-align:center}
+
+  .rechtshinweis{flex:0 0 auto;margin-top:3mm;font-size:7.2pt;line-height:1.45;
+                 color:var(--ink-leise);max-width:150mm}
+</style>
+</head>
+<body>
+
+<!-- Wiederverwendete Zeichen. Als SVG, damit keine Systemschrift einspringt. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-logo" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="12" fill="currentColor"/>
+    <circle cx="12" cy="12" r="4.6" fill="#fff"/>
+  </symbol>
+  <symbol id="i-stern" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 2.4l2.9 6.1 6.7.9-4.9 4.7 1.2 6.6-5.9-3.2-5.9 3.2 1.2-6.6L2.4 9.4l6.7-.9z"/>
+  </symbol>
+  <symbol id="i-pfeil" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+          stroke-linejoin="round" d="M4 12h15M13 6l6 6-6 6"/>
+  </symbol>
+  <symbol id="i-lupe" viewBox="0 0 24 24">
+    <path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"
+          d="M10.6 3.4a7.2 7.2 0 106.9 9.2M20.6 20.6l-4.8-4.8"/>
+  </symbol>
+  <symbol id="i-waage" viewBox="0 0 24 24">
+    <path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"
+          stroke-linejoin="round" d="M12 3.6v16.8M6.4 20.4h11.2M4 8.4h16M4 8.4L1.8 14h4.4zM20 8.4L17.8 14h4.4z"/>
+  </symbol>
+  <symbol id="i-schild" viewBox="0 0 24 24">
+    <path fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"
+          stroke-linejoin="round" d="M12 2.8l7.4 2.9v6.1c0 4.5-3.1 7.8-7.4 9.4-4.3-1.6-7.4-4.9-7.4-9.4V5.7z"/>
+  </symbol>
+</svg>
+
+<!-- ══════════════════ SEITE 1 · TITEL ══════════════════ -->
+<section class="seite titel">
+  <div class="titel-bild">
+    <img src="hero.jpeg" alt="">
+    <div class="titel-schleier"></div>
+  </div>
+
+  <div class="titel-inhalt">
+    <div class="kopf">
+      <div class="logo">
+        <svg class="logo-zeichen" style="color:#fff"><use href="#i-logo"/></svg>
+        <span class="logo-wort">claimondo</span>
+      </div>
+      <span class="rubrik">Unfallguide</span>
+    </div>
+
+    <span class="versprechen"><span class="punkt"></span>Rückruf in 15 Minuten · 8–20 Uhr</span>
+
+    <h1>Unverschuldet im Unfall?<span class="zweit">Das steht Ihnen zu.</span></h1>
+
+    <p class="anriss">Die meisten Geschädigten fordern weniger, als ihnen zusteht. Auf
+    drei Seiten steht, was Sie verlangen können, welche Fehler teuer werden und wie Sie
+    in 30 Sekunden starten.</p>
+
+    <div class="zahlen">
+      <div class="zahl">
+        <span class="v">Erstangebot</span>
+        <span class="l">ist selten das Endangebot. Wir prüfen, was darin fehlt.</span>
+      </div>
+      <div class="zahl">
+        <span class="v">0 €</span>
+        <span class="l">zahlen Sie bei unverschuldetem Unfall — § 249 BGB</span>
+      </div>
+      <div class="zahl">
+        <span class="v">Wochen</span>
+        <span class="l">statt Monate — wir treiben den Fall, statt zu warten</span>
+      </div>
+      <div class="zahl">
+        <span class="v">4,8 <svg width="13" height="13" style="color:var(--light)"><use href="#i-stern"/></svg></span>
+        <span class="l">bei ProvenExpert, aus 27 Bewertungen</span>
+      </div>
+    </div>
+
+    <a class="cta" href="tel:+4915153608515">
+      <span class="cta-text">
+        <span class="cta-t">Fragen? Rufen Sie einfach an.</span>
+        <span class="cta-s">Kostenlos und unverbindlich — auch wenn Sie nur wissen wollen,
+        ob sich etwas lohnt.</span>
+      </span>
+      <span class="cta-pille">0151 5360 8515</span>
+    </a>
+
+    <div class="fuss">
+      <span>Ausgabe 2026</span>
+      <span class="fuss-mitte"></span>
+      <span class="marke">claimondo.de</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ SEITE 2 · IHR RECHT ══════════════════ -->
+<section class="seite">
+  <div class="kopf">
+    <div class="logo">
+      <svg class="logo-zeichen" style="color:var(--navy)"><use href="#i-logo"/></svg>
+      <span class="logo-wort">claimondo</span>
+    </div>
+    <span class="rubrik">Ihr Recht</span>
+  </div>
+
+  <h2>Holen Sie sich, <span class="zweit">was Ihnen zusteht.</span></h2>
+
+  <p class="fliess">Die gegnerische Versicherung ist kein neutraler Schlichter. Sie
+  vertritt ihren Kunden, nicht Sie. Auf Ihr Recht zu bestehen ist kein Streit, sondern
+  der Normalfall: <b>§ 249 BGB</b> verpflichtet die Gegenseite, den Zustand herzustellen,
+  der ohne den Unfall bestünde. Vollständig, nicht ungefähr.</p>
+
+  <div class="posten">
+    <div class="posten-zeile">
+      <span class="posten-was"><b>Reparatur oder Wiederbeschaffung</b>
+        <span>Fachwerkstatt Ihrer Wahl, keine Bindung an Partnerbetriebe</span></span>
+      <span class="posten-betrag">voll</span>
+    </div>
+    <div class="posten-zeile">
+      <span class="posten-was"><b>Unabhängiger Gutachter</b>
+        <span>Frei wählbar. Das Gutachten gehört Ihnen, nicht der Versicherung</span></span>
+      <span class="posten-betrag">300–1.200 €</span>
+    </div>
+    <div class="posten-zeile">
+      <span class="posten-was"><b>Anwalt</b>
+        <span>Eigenständige Schadensposition, kein Kostenrisiko für Sie</span></span>
+      <span class="posten-betrag">voll</span>
+    </div>
+    <div class="posten-zeile">
+      <span class="posten-was"><b>Nutzungsausfall</b>
+        <span>Pauschale pro Tag, wenn Sie keinen Mietwagen nehmen</span></span>
+      <span class="posten-betrag">27–175 € / Tag</span>
+    </div>
+    <div class="posten-zeile">
+      <span class="posten-was"><b>Wertminderung</b>
+        <span>Ihr Auto ist nach der Reparatur weniger wert — das wird ersetzt</span></span>
+      <span class="posten-betrag">200–5.000 €</span>
+    </div>
+    <div class="posten-zeile">
+      <span class="posten-was"><b>Mietwagen · Schmerzensgeld · Verdienstausfall</b>
+        <span>Je nach Fall zusätzlich, auch bei leichten Nackenbeschwerden</span></span>
+      <span class="posten-betrag">je nach Fall</span>
+    </div>
+  </div>
+
+  <p class="hinweis"><b>Am seltensten geltend gemacht:</b> Nutzungsausfall und
+  Wertminderung. Zusammen oft mehr als die halbe Reparatursumme — und genau die
+  Positionen, die eine Versicherung von sich aus nicht anbietet.</p>
+
+  <div class="saeulen">
+    <div class="saeule">
+      <span class="saeule-zeichen"><svg width="17" height="17"><use href="#i-lupe"/></svg></span>
+      <b>Partnergutachter</b>
+      <span>Unabhängig, in Ihrem Interesse — nicht in dem der Versicherung.</span>
+    </div>
+    <div class="saeule">
+      <span class="saeule-zeichen"><svg width="17" height="17"><use href="#i-waage"/></svg></span>
+      <b>Partnerkanzlei</b>
+      <span>Fachanwälte verhandeln. Sie müssen nicht selbst argumentieren.</span>
+    </div>
+    <div class="saeule">
+      <span class="saeule-zeichen"><svg width="17" height="17"><use href="#i-schild"/></svg></span>
+      <b>Werkstatt Ihrer Wahl</b>
+      <span>Keine Bindung an Partnerbetriebe. Sie entscheiden.</span>
+    </div>
+  </div>
+
+  <a class="cta" href="tel:+4915153608515">
+    <span class="cta-text">
+      <span class="cta-t">Der gesamte Service ist für Sie kostenlos.</span>
+      <span class="cta-s">Bei unverschuldetem Unfall trägt die Gegenseite alles — auch uns.
+      Claimondo verdient nie am Kunden.</span>
+    </span>
+    <span class="cta-pille">0151 5360 8515</span>
+  </a>
+
+  <div class="fuss">
+    <span>Claimondo Unfallguide</span>
+    <span class="fuss-mitte"></span>
+    <span class="zahl-seite zahl">2</span>
+  </div>
+</section>
+
+<!-- ══════════════════ SEITE 3 · DIE FALLEN ══════════════════ -->
+<section class="seite">
+  <div class="kopf">
+    <div class="logo">
+      <svg class="logo-zeichen" style="color:var(--navy)"><use href="#i-logo"/></svg>
+      <span class="logo-wort">claimondo</span>
+    </div>
+    <span class="rubrik">Die Fallen</span>
+  </div>
+
+  <h2>Sechs Fehler, <span class="zweit">die richtig teuer werden.</span></h2>
+
+  <div class="fehler">
+    <div class="fehler-zeile">
+      <span class="fehler-nr">1</span>
+      <span class="fehler-was"><b>Schuld am Unfallort einräumen</b>
+        <span>Ein „Tut mir leid“ wirkt höflich und kann als Anerkenntnis ausgelegt werden.</span></span>
+      <span class="fehler-preis">volle Summe</span>
+    </div>
+    <div class="fehler-zeile">
+      <span class="fehler-nr">2</span>
+      <span class="fehler-was"><b>Den Gutachter der Gegenseite akzeptieren</b>
+        <span>Er wird von dem bezahlt, der möglichst wenig zahlen will.</span></span>
+      <span class="fehler-preis">300–1.200 €</span>
+    </div>
+    <div class="fehler-zeile">
+      <span class="fehler-nr">3</span>
+      <span class="fehler-was"><b>Über die eigene Kasko abrechnen</b>
+        <span>Schnell erledigt, teuer bezahlt: Die Rückstufung wirkt über Jahre nach.</span></span>
+      <span class="fehler-preis">3.000–8.000 €</span>
+    </div>
+    <div class="fehler-zeile">
+      <span class="fehler-nr">4</span>
+      <span class="fehler-was"><b>Das erste Angebot annehmen</b>
+        <span>Wer unterschreibt, verzichtet auf den Rest — oft auch auf Spätfolgen.</span></span>
+      <span class="fehler-preis">Restanspruch</span>
+    </div>
+    <div class="fehler-zeile">
+      <span class="fehler-nr">5</span>
+      <span class="fehler-was"><b>Reparieren, bevor dokumentiert ist</b>
+        <span>Danach sind Wertminderung und Nutzungsausfall kaum durchsetzbar.</span></span>
+      <span class="fehler-preis">200–5.000 €</span>
+    </div>
+    <div class="fehler-zeile">
+      <span class="fehler-nr">6</span>
+      <span class="fehler-was"><b>Ohne Anwalt verhandeln</b>
+        <span>Bei klarer Haftung zahlt die Gegenseite den Anwalt. Verzicht spart nichts.</span></span>
+      <span class="fehler-preis">Sie sparen nichts</span>
+    </div>
+  </div>
+
+  <h3>Was am Telefon gesagt wird — und was dabei fehlt</h3>
+
+  <div class="saetze">
+    <div class="satz"><b>„Wir schicken unseren Gutachter, das geht schneller.“</b>
+      <span>Sie haben freie Wahl. Bei klarer Haftung zahlt die Gegenseite auch Ihren eigenen.</span></div>
+    <div class="satz"><b>„Bei unserer Partnerwerkstatt ist es günstiger.“</b>
+      <span>Günstiger für wen? Eine Bindung müssen Sie nicht akzeptieren.</span></div>
+    <div class="satz"><b>„Bei dem Fahrzeugalter gibt es keine Wertminderung.“</b>
+      <span>Eine feste Altersgrenze gibt es nicht. Das entscheidet der Sachverständige.</span></div>
+    <div class="satz"><b>„Unterschreiben Sie hier, dann ist es erledigt.“</b>
+      <span>Eine Abfindung beendet den Fall endgültig — auch für Spätfolgen.</span></div>
+    <div class="satz"><b>„Einen Anwalt brauchen Sie nicht.“</b>
+      <span>Der Rat kommt von der Partei, die gegenüber sitzt.</span></div>
+  </div>
+
+  <a class="cta" href="tel:+4915153608515">
+    <span class="cta-text">
+      <span class="cta-t">Bevor Sie zusagen: kurz anrufen.</span>
+      <span class="cta-s">Wir sagen Ihnen in fünf Minuten, ob das Angebot passt.
+      4,8 <svg width="8" height="8" style="color:var(--light)"><use href="#i-stern"/></svg>
+      bei ProvenExpert.</span>
+    </span>
+    <span class="cta-pille">0151 5360 8515</span>
+  </a>
+
+  <div class="fuss">
+    <span>Claimondo Unfallguide</span>
+    <span class="fuss-mitte"></span>
+    <span class="zahl">3</span>
+  </div>
+</section>
+
+<!-- ══════════════════ SEITE 4 · ZUM ABHAKEN ══════════════════ -->
+<section class="seite">
+  <div class="kopf">
+    <div class="logo">
+      <svg class="logo-zeichen" style="color:var(--navy)"><use href="#i-logo"/></svg>
+      <span class="logo-wort">claimondo</span>
+    </div>
+    <span class="rubrik">Zum Abhaken</span>
+  </div>
+
+  <h2>Ihre Checkliste. <span class="zweit">Schritt für Schritt.</span></h2>
+
+  <p class="legende">
+    <span class="marke-chip m-immer">Immer</span>
+    <span class="marke-chip m-haft">Haftpflicht</span>
+    <span class="marke-chip m-kasko">Kasko</span>
+    — drei Schritte hängen davon ab, wer den Unfall verursacht hat
+  </p>
+
+  <div class="phase">
+    <span class="phase-zeit">Sofort</span><span class="phase-wo">Am Unfallort</span>
+  </div>
+  <div class="schritte">
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Absichern</b> und Polizei rufen (110) bei
+      Personenschäden, Schäden über etwa 750 €, Streit oder Fluchtverdacht.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Durchschrift der Polizei mitnehmen.</b> Die bekommen
+      Sie direkt vor Ort — später kostet der Bericht Zeit und Gebühren.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Fotografieren:</b> Schäden, Endposition, Bremsspuren,
+      Kennzeichen, Fahrzeugschein.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Personalien, Versicherer und Versicherungsnummer</b>
+      notieren — steht auf der Versicherungskarte. Zeugen mit Telefonnummer festhalten.</span>
+      <span class="schritt-marke marke-chip m-haft">Haftpflicht</span></div>
+  </div>
+
+  <div class="phase">
+    <span class="phase-zeit">24 Std.</span><span class="phase-wo">Am selben Tag</span>
+  </div>
+  <div class="schritte">
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Zum Arzt</b> — auch wenn nichts wehtut.
+      Nackenbeschwerden zeigen sich oft erst nach 6 bis 24 Stunden.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Unabhängigen Gutachter über Claimondo beauftragen.</b>
+      Freie Wahl, bei klarer Haftung zahlt ihn die Gegenseite.</span>
+      <span class="schritt-marke marke-chip m-haft">Haftpflicht</span>
+      <a class="schritt-knopf" href="tel:+4915153608515">Anrufen
+        <svg width="9" height="9" style="color:#fff"><use href="#i-pfeil"/></svg></a></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Selbstbehalt und Rückstufung prüfen,</b> bevor Sie die
+      eigene Kasko nutzen. Oft ist der Weg über die Gegenseite günstiger.</span>
+      <span class="schritt-marke marke-chip m-kasko">Kasko</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Schaden melden</b> — bei fremdem Verschulden der
+      gegnerischen Versicherung, sonst der eigenen. Melden heißt nicht abwickeln.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+  </div>
+
+  <div class="phase">
+    <span class="phase-zeit">7 Tage</span><span class="phase-wo">In der ersten Woche</span>
+  </div>
+  <div class="schritte">
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Beschwerden täglich notieren.</b> Ein einfaches
+      Tagebuch genügt und trägt später weit.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Anwalt einschalten.</b> Bei klarer Haftung trägt die
+      Kosten die Gegenseite.</span>
+      <span class="schritt-marke marke-chip m-haft">Haftpflicht</span></div>
+    <div class="schritt"><span class="kaestchen"></span>
+      <span class="schritt-text"><b>Vier Wochen Prüffrist im Blick behalten.</b> Danach ist
+      die Versicherung im Verzug — ab dann kostet Verzögerung sie Geld statt Sie Nerven.</span>
+      <span class="schritt-marke marke-chip m-immer">Immer</span></div>
+  </div>
+
+  <div class="abschluss">
+    <a class="cta" href="tel:+4915153608515">
+      <span class="cta-text">
+        <span class="cta-t">Jetzt anrufen</span>
+        <span class="cta-s">0151 5360 8515 · Rückruf in 15 Minuten, 8–20 Uhr</span>
+      </span>
+      <span class="cta-pille">0151 5360 8515</span>
+    </a>
+    <a class="qr-karte"
+       href="https://claimondo.de/gutachter-finden?utm_source=unfallguide&amp;utm_medium=pdf&amp;utm_campaign=leadmagnet">
+      <img src="qr-gutachter-finden.svg" alt="QR-Code zu claimondo.de/gutachter-finden">
+      <span>Lieber online</span>
+    </a>
+  </div>
+
+  <p class="rechtshinweis">Dieser Guide ersetzt keine Rechtsberatung im Einzelfall. Die
+  genannten Beträge sind typische Spannen aus der Praxis und keine Zusicherung.</p>
+
+  <div class="fuss">
+    <span>Claimondo Unfallguide · Stand 2026</span>
+    <span class="fuss-mitte">Anbieter: claimondo.de/impressum · Datenschutz: claimondo.de/datenschutz</span>
+    <span class="zahl">4</span>
+  </div>
+</section>
+
+</body>
+</html>

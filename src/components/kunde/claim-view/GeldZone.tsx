@@ -24,6 +24,8 @@ import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import WerkstattVermittlungHoldingCard from '@/components/kunde/WerkstattVermittlungHoldingCard'
+import KaskoTarifCard from '@/components/kunde/KaskoTarifCard'
+import KaskoBindungCard from '@/components/kunde/KaskoBindungCard'
 import { saveBankdaten, updateZahlungsweg } from '@/app/kunde/faelle/[id]/actions'
 
 export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
@@ -48,7 +50,10 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
         <SchadensfotoUploadCard claimId={vm.claimId} fotos={werkstatt.schadensfotoUrls.map((url) => ({ url }))} />
       )}
       {/* Werkstatt-Finder — Kunde ohne vermittelte Werkstatt (kanonischer brauchtWerkstattVermittlung-Gate). */}
-      {werkstatt.brauchtVermittlung && flags.reparaturPhaseErreicht && <WerkstattFinderCard claimId={vm.claimId} />}
+      {/* Kasko-WB Phase 1: erst Tariffrage, dann Finder; gebunden -> Info, keine Vermittlung. */}
+      {flags.kaskoBindungOffen && flags.reparaturPhaseErreicht && <KaskoTarifCard claimId={vm.claimId} />}
+      {flags.kaskoGebunden && <KaskoBindungCard claimId={vm.claimId} />}
+      {!flags.kaskoBindungOffen && werkstatt.brauchtVermittlung && flags.reparaturPhaseErreicht && <WerkstattFinderCard claimId={vm.claimId} />}
       {/* Werkstatt-Card — bei hinterlegter Werkstatt (+ Reparaturtermin-Status). */}
       {werkstatt.data && <WerkstattCard claimId={vm.claimId} werkstatt={werkstatt.data} termin={werkstatt.reparaturTermin} />}
       {/* R3 (Vermittlungs-Blind-Window): Finder aus (brauchtVermittlung=false, z.B. Dispatch/KB
@@ -57,7 +62,9 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
       {flags.istReparaturRoute &&
         flags.reparaturPhaseErreicht &&
         !werkstatt.brauchtVermittlung &&
-        !werkstatt.data && <WerkstattVermittlungHoldingCard />}
+        !werkstatt.data &&
+        !flags.kaskoGebunden &&
+        !flags.kaskoBindungOffen && <WerkstattVermittlungHoldingCard />}
       {/* KVA-Loop — Reparatur-Claim (Werkstatt) mit hochgeladenem Kostenvoranschlag. */}
       {kvaSichtbar && (
         <KostenvoranschlagCard
@@ -129,7 +136,10 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
           im gesperrten Zustand (dann als Anzeige mit Begruendung, statt wortlos zu fehlen). */}
       <div className="rounded-ios-xl border border-claimondo-border bg-white px-4 py-4">
         <p className="text-body-sm font-semibold text-claimondo-navy">Abrechnungsart</p>
-        <p className="text-caption text-claimondo-ondo mt-0.5">
+        {/* Lesbarkeits-Audit 01.09.: stand auf `text-caption` — das ist der OVERLINE-Token
+            (10 px, weight 600, letter-spacing), gedacht fuer Labels wie „AUS GUTACHTEN".
+            Fuer einen ganzen Satz ist er die falsche Stufe; gemessen kamen 10 px an. */}
+        <p className="text-body-sm text-claimondo-ondo mt-0.5">
           Reparatur in der Werkstatt oder Auszahlung auf Gutachtenbasis.
         </p>
         <AuszahlungsartWahlKunde
