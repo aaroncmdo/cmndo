@@ -50,6 +50,10 @@ const MANUELLE_LIVE_SMOKES = [
   // ⚠ Diese Sicherung ist aber eine FEHLENDE ENV-Variable, nicht die Liste — wer
   // STAGING_BASIC_PASS fuer irgendetwas anderes in CI setzt, laesst sie scharf laufen.
   'flows/smoke-vollstrecke.spec.ts',
+  // Regel-4-Smoke des Kasko-Zustellnachweises: legt einen echten Lead auf prod an und loest eine
+  // echte Mail aus, um Resends Zustellmeldung zu belegen. Braucht bewusst KEIN Postfach und keinen
+  // RUN_*-Schalter — ohne diesen Eintrag wuerde CI ihn also bei jedem Lauf scharf mitfahren.
+  'flows/kasko-e6-mail-zustellnachweis.spec.ts',
   // Regel-4-Smoke der Unfallguide-Strecke: fuellt das oeffentliche Formular auf
   // prod aus und erzeugt damit Lead, Rueckruf-Auftrag, FlowLink und eine echte
   // E-Mail. Gehoert nie in CI. Zusaetzlich hinter RUN_UNFALLGUIDE_SMOKE.
