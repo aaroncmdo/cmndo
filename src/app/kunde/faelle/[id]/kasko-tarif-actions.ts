@@ -2,12 +2,14 @@
 
 // Kasko-WB Phase 1 — Kunde-Portal (Umgehung b aus dem Scan): Kasko-Claims aus der Schadenmeldung kannten die
 // Bindung nie. Der Kunde beantwortet die Tariffrage jetzt VOR dem Finder. Muster wie werkstatt-finder-actions.ts:
-// Ownership via Kunde-RLS, Write via Service-Client, Authz VOR dem Write.
+// Ownership via Kunde-RLS, Write via Service-Client, Authz VOR dem Write. Schreibsatz: lib/kasko-wb/persistenz.ts
+// (gemeinsam mit FlowLink + Dispatcher, Review #5864).
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
+import { baueKaskoLeadPatch, baueKaskoTarifFelder, leseKaskoAltStand, type KaskoAltStand } from '@/lib/kasko-wb/persistenz'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import type { Bindungsumfang, KaskoBindungsInfo, KaskoTarifAuswahl, WbStatus } from '@/lib/kasko-wb/types'
 
@@ -42,19 +44,28 @@ export async function speichereKaskoTarifPortal(
   }
   const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas: false })
 
-  const patch: Record<string, unknown> = {
-    eigene_versicherung_marke_id: auswahl.markeId,
-    eigene_versicherung_name: markeName,
-    eigene_kasko_tarif_id: auswahl.tarifId,
-    eigene_kasko_tarif_name: tarifName,
-    werkstattbindung_quelle: ergebnis.quelle,
-    ...(ergebnis.freieWerkstattwahl !== null ? { freie_werkstattwahl: ergebnis.freieWerkstattwahl } : {}),
+  // Alt-Stand des Leads VOR jedem Write (Review #5864, Befund 7): ein Read-Fehler ist ein Fehler — sonst bliebe ein
+  // wegen Werkstattbindung disqualifizierter Lead still disqualifiziert. Im Portal existiert per Definition ein Claim.
+  let alt: KaskoAltStand | null = null
+  if (owner.leadId) {
+    const { data: altRow, error: altErr } = await svc
+      .from('leads')
+      .select('disqualifiziert_grund_key, freie_werkstattwahl, eigene_versicherung_marke_id, eigene_kasko_tarif_id')
+      .eq('id', owner.leadId)
+      .maybeSingle()
+    if (altErr) return { ok: false, error: altErr.message }
+    const gelesen = leseKaskoAltStand(altRow)
+    alt = gelesen ? { ...gelesen, konvertiert: true } : null
   }
+
+  // freie_werkstattwahl IMMER explizit, auch null (Review #5864, Befund 1: Korrektur gebunden -> unbekannt).
+  const patch = baueKaskoTarifFelder(auswahl, ergebnis, { markeName, tarifName })
   const { error } = await svc.from('claims').update(patch as never).eq('id', claimId)
   if (error) return { ok: false, error: error.message }
   if (owner.leadId) {
-    // Lead spiegeln (Reminder-Cron liest freie_werkstattwahl vom Lead) — non-critical.
-    const { error: leadErr } = await svc.from('leads').update(patch as never).eq('id', owner.leadId)
+    // Lead spiegeln (Reminder-Cron liest freie_werkstattwahl vom Lead) + Re-Qualifikation nach frueherer Bindung — non-critical.
+    const leadPatch = baueKaskoLeadPatch(patch, ergebnis, alt)
+    const { error: leadErr } = await svc.from('leads').update(leadPatch as never).eq('id', owner.leadId)
     if (leadErr) console.error('[kasko-tarif-portal] Lead-Spiegel fehlgeschlagen (non-critical):', leadErr.message)
   }
   if (ergebnis.freieWerkstattwahl === null) {

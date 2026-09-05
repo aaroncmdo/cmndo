@@ -4,22 +4,19 @@
 // fragt der Step Versicherer + Tarif (KaskoTarifFrage) und leitet die Bindung aus der Wissensbasis ab.
 // Config-Bedingung {"freie_werkstattwahl": null, "werkstattbindung_quelle": null} (Mig 3). Ergebnisse:
 //   frei      -> onWeiter (Werkstatt-Strecke)
-//   gebunden  -> KaskoBindungEndansicht (ehrlich: Marke, Sanktion, Versicherer-Kontakt, Rueckruf)
+//   gebunden  -> Seite neu laden; das Re-Visit-Gate (FlowKaskoBindungGate) rendert die Bindungs-Endseite ohne Stepper
 //   unbekannt -> KaskoUnklarHinweis, dann onWeiter (E3: durchlassen, Dispatch klaert)
 
 import { useState } from 'react'
 import { KaskoTarifFrage } from '@/components/self-service/KaskoTarifFrage'
-import { KaskoBindungEndansicht } from '@/components/self-service/KaskoBindungEndansicht'
 import { KaskoUnklarHinweis } from '@/components/self-service/KaskoUnklarHinweis'
-import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
-import type { KaskoBindungsInfo, KaskoTarifAuswahl } from '@/lib/kasko-wb/types'
-import { fordereRueckrufAn, speichereKaskoTarifFlow } from './self-service-actions'
+import type { KaskoTarifAuswahl } from '@/lib/kasko-wb/types'
+import { speichereKaskoTarifFlow } from './self-service-actions'
 
-type Phase = 'frage' | 'sende' | 'abbruch' | 'unklar' | 'fehler'
+type Phase = 'frage' | 'sende' | 'unklar' | 'fehler'
 
 export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; onWeiter: () => void }) {
   const [phase, setPhase] = useState<Phase>('frage')
-  const [info, setInfo] = useState<KaskoBindungsInfo | null>(null)
   const [markeName, setMarkeName] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
 
@@ -35,8 +32,9 @@ export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; o
         return
       }
       if (r.ergebnis === 'abbruch') {
-        setInfo(r.info)
-        setPhase('abbruch')
+        // Abnahme 04.09.: Endseite OHNE Wizard-Schrittanzeige — nach dem Neuladen rendert das Re-Visit-Gate
+        // (FlowKaskoBindungGate) die Bindungs-Endseite ohne "Schritt 2 von n".
+        window.location.reload()
         return
       }
       if (r.ergebnis === 'unklar') {
@@ -50,10 +48,6 @@ export function FlowWerkstattbindungStep({ token, onWeiter }: { token: string; o
     }
   }
 
-  if (phase === 'abbruch') {
-    // Info nicht ladbar -> generische Endseite, nie zurueck in die Frage.
-    return info ? <KaskoBindungEndansicht info={info} onRueckruf={() => fordereRueckrufAn(token)} /> : <KaskoEndansicht />
-  }
   if (phase === 'unklar') {
     return <KaskoUnklarHinweis markeName={markeName} onWeiter={onWeiter} />
   }

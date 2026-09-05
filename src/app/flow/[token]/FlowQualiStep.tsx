@@ -12,12 +12,11 @@ import { useTranslations } from 'next-intl'
 import { QualiOptionen } from '@/components/self-service/QualiOptionen'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { KaskoTarifFrage } from '@/components/self-service/KaskoTarifFrage'
-import { KaskoBindungEndansicht } from '@/components/self-service/KaskoBindungEndansicht'
 import { KaskoUnklarHinweis } from '@/components/self-service/KaskoUnklarHinweis'
-import type { KaskoBindungsInfo, KaskoTarifAuswahl } from '@/lib/kasko-wb/types'
-import { speichereQualiFlow, erzeugeSelbstzahlerClaim, fordereRueckrufAn, speichereKaskoTarifFlow } from './self-service-actions'
+import type { KaskoTarifAuswahl } from '@/lib/kasko-wb/types'
+import { speichereQualiFlow, erzeugeSelbstzahlerClaim, speichereKaskoTarifFlow } from './self-service-actions'
 
-type Phase = 'frage' | 'versicherung' | 'werkstattbindung' | 'sende' | 'abbruch' | 'abbruch_bindung' | 'unklar' | 'selbstzahler' | 'fehler'
+type Phase = 'frage' | 'versicherung' | 'werkstattbindung' | 'sende' | 'abbruch' | 'unklar' | 'selbstzahler' | 'fehler'
 // Kasko-WB Phase 1: die Bindungs-Antwort reist zur Step-Neuberechnung mit (siehe uebernimmSzenario).
 type Bindung = { freie_werkstattwahl: boolean | null; werkstattbindung_quelle: string | null }
 
@@ -45,7 +44,6 @@ export function FlowQualiStep({
   const t = useTranslations('selfService')
   const [phase, setPhase] = useState<Phase>('frage')
   const [fehler, setFehler] = useState<string | null>(null)
-  const [bindungInfo, setBindungInfo] = useState<KaskoBindungsInfo | null>(null)
   const [markeName, setMarkeName] = useState<string | null>(null)
   const [letzteBindung, setLetzteBindung] = useState<Bindung | null>(null)
 
@@ -110,8 +108,9 @@ export function FlowQualiStep({
         return
       }
       if (r.ergebnis === 'abbruch') {
-        setBindungInfo(r.info)
-        setPhase('abbruch_bindung')
+        // Abnahme 04.09.: Endseite OHNE Wizard-Schrittanzeige — der Lead ist jetzt disqualifiziert, nach dem
+        // Neuladen rendert das Re-Visit-Gate (FlowKaskoBindungGate) dieselbe Endseite ohne "Schritt 2 von n".
+        window.location.reload()
         return
       }
       if (r.ergebnis === 'unklar') {
@@ -135,10 +134,6 @@ export function FlowQualiStep({
     void sende(value)
   }
 
-  if (phase === 'abbruch_bindung') {
-    // Info nicht ladbar -> generische Endseite, nie zurueck in die Schuldfrage.
-    return bindungInfo ? <KaskoBindungEndansicht info={bindungInfo} onRueckruf={() => fordereRueckrufAn(token)} /> : <KaskoEndansicht />
-  }
   if (phase === 'unklar') {
     return <KaskoUnklarHinweis markeName={markeName} onWeiter={() => void nachQualiWeiter('eigenverantwortung', true, 'kasko', letzteBindung ?? undefined)} />
   }

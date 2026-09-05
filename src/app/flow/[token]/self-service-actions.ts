@@ -28,6 +28,7 @@ import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlae
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 import { spiegleQualiAufClaim } from '@/lib/leads/spiegle-quali-auf-claim'
 import { buildDisqualifikationPatch } from '@/lib/self-service/disqualifikation-patch'
+import { baueKaskoLeadPatch, baueKaskoTarifFelder, leseKaskoAltStand, sollBindungsMailSenden } from '@/lib/kasko-wb/persistenz'
 import { leiteWerkstattbindungAb } from '@/lib/kasko-wb/werkstattbindung'
 import { ladeKaskoBindungsInfo } from '@/lib/kasko-wb/actions'
 import { notifyKundeWerkstattbindung } from '@/lib/kasko-wb/notify-kunde-werkstattbindung'
@@ -273,38 +274,41 @@ export async function speichereKaskoTarifFlow(
   // Unfall-Flow = Karosserieschaden (Spec §3 Annahmen).
   const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas: false })
 
+  // Review #5864 (Befunde 7+8): Alt-Stand VOR dem Quali-Pfad lesen — speichereQualiFlow schreibt bei „gebunden"
+  // bereits freie_werkstattwahl=false, danach liesse sich eine ERSTE Bindung nicht mehr von einer unveraenderten
+  // Bestaetigung aus dem Re-Visit-Gate unterscheiden. Ein Read-Fehler ist ein Fehler, kein stilles „nicht disqualifiziert".
+  const { data: altRow, error: altErr } = await admin
+    .from('leads')
+    .select('disqualifiziert_grund_key, freie_werkstattwahl, eigene_versicherung_marke_id, eigene_kasko_tarif_id, konvertiert_zu_claim_id, konvertiert_zu_fall_id')
+    .eq('id', leadId)
+    .maybeSingle()
+  if (altErr) return { ok: false, error: altErr.message }
+  const alt = leseKaskoAltStand(altRow)
+
   // Review W2: ERST die Entscheidung ueber den bestehenden Quali-Pfad (Disqualifikation, Gutachter loesen,
   // Reparaturwunsch, Spiegel), DANN Tariffelder + Herkunft. Scheitert der Quali-Pfad, bleibt
   // werkstattbindung_quelle leer und der Step erscheint erneut — statt ohne Entscheidung zu verschwinden.
   const quali = await speichereQualiFlow(token, 'eigenverantwortung', true, ergebnis.freieWerkstattwahl ?? undefined)
   if (!quali.ok) return { ok: false, error: quali.error ?? 'Speichern fehlgeschlagen.' }
 
-  const tarifFelder: Record<string, unknown> = {
-    eigene_versicherung_marke_id: auswahl.markeId,
-    eigene_versicherung_name: markeName,
-    eigene_kasko_tarif_id: auswahl.tarifId,
-    eigene_kasko_tarif_name: tarifName,
-    werkstattbindung_quelle: ergebnis.quelle,
-  }
-  const { error: updErr } = await admin.from('leads').update(tarifFelder).eq('id', leadId)
+  // Gemeinsamer Schreibsatz (lib/kasko-wb/persistenz.ts): freie_werkstattwahl IMMER explizit, auch null — die
+  // Korrektur gebunden -> unbekannt muss das alte false loeschen (Review #5864, Befund 1). Abnahme 04.09.: frei/
+  // unbekannt hebt eine Werkstattbindungs-Disqualifikation wieder auf (speichereQualiFlow re-qualifiziert nie).
+  const tarifFelder = baueKaskoTarifFelder(auswahl, ergebnis, { markeName, tarifName })
+  const leadPatch = baueKaskoLeadPatch(tarifFelder, ergebnis, alt)
+  const { error: updErr } = await admin.from('leads').update(leadPatch).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
   // Review W1: ein bereits konvertierter Claim bekommt die Antwort UEBERSCHREIBEND (spiegleQualiAufClaim fuellt nur
   // leere Felder, und der Disqualifikations-Zweig von speichereQualiFlow spiegelt gar nicht) — sonst zeigt das Portal
   // den Werkstatt-Finder, waehrend der Lead gebunden ist. Ohne Claim: 0 Zeilen, kein Fehler. Non-critical.
-  const { error: claimErr } = await admin
-    .from('claims')
-    .update({
-      ...tarifFelder,
-      ...(ergebnis.freieWerkstattwahl !== null ? { freie_werkstattwahl: ergebnis.freieWerkstattwahl } : {}),
-    } as never)
-    .eq('lead_id', leadId)
+  const { error: claimErr } = await admin.from('claims').update(tarifFelder as never).eq('lead_id', leadId)
   if (claimErr) console.error('[kasko-tarif] Claim-Nachzug fehlgeschlagen (non-critical):', claimErr.message)
 
   if (ergebnis.freieWerkstattwahl === false) {
     const infoRes = await ladeKaskoBindungsInfo(auswahl.markeId, auswahl.tarifId, markeName)
     const info = infoRes.ok ? infoRes.info : null
-    if (info) {
-      // E6: Zusammenfassung per Mail — non-critical.
+    if (info && sollBindungsMailSenden(ergebnis, auswahl, alt)) {
+      // E6: Zusammenfassung per Mail — nur bei neuer/geaenderter Bindung (Review #5864, Befund 8), non-critical.
       try {
         const { data: lead } = await admin.from('leads').select('vorname, email').eq('id', leadId).maybeSingle()
         await notifyKundeWerkstattbindung({ kunde: { vorname: (lead?.vorname as string | null) ?? null, email: (lead?.email as string | null) ?? null }, info })
