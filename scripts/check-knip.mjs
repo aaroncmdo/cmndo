@@ -43,6 +43,12 @@ const WHITELISTED_DEPS = new Set([
   'tailwindcss', // CSS @import "tailwindcss" in globals.css + PostCSS-Plugin-Kette via @tailwindcss/postcss
   'tw-animate-css', // CSS @import "tw-animate-css" in globals.css
   'supabase', // CLI: npx supabase in scripts/ + Edge-Functions
+  // Abnahme-Inbox (05.09.2026): IMAP-Helfer tests/e2e/lib/abnahme-inbox.ts — knip scannt nur src/** (knip.json
+  // project), Playwright-Specs/-Libs sieht es nicht. Echt genutzt: imapflow (IMAP-Client), mailparser
+  // (MIME -> text/html) + dessen Typen. Siehe docs/abnahme-inbox.md.
+  'imapflow',
+  'mailparser',
+  '@types/mailparser',
 ])
 
 // Unlisted, die transitiv/builtin bereitgestellt werden (kein echter Bug) → ignorieren.

@@ -68,6 +68,13 @@ describe('sendEmail — Send-Isolation & allowInternalRecipient', () => {
     expect(res.messageId).toBe('smtp-real-123')
   }, 20000)
 
+  it('stellt die Abnahme-Inbox abnahme+<tag>@claimondo.de OHNE Flag zu (Regel-4-Mail-Nachweis)', async () => {
+    const { sendEmail } = await import('../client')
+    const res = await sendEmail({ to: 'abnahme+e6-kasko-1725000000@claimondo.de', subject: 's', html: '<p>h</p>' })
+    expect(sendMailMock).toHaveBeenCalledTimes(1)
+    expect(res.messageId).toBe('smtp-real-123')
+  }, 20000)
+
   it('haelt eine NICHT-allowlistete Founder-Adresse OHNE Flag weiter suppressed (Guard scharf)', async () => {
     const { sendEmail } = await import('../client')
     const res = await sendEmail({ to: 'aaron.sprafke@claimondo.de', subject: 's', html: '<p>h</p>' })

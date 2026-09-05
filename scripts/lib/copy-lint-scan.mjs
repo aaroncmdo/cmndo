@@ -27,7 +27,10 @@ export const RDG_PATTERNS = [
   ['wir_fuehren_verhandlung', /\b[Ww]ir\s+führen\b[^.!?\n]{0,80}\b(Verhandlung|Verhandlungen|Gespräch|Gespräche)\b/],
   ['wir_machen_geltend', /\b[Ww]ir\s+machen\b[^.!?\n]{0,60}\bgeltend\b/],
   ['nachgestellt', /\b(verhandeln|klagen|fordern|erstreiten)\s+wir\b|\bsetzen\s+wir\b[^.!?\n]{0,60}\bdurch\b|\bholen\s+wir\b[^.!?\n]{0,60}\bzurück\b|\bholen\s+wir\b[^.!?\n]{0,60}\b(\w*[Kk]osten|Kürzung\w*|Erstattung|Geld|Betrag|Anspr\w+|Versicherung|Maximum|Honorar\w*)\b[^.!?\n]{0,60}\bein\b/],
-  ['unser_anwalt', /\bunser(e|em|en|er)?\s+(Anwalt|Anwälte|Rechtsanwalt|Rechtsanwälte)\b/i],
+  ['unser_anwalt', /\bunser(e|em|en|er)?\s+(Anwalt|Anwälte|Anwälten|Rechtsanwalt|Rechtsanwälte|Rechtsanwälten)\b/i],
+  // Verb-Reihung nach Komma: "Wir disponieren …, führen die Verhandlung und setzen … durch" — das
+  // Subjekt "Wir" steht weit vorn, die Rechtsverben folgen erst nach dem Komma (B2C-Durchgang 05.09.).
+  ['wir_reihung', /\b[Ww]ir\b[^.!?\n]{0,120},\s*[^.!?\n]{0,60}\b(setzen\b[^.!?\n]{0,60}\bdurch|führen\b[^.!?\n]{0,40}\bVerhandlung|verhandeln|klagen|holen\b[^.!?\n]{0,40}\bzurück)\b/],
   ['claimondo_rechtsverb', /\bClaimondo\s+(setzt\b[^.!?\n]{0,80}\bdurch|verhandelt|klagt|fordert|holt\b[^.!?\n]{0,60}\b(zurück|ein|raus))\b/],
 ]
 

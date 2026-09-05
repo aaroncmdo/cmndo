@@ -45,7 +45,7 @@
   "check": {
     "badge": "Free · no cost risk",
     "h1": "What are you entitled to after your accident?",
-    "sub": "Answer 3 quick questions — we'll show you instantly which claims you have. No obligation.",
+    "sub": "Three quick questions, then you see immediately which claims you have. No account, no cost.",
     "step_of": "Question {current} of {total}",
     "back": "Back",
     "q1_label": "Who is at fault for the accident?",
@@ -74,16 +74,16 @@
     "insight_versicherung": "Important: you may choose your own independent expert — not the one from the other party’s insurer.",
     "insight_verjaehrung": "Even after weeks your claim is usually not time-barred — the limitation period is generally 3 years.",
     "insight_teilschuld": "Even with partial fault you're entitled to proportional compensation.",
-    "insight_unklar": "We'll clarify the question of fault together — often faster than you'd think.",
+    "insight_unklar": "Our partner law firm clarifies the question of fault with you – often faster than you'd think.",
     "q1_selbst": "I was (mainly) at fault",
     "result_voll_heading": "This is yours — €0 out of pocket",
-    "result_voll_sub": "Not your fault? Then the other party's insurer pays. Under §249 BGB you're restored as if the accident never happened.",
+    "result_voll_sub": "Not your fault? Then the other party's insurer pays for everything: appraisal, lawyer, repair, rental car. You are put in the position as if the accident had never happened (§ 249 BGB).",
     "result_quote_heading": "You have claims — proportionally",
     "result_quote_sub": "With partial fault your damage is reimbursed in proportion to the fault ratio (§254 BGB). Our partner law firm gets the maximum for you.",
     "result_pruefen_heading": "There's often more to it than you think",
-    "result_pruefen_sub": "The question of fault is frequently clearer than expected — we clarify it with a lawyer and secure your claims.",
+    "result_pruefen_sub": "The question of fault is often clearer than it feels. Our partner law firm reviews what happened and secures your claims – free of charge for you.",
     "result_kasko_heading": "We help even if you're at fault",
-    "result_kasko_sub": "There's no claim against the other party — but through your comprehensive (Kasko) insurance we handle the appraisal, repair shop and processing for you.",
+    "result_kasko_sub": "There is no claim against the other party. Through your comprehensive (Kasko) insurance we coordinate the appraisal, repair shop and processing for you.",
     "ent_kasko_gutachten_t": "Independent damage appraisal",
     "ent_kasko_gutachten_d": "neutral assessment of the damage amount for your comprehensive insurer",
     "ent_kasko_werkstatt_t": "Repair shop & repair",
@@ -99,9 +99,9 @@
     "range_kostenlos": "Appraisal & lawyer: €0 for you — paid by the other party's insurer",
     "ranges_disclaimer": "Typical ranges, not a binding offer.",
     "result_disclaimer": "Non-binding initial assessment, not legal advice.",
-    "lead_heading": "Have your claim checked now — free of charge",
-    "lead_sub": "We'll call you back — usually within a few minutes.",
-    "lead_submit": "Check my claim for free",
+    "lead_heading": "Find out for free what you're entitled to",
+    "lead_sub": "An advisor calls you within 15 minutes (daily 8am–8pm) and goes through your claims with you. Free, no commitment.",
+    "lead_submit": "Request my free callback",
     "restart": "Start over",
     "alternativ_text": "Prefer to talk directly? We're here for you.",
     "alternativ_cta": "Report your claim online",
@@ -1002,14 +1002,14 @@
       "quote_accent": "Your claim doesn't."
     },
     "hero": {
-      "trust_badge": "Sachverständigen-Netzwerk · nationwide coverage",
+      "trust_badge": "Independent vehicle assessors · appointment within 48 hours",
       "h1_plain": "Not your fault in the crash?",
-      "h1_accent": "We've got you covered.",
-      "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
-      "cta_primary": "Let us talk to the insurance →",
+      "h1_accent": "Your own assessor. €0 for you.",
+      "sub_headline": "An independent assessor comes to you, usually within 48 hours. The other party's insurer pays for the appraisal, lawyer and repair (§ 249 BGB). Our partner law firm negotiates, and you see every step in your case file.",
+      "cta_primary": "Book my assessor appointment →",
       "cta_call": "Call now — callback within 15 minutes",
       "cta_whatsapp": "WhatsApp",
-      "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
+      "trust_footer": "Free · no commitment · you decide after the call"
     },
     "login": {
       "trigger": "Login",
@@ -1038,17 +1038,17 @@
       "Your case. Always in your pocket.",
       "One advisor. One number. Always the same.",
       "You see every letter, every call, every cent.",
-      "32 days instead of 4 months. On average.",
+      "Appointment within 48 hours. The assessor comes to you.",
       "€0 for you. (§249 BGB)."
     ],
     "kpis": [
       {
-        "wert": "2,000+",
-        "label": "claims handled"
+        "wert": "€0",
+        "label": "your cost if the accident wasn't your fault"
       },
       {
-        "wert": "€8M+",
-        "label": "compensation enforced"
+        "wert": "< 48 h",
+        "label": "to your assessor appointment"
       },
       {
         "wert": "32 days",
@@ -1059,7 +1059,7 @@
         "label": "to first callback"
       }
     ],
-    "kpi_methodik": "Aggregated analysis of all cases referred through the Claimondo partner network since inception. As of 14.05.2026. Detailed methodology available on request.",
+    "kpi_methodik": "32 days: average of all liability cases handled through Claimondo since inception, as of 14.05.2026. Callback and appointment: actual process times, daily 8am–8pm.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Your statutory entitlement",
       "heading": "Four conversations — our partner law firm conducts them, not you.",
@@ -1441,7 +1441,7 @@
       "btn_submit": "Request a callback",
       "btn_submit_pending": "Sending…",
       "success_heading": "We'll call you back",
-      "success_sub": "An advisor will be in touch — usually within 15 minutes during business hours.",
+      "success_sub": "An advisor will call within 15 minutes, daily 8am–8pm. The number may be withheld.",
       "close_aria": "Close",
       "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR).",
       "einklappen_aria": "Collapse contact bar",
@@ -1449,15 +1449,15 @@
     },
     "lead_form": {
       "rueckruf_badge": "Callback within 15 minutes · 8am–8pm",
-      "heading": "Report your claim in 30 seconds",
-      "sub": "Three fields. No account needed. GDPR-compliant.",
+      "heading": "Request a callback – we tell you what you're entitled to",
+      "sub": "Three details, no account. An advisor calls you within 15 minutes.",
       "field_name_label": "Your name",
       "field_name_placeholder": "Jane Smith",
       "field_phone_label": "Your phone number",
       "field_phone_placeholder": "0151 12345678",
       "field_city_label": "City / postcode of the accident",
       "field_city_placeholder": "e.g. Köln or 50670",
-      "submit": "Get your free callback now →",
+      "submit": "Request my free callback →",
       "submit_pending": "Sending …",
       "success_heading": "Thank you{name, select, empty{} other{, {name}}} — we'll be in touch shortly.",
       "success_body": "An advisor will call you back in <strong>under 15 minutes</strong>. Please keep your phone nearby — the number may appear as withheld.",
@@ -1541,8 +1541,8 @@
         "label": "Insurer reduction recovered¹"
       },
       {
-        "wert": "€8 million+",
-        "label": "claims enforced (aggregate)"
+        "wert": "< 48 h",
+        "label": "to your assessor appointment"
       },
       {
         "wert": "€0",
@@ -3792,26 +3792,26 @@
     "hero_badge": "independent appraisers available now {ort}",
     "hero_h1_line1": "Been in an accident?",
     "hero_h1_city": "Your car appraiser {ort}.",
-    "hero_subheadline": "We dispatch your appraiser (< 48 h), handle the insurance negotiations, and enforce your claim in full — BGH-compliant. 0 € for you.",
+    "hero_subheadline": "Your independent assessor comes to you, usually within 48 hours. The other party's insurer pays for the appraisal and lawyer (§ 249 BGB); our partner law firm negotiates. €0 for you.",
     "hero_bullets": [
       "Your case. Always in your pocket.",
       "One advisor. One number. Always the same.",
       "You see every letter, every call, every cent.",
-      "32 days instead of 4 months. On average.",
+      "Appointment within 48 hours. The assessor comes to you.",
       "0 € for you. (§ 249 BGB)."
     ],
     "hero_cta_call": "Call now — callback in 15 minutes",
-    "hero_trust_line": "Anonymous advice · No commitment · DSGVO-compliant (GDPR)",
+    "hero_trust_line": "Free · no commitment · you decide after the call",
     "form_badge": "Callback in 15 minutes · 8am–8pm",
-    "form_h2": "Report your claim — in 30 seconds",
-    "form_sub": "Three fields. No registration. DSGVO-compliant.",
+    "form_h2": "Request a callback – we tell you what you're entitled to",
+    "form_sub": "Three details, no account. An advisor calls you within 15 minutes.",
     "form_name_label": "Your name",
     "form_name_placeholder": "John Smith",
     "form_phone_label": "Your phone number",
     "form_phone_placeholder": "+44 7700 900000",
     "form_city_label": "City / postcode of the accident",
     "form_city_placeholder": "{stadt} or postcode",
-    "form_submit_idle": "Get your free callback now →",
+    "form_submit_idle": "Request my free callback →",
     "form_submit_pending": "Sending …",
     "form_consent": "By submitting I accept the <link>Privacy Policy</link>.",
     "form_toast_success": "Thank you! We will get back to you within 15 minutes.",
@@ -3819,12 +3819,12 @@
     "form_toast_rate_limit": "Too many requests. Please try again in a few minutes.",
     "trust_kpis": [
       {
-        "wert": "2,000+",
-        "label": "claims handled"
+        "wert": "€0",
+        "label": "your cost if the accident wasn't your fault"
       },
       {
-        "wert": "€8M+",
-        "label": "compensation enforced"
+        "wert": "< 48 h",
+        "label": "to your assessor appointment"
       },
       {
         "wert": "32 days",
@@ -3835,7 +3835,7 @@
         "label": "until first callback"
       }
     ],
-    "trust_methodik": "Aggregated analysis of all cases referred through the Claimondo partner network since founding. As of 14.05.2026. Detailed methodology available on request.",
+    "trust_methodik": "32 days: average of all liability cases handled through Claimondo since inception, as of 14.05.2026. Callback and appointment: actual process times, daily 8am–8pm.",
     "lokal_eyebrow": "Locally rooted — active nationwide",
     "lokal_h2": "Car damage assessment {ort}",
     "lokal_capsule": "<strong>Competent court:</strong> {landgericht}. <strong>Bar association:</strong> {kammer}. <strong>Postcode area:</strong> {plz} (approx. {bevoelkerung} residents, state of {bundesland}). In legal disputes with insurers, our partner law firm for traffic law typically files at {landgericht} — the chambers know the cases. Fee range per BVSK: <strong>{bvskSpanne}</strong> (scales with claim amount).",
@@ -4259,8 +4259,8 @@
       "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV and inspection-service providers — explained clearly, with your rights under § 249 BGB."
     },
     "schaden_melden": {
-      "title": "Report damage — secure login link",
-      "description": "Report damage in 30 seconds. You receive a secure login link straight away via WhatsApp or email."
+      "title": "Report your accident damage online – secure link via WhatsApp | Claimondo",
+      "description": "Report your claim in three minutes: you immediately receive a secure link via WhatsApp or e-mail, choose the assessor appointment and sign the power of attorney. €0 if the accident wasn't your fault (§ 249 BGB)."
     },
     "gutachter_partner_neukundengewinnung": {
       "title": "New Client Acquisition for Car Appraisers — Without CPL Risk",

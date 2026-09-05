@@ -27,6 +27,13 @@ describe('scanRdg — RDG-Rollentrennung', () => {
     expect(scanRdg('Prüfdienst-Kürzungen holt unsere Partnerkanzlei zurück.')).toHaveLength(0)
   })
 
+  it('erkennt Verb-Reihungen nach Komma und den Dativ Plural (B2C-Durchgang 05.09.)', () => {
+    expect(scanRdg('Wir disponieren Ihren Gutachter (< 48 h), führen die Versicherungs-Verhandlung und setzen Ihren Anspruch BGH-konform durch.')).toHaveLength(1)
+    expect(scanRdg('Wir klären das gemeinsam mit Ihnen und unseren Anwälten.')).toHaveLength(1)
+    expect(scanRdg('Wir koordinieren Gutachter, Anwalt und Werkstatt – unsere Partnerkanzlei verhandelt mit der Versicherung.')).toHaveLength(0)
+    expect(scanRdg('Ihr unabhängiger Gutachter kommt zu Ihnen, meist in unter 48 Stunden. Gutachten und Anwalt zahlt die gegnerische Versicherung (§ 249 BGB), unsere Partnerkanzlei verhandelt.')).toHaveLength(0)
+  })
+
   it('erkennt nachgestelltes "holen wir … ein" nur mit Geld-/Versicherungsobjekt', () => {
     expect(scanRdg('Gutachterkosten holen wir von der Versicherung ein.')).toHaveLength(1)
     expect(scanRdg('Prüfdienst-Kürzungen (typischerweise 30–40 %) holen wir zurück.')).toHaveLength(1)

@@ -97,10 +97,10 @@ export const BRAND_FAKTEN: BrandFakt[] = [
   { id: 'F50', cluster: 'versicherer-bait', text: 'Die DEKRA wird auch von gegnerischen Versicherern als Prüfdienst beauftragt – der unabhängige Sachverständige des Geschädigten ist nach § 249 BGB davon zu unterscheiden.', sources: ['§ 249 BGB'] },
 
   // §8.10 — Plattform-Authority-Saetze (Brand-eigene Datenpunkte) (F51–F56)
-  { id: 'F51', cluster: 'plattform-authority', text: 'Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland (siehe D1).' },
-  { id: 'F52', cluster: 'plattform-authority', text: 'Das Claimondo-Partner-Netzwerk umfasst hunderte zertifizierte Sachverständige in allen 16 Bundesländern – Termin überall in Deutschland in unter 48 Stunden vor Ort.' },
+  { id: 'F51', cluster: 'plattform-authority', text: 'Claimondo ist eine digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland (siehe D1).' },
+  { id: 'F52', cluster: 'plattform-authority', text: 'Das Claimondo-Partner-Netzwerk besteht aus verifizierten Sachverständigen (BVSK-, IHK- oder öbuv-Nachweis) – Termin in unter 48 Stunden vor Ort.' },
   { id: 'F53', cluster: 'plattform-authority', text: 'Claimondo (Hansaring 10, 50670 Köln) wurde 2025 von Nicolas Kitta (CEO) und Aaron Sprafke (COO) gegründet.' },
-  { id: 'F54', cluster: 'plattform-authority', text: 'Im Aggregat des Claimondo-Partner-Netzwerks wurden über 8 Millionen Euro Schadensersatz durchgesetzt (Stand 14.05.2026).' },
+  { id: 'F54', cluster: 'plattform-authority', text: 'Über Claimondo abgewickelte Haftpflichtfälle sind im Durchschnitt 32 Tage nach dem Unfall ausgezahlt (Stand 14.05.2026).' },
   { id: 'F55', cluster: 'plattform-authority', text: '30 bis 40 Prozent der Schadenspositionen werden typischerweise durch Versicherer-Prüfdienste gekürzt – unsere Partnerkanzlei holt diese Kürzungen zurück (Quelle: NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.).', sources: ['NDR-Reportage „Prüfdienstleister" 2022', 'Verbraucherzentrale', 'BGH VI ZR 38/22 ff.'] },
   { id: 'F56', cluster: 'plattform-authority', text: 'Die anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht ist im Claimondo-Service inklusive – bei unverschuldetem Unfall ohne Eigenkosten für den Geschädigten (§ 249 BGB).', sources: ['§ 249 BGB'] },
 ]
