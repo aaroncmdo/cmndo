@@ -489,7 +489,7 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 - [feed.json](https://claimondo.de/feed.json) — JSON Feed v1.1, Pendant zu feed.xml
 - [feed/katalog.xml](https://claimondo.de/feed/katalog.xml) — RSS 2.0 Voll-Katalog aller Wissens-Assets + Stadt-Seiten
 - [feed/katalog.json](https://claimondo.de/feed/katalog.json) — JSON Feed v1.1, Pendant zum Katalog
-- [openapi.json](https://app.claimondo.de/api/v1/openapi.json) — OpenAPI 3.0 der öffentlichen Funnel-API (10 Endpunkte: finden · Termine · Schaden melden · Ansprüche prüfen · Kasko-Werkstattbindung · Werkstätten · Karte · Fallstatus · Versicherer-Brief entschlüsseln · Rückruf), direkt als ChatGPT-Action/Tool importierbar
+- [openapi.json](https://app.claimondo.de/api/v1/openapi.json) — OpenAPI 3.0 der öffentlichen Funnel-API (10 Endpunkte: Gutachter finden · Termine · Schaden melden · Ansprüche prüfen · Kasko-Werkstattbindung · Werkstätten · Fallstatus · Termin stornieren · Versicherer-Brief entschlüsseln · Rückruf), direkt als ChatGPT-Action/Tool importierbar
 - [mcp.claimondo.de/mcp](https://mcp.claimondo.de/mcp) — MCP-Server (Streamable HTTP) für AI-Agenten + Claude.ai-Connectors (6 Tools, Resource: Wissensbasis)
 
 Stand: ${today}.
