@@ -264,6 +264,14 @@ jobs:
       - name: Stumme-Waechter-Ratchet
         run: npm run check:stumme-waechter -- --ratchet
 
+      # Server-Actions-Gate: R1 blockt Value-Exports aus 'use server'-Files — die landen im
+      # Client-Bundle als `undefined` (AAR-664, Urgent-Crash). Das Skript existierte seit
+      # 13.05.2026 mit npm-Key, wurde aber von keinem Workflow aufgerufen und lief damit nie;
+      # gefunden von der zweiten Achse des Stumme-Waechter-Ratchets direkt darueber (#5879).
+      # R2 (Mutation ohne revalidatePath) sind Hinweise, kein Exit-Code.
+      - name: Server-Actions-Gate
+        run: npm run check:server-actions
+
       # Query-Drift-Bremse (Ratchet): blockt NEUE Queries auf nicht-existente Spalten —
       # Filter-/Order-Params (.order('created_at') auf flow_links/auftraege), insert/update-
       # Keys (pflichtdokumente.datei_url) und top-level select-Spalten — gg. database.types.ts
