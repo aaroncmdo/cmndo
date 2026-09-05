@@ -8,6 +8,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
+import { SchadenBild } from '@/components/content/SchadenBild'
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
@@ -148,6 +149,17 @@ export default function Page() {
             </div>
           </div>
         </header>
+
+        {/* Bild direkt nach der Ueberschrift: beantwortet die Frage beim Landen
+            ("betrifft mich das?"), bevor der erste Textblock kommt. Nennung von
+            Urheber und Lizenz steckt in SchadenBild — sie ist bei CC BY/BY-SA
+            Bedingung der Nutzung, nicht Hoeflichkeit. */}
+        <SchadenBild
+          datei="leichter-schaden-kotfluegel-delle"
+          alt="Deutlich sichtbare Delle im vorderen Kotflügel eines roten Fahrzeugs"
+          bildunterschrift="Auch ein kleiner Schaden hat einen Wert — den ein Gutachten belegt und ein Kostenvoranschlag nur schätzt."
+          prioritaet
+        />
 
         {/* 0-€-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">

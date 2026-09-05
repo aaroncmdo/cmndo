@@ -8,6 +8,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
+import { SchadenBild } from '@/components/content/SchadenBild'
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
@@ -159,6 +160,17 @@ export default function Page() {
             </div>
           </div>
         </header>
+
+        {/* Bild direkt nach der Ueberschrift: beantwortet die Frage beim Landen
+            ("betrifft mich das?"), bevor der erste Textblock kommt. Nennung von
+            Urheber und Lizenz steckt in SchadenBild — sie ist bei CC BY/BY-SA
+            Bedingung der Nutzung, nicht Hoeflichkeit. */}
+        <SchadenBild
+          datei="unfall-frontschaden-schwarzer-pkw"
+          alt="Schwarzer Pkw mit eingedrückter Front nach einem Unfall, aufgenommen am Unfallort"
+          bildunterschrift="Wessen Gutachter diesen Schaden bewertet, entscheiden Sie — nicht die gegnerische Versicherung."
+          prioritaet
+        />
 
         {/* Antwort-zuerst-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
