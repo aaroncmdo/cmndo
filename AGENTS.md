@@ -59,8 +59,20 @@ darin ist als Absicht der besitzenden Lane belegt, samt Nachweis, dass nichts me
 (Erstmals angeschlagen in R470: `docs/unfallguide/hero.jpeg`, gewollt ersetzt durch `titelbild.jpg`.)
 
 **D4 — Migration-File-Parität ist Teil von Gate 2 und blockt die Runde.**
-`npm run check:migration-files -- --ratchet` muss vor dem Reparent `exit 0` liefern. Eine neue
-getrackte Migration ohne File im Repo hält die Runde an.
+`npm run check:migration-files -- --ratchet` muss vor dem Reparent die **Summenzeile mit `0 neu`**
+zeigen — z. B. `1267 getrackt, 1265 Files, 2 ohne File (Baseline 2), 0 neu`. Eine neue getrackte
+Migration ohne File im Repo hält die Runde an.
+
+⚠ **Verlangt wird die Zeile, nicht nur `exit 0`** — und der Lauf gehört **ohne** Ausgabe-Umleitung
+gefahren. Ein abgestürzter Check liefert ebenfalls einen Exit ≠ 0 und sieht damit aus wie ein Fund.
+Am 06.09.2026 genau so passiert: `exit 1` kam nicht von einer verwaisten Migration, sondern von
+`ERR_MODULE_NOT_FOUND` — im **Haupt-Checkout** fehlt `@supabase/supabase-js`, weil dort keine
+Abhängigkeiten installiert sind. Der Lauf war nach `/dev/null` geleitet, also war genau die Zeile
+unterdrückt, die es gesagt hätte. Fail-closed ist richtig, die falsche **Diagnose** ist der Schaden:
+sie schickt die nächste Session auf die Suche nach einer Migration, die es nicht gibt.
+→ Den Check in einem Worktree mit `node_modules` fahren, `--env-file` per **absolutem** Pfad auf die
+`.env.local` des Haupt-Checkouts zeigen lassen, und die Ausgabe lesen. Grundsatz: **ein Positiv
+verlangen, nicht die Abwesenheit eines Negativs.**
 ⚠ Dieses Gate steht **bewusst beim Drain und nicht in der CI**: die Drift entsteht außerhalb eines
 PRs, ein CI-Ratchet würde unbeteiligte Lanes rot färben (Begründung des Autors im ci.yml-Kommentar,
 unverändert gültig). Beim Drain ist der Radius genau eine Runde, und der Drain darf sie selbst
