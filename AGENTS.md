@@ -108,6 +108,46 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 Begründung: Wiederholt war „build grün" ≠ „live nutzbar" (Feature nie erreichbar, Route 500, Silent-DB-CHECK-Reject, den kein Build/`tsc` fängt). Der Prod-Smoke ist die einzige Instanz, die echtes Nutzerverhalten prüft. Codifiziert den Broadcast-Mandat (11.07., Aaron) als harte Regel.
 
 Begründung „Soll zuerst" (Schritt 1, Aaron-Regel 27.07., verankert 11.08.): Ein Smoke, der nur die Implementierung nachfährt („seede den Zustand, den der Code erwartet, treibe den Pfad, den der Code nimmt"), bestätigt bloß *„Code tut, was Code tut"* — eine **Tautologie**. Er verdeckt die Lücke zwischen dem, was gebaut wurde, und dem, was Nutzer/Geschäft brauchen. Ausgelöst durch den #4567-Reparatur-Funnel-Smoke: auf `reparatur-laeuft` geseedet + nur den Abschluss getrieben → bestätigte den Code-Pfad statt des vollen operativen Wegs (Schadenmeldung → Kunden-Beleg). Wer das Soll erst nach dem Code formuliert, schreibt die Implementierung als Maßstab fest — genau das soll diese Regel verhindern.
+
+## Regel 6 — Soll-Blatt vor dem Bau (Auftragsklärung)
+
+Jede Aufgabe, die Aaron stellt, beginnt mit einem **Soll-Blatt** — geschrieben, **bevor** die erste Code-Zeile, der erste Seed, die erste Spec oder Migration entsteht. Skill: **`operatives-soll`** (Pflicht — Aaron 05.09.2026: „für jede Session und jede Aufgabe, die ich stelle"). Das Soll-Blatt ist die Abnahme-Datei `memory/abnahmen/<YYYY-MM-DD>-<slug>.md` (nach `_VORLAGE.md`) in ihrer Soll-Fassung, Status im Register `🔵 Soll steht`. Regel 4 misst später **gegen** dieses Blatt, Regel 5 wertet es aus. Der Code ist der Prüfling, das Blatt der Maßstab.
+
+**Tiefe nach Impact:** UI / Route / Server-Action / DB-Write-Pfad / Cron / Migration / Comms / Lead-Eingang → volles Blatt. Audit / Analyse / Messung → Auftrag, Warum, Soll (= die Messlatte) + Kriterien. Reine Docs / Scripts / Config ohne Runtime-Flow → Dreizeiler (Warum · Done-Kriterium · „n/a Matrix"), im PR vermerkt.
+
+**Pflichtinhalt (volles Blatt):**
+
+```
+1.  Auftrag            — Aarons Worte wörtlich, nicht paraphrasiert; seine Entscheidungen unterwegs datiert
+1b. Warum              — welcher Geschäftsvorfall, welche Rolle, welches Problem; was passiert heute ohne;
+                         woran erkennt Aaron IM BETRIEB, dass es erreicht ist (messbar: DB-Zeile, Zustellung, Klick)
+1c. Operatives Soll    — Nutzer-Schrittfolge je Rolle aus der Fachlogik, nicht aus dem Code, mit Folgezustand
+                         (Nachbar-Sicht, Benachrichtigung, DB); bei J1–J10-Berührung = der Journey-Delta (D1)
+2.  Skills je Bereich  — geplant JETZT (Bereich · Skill · warum · geprüfte Alternative); am Ende wird es die Bilanz
+6.  Eingänge × Rollen  — aus dem Register (docs/fundament/entry-points.md, entry-points-flowlink.md), nicht aus
+                         dem Gedächtnis: jede Zelle, in der der Zustand entsteht, gelesen oder geändert wird —
+                         auch vorbelegt (Dispatch legt an, Webhook, API, Cron), Re-Visit, interner Override
+6a. Sicht-Matrix       — je Rolle MUSS sehen · DARF ändern · DARF NICHT sehen; Pflichtzellen anonym +
+                         Nicht-Berechtigter (test-rls-nobody@); kundensichtbare Spalten = Entscheidung HIER,
+                         bevor eine Grant-Migration sie festschreibt
+6b. DB-Voraussetzungen — je Zelle, was in prod wahr sein muss (Spalten-Grant, Policy, View-Spalte, RPC-Grant,
+                         enum-CHECK, Realtime-Publication, Bucket, Edge Function, pg_cron, NEXT_PUBLIC_* zur
+                         Build-Zeit, publicPaths, Outbox) — mit Lese-Kommando, VOR dem Bau gelesen; was fehlt,
+                         wird Teil des Auftrags (Migration via MCP, Regel 2), nicht Annahme
+10. Abnahmekriterien   — Checkliste für Aaron: „Wenn <Rolle> <tut>, dann <messbarer Folgezustand>"
+```
+
+**Abstimmung:** Kurzfassung (Warum · Soll in drei Sätzen · Matrix-Zeilen · Annahmen · höchstens drei Fragen) an Aaron, **bevor** gebaut wird. Antwortet er nicht: Annahmen im Blatt markieren und weiterarbeiten (FUNDAMENT §0.2 — nie raten und schweigen, nie blockieren). Blockierend warten nur, wenn das Feature Geld bewegt, echte Kunden-Comms auslöst oder löscht.
+
+**Danach:** `regel4-smoke` Schritt 1 schreibt kein neues Soll, er **liest** 1c und misst 6/6a/6b. Die Abnahme-Session (Regel 5, Abschnitt 12) prüft „Soll-Blatt vor dem Bau vorhanden? Abweichung Soll ↔ Gebaut?" und die Skill-Bilanz.
+
+**Verboten:**
+* Code, Seed, Spec oder Migration vor dem Soll-Blatt; das Soll aus dem Code ableiten (Tautologie).
+* Matrix aus dem Kopf statt aus dem Register; „darf sehen" ohne „darf nicht sehen".
+* DB-Voraussetzungen annehmen statt lesen („der Grant wird schon da sein").
+* Das Blatt nach dem Bau an das Gebaute anpassen — die Abweichung ist ein Befund (Regel 4/5).
+
+Begründung: Aaron 05.09.2026 („immer am Anfang die operative Richtigkeit kurz klarstellen und wirklich ganz durchdenken, warum diese Sache entwickelt wird"). Alle bestehenden Gates prüfen Hygiene und Sicherheit — keines beweist, dass die **gemeinte Rolle genug sieht** oder dass die Infrastruktur neben dem Schema stimmt. Belegt: Kasko-Werkstattbindung Phase 1 — bei Übergabe 6/10 Matrix-Zeilen „UI-Klick offen", ein Eingang (vorbelegter FlowLink) fehlte bis zur Nachfrage; Kundenbetreuer sah 28/81 Fälle leer (#5773); vier Realtime-Listener ohne Publication feuerten nie (03.09.); vier `claims`-Spalten ohne Grant (#5813). Ein vorab gelesenes Soll-Blatt hebt solche Lücken in den Auftrag statt in die Abnahme. Design: `docs/superpowers/specs/2026-09-05-regel-6-soll-blatt-design.md`.
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
