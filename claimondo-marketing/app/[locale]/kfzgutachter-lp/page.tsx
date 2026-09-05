@@ -229,8 +229,8 @@ function TrustSiegelStrip() {
 
 function TrustBar() {
   const items = [
-    '2.000+ vermittelte Fälle',
-    '100+ geprüfte Gutachter',
+    '0 € für Unverschuldete',
+    'Termin in unter 48 h',
     '5,0 ★ Google',
     'Anwalt + VS-Kommunikation kostenfrei',
   ]

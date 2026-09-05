@@ -45,7 +45,7 @@
   "check": {
     "badge": "Bezpłatnie · bez ryzyka kosztów",
     "h1": "Co Ci się należy po wypadku?",
-    "sub": "Odpowiedz na 3 krótkie pytania — od razu pokażemy, jakie masz roszczenia. Bez zobowiązań.",
+    "sub": "Trzy krótkie pytania i od razu widzisz, jakie masz roszczenia. Bez rejestracji, bez kosztów.",
     "step_of": "Pytanie {current} z {total}",
     "back": "Wstecz",
     "q1_label": "Kto ponosi winę za wypadek?",
@@ -74,16 +74,16 @@
     "insight_versicherung": "Ważne: możesz wybrać własnego niezależnego rzeczoznawcę — nie tego od ubezpieczyciela drugiej strony.",
     "insight_verjaehrung": "Nawet po tygodniach Twoje roszczenie zwykle się nie przedawnia — termin to z reguły 3 lata.",
     "insight_teilschuld": "Nawet przy współwinie należy Ci się proporcjonalne odszkodowanie.",
-    "insight_unklar": "Kwestię winy wyjaśnimy razem — często szybciej, niż myślisz.",
+    "insight_unklar": "Kwestię winy wyjaśni z Tobą nasza kancelaria partnerska – często szybciej, niż myślisz.",
     "q1_selbst": "To ja byłem (głównie) winny",
     "result_voll_heading": "To Ci się należy — 0 € kosztów własnych",
-    "result_voll_sub": "Wypadek nie z Twojej winy? Wtedy płaci ubezpieczyciel drugiej strony. Zgodnie z §249 BGB zostajesz postawiony w sytuacji, jakby do wypadku nigdy nie doszło.",
+    "result_voll_sub": "Nie z Twojej winy? Wtedy ubezpieczyciel sprawcy płaci za wszystko: ekspertyzę, adwokata, naprawę, auto zastępcze. Zostajesz postawiony w sytuacji, jakby do wypadku nie doszło (§ 249 BGB).",
     "result_quote_heading": "Przysługują Ci roszczenia — proporcjonalnie",
     "result_quote_sub": "Przy współwinie Twoja szkoda jest pokrywana proporcjonalnie do stopnia winy (§254 BGB). Nasza kancelaria partnerska wywalczy dla Ciebie maksimum.",
     "result_pruefen_heading": "Często da się uzyskać więcej, niż myślisz",
-    "result_pruefen_sub": "Kwestia winy bywa jaśniejsza, niż się wydaje — wyjaśnimy ją wspólnie z prawnikiem i zabezpieczymy Twoje roszczenia.",
+    "result_pruefen_sub": "Kwestia winy jest często jaśniejsza, niż się wydaje. Nasza kancelaria partnerska sprawdza przebieg i zabezpiecza Twoje roszczenia – dla Ciebie bezpłatnie.",
     "result_kasko_heading": "Pomagamy również przy własnej winie",
-    "result_kasko_sub": "Wobec drugiej strony nie przysługuje roszczenie — ale przez Twoje ubezpieczenie AC zorganizujemy dla Ciebie ekspertyzę, warsztat i całą obsługę.",
+    "result_kasko_sub": "Wobec drugiej strony nie przysługuje roszczenie. Przez Twoje ubezpieczenie AC koordynujemy dla Ciebie ekspertyzę, warsztat i obsługę.",
     "ent_kasko_gutachten_t": "Niezależna ekspertyza szkody",
     "ent_kasko_gutachten_d": "neutralne ustalenie wysokości szkody dla Twojego ubezpieczyciela AC",
     "ent_kasko_werkstatt_t": "Warsztat i naprawa",
@@ -99,9 +99,9 @@
     "range_kostenlos": "Ekspertyza i prawnik: 0 € dla Ciebie — płaci ubezpieczyciel drugiej strony",
     "ranges_disclaimer": "Typowe rzędy wielkości, nie wiążąca oferta.",
     "result_disclaimer": "Niewiążąca wstępna ocena, nie porada prawna.",
-    "lead_heading": "Sprawdź swoje roszczenie teraz — bezpłatnie",
-    "lead_sub": "Oddzwonimy — zwykle w ciągu kilku minut.",
-    "lead_submit": "Sprawdź roszczenie bezpłatnie",
+    "lead_heading": "Sprawdź bezpłatnie, co Ci przysługuje",
+    "lead_sub": "Doradca oddzwoni w ciągu 15 minut (codziennie 8–20) i omówi z Tobą roszczenia. Bezpłatnie, bez zobowiązań.",
+    "lead_submit": "Zamów bezpłatne oddzwonienie",
     "restart": "Zacznij od nowa",
     "alternativ_text": "Wolisz porozmawiać bezpośrednio? Jesteśmy do dyspozycji.",
     "alternativ_cta": "Zgłoś szkodę online",
@@ -1002,14 +1002,14 @@
       "quote_accent": "Roszczenie zostaje."
     },
     "hero": {
-      "trust_badge": "Sieć rzeczoznawców Kfz-Sachverständige · zasięg ogólnokrajowy",
+      "trust_badge": "Niezależni rzeczoznawcy samochodowi · termin w ciągu 48 godzin",
       "h1_plain": "Wypadek nie z Twojej winy?",
-      "h1_accent": "Zajmiemy się wszystkim.",
-      "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — a negocjacje z ubezpieczeniem sprawcy prowadzi kancelaria partnerska. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
-      "cta_primary": "Pozwól, że porozmawiamy z ubezpieczycielem →",
+      "h1_accent": "Twój własny rzeczoznawca. 0 € dla Ciebie.",
+      "sub_headline": "Niezależny rzeczoznawca przyjeżdża do Ciebie, zwykle w ciągu 48 godzin. Ekspertyzę, adwokata i naprawę płaci ubezpieczyciel sprawcy (§ 249 BGB). Nasza kancelaria partnerska negocjuje, a Ty widzisz każdy krok w swojej sprawie.",
+      "cta_primary": "Umów rzeczoznawcę →",
       "cta_call": "Zadzwoń teraz — oddzwonimy w 15 minut",
       "cta_whatsapp": "WhatsApp",
-      "trust_footer": "Anonimowa porada · Bez zobowiązań · Zgodność z RODO"
+      "trust_footer": "Bezpłatnie · bez zobowiązań · decydujesz po rozmowie"
     },
     "login": {
       "trigger": "Logowanie",
@@ -1038,17 +1038,17 @@
       "Twoja sprawa. Zawsze pod ręką.",
       "Jeden doradca. Jeden numer. Zawsze ten sam.",
       "Widzą Państwo każde pismo, każdy telefon, każdy grosz.",
-      "32 dni zamiast 4 miesięcy. Średnio.",
+      "Termin w ciągu 48 godzin. Rzeczoznawca przyjeżdża do Ciebie.",
       "0 € dla Państwa. (§ 249 BGB)."
     ],
     "kpis": [
       {
-        "wert": "2.000+",
-        "label": "obsłużonych szkód"
+        "wert": "0 €",
+        "label": "Twój udział przy wypadku nie z Twojej winy"
       },
       {
-        "wert": "8 mln €+",
-        "label": "wyegzekwowanego odszkodowania"
+        "wert": "< 48 h",
+        "label": "do wizyty rzeczoznawcy"
       },
       {
         "wert": "32 dni",
@@ -1059,7 +1059,7 @@
         "label": "do pierwszego oddzwonienia"
       }
     ],
-    "kpi_methodik": "Zagregowane zestawienie wszystkich spraw przekazanych za pośrednictwem sieci partnerskiej Claimondo od momentu założenia. Stan na 14.05.2026. Szczegółowa metodyka dostępna na życzenie.",
+    "kpi_methodik": "32 dni: średnia wszystkich spraw z OC obsłużonych przez Claimondo od założenia, stan na 14.05.2026. Oddzwonienie i termin: rzeczywiste czasy procesu, codziennie 8–20.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Twoje ustawowe roszczenie",
       "heading": "Cztery rozmowy — prowadzi je nasza kancelaria partnerska, nie Państwo.",
@@ -1441,7 +1441,7 @@
       "btn_submit": "Zamów oddzwonienie",
       "btn_submit_pending": "Wysyłanie…",
       "success_heading": "Oddzwonimy do Państwa",
-      "success_sub": "Doradca skontaktuje się z Państwem — zazwyczaj w ciągu 15 minut w godzinach pracy.",
+      "success_sub": "Doradca zadzwoni w ciągu 15 minut, codziennie 8–20. Numer może być zastrzeżony.",
       "close_aria": "Zamknij",
       "datenschutz_note": "Wysyłając formularz, wyrażają Państwo zgodę na kontakt zwrotny. Ochrona danych zgodnie z RODO.",
       "einklappen_aria": "Zwiń pasek kontaktowy",
@@ -1449,8 +1449,8 @@
     },
     "lead_form": {
       "rueckruf_badge": "Oddzwonienie w 15 minut · 8–20",
-      "heading": "Zgłoś szkodę w 30 sekund",
-      "sub": "Trzy pola. Bez rejestracji. Zgodnie z RODO.",
+      "heading": "Zamów oddzwonienie – powiemy, co Ci przysługuje",
+      "sub": "Trzy dane, bez rejestracji. Doradca oddzwoni w ciągu 15 minut.",
       "field_name_label": "Imię i nazwisko",
       "field_name_placeholder": "Jan Kowalski",
       "field_phone_label": "Numer telefonu",
@@ -1541,8 +1541,8 @@
         "label": "Odzyskane cięcia ubezpieczyciela¹"
       },
       {
-        "wert": "8 mln €+",
-        "label": "wyegzekwowane roszczenia (łącznie)"
+        "wert": "< 48 h",
+        "label": "do wizyty rzeczoznawcy"
       },
       {
         "wert": "0 €",
@@ -3792,26 +3792,26 @@
     "hero_badge": "Rzeczoznawcy aktualnie dostępni {ort}",
     "hero_h1_line1": "Miałeś wypadek?",
     "hero_h1_city": "Twój rzeczoznawca samochodowy {ort}.",
-    "hero_subheadline": "Organizujemy rzeczoznawcę (< 48 h), prowadzimy negocjacje z ubezpieczycielem i egzekwujemy Twoje roszczenie zgodnie z orzecznictwem BGH. 0 € dla Ciebie.",
+    "hero_subheadline": "Twój niezależny rzeczoznawca przyjeżdża do Ciebie, zwykle w ciągu 48 godzin. Ekspertyzę i adwokata płaci ubezpieczyciel sprawcy (§ 249 BGB); nasza kancelaria partnerska negocjuje. 0 € dla Ciebie.",
     "hero_bullets": [
       "Twoja sprawa. Zawsze pod ręką.",
       "Jeden doradca. Jeden numer. Zawsze ten sam.",
       "Widzisz każde pismo, każdą rozmowę, każdy cent.",
-      "32 dni zamiast 4 miesięcy. Średnio.",
+      "Termin w ciągu 48 godzin. Rzeczoznawca przyjeżdża do Ciebie.",
       "0 € dla Ciebie. (§ 249 BGB)."
     ],
     "hero_cta_call": "Zadzwoń teraz — oddzwonimy w 15 minut",
-    "hero_trust_line": "Anonimowa porada · Bez zobowiązań · Zgodnie z DSGVO (RODO)",
+    "hero_trust_line": "Bezpłatnie · bez zobowiązań · decydujesz po rozmowie",
     "form_badge": "Oddzwonienie w 15 minut · 8–20",
-    "form_h2": "Zgłoś szkodę — w 30 sekund",
-    "form_sub": "Trzy pola. Bez rejestracji. Zgodnie z DSGVO (RODO).",
+    "form_h2": "Zamów oddzwonienie – powiemy, co Ci przysługuje",
+    "form_sub": "Trzy dane, bez rejestracji. Doradca oddzwoni w ciągu 15 minut.",
     "form_name_label": "Imię i nazwisko",
     "form_name_placeholder": "Jan Kowalski",
     "form_phone_label": "Numer telefonu",
     "form_phone_placeholder": "+48 501 234 567",
     "form_city_label": "Miasto / kod pocztowy miejsca wypadku",
     "form_city_placeholder": "{stadt} lub kod pocztowy",
-    "form_submit_idle": "Uzyskaj bezpłatne oddzwonienie →",
+    "form_submit_idle": "Zamów bezpłatne oddzwonienie →",
     "form_submit_pending": "Wysyłanie …",
     "form_consent": "Wysyłając formularz, akceptuję <link>politykę prywatności</link>.",
     "form_toast_success": "Dziękujemy! Oddzwonimy w ciągu 15 minut.",
@@ -3819,12 +3819,12 @@
     "form_toast_rate_limit": "Zbyt wiele zgłoszeń. Spróbuj ponownie za kilka minut.",
     "trust_kpis": [
       {
-        "wert": "2.000+",
-        "label": "pośredniczonych spraw szkodowych"
+        "wert": "0 €",
+        "label": "Twój udział przy wypadku nie z Twojej winy"
       },
       {
-        "wert": "8 Mio. €+",
-        "label": "wyegzekwowanego odszkodowania"
+        "wert": "< 48 h",
+        "label": "do wizyty rzeczoznawcy"
       },
       {
         "wert": "32 dni",
@@ -3835,7 +3835,7 @@
         "label": "do pierwszego oddzwonienia"
       }
     ],
-    "trust_methodik": "Zagregowana analiza wszystkich spraw pośredniczonych przez sieć partnerów Claimondo od założenia. Stan na 14.05.2026. Szczegółowa metodyka dostępna na żądanie.",
+    "trust_methodik": "32 dni: średnia wszystkich spraw z OC obsłużonych przez Claimondo od założenia, stan na 14.05.2026. Oddzwonienie i termin: rzeczywiste czasy procesu, codziennie 8–20.",
     "lokal_eyebrow": "Zakorzenieni lokalnie — aktywni ogólnoniemiecko",
     "lokal_h2": "Ekspertyza samochodowa {ort}",
     "lokal_capsule": "<strong>Właściwy sąd:</strong> {landgericht}. <strong>Izba adwokacka:</strong> {kammer}. <strong>Obszar PLZ:</strong> {plz} (ok. {bevoelkerung} mieszkańców, kraj związkowy {bundesland}). W sporach sądowych z ubezpieczycielami nasza kancelaria partnerska ds. prawa drogowego wytacza powództwo przed {landgericht} — tamtejsze składy orzekające znają specyfikę. Przedział wynagrodzenia według BVSK: <strong>{bvskSpanne}</strong> (skaluje się z wysokością szkody).",
@@ -4259,8 +4259,8 @@
       "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV i usługodawcy kontrolni — wyjaśnione przystępnie, z Pana/Pani prawami wg § 249 BGB."
     },
     "schaden_melden": {
-      "title": "Zgłoś szkodę — bezpieczny link do logowania",
-      "description": "Zgłoś szkodę w 30 sekund. Od razu otrzyma Pan/Pani bezpieczny link do logowania przez WhatsApp lub e-mail."
+      "title": "Zgłoś szkodę online – bezpieczny link przez WhatsApp | Claimondo",
+      "description": "Zgłoś szkodę w trzy minuty: od razu otrzymasz bezpieczny link przez WhatsApp lub e-mail, wybierzesz termin rzeczoznawcy i podpiszesz pełnomocnictwo. 0 € przy wypadku nie z Twojej winy (§ 249 BGB)."
     },
     "gutachter_partner_neukundengewinnung": {
       "title": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych — bez ryzyka CPL",
@@ -4756,6 +4756,6 @@
     "ehrlich_schluss": "We wszystkich trzech przypadkach nadal obowiązuje: za pośrednictwo przez Claimondo nie płacisz nic. Mówimy Ci wcześniej, jak wygląda Twoja sytuacja.",
     "cta_h": "Wypadek nie z Twojej winy?",
     "cta_p": "Sprawdź w dwie minuty, co Ci przysługuje – bezpłatnie i bez zobowiązań.",
-    "cta_btn": "Sprawdź roszczenie bezpłatnie"
+    "cta_btn": "Zamów bezpłatne oddzwonienie"
   }
 }
