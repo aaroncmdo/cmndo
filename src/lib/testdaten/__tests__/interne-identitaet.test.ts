@@ -144,12 +144,19 @@ describe('istAbnahmeInbox — Abnahme-Postfach (Send-Pfad)', () => {
     expect(istAbnahmeInbox('abnahme+e6-kasko-1725000000@claimondo.de')).toBe(true)
     expect(istAbnahmeInbox('Abnahme+Smoke@Claimondo.de')).toBe(true)
   })
+  it('erkennt noreply@ und dessen Plus-Adressen (Aaron 05.09.: Alternative ohne neues Konto)', () => {
+    expect(istAbnahmeInbox('noreply@claimondo.de')).toBe(true)
+    expect(istAbnahmeInbox('noreply+e6-kasko@claimondo.de')).toBe(true)
+    expect(istAbnahmeInbox('NoReply+Smoke@Claimondo.de')).toBe(true)
+  })
   it('bleibt fuer die Lead-Identitaet intern (Matching-Guard unveraendert)', () => {
     expect(istInterneEmail('abnahme+e6@claimondo.de')).toBe(true)
   })
   it('kein anderes Postfach, keine andere Domain, kein Praefix-Treffer', () => {
     expect(istAbnahmeInbox('abnahme@gmail.com')).toBe(false)
     expect(istAbnahmeInbox('abnahmeleitung@claimondo.de')).toBe(false)
+    expect(istAbnahmeInbox('noreply-alt@claimondo.de')).toBe(false)
+    expect(istAbnahmeInbox('noreply@sub.claimondo.de')).toBe(false)
     expect(istAbnahmeInbox('info@claimondo.de')).toBe(false)
     expect(istAbnahmeInbox(null)).toBe(false)
     expect(istAbnahmeInbox('')).toBe(false)
