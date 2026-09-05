@@ -25,15 +25,17 @@ export function buildDisqualifikationPatch(grundKey: DisqualifikationsGrundKey, 
 
 /**
  * Gegenstueck: Disqualifikation wegen Werkstattbindung aufheben (Review W4/W5) — Embed-Re-Entry ohne Bindung und
- * Dispatcher-Override auf „frei"/„unbekannt". status zurueck auf 'neu' (lead_status-Enum), damit der Lead wieder in
- * den Queues erscheint. Nur fuer disqualifiziert_grund_key='werkstattbindung' verwenden.
+ * Dispatcher-Override auf „frei"/„unbekannt". Nur fuer disqualifiziert_grund_key='werkstattbindung' verwenden.
+ * status: 'neu' (Lead ohne Vorgang -> zurueck in die Queues) bzw. 'umgewandelt', wenn der Lead schon zu Claim/Fall
+ * konvertiert ist (Portal-Korrektur, Dispatcher nach Konversion) — sonst taucht ein laufender Vorgang als neuer
+ * Lead in der Dispatch-Queue auf (Review #5864, Befund 7). Beides gueltige lead_status-Enum-Werte.
  */
-export function buildReQualifikationPatch(): Record<string, unknown> {
+export function buildReQualifikationPatch(opts: { konvertiert?: boolean } = {}): Record<string, unknown> {
   return {
     disqualifiziert: false,
     disqualifiziert_am: null,
     disqualifiziert_grund_key: null,
     disqualifiziert_grund: null,
-    status: 'neu',
+    status: opts.konvertiert ? 'umgewandelt' : 'neu',
   }
 }

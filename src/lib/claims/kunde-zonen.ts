@@ -86,7 +86,9 @@ export function deriveKundeAufgaben(vm: KundeClaimViewModel): KundeAufgabe[] {
       zone: offenerTermin.art === 'reparatur' ? 'geld' : 'doksTermine',
     })
   }
-  if (vm.fall.sa_unterschrieben === false) {
+  // Aaron 08.08. (Abnahme 05.09., Screenshot Fallakte Kasko): Kasko/Selbstzahler unterschreiben nichts —
+  // die Aufgabe nur auf der Gutachter-Route (gleiche Weiche wie flow/[token]/page.tsx: istWerkstattReparaturWeg).
+  if (vm.fall.sa_unterschrieben === false && !vm.flags.istReparaturRoute) {
     aufgaben.push({ id: 'sa_vollmacht', label: 'Unterschrift ausstehend' })
   }
 
