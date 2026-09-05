@@ -1,6 +1,6 @@
 # Kasko-Werkstattbindung, Phase 2: Die Anspruchsprüfung kennt die Bindung
 
-**Status:** Entscheidungsvorlage für Aaron (05.09.2026). Kein Code, bevor die Punkte in Abschnitt 5 entschieden sind.
+**Status:** Entschieden von Aaron am 05.09.2026, 15:30 Uhr (im Gespräch): **D1 = A + C** (ehrlich sagen, im FlowLink fragen, API ausbauen) · **D2 ja** (durchreichen + Dispatch) · **D3 ja** (Quiz-Texte, 6 Sprachen) · **D4 ja** (Foto-Check-CTA bei Kasko) · **D5 = alles drei** (Parameter, Namens-Lookup, eigener Endpunkt) · **D6 ja** (Widerspruch + Hinweis) · **D7 = Phase 2** für die API-Doku. Zusätzlich beschlossen: eine Abnahme-Mailbox `abnahme@claimondo.de` für den Nachweis von Kunden-Mails (eigener PR, Infrastruktur für alle Lanes). Umsetzung nach Plan `docs/superpowers/plans/2026-09-05-kasko-wb-phase2-anspruchspruefung.md`.
 **Grundlage:** Phase 1 (#5857 auf prod, Nachbesserung #5864), Aarons Auftrag („Die Information soll auch die Anspruchsprüfung berücksichtigen", Entscheidung E4: Phase 2 = Anspruchsprüfung), zwei Code-Scans vom 05.09. (Check-Quiz + Konversion; Berater-API + Foto-Tool) und Prod-Reads.
 **Vorgänger:** `docs/superpowers/specs/2026-09-04-werkstattbindung-kasko-tarife-design.md` (Datenmodell, Ableitung, Entscheidungen E1–E7).
 
