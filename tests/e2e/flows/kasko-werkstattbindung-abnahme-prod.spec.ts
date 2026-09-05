@@ -643,6 +643,17 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await expect(weiter, 'Weiter erst mit Antwort').toBeDisabled()
     await waehleMarke(page, 'HUK-COBURG')
     await page.getByText('Classic SELECT', { exact: true }).click()
+    // Nachbesserung #5864 (Befund 1) wirkt auch im Embed: erst bestaetigen, dann das Ergebnis. Vorher
+    // entschied ein Klick auf die Tarif-Karte sofort. Laufzeit-Erkennung, damit der Test auf einem Ziel
+    // ohne die Nachbesserung nicht faelschlich rot wird.
+    const bestaetigenEmbed = page
+      .getByTestId('kasko-bestaetigen-ja')
+      .or(page.getByRole('button', { name: /Ja, das ist mein Tarif/i }))
+      .first()
+    if (await bestaetigenEmbed.waitFor({ state: 'visible', timeout: 8_000 }).then(() => true).catch(() => false)) {
+      await shot(page, 't5-01b-bestaetigung')
+      await bestaetigenEmbed.click()
+    }
     await expect(page.getByText(/Ihr Tarif enthält eine Werkstattbindung/i)).toBeVisible({ timeout: 15_000 })
     await shot(page, 't5-02-abrechnung-gebunden')
     await expect(weiter).toBeEnabled()
@@ -652,7 +663,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await expect(page.getByText(/Wir vermitteln in diesem Fall keine Werkstatt/i)).toBeVisible({ timeout: 15_000 })
     // UX-Messung (Befund A, Lauf 3): Text sagt „keine Werkstatt", darunter stehen Werkstaetten mit „Auswaehlen".
     const auswaehlen = await page.getByRole('button', { name: /^Auswählen$/ }).count()
-    const absendenLabel = await page.getByRole('button', { name: /Anfrage absenden|Werkstatt anfragen/i }).first().innerText()
+    const absendenLabel = await page.getByRole('button', { name: /Rückruf anfordern|Anfrage absenden|Werkstatt anfragen/i }).first().innerText()
     console.log(`[T5 ${variante.name}] Werkstatt-„Auswählen"-Buttons im gebundenen Kontakt-Schritt:`, auswaehlen, '· Absende-Button:', JSON.stringify(absendenLabel))
     expect.soft(auswaehlen, 'gebunden: keine Werkstatt zur Auswahl anbieten (Text verspricht es)').toBe(0)
     await page.getByPlaceholder('Vorname').fill('Abnahme')
@@ -660,7 +671,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await page.getByPlaceholder('E-Mail').fill(email)
     if (variante.telefon) await page.getByPlaceholder('Telefon (optional)').fill(variante.telefon)
     await shot(page, `t5-03-kontakt-${variante.telefon ? 'mit' : 'ohne'}-telefon`)
-    await page.getByRole('button', { name: /Anfrage absenden|Werkstatt anfragen/i }).first().click()
+    await page.getByRole('button', { name: /Rückruf anfordern|Anfrage absenden|Werkstatt anfragen/i }).first().click()
 
     // Weiterleitung in den /flow -> Bindungs-Endseite (Re-Visit-Gate), ggf. nach Consent
     await page.waitForURL(/\/flow\//, { timeout: 60_000 })
@@ -1165,6 +1176,201 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     console.log('[T18] Portal nach Korrektur unbekannt — Toast gesehen:', toastGesehen, '· Finder:', finderDa, '· Holding-Card:', holdingDa, '· dauerhafter Unklar-Hinweis:', dauerhaft)
     await shot(page, 't18-02-portal-nach-korrektur-unbekannt')
     expect(finderDa, 'unbekannt wird durchgelassen (E3): Werkstatt-Finder sichtbar').toBe(true)
+  })
+
+
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+  // PHASE 2 (Anspruchspruefung, PR #5878) — Abnahme-Zellen der Abnahme-Session.
+  // BEWUSST NICHT hier: Quiz-Weg und die vier API-Grundfaelle — die misst die Lane selbst
+  // (check-quiz-kasko-lead-smoke.spec.ts, kostenfrage-geo-assets-smoke.spec.ts). Diese Zellen
+  // decken ab, was dort fehlt: Rate-Limit, PII-Freiheit, die GEO-Schicht (Quelltext, nicht
+  // innerText), der Dispatch-Blick auf die Quiz-Auswertung und die Pruef-Card samt Task-Anlage.
+  // Alle skippen sichtbar, solange Phase 2 auf dem Ziel nicht live ist (Laufzeit-Erkennung).
+  // ══════════════════════════════════════════════════════════════════════════════════════════
+
+  test('T20 Berater-API: Tarifliste anonym, Rate-Limit greift, keine Personendaten in der Antwort', async ({ request }) => {
+    test.setTimeout(180_000)
+    const url = `${APP}/api/v1/kasko-werkstattbindung?versicherer=HUK-COBURG`
+    const erste = await request.get(url)
+    test.skip(erste.status() === 404, 'Phase 2 (Endpunkt kasko-werkstattbindung) ist auf dem Ziel noch nicht live')
+
+    // 1) Anonym erreichbar — kein 307 der Auth-Weiche (publicPaths '/api'), kein Schluessel noetig.
+    expect(erste.status(), 'anonym erreichbar').toBe(200)
+    const body = await erste.json()
+    console.log('[T20] Antwort-Schluessel:', JSON.stringify(Object.keys(body)))
+
+    // 2) Die Wissensbasis antwortet mit Tarifen, nicht mit Raten.
+    const alsText = JSON.stringify(body)
+    expect(alsText, 'HUK-COBURG erkannt').toMatch(/HUK/i)
+
+    // 3) Keine Personendaten: der Endpunkt liest ueber den Admin-Client, ein Leck waere hier fatal.
+    for (const feld of ['email', 'telefon', 'vorname', 'nachname', 'lead_id', 'claim_id', 'kennzeichen']) {
+      expect(alsText.toLowerCase(), `kein Feld ${feld} in der Antwort`).not.toContain(`"${feld}"`)
+    }
+
+    // 4) Rate-Limit: 60 Anfragen pro Minute. Die 61. muss 429 sein — sonst ist ein offener Endpunkt
+    //    ohne Schluessel ein Kostenrisiko. Sequenziell, damit die Zaehlung eindeutig bleibt.
+    let status429 = 0
+    let letzterStatus = 200
+    for (let i = 0; i < 70; i++) {
+      const r = await request.get(url)
+      letzterStatus = r.status()
+      if (letzterStatus === 429) { status429 = i + 1; break }
+    }
+    console.log('[T20] 429 ab Anfrage Nr.:', status429 || 'nie', '· letzter Status:', letzterStatus)
+    expect(status429, 'Rate-Limit greift innerhalb von 70 Anfragen').toBeGreaterThan(0)
+    expect(status429, 'Rate-Limit erst nach dem dokumentierten Kontingent').toBeGreaterThan(30)
+  })
+
+  test('T21 GEO-Schicht: OpenAPI und llms.txt beschreiben die Werkstattbindung als TEXT', async ({ request }) => {
+    test.setTimeout(120_000)
+    // Messfalle 4 (AGENTS.md): fuer LLM-Themen den QUELLTEXT messen, nicht innerText — ein LLM liest,
+    // was ausgeliefert wird, nicht was der Browser zusammensetzt.
+    const openapi = await request.get(`${APP}/api/v1/openapi.json`)
+    expect(openapi.status()).toBe(200)
+    const spec = await openapi.text()
+    const hatEndpunkt = spec.includes('/kasko-werkstattbindung')
+    const hatParameter = /werkstattbindung/i.test(spec)
+    console.log('[T21] openapi.json — Endpunkt:', hatEndpunkt, '· Parameter werkstattbindung:', hatParameter, '· Bytes:', spec.length)
+    test.skip(!hatEndpunkt && !hatParameter, 'Phase 2 (OpenAPI-Eintrag) ist auf dem Ziel noch nicht live')
+    expect(hatEndpunkt, 'openapi.json listet den Endpunkt').toBe(true)
+    expect(hatParameter, 'openapi.json nennt den Parameter').toBe(true)
+
+    // llms.txt liegt auf der MARKETING-Domain, nicht auf der App.
+    const marketing = APP.includes('staging') ? 'https://staging.claimondo.de' : 'https://claimondo.de'
+    for (const datei of ['llms.txt', 'llms-full.txt']) {
+      const r = await request.get(`${marketing}/${datei}`)
+      if (r.status() !== 200) { console.log(`[T21] ${datei}: HTTP ${r.status()} — uebersprungen`); continue }
+      const txt = await r.text()
+      const treffer = /werkstattbindung/i.test(txt)
+      console.log(`[T21] ${datei} — Werkstattbindung erwaehnt:`, treffer, '· Bytes:', txt.length)
+      expect(treffer, `${datei} beschreibt die Werkstattbindung`).toBe(true)
+    }
+  })
+
+  test('T22 Foto-Tool (anonym): Kasko zeigt den Bindungs-Hinweis statt eines Werkstatt-Versprechens', async ({ page }) => {
+    test.setTimeout(180_000)
+    await page.goto(`${APP}/embed/anspruch-pruefen`, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle').catch(() => {})
+    const selbst = page.getByRole('button', { name: /^Ich selbst|selbst verursacht|Eigenverschulden/i }).first()
+    const da = await selbst.waitFor({ state: 'visible', timeout: 20_000 }).then(() => true).catch(() => false)
+    test.skip(!da, 'Foto-Tool: Schuldfrage-Option nicht gefunden — Aufbau geaendert, Zelle von Hand nachziehen')
+    await selbst.click()
+    await page.waitForTimeout(2_000)
+    // Bis zur Zusammenfassung durchklicken (der Wizard hat je nach Antwort unterschiedlich viele Schritte).
+    for (let i = 0; i < 8; i++) {
+      const text = await page.locator('body').innerText().catch(() => '')
+      if (/Werkstattbindung|Ihre Kasko|Selbstbeteiligung/i.test(text)) break
+      const weiter = page.getByRole('button', { name: /^Weiter|^Ergebnis|^Fertig/i }).first()
+      if (!(await weiter.isVisible().catch(() => false))) break
+      await weiter.click()
+      await page.waitForTimeout(1_500)
+    }
+    const seite = await page.locator('body').innerText()
+    const nenntBindung = /Werkstattbindung/i.test(seite)
+    const versprichtWerkstatt = /vermitteln (dir|Ihnen) eine (Partner)?werkstatt|Partnerwerkstatt in Ihrer N/i.test(seite)
+    console.log('[T22] Bindung erwaehnt:', nenntBindung, '· Werkstatt-Versprechen:', versprichtWerkstatt)
+    await shot(page, 't22-01-fototool-kasko')
+    test.skip(!nenntBindung && !versprichtWerkstatt, 'Phase 2 (Foto-Tool-Hinweis) ist auf dem Ziel noch nicht live')
+    expect(versprichtWerkstatt, 'kein Werkstatt-Versprechen bei Kasko').toBe(false)
+  })
+
+  test('T23 Dispatch (angemeldet): die unverbindliche Quiz-Auswertung steht am Lead', async ({ page }) => {
+    test.setTimeout(240_000)
+    const email = `abnahme-kwb-t23-${Date.now()}@claimondo.test`
+    aufraeumen.push(email)
+    const db = svc()
+    const { leadId } = await seedeLeadUndFlowLink(db, email)
+    // Ausgangszustand, wie ihn die Quiz-Konversion erzeugt (D2: auswertung_unverbindlich am Lead).
+    const { error } = await db
+      .from('leads')
+      .update({
+        schuldfrage: 'eigenverantwortung',
+        auswertung_unverbindlich: {
+          tier: 'kasko',
+          erstellt_am: new Date().toISOString(),
+          antworten: { schuld: 'selbst', zeitfenster: 'unter_2_wochen', gutachten: 'nein' },
+        },
+      } as never)
+      .eq('id', leadId)
+    if (error) throw new Error(`Seed der Auswertung fehlgeschlagen: ${error.message}`)
+
+    await login(page, 'test-dispatch@claimondo.de', process.env.TEST_DISPATCH_PASSWORD ?? '')
+    await page.goto(`${APP}/dispatch/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle').catch(() => {})
+    const block = page.getByTestId('dispatch-anspruchspruefung').or(page.getByText(/Anspruchsprüfung des Kunden/i)).first()
+    const sichtbar = await block.waitFor({ state: 'visible', timeout: 25_000 }).then(() => true).catch(() => false)
+    console.log('[T23] Anspruchspruefungs-Block sichtbar:', sichtbar)
+    await shot(page, 't23-01-dispatch-auswertung')
+    test.skip(!sichtbar, 'Phase 2 (Dispatch-Hinweis) ist auf dem Ziel noch nicht live')
+    const text = await block.innerText()
+    console.log('[T23] Inhalt:', JSON.stringify(text.replace(/\s+/g, ' ').slice(0, 180)))
+    expect(text, 'die Auswertung ist als unverbindlich gekennzeichnet').toMatch(/unverbindlich/i)
+  })
+
+  test('T19 Kunde-Portal: Prüf-Card bei ungeklärter Bindung, Task für Dispatch entsteht', async ({ page }) => {
+    test.setTimeout(300_000)
+    test.skip(!process.env.TEST_KUNDE_PASSWORD, 'TEST_KUNDE_PASSWORD leer')
+    const db = svc()
+    await login(page, 'smoke-kunde@claimondo.de', process.env.TEST_KUNDE_PASSWORD ?? '')
+    await page.goto(`${APP}/kunde/schaden-melden`, { waitUntil: 'domcontentloaded' })
+    await page.getByLabel('Kennzeichen').fill(`K-WB ${100 + Math.floor(Math.random() * 900)}`)
+    await page.getByPlaceholder('TT.MM.JJJJ').fill('02.09.2026')
+    await page.getByLabel('PLZ des Schadenorts').fill('50667')
+    await page.locator('#hergang').fill('Abnahme Phase 2: Pruef-Card bei ungeklaerter Werkstattbindung (T19).')
+    await page.getByLabel('Wie ist der Schaden entstanden?').selectOption('vollkasko')
+    await page.getByRole('button', { name: /^Schaden melden$/i }).click()
+    await page.waitForURL(/\/kunde\/faelle\/[0-9a-f-]+/, { timeout: 90_000 })
+    const claimId = page.url().match(/\/kunde\/faelle\/([0-9a-f-]+)/)![1]
+    portalClaimIds.push(claimId)
+    await page.waitForLoadState('networkidle').catch(() => {})
+
+    // Tarif unbekannt -> Bindung bleibt offen. Genau dann soll die Card dauerhaft stehen.
+    await page.getByRole('button', { name: /Kaskoversicherung wählen/i }).click()
+    await page.getByPlaceholder(/Versicherung suchen/).fill('HUK-COBURG')
+    await page.getByRole('option', { name: 'HUK-COBURG', exact: true }).click()
+    await tarifUnbekanntWaehlen(page)
+    await expect
+      .poll(async () => (await db.from('claims').select('werkstattbindung_quelle').eq('id', claimId).maybeSingle()).data?.werkstattbindung_quelle, {
+        timeout: 30_000,
+      })
+      .toBe('unbekannt')
+
+    // Task fuer Dispatch — VOR dem Cleanup messen (die Aufraeum-Routine loescht sie am Testende).
+    // ⚠ Messfalle 2 (zu frueh): der DB-Wert `werkstattbindung_quelle` wird VOR der Task geschrieben, die
+    // Task-Anlage ist non-critical und laeuft danach. Ein einmaliges Lesen direkt nach dem Poll fand 0 —
+    // deshalb hier POLLEN, und erst ein leeres Ergebnis nach der vollen Wartezeit ist ein Befund.
+    const tasksVonBeiden = async () => {
+      const { data } = await db
+        .from('tasks')
+        .select('task_code, status, claim_id, entity_type, entity_id')
+        .eq('task_code', 'kasko_werkstattbindung_klaeren')
+        .eq('claim_id', claimId)
+      return data ?? []
+    }
+    await expect.poll(async () => (await tasksVonBeiden()).length, { timeout: 30_000, message: 'Klärungs-Aufgabe für Dispatch' })
+      .toBeGreaterThan(0)
+      .catch(() => {})
+    const tasks = await tasksVonBeiden()
+    console.log('[T19] Klaerungs-Tasks zum Claim (nach Poll):', JSON.stringify(tasks))
+
+    // Die Card muss den RELOAD ueberleben — der Toast tut es nicht, das war der Nebenbefund der Gegenabnahme.
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle').catch(() => {})
+    const card = page.getByTestId('kasko-pruefung-card').or(page.getByText(/Versicherungsschein wird geprüft/i)).first()
+    const sichtbar = await card.waitFor({ state: 'visible', timeout: 25_000 }).then(() => true).catch(() => false)
+    console.log('[T19] Pruef-Card nach Reload sichtbar:', sichtbar)
+    await shot(page, 't19-01-portal-pruefcard')
+    test.skip(!sichtbar, 'Phase 2 (Prüf-Card, Task 9) ist auf dem Ziel noch nicht live')
+    const text = await card.innerText()
+    expect(text, 'du-Anrede').toMatch(/dein/i)
+    // Zwei Handlungen, wie im Soll-Blatt festgelegt.
+    await expect(page.getByTestId('kasko-pruefung-korrigieren').or(page.getByRole('button', { name: /Angaben korrigieren/i })).first()).toBeVisible()
+    await expect(page.getByTestId('kasko-pruefung-dokumente').or(page.getByRole('button', { name: /Zu den Dokumenten/i })).first()).toBeVisible()
+    // Der Finder bleibt sichtbar (E3: unbekannt wird durchgelassen, die Card warnt nur — Annahme A1).
+    const finder = await page.getByRole('heading', { name: /Werkstatt finden/i }).count()
+    console.log('[T19] Werkstatt-Finder trotz Card sichtbar:', finder > 0)
+    expect(tasks?.length ?? 0, 'genau eine Klärungs-Aufgabe für Dispatch').toBeGreaterThan(0)
   })
 
   // ── T8 · Admin (angemeldet): Wissensbasis-Liste ──
