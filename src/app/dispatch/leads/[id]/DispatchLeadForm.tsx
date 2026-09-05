@@ -15,6 +15,7 @@ import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { saveDispatchLeadFelder } from './_actions/dispatch-lead-felder'
 import DispatchGatesPanel from './DispatchGatesPanel'
+import DispatchAnspruchspruefungHinweis from './_v2/DispatchAnspruchspruefungHinweis'
 import type { AktiverTermin } from './SvDispatchPanel'
 import { hasDispatchFieldOverride } from './_v2/dispatch-field-override-keys'
 import { renderDispatchFieldOverride } from './_v2/dispatch-field-overrides'
@@ -215,6 +216,8 @@ export default function DispatchLeadForm({
       <DispatchSaBanner saUnterschrieben={!!lead.sa_unterschrieben} fallId={fallId} />
 
       <DispatchGatesPanel values={values} lead={lead} />
+      {/* Kasko-WB Phase 2 (D2): was der Kunde im /check-Quiz angeklickt hat — unverbindlich, nur Anzeige. */}
+      <DispatchAnspruchspruefungHinweis auswertung={(lead as Record<string, unknown>).auswertung_unverbindlich} />
 
       {/* AAR-956 15.06. (Aaron): Sektionen als Tabs (Desktop-Power-User) statt
           gestapeltem Akkordeon; Felder im 2-Spalten-Grid (mehrzeilig/Rich = volle

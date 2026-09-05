@@ -35,6 +35,9 @@ const SECTION = join(WURZEL, 'claimondo-marketing', 'components', 'embed-finder'
 const NICHT_FUER_DEN_FINDER: Record<string, string> = {
   radius: 'API-Parameter von GET /sv-in-naehe — geht direkt an die Route, kein Wrapper dazwischen',
   vollkasko: 'API-Parameter von GET /pruefe-anspruch — dito',
+  werkstattbindung: 'API-Parameter von GET /pruefe-anspruch (Kasko-WB Phase 2) — dito',
+  versicherer: 'API-Parameter von GET /pruefe-anspruch + /kasko-werkstattbindung — Tarifliste-Lookup, kein Finder',
+  tarif: 'API-Parameter von GET /pruefe-anspruch + /kasko-werkstattbindung — dito',
   plz: 'wird server-seitig zu lat/lng geocodet und SO durchgereicht (nicht als plz=)',
   stadt: 'wie plz — server-seitig geocodet',
 }

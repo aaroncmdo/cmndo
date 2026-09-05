@@ -2,7 +2,7 @@
 import type { AnspruchSpanne } from '@/lib/anspruch/types'
 import { AnspruchPositionsListe } from '@/components/shared/AnspruchPositionsListe'
 import { AnspruchTotalschadenWege } from '@/components/shared/AnspruchTotalschadenWege'
-import { schuldBotschaft } from '@/lib/anspruch/darstellung'
+import { schuldBotschaft, KASKO_WERKSTATTBINDUNG_HINWEIS } from '@/lib/anspruch/darstellung'
 import { Button } from '@/components/primitives'
 
 const TON_KLASSE = {
@@ -49,6 +49,12 @@ export function AnspruchSummaryStep({
         <p className={`text-heading-sm font-bold ${ton.titel}`}>{botschaft.titel}</p>
         <p className="mt-1 text-body-sm text-claimondo-shield">{botschaft.beleg}</p>
       </div>
+      {/* Kasko-WB Phase 2 (D6): keine Tariffrage hier (die stellt der FlowLink), aber der Hinweis auf die Bindung. */}
+      {spanne.schuld === 'selbst' && (
+        <p className="text-body-sm text-claimondo-shield" data-testid="anspruch-kasko-wb-hinweis">
+          {KASKO_WERKSTATTBINDUNG_HINWEIS}
+        </p>
+      )}
 
       <Button onClick={onBeauftragen} className="w-full">Gutachter beauftragen</Button>
     </div>

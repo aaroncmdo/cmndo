@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { darstellePositionen, schuldBotschaft } from './darstellung'
+import { darstellePositionen, schuldBotschaft, KASKO_WERKSTATTBINDUNG_HINWEIS } from './darstellung'
 import type { AnspruchPosition } from './types'
 
 const POSITIONEN: AnspruchPosition[] = [
@@ -93,5 +93,20 @@ describe('schuldBotschaft', () => {
     const b = schuldBotschaft('selbst')
     expect(b.ton).toBe('warnung')
     expect(b.titel).toMatch(/Kasko/i)
+  })
+})
+
+// Kasko-WB Phase 2 (D6): Foto-Tool-Texte fuer Selbstverschulden.
+describe('schuldBotschaft — selbst (Kasko-WB Phase 2)', () => {
+  it('trennt Vollkasko ja/nein sauber statt sich zu widersprechen', () => {
+    const b = schuldBotschaft('selbst')
+    expect(b.beleg).toContain('Mit Vollkasko')
+    expect(b.beleg).toContain('ohne tragen Sie den Schaden selbst')
+    expect(b.beleg).not.toMatch(/^Ohne Vollkasko/)
+    expect(b.ton).toBe('warnung')
+  })
+  it('Bindungs-Hinweis nennt den Versicherungsschein und die Folge', () => {
+    expect(KASKO_WERKSTATTBINDUNG_HINWEIS).toContain('Versicherungsschein')
+    expect(KASKO_WERKSTATTBINDUNG_HINWEIS).toContain('benennt Ihre Versicherung die Werkstatt')
   })
 })
