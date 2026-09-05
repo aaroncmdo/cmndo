@@ -127,12 +127,20 @@ const FRAGEN = [
 export default async function UnfallguidePage() {
   return (
     <>
-      {jsonLdScript(
-        breadcrumbsSchema([
-          { name: 'Start', url: SITE_URL },
-          { name: 'Unfallguide', url: `${SITE_URL}/unfallguide` },
-        ]),
-      )}
+      {/* ⚠ `jsonLdScript()` liefert ein `{ __html }`-Objekt FUER
+          `dangerouslySetInnerHTML` — es ist kein Element. Wer es als Kind
+          rendert, bekommt zur Laufzeit "Objects are not valid as a React child"
+          und die Route antwortet mit 500. Build und tsc sehen davon nichts.
+          So macht es jede andere Seite (autor/, beratung-anfragen/, check/ …). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript(
+          breadcrumbsSchema([
+            { name: 'Start', url: SITE_URL },
+            { name: 'Unfallguide', url: `${SITE_URL}/unfallguide` },
+          ]),
+        )}
+      />
 
       {/* Topbar und Fusszeile werden in dieser App JE SEITE gemountet, nicht im
           Layout. Ohne sie stand die Seite ohne Navigation und ohne Rechtslinks da —
