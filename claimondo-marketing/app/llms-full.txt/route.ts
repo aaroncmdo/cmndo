@@ -362,7 +362,7 @@ const VORTEILE_KERN = `
 ### Hero
 - H1: "Versicherer-Kürzungen zurückgeholt — ohne Eigenanteil."
 - Pill: "§249 BGB · BVSK · BGH-Rechtsprechung"
-- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
+- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Unsere Partnerkanzlei holt sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk** und BGH-Rechtsprechung im Rücken.
 
 ### KPIs
 - 30–40 % Versicherer-Kürzung zurückgeholt (Quelle: BGH VI ZR 38/22 ff.)
