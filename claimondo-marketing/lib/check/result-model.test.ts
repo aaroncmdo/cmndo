@@ -28,12 +28,20 @@ describe('buildCheckResult', () => {
     expect(r.insightKeys).toContain('insight_teilschuld')
   })
 
-  it('Eigenverschulden → kasko: Kasko-Positionen, KEINE €-Spannen', () => {
+  it('Eigenverschulden → kasko: Kasko-Positionen, KEINE €-Spannen, aber Foto-Check + Werkstattbindungs-Hinweis', () => {
     const r = buildCheckResult({ schuld: 'selbst' })
     expect(r.tier).toBe('kasko')
     expect(r.positions).toEqual(['kasko_gutachten', 'kasko_werkstatt', 'kasko_abwicklung'])
     expect(r.showRanges).toBe(false)
+    expect(r.showFotoCta).toBe(true)
     expect(r.insightKeys).toContain('insight_kasko')
+    expect(r.insightKeys).toContain('insight_kasko_werkstattbindung')
+  })
+
+  it('unklar → pruefen: kein Foto-CTA (keine Schuld-Vorbelegung moeglich); voll/quote zeigen ihn', () => {
+    expect(buildCheckResult({ schuld: 'unklar' }).showFotoCta).toBe(false)
+    expect(buildCheckResult({ schuld: 'gegner' }).showFotoCta).toBe(true)
+    expect(buildCheckResult({ schuld: 'teils' }).showFotoCta).toBe(true)
   })
 
   it('unklar → pruefen: kein €-Block + Prüf-Insight', () => {

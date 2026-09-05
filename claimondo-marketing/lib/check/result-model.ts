@@ -26,6 +26,8 @@ export type CheckResult = {
   insightKeys: string[]
   /** illustrative EUR-Spannen nur wo ein echter Gegner-Anspruch besteht */
   showRanges: boolean
+  /** Foto-Check-CTA ueberall, wo das Tool die Schuld vorbelegen kann (voll/quote/kasko) — Kasko-WB Phase 2, D4 */
+  showFotoCta: boolean
 }
 
 export function resolveTier(schuld: Schuld | undefined): Tier {
@@ -63,7 +65,8 @@ export function buildCheckResult(answers: CheckAnswers): CheckResult {
   if (answers.unfall_her === 'ueber_monat') insightKeys.push('insight_verjaehrung')
   if (tier === 'quote') insightKeys.push('insight_teilschuld')
   if (tier === 'pruefen') insightKeys.push('insight_unklar')
-  if (tier === 'kasko') insightKeys.push('insight_kasko')
+  // Kasko-WB Phase 2 (D3): das Quiz verspricht keine Partnerwerkstatt mehr, sondern die Tarifpruefung.
+  if (tier === 'kasko') insightKeys.push('insight_kasko', 'insight_kasko_werkstattbindung')
 
   return {
     tier,
@@ -72,5 +75,6 @@ export function buildCheckResult(answers: CheckAnswers): CheckResult {
     positions,
     insightKeys,
     showRanges: tier === 'voll' || tier === 'quote',
+    showFotoCta: tier === 'voll' || tier === 'quote' || tier === 'kasko',
   }
 }
