@@ -121,6 +121,8 @@ Jede Aufgabe, die Aaron einer Session gibt, endet mit einer **Arbeitsabnahme**: 
 2. **Funktioniert es für den Nutzerstrom?** Der ganze Weg über alle Eingänge und Rollen (Kunde, Werkstatt, Dispatch, SV, Admin) auf der deployten Umgebung — nicht nur die neue Funktion im Unit-Test. Regel 4 liefert diesen Nachweis; ohne ihn ist die Abnahme „offen", nie „erledigt".
 3. **Was wurde gemacht, und wie?** Die **Herangehensweise** (Methode, Reihenfolge, Werkzeuge, wer/welches Modell was getan hat, warum so) und die **Schritte** lückenlos und nachvollziehbar: Änderungen, Migrationen, Entscheidungen unterwegs, gefundene und behobene Fehler — auch die eigenen.
 
+**Strukturell, auf allen Seiten, end-to-end (Aaron 05.09.2026).** Die Abnahme prüft nie die neue Funktion isoliert, sondern den ganzen Lauf über alle Seiten, Portale und Rollen und über alle Eingänge — als **Matrix Eingänge × Rollen** — bis zum **Folgezustand in der Datenbank und in der Nachbar-Sicht** (was sehen Werkstatt, Dispatcher, Sachverständiger und Kunde danach?). Ausdrücklich auch die Eingänge, an denen der Zustand schon **vorbelegt** ankommt: der Dispatcher legt an, ein Webhook oder die API schreibt, der Kunde kommt über einen alten Link zurück (Re-Visit). Auslöser war Aarons Frage, ob die Kasko-Tariffrage auch greift, wenn ein Kunde „anders" in den FlowLink kommt als über die Quali. Die Matrix ist Pflichtabschnitt 6 in `memory/abnahmen/_VORLAGE.md`.
+
 **Pflichtinhalt des Berichts** (in dieser Reihenfolge):
 
 ```
