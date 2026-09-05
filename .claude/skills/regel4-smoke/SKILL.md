@@ -1,15 +1,35 @@
 ---
 name: regel4-smoke
-description: Use when running the Regel-4 prod smoke after a PR, or whenever a Playwright smoke is written or debugged against app.claimondo.de / app.staging.claimondo.de. Triggers on "Regel 4", "Prod-Smoke", "Smoke fahren", "smoke gegen prod", "Playwright gegen prod", "Regel-4-Nachweis", and on any red/skipped smoke that needs diagnosing. Carries the failure modes that cost this project multiple days.
+description: Use when running the Regel-4 prod smoke after a PR, when a Regel-5 Abnahme measures the Nutzerstrom on the deployed environment, or whenever a Playwright smoke is written or debugged against app.claimondo.de / app.staging.claimondo.de. Triggers on "Regel 4", "Regel 5", "Abnahme", "Prod-Smoke", "Smoke fahren", "smoke gegen prod", "Playwright gegen prod", "Regel-4-Nachweis", "Nutzerstrom", and on any red/skipped smoke that needs diagnosing. Carries the failure modes that cost this project multiple days.
 ---
 
 # Regel-4-Smoke — operatives Soll zuerst, dann messen
+
+## Schritt 0 — liegt der Stand überhaupt dort, wo du misst?
+
+Bevor du einen Prod-Lauf startest: **beweise, dass der Code auf prod liegt.** Am 04.09. hielten
+zwei Sessions denselben Stand für „noch nicht auf prod" — die eine wegen `git merge-base
+--is-ancestor <merge-commit> origin/main` (liefert bei Squash-Drains **falsche Negative**), die
+andere, weil sie den Drain nach ihrem Merge nicht gesehen hatte. Beide hätten gegen den alten
+Stand gemessen.
+
+```bash
+git fetch origin main staging --quiet
+git diff --stat origin/main origin/staging | tail -3      # nur fremde Dateien = dein Stand ist drin
+git ls-tree --name-only origin/main <pfad-deiner-datei>   # Datei existiert auf main
+gh run list --workflow="Deploy → VPS (app.claimondo.de)" --limit 3 --json conclusion,createdAt,displayTitle
+```
+
+Tree-Diff + erfolgreicher Deploy-Run nach dem Release-Merge = auf prod. Der stärkste Beleg bleibt
+eine DB-Zeile, die nur der neue Code erzeugen kann (`werkstattbindung_quelle='tarif'` gab es vor
+dem Deploy nirgends). Ausführlich: Memory `reference-beweis-dass-code-auf-prod-live-ist`.
 
 ## Schritt 1 ist NICHT der Test
 
 Bevor irgendetwas gefahren wird: **formuliere das operative Soll** — wie sollte das Feature
 aus Nutzer-/Geschäftssicht ablaufen, **unabhängig davon, was gebaut ist**. Aus der Fachlogik
-hergeleitet, nicht aus dem Code gelesen.
+hergeleitet, nicht aus dem Code gelesen. Das Soll gehört in den PR und in die Abnahme-Datei
+(`memory/abnahmen/`, Abschnitt 1b), **bevor** du die Komponenten liest.
 
 Ein Smoke, der die Implementierung nachfährt („seede den Zustand, den der Code erwartet,
 treibe den Pfad, den der Code nimmt"), bestätigt nur *„Code tut, was Code tut"* — eine
@@ -18,23 +38,98 @@ man herum-baut.
 
 **Alles per UI.** Jeder Zustandsübergang, der zum getesteten Soll gehört, ist ein echter
 Klick über echte Logins, über alle beteiligten Rollen. DB-Seed ist nur für den
-*Ausgangszustand* erlaubt, den ein vorgelagerter Schritt erzeugt hätte.
+*Ausgangszustand* erlaubt, den ein vorgelagerter Schritt erzeugt hätte (Lead + FlowLink,
+wie ein Kanal ihn anlegt — Muster `smoke-kundenfunnel-szenarien-prod.spec.ts`).
 
-## Vor dem Lauf: die zwei Zeilen, die drei Tage gekostet haben
+## Schritt 2 — Eingänge × Rollen: der Nutzerstrom, nicht die Funktion
+
+> „Wir haben öfter andere Leute, ab und an auch Leute, die angemeldet sind. Du musst das immer
+> von allen Ecken und Enden durchleuchten." *(Aaron, 04.09.2026)*
+
+Ein Feature-Smoke, der einen Eingang fährt, beweist einen Eingang. Vor dem Schreiben die Matrix
+aufstellen — **jede Zelle, in der der Zustand entstehen oder gelesen werden kann, ist ein Test:**
+
+| | Eingänge, an denen der Zustand entsteht | Rollen, die ihn sehen oder ändern |
+|---|---|---|
+| **anonym** | Marketing-Seite · FlowLink `/flow/<token>` · Embed im `iframe` (`/embed/…`) · QR/NFC-Karte · Anspruchsprüfung `/check` · Telefon → Dispatcher legt an | Besucher (Re-Visit desselben Links!) |
+| **angemeldet** | Kunde-Portal „Schaden melden" · Werkstatt-QR · Dispatch-Anlage | Kunde (Fallakte) · Werkstatt · SV · Dispatch (Override) · Admin (Stammdaten) · KB · Makler · Flotte · Kanzlei |
+
+Beispiel Kasko-Werkstattbindung (04.09.): 9 Tests — FlowLink gebunden/frei/unklar/Freitext,
+Embed gebunden, Dispatch-Override wirkt auf Lead **und** Claim **und** Kundensicht, Kunde-Portal
+„Schaden melden" → Tarif-Card, Admin-Liste, Marketing-Einbettung. Der Re-Visit ist eine eigene
+Zelle: derselbe Link, zweiter Besuch, muss das Ergebnis zeigen und nicht die Frage.
+
+**Endzustände sind Zellen mit eigener Frage:** Welche Handlungen bietet die Seite? Buttons und
+Links zählen (`getByRole('button').allInnerTexts()`). Ein irreversibler Klick ohne Bestätigung
+und ohne Weg zurück ist ein Befund (Kasko-WB: ein Klick auf die Tarif-Karte disqualifizierte
+den Lead und schickte die Mail; die Endseite bot nur „Rückruf" → PR #5864).
+
+## Immer Playwright, immer mit echter Eingabe — die fünf Messfallen
+
+`curl`, ein Statuscode, ein Grep im HTML oder ein DB-Read sind **kein** Nachweis; sie ergänzen
+einen Playwright-Lauf. Zum Nachweis gehören echte Eingaben und der Folgezustand. Fünf Fallen,
+alle real aufgetreten (AGENTS.md Regel 4):
+
+1. **Falscher Frame.** Der Finder läuft im `iframe` auf der Marketing-Seite. Wer das äußere
+   Dokument misst, sieht „0 Eingabefelder". → `page.frames().find(f => f.url().includes('embed/'))`.
+2. **Zu früh gemessen.** „Leer" und „noch nicht fertig" sehen identisch aus. Am 04.09.: die
+   Endseite war sichtbar, dann rendert `revalidatePath` die Seite über das Re-Visit-Gate neu
+   („Wird geladen …") — ein einmaliger `innerText`-Snapshot las genau diesen Moment und meldete
+   die Endseite als leer. → **Auto-Wait-Assertions** (`expect(locator).toBeVisible()`,
+   `expect.poll`), Ladezustände explizit wegwarten (`expect(page.getByText('Wird geladen …')).toHaveCount(0)`),
+   nie `innerText` einmal lesen und daran mehrere `expect` hängen.
+3. **Erfundene Testdaten.** Ein ausgedachter Slot/Tarif fällt korrekt auf einen Fallback — das
+   sieht aus wie ein Bruch. Werte aus der laufenden Oberfläche oder der DB holen
+   (`HUK-COBURG` → Tarife `Basis|Basis SELECT|Classic|Classic SELECT|…` per `execute_sql`).
+4. **Falsche Schicht.** `innerText` blendet Kommentare aus; für LLM-Themen den Quelltext
+   messen. Erst die Frage klären, dann die Schicht wählen.
+5. **Blindes Instrument.** Eine Null ist erst ein Befund, wenn dasselbe Werkzeug einen Fehler
+   auch zeigen würde. Positivkontrolle mitfahren.
+
+**`has-text` matcht Substring UND case-insensitiv** — `getByText('Classic', { exact: true })`,
+sonst trifft „Classic" auch „Classic SELECT" und „Classic Kasko PLUS SELECT".
+
+## Vor dem Lauf: Umgebung, die den Lauf verhindert
 
 ```bash
-rm -rf playwright/.auth          # sonst fährst du mit fremden Cookies
-rm -rf .next/dev                 # sonst bricht der nächste Production-Build
+rm -rf playwright/.auth/*.json    # sonst fährst du mit fremden Cookies (totp-secrets.json behalten!)
+rm -rf .next/dev                  # sonst bricht der nächste Production-Build
 ```
 
 `playwright/.auth/<rolle>.json` trägt den Host **nicht im Namen**. Ein gecachter
 localhost-Login lässt einen prod-Lauf als flächendeckenden Produktfehler erscheinen —
-gemessen: 4/4 Wege rot, „0 Links" überall, darunter eine Liste, die niemand angefasst hatte.
+gemessen: 4/4 Wege rot, „0 Links" überall.
 
 Gegenprobe, wenn etwas nicht stimmt:
 ```bash
 node -e "const s=require('./playwright/.auth/admin.json'); console.log([...new Set((s.cookies||[]).map(c=>c.domain))])"
 ```
+
+**Der Haupt-Checkout hat unter Umständen kein `node_modules`** (04.09.: 0 Einträge; `npx
+playwright --version` antwortet trotzdem aus dem npx-Cache und täuscht eine Installation vor).
+Im Worktree eine Junction auf ein **echtes** `node_modules` eines Nachbar-Worktrees legen —
+aber nie so:
+
+* `cmd //c "mklink /J …"` aus Git-Bash → MSYS-Pfadkonvertierung verstümmelt das Ziel (`\C:\…`);
+  mit `MSYS_NO_PATHCONV=1` wird `//c` nicht mehr zu `/c` und `cmd` startet eine leere Shell.
+* `node -e "fs.symlinkSync('C:\\…')"` → Bash frisst die Backslashes, `\n` wird zum Zeilenumbruch.
+
+Richtig: Script-Datei mit Forward-Slashes, `fs.symlinkSync(target, 'node_modules', 'junction')`,
+danach `createRequire` auf `@playwright/test/package.json` prüfen. Turbopack-Builds brechen an
+Junctions (Memory Werkstattbindung-Lane) — für den Smoke ist das egal.
+
+**Secrets:** `.env.local` trägt `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`, aber
+**keine** `TEST_*`-Passwörter. Die stehen in der Memory-Referenz
+`reference-internal-test-account-logins` (rotiert 31.08., 32 Zeichen, nie ins Repo). Lauf:
+
+```bash
+RUN_<GATE>=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de \
+  node --env-file=.env.local --env-file=<session-scratch>/smoke.env \
+  node_modules/@playwright/test/cli.js test <spec> --project=chromium --reporter=line --retries=0 --workers=1
+```
+
+Die Test-Konten `test-admin@`, `test-dispatch@`, `smoke-kunde@` haben **0 verifizierte
+MFA-Faktoren** (Stand 04.09.) — ein `/login/2fa`-Umweg bedeutet, dass jemand das geändert hat.
 
 ## Zeigt der Lauf wirklich dorthin, wo du denkst?
 
@@ -55,6 +150,21 @@ der Lauf ging in Wahrheit scharf gegen prod.)
 Zentrale Stelle für Ziel + Basic-Auth: `tests/e2e/lib/ziel.ts`. Nur staging liegt hinter
 nginx-Basic-Auth.
 
+## Bezeichner nachschlagen, nie raten
+
+Vier geratene Namen in einer Session, vier fehlgeschlagene Prod-Queries: `onboarding_flow_steps`
+(heißt `flow_szenario_steps`, Schlüssel `step_id`), `claims.erstellt_am` (heißt `created_at`),
+`claims.fallnummer` (gibt es nicht). Vor jeder DB-Assertion:
+
+```sql
+select column_name from information_schema.columns where table_name = 'email_log';
+```
+
+Test-Identitäten `…@claimondo.test` sind **intern** (`ist_interne_email` = true): keine
+Kunden-WhatsApp, aber E-Mails laufen — der Nachweis ist `email_log (empfaenger, template,
+status)`, nicht der Posteingang und nicht `nachrichten.template_key` (der Sendeweg schreibt
+ihn nicht; Memory `audit-kundenfluss-laeuft-durch-16-befunde`).
+
 ## Assertions: die vier Fallen
 
 **Am DB-Zustand messen, nicht am Toast.** `sonner`-Toasts sind beim Auslesen oft schon weg.
@@ -73,6 +183,26 @@ Nav. Richtig: `.filter({ hasText: 'Schaden melden' })` — und danach `count()` 
 **Body-Text-Polls treffen die Navigation.** Ein Poll auf „Kostenvoranschlag" war sofort
 erfüllt, weil das ein Nav-Eintrag ist — er meldete Erfolg, bevor geklickt wurde.
 
+**Kein `describe.configure({ mode: 'serial' })` über unabhängige Eingänge.** Ein roter T1 riss
+am 04.09. acht weitere Eingänge mit („8 did not run") — jeder Eingang ist ein eigener Befund.
+Serial nur für echte Abhängigkeiten, und die abhängige Zelle skippt sauber mit Grund.
+
+**Nach einem FEHLGESCHLAGENEN Test startet Playwright einen neuen Worker** — Modul-State ist
+dann weg, und `afterAll` des alten Workers läuft beim Shutdown. Ein Test, der den Zustand
+eines früheren Tests braucht (Dispatch-Override auf den Lead des Flow-Laufs), muss direkt
+hinter ihm stehen und den Zustand zusätzlich als Datei persistieren; sonst sieht er `null`,
+skippt, und das Cleanup hat den Zustand schon gelöscht (05.09., zweimal).
+
+**`page.goto` direkt nach einem Client-Redirect wirft `net::ERR_ABORTED`.** Nach Passwort-Setzen
+oder Login navigiert die App noch selbst; ein sofortiges `goto` auf die Fallakte wird
+abgebrochen. `waitForLoadState('networkidle')` davor, und den `goto` einmal wiederholen.
+Kein Produktfehler — derselbe Schritt war in den Läufen davor grün.
+
+**Portale liegen in Tabs.** Die Dispatch-Lead-Seite zeigt Kontakt · Schaden · Unfall · Fahrzeug ·
+Schuld · … — ein Feld aus der Sektion `schuld` existiert erst nach dem Klick auf den Tab.
+`getByLabel` findet nichts und meldet ein fehlendes Feature; der Screenshot vom Fehlerzeitpunkt
+zeigt die Tab-Leiste. Erst den Screenshot ansehen, dann den Selektor anzweifeln.
+
 ## Vorbedingungen scharf stellen
 
 Jeder Smoke prüft **zuerst** seinen Ausgangszustand. Ohne das prüft er unbemerkt etwas
@@ -82,26 +212,39 @@ anderes: ein bereits freigegebener Auftrag ist ohnehin offen → grün ohne Auss
 
 Bei Test-Timeout bricht Playwright den Test-Body ab — ein `finally { cleanup() }` läuft
 **nicht** mehr. Real passiert: der Lead eines geflakten Laufs blieb auf prod stehen, obwohl
-die Spec „0 Residue" versprach.
+die Spec „0 Residue" versprach. Mit aufräumen: `tasks` (entity_id **und** lead_id/claim_id),
+`admin_termine`, `flow_links`, Claim deaktivieren, Auth-User löschen — sonst flutet die
+Task-Liste an vier Stellen.
 
 ## Ein grünes Ergebnis ist nicht automatisch ein Nachweis
 
 `0 passed / N skipped` ist **kein** erbrachter Lauf, sondern ein stiller Skip. Die Zeile
 `N passed` muss dastehen. Ebenso: `cancelled` ist kein Erfolg, und ein `✓` mit einem Hinweis
-darin ist ein halber Befund.
+darin ist ein halber Befund. **Ein Wrapper-Exit maskiert den echten Exit** — `… | tee log | tail`
+liefert den Exit von `tail`; den Playwright-Exit separat festhalten
+(`…; echo "PLAYWRIGHT_EXIT=$?" >> log`).
 
 ## Selektoren gegen prod
 
 Prod deployt von `main`; viele `data-testid` liegen nur auf `staging`. **Rollenbasiert
 schreiben** (`getByRole`), nicht per Testid. Und „ist X auf prod?" nie per
 `git branch --contains` prüfen — staging→main läuft über Squash-Commits, der Test liefert
-massenhaft falsche Negative. Inhaltlich prüfen:
+massenhaft falsche Negative. Inhaltlich prüfen (Schritt 0):
 ```bash
 git cat-file blob origin/main:<pfad> | grep -c '<marker>'
 ```
+
+## Ergebnis ablegen (Regel 5)
+
+Der Lauf ist erst Nachweis, wenn er dort steht, wo Aaron und die Abnahme-Session ihn finden:
+`memory/abnahmen/<datum>-<slug>.md`, Abschnitt 7 (Nachweise mit Zahlen + Quelle: Kommando,
+`N passed`, DB-Reads, Screenshot-Pfade) und Abschnitt 10 (Checkliste). Screenshots je Zelle
+(`page.screenshot({ fullPage: true })`) sind der Beleg fürs Auge — die Abnahme-Session prüft
+sie gegen das Soll aus Abschnitt 1b.
 
 ## Verwandt
 
 - `journey-verifikation` — prüft den ganzen Lauf, nicht nur die neue Funktion
 - `docs/fundament/journey-smokes.md` — welche Spec bewacht welche Journey
-- Test-Konten: `scripts/test-fixtures/ids.ts` (stabile IDs immer von dort)
+- Test-Konten: `scripts/test-fixtures/ids.ts` (stabile IDs immer von dort); Passwörter nur aus Memory
+- Abnahme-Mandat: Memory `feedback-abnahme-instanz-mandat-aaron` + `memory/abnahmen/INDEX.md`

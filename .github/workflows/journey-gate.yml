@@ -233,6 +233,15 @@ jobs:
         env:
           RUN_KASKO_SMOKE: '1'
 
+      # J5-Delta (Kasko-Werkstattbindung, #5857): im Tor nur die beiden FlowLink-Kerne — gebunden (Endseite,
+      # Rueckruf, Disqualifikation, Re-Visit) und frei (Werkstatt-Strecke bis Portal, Claim traegt die
+      # Antwort). Die uebrigen Eingaenge (Embed, Dispatch-Override, Kunde-Portal, Admin, Marketing) laufen
+      # nightly gegen prod (ci.yml e2e). Seed nur Lead + FlowLink, alles danach per UI, self-cleaning.
+      - name: J5-Delta — Kasko-Werkstattbindung (FlowLink gebunden + frei)
+        run: npx playwright test kasko-werkstattbindung-abnahme-prod --project=chromium --reporter=line --retries=0 --workers=1 --grep "T1 |T2 "
+        env:
+          RUN_KASKO_WB_ABNAHME: '1'
+
       - name: Seed J10-Fixture (Werkstatt-Finder)
         run: node scripts/smoke/werkstatt-finder-seed.mjs
       - name: J10 — Werkstatt-Finder

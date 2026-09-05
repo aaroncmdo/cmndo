@@ -34,8 +34,20 @@
   },
   "J5": {
     "titel": "Kasko / Selbstzahler",
-    "pfade": ["src/lib/abrechnung/**", "src/lib/abrechnungen/**"],
-    "waechter": ["kasko-reparatur-phase-smoke"]
+    "pfade": [
+      "src/lib/abrechnung/**",
+      "src/lib/abrechnungen/**",
+      "src/lib/kasko-wb/**",
+      "src/components/self-service/Kasko*",
+      "src/components/kunde/Kasko*",
+      "src/app/flow/[token]/FlowWerkstattbindungStep.tsx",
+      "src/app/flow/[token]/FlowKaskoBindungGate.tsx",
+      "src/app/kunde/faelle/[id]/kasko-tarif-actions.ts",
+      "src/app/dispatch/leads/[id]/_actions/kasko-tarif.ts",
+      "src/app/dispatch/leads/[id]/_v2/DispatchKaskoTarifField.tsx",
+      "src/app/admin/einstellungen/kasko-tarife/**"
+    ],
+    "waechter": ["kasko-reparatur-phase-smoke", "kasko-werkstattbindung-abnahme-prod"]
   },
   "J6": {
     "titel": "Kanzlei-Uebergabe",
