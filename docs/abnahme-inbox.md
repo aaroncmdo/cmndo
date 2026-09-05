@@ -2,6 +2,20 @@
 
 **Entscheidung Aaron, 05.09.2026.** Ein Postfach empfängt die Mails, die Smokes und Abnahmen auslösen. Damit wird die letzte Lücke im Regel-4-Nachweis geschlossen: Bis dahin war keine einzige Kunden-Mail belegbar.
 
+> **Wofuer das Postfach seit dem 06.09.2026 noch gebraucht wird — und wofuer nicht mehr.**
+> Fuer die Frage **„kommt die Mail an?"** wird es nicht mehr gebraucht. Resend meldet die Zustellung
+> per Webhook, und `email_log.status` traegt sie seither ein (`src/lib/email/zustellstatus.ts`).
+> Bis dahin wurde diese Meldung fuer transaktionale Mails weggeworfen: gemessen standen **542 Mails
+> aus 30 Tagen auf `sent` und KEINE auf zugestellt**. Muster ohne Postfach:
+> `tests/e2e/flows/kasko-e6-mail-zustellnachweis.spec.ts`.
+> Fuer **„was steht drin?"** und **„haengt das PDF wirklich dran?"** bleibt das Postfach noetig —
+> der Webhook meldet Zustellung, nicht Inhalt.
+>
+> ⚠ **Ungeprueft ist, ob `abnahme@`/`noreply@claimondo.de` ueberhaupt Mail ANNIMMT** (Stand 06.09.:
+> 0 Zeilen im `email_log` an diese Adressen; `noreply@` ist die Absenderadresse und muss kein Postfach
+> haben). Meldet ein Smoke `bounced` statt `delivered`, ist das ein echter Befund — und dann loest ein
+> App-Passwort allein den Inhalts-Nachweis auch nicht.
+
 **Zwei Postfächer sind zugelassen — du wählst eines:**
 
 | Adresse | wann | Aufwand |
@@ -70,5 +84,6 @@ expect(await zaehleMails({ an: email, betreffEnthaelt: 'Werkstattbindung', seit 
 ## Grenzen
 
 * IMAP `SINCE` ist tagesgenau; der Feinfilter läuft über das Datum der Mail. Für Läufe über Mitternacht `seit` großzügig wählen.
-* Die Inbox beweist Zustellung und Inhalt bei Google. Ob ein Kunde mit anderem Provider die Mail bekommt, beweist sie nicht.
+* Die Inbox beweist Zustellung und Inhalt bei Google. Ob ein Kunde mit anderem Provider die Mail bekommt, beweist sie nicht. Fuer **jeden** Empfaenger gilt dagegen der Resend-Zustellstatus in `email_log.status` — er ist providerunabhaengig, sagt aber nichts ueber den Inhalt.
+* Der Webhook-Weg ersetzt die Inbox NICHT vollstaendig: Anhaenge, Betreff-Text und Fliesstext sieht nur, wer die Mail wirklich liest. Wer einen Anhang nachweisen muss, braucht das App-Passwort.
 * Bewusst kein automatisches Löschen im Postfach: Gmail hält 15 GB, der Verlauf ist als Beleg nützlich. Ab etwa 5.000 Mails sollte ein Filter alte Läufe archivieren.
