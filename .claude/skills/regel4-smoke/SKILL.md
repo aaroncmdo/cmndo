@@ -118,6 +118,19 @@ Richtig: Script-Datei mit Forward-Slashes, `fs.symlinkSync(target, 'node_modules
 danach `createRequire` auf `@playwright/test/package.json` prüfen. Turbopack-Builds brechen an
 Junctions (Memory Werkstattbindung-Lane) — für den Smoke ist das egal.
 
+**Typecheck im Worktree braucht Heap:** `npx tsc --noEmit` stirbt mit dem Default-Heap als
+V8-Crash (`Exit 134`, Stacktrace mit `v8::String::Utf8Value`) — das ist **kein Typfehler**, aber
+auch kein Nachweis. Mit `NODE_OPTIONS=--max-old-space-size=8192` läuft er in ~6 Minuten grün
+(05.09., zweimal reproduziert).
+
+**Lange Läufe unter dem 10-Minuten-Limit des Bash-Tools halten.** Ein Hintergrundbefehl, der
+auf ein Deploy wartet **und** danach sechs Tests fährt, wird am Limit abgeschossen, ohne dass
+ein Test gelaufen ist. Aufteilen: ein Poll-Befehl (≤ 9 Min), dann je Lauf ein eigener Befehl
+mit 2–3 Tests. Parallele Läufe brauchen je Lauf ein eigenes `--output <dir>` **und** ein eigenes
+Screenshot-Verzeichnis (`ABNAHME_SHOTS_DIR`) — Playwright leert `test-results/` beim Start, ein
+zweiter Prozess löscht sonst die Bilder des ersten, während der noch läuft (Lauf 11 → 12: die
+Screenshots von „frei" waren weg, ein reiner Bilder-Lauf musste nach).
+
 **Secrets:** `.env.local` trägt `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`, aber
 **keine** `TEST_*`-Passwörter. Die stehen in der Memory-Referenz
 `reference-internal-test-account-logins` (rotiert 31.08., 32 Zeichen, nie ins Repo). Lauf:
