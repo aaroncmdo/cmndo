@@ -56,15 +56,15 @@ export function buildWhatsAppText(opts: {
 }): string {
   const greet = opts.vorname ? `Hi ${opts.vorname}` : 'Hi'
   return [
-    `${greet}, danke für deine Schadenmeldung bei Claimondo.`,
+    `${greet}, danke für Ihre Schadenmeldung bei Claimondo.`,
     '',
-    'Hier ist dein persönlicher Link (gültig 72 Stunden):',
+    'Hier ist Ihr persönlicher Link (gültig 72 Stunden):',
     opts.flowUrl,
     '',
-    'Dort unterschreibst du Vollmacht und Sicherungsabtretung — damit dürfen wir den ' +
-      'Schaden für dich abwickeln. Danach siehst du in deinem Portal jederzeit, wie es weitergeht.',
+    'Dort unterschreiben Sie Vollmacht und Sicherungsabtretung — damit dürfen wir den ' +
+      'Schaden für Sie abwickeln. Danach sehen Sie in Ihrem Portal jederzeit, wie es weitergeht.',
     '',
-    'Unser Service ist für dich kostenlos.',
+    'Unser Service ist für Sie kostenlos.',
   ].join('\n')
 }
 

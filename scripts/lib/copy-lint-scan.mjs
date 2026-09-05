@@ -69,3 +69,45 @@ export function scanHeadingCode(headingText) {
 export function scanTitleBrandTwice(title) {
   return /\|\s*Claimondo\s*\|\s*Claimondo/i.test(title || '')
 }
+
+// ---------------------------------------------------------------------------------------------
+// 5. Anrede — die Seite siezt. Ueberall.
+//
+// Aaron 06.09.2026: "das soll auf Sie bleiben. Weil wenn das auch Du ist, haben wir meistens die
+// Schwierigkeit, dass sich einheitlich ist. Also es soll die einheitliche Ansprache."
+//
+// Vorgeschichte: 942 Du-Formen in 65 Content-Markdowns, waehrend Formulare, CTAs und
+// Bestaetigungen durchgehend siezten. Wer ueber "Ihre Telefonnummer" in einen Ratgeber mit
+// "dein Auto" kam, las zwei Absender. Umgestellt in #5899 — dieser Detektor haelt es so.
+//
+// ⚠ NUR DEUTSCH. "du" ist auch Franzoesisch ("chef du service") und in tuerkischen Texten
+// haeufig; die 5 Fremdsprach-Locales haben eigene Hoeflichkeitsformen und werden vom
+// Aufrufer (check-copy-lint.mjs) ohnehin nur fuer de.json geprueft.
+//
+// ⚠ NICHT geflaggt werden: Code-Bezeichner (`const dir = …`), Kommentare (strippt der
+// Aufrufer), Dateipfade und die Wortteile in "Individuum", "Reduktion" — die Wortgrenze
+// allein reicht dafuer nicht, deshalb die Ausschluesse unten.
+
+const ANREDE_DU = /\b(du|dir|dich|dein|deine|deinem|deinen|deiner|deines)\b/gi
+
+// Stellen, an denen dieselbe Buchstabenfolge kein deutsches Duzen ist.
+const ANREDE_AUSNAHMEN = [
+  /\bchef\s+du\b/i,          // franzoesisch
+  /\bdu\s+jour\b/i,          // franzoesisch
+  /\bcode\s+du\b/i,
+  /\bdir\s*[=:)\]]/,         // Code: dir = …, dir: …, dir)
+  /\b(const|let|var|function|import|export)\s+\w*dir\b/,
+  /\bdirname\b|\breaddir\b|\bmkdir\b|\brmdir\b|\bdir\/|\/dir\b/i,
+  // Kfz-Kennzeichen und Ortsteile: "DU Beeckerwerth" ist Duisburg, kein Duzen.
+  /(DU|DD|DO|DA|HD|KA)\s+[A-ZÄÖÜ][a-zäöüß]/,
+]
+
+/**
+ * Deutsche Du-Anrede in einem nutzersichtbaren Text.
+ * @returns {string[]} die gefundenen Formen (leer = siezt)
+ */
+export function scanAnrede(text) {
+  if (!text) return []
+  for (const aus of ANREDE_AUSNAHMEN) if (aus.test(text)) return []
+  return [...new Set((text.match(ANREDE_DU) || []).map((w) => w.toLowerCase()))]
+}

@@ -8,12 +8,12 @@ export const PARTNER_FAQ = [
   {
     frage: 'Wie hoch ist die Plattform-Provision?',
     antwort:
-      'Die Provision hängt vom Auftragsvolumen, der Region und dem gewählten Paket ab. Wir besprechen den konkreten Satz transparent im Erstgespräch – du bekommst vorab eine Beispielrechnung auf Basis deiner letzten 12 Monate. BVSK-Honorartabelle ist immer Verhandlungsgrundlage.',
+      'Die Provision hängt vom Auftragsvolumen, der Region und dem gewählten Paket ab. Wir besprechen den konkreten Satz transparent im Erstgespräch – Sie bekommen vorab eine Beispielrechnung auf Basis deiner letzten 12 Monate. BVSK-Honorartabelle ist immer Verhandlungsgrundlage.',
   },
   {
     frage: 'Bin ich an Claimondo gebunden oder darf ich eigene Aufträge weiter machen?',
     antwort:
-      'Du bleibst selbstständig. Eigene Direktaufträge, BVSK-Mitgliedschaft, Versicherer-Listungen – alles bleibt unverändert. Claimondo ist ein zusätzlicher Kanal, keine Exklusiv-Bindung.',
+      'Sie bleiben selbstständig. Eigene Direktaufträge, BVSK-Mitgliedschaft, Versicherer-Listungen – alles bleibt unverändert. Claimondo ist ein zusätzlicher Kanal, keine Exklusiv-Bindung.',
   },
   {
     frage: 'Welche Voraussetzungen muss ich erfüllen?',
@@ -23,7 +23,7 @@ export const PARTNER_FAQ = [
   {
     frage: 'Wie lange dauert das Onboarding?',
     antwort:
-      'Nach Freischaltung deiner Region: 7 bis 14 Werktage. Schritte sind Verifikation der Qualifikation, Vertragsunterzeichnung, Einrichtung im Portal und ein 30-minütiger Live-Onboarding-Call. Danach gehen die ersten Aufträge live.',
+      'Nach Freischaltung Ihrer Region: 7 bis 14 Werktage. Schritte sind Verifikation der Qualifikation, Vertragsunterzeichnung, Einrichtung im Portal und ein 30-minütiger Live-Onboarding-Call. Danach gehen die ersten Aufträge live.',
   },
   {
     frage: 'Welche Software ist im Einsatz?',
@@ -38,11 +38,11 @@ export const PARTNER_FAQ = [
   {
     frage: 'Kann ich meine Region später anpassen?',
     antwort:
-      'Ja. Radius und PLZ-Liste passt du jederzeit im Portal an. Bei Vergrößerung prüfen wir, ob die Nachbarregion frei ist – bei Schrumpfung sofort wirksam.',
+      'Ja. Radius und PLZ-Liste passen Sie jederzeit im Portal an. Bei Vergrößerung prüfen wir, ob die Nachbarregion frei ist – bei Schrumpfung sofort wirksam.',
   },
   {
     frage: 'Was passiert mit Kundendaten? DSGVO-konform?',
     antwort:
-      'Alle Kundendaten liegen DSGVO-konform auf deutschen Servern (Supabase Frankfurt). Du erhältst Auftragsdaten ausschließlich für den Bearbeitungszeitraum, Löschung erfolgt automatisiert nach Auftragsabschluss + gesetzlicher Aufbewahrungsfrist.',
+      'Alle Kundendaten liegen DSGVO-konform auf deutschen Servern (Supabase Frankfurt). Sie erhalten Auftragsdaten ausschließlich für den Bearbeitungszeitraum, Löschung erfolgt automatisiert nach Auftragsabschluss + gesetzlicher Aufbewahrungsfrist.',
   },
 ]

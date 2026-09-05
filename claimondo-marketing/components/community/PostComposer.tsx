@@ -107,7 +107,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               name="email"
               type="email"
               required
-              placeholder="Deine E-Mail-Adresse"
+              placeholder="Ihre E-Mail-Adresse"
               className={input}
             />
           </>
@@ -139,7 +139,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               onChange={(e) => setBody(e.target.value)}
               maxLength={5000}
               rows={4}
-              placeholder="Was möchtest du mit der Community teilen? (max. 5.000 Zeichen)"
+              placeholder="Was möchten Sie mit der Community teilen? (max. 5.000 Zeichen)"
               className={input}
             />
             <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/75">

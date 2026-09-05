@@ -22,8 +22,8 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
   const input = 'w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2.5 text-sm focus:border-claimondo-ondo focus:outline-none'
   const btn = 'rounded-ios-md bg-claimondo-navy px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-claimondo-shield disabled:opacity-60'
 
-  if (stage === 'sent') return <p className="text-sm text-claimondo-shield">Wir haben dir einen Anmelde-Link per E-Mail geschickt. Bitte prüfe dein Postfach.</p>
-  if (stage === 'posted') return <p className="text-sm text-claimondo-shield">Danke! Dein Kommentar wird nach kurzer Prüfung freigeschaltet.</p>
+  if (stage === 'sent') return <p className="text-sm text-claimondo-shield">Wir haben Ihnen einen Anmelde-Link per E-Mail geschickt. Bitte prüfe dein Postfach.</p>
+  if (stage === 'posted') return <p className="text-sm text-claimondo-shield">Danke! Ihr Kommentar wird nach kurzer Prüfung freigeschaltet.</p>
 
   return (
     <form
@@ -38,7 +38,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
       }}
     >
       {stage === 'email' && (
-        <input name="email" type="email" required placeholder="Deine E-Mail (für den Anmelde-Link)" className={input} />
+        <input name="email" type="email" required placeholder="Ihre E-Mail (für den Anmelde-Link)" className={input} />
       )}
       {stage === 'username' && (
         <>
@@ -59,7 +59,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
               Du kommentierst <span className="font-medium">öffentlich</span> als <span className="font-semibold text-claimondo-navy">{username}</span>.
             </p>
           )}
-          <textarea name="body" required maxLength={2000} rows={3} placeholder="Deinen Kommentar schreiben …" className={input} />
+          <textarea name="body" required maxLength={2000} rows={3} placeholder="Ihren Kommentar schreiben …" className={input} />
           <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/70">
             Bitte beachte die{' '}
             <a href="/kommentar-regeln" className="underline hover:text-claimondo-shield">Kommentar-Regeln</a>{' '}

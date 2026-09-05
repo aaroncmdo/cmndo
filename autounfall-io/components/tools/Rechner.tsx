@@ -116,7 +116,7 @@ const CONFIG: Record<RechnerType, RechnerConfig> = {
             : '<b>Grenzfall</b> — beim Versicherer den genauen Wiederaufstiegs-Effekt anfragen (kostenlos). Faustregel: Schaden unter ~800 € bei hoher SF → eher selbst zahlen.'
       return (
         `Rückstufung ca. SF ${sfv} → SF ${sn}. Mehrbeitrag über ~${j} Jahre: <b>${eur(lo)}–${eur(hi)} €</b>. ${rec}` +
-        `<span class="aur-note">Richtwert — exakt nur über deinen Versicherer. ` +
+        `<span class="aur-note">Richtwert — exakt nur über Ihren Versicherer. ` +
         `Bei <b>unverschuldetem</b> Unfall entfällt die Rückstufung ganz: dann reguliert die gegnerische Haftpflicht.</span>`
       )
     },

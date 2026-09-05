@@ -30,8 +30,8 @@ export const metadata: Metadata = {
 
 const VERBOTEN: { titel: string; text: string }[] = [
   {
-    titel: 'Keine sensiblen Daten über dich selbst',
-    text: 'Verzichte auf Gesundheits- und Verletzungsdetails, Finanzangaben oder genaue Angaben zu deinem Fall. Kommentare sind öffentlich und werden von Suchmaschinen erfasst.',
+    titel: 'Keine sensiblen Daten über sich selbst',
+    text: 'Verzichten Sie auf Gesundheits- und Verletzungsdetails, Finanzangaben oder genaue Angaben zu Ihrem Fall. Kommentare sind öffentlich und werden von Suchmaschinen erfasst.',
   },
   {
     titel: 'Keine Daten über andere Personen',
