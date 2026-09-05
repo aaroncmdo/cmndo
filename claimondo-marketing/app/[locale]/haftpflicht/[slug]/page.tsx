@@ -18,6 +18,7 @@ import { VrBaitBlock } from '@/components/content/VrBaitBlock'
 import { FAQ_STEMS_MAPPING } from '@/data/faq-stems-mapping'
 import { VR_BAIT_MAPPING } from '@/data/vr-bait-mapping'
 import { CitationBox } from '@/components/content/CitationBox'
+import { GuidePopover } from '@/components/content/GuidePopover'
 import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
@@ -123,6 +124,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
         <SpokeCtaBand />
       </main>
+      {/* Guide-Angebot bei 15 % Artikeltext. Auf Mobil bewusst ein Band statt
+          eines Overlays — die Ratgeber-Seiten sind die SEO-Flaeche, und Google
+          wertet verdeckenden Inhalt auf Mobilgeraeten ab. */}
+      <GuidePopover />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>
