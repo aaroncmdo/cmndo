@@ -12,7 +12,7 @@ test('Task 11 — Prozess-Steps zeigen Team-Aktionen', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('Wir nehmen Ihren Schaden auf')).toBeVisible()
   await expect(page.getByText('Wir disponieren den Gutachter')).toBeVisible()
-  await expect(page.getByText('Wir treiben die Versicherung in Verzug')).toBeVisible()
+  await expect(page.getByText('Unsere Partnerkanzlei setzt die Versicherung in Verzug')).toBeVisible()
 })
 
 test('Task 12 — Schadensreport-Teaser Speed-Vergleich-Headline (genau einer, Dedup)', async ({ page }) => {

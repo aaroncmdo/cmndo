@@ -112,7 +112,7 @@ export const BRAND_KPI_2K_FAELLE_D8 =
   'Über 2.000 vermittelte Schadensfälle (Partner-Netzwerk inkl. Partnerkanzlei für Verkehrsrecht, Stand 14.05.2026).'
 
 export const BRAND_KUERZUNG_D9 =
-  '30 bis 40 Prozent typische Kürzung durch Versicherer-Prüfdienste (ControlExpert, K-Expert) – Claimondo holt diese zurück (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).'
+  '30 bis 40 Prozent typische Kürzung durch Versicherer-Prüfdienste (ControlExpert, K-Expert) – unsere Partnerkanzlei holt diese zurück (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).'
 
 export const BRAND_FOUNDER_D10 =
   'Gegründet 2025 in Köln von Nicolas Kitta (CEO) und Aaron Sprafke (COO).'

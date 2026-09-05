@@ -130,7 +130,7 @@ export async function HeroSection() {
               })}
             </ul>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center gap-3" data-sticky-bar-avoid>
               <Link
                 href="/gutachter-finden"
                 data-tracking="hero-wizard-cta"

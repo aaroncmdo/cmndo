@@ -128,7 +128,7 @@ export default function ErsteinschaetzungPage() {
           <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
             {t('hero_intro')}
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row" data-sticky-bar-avoid>
             <Link
               href="/check"
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
@@ -224,7 +224,7 @@ export default function ErsteinschaetzungPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl font-black text-claimondo-border">{meta.nr}</span>
+                      <span className="text-3xl font-black text-claimondo-shield/55">{meta.nr}</span>
                       <div>
                         <h3 className="text-lg font-bold text-claimondo-navy">{schritt.title}</h3>
                         <p className="text-sm font-semibold text-claimondo-ondo">{schritt.subtitle}</p>

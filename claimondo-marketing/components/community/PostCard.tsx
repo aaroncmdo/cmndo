@@ -65,7 +65,7 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
             Redaktion
           </span>
         )}
-        <span className="ml-auto text-[0.65rem] text-claimondo-shield/50">
+        <span className="ml-auto text-[0.65rem] text-claimondo-shield/75">
           {new Date(entry.createdAt).toLocaleDateString('de-DE')}
         </span>
       </div>
@@ -138,14 +138,14 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
         </button>
 
         {reported ? (
-          <span className="ml-auto text-[0.7rem] text-claimondo-shield/50">Gemeldet – danke.</span>
+          <span className="ml-auto text-[0.7rem] text-claimondo-shield/75">Gemeldet – danke.</span>
         ) : (
           <span className="ml-auto inline-flex flex-col items-end gap-0.5">
             <button
               type="button"
               onClick={handleReport}
               disabled={reportPending}
-              className="text-[0.7rem] text-claimondo-shield/50 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
+              className="text-[0.7rem] text-claimondo-shield/75 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
             >
               Melden
             </button>
@@ -160,7 +160,7 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
       {expanded && (
         <>
           {threadPending || thread === null ? (
-            <p className="mt-3 text-xs text-claimondo-shield/60">Lade Kommentare …</p>
+            <p className="mt-3 text-xs text-claimondo-shield/75">Lade Kommentare …</p>
           ) : (
             <PostComments
               targetKind={targetKind}

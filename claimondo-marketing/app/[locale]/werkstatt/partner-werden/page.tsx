@@ -90,7 +90,7 @@ const ABLAUF = [
   {
     nr: '03',
     title: 'Sie reparieren, wir regulieren',
-    text: 'Sie führen die Reparatur fachgerecht aus. Claimondo setzt alle Ansprüche gegen die gegnerische Versicherung durch – die Provision fällt nur auf den vermittelten Auftrag an.',
+    text: 'Sie führen die Reparatur fachgerecht aus. Claimondo koordiniert das Gutachten, unsere Partnerkanzlei setzt die Ansprüche gegen die gegnerische Versicherung durch – die Provision fällt nur auf den vermittelten Auftrag an.',
   },
 ]
 

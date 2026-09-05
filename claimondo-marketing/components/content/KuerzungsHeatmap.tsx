@@ -71,7 +71,7 @@ export function KuerzungsHeatmap({ kuerzungen }: Props) {
           )
         })}
       </ul>
-      <p className="mt-2 text-xs leading-relaxed text-claimondo-shield/60">
+      <p className="mt-2 text-xs leading-relaxed text-claimondo-shield/75">
         Einordnung: dokumentierte Einzelfälle, nicht repräsentativ für alle Schadenfälle. Die
         Belege je Position stehen in den verlinkten Decodern.
       </p>

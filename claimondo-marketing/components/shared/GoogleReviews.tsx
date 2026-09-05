@@ -62,7 +62,7 @@ export async function GoogleReviews() {
               <p className="mt-4 text-xs font-semibold text-claimondo-navy">
                 {rv.author}
                 {rv.relativeTime ? (
-                  <span className="font-normal text-claimondo-shield/60"> · {rv.relativeTime}</span>
+                  <span className="font-normal text-claimondo-shield/75"> · {rv.relativeTime}</span>
                 ) : null}
               </p>
             </li>

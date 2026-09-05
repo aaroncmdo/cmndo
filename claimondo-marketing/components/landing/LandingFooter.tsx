@@ -68,9 +68,9 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
 
           {/* Spalte 2: Produkt */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('product.heading')}
-            </h4>
+            </h2>
             {/* Tippziele: die Links waren mobil 133x20px — unter jeder Schwelle
                 (WCAG 2.5.8 will 24px, iOS 44pt, Android 48dp). Statt jeden der
                 24 Links einzeln anzufassen, gibt die Liste ihren <a> das
@@ -160,9 +160,9 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
 
           {/* Spalte 3: Partner */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('partner.heading')}
-            </h4>
+            </h2>
             {/* Tippziele: die Links waren mobil 133x20px — unter jeder Schwelle
                 (WCAG 2.5.8 will 24px, iOS 44pt, Android 48dp). Statt jeden der
                 24 Links einzeln anzufassen, gibt die Liste ihren <a> das
@@ -200,9 +200,9 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
 
           {/* Spalte 4: Legal */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('legal.heading')}
-            </h4>
+            </h2>
             {/* Tippziele: die Links waren mobil 133x20px — unter jeder Schwelle
                 (WCAG 2.5.8 will 24px, iOS 44pt, Android 48dp). Statt jeden der
                 24 Links einzeln anzufassen, gibt die Liste ihren <a> das
@@ -241,9 +241,9 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
 
         {/* Doc 37 §8.2: Top-Standorte – Local-SEO-Anker von jeder Seite. */}
         <div className="mt-10 border-t border-white/10 pt-6">
-          <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
+          <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
             Top-Standorte
-          </h4>
+          </h2>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-white/60">
             {FOOTER_STANDORTE.map((s) => (
               <Link

@@ -154,7 +154,7 @@ export default function Page() {
                 strong: (chunks) => <strong className="text-white">{chunks}</strong>,
               })}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-3" data-sticky-bar-avoid>
               <Link href="/gutachter-finden" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
                 {t('hero_cta_primary')}
                 <ChevronRight className="h-4 w-4" aria-hidden />

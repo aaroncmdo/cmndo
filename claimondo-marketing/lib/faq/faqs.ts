@@ -50,12 +50,12 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was streichen Versicherungen am häufigsten?',
         antwort:
-          '1. Stundenverrechnungssätze (Verweis auf billigere Werkstatt), 2. UPE-Aufschläge (trotz BGH VI ZR 65/18 erstattungsfähig), 3. Verbringungskosten (trotz BGH-Recht), 4. Beilackierungskosten (BGH VI ZR 174/24 aus 2025 gilt), 5. Sachverständigenkosten ("überhöht"), 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück.',
+          '1. Stundenverrechnungssätze (Verweis auf billigere Werkstatt), 2. UPE-Aufschläge (trotz BGH VI ZR 65/18 erstattungsfähig), 3. Verbringungskosten (trotz BGH-Recht), 4. Beilackierungskosten (BGH VI ZR 174/24 aus 2025 gilt), 5. Sachverständigenkosten ("überhöht"), 6. Wertminderung (wird oft komplett ignoriert). Unsere Partnerkanzlei kennt alle diese Positionen und fordert sie zurück.',
       },
       {
         frage: 'HUK, LVM, AXA – macht das einen Unterschied?',
         antwort:
-          'Ja. HUK-COBURG erklärt Gutachten systematisch als "unbrauchbar" und verweigert SV-Kosten. LVM geht gegen KI-gestützte Gutachten vor. AXA nutzt überregionale Restwertbörsen um den Restwert hochzurechnen (dagegen: BGH VI ZR 119/04 – regionaler Markt gilt). Unser Anwalt kennt die versicherungsspezifischen Taktiken und reagiert entsprechend.',
+          'Ja. HUK-COBURG erklärt Gutachten systematisch als "unbrauchbar" und verweigert SV-Kosten. LVM geht gegen KI-gestützte Gutachten vor. AXA nutzt überregionale Restwertbörsen um den Restwert hochzurechnen (dagegen: BGH VI ZR 119/04 – regionaler Markt gilt). Unsere Partnerkanzlei kennt die versicherungsspezifischen Taktiken und reagiert entsprechend.',
       },
     ],
   },
@@ -140,7 +140,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Wann bekomme ich mein Geld?',
         antwort:
-          'Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unser Anwalt – kürzt die Versicherung trotzdem, Klage. Bundesweiter Durchschnitt: 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung.',
+          'Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unsere Partnerkanzlei – kürzt die Versicherung trotzdem, folgt die Klage. Bundesweiter Durchschnitt: 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung.',
       },
       {
         frage: 'Muss ich mein Auto vor der Begutachtung waschen oder reparieren?',
@@ -290,7 +290,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was, wenn der Versicherer trotzdem auf dem überregionalen Restwert besteht?',
         antwort:
-          'Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht – die Rechtsprechung ist eindeutig auf Ihrer Seite.',
+          'Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagt die Partnerkanzlei vor dem zuständigen Landgericht – die Rechtsprechung ist eindeutig auf Ihrer Seite.',
       },
     ],
   },

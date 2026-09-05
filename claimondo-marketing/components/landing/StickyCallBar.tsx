@@ -125,16 +125,42 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
   const leisteRef = useRef<HTMLDivElement>(null)
   const [ctaKollision, setCtaKollision] = useState(false)
   useEffect(() => {
-    const cta = document.querySelector('[data-tracking^="lead-form"] button[type="submit"]')
-    if (!cta) return
+    // Design-Aufnahme 05.09.2026 (Playwright, document.elementFromPoint auf 1.155 Seiten):
+    // der Submit-Button war nur EIN Opfer. Verdeckt waren ausserdem der Hero-CTA
+    // "Lassen Sie uns mit der Versicherung reden" (Startseite, 390x844, OHNE Scrollen),
+    // die Felder Name/Telefon/PLZ des Lead-Formulars (1280x720 und 1440x900, Stadtseite
+    // Koeln) und die Antwort "Noch unklar" im /check-Wizard. Geprueft wird deshalb jedes
+    // Feld und jeder Knopf des Lead-Formulars, jeder Hero-CTA (data-tracking *-hero bzw.
+    // hero-*) und alles, was eine Seite mit data-sticky-bar-avoid markiert.
+    const ZIELE = [
+      '[data-tracking^="lead-form"] input',
+      '[data-tracking^="lead-form"] select',
+      '[data-tracking^="lead-form"] textarea',
+      '[data-tracking^="lead-form"] button',
+      '[data-tracking$="-hero"]',
+      '[data-tracking^="hero-"]',
+      '[data-sticky-bar-avoid]',
+      '[data-sticky-bar-avoid] a[href]',
+      '[data-sticky-bar-avoid] button',
+      '[data-sticky-bar-avoid] input',
+    ].join(',')
     let angefordert = false
     const pruefe = () => {
       angefordert = false
       const leiste = leisteRef.current
       if (!leiste) return
-      const b = cta.getBoundingClientRect()
       const l = leiste.getBoundingClientRect()
-      setCtaKollision(b.bottom > l.top && b.top < l.bottom && b.right > l.left && b.left < l.right)
+      let kollidiert = false
+      for (const ziel of document.querySelectorAll<HTMLElement>(ZIELE)) {
+        if (leiste.contains(ziel)) continue
+        const b = ziel.getBoundingClientRect()
+        if (b.width === 0 || b.height === 0) continue
+        if (b.bottom > l.top && b.top < l.bottom && b.right > l.left && b.left < l.right) {
+          kollidiert = true
+          break
+        }
+      }
+      setCtaKollision(kollidiert)
     }
     const geplant = () => { if (!angefordert) { angefordert = true; requestAnimationFrame(pruefe) } }
     pruefe()

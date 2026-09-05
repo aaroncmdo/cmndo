@@ -111,7 +111,7 @@ export default function Page() {
                 <div className="flex gap-3">
                   <span
                     style={HEAD_FONT}
-                    className="shrink-0 text-[0.8125rem] font-bold text-claimondo-light-blue"
+                    className="shrink-0 text-[0.8125rem] font-bold text-claimondo-ondo"
                   >
                     {i + 1}.
                   </span>
