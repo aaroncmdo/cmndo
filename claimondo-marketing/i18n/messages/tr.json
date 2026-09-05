@@ -79,7 +79,7 @@
     "result_voll_heading": "Bu sizin hakkınız — 0 € cep masrafı",
     "result_voll_sub": "Kusurunuz yok mu? O zaman karşı tarafın sigortası öder. §249 BGB uyarınca, sanki kaza hiç olmamış gibi tazmin edilirsiniz.",
     "result_quote_heading": "Talepleriniz var — orantılı olarak",
-    "result_quote_sub": "Kısmi kusur durumunda zararınız kusur oranına göre orantılı olarak tazmin edilir (§254 BGB). Sizin için azami tutarı alırız.",
+    "result_quote_sub": "Kısmi kusur durumunda zararınız kusur oranına göre orantılı olarak tazmin edilir (§254 BGB). Ortak hukuk büromuz sizin için azami tutarı alır.",
     "result_pruefen_heading": "Çoğu zaman düşündüğünüzden fazlası söz konusu",
     "result_pruefen_sub": "Kusur sorusu genellikle sanılandan daha nettir — bunu bir avukatla birlikte açıklığa kavuşturur ve taleplerinizi güvence altına alırız.",
     "result_kasko_heading": "Kendi kusurunuzda da yardımcı oluruz",
@@ -1140,13 +1140,13 @@
           "nr": 3
         },
         {
-          "titel": "Sigortayı temerrüde düşürüyoruz",
+          "titel": "Ortak hukuk büromuz sigortayı temerrüde düşürür",
           "text": "§286 BGB uyarınca 4 haftalık süre. Kesinti girişiminde: Avukat aynı gün yanıt yazar.",
           "href": "/gegnerische-versicherung-zahlt-nicht",
           "nr": 4
         },
         {
-          "titel": "Ödemenizi yapıyoruz",
+          "titel": "Sigorta öder – siz canlı takip edersiniz",
           "text": "Hasar bildiriminden ödemeye kadar ortalama 32 gün. Portal üzerinden canlı takip edilebilir.",
           "href": "/schadensreport-2026",
           "nr": 5
@@ -1302,7 +1302,7 @@
           "versicherer": "HUK · LVM",
           "pruefdienstleister": "kendi hasar departmanı",
           "kuerzung": "Bilirkişi maliyetleri + araç ikame değerinin tamamen reddedilmesi",
-          "gegenargument": "Bilirkişi riski sigortaya aittir. Avukat yetkili Landgericht'te dava açar.",
+          "gegenargument": "Bilirkişi riski sigortaya aittir. Ortak hukuk büromuz yetkili Landgericht'te dava açar.",
           "bgh": "BGH VI ZR 280/22",
           "href": "/haftpflicht/sv-kosten"
         }
@@ -1769,11 +1769,11 @@
           },
           {
             "frage": "Sigortalar en sık hangi kalemleri kesiyor?",
-            "antwort": "1. Saat ücreti tarifeleri (daha ucuz tamirhanelere yönlendirme), 2. UPE ek ücretleri (BGH VI ZR 65/18 uyarınca iade edilebilir olmasına rağmen), 3. Nakliye masrafları (BGH hakkına rağmen), 4. Komşu panel lakası masrafları (BGH VI ZR 174/24, 2025 tarihli karar geçerlidir), 5. Bilirkişi ücretleri (\"aşırı yüksek\" gerekçesiyle), 6. Değer kaybı (çoğunlukla tamamen göz ardı edilir). Avukatımız bu kalemlerin tümünü bilir ve geri talep eder."
+            "antwort": "1. Saat ücreti tarifeleri (daha ucuz tamirhanelere yönlendirme), 2. UPE ek ücretleri (BGH VI ZR 65/18 uyarınca iade edilebilir olmasına rağmen), 3. Nakliye masrafları (BGH hakkına rağmen), 4. Komşu panel lakası masrafları (BGH VI ZR 174/24, 2025 tarihli karar geçerlidir), 5. Bilirkişi ücretleri (\"aşırı yüksek\" gerekçesiyle), 6. Değer kaybı (çoğunlukla tamamen göz ardı edilir). Ortak hukuk büromuz bu kalemlerin tümünü bilir ve geri talep eder."
           },
           {
             "frage": "HUK, LVM, AXA — bunun bir farkı var mı?",
-            "antwort": "Evet. HUK-COBURG bilirkişi raporlarını sistematik olarak \"kullanılamaz\" ilan eder ve SV maliyetlerini reddeder. LVM, yapay zeka destekli bilirkişi raporlarına karşı çıkar. AXA, hurda değerini yukarı çekmek için bölge dışı hurda borsalarını kullanır (buna karşı: BGH VI ZR 119/04 — bölgesel piyasa esas alınır). Avukatımız her sigortaya özgü taktikleri bilir ve buna göre hareket eder."
+            "antwort": "Evet. HUK-COBURG bilirkişi raporlarını sistematik olarak \"kullanılamaz\" ilan eder ve SV maliyetlerini reddeder. LVM, yapay zeka destekli bilirkişi raporlarına karşı çıkar. AXA, hurda değerini yukarı çekmek için bölge dışı hurda borsalarını kullanır (buna karşı: BGH VI ZR 119/04 — bölgesel piyasa esas alınır). Ortak hukuk büromuz her sigortaya özgü taktikleri bilir ve buna göre hareket eder."
           }
         ]
       },
@@ -3034,7 +3034,7 @@
       },
       {
         "frage": "Sigorta bilirkişi raporunu kısarsa ne olur?",
-        "antwort": "Sigorta çoğu zaman değer kaybını (Wertminderung), UPE ek ücretlerini, nakliye masraflarını veya bilirkişi honorarını kısar. Avukatımız ilgili BGH kararlarıyla (VI ZR 65/18, VI ZR 174/24) itiraz yazar. Kesinti devam ederse hukuk bürosu dava açar. Dava masraflarını, kazanılması halinde, karşı taraf tamamen üstlenir."
+        "antwort": "Sigorta çoğu zaman değer kaybını (Wertminderung), UPE ek ücretlerini, nakliye masraflarını veya bilirkişi honorarını kısar. Ortak hukuk büromuz ilgili BGH kararlarıyla (VI ZR 65/18, VI ZR 174/24) itiraz yazar. Kesinti devam ederse hukuk bürosu dava açar. Dava masraflarını, kazanılması halinde, karşı taraf tamamen üstlenir."
       },
       {
         "frage": "Kiralık araç (Mietwagen) veya kullanım kaybı (Nutzungsausfall) ne zaman hakkımdır?",
@@ -4094,7 +4094,7 @@
     "vorteile": {
       "title": "Avantajlar — Sigortacı kesintileri geri alındı",
       "description": "Suçsuz kazada 0 € masraf payı (§249 BGB). Denetim hizmeti kesintisi yerine bağımsız bilirkişi. Size gerçekte neyin hak edildiğini görün.",
-      "og_description": "Suçsuz kazada §249 BGB uyarınca 0 € masraf payı. Bağımsız bilirkişi, tam talep hakkı. Denetim hizmeti kesintilerini (BGH'a göre tipik olarak %30–40) geri alıyoruz."
+      "og_description": "Suçsuz kazada §249 BGB uyarınca 0 € masraf payı. Bağımsız bilirkişi, tam talep hakkı. Denetim hizmeti kesintilerini (tipik olarak %30–40) ortak hukuk büromuz geri alır."
     },
     "faq": {
       "title": "Araç hasarı SSS — Bilmeniz gerekenler (BGH ile kanıtlı)",

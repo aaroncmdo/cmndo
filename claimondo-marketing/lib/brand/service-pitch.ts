@@ -8,6 +8,12 @@
 // Drift-Risiko: wenn Wordings in einzelnen Components hartkodiert werden,
 // verlieren beide Seiten ihre Konsistenz. Im Doubt: hier ergänzen, dort
 // importieren.
+//
+// RDG-Rollentrennung (Aaron 31.05.2026, Copy-Audit 04.09.2026): Claimondo
+// koordiniert, kommuniziert, rechnet ab. Verhandeln, durchsetzen, zurueckholen,
+// klagen tut ausschliesslich "unsere Partnerkanzlei" — nie "wir", nie "unser
+// Anwalt". Diese Konstanten speisen Startseiten-Sektionen UND llms.txt/
+// llms-full.txt; ein Rueckfall hier landet direkt im KI-Feed.
 
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -36,10 +42,10 @@ export const SERVICE_PITCH_HEADLINES = {
 // ─── Sub-Headlines ──────────────────────────────────────────────
 
 export const SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO =
-  'Wir koordinieren Gutachter, Anwalt und Werkstatt – und führen die Verhandlung mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.'
+  'Wir koordinieren Gutachter, Anwalt und Werkstatt – unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.'
 
 export const SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP =
-  'Wir disponieren Ihren Gutachter (< 48 h), führen die Versicherungs-Verhandlung und setzen Ihren Anspruch BGH-konform durch. 0 € für Sie.'
+  'Wir disponieren Ihren Gutachter (< 48 h), unsere Partnerkanzlei verhandelt mit der Versicherung und setzt Ihren Anspruch BGH-konform durch. 0 € für Sie.'
 
 // ─── Hero-Bullets (5 Service-Realität, Brand-Konsistenz-Anker) ─
 
@@ -81,7 +87,7 @@ export const SERVICE_REALITY_CARDS_DETAILED: ServiceRealityCard[] = [
   {
     label: 'Sie wissen vor der Versicherung, was los ist.',
     Icon: Eye,
-    body: 'Wenn die Versicherung kürzt, sehen Sie es am selben Tag. Der Anwalt schreibt zurück, bevor Sie „Wartezeit" tippen können.',
+    body: 'Wenn die Versicherung kürzt, sehen Sie es am selben Tag. Die Partnerkanzlei schreibt zurück, bevor Sie „Wartezeit" tippen können.',
   },
   {
     label: 'Kein Aktendeckel. Alles digital.',
@@ -117,7 +123,7 @@ export const PLATTFORM_MECHANIK_STEPS: PlattformMechanikStep[] = [
   {
     nr: 3,
     titel: 'Kürzungs-Alarm',
-    body: 'Wenn die Versicherung kürzen will, schreibt unser Anwalt zurück – bevor Sie „Wartezeit" tippen können.',
+    body: 'Wenn die Versicherung kürzen will, schreibt unsere Partnerkanzlei zurück – bevor Sie „Wartezeit" tippen können.',
   },
 ]
 
@@ -137,22 +143,22 @@ export const SERVICE_PITCH_CTAS = {
 export const ANSPRUECHE_REFRAMED = [
   {
     titel: 'Reparatur oder Wiederbeschaffungswert',
-    text: 'Wir verhandeln vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.',
+    text: 'Unsere Partnerkanzlei verhandelt vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.',
     href: '/haftpflicht/reparaturkosten',
   },
   {
     titel: 'Merkantile Wertminderung',
-    text: 'Wir setzen die Wertminderung nach Sanden/Danner-Formel durch – auch wenn die Versicherung „angemessen" anbietet. BGH VI ZR 357/03.',
+    text: 'Unsere Partnerkanzlei setzt die Wertminderung nach Sanden/Danner-Formel durch – auch wenn die Versicherung „angemessen" anbietet. BGH VI ZR 357/03.',
     href: '/haftpflicht/wertminderung',
   },
   {
     titel: 'Mietwagen oder Nutzungsausfall',
-    text: 'Wir verhandeln Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.',
+    text: 'Unsere Partnerkanzlei verhandelt Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–219 €/Tag nach Sanden/Danner-Klasse.',
     href: '/haftpflicht/nutzungsausfall',
   },
   {
     titel: 'Gutachter- und Anwaltskosten',
-    text: 'Wir holen Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein – §249 BGB. Sie zahlen 0 €.',
+    text: 'Unsere Partnerkanzlei holt Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein – §249 BGB. Sie zahlen 0 €.',
     href: '/kosten-kfz-gutachten',
   },
 ] as const
@@ -211,13 +217,13 @@ export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
     cluster: 5,
     titel: 'Vertrauen / Authority',
     beschreibung:
-      'Hunderte BVSK-zertifizierte Sachverständige. Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk). 2025 in Köln gegründet. Founder Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).',
+      'Verifizierte Sachverständige mit BVSK-, IHK- oder öbuv-Nachweis. Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk). 2025 in Köln gegründet. Founder Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).',
   },
   {
     cluster: 6,
     titel: 'Plattform-Mechanik (Uber-Prinzip)',
     beschreibung:
-      'On-demand-disponiert statt vermittelt – der nächste freie Gutachter, nicht der in drei Wochen. Sachverständige haben den Fall mobile in der Tasche, können sofort zurückpingen. Kein Papierkram für irgendwen – alles digital. Wenn die Versicherung kürzt, alarmiert die Plattform den Anwalt automatisch – Antwort am selben Tag.',
+      'On-demand-disponiert statt vermittelt – der nächste freie Gutachter, nicht der in drei Wochen. Sachverständige haben den Fall mobile in der Tasche, können sofort zurückpingen. Kein Papierkram für irgendwen – alles digital. Wenn die Versicherung kürzt, alarmiert die Plattform die Partnerkanzlei automatisch – Antwort am selben Tag.',
   },
 ]
 
@@ -226,4 +232,4 @@ export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
  * Single source of truth — wenn du den Pitch änderst, ändere ihn hier.
  * Konsumenten: `src/app/llms.txt/route.ts`, `src/app/llms-full.txt/route.ts`.
  */
-export const SERVICE_PITCH_BRAND_BLOCK = `Claimondo nimmt Ihnen die Versicherung ab. Wörtlich: Wir führen die komplette Kommunikation mit der gegnerischen Haftpflichtversicherung – Sie reden mit niemandem. Wir koordinieren Gutachter (in unter 48 h vor Ort, on-demand-disponiert wie Uber), Partnerkanzlei für Verkehrsrecht und Werkstatt in einem integrierten digitalen Workflow. Ein persönlicher Ansprechpartner mit Foto und Direktwahl. Live-Status im Portal, „Ihr Fall. Immer in der Tasche." 0 € für unverschuldet Geschädigte (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt. BGH-konform durchgesetzt.`
+export const SERVICE_PITCH_BRAND_BLOCK = `Claimondo nimmt Ihnen die Versicherung ab. Wörtlich: Wir führen die komplette Kommunikation mit der gegnerischen Haftpflichtversicherung – Sie reden mit niemandem. Wir koordinieren Gutachter (in unter 48 h vor Ort, on-demand-disponiert wie Uber), Partnerkanzlei für Verkehrsrecht und Werkstatt in einem integrierten digitalen Workflow. Ein persönlicher Ansprechpartner mit Foto und Direktwahl. Live-Status im Portal, „Ihr Fall. Immer in der Tasche." 0 € für unverschuldet Geschädigte (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt. Unsere Partnerkanzlei setzt die Ansprüche BGH-konform durch.`

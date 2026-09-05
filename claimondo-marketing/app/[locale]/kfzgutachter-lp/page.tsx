@@ -282,7 +282,7 @@ const WAS_WIR: { titel: string; text: string }[] = [
     text: 'Sobald das Gutachten erstellt ist, übernimmt unsere Partnerkanzlei die Kommunikation mit der gegnerischen Versicherung – vollständig und in Ihrem Namen.',
   },
   {
-    titel: 'Wir setzen alle Ansprüche durch',
+    titel: 'Unsere Partnerkanzlei setzt alle Ansprüche durch',
     text: 'Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld – auch wenn die Versicherung kürzt. Kürzungen holt unsere Kanzlei BGH-konform zurück.',
   },
   {

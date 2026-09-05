@@ -79,7 +79,7 @@
     "result_voll_heading": "This is yours — €0 out of pocket",
     "result_voll_sub": "Not your fault? Then the other party's insurer pays. Under §249 BGB you're restored as if the accident never happened.",
     "result_quote_heading": "You have claims — proportionally",
-    "result_quote_sub": "With partial fault your damage is reimbursed in proportion to the fault ratio (§254 BGB). We get the maximum for you.",
+    "result_quote_sub": "With partial fault your damage is reimbursed in proportion to the fault ratio (§254 BGB). Our partner law firm gets the maximum for you.",
     "result_pruefen_heading": "There's often more to it than you think",
     "result_pruefen_sub": "The question of fault is frequently clearer than expected — we clarify it with a lawyer and secure your claims.",
     "result_kasko_heading": "We help even if you're at fault",
@@ -304,7 +304,7 @@
         },
         "unklar": {
           "label": "Still unclear",
-          "description": "No problem — we'll clarify the question of fault together with your lawyer."
+          "description": "No problem — we'll clarify the question of fault together with your partner law firm."
         }
       },
       "marken": {
@@ -845,7 +845,7 @@
       "voll_kostenlos": "€0 for you — insurance pays lawyer + appraiser",
       "beispiel_label": "Example · €4,800 claim amount",
       "beispiel_plus": "Plus what would otherwise be reduced",
-      "beispiel_anwalt": "Your lawyer demands the full amount",
+      "beispiel_anwalt": "Your partner law firm demands the full amount",
       "nur_gutachten": "Expert report only — settle yourself →",
       "zurueck": "← Choose a different appointment"
     },
@@ -1140,13 +1140,13 @@
           "nr": 3
         },
         {
-          "titel": "We put the insurance in default",
-          "text": "4-week deadline under §286 BGB. If they attempt a reduction: our lawyer responds the same day.",
+          "titel": "Our partner law firm puts the insurer in default",
+          "text": "4-week deadline under §286 BGB. If they attempt a reduction: our partner law firm responds the same day.",
           "href": "/gegnerische-versicherung-zahlt-nicht",
           "nr": 4
         },
         {
-          "titel": "We pay you out",
+          "titel": "The insurer pays out – you see it live",
           "text": "Ø 32 days from claim submission to payout. Trackable live in the portal.",
           "href": "/schadensreport-2026",
           "nr": 5
@@ -1302,7 +1302,7 @@
           "versicherer": "HUK · LVM",
           "pruefdienstleister": "in-house claims department",
           "kuerzung": "Complete refusal of expert costs + replacement value",
-          "gegenargument": "The insurance bears the expert risk. Lawyer files suit at the competent regional court.",
+          "gegenargument": "The insurance bears the expert risk. Our partner law firm files suit at the competent regional court.",
           "bgh": "BGH VI ZR 280/22",
           "href": "/liability/expert-costs"
         }
@@ -1769,11 +1769,11 @@
           },
           {
             "frage": "What do insurers cut most often?",
-            "antwort": "1. Hourly labour rates (citing cheaper workshops), 2. UPE surcharges (recoverable despite BGH VI ZR 65/18), 3. Transport costs (despite BGH entitlement), 4. Blending costs (BGH VI ZR 174/24 from 2025 applies), 5. Expert fees (\"excessive\"), 6. Diminished value (frequently ignored entirely). Our lawyer knows every one of these line items and pursues them in full."
+            "antwort": "1. Hourly labour rates (citing cheaper workshops), 2. UPE surcharges (recoverable despite BGH VI ZR 65/18), 3. Transport costs (despite BGH entitlement), 4. Blending costs (BGH VI ZR 174/24 from 2025 applies), 5. Expert fees (\"excessive\"), 6. Diminished value (frequently ignored entirely). Our partner law firm knows every one of these line items and pursues them in full."
           },
           {
             "frage": "HUK, LVM, AXA — does it make a difference?",
-            "antwort": "Yes. HUK-COBURG systematically declares expert reports \"unusable\" and refuses to cover appraiser costs. LVM challenges AI-assisted expert reports. AXA uses supra-regional residual-value exchanges to inflate the residual value (counter-argument: BGH VI ZR 119/04 — the regional market applies). Our lawyer knows each insurer's specific tactics and responds accordingly."
+            "antwort": "Yes. HUK-COBURG systematically declares expert reports \"unusable\" and refuses to cover appraiser costs. LVM challenges AI-assisted expert reports. AXA uses supra-regional residual-value exchanges to inflate the residual value (counter-argument: BGH VI ZR 119/04 — the regional market applies). Our partner law firm knows each insurer's specific tactics and responds accordingly."
           }
         ]
       },
@@ -1845,7 +1845,7 @@
           },
           {
             "frage": "When do I receive my money?",
-            "antwort": "Repair costs are typically paid by the insurance within 4–8 weeks of receiving the expert report. Diminished value, rental car, and loss of use usually follow within the same period. If there are delays or reductions, our lawyer writes — if the insurance still reduces the payout, the partner law firm litigates. Nationwide average: 6–8 weeks from accident to full payment."
+            "antwort": "Repair costs are typically paid by the insurance within 4–8 weeks of receiving the expert report. Diminished value, rental car, and loss of use usually follow within the same period. If there are delays or reductions, our partner law firm writes — if the insurance still reduces the payout, the partner law firm litigates. Nationwide average: 6–8 weeks from accident to full payment."
           },
           {
             "frage": "Do I need to wash or repair my car before the inspection?",
@@ -3034,7 +3034,7 @@
       },
       {
         "frage": "What happens if the insurance reduces the expert report?",
-        "antwort": "Insurers frequently reduce diminished value, UPE surcharges, transport costs, or the expert's fee. Our lawyer responds citing the relevant BGH rulings (VI ZR 65/18, VI ZR 174/24). If reductions persist, the law firm litigates. Litigation costs are borne entirely by the opposing party upon success."
+        "antwort": "Insurers frequently reduce diminished value, UPE surcharges, transport costs, or the expert's fee. Our partner law firm responds citing the relevant BGH rulings (VI ZR 65/18, VI ZR 174/24). If reductions persist, the law firm litigates. Litigation costs are borne entirely by the opposing party upon success."
       },
       {
         "frage": "When do I get a rental car or loss-of-use compensation?",
@@ -4094,7 +4094,7 @@
     "vorteile": {
       "title": "Benefits — insurer deductions recovered",
       "description": "€0 out of pocket if the crash was not your fault (§249 BGB). An independent independent assessor instead of an inspection-service cut. See what you are really entitled to.",
-      "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. We recover inspection-service cuts (typically 30–40 % per BGH)."
+      "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. Our partner law firm recovers inspection-service cuts (typically 30–40 %)."
     },
     "faq": {
       "title": "Car accident claim FAQ — what you need to know (BGH-backed)",
@@ -4581,7 +4581,7 @@
       },
       {
         "frage": "Do I have to give information to the at-fault insurer?",
-        "antwort": "You are not obliged to give the at-fault insurer details about the course of events, fault or injuries on the phone. Such statements are later readily used against you. Politely refer them to your appraiser and your lawyer."
+        "antwort": "You are not obliged to give the at-fault insurer details about the course of events, fault or injuries on the phone. Such statements are later readily used against you. Politely refer them to your appraiser and your partner law firm."
       },
       {
         "frage": "What if the question of fault is unclear?",
