@@ -52,8 +52,16 @@ function userStrings(file, src) {
   return lines
 }
 
+// Einzeldateien mit nutzersichtbaren Texten ausserhalb der Marketing-Builds: die Blatt-Texte der
+// Bildserie "Aus der Patsche" leben als String-Literale im Generator (Abnahme 05.09.: sonst sind die
+// Blaetter fuer den Ratchet unsichtbar). Python-Literale werden wie TS/JS-Literale extrahiert.
+const EXTRA_FILES = ['docs/marketing/aus-der-patsche/generator.py']
+const SCAN_FILES = []
+for (const r of ROOTS) for (const sd of SUBDIRS) SCAN_FILES.push(...walk(join(ROOT, r, sd)))
+for (const e of EXTRA_FILES) { const p = join(ROOT, e); if (existsSync(p)) SCAN_FILES.push(p) }
+
 const findings = [] // {file, line, code, match}
-for (const r of ROOTS) for (const sd of SUBDIRS) for (const f of walk(join(ROOT, r, sd))) {
+for (const f of SCAN_FILES) {
   const rel = relative(ROOT, f).replace(/\\/g, '/')
   let src
   try { src = readFileSync(f, 'utf8') } catch { continue }

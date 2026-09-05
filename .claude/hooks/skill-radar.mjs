@@ -150,9 +150,14 @@ const DE = {
   'verification-before-completion': ['nachweis', 'beweis dass', 'wirklich gruen'],
   'code-review': ['code-review', 'drueberschauen'],
   'dsgvo-auth-and-logging': ['dsgvo', 'datenschutz', 'personenbezogen'],
-  'regel4-smoke': ['regel 4', 'regel-4', 'prod-smoke'],
-  'journey-verifikation': ['journey', 'ganzer lauf', 'regression'],
+  'regel4-smoke': ['regel 4', 'regel-4', 'prod-smoke', 'abnahme', 'nutzerstrom'],
+  'journey-verifikation': ['journey', 'ganzer lauf', 'regression', 'nutzerstrom', 'eingänge', 'eingaenge'],
   'release-drain': ['drain', 'nach main', 'release'],
+  // Regel 6 (05.09.): bewusst KEIN nacktes 'soll' — das Modalverb steht in jedem zweiten Prompt,
+  // ein Hinweis bei jedem zweiten Prompt wird weggeklickt. Die Pflicht kommt aus AGENTS.md, nicht vom Radar.
+  'operatives-soll': ['soll-blatt', 'sollblatt', 'operatives soll', 'operative soll', 'auftragsklärung',
+    'auftragsklaerung', 'warum bauen', 'sicht-matrix', 'sichtmatrix', 'wer darf', 'regel 6', 'regel-6',
+    'eingänge', 'eingaenge', 'neues feature', 'bau mir', 'leads müssen', 'leads muessen'],
 }
 
 /**

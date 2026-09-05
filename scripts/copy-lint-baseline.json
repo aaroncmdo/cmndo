@@ -1,0 +1,23 @@
+{
+  "files": [
+    "autounfall-io/components/tools/UnfallAssistanceWizard.tsx",
+    "autounfall-io/content/rest-pages.manual.ts",
+    "autounfall-io/lib/pseo.ts",
+    "claimondo-marketing/app/[locale]/haftpflicht/page.tsx",
+    "claimondo-marketing/app/api/kfzgutachter-lp/gutachter-verfuegbar/route.ts",
+    "claimondo-marketing/i18n/messages/de.json",
+    "claimondo-marketing/lib/actions/create-lead-from-mini-wizard.ts",
+    "claimondo-marketing/lib/analytics/oaiq-capi.ts",
+    "claimondo-marketing/lib/check/foto-check-url.ts",
+    "claimondo-marketing/lib/content/claimondo-mdx.ts",
+    "claimondo-marketing/lib/kfz-gutachter/lokalinhalt.ts",
+    "claimondo-marketing/lib/kfz-gutachter/unfallhotspots.ts",
+    "claimondo-marketing/lib/leads/flowlink-fuer-lead.ts",
+    "claimondo-marketing/lib/sv-basic/claim-actions.ts",
+    "kfz-gutachter-aachen/lib/lokalinhalt.ts",
+    "kfz-gutachter-bonn/lib/lokalinhalt.ts",
+    "kfz-gutachter-duesseldorf/lib/lokalinhalt.ts",
+    "kfz-gutachter-koeln/lib/lokalinhalt.ts",
+    "kfz-gutachter-wuppertal/lib/lokalinhalt.ts"
+  ]
+}

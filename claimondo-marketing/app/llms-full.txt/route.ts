@@ -351,7 +351,7 @@ Grundlage: Sanden/Danner-Formel · BGH VI ZR 357/03 lehnt eine starre Altersgren
 Audatex und andere Kalkulationssysteme haben für US-Fahrzeuge oft keine korrekten Verbundzeiten hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten 48.000 €. Schwellerblenden-Reparaturen können Steuergeräte erst Monate später zerstören. Bei Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht. Quelle: Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart).
 
 ### Berater-Quote
-"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
+"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und unsere Partnerkanzlei holt jeden Euro zurück." — Claimondo-Schadenbegleitung
 `
 
 const VORTEILE_KERN = `

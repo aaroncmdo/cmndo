@@ -36,7 +36,7 @@ const SCHULDFRAGE_OPTIONS = [
   {
     value: 'unklar' as const,
     title: 'Die Schuldfrage ist unklar',
-    desc: 'Wir klären das gemeinsam mit Ihnen und unseren Anwälten.',
+    desc: 'Das klären wir gemeinsam mit Ihnen und unserer Partnerkanzlei.',
   },
   {
     value: 'eigenverantwortung' as const,
