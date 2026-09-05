@@ -699,6 +699,14 @@ CI fährt `npm run check:anthropic-stop-reason -- --ratchet`. Lokal (ohne Flag) 
 
 **Baseline 0** — kein Bestand, kein Grandfathering. Jeder neue erzwungene Tool-Aufruf ohne `stop_reason`-Prüfung blockt sofort (nachgemessen: Probe-Datei eingebaut → exit 1, entfernt → exit 0). Der einzige Alt-Verstoß (`flow-intake/extract.ts`) ist mit #5377 behoben. Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
 
+# Copy-Lint-Gate (Ratchet)
+
+**Nutzersichtbare Marketing-Texte dürfen keine Rechtsdienstleistung behaupten.** Claimondo koordiniert, kommuniziert und rechnet ab; verhandeln, durchsetzen, zurückholen und geltend machen tut ausschließlich „unsere Partnerkanzlei". Der Scanner (`scripts/lib/copy-lint-scan.mjs`, unit-getestet) kennt die vier real aufgetretenen Textformen: „wir verhandeln/setzen durch/holen zurück", „unser Anwalt/unseren Anwälten", die Verb-Reihung nach Komma („Wir disponieren …, führen … und setzen … durch", 36 Stadtseiten × 6 Sprachen) und Konstanten/Feeds (`brand-constants.ts`, `llms-full.txt`).
+
+CI fährt `npm run check:copy-lint -- --ratchet`. **RDG ist hart (Baseline 0)** — jeder Treffer blockt. Umlaut-Ersatz in UI-Strings (`fuer`, `pruefen`, …) ist ein Ratchet gegen `scripts/copy-lint-baseline.json` (19 grandfathered Files, Stand 05.09.: überwiegend URLs/Slugs und Log-Strings, dazu ein echter UI-Treffer `haftpflicht/page.tsx` „Komplexe Faelle" → Boy-Scout). Lokal (ohne Flag) `--warn`. Gescannt werden die Marketing-Builds (`app`/`components`/`lib`/`content`/`i18n`/`data`/`config`; bei i18n nur `de.json`) und die Einzeldateien in `EXTRA_FILES` — dort steht der Generator der Bildserie „Aus der Patsche", weil Bildtexte sonst für jeden Ratchet unsichtbar sind (Abnahme-Befund 05.09.).
+
+⚠ Der Scanner existierte seit #5862, war aber bis #5876 **nicht verdrahtet** — die Klasse „stummer Wächter" aus dem Abschnitt oben, nur ohne `RUN_*`-Schalter: ein Script, das kein Workflow aufruft. Positivkontrolle beim Verdrahten: Probe-Satz „Wir verhandeln direkt mit der Versicherung" in den Generator → 1 RDG-Treffer, entfernt → 0.
+
 # Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
 
 **Kanonische Referenz: `docs/fundament/zugriffs-doktrin.md`** (Fundament C5, #4860). Kern in einem Satz: **Client liest über Views/RPCs je Rolle, schreibt über Server-Actions mit Guard + `.select()`-Row-Check; RLS ist Sicherheitsnetz, nicht Feinsteuerung** (Verfassung §7). Ist-Stand: Client-Direkt-Selects auf Basistabellen = **0** (verifiziert) — server-first ist gelebt.

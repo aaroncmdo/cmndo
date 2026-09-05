@@ -413,7 +413,7 @@ def sheet_03():
     chrome(
         sh, 3, "Beobachtung 03 · Die Werkstatt regelt das",
         "„Wir regeln das mit der Versicherung.“ Die Werkstatt regelt die Reparatur. Sechs weitere Positionen regelt niemand.",
-        "Ein Gutachten erfasst alle sieben Positionen. Unsere Partnerkanzlei macht sie geltend, für Sie 0 €.",
+        "Ein Gutachten belegt den Schaden. Unsere Partnerkanzlei macht alle sieben Positionen geltend, für Sie 0 €.",
         "Positionen eines Haftpflichtschadens · 1 von 7 belegt",
     )
     return sh.save("patsche-03-die-werkstatt-regelt-das.png")
