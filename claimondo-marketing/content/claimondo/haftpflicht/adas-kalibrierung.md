@@ -46,7 +46,7 @@ ADAS-Kalibrierung · Justage der Assistenzsysteme · Kamera-Einlernen · Sensorj
 
 ## In einem Satz erklärt
 
-Wenn bei der Reparatur ein Bauteil bewegt, getauscht oder ausgerichtet wurde, an dem ein Assistenzsensor sitzt, muss dieser Sensor anschließend neu kalibriert werden – sonst verlässt du dich auf ein System, das seine eigene Blickrichtung nicht mehr kennt.
+Wenn bei der Reparatur ein Bauteil bewegt, getauscht oder ausgerichtet wurde, an dem ein Assistenzsensor sitzt, muss dieser Sensor anschließend neu kalibriert werden – sonst verlässt Sie Sie auf ein System, das seine eigene Blickrichtung nicht mehr kennt.
 
 ## In drei Sätzen erklärt
 
@@ -88,7 +88,7 @@ Welches Verfahren gilt, bestimmt der Hersteller, nicht die Werkstatt – und sch
 
 Bei den meisten gekürzten Positionen geht es um Geld. Hier nicht nur.
 
-Ein dejustierter Notbremsassistent hat zwei Fehlermodi, und beide sind gefährlich: Er kann **zu spät oder gar nicht** auslösen, weil er das Hindernis nicht im Erfassungsbereich hat. Oder er löst **grundlos** aus, weil er ein Schilderbrett am Fahrbahnrand für ein stehendes Fahrzeug hält – eine Vollbremsung ohne Anlass, mit dem Verkehr hinter dir.
+Ein dejustierter Notbremsassistent hat zwei Fehlermodi, und beide sind gefährlich: Er kann **zu spät oder gar nicht** auslösen, weil er das Hindernis nicht im Erfassungsbereich hat. Oder er löst **grundlos** aus, weil er ein Schilderbrett am Fahrbahnrand für ein stehendes Fahrzeug hält – eine Vollbremsung ohne Anlass, mit dem Verkehr hinter Ihnen.
 
 Das Tückische: Beides fällt im Alltag nicht auf. Die Systeme greifen selten ein, und wenn sie es tun, ist es genau der Moment, in dem man sich auf sie verlässt. Ein Warnsymbol im Cockpit erscheint nur, wenn der Sensor sich selbst als gestört erkennt – eine saubere, aber **falsch ausgerichtete** Kamera meldet keinen Fehler.
 
@@ -105,11 +105,11 @@ Das Tückische: Beides fällt im Alltag nicht auf. Die Systeme greifen selten ei
 
 Wie diese Prüfberichte zustande kommen – nach Aktenlage, ohne das Fahrzeug zu sehen – steht unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten). Dieselbe Mechanik trifft die [Beilackierung](/haftpflicht/beilackierung).
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 1. **Kalibrierprotokoll anfordern.** Seriöse Werkstätten dokumentieren Verfahren, Sollwerte und Ergebnis. Das ist der beste Beleg gegen eine Pauschalkürzung.
 2. **Herstellervorgabe benennen lassen.** Die Werkstatt kann zeigen, welcher Reparaturschritt die Kalibrierung auslöst – das schlägt die Behauptung „nicht erforderlich".
-3. **Nicht auf die Position verzichten, um Streit zu vermeiden.** Eine nicht durchgeführte Kalibrierung spart kein Geld, sie verschiebt ein Sicherheitsrisiko in deinen Alltag.
+3. **Nicht auf die Position verzichten, um Streit zu vermeiden.** Eine nicht durchgeführte Kalibrierung spart kein Geld, sie verschiebt ein Sicherheitsrisiko in Ihren Alltag.
 4. **Bei Kürzung den Sachverständigen einschalten** – die Erforderlichkeit ist eine technische Frage, keine kaufmännische.
 
 ### 💡 Die wichtigste Regel

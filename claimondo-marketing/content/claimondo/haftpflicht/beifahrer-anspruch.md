@@ -63,7 +63,7 @@ Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschä
 
 ### 1. Unfall durch gegnerisches Fahrzeug verschuldet
 - Beifahrer hat volle Ansprüche **gegen die gegnerische Haftpflichtversicherung**
-- Quote 100 : 0 zu deinen Gunsten (sofern kein eigenes Mitverschulden)
+- Quote 100 : 0 zu Ihren Gunsten (sofern kein eigenes Mitverschulden)
 - Anwaltskosten zahlt der gegnerische Versicherer
 
 ### 2. Unfall durch eigenes Fahrzeug verschuldet
@@ -73,7 +73,7 @@ Beifahrer und Mitfahrer sind im deutschen Schadensersatzrecht **primäre Geschä
 
 ### 3. Beidseitige Schuld
 - Beifahrer hat Ansprüche **gegen beide Haftpflichtversicherungen** (gesamtschuldnerisch)
-- Du kannst wählen, gegen welche du primär forderst – die Versicherer regeln den Innen-Ausgleich (§ 426 BGB)
+- Sie können wählen, gegen welche Sie primär fordern – die Versicherer regeln den Innen-Ausgleich (§ 426 BGB)
 
 ---
 
@@ -135,7 +135,7 @@ Falsch. Anspruch besteht objektiv gegen die Versicherung, unabhängig vom Verhä
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Beifahrer-Ansprüche sind vollwertig – egal welches Auto schuldig war. Familien-Konstellation hindert nicht.
@@ -168,7 +168,7 @@ Möglich. Bei Verletzungsfolge typisch 20–30 % Mitverschulden, wenn der Versic
 Nein. Die Klage geht gegen die Haftpflichtversicherung, nicht persönlich gegen das Familienmitglied.
 
 **Was, wenn beide Fahrer schuld sind?**
-Beifahrer hat Ansprüche gegen beide Haftpflichtversicherungen – gesamtschuldnerisch. Wahl, an wen du dich primär wendest.
+Beifahrer hat Ansprüche gegen beide Haftpflichtversicherungen – gesamtschuldnerisch. Wahl, an wen Sie sich primär wenden.
 
 ---
 
@@ -181,7 +181,7 @@ Beifahrer hat Ansprüche gegen beide Haftpflichtversicherungen – gesamtschuldn
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum eigenen Fahrer unklar ist. Spezialisierte Verkehrsrechts-Kanzleien klären das routiniert – Anwaltskosten zahlt der Versicherer.
 

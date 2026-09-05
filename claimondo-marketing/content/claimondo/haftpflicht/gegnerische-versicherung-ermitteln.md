@@ -32,9 +32,9 @@ related:
 meta_description: "Gegnerische Versicherung herausfinden: Der Zentralruf der Autoversicherer ermittelt sie kostenfrei über das Kennzeichen – 0800 250 260 0, rund um die Uhr."
 ---
 
-# Gegnerische Versicherung herausfinden – so ermittelst du sie über das Kennzeichen
+# Gegnerische Versicherung herausfinden – so ermitteln Sie sie über das Kennzeichen
 
-> **Kurz erklärt:** Wenn du nach einem unverschuldeten Unfall nicht weißt, bei welcher Gesellschaft der Unfallgegner haftpflichtversichert ist, musst du nicht bei ihm nachfragen. Der **Zentralruf der Autoversicherer** ermittelt die zuständige Kfz-Haftpflichtversicherung für dich – **kostenfrei**, unter **0800 250 260 0**, rund um die Uhr an 365 Tagen im Jahr. Du brauchst dafür nur drei Angaben: **Kennzeichen, Schadentag und Unfallland**.
+> **Kurz erklärt:** Wenn Sie nach einem unverschuldeten Unfall nicht weißt, bei welcher Gesellschaft der Unfallgegner haftpflichtversichert ist, müssen Sie nicht bei ihm nachfragen. Der **Zentralruf der Autoversicherer** ermittelt die zuständige Kfz-Haftpflichtversicherung für Sie – **kostenfrei**, unter **0800 250 260 0**, rund um die Uhr an 365 Tagen im Jahr. Sie brauchen dafür nur drei Angaben: **Kennzeichen, Schadentag und Unfallland**.
 
 ## Auch bekannt als
 
@@ -44,37 +44,37 @@ Zentralruf der Autoversicherer · Versicherung über Kennzeichen ermitteln · Ha
 
 ## In einem Satz erklärt
 
-Der Zentralruf ist eine zentrale Auskunftsstelle der deutschen Autoversicherer, die anhand eines Kennzeichens die zuständige Kfz-Haftpflichtversicherung nennt – ohne dass du den Unfallgegner um Auskunft bitten musst.
+Der Zentralruf ist eine zentrale Auskunftsstelle der deutschen Autoversicherer, die anhand eines Kennzeichens die zuständige Kfz-Haftpflichtversicherung nennt – ohne dass Sie den Unfallgegner um Auskunft bitten müssen.
 
-## Die drei Angaben, die du brauchst
+## Die drei Angaben, die Sie brauchen
 
 Mehr wird nicht verlangt:
 
 | Angabe | Beispiel | Woher |
 |---|---|---|
 | Gegnerisches Kennzeichen | K-AB 1234 | Foto vom Unfallort, Polizeiprotokoll |
-| Schadentag | 12.08.2026 | dein Gedächtnis, Unfallbericht |
+| Schadentag | 12.08.2026 | Ihr Gedächtnis, Unfallbericht |
 | Unfallland | Deutschland | – |
 
 Ein Foto des Kennzeichens direkt am Unfallort ist deshalb der wichtigste einzelne Handgriff nach einem Unfall – wichtiger als der Austausch von Telefonnummern.
 
-## So erreichst du den Zentralruf
+## So erreichen Sie den Zentralruf
 
 **Telefonisch aus Deutschland:** **0800 250 260 0** – kostenfrei, **365 Tage im Jahr, 24 Stunden am Tag**.
 
 **Aus dem Ausland:** +49 40 300 330 300, Montag bis Freitag von 8 bis 20 Uhr.
 
-**Online:** Über das Anfrageformular auf [zentralruf.de](https://www.zentralruf.de/) – dort wird zusätzlich deine E-Mail-Adresse benötigt, an die die Auskunft geht.
+**Online:** Über das Anfrageformular auf [zentralruf.de](https://www.zentralruf.de/) – dort wird zusätzlich Ihre E-Mail-Adresse benötigt, an die die Auskunft geht.
 
-Die Auskunft ist in beiden Wegen kostenlos. Du musst weder Mitglied noch Kunde einer bestimmten Gesellschaft sein.
+Die Auskunft ist in beiden Wegen kostenlos. Sie müssen weder Mitglied noch Kunde einer bestimmten Gesellschaft sein.
 
-## Warum du den Gegner nicht fragen musst
+## Warum Sie den Gegner nicht fragen müssen
 
 Nach einem Unfall ist der Verursacher zwar verpflichtet, seine Daten anzugeben. In der Praxis scheitert das häufig: Der Zettel ist unleserlich, die genannte Gesellschaft stimmt nicht, oder der Kontakt bricht ab, sobald die Schuldfrage unbequem wird.
 
-Der Zentralruf umgeht das vollständig. Er fragt nicht den Gegner, sondern die zentrale Datenbank der Versicherer. Damit bist du unabhängig von dessen Mitwirkung.
+Der Zentralruf umgeht das vollständig. Er fragt nicht den Gegner, sondern die zentrale Datenbank der Versicherer. Damit sind Sie unabhängig von dessen Mitwirkung.
 
-## Wenn du das Kennzeichen nicht hast
+## Wenn Sie das Kennzeichen nicht haben
 
 Ohne Kennzeichen kann der Zentralruf nichts ausrichten – dann liegt ein anderer Fall vor: Der Verursacher ist unbekannt geblieben, also **Fahrerflucht**. Dafür gibt es die **Verkehrsopferhilfe e.V.** nach § 12 PflVG, die bei unbekanntem Verursacher eintritt (Sachschäden mit 500 € Selbstbeteiligung, Personenschäden vollständig). Voraussetzung ist unter anderem eine Polizeianzeige.
 
@@ -82,9 +82,9 @@ Ohne Kennzeichen kann der Zentralruf nichts ausrichten – dann liegt ein andere
 
 ## Was danach passiert – die Reihenfolge zählt
 
-Sobald du die Versicherung kennst, gilt: **Erst das Gutachten, dann die Meldung.** Wer den Schaden meldet, bevor ein eigener Sachverständiger das Fahrzeug gesehen hat, überlässt die Schadenhöhe der Gegenseite – sie schickt dann ihren eigenen Prüfdienst.
+Sobald Sie die Versicherung kennen, gilt: **Erst das Gutachten, dann die Meldung.** Wer den Schaden meldet, bevor ein eigener Sachverständiger das Fahrzeug gesehen hat, überlässt die Schadenhöhe der Gegenseite – sie schickt dann ihren eigenen Prüfdienst.
 
-Als unverschuldet Geschädigter hast du nach § 249 BGB das Recht, einen **eigenen** Sachverständigen zu beauftragen. Die Kosten trägt die gegnerische Versicherung.
+Als unverschuldet Geschädigter haben Sie nach § 249 BGB das Recht, einen **eigenen** Sachverständigen zu beauftragen. Die Kosten trägt die gegnerische Versicherung.
 
 → Weiter mit [Wer ist anspruchsberechtigt](/haftpflicht/geschaedigte-primaer) und der [4-Wochen-Frist](/haftpflicht/4-wochen-frist).
 
@@ -119,7 +119,7 @@ Das Unfallland ist eine der Pflichtangaben – die Abfrage ist also nicht auf De
     },
     {
       "@type": "Article",
-      "headline": "Gegnerische Versicherung herausfinden – so ermittelst du sie über das Kennzeichen",
+      "headline": "Gegnerische Versicherung herausfinden – so ermitteln Sie sie über das Kennzeichen",
       "datePublished": "2026-08-28",
       "dateModified": "2026-08-28",
       "inLanguage": "de-DE",
@@ -135,7 +135,7 @@ Das Unfallland ist eine der Pflichtangaben – die Abfrage ist also nicht auf De
         {"@type": "Question", "name": "Wie finde ich die Versicherung des Unfallgegners heraus?", "acceptedAnswer": {"@type": "Answer", "text": "Über den Zentralruf der Autoversicherer unter 0800 250 260 0 – kostenfrei und rund um die Uhr. Benötigt werden das gegnerische Kennzeichen, der Schadentag und das Unfallland."}},
         {"@type": "Question", "name": "Ist die Auskunft des Zentralrufs kostenlos?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Sowohl die 0800-Rufnummer als auch die Online-Anfrage über zentralruf.de sind kostenfrei."}},
         {"@type": "Question", "name": "Was tun, wenn ich das Kennzeichen nicht habe?", "acceptedAnswer": {"@type": "Answer", "text": "Dann liegt Fahrerflucht vor. Bei unbekanntem Verursacher tritt die Verkehrsopferhilfe e.V. nach § 12 PflVG ein – Sachschäden mit 500 Euro Selbstbeteiligung, Personenschäden vollständig. Voraussetzung ist unter anderem eine Polizeianzeige."}},
-        {"@type": "Question", "name": "Muss ich den Unfallgegner nach seiner Versicherung fragen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Der Zentralruf fragt die zentrale Datenbank der Versicherer ab, nicht den Unfallgegner. Du bist damit unabhängig von dessen Mitwirkung."}}
+        {"@type": "Question", "name": "Muss ich den Unfallgegner nach seiner Versicherung fragen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Der Zentralruf fragt die zentrale Datenbank der Versicherer ab, nicht den Unfallgegner. Sie sind damit unabhängig von dessen Mitwirkung."}}
       ]
     }
   ]

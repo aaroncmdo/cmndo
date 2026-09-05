@@ -145,7 +145,7 @@ In der Praxis oft Kapitalisierung im Vergleich – komplexe aktuarielle Berechnu
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Unterhaltsschaden ist die **wirtschaftlich größte** Position bei tödlichem Verkehrsunfall – und gleichzeitig die komplexeste. Spezialisierter Verkehrsrechts-/Familienrechts-Anwalt zwingend.
@@ -191,7 +191,7 @@ Anspruch besteht, wenn voraussichtlich Unterhaltsverpflichtung entstanden wäre.
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

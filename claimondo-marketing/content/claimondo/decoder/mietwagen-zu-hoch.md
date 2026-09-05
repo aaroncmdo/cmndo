@@ -44,7 +44,7 @@ Mietwagen-Kürzung · Tagessatz-Streit · Unfall-Ersatz-Tarif-Streit · Schwacke
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -67,16 +67,16 @@ Drei Merkmale dieser Kürzung:
 ## Was wirklich dahintersteht
 
 ### 1. Differenz-Belastung
-Mietwagen-Rechnung 120 € × 14 Tage = 1.680 €. Versicherer-Erstattung 80 € × 14 Tage = 1.120 €. Differenz **560 €** zu deinen Lasten – pro Fall.
+Mietwagen-Rechnung 120 € × 14 Tage = 1.680 €. Versicherer-Erstattung 80 € × 14 Tage = 1.120 €. Differenz **560 €** zu Ihren Lasten – pro Fall.
 
 ### 2. Strategische Tabellen-Wahl
-Schwacke-Liste (basierend auf Befragung von Vermietern, Direkt-Tarife) liegt typischerweise höher als Fraunhofer-Mietpreisspiegel (Online-Auswertung mit Vorbuchungs-Rabatten). Versicherer wählt strategisch die niedrigere Tabelle – auch wenn die andere für deinen konkreten Fall einschlägiger wäre.
+Schwacke-Liste (basierend auf Befragung von Vermietern, Direkt-Tarife) liegt typischerweise höher als Fraunhofer-Mietpreisspiegel (Online-Auswertung mit Vorbuchungs-Rabatten). Versicherer wählt strategisch die niedrigere Tabelle – auch wenn die andere für Ihren konkreten Fall einschlägiger wäre.
 
 ### 3. Partner-Mietwagen drängen
-Viele Versicherer haben Partner-Vermieter mit Pauschal-Konditionen, die unter dem Markttarif liegen. Du wirst (oft schon im Erstkontakt) auf diese Partner verwiesen – ohne Hinweis, dass du auch frei wählen darfst.
+Viele Versicherer haben Partner-Vermieter mit Pauschal-Konditionen, die unter dem Markttarif liegen. Sie werden (oft schon im Erstkontakt) auf diese Partner verwiesen – ohne Hinweis, dass Sie auch frei wählen dürfen.
 
 ### 4. Verfügbarkeit ignorieren
-Du mietest, wo verfügbar – am Wochenende, in der Nacht, am Unfallort. Vergleichs-Recherche ist in akuten Lagen nicht zumutbar. Die BGH-Linie schützt diese Wahl – der Versicherer-Vorwurf „Sie hätten günstiger mieten können" ist meist nicht haltbar.
+Sie mieten, wo verfügbar – am Wochenende, in der Nacht, am Unfallort. Vergleichs-Recherche ist in akuten Lagen nicht zumutbar. Die BGH-Linie schützt diese Wahl – der Versicherer-Vorwurf „Sie hätten günstiger mieten können" ist meist nicht haltbar.
 
 ---
 
@@ -109,7 +109,7 @@ Mietwagen-Firmen bieten oft einen „Unfall-Ersatz-Tarif" an, der höher ist als
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Verfügbarkeit zum Anmietzeitpunkt dokumentieren – das ist der Schlüssel zur vollen Erstattung. Wenn günstigere Tarife nicht verfügbar waren, gilt der tatsächlich gezahlte Tagessatz.
@@ -117,10 +117,10 @@ Verfügbarkeit zum Anmietzeitpunkt dokumentieren – das ist der Schlüssel zur 
 ### 🛠 Vier Schritte
 
 **1. Schwacke- und Fraunhofer-Werte ermitteln**
-Beide Tabellen für deine PLZ-Region und Mietwagen-Kategorie. Misch-Mittel berechnen – das ist die typische gerichtliche Bezugsgröße.
+Beide Tabellen für Ihre PLZ-Region und Mietwagen-Kategorie. Misch-Mittel berechnen – das ist die typische gerichtliche Bezugsgröße.
 
 **2. Verfügbarkeit dokumentieren**
-Wann hast du gemietet (Uhrzeit, Tag, Wochenende)? Welche Anbieter hattest du angefragt? Waren günstigere Tarife verfügbar? Zugangsnachweise (E-Mail, Buchungs-Bestätigungen) sichern.
+Wann haben Sie gemietet (Uhrzeit, Tag, Wochenende)? Welche Anbieter hatten Sie angefragt? Waren günstigere Tarife verfügbar? Zugangsnachweise (E-Mail, Buchungs-Bestätigungen) sichern.
 
 **3. Vergleichs-Angebote sammeln**
 Welche Tarife waren verfügbar – und welche nicht? Screenshots aus Buchungs-Plattformen zum Anmietzeitpunkt.
@@ -173,35 +173,35 @@ Mit freundlichen Grüßen
 ### Reaktion A – Tabellen-Streit
 > *„Schwacke ist veraltet – Fraunhofer ist maßgeblich."*
 
-**Deine Antwort:** BGH-Linie zum Misch-Mittel. In den meisten OLG-Bezirken ist das arithmetische Mittel etabliert. Versicherer kann nicht einseitig die für ihn günstigere Tabelle wählen.
+**Ihre Antwort:** BGH-Linie zum Misch-Mittel. In den meisten OLG-Bezirken ist das arithmetische Mittel etabliert. Versicherer kann nicht einseitig die für ihn günstigere Tabelle wählen.
 
 ### Reaktion B – Partner-Angebot
 > *„Bei unserem Partner [X] hätten Sie nur 65 €/Tag bezahlt."*
 
-**Deine Antwort:** Verfügbarkeit zum Anmietzeitpunkt prüfen. Partner-Verweis ist Empfehlung, nicht Pflicht – du hast freie Wahl.
+**Ihre Antwort:** Verfügbarkeit zum Anmietzeitpunkt prüfen. Partner-Verweis ist Empfehlung, nicht Pflicht – Sie haben freie Wahl.
 
 ### Reaktion C – Klasse-Reduzierung
 > *„Sie hätten eine niedrigere Klasse mieten können."*
 
-**Deine Antwort:** Eigene Fahrzeug-Klasse als Bezug. Bei Mittelklasse-Eigentum: Mittelklasse-Mietwagen oder eine Klasse darunter – keine pauschale Reduktion auf Kleinstwagen.
+**Ihre Antwort:** Eigene Fahrzeug-Klasse als Bezug. Bei Mittelklasse-Eigentum: Mittelklasse-Mietwagen oder eine Klasse darunter – keine pauschale Reduktion auf Kleinstwagen.
 
 ### Reaktion D – Verlängerungs-Streit
 > *„14 Tage sind zu lang – wir erstatten nur 7."*
 
-**Deine Antwort:** Reparatur-Dauer dokumentieren – Werkstatt-Auftrag, Werkstatt-Auslastung, Ersatzteil-Wartezeiten. BGH-Linie zur tatsächlichen Reparatur-Dauer.
+**Ihre Antwort:** Reparatur-Dauer dokumentieren – Werkstatt-Auftrag, Werkstatt-Auslastung, Ersatzteil-Wartezeiten. BGH-Linie zur tatsächlichen Reparatur-Dauer.
 
 ---
 
 ## Häufige Fragen
 
 **Wie viel pro Tag bekomme ich für Mietwagen erstattet?**
-Der „ortsübliche Normaltarif" für deine Region und Mietwagen-Kategorie. Praktisch das arithmetische Mittel aus Schwacke-Liste und Fraunhofer-Mietpreisspiegel. Bei verfügbarkeits-bedingt höherem Tagessatz: der tatsächlich gezahlte Betrag.
+Der „ortsübliche Normaltarif" für Ihre Region und Mietwagen-Kategorie. Praktisch das arithmetische Mittel aus Schwacke-Liste und Fraunhofer-Mietpreisspiegel. Bei verfügbarkeits-bedingt höherem Tagessatz: der tatsächlich gezahlte Betrag.
 
 **Was ist der Unterschied zwischen Schwacke und Fraunhofer?**
 Schwacke-Liste basiert auf Befragung von Autovermietern (Direkt-Tarife, höher). Fraunhofer-Spiegel basiert auf Online-Buchungs-Plattformen (mit Vorbuchungs-Rabatten, niedriger). BGH-Linie: Misch-Mittel.
 
 **Welche Mietwagen-Klasse darf ich nehmen?**
-Maximal die gleiche Klasse wie dein eigenes Fahrzeug. Eine Klasse darunter ist Schadensminderungs-zumutbar. Bei Premium-Wagen ggf. nur Mittelklasse.
+Maximal die gleiche Klasse wie Ihr eigenes Fahrzeug. Eine Klasse darunter ist Schadensminderungs-zumutbar. Bei Premium-Wagen ggf. nur Mittelklasse.
 
 **Wie lange darf der Mietwagen-Zeitraum sein?**
 Solange Reparatur oder Wiederbeschaffung dauert – bei Reparatur die tatsächliche Werkstattzeit, bei Totalschaden typisch 14 Tage Wiederbeschaffungs-Dauer.
@@ -223,7 +223,7 @@ Wirtschaftlich ja, weil Anwaltskosten der Versicherer trägt. Praktisch ist Klag
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Mietwagen-Streitigkeiten sind ein häufiges, gut beherrschbares Feld – typische Kürzungen lassen sich bei guter Dokumentation zu 70–100 % rückgängig machen. Anwaltskosten zahlt der Versicherer bei unverschuldetem Unfall.
 
@@ -266,7 +266,7 @@ Mietwagen-Streitigkeiten sind ein häufiges, gut beherrschbares Feld – typisch
       "mainEntity": [
         {"@type": "Question", "name": "Wie viel pro Tag bekomme ich für Mietwagen erstattet?", "acceptedAnswer": {"@type": "Answer", "text": "Der ortsübliche Normaltarif — praktisch das arithmetische Mittel aus Schwacke-Liste und Fraunhofer-Mietpreisspiegel. Bei verfügbarkeits-bedingt höherem Tagessatz: der tatsächlich gezahlte Betrag."}},
         {"@type": "Question", "name": "Was ist der Unterschied zwischen Schwacke und Fraunhofer?", "acceptedAnswer": {"@type": "Answer", "text": "Schwacke basiert auf Befragung von Autovermietern (Direkt-Tarife, höher). Fraunhofer basiert auf Online-Buchungs-Plattformen (Vorbuchungs-Rabatte, niedriger). BGH-Linie: Misch-Mittel beider."}},
-        {"@type": "Question", "name": "Welche Mietwagen-Klasse darf ich nehmen?", "acceptedAnswer": {"@type": "Answer", "text": "Maximal die gleiche Klasse wie dein eigenes Fahrzeug. Eine Klasse darunter ist Schadensminderungs-zumutbar. Bei Premium-Wagen ggf. nur Mittelklasse."}}
+        {"@type": "Question", "name": "Welche Mietwagen-Klasse darf ich nehmen?", "acceptedAnswer": {"@type": "Answer", "text": "Maximal die gleiche Klasse wie Ihr eigenes Fahrzeug. Eine Klasse darunter ist Schadensminderungs-zumutbar. Bei Premium-Wagen ggf. nur Mittelklasse."}}
       ]
     }
   ]

@@ -38,7 +38,7 @@ meta_description: "Beilackierung nach Unfall: bei modernen Lacken technisch nöt
 
 # Beilackierung nach Unfall – wann die Versicherung sie zahlen muss
 
-> **Kurz erklärt:** Beilackierung heißt, dass die Werkstatt angrenzende, **unbeschädigte** Bauteile mitlackiert – damit das reparierte Teil farblich nicht absticht. Bei modernen Metallic- und Effektlacken ist das in vielen Fällen technisch nicht vermeidbar. Der Bundesgerichtshof hat die Position in **VI ZR 174/24** als erstattungsfähig bestätigt. Trotzdem ist sie einer der am häufigsten gestrichenen Posten – meist pauschal im Prüfbericht, ohne dass jemand dein Fahrzeug gesehen hat.
+> **Kurz erklärt:** Beilackierung heißt, dass die Werkstatt angrenzende, **unbeschädigte** Bauteile mitlackiert – damit das reparierte Teil farblich nicht absticht. Bei modernen Metallic- und Effektlacken ist das in vielen Fällen technisch nicht vermeidbar. Der Bundesgerichtshof hat die Position in **VI ZR 174/24** als erstattungsfähig bestätigt. Trotzdem ist sie einer der am häufigsten gestrichenen Posten – meist pauschal im Prüfbericht, ohne dass jemand Ihr Fahrzeug gesehen hat.
 
 ## Auch bekannt als
 
@@ -87,11 +87,11 @@ Die Beilackierung löst das, indem der neue Lack in das Nachbarteil hinein „au
 
 Mit **VI ZR 174/24** hat der Bundesgerichtshof bestätigt, dass die Beilackierung bei modernen Lacken eine erstattungsfähige Position ist. Damit ist der jahrelange Grundsatzstreit, ob es sich um „Sowieso-Kosten" oder um überflüssigen Aufwand handelt, entschieden.
 
-Fachverbände wie der **ZKF** (Zentralverband Karosserie- und Fahrzeugtechnik) und das **IFL** vertreten diese Position schon länger; die BGH-Entscheidung stützt sie. Das ist praktisch wichtig: Wenn dein Sachverständiger die Beilackierung kalkuliert und die Versicherung sie streicht, steht deine Seite nicht allein mit einer Meinung da.
+Fachverbände wie der **ZKF** (Zentralverband Karosserie- und Fahrzeugtechnik) und das **IFL** vertreten diese Position schon länger; die BGH-Entscheidung stützt sie. Das ist praktisch wichtig: Wenn Ihr Sachverständiger die Beilackierung kalkuliert und die Versicherung sie streicht, steht Ihre Seite nicht allein mit einer Meinung da.
 
 > **Wichtig:** Der BGH sagt nicht, dass Beilackierung *immer* zu zahlen ist. Er sagt, dass sie erstattungsfähig ist, **wenn sie technisch erforderlich ist**. Diese Beurteilung gehört zum Sachverständigen – nicht in einen Prüfbericht, der nach Aktenlage erstellt wurde.
 
-## Die typische Kürzung – und woran du sie erkennst
+## Die typische Kürzung – und woran Sie sie erkennen
 
 Die Streichung kommt selten mit technischer Begründung. Typische Formulierungen im Prüfbericht:
 
@@ -102,26 +102,26 @@ Die Streichung kommt selten mit technischer Begründung. Typische Formulierungen
 | „Position entspricht nicht dem Schadenbild" | Widerspruch zum Gutachten – ohne Gegengutachten |
 | „Farbtonangleichung ist Sowieso-Aufwand" | Behauptung, die der BGH so nicht stützt |
 
-Das Muster ist immer dasselbe: Ein Prüfdienstleister bewertet die Kalkulation deines Sachverständigen **am Schreibtisch**, ohne das Fahrzeug gesehen zu haben. Wie diese Prüfberichte entstehen und was sie wert sind, steht ausführlich unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
+Das Muster ist immer dasselbe: Ein Prüfdienstleister bewertet die Kalkulation Ihres Sachverständigen **am Schreibtisch**, ohne das Fahrzeug gesehen zu haben. Wie diese Prüfberichte entstehen und was sie wert sind, steht ausführlich unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
 
 ## Beilackierung bei fiktiver Abrechnung
 
-Rechnest du **fiktiv** ab – also nach Gutachten, ohne die Reparatur durchführen zu lassen —, versuchen Versicherer die Position besonders häufig zu streichen: Es werde ja nicht lackiert, also entstehe kein Aufwand.
+Rechnen Sie **fiktiv** ab – also nach Gutachten, ohne die Reparatur durchführen zu lassen —, versuchen Versicherer die Position besonders häufig zu streichen: Es werde ja nicht lackiert, also entstehe kein Aufwand.
 
-Dieses Argument verkennt die Systematik der fiktiven Abrechnung. Dort wird der **objektiv erforderliche Reparaturaufwand** ersetzt, nicht der tatsächlich angefallene. Genau deshalb bekommst du bei fiktiver Abrechnung auch keine Mehrwertsteuer, wohl aber die kalkulierten Arbeitswerte. Was zum erforderlichen Aufwand gehört, steht im Gutachten – und wenn die Beilackierung dort begründet kalkuliert ist, gehört sie dazu.
+Dieses Argument verkennt die Systematik der fiktiven Abrechnung. Dort wird der **objektiv erforderliche Reparaturaufwand** ersetzt, nicht der tatsächlich angefallene. Genau deshalb bekommen Sie bei fiktiver Abrechnung auch keine Mehrwertsteuer, wohl aber die kalkulierten Arbeitswerte. Was zum erforderlichen Aufwand gehört, steht im Gutachten – und wenn die Beilackierung dort begründet kalkuliert ist, gehört sie dazu.
 
-Die Grundlagen zu beiden Abrechnungswegen findest du unter [Reparaturkosten](/haftpflicht/reparaturkosten).
+Die Grundlagen zu beiden Abrechnungswegen finden Sie unter [Reparaturkosten](/haftpflicht/reparaturkosten).
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 1. **Prüfbericht neben das Gutachten legen.** Vergleiche Position für Position. Gestrichene Beilackierung steht meist ohne technische Begründung da.
-2. **Deinen Sachverständigen einschalten.** Er hat das Fahrzeug gesehen und kann die Erforderlichkeit begründen – eine Stellungnahme zur gekürzten Position ist der wirksamste Schritt.
+2. **Ihren Sachverständigen einschalten.** Er hat das Fahrzeug gesehen und kann die Erforderlichkeit begründen – eine Stellungnahme zur gekürzten Position ist der wirksamste Schritt.
 3. **Nicht selbst nachverhandeln.** Wer die Kürzung „aus Kulanz" akzeptiert, verliert den Betrag endgültig.
 4. **Frist setzen.** Reagiert die Versicherung nicht, gelten die üblichen Regulierungsfristen – siehe [4-Wochen-Frist](/haftpflicht/4-wochen-frist).
 
 ### 💡 Die wichtigste Regel
 
-Eine gestrichene Beilackierung ist **kein technisches Urteil**, sondern zunächst eine Behauptung. Technisch beurteilen kann sie nur, wer den Lack am Fahrzeug gesehen hat. Genau das ist der Punkt, an dem dein Gutachten mehr wiegt als ein Prüfbericht nach Aktenlage.
+Eine gestrichene Beilackierung ist **kein technisches Urteil**, sondern zunächst eine Behauptung. Technisch beurteilen kann sie nur, wer den Lack am Fahrzeug gesehen hat. Genau das ist der Punkt, an dem Ihr Gutachten mehr wiegt als ein Prüfbericht nach Aktenlage.
 
 ```json
 {

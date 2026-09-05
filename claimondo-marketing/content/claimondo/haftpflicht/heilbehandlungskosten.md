@@ -34,7 +34,7 @@ meta_description: "Heilbehandlungskosten nach Unfall sind nach §249 BGB voll er
 
 # Heilbehandlungskosten nach Verkehrsunfall
 
-> **Kurz erklärt:** Alle unfallbedingten Behandlungs- und Therapie-Kosten sind nach § 249 BGB voll erstattbar – von der Notaufnahme über Hausarzt, Facharzt, Reha bis zur Psychotherapie. Krankenkasse zahlt zunächst Pflichtleistungen und holt sich die Kosten per **§ 116 SGB X-Regress** vom Versicherer zurück. Du als geschädigte Person forderst direkt: **Zuzahlungen, Privatleistungen, Fahrtkosten, Hilfsmittel** und alle Beträge, die deine Krankenkasse nicht trägt.
+> **Kurz erklärt:** Alle unfallbedingten Behandlungs- und Therapie-Kosten sind nach § 249 BGB voll erstattbar – von der Notaufnahme über Hausarzt, Facharzt, Reha bis zur Psychotherapie. Krankenkasse zahlt zunächst Pflichtleistungen und holt sich die Kosten per **§ 116 SGB X-Regress** vom Versicherer zurück. Sie als geschädigte Person fordern direkt: **Zuzahlungen, Privatleistungen, Fahrtkosten, Hilfsmittel** und alle Beträge, die Ihre Krankenkasse nicht trägt.
 
 ## Auch bekannt als
 
@@ -48,7 +48,7 @@ Heilbehandlungskosten sind alle unfallbedingten medizinischen Kosten – vom Not
 
 ## In drei Sätzen erklärt
 
-Bei unverschuldetem Verkehrsunfall sind sämtliche **unfallbedingten Heilbehandlungskosten** erstattbar (§ 249 BGB) – Notaufnahme, Krankenhaus, ambulante Behandlung, Medikamente, Therapien, Reha, Psychotherapie, Hilfsmittel, Fahrtkosten zur Behandlung. Die gesetzliche Krankenkasse übernimmt zunächst die Pflichtleistungen und nimmt anschließend **Regress** beim gegnerischen Haftpflichtversicherer nach § 116 SGB X – für dich entstehen daraus keine zusätzlichen Schritte. Du selbst forderst direkt diejenigen Beträge, die deine Krankenkasse **nicht** abgedeckt hat: **Zuzahlungen** (Apotheke, Krankenhaus, Heilmittel), **Privatleistungen** (z. B. Privatklinik, Privatpraxis, IGeL), **Fahrtkosten** und **Hilfsmittel**, die über die Krankenkassen-Standard hinausgehen.
+Bei unverschuldetem Verkehrsunfall sind sämtliche **unfallbedingten Heilbehandlungskosten** erstattbar (§ 249 BGB) – Notaufnahme, Krankenhaus, ambulante Behandlung, Medikamente, Therapien, Reha, Psychotherapie, Hilfsmittel, Fahrtkosten zur Behandlung. Die gesetzliche Krankenkasse übernimmt zunächst die Pflichtleistungen und nimmt anschließend **Regress** beim gegnerischen Haftpflichtversicherer nach § 116 SGB X – für Sie entstehen daraus keine zusätzlichen Schritte. Sie selbst fordern direkt diejenigen Beträge, die Ihre Krankenkasse **nicht** abgedeckt hat: **Zuzahlungen** (Apotheke, Krankenhaus, Heilmittel), **Privatleistungen** (z. B. Privatklinik, Privatpraxis, IGeL), **Fahrtkosten** und **Hilfsmittel**, die über die Krankenkassen-Standard hinausgehen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -70,7 +70,7 @@ Bei unverschuldetem Verkehrsunfall sind sämtliche **unfallbedingten Heilbehandl
 
 ### Stationäre Behandlung
 - Krankenhaus-Aufenthalt
-- **Zuzahlung 10 €/Tag (max. 28 Tage/Jahr)** als deine Eigenleistung – vom Versicherer erstattbar
+- **Zuzahlung 10 €/Tag (max. 28 Tage/Jahr)** als Ihre Eigenleistung – vom Versicherer erstattbar
 
 ### Ambulante Behandlung
 - Hausarzt
@@ -108,7 +108,7 @@ Bei unverschuldetem Verkehrsunfall sind sämtliche **unfallbedingten Heilbehandl
 - Alle Standard-Leistungen nach GKV-Katalog
 - Macht dann § 116 SGB X-Regress beim Versicherer
 
-### Du zahlst zunächst – bekommst vom Versicherer zurück
+### Sie zahlen zunächst – bekommen vom Versicherer zurück
 - **Zuzahlungen** Apotheke, Krankenhaus, Heilmittel (10 € pro Rezept, 10 €/Tag stationär)
 - **Privatleistungen** (Privatklinik, Privatpraxis, IGeL)
 - **Fahrtkosten** zu Behandlungen
@@ -130,7 +130,7 @@ Wenn Trauma-Therapie-Wartezeit über 4 Monaten = Versorgungs-Engpass: Selbstzahl
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Sammle alle Belege. Auch kleinere Zuzahlungen (10 € hier, 15 € dort) summieren sich über die Heilungsphase schnell auf 200–500 €.
@@ -154,7 +154,7 @@ In monatlichen oder quartalsweisen Bündeln an den Versicherer.
 ## Häufige Fragen
 
 **Wer zahlt die Arztrechnung nach Autounfall?**
-Bei gesetzlich Versicherten: Krankenkasse zahlt zunächst und holt sich die Kosten beim Versicherer zurück (§ 116 SGB X). Du zahlst nur Zuzahlungen (10 €/Tag stationär, 10 € Rezept-Zuzahlung) und privat erbrachte Leistungen – die bekommst du vom Versicherer erstattet.
+Bei gesetzlich Versicherten: Krankenkasse zahlt zunächst und holt sich die Kosten beim Versicherer zurück (§ 116 SGB X). Sie zahlen nur Zuzahlungen (10 €/Tag stationär, 10 € Rezept-Zuzahlung) und privat erbrachte Leistungen – die bekommen Sie vom Versicherer erstattet.
 
 **Kann ich Therapie privat abrechnen?**
 Bei Versorgungs-Engpass (Wartezeit > 4 Monate für Trauma-Therapie) oder medizinisch indiziert: ja, Mehrkosten sind erstattbar.
@@ -182,7 +182,7 @@ Privatleistung in Anspruch nehmen und beim Versicherer einreichen. Bei klarer me
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Heilbehandlungs-Belege werden in der Hektik der Genesung oft nicht systematisch gesammelt – Belege ohne sofortiges Einreichen werden später ggf. nicht mehr akzeptiert. Anwaltliche Begleitung sichert die Vollständigkeit.
 
@@ -230,7 +230,7 @@ Heilbehandlungs-Belege werden in der Hektik der Genesung oft nicht systematisch 
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Wer zahlt die Arztrechnung nach Autounfall?", "acceptedAnswer": {"@type": "Answer", "text": "Bei gesetzlich Versicherten zahlt die Krankenkasse zunächst und holt sich die Kosten beim Versicherer zurück (§ 116 SGB X). Zuzahlungen und Privatleistungen bekommst du direkt vom Versicherer erstattet."}},
+        {"@type": "Question", "name": "Wer zahlt die Arztrechnung nach Autounfall?", "acceptedAnswer": {"@type": "Answer", "text": "Bei gesetzlich Versicherten zahlt die Krankenkasse zunächst und holt sich die Kosten beim Versicherer zurück (§ 116 SGB X). Zuzahlungen und Privatleistungen bekommen Sie direkt vom Versicherer erstattet."}},
         {"@type": "Question", "name": "Bekomme ich Zuzahlungen erstattet?", "acceptedAnswer": {"@type": "Answer", "text": "Ja — alle unfallbedingten Zuzahlungen (Apotheke, Krankenhaus, Heilmittel) sind voll erstattbar als Schadensposition."}},
         {"@type": "Question", "name": "Kann ich Therapie privat abrechnen?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Versorgungs-Engpass (Wartezeit über 4 Monate) oder medizinisch indiziert: ja. Mehrkosten gegenüber Standard sind erstattbar."}}
       ]

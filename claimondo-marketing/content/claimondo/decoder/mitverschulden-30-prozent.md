@@ -28,11 +28,11 @@ meta_description: "„30 % Mitverschulden“? Warum pauschale Quoten ohne konkre
 
 # „Wir sehen ein Mitverschulden von 30 %" – Decoder
 
-> **Kurz erklärt:** Die pauschale Anrechnung einer Mitverschuldens-Quote ohne konkrete Tatsachen und ohne konkrete Kausalitätsbegründung ist eine der häufigsten Kürzungs-Strategien deutscher Kfz-Haftpflichtversicherer. Bei 10.000 € Forderung spart der Versicherer mit einer 30 %-Quote 3.000 € pro Fall. Die Beweislast liegt aber vollständig beim Versicherer, nicht bei dir. Pauschale Quotenbehauptungen sind nach BGH-Rechtsprechung zurückzuweisen.
+> **Kurz erklärt:** Die pauschale Anrechnung einer Mitverschuldens-Quote ohne konkrete Tatsachen und ohne konkrete Kausalitätsbegründung ist eine der häufigsten Kürzungs-Strategien deutscher Kfz-Haftpflichtversicherer. Bei 10.000 € Forderung spart der Versicherer mit einer 30 %-Quote 3.000 € pro Fall. Die Beweislast liegt aber vollständig beim Versicherer, nicht bei Ihnen. Pauschale Quotenbehauptungen sind nach BGH-Rechtsprechung zurückzuweisen.
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten desselben Briefes:
 
@@ -46,7 +46,7 @@ Typische Varianten desselben Briefes:
 
 Drei Merkmale, die fast immer dabei sind:
 
-- **Keine konkreten Tatsachen** – was genau du falsch gemacht haben sollst, bleibt offen.
+- **Keine konkreten Tatsachen** – was genau Sie falsch gemacht haben sollen, bleibt offen.
 - **Keine Kausalitätsbegründung** – der Bezug zwischen behauptetem Verhalten und konkretem Schaden fehlt.
 - **Pauschale Quote** – 20, 25, 30, 50 % – Zahlen aus dem Bauch, nicht aus dem Sachverhalt.
 
@@ -60,7 +60,7 @@ Versicherer wissen: Selbst wenn nur 30–40 % der Geschädigten eine pauschale Q
 
 ### 2. Beweislast-Umkehr inszenieren
 
-Versicherer formulieren so, als müsstest **du** deine Schuldfreiheit beweisen. Rechtlich ist es genau umgekehrt: Für ein Mitverschulden trägt der Versicherer die volle Beweislast – konkrete Tatsachen plus konkrete Kausalität zum Schaden. Wer das nicht weiß, fällt darauf herein.
+Versicherer formulieren so, als müssten **Sie** Ihre Schuldfreiheit beweisen. Rechtlich ist es genau umgekehrt: Für ein Mitverschulden trägt der Versicherer die volle Beweislast – konkrete Tatsachen plus konkrete Kausalität zum Schaden. Wer das nicht weiß, fällt darauf herein.
 
 ### 3. Verhandlungsanker setzen
 
@@ -82,7 +82,7 @@ Die Beweislast für die Tatsachen, aus denen sich ein Mitverschulden ergibt, tr�
 
 ### Anscheinsbeweis (siehe [Anscheinsbeweis](/haftpflicht/anscheinsbeweis))
 
-In klaren Konstellationen greift der Anscheinsbeweis **zu deinen Gunsten**:
+In klaren Konstellationen greift der Anscheinsbeweis **zu Ihren Gunsten**:
 
 - **Auffahrunfall:** Anscheinsbeweis spricht für 100 % Schuld des Auffahrenden.
 - **Vorfahrtsverletzung:** Anscheinsbeweis spricht gegen den Vorfahrtsverletzer.
@@ -96,7 +96,7 @@ Bei Unfällen zwischen Fahrzeugen wird zusätzlich auf [§ 17 StVG](/haftpflicht
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Pauschale Quote zurückweisen. Konkrete Tatsachen verlangen. Niemals nach unten verhandeln, bevor die Quote überhaupt rechtlich begründet ist.
@@ -157,22 +157,22 @@ Mit freundlichen Grüßen
 ### Reaktion A – Minimale Nachbegründung
 > *„Aufgrund Ihrer überhöhten Geschwindigkeit sehen wir 30 % Mitverschulden."*
 
-**Deine Antwort:** Konkrete Geschwindigkeit? Konkrete Witterungstatsachen? Wer hat das wie festgestellt? Beweismittel? Bei vager Begründung weiter zurückweisen.
+**Ihre Antwort:** Konkrete Geschwindigkeit? Konkrete Witterungstatsachen? Wer hat das wie festgestellt? Beweismittel? Bei vager Begründung weiter zurückweisen.
 
 ### Reaktion B – „Streitbeilegungs"-Quote
 > *„Wir reduzieren auf 20 % zur Streitbeilegung."*
 
-**Deine Antwort:** Quote-Reduktion ist kein Beweis-Ersatz. Wenn keine konkreten Tatsachen genannt sind, bleibst du bei 0 %.
+**Ihre Antwort:** Quote-Reduktion ist kein Beweis-Ersatz. Wenn keine konkreten Tatsachen genannt sind, bleiben Sie bei 0 %.
 
 ### Reaktion C – Klage-Drohung umdrehen
 > *„Wenn Sie nicht akzeptieren, verweisen wir Sie auf den Klageweg."*
 
-**Deine Antwort:** Der Klageweg ist dein Recht – und bei klarer Konstellation deine beste Karte. Anwaltskosten trägt der Versicherer.
+**Ihre Antwort:** Der Klageweg ist Ihr Recht – und bei klarer Konstellation Ihre beste Karte. Anwaltskosten trägt der Versicherer.
 
 ### Reaktion D – Versicherer-Sachverständiger als „Beweis"
 > *„Unser Gutachter bestätigt das Mitverschulden."*
 
-**Deine Antwort:** Der Versicherer-Gutachter ist nicht neutral. Du hast Anspruch auf einen [freien Sachverständigen deiner Wahl](/haftpflicht/sv-kosten). Bei Streit zwischen den Gutachten entscheidet im Klagefall ein Gerichtsgutachter.
+**Ihre Antwort:** Der Versicherer-Gutachter ist nicht neutral. Sie haben Anspruch auf einen [freien Sachverständigen Ihrer Wahl](/haftpflicht/sv-kosten). Bei Streit zwischen den Gutachten entscheidet im Klagefall ein Gerichtsgutachter.
 
 ---
 
@@ -182,7 +182,7 @@ Mit freundlichen Grüßen
 ADAC und Deutscher Anwaltverein veröffentlichen Quotenkataloge mit typischen Mitverschuldens-Quoten in Standard-Konstellationen. Diese sind aber **Orientierungshilfen** für Gerichte, keine bindenden Regeln und **keine Vorwegnahme** der Beweislast.
 
 **Muss ich überhaupt mit dem Versicherer verhandeln?**
-Verhandlungspflicht im engeren Sinn gibt es nicht. Du kannst direkt klagen – bei klaren Sachverhalten ist das oft schneller als monatelange Korrespondenz.
+Verhandlungspflicht im engeren Sinn gibt es nicht. Sie können direkt klagen – bei klaren Sachverhalten ist das oft schneller als monatelange Korrespondenz.
 
 **Was, wenn die Polizei „beidseitiges Verschulden" angekreuzt hat?**
 Polizei-Vermerke sind Indizien, aber keine bindende Schuldzuweisung. Im Zivilrecht zählt das Ergebnis einer eigenen Beweisaufnahme – Polizeibefunde können angegriffen werden.
@@ -195,7 +195,7 @@ Wenn ein Mitverschulden tatsächlich vorliegt (z. B. nicht angeschnallt, anerkan
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Mitverschuldens-Streitigkeiten gehören zu den ertragreichsten Disziplinen spezialisierter Verkehrsrechts-Kanzleien. Erfahrungswerte: 60–80 % aller Pauschal-Quoten lassen sich entweder ganz kippen oder deutlich reduzieren. Anwaltskosten zahlt bei unverschuldetem oder überwiegend nicht selbst verschuldetem Unfall die gegnerische Versicherung.
 
@@ -241,12 +241,12 @@ Mitverschuldens-Streitigkeiten gehören zu den ertragreichsten Disziplinen spezi
         {
           "@type": "Question",
           "name": "Muss ich beweisen, dass ich nicht mitverantwortlich war?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Nein. Die Beweislast für ein behauptetes Mitverschulden nach § 254 BGB liegt vollständig beim Versicherer. Du musst keine eigene Schuldfreiheit beweisen."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Nein. Die Beweislast für ein behauptetes Mitverschulden nach § 254 BGB liegt vollständig beim Versicherer. Sie müssen keine eigene Schuldfreiheit beweisen."}
         },
         {
           "@type": "Question",
           "name": "Was bedeutet eine pauschale Quote von 30 %?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Es bedeutet, dass der Versicherer ohne konkrete Tatsachen und ohne Kausalitätsbegründung 30 % deiner Forderung kürzen will. Pauschale Quoten sind nach BGH-Rechtsprechung ohne konkrete Tatsachen-Grundlage unzulässig."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Es bedeutet, dass der Versicherer ohne konkrete Tatsachen und ohne Kausalitätsbegründung 30 % Ihrer Forderung kürzen will. Pauschale Quoten sind nach BGH-Rechtsprechung ohne konkrete Tatsachen-Grundlage unzulässig."}
         },
         {
           "@type": "Question",

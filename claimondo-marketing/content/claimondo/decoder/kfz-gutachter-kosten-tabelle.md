@@ -46,7 +46,7 @@ Gutachterkosten nach Unfall · Sachverständigenhonorar · BVSK-Honorartabelle �
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Wenn die Versicherung das Honorar kürzt, klingt das typischerweise so:
 
@@ -115,10 +115,10 @@ Foto-, Schreib- und Fahrtkosten sind eigenständige Positionen. Pauschale Streic
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Bei unverschuldetem Unfall über der Bagatellgrenze ist das **eigene** SV-Gutachten dein gutes Recht – und es kostet dich nichts. Ohne eigenes Gutachten regulierst du auf Basis der Versicherer-Zahlen.
+Bei unverschuldetem Unfall über der Bagatellgrenze ist das **eigene** SV-Gutachten Ihr gutes Recht – und es kostet Sie nichts. Ohne eigenes Gutachten reguliern Sie auf Basis der Versicherer-Zahlen.
 
 ### 🛠 Vier Schritte
 
@@ -126,7 +126,7 @@ Bei unverschuldetem Unfall über der Bagatellgrenze ist das **eigene** SV-Gutach
 Honorar nach BVSK HB V – das Gutachten weist Grund- und Nebenkosten transparent aus.
 
 **2. Sicherungsabtretung unterschreiben**
-Damit rechnet der Gutachter direkt mit der Versicherung ab – kein Vorleistungsrisiko für dich.
+Damit rechnet der Gutachter direkt mit der Versicherung ab – kein Vorleistungsrisiko für Sie.
 
 **3. Honorar-Kürzung schriftlich zurückweisen**
 Bei „nicht ortsüblich": auf BGH-Linie (VI ZR 50/15, VI ZR 76/16) und das fehlende Preisermittlungsrisiko verweisen.
@@ -169,17 +169,17 @@ Mit freundlichen Grüßen
 ### Reaktion A – eigener Honorarkorridor
 > *„Unsere Prüfung ergibt ein angemessenes Honorar von [niedriger] €."*
 
-**Deine Antwort:** BVSK HB V als BGH-anerkannte Schätzungsgrundlage; der Versicherer-Korridor ist nicht maßgeblich.
+**Ihre Antwort:** BVSK HB V als BGH-anerkannte Schätzungsgrundlage; der Versicherer-Korridor ist nicht maßgeblich.
 
 ### Reaktion B – Nebenkosten erneut streichen
 > *„Die Nebenkosten bleiben gekürzt."*
 
-**Deine Antwort:** Foto-/Schreib-/Fahrtkosten sind eigenständig erstattungsfähig; pauschale Streichung ist die Ausnahme.
+**Ihre Antwort:** Foto-/Schreib-/Fahrtkosten sind eigenständig erstattungsfähig; pauschale Streichung ist die Ausnahme.
 
 ### Reaktion C – Abtretung anzweifeln
 > *„Die Abtretung erkennen wir nicht an."*
 
-**Deine Antwort:** § 398 BGB; die Sicherungsabtretung ist wirksam und darf nicht einseitig zurückgewiesen werden.
+**Ihre Antwort:** § 398 BGB; die Sicherungsabtretung ist wirksam und darf nicht einseitig zurückgewiesen werden.
 
 ---
 
@@ -211,7 +211,7 @@ Häufige Taktik „nicht ortsüblich". Der BGH (VI ZR 50/15, VI ZR 76/16) lässt
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Honorar-Kürzungen sind Massengeschäft – die Differenz zwischen Versicherer-Korridor und tatsächlichem Honorar liegt oft bei 100–400 €. Eigenes SV-Gutachten + Sicherungsabtretung + anwaltliche Nachforderung trägt der Versicherer.
 

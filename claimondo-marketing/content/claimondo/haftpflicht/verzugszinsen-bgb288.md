@@ -35,7 +35,7 @@ meta_description: "Verzugszinsen nach §288 BGB: 5 Prozentpunkte über dem Basis
 
 # Verzugszinsen nach § 288 BGB bei der Schadensregulierung
 
-> **Kurz erklärt:** Ist die Haftpflichtversicherung mit der Schadensregulierung in Verzug, schuldet sie **5 Prozentpunkte Verzugszinsen über dem Basiszinssatz** (§ 288 Abs. 1 BGB). Bei einem Basiszinssatz von typischerweise 0–4 % entspricht das **5–9 % Verzugszinsen pro Jahr**. Die Zinsen laufen ab Verzugs-Eintritt, sind eigenständige Forderung und werden auf den vollen berechtigten Schadensbetrag berechnet. Sie sind dein zusätzlicher Hebel zur Schadensregulierung.
+> **Kurz erklärt:** Ist die Haftpflichtversicherung mit der Schadensregulierung in Verzug, schuldet sie **5 Prozentpunkte Verzugszinsen über dem Basiszinssatz** (§ 288 Abs. 1 BGB). Bei einem Basiszinssatz von typischerweise 0–4 % entspricht das **5–9 % Verzugszinsen pro Jahr**. Die Zinsen laufen ab Verzugs-Eintritt, sind eigenständige Forderung und werden auf den vollen berechtigten Schadensbetrag berechnet. Sie sind Ihr zusätzlicher Hebel zur Schadensregulierung.
 
 ## Auch bekannt als
 
@@ -45,7 +45,7 @@ Verzinsung im Verzug · Schuldnerzinsen · Verzugszinssatz · Verzugsschaden Zin
 
 ## In einem Satz erklärt
 
-Verzugszinsen sind der gesetzlich pauschalisierte Mindest-Schaden, der dir entsteht, wenn die Haftpflicht in Verzug ist – 5 Prozentpunkte über Basiszinssatz auf den gesamten berechtigten Betrag (§ 288 Abs. 1 BGB).
+Verzugszinsen sind der gesetzlich pauschalisierte Mindest-Schaden, der Ihnen entsteht, wenn die Haftpflicht in Verzug ist – 5 Prozentpunkte über Basiszinssatz auf den gesamten berechtigten Betrag (§ 288 Abs. 1 BGB).
 
 ## In drei Sätzen erklärt
 
@@ -81,7 +81,7 @@ Der Basiszinssatz wird zweimal jährlich (zum 1.1. und 1.7.) von der Deutschen B
 | 01.01.2024 – 30.06.2024 | 3,62 % | 8,62 % |
 | 01.07.2024 – 31.12.2024 | 3,37 % | 8,37 % |
 
-Für deinen Fall maßgeblich: der **jeweils geltende** Basiszinssatz an dem Tag, für den die Zinsen berechnet werden – der Satz kann sich während eines laufenden Verzugs ändern.
+Für Ihren Fall maßgeblich: der **jeweils geltende** Basiszinssatz an dem Tag, für den die Zinsen berechnet werden – der Satz kann sich während eines laufenden Verzugs ändern.
 
 ### Rechenbeispiel
 
@@ -101,7 +101,7 @@ Zinsen = 9.600 € × 8,37 % × (90 / 365)
 
 ## Auf welche Beträge die Zinsen anfallen
 
-Maßgeblich ist die **berechtigte Forderung** – also der Betrag, der dir letztlich zugesprochen wird. Wichtig:
+Maßgeblich ist die **berechtigte Forderung** – also der Betrag, der Ihnen letztlich zugesprochen wird. Wichtig:
 
 - **Alle berechtigten Schadenspositionen** zinst: Reparaturkosten, Wertminderung, Nutzungsausfall, Mietwagenkosten, Schmerzensgeld, Verdienstausfall, Sachverständigenkosten, Heilbehandlungskosten.
 - **Keine Zinsen auf Anwaltskosten** als solche – Anwaltskosten sind eigenständiger Verzugsschaden (siehe [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung)).
@@ -123,7 +123,7 @@ Bei strittiger Konstellation entscheidet das Gericht – in der Praxis aber oft 
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Verzugszinsen **immer mit einklagen**. Sie sind kostenlose Zusatzforderung – der Streitwert (für Gerichtskosten) richtet sich nach der Hauptforderung, die Zinsen kommen oben drauf.
@@ -131,7 +131,7 @@ Verzugszinsen **immer mit einklagen**. Sie sind kostenlose Zusatzforderung – d
 ### 🛠 Drei Punkte
 
 **1. Verzugs-Eintritt sauber dokumentieren**
-Anspruchsschreiben mit Rückschein, Mahnung mit Rückschein. Beide Daten in deiner Akte.
+Anspruchsschreiben mit Rückschein, Mahnung mit Rückschein. Beide Daten in Ihrer Akte.
 
 **2. Zinsbetrag laufend berechnen**
 Pro Tag aktualisieren. Online-Rechner wie [Verzugszinsrechner](https://www.basiszinssatz.de) helfen. Stand am Tag der Klage einsetzen.
@@ -154,7 +154,7 @@ Nebenforderung:          Zinsen in Höhe von 5 Prozent-
 
 > *„Zinsen werden bei Erfüllung berücksichtigt – kein Streit nötig."*
 
-In der Praxis werden Zinsen oft „vergessen", wenn du nicht explizit nachforderst. Immer explizit auf die Forderung schreiben.
+In der Praxis werden Zinsen oft „vergessen", wenn Sie nicht explizit nachfordern. Immer explizit auf die Forderung schreiben.
 
 > *„Zinslauf erst ab Mahnung."*
 
@@ -181,7 +181,7 @@ Verzugszinsen sind grundsätzlich **Kapitalerträge** und unterliegen der Einkom
 Nein. Zinsen sind gesetzlich vorgesehen und nicht verhandelbar bei nachgewiesenem Verzug. Eine pauschale Kürzung ohne rechtliche Grundlage ist abzulehnen.
 
 **Lohnt sich der Aufwand für 100–200 € Zinsen?**
-Ja. Erstens summieren sich Zinsen bei längeren Verfahren schnell auf höhere Beträge. Zweitens kosten dich Anwalt und Geltendmachung nichts (Anwaltskosten zahlt der Versicherer). Drittens erhöhen die Zinsen den Druck zur schnellen Regulierung – sie wirken **präventiv** gegen Verschleppung.
+Ja. Erstens summieren sich Zinsen bei längeren Verfahren schnell auf höhere Beträge. Zweitens kosten Sie Anwalt und Geltendmachung nichts (Anwaltskosten zahlt der Versicherer). Drittens erhöhen die Zinsen den Druck zur schnellen Regulierung – sie wirken **präventiv** gegen Verschleppung.
 
 ---
 
@@ -194,9 +194,9 @@ Ja. Erstens summieren sich Zinsen bei längeren Verfahren schnell auf höhere Be
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Spezialisierte Verkehrsrechts-Kanzleien führen Verzugszinsen in jeder Klage standardmäßig mit. Bei unverschuldetem Unfall trägt der Versicherer die Anwaltskosten – du verlierst nichts und gewinnst die Zinsen extra.
+Spezialisierte Verkehrsrechts-Kanzleien führen Verzugszinsen in jeder Klage standardmäßig mit. Bei unverschuldetem Unfall trägt der Versicherer die Anwaltskosten – Sie verlieren nichts und gewinnen die Zinsen extra.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

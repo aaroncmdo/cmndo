@@ -33,9 +33,9 @@ related:
 meta_description: "Haushaltsführungsschaden nach §843 BGB: Geld für nicht mehr leistbare Hausarbeit – nach Schulz-Borck-Hofmann, 10–14 €/Std. So berechnen Sie ihn."
 ---
 
-# Haushaltsführungsschaden – wenn der Unfall deinen Haushalt lahmlegt
+# Haushaltsführungsschaden – wenn der Unfall Ihren Haushalt lahmlegt
 
-> **Kurz erklärt:** Der Haushaltsführungsschaden ist die Erstattung für den Wert der Hausarbeit, die du **nach unfallbedingter Verletzung nicht mehr selbst leisten kannst** – egal, ob du sie tatsächlich extern erledigen lässt oder Angehörige einspringen. Bemessung nach der **Schulz-Borck-Hofmann-Tabelle** mit fiktivem Netto-Stundensatz (typisch 10–14 €) × ausgefallener Stundenzahl × Krankschreibungs-Dauer. Eigenständige Position neben Verdienstausfall und Schmerzensgeld.
+> **Kurz erklärt:** Der Haushaltsführungsschaden ist die Erstattung für den Wert der Hausarbeit, die Sie **nach unfallbedingter Verletzung nicht mehr selbst leisten können** – egal, ob Sie sie tatsächlich extern erledigen lassen oder Angehörige einspringen. Bemessung nach der **Schulz-Borck-Hofmann-Tabelle** mit fiktivem Netto-Stundensatz (typisch 10–14 €) × ausgefallener Stundenzahl × Krankschreibungs-Dauer. Eigenständige Position neben Verdienstausfall und Schmerzensgeld.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ Haushaltsführungs-Schaden · Haushaltsführungspauschale · Schulz-Borck-Schade
 
 ## In einem Satz erklärt
 
-Haushaltsführungsschaden ist der pauschalierte Wert der Haushaltsarbeit, die du nach Unfall nicht mehr leisten kannst – bemessen nach Schulz-Borck-Tabelle.
+Haushaltsführungsschaden ist der pauschalierte Wert der Haushaltsarbeit, die Sie nach Unfall nicht mehr leisten können – bemessen nach Schulz-Borck-Tabelle.
 
 ## In drei Sätzen erklärt
 
-Wenn du nach einem Verkehrsunfall vorübergehend oder dauerhaft eingeschränkt bist, deinen eigenen Haushalt zu führen, hast du Anspruch auf eine **eigenständige Geldentschädigung** – den Haushaltsführungsschaden nach § 843 BGB (für Verletzte) bzw. § 844 Abs. 2 BGB (für Hinterbliebene). Bezugsgröße ist die **Schulz-Borck-Hofmann-Tabelle**, die den wöchentlichen Stundenbedarf nach Haushalts-Größe und Personenzahl typisiert; multipliziert mit einem fiktiven Stundensatz (typisch 10–14 € netto, an Mindestlohn und ortsüblichem Niveau orientiert) und der unfallbedingten Minderung der Haushaltsführung in Prozent. Der Anspruch besteht **unabhängig davon, ob du tatsächlich eine Haushaltshilfe einstellst** – die fiktive Berechnung ist nach BGH-Linie zulässig.
+Wenn Sie nach einem Verkehrsunfall vorübergehend oder dauerhaft eingeschränkt sind, Ihren eigenen Haushalt zu führen, haben Sie Anspruch auf eine **eigenständige Geldentschädigung** – den Haushaltsführungsschaden nach § 843 BGB (für Verletzte) bzw. § 844 Abs. 2 BGB (für Hinterbliebene). Bezugsgröße ist die **Schulz-Borck-Hofmann-Tabelle**, die den wöchentlichen Stundenbedarf nach Haushalts-Größe und Personenzahl typisiert; multipliziert mit einem fiktiven Stundensatz (typisch 10–14 € netto, an Mindestlohn und ortsüblichem Niveau orientiert) und der unfallbedingten Minderung der Haushaltsführung in Prozent. Der Anspruch besteht **unabhängig davon, ob Sie tatsächlich eine Haushaltshilfe einstellen** – die fiktive Berechnung ist nach BGH-Linie zulässig.
 
 ## Die fünf Schlüsselzahlen
 
@@ -112,7 +112,7 @@ Haushaltsführungsschaden = wöchentliche Std × Stundensatz × Wochen
 
 ## MdH-% – die Minderungsgrade
 
-Der Versicherer (bzw. Gericht/Sachverständiger) bewertet, wie stark deine Haushaltsführung eingeschränkt ist:
+Der Versicherer (bzw. Gericht/Sachverständiger) bewertet, wie stark Ihre Haushaltsführung eingeschränkt ist:
 
 | MdH | Beschreibung | Beispiele |
 |---|---|---|
@@ -154,10 +154,10 @@ In der Praxis: gestufte MdH-Verläufe über die Heilungsphase, jeweils mit eigen
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Haushaltsführungsschaden ist eine der **häufig vergessenen** Positionen. Du musst ihn aktiv geltend machen – Versicherer regulieren nur, was explizit gefordert wird.
+Haushaltsführungsschaden ist eine der **häufig vergessenen** Positionen. Sie müssen ihn aktiv geltend machen – Versicherer regulieren nur, was explizit gefordert wird.
 
 ### 🛠 Vier Schritte
 
@@ -183,7 +183,7 @@ Erleichtertes Beweismaß nach § 287 ZPO. Eidesstattliche Versicherung + AU-Besc
 
 > *„Sie haben keine Hilfe in Anspruch genommen – also kein Schaden."*
 
-Falsch. Fiktive Berechnung ist nach BGH-Linie zulässig – du musst keine Hilfe tatsächlich eingestellt haben.
+Falsch. Fiktive Berechnung ist nach BGH-Linie zulässig – Sie müssen keine Hilfe tatsächlich eingestellt haben.
 
 > *„Stundensatz zu hoch."*
 
@@ -197,13 +197,13 @@ Falsch. Fiktive Berechnung ist nach BGH-Linie zulässig – du musst keine Hilfe
 Ja – gerade dann. Hausfrauen / Hausmänner bekommen keinen klassischen Verdienstausfall, dafür den vollen Haushaltsführungsschaden.
 
 **Muss ich tatsächlich jemanden eingestellt haben?**
-Nein. Fiktive Berechnung nach Schulz-Borck-Hofmann-Tabelle ist nach BGH-Linie zulässig. Auch wenn Angehörige eingesprungen sind oder du die Arbeit nachträglich erledigst.
+Nein. Fiktive Berechnung nach Schulz-Borck-Hofmann-Tabelle ist nach BGH-Linie zulässig. Auch wenn Angehörige eingesprungen sind oder Sie die Arbeit nachträglich erledigen.
 
 **Wie hoch ist der Stundensatz?**
 Typisch 10–14 €/Std netto bei fiktiver Berechnung. Bei konkret beauftragter Haushaltshilfe der tatsächlich gezahlte Betrag (oft 15–18 €/Std).
 
 **Was ist die MdH?**
-Minderung der Haushaltsführung in Prozent – wie stark du in deiner Haushaltsführung eingeschränkt warst. Bewertung durch Arzt oder bei Streit durch Sachverständigen.
+Minderung der Haushaltsführung in Prozent – wie stark Sie in Ihrer Haushaltsführung eingeschränkt waren. Bewertung durch Arzt oder bei Streit durch Sachverständigen.
 
 **Bekomme ich Haushaltsführungsschaden zusätzlich zum Verdienstausfall?**
 Ja, beides parallel möglich. Verdienstausfall für die Erwerbsarbeit, Haushaltsführungsschaden für die Hausarbeit.
@@ -222,7 +222,7 @@ Dann analoge Anwendung wie bei [Erwerbsminderungs-Rente § 843 BGB](/haftpflicht
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Haushaltsführungsschaden wird in über 50 % der Fälle nicht geltend gemacht – bei Hausfrauen / Hausmännern oder Familien mit mehreren Kindern kann er aber 1.000–3.000 € pro Heilungsphase ausmachen. Eigener SV + Anwalt empfehlenswert.
 
@@ -251,7 +251,7 @@ Haushaltsführungsschaden wird in über 50 % der Fälle nicht geltend gemacht �
       "name": "Haushaltsführungsschaden",
       "alternateName": ["Schulz-Borck-Schaden", "MdH-Schaden", "Haushaltsführungspauschale"],
       "termCode": "BGB § 843",
-      "description": "Erstattung des Werts der Haushaltsarbeit, die du nach unfallbedingter Verletzung nicht mehr selbst leisten kannst. Bemessung nach Schulz-Borck-Hofmann-Tabelle mit fiktivem Stundensatz und MdH-Prozentsatz.",
+      "description": "Erstattung des Werts der Haushaltsarbeit, die Sie nach unfallbedingter Verletzung nicht mehr selbst leisten können. Bemessung nach Schulz-Borck-Hofmann-Tabelle mit fiktivem Stundensatz und MdH-Prozentsatz.",
       "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
     },
     {
