@@ -10,7 +10,12 @@ function zuWerkstattbindung(frei: boolean | null): Werkstattbindung {
   return frei === false ? 'ja' : frei === true ? 'nein' : 'unbekannt'
 }
 
-export function zuBefund(e: LookupErgebnis, versicherer: string, tarif: string | null): KaskoTarifBefund {
+/**
+ * @param schadenIstGlas Glas-/Steinschlagschaden? Neun Tarife (KRAVAG, Signal Iduna, VOEDAG) binden NUR Glas:
+ *   bei Karosserie bleibt der Kunde frei (E7, Aaron 04.09.), bei einem echten Glasschaden ist er gebunden.
+ *   Default false = Karosserie, wie der Unfall-Flow. (Aaron 05.09.: die Schadenart setzt den Glas-Fall.)
+ */
+export function zuBefund(e: LookupErgebnis, versicherer: string, tarif: string | null, schadenIstGlas = false): KaskoTarifBefund {
   if (e.status === 'nicht_gefunden') {
     return { versicherer, tarif, werkstattbindung: 'unbekannt', bindungsumfang: null, verlaesslichkeit: null, kandidaten: [], stand: null }
   }
@@ -29,7 +34,7 @@ export function zuBefund(e: LookupErgebnis, versicherer: string, tarif: string |
     wbStatus: e.marke.wbStatus,
     tarif: e.tarif ? { hatWerkstattbindung: e.tarif.hatWerkstattbindung, bindungsumfang: e.tarif.bindungsumfang } : null,
     markerAntwort: null,
-    schadenIstGlas: false,
+    schadenIstGlas,
   })
   return {
     versicherer: e.marke.marke,

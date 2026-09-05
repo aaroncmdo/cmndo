@@ -271,8 +271,12 @@ export async function speichereKaskoTarifFlow(
       tarifName = t.anzeigename as string
     }
   }
-  // Unfall-Flow = Karosserieschaden (Spec §3 Annahmen).
-  const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas: false })
+  // Glas-Achse (Aaron 05.09.): bis dahin galt im Flow immer "Karosserie" — die neun Tarife, die NUR Glas
+  // binden, griffen deshalb nie. Jetzt entscheidet die erhobene Schadenart: 'glas' = Glasschaden, alles
+  // andere bleibt Karosserie (E7 vom 04.09. gilt unveraendert: eine reine Glas-Bindung bindet sie nicht).
+  const { data: artRow } = await admin.from('leads').select('schadentyp').eq('id', leadId).maybeSingle()
+  const schadenIstGlas = ((artRow?.schadentyp as string | null) ?? null) === 'glas'
+  const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas })
 
   // Review #5864 (Befunde 7+8): Alt-Stand VOR dem Quali-Pfad lesen — speichereQualiFlow schreibt bei „gebunden"
   // bereits freie_werkstattwahl=false, danach liesse sich eine ERSTE Bindung nicht mehr von einer unveraenderten
