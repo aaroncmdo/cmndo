@@ -87,7 +87,7 @@ export function BafinFaktencheck({
       >
         Quelle: BaFin-Beschwerdestatistik <ExternalLink className="h-3.5 w-3.5" aria-hidden />
       </a>
-      <p className="mt-2 text-xs leading-relaxed text-claimondo-shield/60">
+      <p className="mt-2 text-xs leading-relaxed text-claimondo-shield/75">
         Die BaFin-Statistik erfasst alle abschließend bearbeiteten Kfz-Beschwerden (Vertrag, Kasko,
         Haftpflicht) – kein isolierter Drittschaden-Indikator, aber die einzige offizielle Quelle.
       </p>

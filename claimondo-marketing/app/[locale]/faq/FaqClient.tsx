@@ -203,9 +203,9 @@ export default function FaqClient({ groups }: FaqClientProps) {
                         <a
                           href={`#${id}`}
                           aria-label={t('link_aria')}
-                          className="mt-1 shrink-0 rounded-full p-1 text-claimondo-light-blue opacity-0 transition-opacity hover:bg-claimondo-ondo/10 hover:text-claimondo-ondo focus:opacity-100 group-hover:opacity-100"
+                          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-claimondo-ondo opacity-0 transition-opacity hover:bg-claimondo-ondo/10 focus-visible:opacity-100 group-hover:opacity-100"
                         >
-                          <Link2 className="h-3.5 w-3.5" aria-hidden />
+                          <Link2 className="h-4 w-4" aria-hidden />
                         </a>
                       </div>
                       <div

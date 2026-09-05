@@ -63,7 +63,7 @@ export function MarkdownRenderer({
             </blockquote>
           ),
           table: ({ children }) => (
-            <div className="my-6 overflow-x-auto rounded-ios-md border border-claimondo-border">
+            <div className="my-6 overflow-x-auto rounded-ios-md border border-claimondo-border" tabIndex={0} role="region" aria-label="Tabelle, horizontal scrollbar">
               <table className="w-full border-collapse text-[0.9375rem]">{children}</table>
             </div>
           ),
@@ -75,7 +75,7 @@ export function MarkdownRenderer({
           ),
           td: ({ children }) => <td className="border-t border-claimondo-border px-4 py-2.5 align-top">{children}</td>,
           pre: ({ children }) => (
-            <pre className="my-5 overflow-x-auto rounded-ios-md bg-claimondo-navy p-4 text-[0.8125rem] leading-relaxed text-white/90">
+            <pre className="my-5 overflow-x-auto rounded-ios-md bg-claimondo-navy p-4 text-[0.8125rem] leading-relaxed text-white/90" tabIndex={0}>
               {children}
             </pre>
           ),

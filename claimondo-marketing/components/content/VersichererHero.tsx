@@ -42,7 +42,7 @@ export function VersichererHero({
       </h1>
       <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
         <div>
-          <dt className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/60">
+          <dt className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/75">
             Marktanteil
           </dt>
           <dd className="mt-0.5 flex items-center gap-1.5 text-xl font-bold text-claimondo-navy">
@@ -51,7 +51,7 @@ export function VersichererHero({
           </dd>
         </div>
         <div>
-          <dt className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/60">
+          <dt className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/75">
             BaFin-Beschwerdequote 2024
           </dt>
           <dd
@@ -65,14 +65,14 @@ export function VersichererHero({
             />
             {bafinQuote !== null ? bafinQuote.toLocaleString('de-DE') : 'nicht ausgewiesen'}
             {bafinQuote !== null && (
-              <span className="text-sm font-normal text-claimondo-shield/60">
+              <span className="text-sm font-normal text-claimondo-shield/75">
                 &nbsp;/ Schnitt {branchenschnitt.toLocaleString('de-DE')}
               </span>
             )}
           </dd>
         </div>
         <div>
-          <dt className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/60">
+          <dt className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/75">
             Hauptsitz
           </dt>
           <dd className="mt-0.5 flex items-center gap-1.5 text-xl font-bold text-claimondo-navy">

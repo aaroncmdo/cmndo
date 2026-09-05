@@ -73,7 +73,7 @@ export async function PortalMockupSection() {
             </div>
 
             <div className="mt-5">
-              <div className="flex justify-between text-[10px] font-semibold uppercase text-claimondo-shield/60">
+              <div className="flex justify-between text-[10px] font-semibold uppercase text-claimondo-shield/75">
                 <span>{t('mockup_schritt')}</span>
                 <span>25 %</span>
               </div>

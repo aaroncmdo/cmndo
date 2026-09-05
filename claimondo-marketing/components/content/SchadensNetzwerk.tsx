@@ -44,7 +44,7 @@ export function SchadensNetzwerk({
       </div>
 
       <div className="mt-4">
-        <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/60">
+        <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-claimondo-shield/75">
           Prüfdienstleister
         </p>
         <ul className="mt-2 flex flex-wrap gap-2">

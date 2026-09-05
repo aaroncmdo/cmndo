@@ -141,7 +141,7 @@ export default function LeadsGenerierenPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl font-black text-claimondo-border">{STEP_NRS[i]}</span>
+                    <span className="text-3xl font-black text-claimondo-shield/55">{STEP_NRS[i]}</span>
                     <h2 className="text-xl font-extrabold text-claimondo-navy">{schritt.titel}</h2>
                   </div>
                   <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{schritt.text}</p>

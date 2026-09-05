@@ -1023,6 +1023,27 @@ html { scroll-behavior: smooth; }
   z-index: 39 !important;
 }
 
+/* Design-Aufnahme 05.09.2026 (Playwright, document.elementFromPoint, 1.155 Seiten):
+ * unterhalb von ~1400 px Breite liegt die ausgeklappte Karte (150 px breit, rechts)
+ * GENAU ueber dem Lead-Formular im Hero. Gemessen bei 1280x720 auf Startseite,
+ * Stadtseite Koeln und kfzgutachter-lp: das Feld "Stadt / PLZ" und der Knopf
+ * "Jetzt kostenlosen Rückruf erhalten" trafen bei einem Klick am rechten Rand
+ * die Karte statt des Formulars (bei 1440x900 auf der Stadtseite ebenfalls der
+ * Knopf). 1280-1366 px ist die haeufigste Laptop-Klasse.
+ *
+ * Das Siegel selbst ist als Trust-Signal gewollt (Aaron 23.08.2026: ausgeklappt
+ * starten). Ein fixes Element hat auf schmalen Laptops aber keinen freien Platz:
+ * unten rechts sitzt die Kontaktleiste, links der Hero-Text mit den CTAs. Deshalb
+ * bleibt es dort aus; die Bewertung steht auf Startseite und LP zusaetzlich als
+ * Inline-Badge ("5,0 von 5 · 27 Bewertungen") im Fluss. Reversibel: diese Regel
+ * entfernen. Nachgemessen mit C:/pwtool/overlay-precise.mjs (0 verdeckte Ziele).
+ */
+@media (max-width: 1399px) {
+  .pe-pro-seal {
+    display: none !important;
+  }
+}
+
 /* Trefferflaeche des Minimieren-Knopfs. Das Siegel startet ausgeklappt (so gewollt,
  * Aaron 23.08.2026) und laesst sich zuklappen — der Knopf dafuer ist aber nur
  * 20x20 px gross, die gemessene Trefferflaeche sogar nur 18x18. Apple nennt 44x44

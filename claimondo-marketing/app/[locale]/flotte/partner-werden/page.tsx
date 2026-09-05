@@ -255,7 +255,7 @@ export default function FlottePartnerWerdenPage() {
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <span
-                  className="flex-shrink-0 text-4xl font-black text-claimondo-border"
+                  className="flex-shrink-0 text-4xl font-black text-claimondo-shield/55"
                   style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
                 >
                   {s.nr}

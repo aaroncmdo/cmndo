@@ -59,12 +59,12 @@ export function CookieConsentBanner() {
     <div
       role="dialog"
       aria-label="Cookie-Einstellungen"
-      className="fixed bottom-4 left-4 z-[2000] w-[calc(100vw-2rem)] max-w-[420px] rounded-2xl border border-border bg-surface shadow-[0_12px_40px_rgba(14,52,70,.22)] p-5 text-ink"
+      className="fixed inset-x-0 bottom-0 z-[2000] w-full border-t border-border bg-surface p-4 text-ink shadow-[0_-8px_32px_rgba(14,52,70,.18)] sm:inset-x-auto sm:bottom-4 sm:left-4 sm:w-[calc(100vw-2rem)] sm:max-w-[420px] sm:rounded-2xl sm:border sm:p-5 sm:shadow-[0_12px_40px_rgba(14,52,70,.22)]"
     >
       {!prefs ? (
         <>
-          <h2 className="font-display font-bold text-[16px] mb-1.5">Wir verwenden Cookies</h2>
-          <p className="text-[13px] leading-relaxed text-secondary mb-4">
+          <h2 className="font-display font-bold text-[16px] mb-1.5 hidden sm:block">Wir verwenden Cookies</h2>
+          <p className="text-[12px] leading-snug text-secondary mb-3 sm:text-[13px] sm:leading-relaxed sm:mb-4">
             Wir nutzen Cookies für Statistik und Marketing. Notwendige Cookies sind immer aktiv. Sie können frei
             wählen und Ihre Einwilligung jederzeit widerrufen.
           </p>
