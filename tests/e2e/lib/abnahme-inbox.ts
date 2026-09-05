@@ -58,7 +58,13 @@ export function abnahmeInboxKonfiguriert(): boolean {
   return Boolean(process.env.ABNAHME_INBOX_USER && process.env.ABNAHME_INBOX_PASS)
 }
 
-async function mitInbox<T>(fn: (client: ImapFlow) => Promise<T>): Promise<T> {
+/**
+ * Oeffnet EINE Verbindung, haelt den Mailbox-Lock und uebergibt eine Suchfunktion. Bewusst so:
+ * Gmail begrenzt Logins pro Zeit — ein Poll-Zyklus mit eigener Verbindung je Runde (12-18 Logins je
+ * Wartevorgang) laeuft in „Too many simultaneous connections". Alle Poll-Runden teilen sich daher
+ * diese eine Sitzung.
+ */
+async function mitInbox<T>(fn: (suche: (s: MailSuche) => Promise<AbnahmeMail[]>) => Promise<T>): Promise<T> {
   const user = process.env.ABNAHME_INBOX_USER
   const pass = process.env.ABNAHME_INBOX_PASS
   if (!user || !pass) throw new Error('Abnahme-Inbox nicht konfiguriert (ABNAHME_INBOX_USER/ABNAHME_INBOX_PASS)')
@@ -73,7 +79,7 @@ async function mitInbox<T>(fn: (client: ImapFlow) => Promise<T>): Promise<T> {
   try {
     const lock = await client.getMailboxLock('INBOX')
     try {
-      return await fn(client)
+      return await fn((s) => sucheInVerbindung(client, s))
     } finally {
       lock.release()
     }
@@ -88,41 +94,41 @@ function betreffPasst(subject: string, filter: string | RegExp | undefined): boo
   return subject.toLowerCase().includes(filter.toLowerCase())
 }
 
+async function sucheInVerbindung(client: ImapFlow, suche: MailSuche): Promise<AbnahmeMail[]> {
+  const seit = suche.seit ?? new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const uids = await client.search({ to: suche.an, since: seit }, { uid: true })
+  if (!uids || uids.length === 0) return []
+  const treffer: AbnahmeMail[] = []
+  for await (const msg of client.fetch(uids, { uid: true, envelope: true, source: true }, { uid: true })) {
+    const subject = msg.envelope?.subject ?? ''
+    if (!betreffPasst(subject, suche.betreffEnthaelt)) continue
+    const datum = msg.envelope?.date ?? null
+    // IMAP SINCE ist tagesgenau -> Feinfilter ueber das Date-Header (60 s Toleranz fuer Uhr-Drift).
+    if (datum && datum.getTime() < seit.getTime() - 60_000) continue
+    const parsed = msg.source ? await simpleParser(msg.source) : null
+    treffer.push({
+      uid: msg.uid,
+      subject,
+      to: (msg.envelope?.to ?? []).map((a) => a.address ?? '').filter(Boolean),
+      from: msg.envelope?.from?.[0]?.address ?? '',
+      date: datum,
+      messageId: msg.envelope?.messageId ?? null,
+      text: parsed?.text ?? '',
+      html: typeof parsed?.html === 'string' ? parsed.html : '',
+    })
+  }
+  treffer.sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0))
+  return treffer
+}
+
 /** Alle Mails an `an` (optional mit Betreff-Filter), neueste zuerst. Eine Verbindung pro Aufruf. */
 export async function findeMails(suche: MailSuche): Promise<AbnahmeMail[]> {
-  const seit = suche.seit ?? new Date(Date.now() - 24 * 60 * 60 * 1000)
-  return mitInbox(async (client) => {
-    const uids = await client.search({ to: suche.an, since: seit }, { uid: true })
-    if (!uids || uids.length === 0) return []
-    const treffer: AbnahmeMail[] = []
-    for await (const msg of client.fetch(uids, { uid: true, envelope: true, source: true }, { uid: true })) {
-      const subject = msg.envelope?.subject ?? ''
-      if (!betreffPasst(subject, suche.betreffEnthaelt)) continue
-      const datum = msg.envelope?.date ?? null
-      if (datum && datum.getTime() < seit.getTime() - 60_000) continue
-      const parsed = msg.source ? await simpleParser(msg.source) : null
-      const toListe = (msg.envelope?.to ?? [])
-        .map((a) => a.address ?? '')
-        .filter(Boolean)
-      treffer.push({
-        uid: msg.uid,
-        subject,
-        to: toListe,
-        from: msg.envelope?.from?.[0]?.address ?? '',
-        date: datum,
-        messageId: msg.envelope?.messageId ?? null,
-        text: parsed?.text ?? '',
-        html: typeof parsed?.html === 'string' ? parsed.html : '',
-      })
-    }
-    treffer.sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0))
-    return treffer
-  })
+  return mitInbox((such) => such(suche))
 }
 
 /**
- * Pollt, bis mindestens eine passende Mail da ist. Liefert die neueste. Wirft nach `timeoutMs` mit einer
- * Meldung, die Adresse und Filter nennt — ein fehlender Treffer ist ein BEFUND, kein Skip.
+ * Pollt in EINER Verbindung, bis mindestens eine passende Mail da ist; liefert die neueste. Wirft nach
+ * `timeoutMs` mit einer Meldung, die Adresse und Filter nennt — eine fehlende Mail ist ein BEFUND, kein Skip.
  */
 export async function warteAufMail(
   suche: MailSuche & { timeoutMs?: number; intervallMs?: number },
@@ -130,22 +136,24 @@ export async function warteAufMail(
   const timeoutMs = suche.timeoutMs ?? 120_000
   const intervallMs = suche.intervallMs ?? 10_000
   const start = Date.now()
-  let letzterFehler: unknown = null
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const mails = await findeMails(suche)
-      if (mails.length > 0) return mails[0]
-    } catch (err) {
-      // IMAP-Wackler nicht als Befund werten — erst nach Ablauf des Budgets.
-      letzterFehler = err
+  const gefunden = await mitInbox(async (such) => {
+    let letzterFehler: unknown = null
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const mails = await such(suche)
+        if (mails.length > 0) return mails[0]
+      } catch (err) {
+        // IMAP-Wackler nicht als Befund werten — erst nach Ablauf des Budgets.
+        letzterFehler = err
+      }
+      await new Promise((r) => setTimeout(r, intervallMs))
     }
-    await new Promise((r) => setTimeout(r, intervallMs))
-  }
+    if (letzterFehler) console.warn('[abnahme-inbox] letzter IMAP-Fehler:', (letzterFehler as Error).message)
+    return null
+  })
+  if (gefunden) return gefunden
   const filter = suche.betreffEnthaelt ? ` mit Betreff „${String(suche.betreffEnthaelt)}“` : ''
-  throw new Error(
-    `Keine Mail an ${suche.an}${filter} binnen ${Math.round(timeoutMs / 1000)} s` +
-      (letzterFehler ? ` (letzter IMAP-Fehler: ${(letzterFehler as Error).message})` : ''),
-  )
+  throw new Error(`Keine Mail an ${suche.an}${filter} binnen ${Math.round(timeoutMs / 1000)} s`)
 }
 
 /** Anzahl passender Mails — fuer Dedup-Nachweise („genau eine Mail", „keine zweite nach X"). */
