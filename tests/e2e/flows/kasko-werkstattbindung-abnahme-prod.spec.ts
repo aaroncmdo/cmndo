@@ -1249,30 +1249,88 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
   })
 
   test('T22 Foto-Tool (anonym): Kasko zeigt den Bindungs-Hinweis statt eines Werkstatt-Versprechens', async ({ page }) => {
-    test.setTimeout(180_000)
-    await page.goto(`${APP}/embed/anspruch-pruefen`, { waitUntil: 'domcontentloaded' })
+    test.setTimeout(300_000)
+    // Einstieg laut Phase-2-Lane: Schuldform per Parameter, Session entsteht per Server-Action.
+    await page.goto(`${APP}/embed/anspruch-pruefen?schuld=selbst`, { waitUntil: 'domcontentloaded' })
+    await expect(page.getByText('Wird geladen …')).toHaveCount(0, { timeout: 40_000 })
     await page.waitForLoadState('networkidle').catch(() => {})
-    const selbst = page.getByRole('button', { name: /^Ich selbst|selbst verursacht|Eigenverschulden/i }).first()
-    const da = await selbst.waitFor({ state: 'visible', timeout: 20_000 }).then(() => true).catch(() => false)
-    test.skip(!da, 'Foto-Tool: Schuldfrage-Option nicht gefunden — Aufbau geaendert, Zelle von Hand nachziehen')
-    await selbst.click()
-    await page.waitForTimeout(2_000)
-    // Bis zur Zusammenfassung durchklicken (der Wizard hat je nach Antwort unterschiedlich viele Schritte).
-    for (let i = 0; i < 8; i++) {
-      const text = await page.locator('body').innerText().catch(() => '')
-      if (/Werkstattbindung|Ihre Kasko|Selbstbeteiligung/i.test(text)) break
-      const weiter = page.getByRole('button', { name: /^Weiter|^Ergebnis|^Fertig/i }).first()
-      if (!(await weiter.isVisible().catch(() => false))) break
-      await weiter.click()
-      await page.waitForTimeout(1_500)
+
+    // Ein Foto ist Pflicht; der Datei-Input ist versteckt (className hidden), per setInputFiles trotzdem
+    // bedienbar. 1x1-PNG als Puffer — es geht um den Ablauf, nicht um den Bildinhalt.
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64',
+    )
+    const input = page.locator('input[type="file"]').first()
+    const inputDa = await input.count().then((n) => n > 0)
+    test.skip(!inputDa, 'Foto-Tool: kein Datei-Input gefunden — Aufbau geändert, Zelle von Hand nachziehen')
+    await input.setInputFiles({ name: 'schaden.png', mimeType: 'image/png', buffer: png })
+
+    const analysieren = page.getByRole('button', { name: /Schaden analysieren/i }).first()
+    await expect(analysieren).toBeEnabled({ timeout: 20_000 })
+    await analysieren.click()
+
+    // Zwei Wege: Bildanalyse laeuft durch (10–30 s) ODER sie scheitert und bietet den Link an. Auf prod ist
+    // das Anthropic-Guthaben laut Marker leer, also ist der zweite Weg der wahrscheinliche — beide fuehren
+    // zum selben Schritt, und fuer diese Zelle zaehlt nur der Bindungs-Hinweis am Ende.
+    const ohneEinschaetzung = page.getByRole('button', { name: /Ohne Einschätzung fortfahren/i }).or(page.getByRole('link', { name: /Ohne Einschätzung fortfahren/i })).first()
+    // Das Jahr-Feld traegt kein verknuepftes <label>; der sichtbare Platzhalter ist der verlaessliche Anker
+    // (Screenshot des ersten Laufs: „Erstzulassung (Jahr)" als Ueberschrift, Platzhalter „z. B. 2021").
+    const erstzulassung = page.getByPlaceholder(/z\. ?B\. ?2021/i).or(page.getByLabel(/Erstzulassung/i)).first()
+    for (let i = 0; i < 20; i++) {
+      if (await erstzulassung.isVisible().catch(() => false)) break
+      if (await ohneEinschaetzung.isVisible().catch(() => false)) { await ohneEinschaetzung.click(); continue }
+      await page.waitForTimeout(3_000)
     }
+    const feldDa = await erstzulassung.isVisible().catch(() => false)
+    await shot(page, 't22-01-fototool-einschaetzung')
+    test.skip(!feldDa, 'Foto-Tool: Einschätzungs-Schritt nicht erreicht (Analyse hängt) — als nicht nachgewiesen ausgewiesen')
+    await erstzulassung.fill('2021')
+    // Zweites Pflichtfeld, das die Fehlermeldung im ersten Lauf verriet („Bitte angeben, ob das Fahrzeug
+    // fahrbereit ist") — ohne es bleibt der Wizard stehen, und das sah aus wie ein fehlender Hinweis.
+    await page.getByRole('button', { name: /^Ja, fahrbereit$/i }).first().click().catch(() => {})
+    await page.getByRole('button', { name: /Anspruch anzeigen/i }).first().click()
+
+    const hinweis = page.getByTestId('anspruch-kasko-wb-hinweis')
+    const hinweisDa = await hinweis.waitFor({ state: 'visible', timeout: 40_000 }).then(() => true).catch(() => false)
     const seite = await page.locator('body').innerText()
-    const nenntBindung = /Werkstattbindung/i.test(seite)
     const versprichtWerkstatt = /vermitteln (dir|Ihnen) eine (Partner)?werkstatt|Partnerwerkstatt in Ihrer N/i.test(seite)
-    console.log('[T22] Bindung erwaehnt:', nenntBindung, '· Werkstatt-Versprechen:', versprichtWerkstatt)
-    await shot(page, 't22-01-fototool-kasko')
-    test.skip(!nenntBindung && !versprichtWerkstatt, 'Phase 2 (Foto-Tool-Hinweis) ist auf dem Ziel noch nicht live')
+    console.log('[T22] Bindungs-Hinweis sichtbar:', hinweisDa, '· Werkstatt-Versprechen im Text:', versprichtWerkstatt)
+    await shot(page, 't22-02-fototool-summary')
+    test.skip(!hinweisDa && !versprichtWerkstatt, 'Phase 2 (Foto-Tool-Hinweis) ist auf dem Ziel noch nicht live')
+    expect(hinweisDa, 'Bindungs-Hinweis im Summary').toBe(true)
     expect(versprichtWerkstatt, 'kein Werkstatt-Versprechen bei Kasko').toBe(false)
+  })
+
+  test('T24 Quiz-Ergebnis in drei Sprachen: Tarifprüfung statt Partnerwerkstatt-Versprechen', async ({ request }) => {
+    test.setTimeout(120_000)
+    // Die Lane misst den deutschen Quiz-WEG per UI. Diese Zelle prueft die AUSLIEFERUNG in mehreren
+    // Sprachen — im Quelltext, weil ein Sprachmodell und ein Crawler genau das lesen.
+    // ⚠ Messfalle der Lane (05.09.): "Partnerwerkstatt" steht auf /check auch in FAQ-Texten ueber die
+    // Schadensteuerung der GEGNERISCHEN Versicherung — dort gehoert es hin. Gemessen wird deshalb der
+    // konkrete alte Baustein, nicht das blosse Wort.
+    const marketing = APP.includes('staging') ? 'https://staging.claimondo.de' : 'https://claimondo.de'
+    const treffer: Record<string, { alt: number; neu: number; bytes: number }> = {}
+    for (const pfad of ['/check', '/en/check', '/tr/check']) {
+      const r = await request.get(`${marketing}${pfad}`)
+      if (r.status() !== 200) { console.log(`[T24] ${pfad}: HTTP ${r.status()} — uebersprungen`); continue }
+      const html = await r.text()
+      // grep -c zaehlt ZEILEN; minifiziertes HTML hat nur eine. Deshalb Vorkommen zaehlen, nicht Zeilen.
+      const zaehle = (re: RegExp) => (html.match(re) ?? []).length
+      treffer[pfad] = {
+        alt: zaehle(/Koordination mit der Partnerwerkstatt/gi),
+        neu: zaehle(/Werkstattbindung|Tarif prüfen|Tarifprüfung/gi),
+        bytes: html.length,
+      }
+    }
+    console.log('[T24] Treffer je Sprache:', JSON.stringify(treffer))
+    test.skip(Object.keys(treffer).length === 0, 'Marketing nicht erreichbar')
+    for (const [pfad, t] of Object.entries(treffer)) {
+      expect(t.alt, `${pfad}: der alte Baustein "Koordination mit der Partnerwerkstatt" ist raus`).toBe(0)
+    }
+    // Mindestens die deutsche Fassung muss die neue Aussage tragen; die uebrigen Sprachen folgen dem
+    // Uebersetzungsstand und werden protokolliert, nicht erzwungen.
+    expect(treffer['/check']?.neu ?? 0, '/check nennt die Tarifprüfung').toBeGreaterThan(0)
   })
 
   test('T23 Dispatch (angemeldet): die unverbindliche Quiz-Auswertung steht am Lead', async ({ page }) => {
