@@ -165,6 +165,14 @@ jobs:
       - name: Client-Timezone-Ratchet
         run: npm run check:client-timezone -- --ratchet
 
+      # Copy-Lint-Gate: RDG-Rollentrennung in nutzersichtbaren Marketing-Texten (hart, Baseline 0:
+      # "wir verhandeln/setzen durch/holen zurueck", "unser Anwalt", Verb-Reihung nach Komma) plus
+      # Umlaut-Ersatz in UI-Strings als Ratchet gegen scripts/copy-lint-baseline.json. Der Scanner
+      # existierte seit #5862, war aber nie verdrahtet (stummer Waechter). Seit #5876 auch die
+      # Bildtexte der Serie "Aus der Patsche" (Generator). Siehe AGENTS.md Copy-Lint-Gate.
+      - name: Copy-Lint-Ratchet
+        run: npm run check:copy-lint -- --ratchet
+
       # Cron-Auth-Gate: `authHeader !== `Bearer ${process.env.CRON_SECRET}`` sieht wie ein
       # Gate aus, ist aber keins — fehlt die Variable, ergibt der Ausdruck "Bearer undefined",
       # und genau dieser Header kommt durch. Richtig ist `assertCronAuth` (fail-closed).
@@ -720,6 +728,10 @@ jobs:
           RUN_GOLDEN_PATH_DEEP: '1'
           # Kasko-WB Phase 2: Check-Quiz (Marketing, nur prod) -> Kasko-Lead -> FlowLink. Laeuft nur gegen prod.
           RUN_CHECK_QUIZ_SMOKE: '1'
+          # Abnahme-Inbox (docs/abnahme-inbox.md): Kunden-Mails per IMAP nachweisen. Fehlt das Secret,
+          # skippt kasko-e6-mail-abnahme-inbox.spec.ts sauber statt die Collection zu sprengen.
+          ABNAHME_INBOX_USER: ${{ secrets.ABNAHME_INBOX_USER }}
+          ABNAHME_INBOX_PASS: ${{ secrets.ABNAHME_INBOX_PASS }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -1086,6 +1098,10 @@ jobs:
           RUN_GOLDEN_PATH_DEEP: '1'
           # Kasko-WB Phase 2: Check-Quiz (Marketing, nur prod) -> Kasko-Lead -> FlowLink. Laeuft nur gegen prod.
           RUN_CHECK_QUIZ_SMOKE: '1'
+          # Abnahme-Inbox (docs/abnahme-inbox.md): Kunden-Mails per IMAP nachweisen. Fehlt das Secret,
+          # skippt kasko-e6-mail-abnahme-inbox.spec.ts sauber statt die Collection zu sprengen.
+          ABNAHME_INBOX_USER: ${{ secrets.ABNAHME_INBOX_USER }}
+          ABNAHME_INBOX_PASS: ${{ secrets.ABNAHME_INBOX_PASS }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

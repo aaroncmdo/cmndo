@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, nurZustellbareEmpfaenger, istOperativerEmpfaenger, letzte9Ziffern } from '../interne-identitaet'
+import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, nurZustellbareEmpfaenger, istOperativerEmpfaenger, letzte9Ziffern, istAbnahmeInbox } from '../interne-identitaet'
 
 // Regression-Guard fuer den Test-SV-Guard (2026-07-03): interne/Test-Leads duerfen NIE
 // einen echten Sachverstaendigen buchen/benachrichtigen. Firmendomain @claimondo.de = intern
@@ -133,5 +133,31 @@ describe('nurZustellbareEmpfaenger — extern ODER operative Inbox (Send-Isolati
   it('behaelt externe + operative gemischt, droppt Test-SV', () => {
     expect(nurZustellbareEmpfaenger(['kunde@gmail.com', 'info@claimondo.de', 'smoke@claimondo.test']))
       .toEqual(['kunde@gmail.com', 'info@claimondo.de'])
+  })
+})
+
+// Abnahme-Inbox (05.09.2026): das eine Postfach, das Test-Mails wirklich empfaengt (Regel-4-Mail-Nachweis).
+// Identitaet bleibt intern (Matching-Guard), nur die Zustellung ist erlaubt.
+describe('istAbnahmeInbox — Abnahme-Postfach (Send-Pfad)', () => {
+  it('erkennt abnahme@ und Plus-Adressen abnahme+<tag>@ (case-insensitiv)', () => {
+    expect(istAbnahmeInbox('abnahme@claimondo.de')).toBe(true)
+    expect(istAbnahmeInbox('abnahme+e6-kasko-1725000000@claimondo.de')).toBe(true)
+    expect(istAbnahmeInbox('Abnahme+Smoke@Claimondo.de')).toBe(true)
+  })
+  it('bleibt fuer die Lead-Identitaet intern (Matching-Guard unveraendert)', () => {
+    expect(istInterneEmail('abnahme+e6@claimondo.de')).toBe(true)
+  })
+  it('kein anderes Postfach, keine andere Domain, kein Praefix-Treffer', () => {
+    expect(istAbnahmeInbox('abnahme@gmail.com')).toBe(false)
+    expect(istAbnahmeInbox('abnahmeleitung@claimondo.de')).toBe(false)
+    expect(istAbnahmeInbox('info@claimondo.de')).toBe(false)
+    expect(istAbnahmeInbox(null)).toBe(false)
+    expect(istAbnahmeInbox('')).toBe(false)
+  })
+  it('nurZustellbareEmpfaenger behaelt die Abnahme-Inbox, filtert andere interne weiter weg', () => {
+    expect(nurZustellbareEmpfaenger(['abnahme+e6@claimondo.de', 'aaron.sprafke@claimondo.de', 'kunde@gmail.com'])).toEqual([
+      'abnahme+e6@claimondo.de',
+      'kunde@gmail.com',
+    ])
   })
 })

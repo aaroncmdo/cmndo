@@ -45,7 +45,7 @@
   "check": {
     "badge": "Ücretsiz · maliyet riski yok",
     "h1": "Kazadan sonra nelere hakkınız var?",
-    "sub": "3 kısa soruyu yanıtlayın — hangi haklara sahip olduğunuzu hemen gösterelim. Yükümlülük yok.",
+    "sub": "Üç kısa soru, sonra hangi haklara sahip olduğunuzu hemen görürsünüz. Kayıt yok, ücret yok.",
     "step_of": "Soru {current} / {total}",
     "back": "Geri",
     "q1_label": "Kazada kusur kimde?",
@@ -74,16 +74,16 @@
     "insight_versicherung": "Önemli: kendi bağımsız bilirkişinizi seçebilirsiniz — karşı tarafın sigortasının değil.",
     "insight_verjaehrung": "Haftalar sonra bile talebiniz genellikle zaman aşımına uğramaz — süre genelde 3 yıldır.",
     "insight_teilschuld": "Kısmi kusurda da orantılı tazminata hakkınız var.",
-    "insight_unklar": "Kusur sorusunu birlikte açıklığa kavuştururuz — çoğu zaman düşündüğünüzden hızlı.",
+    "insight_unklar": "Kusur sorusunu ortak hukuk büromuz sizinle açıklığa kavuşturur – çoğu zaman düşündüğünüzden hızlı.",
     "q1_selbst": "Kazada (esas olarak) ben kusurluydum",
     "result_voll_heading": "Bu sizin hakkınız — 0 € cep masrafı",
-    "result_voll_sub": "Kusurunuz yok mu? O zaman karşı tarafın sigortası öder. §249 BGB uyarınca, sanki kaza hiç olmamış gibi tazmin edilirsiniz.",
+    "result_voll_sub": "Kusurunuz yok mu? O zaman karşı tarafın sigortası her şeyi öder: ekspertiz, avukat, onarım, kiralık araç. Sanki kaza hiç olmamış gibi tazmin edilirsiniz (§ 249 BGB).",
     "result_quote_heading": "Talepleriniz var — orantılı olarak",
     "result_quote_sub": "Kısmi kusur durumunda zararınız kusur oranına göre orantılı olarak tazmin edilir (§254 BGB). Ortak hukuk büromuz sizin için azami tutarı alır.",
     "result_pruefen_heading": "Çoğu zaman düşündüğünüzden fazlası söz konusu",
-    "result_pruefen_sub": "Kusur sorusu genellikle sanılandan daha nettir — bunu bir avukatla birlikte açıklığa kavuşturur ve taleplerinizi güvence altına alırız.",
+    "result_pruefen_sub": "Kusur sorusu çoğu zaman hissettirdiğinden daha nettir. Ortak hukuk büromuz olayı inceler ve taleplerinizi güvence altına alır – sizin için ücretsiz.",
     "result_kasko_heading": "Kendi kusurunuzda da yardımcı oluruz",
-    "result_kasko_sub": "Karşı tarafa yönelik bir talep yok. Kasko sigortanız üzerinden süreci sizinle birlikte yürütürüz – hangi servisin onarım yapabileceği tarifenize bağlıdır.",
+    "result_kasko_sub": "Karşı tarafa karşı talep hakkı yoktur. Kasko sigortanız üzerinden ekspertiz ve süreci sizin için koordine ederiz – hangi servisin onarım yapabileceği tarifenize bağlıdır.",
     "ent_kasko_gutachten_t": "Bağımsız hasar ekspertizi",
     "ent_kasko_gutachten_d": "kasko sigortanız için tarafsız hasar tutarı tespiti",
     "ent_kasko_werkstatt_t": "Servis ve onarım",
@@ -100,9 +100,9 @@
     "range_kostenlos": "Ekspertiz ve avukat: sizin için 0 € — karşı tarafın sigortası öder",
     "ranges_disclaimer": "Tipik büyüklük aralıkları olup bağlayıcı bir teklif değildir.",
     "result_disclaimer": "Bağlayıcı olmayan ilk değerlendirme, hukuki danışmanlık değildir.",
-    "lead_heading": "Talebinizi şimdi ücretsiz kontrol ettirin",
-    "lead_sub": "Sizi telefonla ararız — genellikle birkaç dakika içinde.",
-    "lead_submit": "Talebimi ücretsiz kontrol et",
+    "lead_heading": "Hakkınız olanı şimdi ücretsiz kontrol ettirin",
+    "lead_sub": "Bir danışman sizi 15 dakika içinde arar (her gün 8–20) ve taleplerinizi sizinle birlikte gözden geçirir. Ücretsiz, bağlayıcılık yok.",
+    "lead_submit": "Ücretsiz geri arama iste",
     "restart": "Yeniden başla",
     "alternativ_text": "Doğrudan konuşmayı mı tercih edersiniz? Buradayız.",
     "alternativ_cta": "Hasarı çevrimiçi bildir",
@@ -1003,14 +1003,14 @@
       "quote_accent": "Hak kalır."
     },
     "hero": {
-      "trust_badge": "Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
+      "trust_badge": "Bağımsız Kfz bilirkişileri · 48 saat içinde randevu",
       "h1_plain": "Kazada kusurunuz yok mu?",
-      "h1_accent": "Biz hallederiz.",
-      "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
-      "cta_primary": "Sigortayla konuşmamıza izin verin →",
+      "h1_accent": "Kendi bilirkişiniz. Sizin için 0 €.",
+      "sub_headline": "Bağımsız bir bilirkişi size gelir, çoğunlukla 48 saat içinde. Ekspertiz, avukat ve onarımı karşı tarafın sigortası öder (§ 249 BGB). Ortak hukuk büromuz müzakere eder, siz her adımı dosyanızda görürsünüz.",
+      "cta_primary": "Bilirkişi randevusu al →",
       "cta_call": "Şimdi arayın — 15 dakikada geri dönüş",
       "cta_whatsapp": "WhatsApp",
-      "trust_footer": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu"
+      "trust_footer": "Ücretsiz · bağlayıcılık yok · görüşmeden sonra siz karar verirsiniz"
     },
     "login": {
       "trigger": "Giriş",
@@ -1039,17 +1039,17 @@
       "Davanız. Her zaman elinizin altında.",
       "Tek danışman. Tek numara. Hep aynı.",
       "Her mektubu, her aramayı, her kuruşu görürsünüz.",
-      "4 ay yerine 32 gün. Ortalama olarak.",
+      "48 saat içinde randevu. Bilirkişi size gelir.",
       "Sizin için 0 €. (§ 249 BGB)."
     ],
     "kpis": [
       {
-        "wert": "2.000+",
-        "label": "yönlendirilen hasar davası"
+        "wert": "0 €",
+        "label": "kusursuz kazada sizin payınız"
       },
       {
-        "wert": "8 Mio. €+",
-        "label": "tahsil edilen tazminat"
+        "wert": "< 48 sa",
+        "label": "bilirkişi randevusuna kadar"
       },
       {
         "wert": "32 gün",
@@ -1060,7 +1060,7 @@
         "label": "ilk geri aramaya kadar"
       }
     ],
-    "kpi_methodik": "Claimondo iş ortağı ağı aracılığıyla kuruluştan bu yana yönlendirilen tüm davaların toplu değerlendirmesi. Tarih: 14.05.2026. Ayrıntılı metodoloji talep üzerine incelenebilir.",
+    "kpi_methodik": "32 gün: kuruluştan bu yana Claimondo üzerinden yürütülen tüm sorumluluk davalarının ortalaması, tarih 14.05.2026. Geri arama ve randevu: fiili süreç süreleri, her gün 8–20.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Yasal Hakkınız",
       "heading": "Dört görüşme — onları siz değil, ortak hukuk büromuz yürütür.",
@@ -1442,7 +1442,7 @@
       "btn_submit": "Geri Arama Talep Et",
       "btn_submit_pending": "Gönderiliyor…",
       "success_heading": "Sizi Geri Arayacağız",
-      "success_sub": "Bir danışman sizinle iletişime geçecek — mesai saatleri içinde genellikle 15 dakika içinde.",
+      "success_sub": "Bir danışman 15 dakika içinde arar, her gün 8–20. Numara gizli görünebilir.",
       "close_aria": "Kapat",
       "datenschutz_note": "Formu göndererek geri aranmayı kabul etmiş olursunuz. DSGVO kapsamında veri gizliliği güvencesi.",
       "einklappen_aria": "İletişim çubuğunu daralt",
@@ -1450,15 +1450,15 @@
     },
     "lead_form": {
       "rueckruf_badge": "15 Dakika İçinde Geri Arama · 08–20",
-      "heading": "30 Saniyede Hasar Bildirin",
-      "sub": "Üç alan. Kayıt gerekmez. DSGVO uyumlu.",
+      "heading": "Geri arama isteyin – hakkınız olanı söyleyelim",
+      "sub": "Üç bilgi, kayıt yok. Bir danışman sizi 15 dakika içinde arar.",
       "field_name_label": "Adınız",
       "field_name_placeholder": "Max Mustermann",
       "field_phone_label": "Telefon Numaranız",
       "field_phone_placeholder": "0151 12345678",
       "field_city_label": "Kaza Yeri / Posta Kodu",
       "field_city_placeholder": "ör. Köln veya 50670",
-      "submit": "Şimdi Ücretsiz Geri Arama Alın →",
+      "submit": "Ücretsiz geri arama iste →",
       "submit_pending": "Gönderiliyor …",
       "success_heading": "Teşekkürler{name, select, empty{} other{, {name}}} — sizi hemen arıyoruz.",
       "success_body": "Bir danışman <strong>15 dakika içinde</strong> sizi geri arayacak. Lütfen telefonunuzu hazır bulundurun — numara gizlenmiş görünebilir.",
@@ -1542,8 +1542,8 @@
         "label": "Sigorta kesintisi geri alındı¹"
       },
       {
-        "wert": "8 Milyon €+",
-        "label": "tahsil edilen tazminatlar (toplam)"
+        "wert": "< 48 sa",
+        "label": "bilirkişi randevusuna kadar"
       },
       {
         "wert": "0 €",
@@ -3793,26 +3793,26 @@
     "hero_badge": "Bilirkişiler şu anda {ort} hizmetinizde",
     "hero_h1_line1": "Kaza mı geçirdiniz?",
     "hero_h1_city": "Kfz bilirkişiniz {ort}.",
-    "hero_subheadline": "Bilirkişinizi koordine ediyoruz (< 48 saat), sigorta görüşmelerini yürütüyoruz ve talebinizi BGH uyumlu biçimde sonuçlandırıyoruz. Sizin için 0 €.",
+    "hero_subheadline": "Bağımsız bilirkişiniz size gelir, çoğunlukla 48 saat içinde. Ekspertiz ve avukatı karşı tarafın sigortası öder (§ 249 BGB); ortak hukuk büromuz müzakere eder. Sizin için 0 €.",
     "hero_bullets": [
       "Davanız. Her an elinizin altında.",
       "Bir danışman. Bir numara. Hep aynısı.",
       "Her mektubu, her aramayı, her kuruşu görürsünüz.",
-      "4 ay yerine 32 gün. Ortalama olarak.",
+      "48 saat içinde randevu. Bilirkişi size gelir.",
       "Sizin için 0 €. (§ 249 BGB)."
     ],
     "hero_cta_call": "Şimdi arayın — 15 dakikada geri dönüş",
-    "hero_trust_line": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu",
+    "hero_trust_line": "Ücretsiz · bağlayıcılık yok · görüşmeden sonra siz karar verirsiniz",
     "form_badge": "15 dakikada geri dönüş · 08–20",
-    "form_h2": "Hasarı bildirin — 30 saniyede",
-    "form_sub": "Üç alan. Kayıt olmadan. DSGVO uyumlu.",
+    "form_h2": "Geri arama isteyin – hakkınız olanı söyleyelim",
+    "form_sub": "Üç bilgi, kayıt yok. Bir danışman sizi 15 dakika içinde arar.",
     "form_name_label": "Adınız",
     "form_name_placeholder": "Ali Yılmaz",
     "form_phone_label": "Telefon numaranız",
     "form_phone_placeholder": "0151 12345678",
     "form_city_label": "Kazanın yaşandığı şehir / posta kodu",
     "form_city_placeholder": "{stadt} veya posta kodu",
-    "form_submit_idle": "Şimdi ücretsiz geri dönüş talep edin →",
+    "form_submit_idle": "Ücretsiz geri arama iste →",
     "form_submit_pending": "Gönderiliyor …",
     "form_consent": "Göndererek <link>Gizlilik Politikası</link>'nı kabul ediyorum.",
     "form_toast_success": "Teşekkürler! 15 dakika içinde sizi arayacağız.",
@@ -3820,12 +3820,12 @@
     "form_toast_rate_limit": "Çok fazla istek. Lütfen birkaç dakika sonra tekrar deneyin.",
     "trust_kpis": [
       {
-        "wert": "2.000+",
-        "label": "yönetilen hasar davası"
+        "wert": "0 €",
+        "label": "kusursuz kazada sizin payınız"
       },
       {
-        "wert": "8 Mio. €+",
-        "label": "tazminat elde edildi"
+        "wert": "< 48 sa",
+        "label": "bilirkişi randevusuna kadar"
       },
       {
         "wert": "32 gün",
@@ -3836,7 +3836,7 @@
         "label": "ilk geri dönüşe kadar"
       }
     ],
-    "trust_methodik": "Claimondo partner ağı üzerinden yönlendirilen tüm davalara ait toplam analiz. Durum: 14.05.2026. Ayrıntılı metodoloji talep üzerine sunulabilir.",
+    "trust_methodik": "32 gün: kuruluştan bu yana Claimondo üzerinden yürütülen tüm sorumluluk davalarının ortalaması, tarih 14.05.2026. Geri arama ve randevu: fiili süreç süreleri, her gün 8–20.",
     "lokal_eyebrow": "Yerel köklü — Almanya genelinde aktif",
     "lokal_h2": "Araç hasar tespiti {ort}",
     "lokal_capsule": "<strong>Yetkili mahkeme:</strong> {landgericht}. <strong>Avukatlar Birliği:</strong> {kammer}. <strong>Posta kodu bölgesi:</strong> {plz} (yaklaşık {bevoelkerung} kişi, {bundesland} eyaleti). Sigortacılarla mahkeme yoluyla yaşanan anlaşmazlıklarda partner trafik hukuku büromuz davayı {landgericht} önünde açmaktadır — daireler burada tanınmaktadır. BVSK kapsamında onur aralığı: <strong>{bvskSpanne}</strong> (hasar miktarıyla orantılı).",
@@ -4260,8 +4260,8 @@
       "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV ve denetim hizmeti sağlayıcıları — anlaşılır biçimde açıklandı, § 249 BGB uyarınca haklarınızla birlikte."
     },
     "schaden_melden": {
-      "title": "Hasar bildirin — Güvenli giriş bağlantısı",
-      "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
+      "title": "Kaza hasarını online bildirin – WhatsApp ile güvenli bağlantı | Claimondo",
+      "description": "Üç dakikada hasar bildirin: WhatsApp veya e-posta ile hemen güvenli bir bağlantı alır, bilirkişi randevusunu seçer ve vekaleti imzalarsınız. Kusursuz kazada 0 € (§ 249 BGB)."
     },
     "gutachter_partner_neukundengewinnung": {
       "title": "Araç Eksperleri için Yeni Müşteri Kazanımı — CPL Riski Olmadan",

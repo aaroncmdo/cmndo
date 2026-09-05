@@ -353,7 +353,7 @@ Grundlage: Sanden/Danner-Formel · BGH VI ZR 357/03 lehnt eine starre Altersgren
 Audatex und andere Kalkulationssysteme haben für US-Fahrzeuge oft keine korrekten Verbundzeiten hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten 48.000 €. Schwellerblenden-Reparaturen können Steuergeräte erst Monate später zerstören. Bei Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht. Quelle: Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart).
 
 ### Berater-Quote
-"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
+"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und unsere Partnerkanzlei holt jeden Euro zurück." — Claimondo-Schadenbegleitung
 `
 
 const VORTEILE_KERN = `
@@ -364,7 +364,7 @@ const VORTEILE_KERN = `
 ### Hero
 - H1: "Versicherer-Kürzungen zurückgeholt — ohne Eigenanteil."
 - Pill: "§249 BGB · BVSK · BGH-Rechtsprechung"
-- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
+- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Unsere Partnerkanzlei holt sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk** und BGH-Rechtsprechung im Rücken.
 
 ### KPIs
 - 30–40 % Versicherer-Kürzung zurückgeholt (Quelle: BGH VI ZR 38/22 ff.)

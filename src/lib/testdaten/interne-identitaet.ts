@@ -82,14 +82,37 @@ export function istOperativerEmpfaenger(email: string | null | undefined): boole
   return OPERATIVE_EMPFAENGER.has(email.trim().toLowerCase())
 }
 
+// Abnahme-Inbox (Aaron 05.09.2026, Regel 4/5): das EINE Postfach, das Test-Mails wirklich EMPFAENGT — damit
+// Kunden-Mails (E6-Bindungsmail, Bestaetigungen, Reminder) im Prod-Smoke nachweisbar sind. Bisher unterdrueckte
+// die Send-Isolation jede Mail an Test-Adressen VOR dem email_log-Insert: ein fehlender Eintrag bewies nichts
+// (Abnahme Kasko-WB 05.09.: „E6 verdrahtet, nicht gelaufen"). Plus-Adressierung (abnahme+<lauf>@) landet im
+// selben Postfach und markiert den Lauf. Die IDENTITAET bleibt intern (@claimondo.de -> Matching-Guard, kein
+// echter SV erreichbar) — nur die ZUSTELLUNG ist erlaubt. Specs: tests/e2e/lib/abnahme-inbox.ts,
+// Einrichtung/Betrieb: docs/abnahme-inbox.md.
+const ABNAHME_INBOX_LOCAL = 'abnahme'
+const ABNAHME_INBOX_DOMAIN = 'claimondo.de'
+
+/** true fuer abnahme@claimondo.de und abnahme+<tag>@claimondo.de (case-insensitiv). */
+export function istAbnahmeInbox(email: string | null | undefined): boolean {
+  if (!email) return false
+  const e = email.trim().toLowerCase()
+  const at = e.lastIndexOf('@')
+  if (at < 0 || e.slice(at + 1) !== ABNAHME_INBOX_DOMAIN) return false
+  const local = e.slice(0, at)
+  return local === ABNAHME_INBOX_LOCAL || local.startsWith(`${ABNAHME_INBOX_LOCAL}+`)
+}
+
 /**
  * Fuer die SEND-Isolation: behaelt die ZUSTELLBAREN Empfaenger = extern ODER operative
- * Betriebs-Inbox. Unterschied zu nurExterneEmpfaenger (das operative Inboxen als intern
- * wegfiltern wuerde): operative Inboxen sind gewollte Alert-Ziele, keine Matching-Bystander.
+ * Betriebs-Inbox ODER die Abnahme-Inbox. Unterschied zu nurExterneEmpfaenger (das operative Inboxen
+ * als intern wegfiltern wuerde): operative Inboxen sind gewollte Alert-Ziele, keine Matching-Bystander;
+ * die Abnahme-Inbox ist das gewollte Ziel des Mail-Nachweises im Prod-Smoke.
  */
 export function nurZustellbareEmpfaenger(to: string | string[]): string[] {
   const list = Array.isArray(to) ? to : [to]
-  return list.filter((r): r is string => !!r && (!istInterneEmail(r) || istOperativerEmpfaenger(r)))
+  return list.filter(
+    (r): r is string => !!r && (!istInterneEmail(r) || istOperativerEmpfaenger(r) || istAbnahmeInbox(r)),
+  )
 }
 
 /**

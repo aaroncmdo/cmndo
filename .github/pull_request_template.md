@@ -9,6 +9,7 @@
 
 ## Pflicht-Checks (AGENTS.md)
 
+- [ ] **Regel 6 — Soll-Blatt VOR dem Bau** (Skill `operatives-soll`): `memory/abnahmen/<datum>-<slug>.md` mit Abschnitten 1 · 1b · 1c · 2 · 6 · 6a · 6b · 10 — _oder_ Dreizeiler „Warum · Done-Kriterium · n/a Matrix" bei reinen Docs/Scripts/Config
 - [ ] **7-Punkte-Audit** im Commit-Body (Build · UI · Redundanz · Dead-Code · Spec · Inkonsistenz · Regression)
 - [ ] **Build/tsc grün** (bei Routen/Layouts/Server-Actions: voller `npm run build`)
 - [ ] **Regel 4 — Prod-Smoke** nach Deploy geplant/gelaufen (Flows + Test-Konten benannt) — _oder_ „n/a (reine Docs/Config/Scripts ohne Runtime-Flow)"

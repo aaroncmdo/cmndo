@@ -45,7 +45,7 @@
   "check": {
     "badge": "Kostenlos · ohne Kostenrisiko",
     "h1": "Was steht Ihnen nach dem Unfall zu?",
-    "sub": "Beantworten Sie 3 kurze Fragen – wir zeigen Ihnen sofort, welche Ansprüche Sie haben. Unverbindlich.",
+    "sub": "Drei kurze Fragen, dann sehen Sie sofort, welche Ansprüche Sie haben. Ohne Anmeldung, ohne Kosten.",
     "step_of": "Frage {current} von {total}",
     "back": "Zurück",
     "q1_label": "Wer trägt die Schuld am Unfall?",
@@ -74,16 +74,16 @@
     "insight_versicherung": "Wichtig: Sie dürfen einen eigenen, unabhängigen Sachverständigen wählen – nicht den der gegnerischen Versicherung.",
     "insight_verjaehrung": "Auch nach Wochen ist Ihr Anspruch meist nicht verjährt – die Frist beträgt in der Regel 3 Jahre.",
     "insight_teilschuld": "Auch bei Teilschuld steht Ihnen anteiliger Schadenersatz zu.",
-    "insight_unklar": "Die Schuldfrage klären wir gemeinsam – das geht oft schneller als gedacht.",
+    "insight_unklar": "Die Schuldfrage klärt unsere Partnerkanzlei mit Ihnen – das geht oft schneller als gedacht.",
     "q1_selbst": "Ich war (haupt)schuld",
     "result_voll_heading": "Das steht Ihnen zu – 0 € Eigenkosten",
-    "result_voll_sub": "Unverschuldet? Dann zahlt die gegnerische Versicherung. Nach §249 BGB werden Sie so gestellt, als wäre der Unfall nie passiert.",
+    "result_voll_sub": "Unverschuldet? Dann zahlt die gegnerische Versicherung alles: Gutachten, Anwalt, Reparatur, Mietwagen. Sie werden so gestellt, als wäre der Unfall nie passiert (§ 249 BGB).",
     "result_quote_heading": "Sie haben Ansprüche – anteilig",
     "result_quote_sub": "Bei Teilschuld wird Ihr Schaden anteilig nach Quote ersetzt (§254 BGB). Unsere Partnerkanzlei holt das Maximum für Sie heraus.",
     "result_pruefen_heading": "Da ist oft mehr drin, als Sie denken",
-    "result_pruefen_sub": "Die Schuldfrage ist häufig klarer als gedacht – wir klären sie mit Anwalt und sichern Ihre Ansprüche.",
+    "result_pruefen_sub": "Die Schuldfrage ist oft klarer, als sie sich anfühlt. Unsere Partnerkanzlei prüft den Hergang und sichert Ihre Ansprüche – für Sie kostenlos.",
     "result_kasko_heading": "Wir helfen auch bei eigener Schuld",
-    "result_kasko_sub": "Gegen einen Gegner besteht kein Anspruch. Über Ihre Kaskoversicherung regeln wir die Abwicklung mit Ihnen – welche Werkstatt reparieren darf, hängt von Ihrem Tarif ab.",
+    "result_kasko_sub": "Gegen den Gegner besteht kein Anspruch. Über Ihre Kaskoversicherung koordinieren wir Gutachten und Abwicklung für Sie – welche Werkstatt reparieren darf, hängt von Ihrem Tarif ab.",
     "ent_kasko_gutachten_t": "Unabhängiges Schadensgutachten",
     "ent_kasko_gutachten_d": "neutrale Schadenhöhe für Ihre Kaskoversicherung",
     "ent_kasko_werkstatt_t": "Werkstatt & Reparatur",
@@ -100,9 +100,9 @@
     "range_kostenlos": "Gutachten & Anwalt: 0 € für Sie – zahlt die gegnerische Versicherung",
     "ranges_disclaimer": "Typische Größenordnungen, kein verbindliches Angebot.",
     "result_disclaimer": "Unverbindliche Ersteinschätzung, keine Rechtsberatung.",
-    "lead_heading": "Anspruch jetzt kostenlos prüfen lassen",
-    "lead_sub": "Wir melden uns telefonisch – meist innerhalb weniger Minuten.",
-    "lead_submit": "Anspruch kostenlos prüfen",
+    "lead_heading": "Jetzt kostenlos prüfen lassen, was Ihnen zusteht",
+    "lead_sub": "Ein Berater ruft Sie in 15 Minuten an (täglich 8–20 Uhr) und geht Ihre Ansprüche mit Ihnen durch. Kostenlos, keine Bindung.",
+    "lead_submit": "Kostenlosen Rückruf anfordern",
     "restart": "Neu starten",
     "alternativ_text": "Lieber direkt sprechen? Wir sind für Sie da.",
     "alternativ_cta": "Schaden online melden",
@@ -680,8 +680,8 @@
       "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV und Prüfdienstleister – verständlich erklärt, mit Ihren Rechten nach § 249 BGB."
     },
     "schaden_melden": {
-      "title": "Schaden melden – Sicherer Link",
-      "description": "In 30 Sekunden Schaden melden. Sie erhalten direkt einen sicheren Link per WhatsApp oder E-Mail."
+      "title": "Unfallschaden online melden – sicherer Link per WhatsApp | Claimondo",
+      "description": "In drei Minuten Schaden melden: Sie erhalten sofort einen sicheren Link per WhatsApp oder E-Mail, wählen den Gutachter-Termin und unterschreiben die Vollmacht. 0 € bei unverschuldetem Unfall (§ 249 BGB)."
     },
     "home": {
       "title": "Kfz-Gutachter-Termin online buchen – ohne Anruf, 0 € | Claimondo",
@@ -1155,14 +1155,14 @@
       "quote_accent": "Anspruch bleibt."
     },
     "hero": {
-      "trust_badge": "Sachverständigen-Netzwerk · bundesweit erreichbar",
+      "trust_badge": "Unabhängige Kfz-Sachverständige · Termin in unter 48 Stunden",
       "h1_plain": "Unverschuldet im Unfall?",
-      "h1_accent": "Wir haben's im Griff.",
-      "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt – unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
-      "cta_primary": "Lassen Sie uns mit der Versicherung reden →",
+      "h1_accent": "Ihr eigener Gutachter. 0 € für Sie.",
+      "sub_headline": "Ein unabhängiger Sachverständiger kommt zu Ihnen, meist in unter 48 Stunden. Gutachten, Anwalt und Reparatur zahlt die gegnerische Versicherung (§ 249 BGB). Unsere Partnerkanzlei verhandelt, Sie sehen jeden Schritt in Ihrer Fallakte.",
+      "cta_primary": "Gutachter-Termin sichern →",
       "cta_call": "Jetzt anrufen – oder Rückruf in 15 Minuten",
       "cta_whatsapp": "WhatsApp",
-      "trust_footer": "Anonyme Beratung · Keine Bindung · DSGVO-konform"
+      "trust_footer": "Kostenlos · keine Bindung · Sie entscheiden nach dem Gespräch"
     },
     "login": {
       "trigger": "Login",
@@ -1191,17 +1191,17 @@
       "Ihr Fall. Immer in der Tasche.",
       "Ein Berater. Eine Nummer. Immer dieselbe.",
       "Sie sehen jeden Brief, jeden Anruf, jeden Cent.",
-      "32 Tage statt 4 Monate. Im Schnitt.",
+      "Termin in unter 48 Stunden. Der Gutachter kommt zu Ihnen.",
       "0 € für Sie. (§ 249 BGB)."
     ],
     "kpis": [
       {
-        "wert": "2.000+",
-        "label": "vermittelte Schadensfälle"
+        "wert": "0 €",
+        "label": "Eigenanteil bei unverschuldetem Unfall"
       },
       {
-        "wert": "8 Mio. €+",
-        "label": "Schadensersatz durchgesetzt"
+        "wert": "< 48 h",
+        "label": "bis zum Termin beim Gutachter"
       },
       {
         "wert": "32 Tage",
@@ -1212,7 +1212,7 @@
         "label": "bis zum ersten Rückruf"
       }
     ],
-    "kpi_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
+    "kpi_methodik": "32 Tage: Durchschnitt aller über Claimondo abgewickelten Haftpflichtfälle seit Gründung, Stand 14.05.2026. Rückruf und Termin: gelebte Prozesszeiten, täglich 8–20 Uhr.",
     "ansprueche": {
       "eyebrow": "§249 BGB – Ihr gesetzlicher Anspruch",
       "heading": "Vier Gespräche – unsere Partnerkanzlei führt sie, nicht Sie.",
@@ -1573,15 +1573,15 @@
     },
     "lead_form": {
       "rueckruf_badge": "Rückruf in 15 Minuten · 8–20 Uhr",
-      "heading": "Schaden melden in 30 Sekunden",
-      "sub": "Drei Felder. Ohne Anmeldung. DSGVO-konform.",
+      "heading": "Rückruf anfordern – wir sagen Ihnen, was Ihnen zusteht",
+      "sub": "Drei Angaben, keine Anmeldung. Ein Berater ruft Sie in 15 Minuten an.",
       "field_name_label": "Ihr Name",
       "field_name_placeholder": "Max Mustermann",
       "field_phone_label": "Ihre Telefonnummer",
       "field_phone_placeholder": "0151 12345678",
       "field_city_label": "Stadt / PLZ des Unfalls",
       "field_city_placeholder": "z. B. Köln oder 50670",
-      "submit": "Jetzt kostenlosen Rückruf erhalten →",
+      "submit": "Kostenlosen Rückruf anfordern →",
       "submit_pending": "Wird gesendet …",
       "success_heading": "Danke{name, select, empty{} other{, {name}}} – wir melden uns gleich.",
       "success_body": "Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück – täglich zwischen 8 und 20 Uhr, außerhalb dieser Zeiten am nächsten Morgen. Bitte halten Sie das Telefon bereit, die Nummer kann unterdrückt sein.",
@@ -1615,7 +1615,7 @@
       "btn_submit": "Rückruf anfordern",
       "btn_submit_pending": "Wird gesendet…",
       "success_heading": "Wir rufen zurück",
-      "success_sub": "Ein Berater meldet sich bei Ihnen – meistens in unter 15 Minuten während der Geschäftszeiten.",
+      "success_sub": "Ein Berater meldet sich in 15 Minuten, täglich 8–20 Uhr. Die Nummer kann unterdrückt sein.",
       "close_aria": "Schließen",
       "datenschutz_note": "Mit dem Absenden willigen Sie ein, dass wir Sie zurückrufen. Datenschutz nach DSGVO.",
       "einklappen_aria": "Kontaktleiste einklappen",
@@ -1845,8 +1845,8 @@
         "label": "Versicherer-Kürzung zurückgeholt¹"
       },
       {
-        "wert": "8 Mio. €+",
-        "label": "durchgesetzte Ansprüche (Aggregat)"
+        "wert": "< 48 h",
+        "label": "bis zum Termin beim Gutachter"
       },
       {
         "wert": "0 €",
@@ -3430,7 +3430,7 @@
       {
         "titel": "Gutachten + Anwalt",
         "dauer": "Termin <48 h, Bericht 48 h später",
-        "text": "Kfz-Sachverständiger besichtigt das Fahrzeug – bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung."
+        "text": "Kfz-Sachverständiger besichtigt das Fahrzeug – bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Unsere Partnerkanzlei fordert anschließend von der gegnerischen Versicherung."
       },
       {
         "titel": "Auszahlung",
@@ -3932,26 +3932,26 @@
     "hero_badge": "Kfz-Sachverständige aktuell {ort} verfügbar",
     "hero_h1_line1": "Unfall gehabt?",
     "hero_h1_city": "Ihr Kfz-Gutachter {ort}.",
-    "hero_subheadline": "Wir disponieren Ihren Gutachter (< 48 h), führen die Versicherungs-Verhandlung und setzen Ihren Anspruch BGH-konform durch. 0 € für Sie.",
+    "hero_subheadline": "Ihr unabhängiger Gutachter kommt zu Ihnen, meist in unter 48 Stunden. Gutachten und Anwalt zahlt die gegnerische Versicherung (§ 249 BGB), unsere Partnerkanzlei verhandelt. Für Sie 0 €.",
     "hero_bullets": [
       "Ihr Fall. Immer in der Tasche.",
       "Ein Berater. Eine Nummer. Immer dieselbe.",
       "Sie sehen jeden Brief, jeden Anruf, jeden Cent.",
-      "32 Tage statt 4 Monate. Im Schnitt.",
+      "Termin in unter 48 Stunden. Der Gutachter kommt zu Ihnen.",
       "0 € für Sie. (§ 249 BGB)."
     ],
     "hero_cta_call": "Jetzt anrufen – oder Rückruf in 15 Minuten",
-    "hero_trust_line": "Anonyme Beratung · Keine Bindung · DSGVO-konform",
+    "hero_trust_line": "Kostenlos · keine Bindung · Sie entscheiden nach dem Gespräch",
     "form_badge": "Rückruf in 15 Minuten · 8–20 Uhr",
-    "form_h2": "Schaden melden – in 30 Sekunden",
-    "form_sub": "Drei Felder. Ohne Anmeldung. DSGVO-konform.",
+    "form_h2": "Rückruf anfordern – wir sagen Ihnen, was Ihnen zusteht",
+    "form_sub": "Drei Angaben, keine Anmeldung. Ein Berater ruft Sie in 15 Minuten an.",
     "form_name_label": "Ihr Name",
     "form_name_placeholder": "Max Mustermann",
     "form_phone_label": "Ihre Telefonnummer",
     "form_phone_placeholder": "0151 12345678",
     "form_city_label": "Stadt / PLZ des Unfalls",
     "form_city_placeholder": "{stadt} oder PLZ",
-    "form_submit_idle": "Jetzt kostenlosen Rückruf erhalten →",
+    "form_submit_idle": "Kostenlosen Rückruf anfordern →",
     "form_submit_pending": "Wird gesendet …",
     "form_consent": "Mit dem Absenden akzeptiere ich die <link>Datenschutzerklärung</link>.",
     "form_toast_success": "Danke! Wir melden uns in unter 15 Minuten zurück – täglich zwischen 8 und 20 Uhr.",
@@ -3959,12 +3959,12 @@
     "form_toast_rate_limit": "Zu viele Anfragen. Bitte in ein paar Minuten erneut versuchen.",
     "trust_kpis": [
       {
-        "wert": "2.000+",
-        "label": "vermittelte Schadensfälle"
+        "wert": "0 €",
+        "label": "Eigenanteil bei unverschuldetem Unfall"
       },
       {
-        "wert": "8 Mio. €+",
-        "label": "Schadensersatz durchgesetzt"
+        "wert": "< 48 h",
+        "label": "bis zum Termin beim Gutachter"
       },
       {
         "wert": "32 Tage",
@@ -3975,7 +3975,7 @@
         "label": "bis zum ersten Rückruf"
       }
     ],
-    "trust_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
+    "trust_methodik": "32 Tage: Durchschnitt aller über Claimondo abgewickelten Haftpflichtfälle seit Gründung, Stand 14.05.2026. Rückruf und Termin: gelebte Prozesszeiten, täglich 8–20 Uhr.",
     "lokal_eyebrow": "Lokal verankert – bundesweit aktiv",
     "lokal_h2": "Kfz-Gutachten {ort}",
     "lokal_capsule": "<strong>Zuständiges Gericht:</strong> {landgericht}. <strong>Anwaltskammer:</strong> {kammer}. <strong>PLZ-Gebiet:</strong> {plz} (rund {bevoelkerung} Einwohner, Bundesland {bundesland}). Bei gerichtlichen Auseinandersetzungen mit Versicherern klagt unsere Partnerkanzlei für Verkehrsrecht vor dem {landgericht} – dort kennen die Kammern. Honorar-Spanne nach BVSK: <strong>{bvskSpanne}</strong> (skaliert mit Schadenshöhe).",
@@ -4761,6 +4761,6 @@
     "ehrlich_schluss": "In allen drei Fällen gilt weiterhin: Für die Vermittlung über Claimondo zahlen Sie nichts. Wir sagen Ihnen vorher, woran Sie sind.",
     "cta_h": "Unverschuldet im Unfall?",
     "cta_p": "Lassen Sie in zwei Minuten prüfen, was Ihnen zusteht – kostenfrei und unverbindlich.",
-    "cta_btn": "Anspruch kostenlos prüfen"
+    "cta_btn": "Kostenlosen Rückruf anfordern"
   }
 }
