@@ -21,6 +21,9 @@ export type KaskoTarifFrageProps = {
   schadenIstGlas?: boolean
   /** Kundensicht im Portal duzt (seit 31.08.), FlowLink und Embed siezen. Default 'sie'. */
   anrede?: 'sie' | 'du'
+  /** Der Bestaetigungstext verspricht die E6-Mail — nur, wo der Aufrufer sie auch schickt (FlowLink; Embed nach dem
+   *  Kontaktschritt). Das Portal sendet keine -> false (Review #5864, Befund 5). Default true. */
+  mitMailHinweis?: boolean
 }
 
 type Stufe = 'laden' | 'marke' | 'freitext' | 'tarif' | 'marker' | 'bestaetigen'
@@ -34,7 +37,7 @@ function TarifBadge({ tarif }: { tarif: KaskoTarif }) {
   return <Badge tone="warning" size="sm">Werkstattbindung</Badge>
 }
 
-export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, schadenIstGlas = false, anrede = 'sie' }: KaskoTarifFrageProps) {
+export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, schadenIstGlas = false, anrede = 'sie', mitMailHinweis = true }: KaskoTarifFrageProps) {
   const du = anrede === 'du'
   const disclaimer = du ? DISCLAIMER_DU : DISCLAIMER
   const [stufe, setStufe] = useState<Stufe>('laden')
@@ -70,7 +73,7 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
     }
   }, [])
 
-  function abschluss(auswahl: KaskoTarifAuswahl, ergebnis: WbErgebnis, zurueck: Stufe = 'tarif') {
+  function abschluss(auswahl: KaskoTarifAuswahl, ergebnis: WbErgebnis, zurueck: Stufe) {
     if (ergebnis.freieWerkstattwahl === false) {
       setPending({ auswahl, ergebnis, zurueck })
       setStufe('bestaetigen')
@@ -234,8 +237,14 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
             {pnd.auswahl.markeName ?? (du ? 'deine Versicherung' : 'Ihre Versicherung')}
             {pnd.auswahl.tarifName ? ` mit dem Tarif „${pnd.auswahl.tarifName}“` : ''}
             {du
-              ? ' angegeben. Wenn das stimmt, vermitteln wir dir keine Werkstatt, denn deine Versicherung benennt sie. Du bekommst von uns eine E-Mail mit den nächsten Schritten. Im Zweifel gilt, was auf deinem Versicherungsschein steht.'
-              : ' angegeben. Wenn das stimmt, vermitteln wir Ihnen keine Werkstatt, denn Ihre Versicherung benennt sie. Sie bekommen von uns eine E-Mail mit den nächsten Schritten. Im Zweifel gilt, was auf Ihrem Versicherungsschein steht.'}
+              ? ' angegeben. Wenn das stimmt, vermitteln wir dir keine Werkstatt, denn deine Versicherung benennt sie.'
+              : ' angegeben. Wenn das stimmt, vermitteln wir Ihnen keine Werkstatt, denn Ihre Versicherung benennt sie.'}
+            {mitMailHinweis
+              ? du
+                ? ' Du bekommst von uns eine E-Mail mit den nächsten Schritten.'
+                : ' Sie bekommen von uns eine E-Mail mit den nächsten Schritten.'
+              : ''}
+            {du ? ' Im Zweifel gilt, was auf deinem Versicherungsschein steht.' : ' Im Zweifel gilt, was auf Ihrem Versicherungsschein steht.'}
           </p>
         </div>
         <Card p={4} radius="lg" accentColor="warning">
@@ -245,17 +254,10 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
           </span>
         </Card>
         <div className="flex flex-col gap-2">
-          <Button
-            variant="navy"
-            fullWidth
-            onClick={() => {
-              setPending(null)
-              onErgebnis(pnd.auswahl, pnd.ergebnis)
-            }}
-            disabled={busy}
-            loading={busy}
-          >
-            <span data-testid="kasko-bestaetigen-ja">Ja, das ist mein Tarif</span>
+          {/* Review #5864 (Befund 3): pending bleibt stehen — sonst faellt die Komponente waehrend des Speicherns (und
+              nach einem Fehler dauerhaft) in die Marker-Frage durch. Bei Erfolg unmountet/wechselt der Aufrufer. */}
+          <Button variant="navy" fullWidth onClick={() => onErgebnis(pnd.auswahl, pnd.ergebnis)} disabled={busy} loading={busy}>
+            <span data-testid="kasko-bestaetigen-ja">{pnd.auswahl.tarifName ? 'Ja, das ist mein Tarif' : 'Ja, das stimmt'}</span>
           </Button>
           <Button
             variant="ghost"

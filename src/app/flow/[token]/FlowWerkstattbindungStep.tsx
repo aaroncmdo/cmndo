@@ -4,7 +4,7 @@
 // fragt der Step Versicherer + Tarif (KaskoTarifFrage) und leitet die Bindung aus der Wissensbasis ab.
 // Config-Bedingung {"freie_werkstattwahl": null, "werkstattbindung_quelle": null} (Mig 3). Ergebnisse:
 //   frei      -> onWeiter (Werkstatt-Strecke)
-//   gebunden  -> KaskoBindungEndansicht (ehrlich: Marke, Sanktion, Versicherer-Kontakt, Rueckruf)
+//   gebunden  -> Seite neu laden; das Re-Visit-Gate (FlowKaskoBindungGate) rendert die Bindungs-Endseite ohne Stepper
 //   unbekannt -> KaskoUnklarHinweis, dann onWeiter (E3: durchlassen, Dispatch klaert)
 
 import { useState } from 'react'

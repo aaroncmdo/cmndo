@@ -8,16 +8,18 @@ import { useEffect, useState } from 'react'
 import { KaskoBindungEndansicht } from '@/components/self-service/KaskoBindungEndansicht'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { KaskoTarifFrage } from '@/components/self-service/KaskoTarifFrage'
+import { KaskoUnklarHinweis } from '@/components/self-service/KaskoUnklarHinweis'
 import type { KaskoBindungsInfo, KaskoTarifAuswahl } from '@/lib/kasko-wb/types'
 import { fordereRueckrufAn, ladeKaskoBindungsInfoFuerFlow, speichereKaskoTarifFlow } from './self-service-actions'
 
-type Modus = 'ansicht' | 'korrigieren' | 'sende'
+type Modus = 'ansicht' | 'korrigieren' | 'sende' | 'unklar'
 
 export function FlowKaskoBindungGate({ token }: { token: string }) {
   const [info, setInfo] = useState<KaskoBindungsInfo | null>(null)
   const [fehler, setFehler] = useState(false)
   const [modus, setModus] = useState<Modus>('ansicht')
   const [sendeFehler, setSendeFehler] = useState<string | null>(null)
+  const [markeName, setMarkeName] = useState<string | null>(null)
   useEffect(() => {
     let alive = true
     ladeKaskoBindungsInfoFuerFlow(token).then((r) => {
@@ -33,6 +35,7 @@ export function FlowKaskoBindungGate({ token }: { token: string }) {
   async function korrigiere(auswahl: KaskoTarifAuswahl) {
     setModus('sende')
     setSendeFehler(null)
+    setMarkeName(auswahl.markeName)
     const r = await speichereKaskoTarifFlow(token, auswahl)
     if (!r.ok) {
       setModus('korrigieren')
@@ -44,8 +47,22 @@ export function FlowKaskoBindungGate({ token }: { token: string }) {
       setModus('ansicht')
       return
     }
-    // frei oder unbekannt: Lead ist re-qualifiziert -> der Wizard uebernimmt beim Neuladen.
+    if (r.ergebnis === 'unklar') {
+      // Review #5864 (Befund 4): der E3-Hinweis („Reparatur erst nach Pruefung des Scheins") gehoert auch in den
+      // Korrekturpfad — gerade hier hatte der Kunde vorher „gebunden" gesagt. Weiter -> Neuladen, der Wizard uebernimmt.
+      setModus('unklar')
+      return
+    }
+    // frei: Lead ist re-qualifiziert -> der Wizard uebernimmt beim Neuladen.
     window.location.reload()
+  }
+
+  if (modus === 'unklar') {
+    return (
+      <div className="max-w-md w-full">
+        <KaskoUnklarHinweis markeName={markeName} onWeiter={() => window.location.reload()} />
+      </div>
+    )
   }
 
   if (modus === 'korrigieren' || modus === 'sende') {
