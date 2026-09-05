@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-05T18:18:01.745Z",
-  "count": 17,
+  "generatedAt": "2026-09-05T18:35:46.684Z",
+  "count": 16,
   "eintraege": [
     "tests/e2e/flows/2fa-hardening-smoke.spec.ts::RUN_2FA_SMOKE",
     "tests/e2e/flows/finder-wunschzeit-anfrage-prod.spec.ts::RUN_WUNSCHZEIT_SMOKE",
@@ -17,7 +17,6 @@
     "tests/e2e/flows/smoke-orchestrator-prod.spec.ts::RUN_ORCHESTRATOR_SMOKE",
     "tests/e2e/flows/trusted-device-smoke.spec.ts::RUN_TRUSTED_DEVICE_SMOKE",
     "tests/e2e/flows/vehicles-nachzug-b-smoke.spec.ts::RUN_VEHICLES_NACHZUG_SMOKE",
-    "tests/e2e/flows/werkstatt-haftpflicht-gate-smoke.spec.ts::RUN_WERKSTATT_GATE_SMOKE",
-    "scripts/check-copy-lint.mjs::KEIN_AUFRUFER"
+    "tests/e2e/flows/werkstatt-haftpflicht-gate-smoke.spec.ts::RUN_WERKSTATT_GATE_SMOKE"
   ]
 }
