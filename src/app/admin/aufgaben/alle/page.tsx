@@ -3,6 +3,7 @@
 // hierher (next.config), ihre page.tsx wurde hierher gemoved. KanbanBoard bleibt
 // unter admin/tasks/ (nur die page.tsx ist gewandert).
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { isExecutorEnabled } from '@/lib/task-executor/policy'
 import KanbanBoard from '@/app/admin/tasks/KanbanBoard'
@@ -88,7 +89,26 @@ export default async function TasksPage() {
   //
   // Zwei Schritte statt Embed-Join: ein `claims!inner(...)` wuerde alle Aufgaben OHNE
   // Claim-Bezug mit ausblenden — davon gibt es 330.
-  const { data: testClaims } = await supabase.from('claims').select('id').eq('ist_testfall', true)
+  // ⚠ createAdminClient, NICHT der RLS-Client oben. `claims` traegt SPALTENWEISE Grants, und
+  // `ist_testfall` ist fuer `authenticated` bewusst NICHT gegrantet — Migration 20260901182708
+  // haelt Aarons Entscheidung fest: auswertung_unverbindlich = kundensichtbar, ist_testfall /
+  // source_channel / source_domain = intern.
+  //
+  // Ueber den RLS-Client gemessen (prod, echte authenticated-Session):
+  //   claims?select=id&ist_testfall=eq.true  ->  HTTP 403, 42501 permission denied
+  //
+  // Und das bleibt STILL: `const { data } = ...` verwirft das error, `data` ist null, `?? []`
+  // macht ein leeres Set daraus -> NULL Aufgaben ausgeblendet, der Hinweis-Kasten ist
+  // `> 0`-gated und erscheint gar nicht. Die Seite haette exakt so ausgesehen wie vorher.
+  // service_role umgeht Spalten-Grants; dieselbe Loesung nutzt der PR in
+  // HaengendeFaelleWidget.tsx und cron/haenger-detektor/route.ts bereits.
+  const { data: testClaims, error: testClaimsErr } = await createAdminClient()
+    .from('claims')
+    .select('id')
+    .eq('ist_testfall', true)
+  if (testClaimsErr) {
+    console.error('[admin/aufgaben] Testdaten-Marker nicht lesbar:', testClaimsErr.message)
+  }
   const testClaimIds = new Set((testClaims ?? []).map((c) => c.id as string))
   const istTestAufgabe = (t: { claim_id?: string | null }) =>
     !!t.claim_id && testClaimIds.has(t.claim_id)
