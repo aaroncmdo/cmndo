@@ -19,6 +19,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ScaleIcon } from 'lucide-react'
+import { Button } from '@/components/primitives/Button'
 import { KanzleiWunschModal } from '@/components/shared/claims'
 
 export function KanzleiWahlBanner({
@@ -48,13 +49,13 @@ export function KanzleiWahlBanner({
               kostenfrei, wenn der Gegner haftet.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setOffen(true)}
-            className="shrink-0 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-body-sm font-medium px-4 py-2 transition-colors"
-          >
+          {/* primitives.Button statt handgerolltem <button> — AGENTS.md §Komponenten-Set.
+              1:1 uebersetzt: bg-claimondo-navy + text-white = variant 'navy' (Default),
+              px-4/py-2 mit text-body-sm = size 'sm' (36px). `shrink-0` bleibt ueber die
+              className-Escape-Hatch erhalten, sonst schrumpft der Button im flex-Row. */}
+          <Button variant="navy" size="sm" className="shrink-0" onClick={() => setOffen(true)}>
             Auswählen
-          </button>
+          </Button>
         </div>
       </div>
 
