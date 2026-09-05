@@ -36,6 +36,8 @@ SV-/Regulierungs-Kette läuft (Haftpflicht → J1) oder der reduzierte Reparatur
 - **Selbstzahler** = Reparatur-only (`istReparaturOnly`): kein SV, kein Gutachten, keine Regulierung.
 - **Weg offen** → der Flow stellt die fehlende Frage nach, statt zu raten.
 
+**Eingang Anspruchsprüfung (Kasko-WB Phase 2, 05.09.2026):** Ein `/check`-Lead mit „Ich war (haupt)schuld" kommt als `eigenverantwortung` an (Migration `20260905172102`); der FlowLink stellt die Versicherungsfrage, dann die Tariffrage (Phase 1). Das Quiz verspricht keine Partnerwerkstatt mehr, sondern die Tarifprüfung; der Foto-Check ist auch bei Kasko erreichbar. Die Berater-API antwortet bei Kasko mit `werkstattbindung` ja/nein/unbekannt und empfiehlt bei Bindung keinen Werkstatt-Finder; `GET /api/v1/kasko-werkstattbindung` liefert die Tarifliste (Kandidaten statt Raten). Im Portal bleibt eine Prüf-Card sichtbar, solange die Bindung ungeklärt ist (Quelle `unbekannt`); der Dispatcher sieht die Quiz-Antworten des Kunden am Lead.
+
 ## Fehlerfälle und ihr Soll-Verhalten
 
 - **Schuldfrage/VS-Frage offen** → `null`; der Flow fragt nach, **kein** stiller Default auf einen Weg.
