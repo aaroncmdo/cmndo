@@ -175,6 +175,22 @@ test('Landeseite: Gegenwert zuerst, Guide sofort, und der Vorgang entsteht volls
     .eq('lead_id', leadId)
   expect((mails ?? []).length, 'Die Willkommens-E-Mail muss protokolliert sein').toBeGreaterThan(0)
 
+  // Die Nachricht steht im NACHRICHTENVERLAUF, nicht nur im Postfach des Kunden.
+  // Ohne diese Zeile saehe der Dispatcher nur "versendet", nicht den Wortlaut —
+  // er koennte also nicht daran anknuepfen, wenn er gleich anruft.
+  const { data: verlauf } = await sb!
+    .from('nachrichten')
+    .select('kanal, richtung, nachricht, hat_anhang')
+    .eq('lead_id', leadId)
+  expect(
+    (verlauf ?? []).length,
+    'Die Willkommensnachricht muss im Nachrichtenverlauf des Leads stehen',
+  ).toBeGreaterThan(0)
+  expect(
+    String((verlauf ?? [])[0]?.nachricht ?? ''),
+    'Der Eintrag muss den Wortlaut tragen, nicht nur einen Vermerk',
+  ).toContain('Unfallguide')
+
   // ⭐ DER EIGENTLICHE NACHWEIS: das PDF liegt im Postfach, nicht nur im Log.
   // „versendet" und „angekommen mit Anhang" sind zwei Aussagen — die zweite ist die,
   // an der die Strecke haengt, und sie kann still scheitern (der Anhang wird zur
@@ -288,6 +304,7 @@ test.afterAll(async () => {
   // aus der Liste, sobald der Lead weg ist.
   for (const [tabelle, spalte] of [
     ['admin_termine', 'lead_id'],
+    ['nachrichten', 'lead_id'],
     ['timeline', 'lead_id'],
     ['flow_links', 'lead_id'],
     ['email_log', 'lead_id'],
