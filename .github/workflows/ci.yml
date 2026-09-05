@@ -456,7 +456,18 @@ jobs:
       # ⚠ BEWUSST --warn, NICHT --ratchet: die Drift entsteht AUSSERHALB eines PRs (per
       # apply_migration), ein blockierendes Gate wuerde also unbeteiligte Lanes rot faerben.
       # Die Warnung erreicht den Verursacher trotzdem — sie erscheint in JEDEM PR, also auch
-      # in seinem naechsten. Nach einer Beobachtungsphase kann daraus --ratchet werden.
+      # in seinem naechsten.
+      #
+      # 05.09.2026 — Beobachtungsphase ausgewertet, Ergebnis: die ERSTE Haelfte der Begruendung
+      # oben gilt weiter (CI-Ratchet wuerde Unbeteiligte rot faerben), die ZWEITE ist widerlegt.
+      # "Die Warnung erreicht den Verursacher trotzdem" stimmt nicht: 20260905185823 und
+      # 20260905185921 entstanden binnen 40 Minuten, die verursachende Lane zog weiter, und
+      # gefunden hat sie erst der Drain beim Reparent — eine Warnung in einem GRUENEN Job liest
+      # niemand. Deshalb bleibt es hier bei --warn, und das BLOCKENDE Gate sitzt jetzt beim Drain
+      # (AGENTS.md Regel 1b, D4): dort ist der Radius genau eine Runde, und der Drain kann die
+      # Luecke selbst schliessen (Statement aus schema_migrations, md5-Abgleich, committen).
+      # Moegliche spaetere Verfeinerung, falls die Klasse wiederkommt: nur PRs blocken, deren
+      # eigener Diff supabase/migrations/ anfasst — schmaler als ein globaler Ratchet.
       # Backing-RPC audit_migration_versions(). Ohne Secrets: sauberer Skip (exit 0).
       # Siehe scripts/check-migration-files.mjs + scripts/migration-files-baseline.json.
       - name: Migration-File-Drift (warn)
