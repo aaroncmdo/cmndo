@@ -1,3 +1,10 @@
+// stumme-waechter-skip: manueller Prod-Smoke, seedet echte Leads in die prod-DB.
+//   Ein Lauf bei jedem Push wuerde bei jedem Commit Test-Leads erzeugen. Der Ratchet hat
+//   zu Recht angeschlagen: RUN_ANREDE_TEILKASKO setzt kein Workflow, also waere die Spec
+//   sonst ein stummer Waechter — sichtbar in der Liste, nie gelaufen, als `skipped`
+//   getarnt. Aufnahme in den nightly ist erst sinnvoll, wenn A1 dort auch gruen laeuft;
+//   heute ist er rot, weil der i18n-Fix (#5917) noch nicht deployed ist. Einen Schalter
+//   einzutragen, der einen roten Test aktiviert, waere das Gegenteil einer Absicherung.
 // Regel-4-Nachweis fuer zwei Aenderungen, die am 06.09. zusammen auf prod gingen:
 //   #5909  Anrede im Portal durchgehend auf Sie (569 Stellen + 14 DB-Vorlagen)
 //   #5888  Teilkasko in der Tariffrage + Glas-Erkennung
