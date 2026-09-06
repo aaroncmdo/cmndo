@@ -21,6 +21,7 @@ import { ClarityInit } from '@/components/analytics/ClarityInit'
 import { OaiqInit } from '@/components/analytics/OaiqInit'
 import { PhoneClickTracker } from '@/components/analytics/PhoneClickTracker'
 import { ProSealWidget } from '@/components/shared/ProSealWidget'
+import { GuideSiegelKarte } from '@/components/shared/GuideSiegelKarte'
 import { isLocale } from '@/i18n/locales'
 import '../globals.css'
 
@@ -273,6 +274,12 @@ export default async function LocaleLayout({
               also auch. Das Consent-Gate selbst sitzt in der Komponente, die vertikale
               Position in globals.css (.pe-pro-seal). */}
           {shouldShowConsent && <ProSealWidget />}
+          {/* Direkt unter dem Siegel (Aaron 06.09.). BEWUSST ohne
+              `shouldShowConsent`: die Karte ist erste Partei und laedt nichts
+              von Dritten — einen Lead-Eingang an eine CMP-Flagge zu haengen,
+              waere ein Fehler mit stiller Wirkung. Geometrie und Schwelle
+              stehen in der Komponente, beides auf prod gemessen. */}
+          <GuideSiegelKarte />
           <PhoneClickTracker />
           {children}
         </NextIntlClientProvider>

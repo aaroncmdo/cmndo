@@ -1,0 +1,151 @@
+name: Deploy → VPS (Baileys WhatsApp-Dienst :3055)
+
+# Aaron am 06.09.2026: „bau du den deploy weg".
+#
+# ⚠ WARUM DIESER WORKFLOW ANDERS AUSSIEHT ALS JEDER ANDERE HIER
+#
+# Alle uebrigen Deploys arbeiten mit einem ATOMAREN VERZEICHNIS-SWITCH:
+# entpacken nach `-new`, `mv` des alten nach `-old`, `mv` des neuen an seinen
+# Platz. Genau das darf hier NIEMALS passieren.
+#
+# Der Baileys-Dienst haelt seine WhatsApp-Anmeldung als Dateien in
+# `auth_info_baileys/` — im Verzeichnis selbst, gitignored, lokal beim ersten
+# QR-Scan entstanden. Ein `mv` oder `rm -rf` des Verzeichnisses kostet die
+# Anmeldung. Danach haengt der Kanal, bis jemand mit Aarons Telefon vor Ort
+# einen neuen QR-Code scannt. Deshalb steht der Dienst bewusst ausserhalb von
+# `/var/www/claimondo-v2` und wurde bis heute von Hand aktualisiert
+# (services/baileys/README.md, Abschnitt „Deployment-Modell").
+#
+# Dieser Workflow bildet genau den dort dokumentierten Handgriff ab:
+#
+#     cd /opt/claimondo-baileys/source && git pull
+#     cd /opt/claimondo-baileys/baileys && npm install
+#     pm2 restart claimondo-baileys
+#
+# Kein `mv`. Kein `rm -rf`. Kein Tarball. Der Rueckweg im Fehlerfall ist ein
+# `git checkout` auf den vorherigen Stand — auch der fasst das Verzeichnis nicht
+# an.
+#
+# ⭐ DIE EIGENTLICHE PRUEFUNG IST NICHT „laeuft der Dienst", SONDERN
+#    „IST DIE ANMELDUNG NOCH DA". `/health` liefert beides:
+#
+#      { "state": "open",  "has_qr": false }   ← gesund
+#      { "state": "close", "has_qr": true  }   ← Anmeldung verloren, QR wartet
+#
+#    Ein Dienst, der laeuft und einen QR-Code anbietet, sieht in jeder
+#    naiven Pruefung gesund aus und sendet trotzdem keine einzige Nachricht.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/baileys/**'
+      - '.github/workflows/deploy-vps-baileys.yml'
+  workflow_dispatch:
+
+# Zwei gleichzeitige Laeufe wuerden im selben Arbeitsverzeichnis pullen und den
+# Dienst zweimal neu starten. `cancel-in-progress: false` ist Absicht: ein
+# laufender Neustart wird zu Ende gefahren, der naechste reiht sich ein.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Pull + Neustart + Anmeldung verifizieren
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+
+            QUELLE=/opt/claimondo-baileys/source
+            DIENST=/opt/claimondo-baileys/baileys
+
+            if [ ! -d "$QUELLE/.git" ]; then
+              echo "FATAL: $QUELLE ist kein git-Checkout. Ersteinrichtung siehe"
+              echo "       services/baileys/README.md, Abschnitt 'Setup auf dem VPS'."
+              exit 1
+            fi
+            if [ ! -d "$DIENST/auth_info_baileys" ]; then
+              echo "WARNUNG: $DIENST/auth_info_baileys fehlt — der Dienst war noch nie"
+              echo "         angemeldet, oder das Verzeichnis liegt woanders."
+            fi
+
+            # Stand VOR dem Pull merken. Das ist der Rueckweg, und er kommt ohne
+            # jede Verzeichnis-Operation aus.
+            cd "$QUELLE"
+            VORHER=$(git rev-parse HEAD)
+            echo "Stand vorher: $VORHER"
+
+            git fetch origin main --quiet
+            git checkout main --quiet
+            git reset --hard origin/main --quiet
+            NACHHER=$(git rev-parse HEAD)
+            echo "Stand nachher: $NACHHER"
+
+            if [ "$VORHER" = "$NACHHER" ]; then
+              echo "Kein neuer Stand — nichts zu tun."
+              exit 0
+            fi
+
+            cd "$DIENST"
+            # `npm install` nur, wenn sich die Abhaengigkeiten geaendert haben.
+            # Ein unnoetiger Lauf kostet Minuten und kann bei einem Netzfehler
+            # einen funktionierenden Dienst kaputtmachen.
+            if git -C "$QUELLE" diff --name-only "$VORHER" "$NACHHER" \
+                 | grep -qE '^services/baileys/package(-lock)?\.json$'; then
+              echo "Abhaengigkeiten geaendert -> npm install"
+              npm install --no-audit --no-fund
+            else
+              echo "Abhaengigkeiten unveraendert -> npm install uebersprungen"
+            fi
+
+            pm2 restart claimondo-baileys --update-env
+            pm2 save
+
+            # Die Verbindung braucht einen Moment. Bis zu 60 s warten, statt
+            # einmal zu raten — „noch nicht verbunden" und „kaputt" sehen in der
+            # ersten Sekunde gleich aus.
+            ZUSTAND=""
+            QR=""
+            for i in $(seq 1 20); do
+              sleep 3
+              ANTWORT=$(curl -s --max-time 5 http://localhost:3055/health || echo '{}')
+              ZUSTAND=$(echo "$ANTWORT" | grep -o '"state":"[^"]*"' | cut -d'"' -f4 || true)
+              QR=$(echo "$ANTWORT" | grep -o '"has_qr":[a-z]*' | cut -d':' -f2 || true)
+              echo "  Versuch $i: state=$ZUSTAND has_qr=$QR"
+              [ "$ZUSTAND" = "open" ] && break
+            done
+
+            # ⭐ Der Fall, den eine naive Pruefung durchwinkt: der Dienst LAEUFT,
+            #    bietet aber einen QR-Code an — die Anmeldung ist weg und keine
+            #    einzige Nachricht geht mehr raus.
+            if [ "$QR" = "true" ]; then
+              echo ""
+              echo "ANMELDUNG VERLOREN: der Dienst fragt nach einem QR-Code."
+              echo "Zurueck auf $VORHER — ein neuer Scan waere sonst noetig."
+              cd "$QUELLE" && git reset --hard "$VORHER" --quiet
+              pm2 restart claimondo-baileys --update-env
+              echo "Zurueckgerollt. ⚠ Die Anmeldung kommt dadurch NICHT von selbst"
+              echo "   wieder — pruefen: curl localhost:3055/health"
+              exit 1
+            fi
+
+            if [ "$ZUSTAND" != "open" ]; then
+              echo ""
+              echo "Dienst nicht verbunden (state=$ZUSTAND) — zurueck auf $VORHER."
+              cd "$QUELLE" && git reset --hard "$VORHER" --quiet
+              cd "$DIENST" && pm2 restart claimondo-baileys --update-env
+              exit 1
+            fi
+
+            echo ""
+            echo "Baileys-Deploy OK: $NACHHER, state=open, Anmeldung erhalten."

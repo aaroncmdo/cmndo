@@ -2,12 +2,13 @@
 
 import { z } from 'zod'
 import { headers } from 'next/headers'
+import { getTranslations } from 'next-intl/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
 import { isWhatsAppAvailable } from '@/lib/whatsapp/availability'
-import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { sendWhatsAppText, sendWhatsAppDocument } from '@/lib/whatsapp/baileys-client'
 import { sendEmail } from '@/lib/email/google/client'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -47,31 +48,81 @@ import { GUIDE_PFAD, type GuideLeadFeld, type GuideLeadErgebnis } from './consta
 //    nach dem Absenden auf der Seite. FlowLink und Rueckruf kommen dazu, aber
 //    der Gegenwert ist geliefert, bevor irgendein Kanal beteiligt ist.
 
-const QUELLE = 'unfallguide'
 
-const LeadSchema = z.object({
-  name: z.string().min(2, 'Bitte Ihren Namen angeben').max(100).trim(),
-  telefon: z
-    .string()
-    .regex(/[+0-9\s\-()]{8,}/, 'Bitte eine erreichbare Telefonnummer angeben'),
+/**
+ * Das Schema haengt an der Sprache, weil seine Meldungen beim NUTZER landen.
+ * Ein Formular, das auf Tuerkisch fragt und auf Deutsch schimpft, ist nicht
+ * uebersetzt — der Fehlerfall ist der Moment, in dem Verstaendlichkeit am
+ * meisten zaehlt.
+ */
+type Uebersetzer = (schluessel: string) => string
+
+function bauLeadSchema(t: Uebersetzer) {
+  return z.object({
+  name: z.string().min(2, t('fehler_name')).max(100).trim(),
+  telefon: z.string().regex(/[+0-9\s\-()]{8,}/, t('fehler_telefon')),
   email: z
-    .union([z.string().trim().email('Diese E-Mail-Adresse sieht nicht gültig aus'), z.literal('')])
+    .union([z.string().trim().email(t('fehler_email')), z.literal('')])
     .optional(),
   // Bewusst refine statt z.literal mit errorMap: die zweite Signatur von
   // z.literal hat sich zwischen den Zod-Generationen geaendert, refine traegt
   // in beiden und liefert dieselbe Meldung.
   einwilligung: z.string().refine((v) => v === 'ja', {
-    message: 'Bitte bestätigen Sie, dass wir Sie zurückrufen dürfen',
+    message: t('fehler_einwilligung'),
   }),
-})
+  // Sprache der Seite, verstecktes Feld aus dem Formular.
+  //
+  // ⚠ BEWUSST aus dem Formular und NICHT per `getLocale()`: eine Server-Action
+  // laeuft nicht unter der Seiten-URL, `requestLocale` ist dort leer, und
+  // next-intl faellt still auf 'de' zurueck. Das Ergebnis waere kein Fehler,
+  // sondern etwas Schlimmeres — jeder Lead traegt 'de', die Spalte sieht
+  // gepflegt aus und misst nichts. Optional, damit ein Absenden ohne das Feld
+  // (alter Cache, JS-Eigenheit) den Lead nicht verliert.
+  sprache: z.string().optional(),
+  quelle: z.string().optional(),
+  })
+}
+
+/**
+ * Woher kam der Lead? Bis 06.09. war das eine Konstante, weil es genau einen
+ * Eingang gab. Mit dem Abschnitt auf der Startseite gibt es zwei — und zwei
+ * Eingaenge unter demselben Herkunftswert sind in der Auswertung nicht mehr
+ * trennbar. Lead-Attribution war hier schon einmal blind, das reicht.
+ *
+ * Whitelist statt Durchreichen: der Wert kommt aus einem Formularfeld, landet
+ * in der Datenbank und in Auswertungen. Ein unbekannter Wert faellt auf den
+ * Landeseiten-Wert zurueck, statt beliebigen Text einzuschleusen.
+ * (`anfragen.quelle` traegt keinen CHECK — gegen prod gelesen; die Disziplin
+ * muss deshalb hier im Code stehen.)
+ */
+const QUELLEN = ['unfallguide', 'unfallguide-startseite'] as const
+
+function gueltigeQuelle(wert: string | undefined): string {
+  return (QUELLEN as readonly string[]).includes(wert ?? '') ? (wert as string) : QUELLEN[0]
+}
+
+/** Erlaubt sind genau die Werte des CHECK auf `leads.sprache` (gegen prod gelesen). */
+const SPRACHEN = ['de', 'en', 'tr', 'ar', 'ru', 'pl'] as const
+
+function gueltigeSprache(wert: string | undefined): string {
+  return (SPRACHEN as readonly string[]).includes(wert ?? '') ? (wert as string) : 'de'
+}
 
 export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLeadErgebnis> {
-  const parsed = LeadSchema.safeParse(Object.fromEntries(formData))
+  // Die Sprache wird VOR der Pruefung gelesen, weil die Pruefung ihre Meldungen
+  // in genau dieser Sprache ausgibt. Roh aus dem Formular, dann gegen die
+  // erlaubten Werte gefiltert — ein manipuliertes Feld faellt auf 'de' zurueck
+  // und kann den CHECK nicht verletzen.
+  const sprache = gueltigeSprache(String(formData.get('sprache') ?? '') || undefined)
+  const QUELLE = gueltigeQuelle(String(formData.get('quelle') ?? '') || undefined)
+  const t = await getTranslations({ locale: sprache, namespace: 'unfallguide_formular' })
+
+  const parsed = bauLeadSchema(t).safeParse(Object.fromEntries(formData))
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
     return {
       ok: false,
-      error: issue?.message ?? 'Bitte prüfen Sie Ihre Eingaben',
+      error: issue?.message ?? t('fehler_allgemein'),
       feld: (issue?.path[0] as GuideLeadFeld | undefined) ?? undefined,
     }
   }
@@ -117,7 +168,7 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
     // und ein Fehler auf unserer Seite darf ihm den Gegenwert nicht wegnehmen.
     return {
       ok: false,
-      error: 'Wir konnten Ihre Anfrage nicht speichern. Der Guide steht trotzdem bereit, und unter 0151 5360 8515 erreichen Sie uns direkt.',
+      error: t('fehler_speichern'),
       guidePfad: GUIDE_PFAD,
     }
   }
@@ -135,7 +186,7 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
     )
     return {
       ok: false,
-      error: 'Ihre Anfrage ist angekommen, die Verarbeitung läuft noch. Wir melden uns.',
+      error: t('hinweis_verarbeitung'),
       guidePfad: GUIDE_PFAD,
     }
   }
@@ -154,11 +205,20 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
   // ⚠ Anders als dort wird der Fehler hier GELESEN — `leads` ist eine kritische
   // Tabelle, und ein try/catch um supabase-js faengt nichts (es wirft nicht).
   {
+    // Sprache faehrt im SELBEN Statement mit wie die Einwilligung: ein Feld
+    // mehr, kein zweiter Schreibvorgang, und der Fehler wird bereits geprueft.
+    //
+    // Warum sie ueberhaupt an den Lead gehoert: der Dispatcher sieht sie damit,
+    // BEVOR er waehlt. Ein deutscher Rueckruf bei einem tuerkischen Kunden ist
+    // ein verbrannter Rueckruf — der Kunde legt auf, der Auftrag bleibt offen,
+    // und niemand weiss warum. `leads_sprache_check` erlaubt genau diese sechs
+    // Werte plus 'other' (gegen prod gelesen, keine Migration noetig).
     const { error: consentErr } = await sb
       .from('leads')
-      .update({ dsgvo_zustimmung_am: new Date().toISOString() } as never)
+      .update({ dsgvo_zustimmung_am: new Date().toISOString(), sprache } as never)
       .eq('id', String(leadId))
-    if (consentErr) console.error('[unfallguide] dsgvo_zustimmung_am am Lead:', consentErr.message)
+    if (consentErr)
+      console.error('[unfallguide] Einwilligung/Sprache am Lead:', consentErr.message)
   }
 
   // RUECKRUF-AUFTRAG. Landeseite, Guide und Willkommensnachricht versprechen einen
@@ -258,7 +318,11 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
     email,
     vorname,
     flowUrl,
-    zusage: fenster.text,
+    zusageSchluessel: fenster.schluessel,
+    zusageStunde: fenster.stunde,
+    // Eigener Uebersetzer fuer den Nachrichten-Namensraum, gebaut fuer die
+    // Sprache des Leads — nicht fuer die Sprache irgendeines Request-Kontexts.
+    t: await getTranslations({ locale: sprache, namespace: 'unfallguide.nachricht' }),
   })
   const kanal = willkommen.kanal
 
@@ -390,7 +454,22 @@ const WOCHENTAG_INDEX: Record<string, number> = {
  * ein konstruiertes Datum — letzteres braeuchte eine Zeitzonen-Bibliothek und
  * ginge an der Sommerzeit-Grenze schief.
  */
-function rueckrufFenster(): { text: string; startZeit: Date } {
+/**
+ * Zwei Ausgaben, mit Absicht:
+ *
+ * - `text` ist DEUTSCH und geht in den internen Rueckruf-Auftrag. Den liest der
+ *   Dispatcher, nicht der Kunde.
+ * - `schluessel` + `stunde` gehen an den KUNDEN und werden in seiner Sprache
+ *   ausformuliert. Ein hier fertig zusammengebauter Satz waere nicht
+ *   uebersetzbar: „heute ab 9 Uhr" hat in jeder Sprache eine andere
+ *   Wortstellung, und ein zerlegter Satz laesst sie nicht zu.
+ */
+function rueckrufFenster(): {
+  text: string
+  schluessel: 'zusage_sofort' | 'zusage_heute' | 'zusage_morgen'
+  stunde: number
+  startZeit: Date
+} {
   const jetzt = new Date()
   // `en-US` fuer den Wochentag: die Kuerzel sind stabil (Mon/Tue/...), waehrend
   // die deutschen je nach ICU-Version mit oder ohne Punkt kommen.
@@ -410,6 +489,8 @@ function rueckrufFenster(): { text: string; startZeit: Date } {
   if (jetztMin >= heute.von * 60 && jetztMin < heute.bis * 60) {
     return {
       text: 'Wir rufen Sie in der Regel innerhalb von 15 Minuten zurück.',
+      schluessel: 'zusage_sofort',
+      stunde: heute.von,
       startZeit: new Date(jetzt.getTime() + 15 * 60_000),
     }
   }
@@ -419,12 +500,16 @@ function rueckrufFenster(): { text: string; startZeit: Date } {
   if (jetztMin < heute.von * 60) {
     return {
       text: `Wir rufen Sie heute ab ${heute.von} Uhr zurück.`,
+      schluessel: 'zusage_heute',
+      stunde: heute.von,
       startZeit: new Date(jetzt.getTime() + (heute.von * 60 - jetztMin) * 60_000),
     }
   }
   const morgen = ERREICHBAR[(tag + 1) % 7]
   return {
     text: `Wir rufen Sie morgen ab ${morgen.von} Uhr zurück.`,
+    schluessel: 'zusage_morgen',
+    stunde: morgen.von,
     startZeit: new Date(jetzt.getTime() + (24 * 60 - jetztMin + morgen.von * 60) * 60_000),
   }
 }
@@ -447,27 +532,52 @@ async function sendeWillkommen(opts: {
   email: string | null
   vorname: string | null
   flowUrl: string | null
-  /** Wortlaut aus rueckrufFenster() — derselbe, der im Rueckruf-Auftrag steht. */
-  zusage: string
+  /** Schluessel + Stunde aus rueckrufFenster(), hier in der Kundensprache ausformuliert. */
+  zusageSchluessel: 'zusage_sofort' | 'zusage_heute' | 'zusage_morgen'
+  zusageStunde: number
+  /** Uebersetzer fuer `unfallguide.nachricht`, gebaut fuer die Sprache des Leads. */
+  t: (schluessel: string, werte?: Record<string, string | number>) => string
 }): Promise<WillkommenErgebnis> {
-  const anrede = opts.vorname ? `Guten Tag ${opts.vorname},` : 'Guten Tag,'
-  const zusage = opts.zusage
+  const t = opts.t
+  const anrede = opts.vorname
+    ? t('anrede_mit_name', { vorname: opts.vorname })
+    : t('anrede_ohne_name')
+  const zusage = t(opts.zusageSchluessel, { stunde: opts.zusageStunde })
   const guideUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}${GUIDE_PFAD}`
 
   // WhatsApp
   try {
     if (await isWhatsAppAvailable('lead', opts.leadId, opts.telefon)) {
       const text = [
-        `${anrede} hier ist Ihr Unfallguide von Claimondo:`,
+        `${anrede} ${t('wa_einleitung')}`,
         guideUrl,
         '',
         zusage,
-        ...(opts.flowUrl
-          ? ['', 'Wenn Sie schon weiter sind und den Schaden direkt melden möchten:', opts.flowUrl]
-          : []),
+        ...(opts.flowUrl ? ['', t('flow_lang'), opts.flowUrl] : []),
         '',
-        'Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.',
+        t('kostenlos'),
       ].join('\n')
+      // Aaron 06.09.2026: „der guide soll per whatsapp versendet werden."
+      // Bis dahin ging hier ein LINK raus. Wer keine E-Mail angab — und die ist
+      // optional — bekam die Datei damit nie, nur einen Verweis darauf.
+      //
+      // Die Reihenfolge ist Absicht: erst die Datei, und NUR wenn das scheitert
+      // der Link. Ein Ausfall des Dienstes darf den Guide nicht kosten.
+      try {
+        const pdf = await readFile(join(process.cwd(), 'public', GUIDE_PFAD))
+        const dok = await sendWhatsAppDocument(
+          opts.telefon,
+          { inhalt: pdf, dateiname: 'Claimondo-Unfallguide.pdf', mimetype: 'application/pdf' },
+          text,
+        )
+        if (dok.ok) {
+          return { kanal: 'whatsapp', text, empfaenger: opts.telefon, hatAnhang: true }
+        }
+        console.error('[unfallguide] WhatsApp-Dokument:', dok.error, '— fällt auf den Link zurück')
+      } catch (err) {
+        console.error('[unfallguide] Guide-PDF für WhatsApp nicht lesbar:', (err as Error).message)
+      }
+
       const r = await sendWhatsAppText(opts.telefon, text)
       if (r.ok) {
         return { kanal: 'whatsapp', text, empfaenger: opts.telefon, hatAnhang: false }
@@ -483,19 +593,19 @@ async function sendeWillkommen(opts: {
   try {
     const pdf = await readFile(join(process.cwd(), 'public', GUIDE_PFAD))
     const flowZeile = opts.flowUrl
-      ? `<p>Wenn Sie schon weiter sind und den Schaden direkt melden möchten: <a href="${opts.flowUrl}">${opts.flowUrl}</a></p>`
+      ? `<p>${t('flow_lang')} <a href="${opts.flowUrl}">${opts.flowUrl}</a></p>`
       : ''
     // Einmal gebaut, zweimal gebraucht: als Mail-Text und als Eintrag im
     // Nachrichtenverlauf. Was der Kunde liest, steht damit auch beim Team.
-    const mailText = `${anrede}\n\nim Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}${
-      opts.flowUrl ? `\n\nWenn Sie schon weiter sind: ${opts.flowUrl}` : ''
-    }\n\nDer Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.\n\nClaimondo · 0151 5360 8515`
+    const mailText = `${anrede}\n\n${t('mail_einleitung')} ${zusage}${
+      opts.flowUrl ? `\n\n${t('flow_kurz')} ${opts.flowUrl}` : ''
+    }\n\n${t('kostenlos')}\n\nClaimondo · 0151 5360 8515`
     await sendEmail({
       to: opts.email,
       leadId: opts.leadId,
-      subject: 'Ihr Unfallguide von Claimondo',
+      subject: t('mail_betreff'),
       text: mailText,
-      html: `<p>${anrede}</p><p>im Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten). ${zusage}</p>${flowZeile}<p>Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.</p><p>Claimondo · <a href="tel:+4915153608515">0151 5360 8515</a></p>`,
+      html: `<p>${anrede}</p><p>${t('mail_einleitung')} ${zusage}</p>${flowZeile}<p>${t('kostenlos')}</p><p>Claimondo · <a href="tel:+4915153608515">0151 5360 8515</a></p>`,
       attachments: [
         { filename: 'Claimondo-Unfallguide.pdf', content: pdf, contentType: 'application/pdf' },
       ],

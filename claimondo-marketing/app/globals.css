@@ -1063,3 +1063,160 @@ html { scroll-behavior: smooth; }
  * Mindest-Trefferflaeche; ⚠ dabei KEIN `position: relative` auf dem Knopf, er ist bereits
  * `absolute` und wandert sonst um 50 px nach links).
  */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Guide-Teaser — die zweite Seite des Unfallguides als Vorschau
+ *
+ * Zwei deckungsgleiche Bilder derselben PDF-Seite: unten die unscharfe Fassung,
+ * darueber die scharfe. Eine Maske schneidet die SCHARFE Ebene ab, sodass die
+ * obere Haelfte lesbar bleibt und der Rest in die Unschaerfe laeuft.
+ *
+ * ⚠ DIE BEIDEN PROZENTWERTE SIND GERECHNET, NICHT GESETZT.
+ * `scripts/build-guide-teaser.mjs` misst sie im gebauten PDF an zwei Ankerzeilen
+ * und gibt sie beim Lauf aus:
+ *
+ *     Anwalt-Zeile (letzte lesbare)      30,6 – 31,7 %
+ *     Nutzungsausfall (erste verborgene)        35,5 %
+ *     -> deckend bis 32,4 %, klar ab 35,2 %
+ *
+ * Wer das Layout der Guide-Seite aendert, MUSS den Generator neu fahren und die
+ * Werte hier nachziehen. Eine Kante auf der falschen Zeile verschenkt entweder
+ * den Effekt oder verraet die Betraege, um die es geht.
+ *
+ * Warum zwei Bilder statt `filter: blur()`: der Filter kostet auf schwachen
+ * Geraeten jeden Frame und flackert beim Scrollen. Zwei vorgerechnete Dateien
+ * kosten nichts, und die unscharfe traegt keine lesbare Schrift mehr und laesst
+ * sich auf ein Vierzehntel der Groesse druecken (126 KB gegen 9 KB).
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.guide-teaser {
+  --deckend: 32.4%;
+  --klar: 35.2%;
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-ios-lg, 24px);
+  background: #f8f9fb;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--brand-primary, #0d1b3e) 8%, transparent),
+    0 18px 40px -12px color-mix(in srgb, var(--brand-primary, #0d1b3e) 35%, transparent);
+  cursor: pointer;
+}
+
+.guide-teaser-stack {
+  position: relative;
+  display: block;
+}
+
+.guide-teaser-layer {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Die scharfe Ebene liegt exakt ueber der unscharfen und wird beschnitten. */
+.guide-teaser-sharp {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 var(--deckend),
+    transparent var(--klar)
+  );
+  mask-image: linear-gradient(to bottom, #000 var(--deckend), transparent var(--klar));
+}
+
+/* Schleier NUR ueber dem unscharfen Teil — dieselbe Kante, umgekehrt. Ueber dem
+ * lesbaren Teil liegt nichts, sonst litte der Kontrast der Schrift. */
+.guide-teaser-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent var(--deckend),
+    color-mix(in srgb, var(--brand-primary, #0d1b3e) 30%, transparent) calc(var(--klar) + 14%),
+    color-mix(in srgb, var(--brand-primary, #0d1b3e) 72%, transparent) 100%
+  );
+}
+
+/* Der Regler sitzt im unscharfen Bereich, unterhalb der Kante. */
+.guide-teaser-unlock {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.25rem clamp(0.75rem, 4vw, 1.5rem) clamp(1rem, 4vw, 1.75rem);
+  pointer-events: none;
+}
+
+.guide-teaser-rail {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(320px, 100%);
+  min-height: 56px; /* 44 waere das Minimum; hier ist die Geste der Inhalt */
+  padding: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 16%, transparent);
+  border: 1px solid color-mix(in srgb, #fff 34%, transparent);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.guide-teaser-knob {
+  position: absolute;
+  inset-inline-start: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  /* Hell auf dunklem Grund. Vorher navy-auf-navy: technisch da, als
+     Bedienelement aber nicht erkennbar — und eine Geste, die man nicht sieht,
+     macht niemand. */
+  background: #fff;
+  color: var(--brand-primary, #0d1b3e);
+  box-shadow: 0 2px 10px color-mix(in srgb, #000 35%, transparent);
+  touch-action: none; /* sonst scrollt die Seite unter dem Finger weg */
+  /* `--zug` kommt aus der Komponente, 0 bis 1. `translate` statt `left`:
+     Layout-Eigenschaften zu animieren ist verboten (impeccable). */
+  translate: calc(var(--zug, 0) * (min(320px, 100%) - 56px)) 0;
+}
+
+/* Rechtslaeufig zieht man nach LINKS. Ohne das zoege die Geste auf Arabisch
+   aus dem Regler heraus. */
+[dir='rtl'] .guide-teaser-knob {
+  translate: calc(var(--zug, 0) * (min(320px, 100%) - 56px) * -1) 0;
+}
+
+.guide-teaser-label {
+  width: 100%;
+  padding-inline-start: 56px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  /* Verblasst, waehrend gezogen wird — die Beschriftung hat ihren Zweck erfuellt. */
+  opacity: calc(1 - var(--zug, 0) * 1.4);
+}
+
+.guide-teaser-hint {
+  max-width: 34ch;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, #fff 82%, transparent);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-teaser-knob {
+    transition: none !important;
+  }
+}
