@@ -205,7 +205,7 @@ const CONFIG: Record<RechnerType, RechnerConfig> = {
       const satz = (isNaN(B) ? 3.37 : B) + 5
       const z = F * (satz / 100) * (T / 365)
       return (
-        `Verzugszinssatz: <b>${satz.toFixed(2).replace('.', ',')} %</b> p.a. · Verzugszinsen: <b>${eur(z)} €</b> (auf ${T} Tage) — die kannst du zusätzlich fordern.` +
+        `Verzugszinssatz: <b>${satz.toFixed(2).replace('.', ',')} %</b> p.a. · Verzugszinsen: <b>${eur(z)} €</b> (auf ${T} Tage) — die können Sie zusätzlich fordern.` +
         `<span class="aur-note">Richtwert; maßgeblich ist der Verzugsbeginn im Einzelfall.</span>`
       )
     },

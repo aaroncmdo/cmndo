@@ -18,9 +18,9 @@ export function subject(p: Props) {
 export function MarketingAbrechnungEmail(props: Props) {
   return (
     <EmailLayout preview={`Abrechnung ${props.abrechnungsNr} – ${props.summeBrutto}`}>
-      <Heading>Deine Monatsabrechnung</Heading>
+      <Heading>Ihre Monatsabrechnung</Heading>
       <Paragraph>
-        Hallo {props.empfaengerName}, anbei deine Abrechnung für {props.monat}.
+        Hallo {props.empfaengerName}, anbei Ihre Abrechnung für {props.monat}.
         Der Gesamtbetrag von {props.summeBrutto} ist bis zum {props.faelligAm} zahlbar
         auf das im PDF angegebene Konto.
       </Paragraph>
@@ -34,7 +34,7 @@ export function MarketingAbrechnungEmail(props: Props) {
       ]} />
 
       <Paragraph>
-        Die detaillierte Abrechnung findest du im angehängten PDF.
+        Die detaillierte Abrechnung finden Sie im angehängten PDF.
       </Paragraph>
 
       <Button href={`${APP_URL}/admin/finance`}>Zum Finance-Dashboard</Button>

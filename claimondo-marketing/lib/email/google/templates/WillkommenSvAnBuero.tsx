@@ -25,7 +25,7 @@ export function WillkommenSvAnBueroEmail(props: Props) {
     <EmailLayout preview={`Neuer Mitarbeiter ${props.neuer_sv_vorname} ${props.neuer_sv_nachname} für ${props.buero_name}`}>
       <Heading>Hallo {props.inhaber_vorname},</Heading>
       <Paragraph>
-        ein neuer Mitarbeiter wurde für dein Büro <strong>{props.buero_name}</strong> angelegt.
+        ein neuer Mitarbeiter wurde für Ihr Büro <strong>{props.buero_name}</strong> angelegt.
       </Paragraph>
 
       <Divider />
@@ -39,17 +39,17 @@ export function WillkommenSvAnBueroEmail(props: Props) {
 
       <Paragraph>
         Er erhält seinen Login per separater Welcome-Mail. Sobald er sich eingeloggt hat
-        und du als Inhaber den Vertrag unterzeichnet + die Anzahlung geleistet hast, kann
+        und Sie als Inhaber den Vertrag unterzeichnet + die Anzahlung geleistet haben, kann
         er Aufträge erhalten.
       </Paragraph>
 
       <Divider />
       <Paragraph>
-        Bei Fragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
+        Bei Fragen erreichen Sie uns unter <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
       <Paragraph>
         Viele Grüße,<br/>
-        Dein Claimondo-Team
+        Ihr Claimondo-Team
       </Paragraph>
     </EmailLayout>
   )

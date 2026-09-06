@@ -76,7 +76,11 @@ for (const f of SCAN_FILES) {
     if (isGerman && !/\.md$/.test(rel)) for (const w of scanUmlaute(text)) findings.push({ file: rel, line, code: 'umlaut', match: w })
     // Anrede: die Seite siezt ueberall (Aaron 06.09.). Nur Deutsch — die 5 uebrigen Locales
     // haben eigene Hoeflichkeitsformen, und "du" ist dort teils ein anderes Wort.
-    if (isGerman) for (const w of scanAnrede(text)) findings.push({ file: rel, line, code: 'anrede-du', match: w })
+    // ⚠ `.json` ist ausgenommen: das sind DATEN, keine Ansprache. Konkret meldete
+    // `stadt-verkehrsmengen.json` die Messstelle "DU Beeckerwerth" — Duisburg, kein Duzen.
+    // Die Kennzeichen-Ausnahme in der Liste trifft den Satz nachweislich, greift an dieser
+    // Aufrufstelle aber nicht; statt den Einzelfall zu flicken ist die ganze Dateiart raus.
+    if (isGerman && !/\.json$/.test(rel)) for (const w of scanAnrede(text)) findings.push({ file: rel, line, code: 'anrede-du', match: w })
     if (/title/i.test(text) || /\|\s*Claimondo/.test(text)) if (scanTitleBrandTwice(text)) findings.push({ file: rel, line, code: 'title-brand-twice', match: text.slice(0, 80) })
   }
 }

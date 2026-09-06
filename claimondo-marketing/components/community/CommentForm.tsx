@@ -22,7 +22,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
   const input = 'w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2.5 text-sm focus:border-claimondo-ondo focus:outline-none'
   const btn = 'rounded-ios-md bg-claimondo-navy px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-claimondo-shield disabled:opacity-60'
 
-  if (stage === 'sent') return <p className="text-sm text-claimondo-shield">Wir haben Ihnen einen Anmelde-Link per E-Mail geschickt. Bitte prüfe dein Postfach.</p>
+  if (stage === 'sent') return <p className="text-sm text-claimondo-shield">Wir haben Ihnen einen Anmelde-Link per E-Mail geschickt. Bitte prüfen Sie Ihr Postfach.</p>
   if (stage === 'posted') return <p className="text-sm text-claimondo-shield">Danke! Ihr Kommentar wird nach kurzer Prüfung freigeschaltet.</p>
 
   return (
@@ -43,7 +43,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
       {stage === 'username' && (
         <>
           <p className="text-[0.8125rem] text-claimondo-shield">
-            Du bist angemeldet – wähle jetzt einmalig einen öffentlichen Nutzernamen für deine Kommentare.
+            Sie sind angemeldet – wählen Sie jetzt einmalig einen öffentlichen Nutzernamen für Ihre Kommentare.
           </p>
           <input name="username" required placeholder="Nutzername (3–24 Zeichen)" className={input} />
           <label className="flex items-start gap-2 text-[0.75rem] text-claimondo-shield">
@@ -56,12 +56,12 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
         <>
           {username && (
             <p className="text-[0.8125rem] text-claimondo-shield">
-              Du kommentierst <span className="font-medium">öffentlich</span> als <span className="font-semibold text-claimondo-navy">{username}</span>.
+              Sie kommentieren <span className="font-medium">öffentlich</span> als <span className="font-semibold text-claimondo-navy">{username}</span>.
             </p>
           )}
           <textarea name="body" required maxLength={2000} rows={3} placeholder="Ihren Kommentar schreiben …" className={input} />
           <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/70">
-            Bitte beachte die{' '}
+            Bitte beachten Sie die{' '}
             <a href="/kommentar-regeln" className="underline hover:text-claimondo-shield">Kommentar-Regeln</a>{' '}
             – keine sensiblen oder fremden personenbezogenen Daten.
           </p>
