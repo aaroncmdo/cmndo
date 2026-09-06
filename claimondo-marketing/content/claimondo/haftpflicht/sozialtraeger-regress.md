@@ -34,7 +34,7 @@ meta_description: "Sozialträger-Regress (§116 SGB X): Krankenkasse & Co. über
 
 # Sozialträger-Regress nach § 116 SGB X – wenn die Krankenkasse mitkassiert
 
-> **Kurz erklärt:** Wenn deine **gesetzliche Krankenkasse, Berufsgenossenschaft oder Rentenversicherung** unfallbedingt Leistungen erbringt (Krankengeld, Heilbehandlung, Erwerbsminderungs-Rente), geht dein Schadensersatz-Anspruch insoweit **auf den Sozialträger über** (Forderungs-Übergang nach § 116 SGB X). Du behältst nur den Anspruch für **eigene** Aufwendungen (Zuzahlungen, Privatleistungen, Differenz zum Krankengeld, Schmerzensgeld). Das ist **keine Belastung** für dich – der Vorgang läuft automatisch zwischen den Versicherungen ab.
+> **Kurz erklärt:** Wenn Ihre **gesetzliche Krankenkasse, Berufsgenossenschaft oder Rentenversicherung** unfallbedingt Leistungen erbringt (Krankengeld, Heilbehandlung, Erwerbsminderungs-Rente), geht Ihr Schadensersatz-Anspruch insoweit **auf den Sozialträger über** (Forderungs-Übergang nach § 116 SGB X). Sie behalten nur den Anspruch für **eigene** Aufwendungen (Zuzahlungen, Privatleistungen, Differenz zum Krankengeld, Schmerzensgeld). Das ist **keine Belastung** für Sie – der Vorgang läuft automatisch zwischen den Versicherungen ab.
 
 ## Auch bekannt als
 
@@ -44,18 +44,18 @@ meta_description: "Sozialträger-Regress (§116 SGB X): Krankenkasse & Co. über
 
 ## In einem Satz erklärt
 
-Sozialträger-Regress ist der automatische Forderungs-Übergang deines Schadensersatz-Anspruchs auf gesetzliche Sozialversicherungen, soweit sie unfallbedingt geleistet haben.
+Sozialträger-Regress ist der automatische Forderungs-Übergang Ihres Schadensersatz-Anspruchs auf gesetzliche Sozialversicherungen, soweit sie unfallbedingt geleistet haben.
 
 ## In drei Sätzen erklärt
 
-§ 116 SGB X regelt einen **automatischen, kraft Gesetzes** stattfindenden Forderungs-Übergang: Sobald deine gesetzliche Krankenkasse, Berufsgenossenschaft, Rentenversicherung, Pflegekasse oder Sozialhilfe-Träger unfallbedingt Leistungen erbringt, geht dein Schadensersatz-Anspruch gegen den gegnerischen Haftpflichtversicherer **insoweit auf den Sozialträger über** – der Sozialträger nimmt direkt Regress beim Versicherer und holt sich seine Kosten zurück. Du behältst nur die Ansprüche für **deine eigenen Aufwendungen** (Zuzahlungen, Privatleistungen, Verdienstdifferenz zum Krankengeld, Schmerzensgeld, Wertminderung) – diese reichst du direkt beim Versicherer ein. Das ist **keine Belastung** für dich – du musst der Krankenkasse nichts zurückzahlen, der Regress läuft zwischen den Versicherungs-Trägern ab.
+§ 116 SGB X regelt einen **automatischen, kraft Gesetzes** stattfindenden Forderungs-Übergang: Sobald Ihre gesetzliche Krankenkasse, Berufsgenossenschaft, Rentenversicherung, Pflegekasse oder Sozialhilfe-Träger unfallbedingt Leistungen erbringt, geht Ihr Schadensersatz-Anspruch gegen den gegnerischen Haftpflichtversicherer **insoweit auf den Sozialträger über** – der Sozialträger nimmt direkt Regress beim Versicherer und holt sich seine Kosten zurück. Sie behalten nur die Ansprüche für **Ihre eigenen Aufwendungen** (Zuzahlungen, Privatleistungen, Verdienstdifferenz zum Krankengeld, Schmerzensgeld, Wertminderung) – diese reichen Sie direkt beim Versicherer ein. Das ist **keine Belastung** für Sie – Sie müssen der Krankenkasse nichts zurückzahlen, der Regress läuft zwischen den Versicherungs-Trägern ab.
 
 ## Die fünf Schlüsselzahlen
 
 - **§ 116 SGB X** als Anspruchsgrundlage Sozialträger
 - **§ 6 EFZG** Arbeitgeber-Regress (Lohnfortzahlung)
 - **§ 86 VVG analog** Krankenkassen-/Vollkasko-Regress
-- **0 €** für dich – kein eigener Aufwand
+- **0 €** für Sie – kein eigener Aufwand
 - **Quotenvorrecht** Geschädigte vor Sozialträger bei Quotelung
 
 ---
@@ -71,27 +71,27 @@ Sozialträger-Regress ist der automatische Forderungs-Übergang deines Schadense
 | **Sozialhilfe-Träger** | Lebenshaltungs-Hilfen | Lebenshaltungs-Aufwendungen |
 | **Arbeitgeber (§ 6 EFZG)** | Lohnfortzahlung 6 Wochen | Lohnfortzahlung |
 
-→ Der Forderungs-Übergang geschieht **automatisch** mit der Leistungs-Erbringung, ohne dass du etwas tun musst.
+→ Der Forderungs-Übergang geschieht **automatisch** mit der Leistungs-Erbringung, ohne dass Sie etwas tun müssen.
 
 ---
 
-## Was bei dir bleibt – was du direkt vom Versicherer holst
+## Was bei Ihnen bleibt – was Sie direkt vom Versicherer holen
 
 | Schadensposition | Wo? |
 |---|---|
 | **Heilbehandlungskosten Standard** | Krankenkasse → Regress |
-| **Zuzahlungen** (Krankenhaus, Apotheke) | Du direkt vom Versicherer |
-| **Privatleistungen** (Privatklinik, Privatpraxis, IGeL) | Du direkt |
-| **Krankengeld-Differenz zum Netto** | Du direkt |
+| **Zuzahlungen** (Krankenhaus, Apotheke) | Sie direkt vom Versicherer |
+| **Privatleistungen** (Privatklinik, Privatpraxis, IGeL) | Sie direkt |
+| **Krankengeld-Differenz zum Netto** | Sie direkt |
 | **Lohnfortzahlung Wochen 1–6** | Arbeitgeber → Regress |
-| **Verdienstausfall ab Woche 7 (Diff Netto–Krankengeld)** | Du direkt |
-| **Schmerzensgeld** | Du direkt (immer eigener Anspruch) |
-| **Wertminderung** | Du direkt |
-| **Mietwagen / Nutzungsausfall** | Du direkt |
-| **Sachverständigen-Kosten** | Du direkt |
-| **Anwaltskosten** | Du direkt |
+| **Verdienstausfall ab Woche 7 (Diff Netto–Krankengeld)** | Sie direkt |
+| **Schmerzensgeld** | Sie direkt (immer eigener Anspruch) |
+| **Wertminderung** | Sie direkt |
+| **Mietwagen / Nutzungsausfall** | Sie direkt |
+| **Sachverständigen-Kosten** | Sie direkt |
+| **Anwaltskosten** | Sie direkt |
 
-→ Du musst **nicht** den Krankenkassen-Anteil selbst einklagen – Krankenkasse macht das eigenständig.
+→ Sie müssen **nicht** den Krankenkassen-Anteil selbst einklagen – Krankenkasse macht das eigenständig.
 
 ---
 
@@ -105,10 +105,10 @@ Bei [Mitverschulden / Quotelung](/haftpflicht/mitverschulden-stvg17) entsteht ei
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Du musst **nichts** an die Krankenkasse zurückzahlen. Der Regress läuft automatisch zwischen Versicherungs-Trägern.
+Sie müssen **nichts** an die Krankenkasse zurückzahlen. Der Regress läuft automatisch zwischen Versicherungs-Trägern.
 
 ### 🛠 Drei Schritte
 
@@ -119,17 +119,17 @@ Schadens-Anzeige bei eigener Krankenkasse – sie macht eigenen Regress.
 Zuzahlungen, Privatleistungen, Verdienst-Differenz, Schmerzensgeld separat einreichen.
 
 **3. Quotenvorrecht im Hinterkopf**
-Bei Mitverschulden: du gehst vor Sozialträger – Anwalt einschalten.
+Bei Mitverschulden: Sie gehen vor Sozialträger – Anwalt einschalten.
 
 ---
 
 ## Häufige Fragen
 
 **Muss ich der Krankenkasse Geld zurückzahlen?**
-Nein. Die Krankenkasse holt sich direkt vom gegnerischen Versicherer ihre Kosten zurück – du bist nicht beteiligt.
+Nein. Die Krankenkasse holt sich direkt vom gegnerischen Versicherer ihre Kosten zurück – Sie sind nicht beteiligt.
 
 **Was ist Forderungs-Übergang nach § 116 SGB X?**
-Ein automatischer Anspruchs-Übergang: Sobald die Krankenkasse unfallbedingt geleistet hat, geht dein Anspruch gegen den Versicherer **insoweit** auf die Kasse über.
+Ein automatischer Anspruchs-Übergang: Sobald die Krankenkasse unfallbedingt geleistet hat, geht Ihr Anspruch gegen den Versicherer **insoweit** auf die Kasse über.
 
 **Was bekomme ich noch direkt?**
 Zuzahlungen, Privatleistungen, Krankengeld-Differenz zum Netto, Schmerzensgeld, Wertminderung, Mietwagen, alle nicht von der Krankenkasse abgedeckten Positionen.
@@ -141,20 +141,20 @@ Bei Mitverschulden / Quotelung: Der Geschädigte erhält seinen Anteil **vorrang
 Ja, bei Wegeunfällen oder Dienst-Unfällen. Der Mechanismus ist identisch zur Krankenkasse.
 
 **Was ist mit der Lohnfortzahlung des Arbeitgebers?**
-Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über – du hast für diese Zeit keinen eigenen Verdienstausfall-Anspruch.
+Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über – Sie haben für diese Zeit keinen eigenen Verdienstausfall-Anspruch.
 
 ---
 
 ## Verwandte Begriffe
 
-- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) – direkter Anteil bei dir
+- [Heilbehandlungskosten](/haftpflicht/heilbehandlungskosten) – direkter Anteil bei Ihnen
 - [Verdienstausfall](/haftpflicht/verdienstausfall) – Differenz zum Krankengeld
 - [Erben-Rechtsnachfolger](/haftpflicht/erben-rechtsnachfolger) – Anspruchsweiter-Übergang bei Tod
 - [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung)
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -198,7 +198,7 @@ Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über – du hast
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Muss ich der Krankenkasse Geld zurückzahlen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Die Krankenkasse holt sich direkt vom gegnerischen Versicherer ihre Kosten zurück — du bist nicht beteiligt."}},
+        {"@type": "Question", "name": "Muss ich der Krankenkasse Geld zurückzahlen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Die Krankenkasse holt sich direkt vom gegnerischen Versicherer ihre Kosten zurück — Sie sind nicht beteiligt."}},
         {"@type": "Question", "name": "Was bekomme ich noch direkt?", "acceptedAnswer": {"@type": "Answer", "text": "Zuzahlungen, Privatleistungen, Krankengeld-Differenz zum Netto, Schmerzensgeld, Wertminderung, Mietwagen, alle nicht von Krankenkasse abgedeckten Positionen."}},
         {"@type": "Question", "name": "Was ist das Quotenvorrecht?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Mitverschulden erhält der Geschädigte seinen Anteil vorrangig vor dem Sozialträger (§ 116 Abs. 1 Satz 3 SGB X)."}}
       ]

@@ -45,11 +45,11 @@ Lohnausfall · Einkommensausfall · Erwerbsschaden · Entgangener Gewinn
 
 ## In einem Satz erklärt
 
-Verdienstausfall ist die Erstattung des Nettoeinkommens, das du durch unfallbedingte Arbeitsunfähigkeit nicht verdienen konntest – abzüglich erhaltener Lohnersatzleistungen.
+Verdienstausfall ist die Erstattung des Nettoeinkommens, das Sie durch unfallbedingte Arbeitsunfähigkeit nicht verdienen konnten – abzüglich erhaltener Lohnersatzleistungen.
 
 ## In drei Sätzen erklärt
 
-Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch auf den **Differenz-Schaden** zwischen dem, was du ohne Unfall verdient hättest, und dem, was du tatsächlich bekommen hast (Lohnfortzahlung, Krankengeld). Bei Arbeitnehmern wird das **Netto-Einkommen** angesetzt – die Bruttogröße ist nur für die interne Berechnung relevant; Steuer- und Sozialversicherungs-Vorteile werden saldiert. Bei Selbständigen ist der **entgangene Gewinn** nach § 252 BGB die Bezugsgröße – Berechnung über Vorjahres-Gewinne, Branchenwerte, sachverständige Schätzung; bei Geringfügig-Beschäftigten und Hausfrauen/-männern greifen besondere Bemessungsregeln.
+Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit haben Sie Anspruch auf den **Differenz-Schaden** zwischen dem, was Sie ohne Unfall verdient hätten, und dem, was Sie tatsächlich bekommen haben (Lohnfortzahlung, Krankengeld). Bei Arbeitnehmern wird das **Netto-Einkommen** angesetzt – die Bruttogröße ist nur für die interne Berechnung relevant; Steuer- und Sozialversicherungs-Vorteile werden saldiert. Bei Selbständigen ist der **entgangene Gewinn** nach § 252 BGB die Bezugsgröße – Berechnung über Vorjahres-Gewinne, Branchenwerte, sachverständige Schätzung; bei Geringfügig-Beschäftigten und Hausfrauen/-männern greifen besondere Bemessungsregeln.
 
 ## Die fünf Schlüsselzahlen
 
@@ -66,13 +66,13 @@ Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch au
 ### Arbeitnehmer
 
 **Phase 1 – die ersten 6 Wochen:**
-- **Lohnfortzahlung** durch Arbeitgeber (§ 3 EFZG) – du bekommst dein volles Nettoentgelt
+- **Lohnfortzahlung** durch Arbeitgeber (§ 3 EFZG) – Sie bekommen Ihr volles Nettoentgelt
 - Direkt-Anspruch gegen den Versicherer geht in dieser Phase nach **§ 6 EFZG** auf den Arbeitgeber über
-- Du hast keinen eigenen Erstattungs-Anspruch für diesen Zeitraum
+- Sie haben keinen eigenen Erstattungs-Anspruch für diesen Zeitraum
 
 **Phase 2 – ab Woche 7 (Krankengeld):**
 - **Krankengeld** durch Krankenkasse (~70 % des Brutto-, max. 90 % des Nettoentgelts)
-- **Differenz** zwischen Krankengeld und tatsächlichem Nettoverdienst ist deine **eigene Forderung** gegen den Versicherer
+- **Differenz** zwischen Krankengeld und tatsächlichem Nettoverdienst ist Ihre **eigene Forderung** gegen den Versicherer
 - Der Krankenkassen-Anteil geht nach **§ 116 SGB X** auf die Krankenkasse über (Regress)
 
 ### Selbständige
@@ -116,7 +116,7 @@ Entgangener Gewinn = Durchschnitt Vorjahres-Gewinne / Tage
 |---|---|
 | Netto-Einkommen vor Unfall | 3.000 €/Monat |
 | Krankschreibung | 12 Wochen |
-| Lohnfortzahlung Wochen 1–6 | voll (kein Schaden für dich) |
+| Lohnfortzahlung Wochen 1–6 | voll (kein Schaden für Sie) |
 | Krankengeld Wochen 7–12 (6 Wochen) | ca. 2.250 €/Monat |
 | Differenz zu Netto | 750 €/Monat |
 | **Verdienstausfall für 1,5 Mon.** | **ca. 1.125 €** |
@@ -149,10 +149,10 @@ Wenn die Arbeitsunfähigkeit dauerhaft besteht (z. B. nach Polytrauma, chronisch
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Sammle alle Einkommens-Belege ab Tag 1. Auch wenn du noch arbeitsunfähig bist – die Dokumentations-Pflicht beginnt sofort.
+Sammle alle Einkommens-Belege ab Tag 1. Auch wenn Sie noch arbeitsunfähig sind – die Dokumentations-Pflicht beginnt sofort.
 
 ### 🛠 Vier Schritte
 
@@ -163,7 +163,7 @@ Originale AU-Bescheinigungen vom Hausarzt + ggf. Facharzt.
 Beim Arbeitgeber für die letzten 12 Monate vor Unfall (Brutto, Netto, Lohnfortzahlungs-Zeitraum).
 
 **3. Krankenkassen-Bescheid sichern**
-Krankengeld-Bezug schriftlich. Krankenkasse macht später eigenen Regress geltend – du kannst nur die Differenz fordern.
+Krankengeld-Bezug schriftlich. Krankenkasse macht später eigenen Regress geltend – Sie können nur die Differenz fordern.
 
 **4. Bei Selbständigen: Sachverständige Schätzung**
 Steuerberater oder Sachverständigen-Gutachten zum entgangenen Gewinn. Anwalts-Koordination empfehlenswert.
@@ -174,7 +174,7 @@ Steuerberater oder Sachverständigen-Gutachten zum entgangenen Gewinn. Anwalts-K
 
 > *„Die Lohnfortzahlung deckt das ab – kein Anspruch."*
 
-Stimmt nur für die ersten 6 Wochen. Ab Woche 7 (Krankengeld) entsteht die Differenz-Forderung für dich.
+Stimmt nur für die ersten 6 Wochen. Ab Woche 7 (Krankengeld) entsteht die Differenz-Forderung für Sie.
 
 > *„Verdienstausfall nicht ausreichend belegt – Sie hätten weiter arbeiten können."*
 
@@ -189,7 +189,7 @@ Falsch. § 287 ZPO erlaubt erleichtertes Beweismaß. Steuerbescheide + BWA + Auf
 ## Häufige Fragen
 
 **Wer zahlt den Lohnausfall nach Unfall?**
-In den ersten 6 Wochen der Arbeitgeber per Lohnfortzahlung – die Forderung geht nach § 6 EFZG auf den Arbeitgeber über. Ab Woche 7 zahlst du die Differenz zwischen Krankengeld und Nettoverdienst direkt vom Versicherer.
+In den ersten 6 Wochen der Arbeitgeber per Lohnfortzahlung – die Forderung geht nach § 6 EFZG auf den Arbeitgeber über. Ab Woche 7 zahlen Sie die Differenz zwischen Krankengeld und Nettoverdienst direkt vom Versicherer.
 
 **Wie wird Verdienstausfall berechnet?**
 Netto vor Unfall minus erhaltene Lohnersatzleistungen (Lohnfortzahlung, Krankengeld) – multipliziert mit Krankschreibungs-Dauer. Bei Selbständigen entgangener Gewinn nach § 252 BGB.
@@ -198,7 +198,7 @@ Netto vor Unfall minus erhaltene Lohnersatzleistungen (Lohnfortzahlung, Krankeng
 Ja. Bezugsgröße ist der entgangene Gewinn – berechnet aus Vorjahres-Daten, Branchen-Vergleich, ggf. Sachverständigen-Schätzung. § 287 ZPO erleichtert die Beweisführung.
 
 **Wie hoch ist das Krankengeld?**
-Etwa 70 % vom Brutto, maximal 90 % vom Nettoentgelt. Die Differenz zum Netto ist deine Forderung gegen den Versicherer.
+Etwa 70 % vom Brutto, maximal 90 % vom Nettoentgelt. Die Differenz zum Netto ist Ihre Forderung gegen den Versicherer.
 
 **Was, wenn ich dauerhaft erwerbsgemindert bin?**
 Dann greift § 843 BGB – Erwerbsminderungs-Rente bis Renteneintritt oder lebenslang. Hochkomplexe Berechnung, spezialisierten Anwalt einschalten.
@@ -217,7 +217,7 @@ Ja, wenn nachweisbar (Lohnabrechnungen der Vorjahre). Auch Sonderzahlungen und 1
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Verdienstausfall-Berechnung wird oft zu niedrig angesetzt. Selbständige verlieren ohne Anwalt typisch 30–50 % des berechtigten Schadens.
 
@@ -267,7 +267,7 @@ Verdienstausfall-Berechnung wird oft zu niedrig angesetzt. Selbständige verlier
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Wer zahlt den Lohnausfall nach Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "Erste 6 Wochen der Arbeitgeber per Lohnfortzahlung. Ab Woche 7 zahlst du die Differenz zwischen Krankengeld und Nettoverdienst direkt vom Versicherer."}},
+        {"@type": "Question", "name": "Wer zahlt den Lohnausfall nach Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "Erste 6 Wochen der Arbeitgeber per Lohnfortzahlung. Ab Woche 7 zahlen Sie die Differenz zwischen Krankengeld und Nettoverdienst direkt vom Versicherer."}},
         {"@type": "Question", "name": "Wie wird Verdienstausfall berechnet?", "acceptedAnswer": {"@type": "Answer", "text": "Netto vor Unfall minus erhaltene Lohnersatzleistungen, multipliziert mit Krankschreibungs-Dauer. Bei Selbständigen entgangener Gewinn nach § 252 BGB."}},
         {"@type": "Question", "name": "Bekomme ich Verdienstausfall als Selbständige?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Bezugsgröße ist der entgangene Gewinn aus Vorjahres-Daten, Branchen-Vergleich, ggf. Sachverständigen-Schätzung. § 287 ZPO erleichtert die Beweisführung."}}
       ]

@@ -37,7 +37,7 @@ meta_description: "Verzug nach §286 BGB: Zahlt die Haftpflicht trotz Mahnung od
 
 # Verzug nach § 286 BGB bei der Schadensregulierung
 
-> **Kurz erklärt:** Verzug nach § 286 BGB tritt ein, wenn der Haftpflichtversicherer eine fällige Leistung trotz Mahnung oder nach Ablauf der angemessenen Prüfungszeit nicht erbringt. Folgen: Verzugszinsen von 5 Prozentpunkten über dem Basiszinssatz, volle Erstattung der Anwaltskosten als Verzugsschaden und Schadensersatz wegen Verzögerung. Verzug ist dein wichtigstes Druckmittel gegen Hinhaltetaktiken – und in vielen Fällen tritt er sogar **ohne Mahnung** ein.
+> **Kurz erklärt:** Verzug nach § 286 BGB tritt ein, wenn der Haftpflichtversicherer eine fällige Leistung trotz Mahnung oder nach Ablauf der angemessenen Prüfungszeit nicht erbringt. Folgen: Verzugszinsen von 5 Prozentpunkten über dem Basiszinssatz, volle Erstattung der Anwaltskosten als Verzugsschaden und Schadensersatz wegen Verzögerung. Verzug ist Ihr wichtigstes Druckmittel gegen Hinhaltetaktiken – und in vielen Fällen tritt er sogar **ohne Mahnung** ein.
 
 ## Auch bekannt als
 
@@ -51,14 +51,14 @@ Verzug nach § 286 BGB bedeutet, dass der Versicherer eine fällige Forderung ni
 
 ## In drei Sätzen erklärt
 
-Verzug entsteht bei Kfz-Haftpflicht-Schäden klassisch durch Mahnung mit Frist (§ 286 Abs. 1 BGB), kann aber auch **ohne Mahnung** automatisch eintreten – etwa bei kalendermäßig bestimmten Fristen, bei ernsthafter und endgültiger Leistungs-Verweigerung des Versicherers oder bei Ablauf der angemessenen Prüfungszeit nach BGH-Linie. Sobald Verzug vorliegt, schuldet der Versicherer **5 Prozentpunkte Verzugszinsen über dem Basiszinssatz** (§ 288 BGB), trägt **vollständig die Anwaltskosten** als Verzugsschaden (BGH VI ZR 235/13) und haftet zusätzlich für **alle weiteren Schäden aus der Verzögerung** (§ 280 BGB). Verzug ist damit das schärfste Eskalations-Werkzeug, das du gegen Verschleppungs-Taktiken in der Hand hast.
+Verzug entsteht bei Kfz-Haftpflicht-Schäden klassisch durch Mahnung mit Frist (§ 286 Abs. 1 BGB), kann aber auch **ohne Mahnung** automatisch eintreten – etwa bei kalendermäßig bestimmten Fristen, bei ernsthafter und endgültiger Leistungs-Verweigerung des Versicherers oder bei Ablauf der angemessenen Prüfungszeit nach BGH-Linie. Sobald Verzug vorliegt, schuldet der Versicherer **5 Prozentpunkte Verzugszinsen über dem Basiszinssatz** (§ 288 BGB), trägt **vollständig die Anwaltskosten** als Verzugsschaden (BGH VI ZR 235/13) und haftet zusätzlich für **alle weiteren Schäden aus der Verzögerung** (§ 280 BGB). Verzug ist damit das schärfste Eskalations-Werkzeug, das Sie gegen Verschleppungs-Taktiken in der Hand haben.
 
 ## Die fünf Schlüsselzahlen
 
 - **5 Prozentpunkte** über Basiszinssatz Verzugszinsen (§ 288 BGB)
 - **14 Tage** üblicher Nachfrist-Zeitraum in der Mahnung
 - **4 Wochen** angemessene Prüfungszeit bei klarer Haftung (BGH-Linie)
-- **0** zusätzliche Kosten für dich bei unverschuldetem Unfall (Verzugsschaden trägt Versicherer)
+- **0** zusätzliche Kosten für Sie bei unverschuldetem Unfall (Verzugsschaden trägt Versicherer)
 - **§ 286 Abs. 1–4 BGB** als Rechtsgrundlage
 
 ---
@@ -93,7 +93,7 @@ Vier Konstellationen lösen Verzug automatisch aus:
 Ab Tag eins des Verzugs schuldet der Versicherer **5 Prozentpunkte über dem Basiszinssatz** auf die gesamte berechtigte Forderung – fortlaufend bis zur Erfüllung. Details: [Verzugszinsen nach § 288 BGB](/haftpflicht/verzugszinsen-bgb288).
 
 ### 2. Anwaltskosten als Verzugsschaden
-Mit Verzugs-Eintritt sind Anwaltskosten **eigenständiger Schadensposten** und vollständig erstattbar – auch wenn du den Anwalt **erst nach Verzugs-Eintritt** beauftragst. Diese BGH-Linie (VI ZR 235/13) entzieht dem Versicherer ein häufiges Gegenargument. Details: [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
+Mit Verzugs-Eintritt sind Anwaltskosten **eigenständiger Schadensposten** und vollständig erstattbar – auch wenn Sie den Anwalt **erst nach Verzugs-Eintritt** beauftragen. Diese BGH-Linie (VI ZR 235/13) entzieht dem Versicherer ein häufiges Gegenargument. Details: [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung).
 
 ### 3. Schadensersatz wegen Verzögerung (§ 280 BGB)
 Alle weiteren Schäden, die aus der Verzögerung entstehen, sind zusätzlich erstattbar. Typische Beispiele bei Verkehrsunfall-Schäden:
@@ -107,7 +107,7 @@ Verzug zwingt den Versicherer faktisch zum Handeln, weil jede weitere Verzögeru
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Verzug ist nicht selbstverständlich. Er muss **erzeugt** werden – durch klare Fristsetzung und gegebenenfalls Mahnung. Wer nur abwartet, hat zwar irgendwann nach der angemessenen Prüfungszeit Verzug – aber den **Beweis dafür schwer**.
@@ -166,7 +166,7 @@ Welcher konkrete Aufklärungsbedarf? Bei klarer Haftungslage ist die Pauschal-Be
 
 > *„Die Verzögerung war unverschuldet – wir vertreten die Verzögerung nicht."*
 
-Vertretenmüssen wird gesetzlich **vermutet** (§ 286 Abs. 4 BGB). Beweislast liegt beim Versicherer, nicht bei dir. Standard-Verzögerungen sind im Versicherer-Risiko-Bereich.
+Vertretenmüssen wird gesetzlich **vermutet** (§ 286 Abs. 4 BGB). Beweislast liegt beim Versicherer, nicht bei Ihnen. Standard-Verzögerungen sind im Versicherer-Risiko-Bereich.
 
 ---
 
@@ -203,9 +203,9 @@ Ja. Sie sind eigenständige Forderung neben der Hauptforderung. Auf jedem Mahnbe
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die Anwaltskosten sind bei unverschuldetem Unfall ab Verzugs-Eintritt **vollständig vom Versicherer zu tragen** – du gehst kein Kostenrisiko ein.
+Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die Anwaltskosten sind bei unverschuldetem Unfall ab Verzugs-Eintritt **vollständig vom Versicherer zu tragen** – Sie gehen kein Kostenrisiko ein.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

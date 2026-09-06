@@ -44,7 +44,7 @@ function MagicLinkGate({
   if (stage === 'sent')
     return (
       <p className="text-xs text-claimondo-shield">
-        Wir haben dir einen Anmelde-Link per E-Mail geschickt. Bitte prüfe dein Postfach.
+        Wir haben Ihnen einen Anmelde-Link per E-Mail geschickt. Bitte prüfen Sie Ihr Postfach.
       </p>
     )
 
@@ -312,7 +312,7 @@ export function PostComments({
             className={input}
           />
           <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/75">
-            Dein Kommentar erscheint <span className="font-medium">öffentlich</span> in der Community.
+            Ihr Kommentar erscheint <span className="font-medium">öffentlich</span> in der Community.
           </p>
           {error && <p className="text-[0.75rem] text-danger-strong">{error}</p>}
           <button type="button" onClick={submitTopLevel} disabled={pending} className={btn}>

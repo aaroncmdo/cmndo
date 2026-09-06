@@ -143,7 +143,7 @@ Seit 2017 (§ 844 Abs. 3 BGB) gibt es zusätzlich das [Hinterbliebenengeld](/haf
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Schockschaden braucht **ärztliche Diagnose mit Krankheitswert**. Normales Trauern reicht nicht – eine fachpsychotherapeutische Diagnose ist Eintrittstor.
@@ -195,7 +195,7 @@ Schockschaden ist auch bei reiner Mitteilung des Unfalls möglich (Telefon, Poli
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Schockschaden ist eine hochsensible und juristisch komplexe Anspruchs-Grundlage. Spezialisierter Anwalt + fachpsychotherapeutische Diagnostik zwingend.
 

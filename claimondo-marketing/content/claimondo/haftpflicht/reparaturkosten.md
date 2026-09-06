@@ -37,7 +37,7 @@ meta_description: "Reparaturkosten: nach §249 BGB voll erstattbar bis zur 130-%
 
 # Reparaturkosten beim Verkehrsunfall – was erstattet wird und was nicht
 
-> **Kurz erklärt:** Reparaturkosten sind der zentrale Sachschaden bei Verkehrsunfällen – erstattet werden Stundenverrechnungssätze, Original-Ersatzteile mit UPE-Aufschlägen, Lackierung, Verbringungskosten und Probefahrten. Bis zur **130 %-Grenze** des Wiederbeschaffungswertes (BGH VI ZR 70/04) ist die Reparatur Pflichterstattung – auch wenn sie teurer wäre als ein Ersatzfahrzeug. Du wählst zwischen **fiktiver Abrechnung** (nach Gutachten, ohne MwSt) und **konkreter Abrechnung** (nach Werkstattrechnung, mit MwSt).
+> **Kurz erklärt:** Reparaturkosten sind der zentrale Sachschaden bei Verkehrsunfällen – erstattet werden Stundenverrechnungssätze, Original-Ersatzteile mit UPE-Aufschlägen, Lackierung, Verbringungskosten und Probefahrten. Bis zur **130 %-Grenze** des Wiederbeschaffungswertes (BGH VI ZR 70/04) ist die Reparatur Pflichterstattung – auch wenn sie teurer wäre als ein Ersatzfahrzeug. Sie wählen zwischen **fiktiver Abrechnung** (nach Gutachten, ohne MwSt) und **konkreter Abrechnung** (nach Werkstattrechnung, mit MwSt).
 
 ## Auch bekannt als
 
@@ -47,11 +47,11 @@ Reparatur-Erstattung · Reparaturschaden · Sachschaden · Kfz-Reparaturkosten
 
 ## In einem Satz erklärt
 
-Reparaturkosten sind die Kosten der sach- und fachgerechten Wiederherstellung deines Fahrzeugs – voll erstattbar bis zur 130 %-Grenze, mit Wahl zwischen fiktiver und konkreter Abrechnung.
+Reparaturkosten sind die Kosten der sach- und fachgerechten Wiederherstellung Ihres Fahrzeugs – voll erstattbar bis zur 130 %-Grenze, mit Wahl zwischen fiktiver und konkreter Abrechnung.
 
 ## In drei Sätzen erklärt
 
-Bei Beschädigung deines Fahrzeugs schuldet der Versicherer die vollständige Erstattung der zur Wiederherstellung erforderlichen Kosten nach § 249 BGB – Reparaturkosten sind dabei die Hauptposition und umfassen Stundenverrechnungssätze, Original-Ersatzteile, UPE-Aufschläge, Lackierung, Verbringungs- und Probefahrtkosten. Bei jungen Fahrzeugen (< 3 Jahre) oder lückenloser Markenwerkstatt-Wartung greift der [Markenwerkstatt-Anspruch](/decoder/werkstatt-netz) mit höheren Stundensätzen und Original-Teilen. Du entscheidest zwischen **konkreter Abrechnung** (nach tatsächlicher Reparatur, inkl. Mehrwertsteuer) und **fiktiver Abrechnung** (nach Gutachten ohne tatsächliche Reparatur, ohne Mehrwertsteuer) – beides ist nach BGH-Linie zulässig.
+Bei Beschädigung Ihres Fahrzeugs schuldet der Versicherer die vollständige Erstattung der zur Wiederherstellung erforderlichen Kosten nach § 249 BGB – Reparaturkosten sind dabei die Hauptposition und umfassen Stundenverrechnungssätze, Original-Ersatzteile, UPE-Aufschläge, Lackierung, Verbringungs- und Probefahrtkosten. Bei jungen Fahrzeugen (< 3 Jahre) oder lückenloser Markenwerkstatt-Wartung greift der [Markenwerkstatt-Anspruch](/decoder/werkstatt-netz) mit höheren Stundensätzen und Original-Teilen. Sie entscheiden zwischen **konkreter Abrechnung** (nach tatsächlicher Reparatur, inkl. Mehrwertsteuer) und **fiktiver Abrechnung** (nach Gutachten ohne tatsächliche Reparatur, ohne Mehrwertsteuer) – beides ist nach BGH-Linie zulässig.
 
 ## Die fünf Schlüsselzahlen
 
@@ -73,9 +73,9 @@ Bei Beschädigung deines Fahrzeugs schuldet der Versicherer die vollständige Er
 ### Ersatzteile + UPE-Aufschläge
 - **Original-Ersatzteile** bei Markenwerkstatt-Anspruch zwingend
 - **UPE-Aufschläge** (Unverbindliche Preis-Empfehlungs-Aufschläge) typisch 10–20 % auf Listenpreis – vom BGH als üblich anerkannt
-- **Identteile / Refabrikate** nur bei deiner ausdrücklichen Zustimmung
+- **Identteile / Refabrikate** nur bei Ihrer ausdrücklichen Zustimmung
 
-→ Worin sich Original-, Ident- und Gebrauchtteile unterscheiden und wann dir welche zustehen: [Ersatzteil-Qualität](/haftpflicht/ersatzteil-qualitaet).
+→ Worin sich Original-, Ident- und Gebrauchtteile unterscheiden und wann Ihnen welche zustehen: [Ersatzteil-Qualität](/haftpflicht/ersatzteil-qualitaet).
 
 ### Lackier-Kosten
 - Lackier-Stunden + Material
@@ -104,11 +104,11 @@ Bei Beschädigung deines Fahrzeugs schuldet der Versicherer die vollständige Er
 
 ## Die 130 %-Regel – wann Reparatur statt Wiederbeschaffung
 
-Auch wenn die Reparatur teurer ist als ein vergleichbares Ersatzfahrzeug, hast du Anspruch auf Reparatur – bis die Reparaturkosten **130 % des Wiederbeschaffungswertes** überschreiten. Voraussetzungen (BGH VI ZR 70/04):
+Auch wenn die Reparatur teurer ist als ein vergleichbares Ersatzfahrzeug, haben Sie Anspruch auf Reparatur – bis die Reparaturkosten **130 % des Wiederbeschaffungswertes** überschreiten. Voraussetzungen (BGH VI ZR 70/04):
 
-1. **Integritätsinteresse** – du willst dein Fahrzeug behalten
+1. **Integritätsinteresse** – Sie wollen Ihr Fahrzeug behalten
 2. **Sachgerechte Reparatur** nach Sachverständigen-Vorgabe
-3. **6-Monats-Behaltens-Pflicht** – du nutzt das Fahrzeug nach Reparatur mindestens 6 Monate weiter
+3. **6-Monats-Behaltens-Pflicht** – Sie nutzt das Fahrzeug nach Reparatur mindestens 6 Monate weiter
 
 ### Beispiel-Rechnung
 
@@ -125,7 +125,7 @@ Bei Reparaturkosten **über** 130 %: nur Wiederbeschaffung minus Restwert. Siehe
 
 ## Fiktive vs. konkrete Abrechnung
 
-Du entscheidest, **wie** du abrechnest – beide Wege sind nach BGH-Linie zulässig:
+Sie entscheiden, **wie** Sie abrechnen – beide Wege sind nach BGH-Linie zulässig:
 
 | | Fiktive Abrechnung | Konkrete Abrechnung |
 |---|---|---|
@@ -133,24 +133,24 @@ Du entscheidest, **wie** du abrechnest – beide Wege sind nach BGH-Linie zuläs
 | **Reparatur erfolgt** | Nein (oder Eigenreparatur) | Ja |
 | **Mehrwertsteuer** | **Nicht erstattbar** | **Erstattbar (19 %)** |
 | **Stundenverrechnungssatz** | Nach Gutachten | Tatsächlich gezahlt |
-| **Wann sinnvoll** | Wenn du selbst reparierst oder das Fahrzeug verkaufst | Wenn du tatsächlich in Werkstatt reparierst |
+| **Wann sinnvoll** | Wenn Sie selbst repariern oder das Fahrzeug verkaufen | Wenn Sie tatsächlich in Werkstatt repariern |
 
 ### Praktische Konsequenz
-Bei 15.000 € fiktiver Abrechnung „kostet" dich die MwSt-Differenz ca. 2.400 € – d. h. konkrete Abrechnung in der Markenwerkstatt bringt finanziell mehr, ist aber an die Reparatur gebunden.
+Bei 15.000 € fiktiver Abrechnung „kostet" Sie die MwSt-Differenz ca. 2.400 € – d. h. konkrete Abrechnung in der Markenwerkstatt bringt finanziell mehr, ist aber an die Reparatur gebunden.
 
-→ Rechnest du fiktiv ab, machst aber Nutzungsausfall oder die 130-%-Regel geltend, verlangt die Versicherung einen Nachweis, dass tatsächlich repariert wurde: [Reparaturbestätigung](/haftpflicht/reparaturbestaetigung).
+→ Rechnen Sie fiktiv ab, machen aber Nutzungsausfall oder die 130-%-Regel geltend, verlangt die Versicherung einen Nachweis, dass tatsächlich repariert wurde: [Reparaturbestätigung](/haftpflicht/reparaturbestaetigung).
 
 ---
 
-## Werkstatt-Risiko – du haftest nicht für Fehler
+## Werkstatt-Risiko – Sie haften nicht für Fehler
 
-Eine wichtige BGH-Linie: Wenn die Werkstatt fehlerhaft repariert oder zu teuer abrechnet, ist das **Schädiger-Risiko** – nicht dein Risiko (sog. „Werkstatt-Risiko" nach BGH-Rechtsprechung). Du musst die Werkstatt nicht überwachen, du musst nicht den günstigsten Anbieter wählen.
+Eine wichtige BGH-Linie: Wenn die Werkstatt fehlerhaft repariert oder zu teuer abrechnet, ist das **Schädiger-Risiko** – nicht Ihr Risiko (sog. „Werkstatt-Risiko" nach BGH-Rechtsprechung). Sie müssen die Werkstatt nicht überwachen, Sie müssen nicht den günstigsten Anbieter wählen.
 
 → Konsequenz: Selbst wenn die Werkstatt-Rechnung über dem SV-Gutachten liegt, weil die Werkstatt mehr berechnet hat, ist die Mehrforderung gegenüber dem Versicherer durchsetzbar.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Eigenes Sachverständigen-Gutachten ist Pflicht – es ist die Grundlage der Reparaturkosten-Berechnung. Versicherer-Gutachten setzen Stundenverrechnungssätze und UPE-Aufschläge tendenziell niedriger an.
@@ -164,7 +164,7 @@ BVSK-Sachverständiger, frei wählbar. Kosten trägt der Versicherer (siehe [SV-
 Bei Markenwerkstatt-Anspruch: Markenwerkstatt. Sonst frei wählbare freie Werkstatt – Partner-Werkstatt des Versicherers nicht zwingend (siehe [Decoder Werkstattnetz](/decoder/werkstatt-netz)).
 
 **3. Abrechnungs-Form entscheiden**
-Fiktive oder konkrete Abrechnung – abhängig davon, ob du repariert hast und ob du MwSt-Erstattung brauchst.
+Fiktive oder konkrete Abrechnung – abhängig davon, ob Sie repariert haben und ob Sie MwSt-Erstattung brauchen.
 
 **4. Anwalt bei Kürzungen über 500 €**
 Bei UPE-Streit, Stundenverrechnungssatz-Kürzung, Verbringungskosten-Streit lohnt sich die Eskalation. Anwaltskosten zahlt der Versicherer.
@@ -193,13 +193,13 @@ Pauschal-Argument. Wenn Karosserie- und Lackierbetrieb getrennt sind, ist die Ve
 Volle Erstattung der zur sachgerechten Wiederherstellung erforderlichen Kosten – Stundenverrechnungssätze, Ersatzteile, UPE-Aufschläge, Lackierung, Verbringung, Probefahrt. Bis zur 130 %-Grenze des Wiederbeschaffungswertes.
 
 **Was ist fiktive Abrechnung?**
-Du bekommst die Reparaturkosten nach SV-Gutachten ausgezahlt, ohne tatsächlich reparieren zu lassen. Die Mehrwertsteuer (19 %) ist dann **nicht** erstattbar – sie wird nur bei tatsächlicher Reparatur erstattet.
+Sie bekommen die Reparaturkosten nach SV-Gutachten ausgezahlt, ohne tatsächlich reparieren zu lassen. Die Mehrwertsteuer (19 %) ist dann **nicht** erstattbar – sie wird nur bei tatsächlicher Reparatur erstattet.
 
 **Muss die Versicherung Markenwerkstatt-Kosten zahlen?**
 Bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie: ja (BGH VI ZR 53/09). Auch die höheren Stundensätze und Original-Ersatzteile sind voll erstattbar.
 
 **Was, wenn die Werkstatt zu hoch abrechnet?**
-Werkstatt-Fehler oder überhöhte Berechnung sind **Schädiger-Risiko** nach BGH-Linie zum Werkstatt-Risiko – der Versicherer trägt Mehrkosten, nicht du.
+Werkstatt-Fehler oder überhöhte Berechnung sind **Schädiger-Risiko** nach BGH-Linie zum Werkstatt-Risiko – der Versicherer trägt Mehrkosten, nicht Sie.
 
 **Bekomme ich die Mehrwertsteuer immer erstattet?**
 Nur bei konkreter Abrechnung (tatsächliche Reparatur). Bei fiktiver Abrechnung nicht – das ist ein wichtiger Unterschied.
@@ -219,7 +219,7 @@ Wertminderung ist eine **eigenständige Position** zusätzlich zu den Reparaturk
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Reparaturkosten-Streitigkeiten sind das ergebnisreichste Feld der Schadensregulierung. Differenz zwischen Versicherer-Bewertung und Berechtigtem typischerweise 15–30 %. Eigener SV + Anwalt zahlt der Versicherer.
 
@@ -268,7 +268,7 @@ Reparaturkosten-Streitigkeiten sind das ergebnisreichste Feld der Schadensreguli
       "@type": "FAQPage",
       "mainEntity": [
         {"@type": "Question", "name": "Wie hoch sind erstattbare Reparaturkosten?", "acceptedAnswer": {"@type": "Answer", "text": "Volle Erstattung der zur sachgerechten Wiederherstellung erforderlichen Kosten — Stundenverrechnungssätze, Ersatzteile, UPE-Aufschläge, Lackierung, Verbringung, Probefahrt. Bis zur 130 %-Grenze des Wiederbeschaffungswertes."}},
-        {"@type": "Question", "name": "Was ist fiktive Abrechnung?", "acceptedAnswer": {"@type": "Answer", "text": "Du bekommst die Reparaturkosten nach SV-Gutachten ausgezahlt, ohne tatsächlich reparieren zu lassen. Die Mehrwertsteuer (19 %) ist dann nicht erstattbar."}},
+        {"@type": "Question", "name": "Was ist fiktive Abrechnung?", "acceptedAnswer": {"@type": "Answer", "text": "Sie bekommen die Reparaturkosten nach SV-Gutachten ausgezahlt, ohne tatsächlich reparieren zu lassen. Die Mehrwertsteuer (19 %) ist dann nicht erstattbar."}},
         {"@type": "Question", "name": "Muss die Versicherung Markenwerkstatt zahlen?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie ja (BGH VI ZR 53/09). Auch höhere Stundensätze und Original-Ersatzteile sind voll erstattbar."}}
       ]
     }

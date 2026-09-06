@@ -41,7 +41,7 @@ export default function KaskoTarifCard({
         <h2 className="text-heading-sm text-claimondo-navy">Ihr Kasko-Tarif</h2>
       </div>
       {/* Kein Mail-Hinweis: der Portal-Pfad schickt keine E6-Mail (Review #5864, Befund 5). */}
-      <KaskoTarifFrage kompakt anrede="Sie" mitMailHinweis={false} onErgebnis={(auswahl) => void speichere(auswahl)} busy={busy} />
+      <KaskoTarifFrage kompakt mitMailHinweis={false} onErgebnis={(auswahl) => void speichere(auswahl)} busy={busy} />
     </Card>
   )
 }

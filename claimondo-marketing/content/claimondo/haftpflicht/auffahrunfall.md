@@ -108,7 +108,7 @@ Technische Defekte sind grundsätzlich Halter-Risiko nach § 7 StVG. Nur bei ext
 
 ---
 
-## Welche Ansprüche du als Vordermann hast
+## Welche Ansprüche Sie als Vordermann haben
 
 - [Reparaturkosten](/haftpflicht/reparaturkosten) – voll
 - [Wertminderung](/haftpflicht/wertminderung) – bei jungem Fahrzeug
@@ -120,10 +120,10 @@ Technische Defekte sind grundsätzlich Halter-Risiko nach § 7 StVG. Nur bei ext
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Anscheinsbeweis ausnutzen. Du musst **nichts** zur Schuld beweisen – der Versicherer muss erschüttern.
+Anscheinsbeweis ausnutzen. Sie müssen **nichts** zur Schuld beweisen – der Versicherer muss erschüttern.
 
 ### 🛠 Drei Schritte
 
@@ -166,7 +166,7 @@ Bei sachlich begründetem Bremsen (Hindernis, Stau, Rotlicht): voll geschützt. 
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Auffahrunfälle sind eine der einfachsten Konstellationen – Anwalts-Erfolgsquote oft >90 %.
 

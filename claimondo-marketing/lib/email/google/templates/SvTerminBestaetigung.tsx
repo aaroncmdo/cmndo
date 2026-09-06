@@ -31,8 +31,8 @@ export function SvTerminBestaetigungEmail(props: Props) {
       <Paragraph>
         Hallo {props.svVorname},{' '}
         {props.istVorreservierung
-          ? 'der Dispatcher hat einen Termin für dich vorreserviert. Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben – sobald er das tut, wird der Termin automatisch bestätigt.'
-          : 'der folgende Termin wurde automatisch bestätigt. Du musst nichts tun. Falls du nicht kannst: bitte innerhalb von 24 Stunden im Portal ablehnen oder einen Gegenvorschlag machen.'}
+          ? 'der Dispatcher hat einen Termin für Sie vorreserviert. Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben – sobald er das tut, wird der Termin automatisch bestätigt.'
+          : 'der folgende Termin wurde automatisch bestätigt. Sie müssen nichts tun. Falls Sie nicht können: bitte innerhalb von 24 Stunden im Portal ablehnen oder einen Gegenvorschlag machen.'}
       </Paragraph>
 
       <InfoTable rows={[
@@ -45,7 +45,7 @@ export function SvTerminBestaetigungEmail(props: Props) {
 
       {props.istVorreservierung ? (
         <Paragraph>
-          Sobald der Kunde die SA unterschrieben hat, erhältst du eine zweite Mail mit der finalen Termin-Bestätigung. Bis dahin: bitte nicht anfahren.
+          Sobald der Kunde die SA unterschrieben hat, erhalten Sie eine zweite Mail mit der finalen Termin-Bestätigung. Bis dahin: bitte nicht anfahren.
         </Paragraph>
       ) : (
         <Paragraph>
@@ -57,7 +57,7 @@ export function SvTerminBestaetigungEmail(props: Props) {
 
       {props.ablehnenUrl && (
         <Paragraph>
-          Wenn du diesen Termin verschieben oder ablehnen möchtest:{' '}
+          Wenn Sie diesen Termin verschieben oder ablehnen möchten:{' '}
           <a href={props.ablehnenUrl}>Hier öffnen – kein Login nötig</a>
         </Paragraph>
       )}

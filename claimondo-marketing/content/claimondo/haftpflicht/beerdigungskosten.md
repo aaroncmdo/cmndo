@@ -123,7 +123,7 @@ Im angemessenen Umfang erstattbar. Standesgemäßheit prüfen.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Alle Belege archivieren. Pauschal-Kürzungen mit konkreten Rechnungen widerlegen.
@@ -144,7 +144,7 @@ Bei pauschalen Kürzungen lohnt sich Eskalation.
 ## Häufige Fragen
 
 **Wer zahlt die Beerdigung nach Autounfall?**
-Bei unverschuldetem tödlichem Unfall die gegnerische Haftpflichtversicherung – als eigenständige Schadensposition nach § 844 Abs. 1 BGB. Voraussetzung: Du hast die Kosten getragen.
+Bei unverschuldetem tödlichem Unfall die gegnerische Haftpflichtversicherung – als eigenständige Schadensposition nach § 844 Abs. 1 BGB. Voraussetzung: Sie haben die Kosten getragen.
 
 **Wie hoch sind erstattbare Beerdigungskosten?**
 Standard-Bestattung 5.000–15.000 €. Bei besonderen Konstellationen (aufwändige Grabstein-Gestaltung, große Trauerfeier) bis 25.000 €+.
@@ -168,7 +168,7 @@ Diejenige Person, die die Beerdigungs-Kosten **tatsächlich getragen** hat. Meis
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

@@ -34,7 +34,7 @@ meta_description: "Eigene Kosten nach Unfall: Taxi, Fahrt-, Porto- und Telefonau
 
 # Eigene Kosten beim Verkehrsunfall – Taxi, Fahrt-, Telefon-, Porto-Aufwand
 
-> **Kurz erklärt:** Eigene Kosten sind alle Klein-Aufwendungen, die du unfallbedingt selbst tragen musst – Taxi, Fahrtkosten, Telefon, Porto, Einschreiben, Kopien. Erstattbar nach § 249 BGB; gerichtlich wird oft eine **Auslagen-Pauschale 25–30 €** anerkannt, daneben können konkrete höhere Kosten belegt werden. Sammle Belege ab Tag 1 – die Summe ist überraschend groß.
+> **Kurz erklärt:** Eigene Kosten sind alle Klein-Aufwendungen, die Sie unfallbedingt selbst tragen müssen – Taxi, Fahrtkosten, Telefon, Porto, Einschreiben, Kopien. Erstattbar nach § 249 BGB; gerichtlich wird oft eine **Auslagen-Pauschale 25–30 €** anerkannt, daneben können konkrete höhere Kosten belegt werden. Sammle Belege ab Tag 1 – die Summe ist überraschend groß.
 
 ## Auch bekannt als
 
@@ -48,7 +48,7 @@ Eigene Kosten sind alle unfallbedingten Klein-Aufwendungen – Taxi, Fahrt-, Tel
 
 ## In drei Sätzen erklärt
 
-Im Verlauf der Schadensregulierung entstehen zahlreiche **Klein-Aufwendungen**, die du selbst tragen musst – Fahrt zu Werkstatt und Arzt, Taxi-Fahrten ohne eigenen Pkw, Einschreiben mit Rückschein, Kopien von Unterlagen, Telefonate mit Versicherer, Anwalt, Sachverständigem. Gerichtlich wird hierfür oft eine **Pauschale von 25–30 €** anerkannt – alternativ können konkrete Belege eingereicht werden, wenn die Summe der tatsächlichen Aufwendungen die Pauschale überschreitet (typisch bei längerer Reparatur oder umfangreicher Korrespondenz). Erstattungsgrundlage ist § 249 BGB; gesammelt mit allen anderen Schadenspositionen geltend zu machen.
+Im Verlauf der Schadensregulierung entstehen zahlreiche **Klein-Aufwendungen**, die Sie selbst tragen müssen – Fahrt zu Werkstatt und Arzt, Taxi-Fahrten ohne eigenen Pkw, Einschreiben mit Rückschein, Kopien von Unterlagen, Telefonate mit Versicherer, Anwalt, Sachverständigem. Gerichtlich wird hierfür oft eine **Pauschale von 25–30 €** anerkannt – alternativ können konkrete Belege eingereicht werden, wenn die Summe der tatsächlichen Aufwendungen die Pauschale überschreitet (typisch bei längerer Reparatur oder umfangreicher Korrespondenz). Erstattungsgrundlage ist § 249 BGB; gesammelt mit allen anderen Schadenspositionen geltend zu machen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -56,7 +56,7 @@ Im Verlauf der Schadensregulierung entstehen zahlreiche **Klein-Aufwendungen**, 
 - **§ 249 BGB** Anspruchsgrundlage
 - **0,30 €/km** typische Fahrtkosten-Erstattung Eigen-Pkw
 - **Belege archivieren** – wenn über Pauschale
-- **Pauschal oder konkret** – du wählst
+- **Pauschal oder konkret** – Sie wählen
 
 ---
 
@@ -102,7 +102,7 @@ Pauschal-Anspruch besteht auch ohne Belege (gerichtliche Praxis).
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Pauschale immer geltend machen – niedrige Schwelle, kein Aufwand. Bei hohem Aufwand auf konkrete Belege umstellen.
@@ -145,7 +145,7 @@ Bei längerer Schadens-Korrespondenz und vielen Belegen ja – gesamtsumme oft 6
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Eigene Kosten sind klein, summieren sich aber. Bei vollständiger Berücksichtigung ein Plus von typisch 50–200 € zur Gesamterstattung.
 

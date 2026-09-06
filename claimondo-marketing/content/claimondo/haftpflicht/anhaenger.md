@@ -61,7 +61,7 @@ meta_description: "Anhänger-Unfall: Zugfahrzeug- und Anhänger-Halter haften ge
 1. **Sowohl Zugfahrzeug- als auch Anhänger-Versicherung** informieren
 2. **Beide Versicherungen-Adressen** an Geschädigte mitgeben
 3. **§ 19a StVG-Logik**: gemeinsame Haftung der Versicherer
-4. **Innen-Ausgleich** läuft zwischen den Versicherern – nicht dein Problem
+4. **Innen-Ausgleich** läuft zwischen den Versicherern – nicht Ihr Problem
 
 ## Häufige Fragen
 

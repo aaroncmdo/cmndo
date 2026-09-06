@@ -32,7 +32,7 @@ meta_description: "Fahrerflucht-Opfer: Bleibt der Verursacher unbekannt, zahlt d
 
 # Fahrerflucht / Unfallflucht – was Geschädigte tun können
 
-> **Kurz erklärt:** Wenn der Schädiger nach dem Unfall flieht und nicht identifiziert werden kann, hast du als Geschädigter dennoch Schutz: Die **Verkehrsopferhilfe e.V.** (VOH) tritt nach § 12 PflVG ein, wenn der Verursacher unbekannt bleibt oder unversichert ist. Voraussetzung: **Anzeige bei der Polizei** binnen sieben Tagen und nachweisbare Bemühungen zur Ermittlung. Personen­schäden werden vollständig erstattet, Sachschäden mit Selbstbeteiligung (500 € bei Sach-, voll bei Personenschäden).
+> **Kurz erklärt:** Wenn der Schädiger nach dem Unfall flieht und nicht identifiziert werden kann, haben Sie als Geschädigter dennoch Schutz: Die **Verkehrsopferhilfe e.V.** (VOH) tritt nach § 12 PflVG ein, wenn der Verursacher unbekannt bleibt oder unversichert ist. Voraussetzung: **Anzeige bei der Polizei** binnen sieben Tagen und nachweisbare Bemühungen zur Ermittlung. Personen­schäden werden vollständig erstattet, Sachschäden mit Selbstbeteiligung (500 € bei Sach-, voll bei Personenschäden).
 
 ## Auch bekannt als
 
@@ -57,8 +57,8 @@ Träger: Verband der Versicherungswirtschaft. Sitz Hamburg.
 - Vorsätzlich-rechtswidrig genutzten Fahrzeugen (Diebstahl, Schwarzfahrt)
 
 ⚠ **Kennzeichen doch notiert – etwa von einem Zeugen?** Dann ist der Verursacher
-nicht unbekannt, und die VOH ist der falsche Weg (500 € Selbstbeteiligung, die du
-sonst nicht hättest). Die zuständige Haftpflicht ermittelst du dann direkt über den
+nicht unbekannt, und die VOH ist der falsche Weg (500 € Selbstbeteiligung, die Sie
+sonst nicht hättest). Die zuständige Haftpflicht ermitteln Sie dann direkt über den
 [Zentralruf der Autoversicherer](/haftpflicht/gegnerische-versicherung-ermitteln) –
 kostenfrei, es genügen Kennzeichen, Schadentag und Unfallland.
 
@@ -77,7 +77,7 @@ kostenfrei, es genügen Kennzeichen, Schadentag und Unfallland.
 
 > *„Verursacher unbekannt – kein Anspruch."*
 
-Falsch – Verkehrsopferhilfe tritt ein. Du musst aktiv den Antrag stellen.
+Falsch – Verkehrsopferhilfe tritt ein. Sie müssen aktiv den Antrag stellen.
 
 ## Häufige Fragen
 

@@ -2,7 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/reparaturbestaetigung
-meta_title: Reparaturbestätigung – wann du sie brauchst
+meta_title: Reparaturbestätigung – wann Sie sie brauchen
 type: glossar-spoke
 cluster: H3
 nummer: H3.19
@@ -38,7 +38,7 @@ meta_description: "Reparaturbestätigung nach Unfall: Wann der Nachweis nötig i
 
 # Reparaturbestätigung – der Nachweis, wenn es keine Rechnung gibt
 
-> **Kurz erklärt:** Die Reparaturbestätigung ist eine kurze Nachbesichtigung durch den Sachverständigen: Er prüft, ob der im Gutachten kalkulierte Schaden **tatsächlich und fachgerecht** behoben wurde. Du brauchst sie immer dann, wenn ein Anspruch am realen Reparaturzustand hängt, es aber **keine Werkstattrechnung** gibt – bei Eigenreparatur, bei Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen.
+> **Kurz erklärt:** Die Reparaturbestätigung ist eine kurze Nachbesichtigung durch den Sachverständigen: Er prüft, ob der im Gutachten kalkulierte Schaden **tatsächlich und fachgerecht** behoben wurde. Sie brauchen sie immer dann, wenn ein Anspruch am realen Reparaturzustand hängt, es aber **keine Werkstattrechnung** gibt – bei Eigenreparatur, bei Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen.
 
 ## Auch bekannt als
 
@@ -50,7 +50,7 @@ Sie belegt gegenüber der Versicherung, dass der Schaden wirklich behoben wurde 
 
 ## In drei Sätzen erklärt
 
-Bei der **fiktiven Abrechnung** bekommst du den kalkulierten Betrag ausgezahlt, ohne reparieren zu müssen – die Versicherung weiß dann aber nicht, ob dein Fahrzeug noch beschädigt ist. Genau daran hängen mehrere Ansprüche: Nutzungsausfall setzt einen Ausfall voraus, und die 130-Prozent-Regel verlangt eine sachgerechte Reparatur plus Weiterbenutzung. Die Reparaturbestätigung schließt diese Beweislücke, ohne dass du den vollen Weg über eine Werkstattrechnung gehen musst.
+Bei der **fiktiven Abrechnung** bekommen Sie den kalkulierten Betrag ausgezahlt, ohne reparieren zu müssen – die Versicherung weiß dann aber nicht, ob Ihr Fahrzeug noch beschädigt ist. Genau daran hängen mehrere Ansprüche: Nutzungsausfall setzt einen Ausfall voraus, und die 130-Prozent-Regel verlangt eine sachgerechte Reparatur plus Weiterbenutzung. Die Reparaturbestätigung schließt diese Beweislücke, ohne dass Sie den vollen Weg über eine Werkstattrechnung gehen müssen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -62,26 +62,26 @@ Bei der **fiktiven Abrechnung** bekommst du den kalkulierten Betrag ausgezahlt, 
 | **Typische Auslöser** | Eigenreparatur · Nutzungsausfall · 130-Prozent-Fall |
 | **Was sie nicht ist** | kein Ersatz für ein Gutachten, keine TÜV-Abnahme |
 
-## Wann du sie wirklich brauchst
+## Wann Sie sie wirklich brauchen
 
 ### Eigenreparatur oder Reparatur in freier Werkstatt ohne Vollrechnung
 
-Hast du selbst repariert oder in einer Werkstatt, die keine vollständige Rechnung über den kalkulierten Umfang stellt, fehlt der Versicherung jeder Beleg. Die Bestätigung ersetzt ihn – sie sagt nicht, was es gekostet hat, sondern **dass der Schaden weg ist**.
+Haben Sie selbst repariert oder in einer Werkstatt, die keine vollständige Rechnung über den kalkulierten Umfang stellt, fehlt der Versicherung jeder Beleg. Die Bestätigung ersetzt ihn – sie sagt nicht, was es gekostet hat, sondern **dass der Schaden weg ist**.
 
 ### Nutzungsausfall trotz fiktiver Abrechnung
 
-Hier ist eine Unterscheidung wichtig, die in Kürzungsschreiben gern verwischt wird: Dass du dein Auto **genutzt** hättest, musst du **nicht** beweisen – bei privat genutzten Fahrzeugen gilt die Eigennutzungs-Vermutung, und der Versicherer müsste eine Nicht-Nutzung belegen (siehe [Nutzungsausfall](/haftpflicht/nutzungsausfall)). Worum es hier geht, ist etwas anderes: die **Dauer** des Ausfalls.
+Hier ist eine Unterscheidung wichtig, die in Kürzungsschreiben gern verwischt wird: Dass Sie Ihr Auto **genutzt** hätten, müssen Sie **nicht** beweisen – bei privat genutzten Fahrzeugen gilt die Eigennutzungs-Vermutung, und der Versicherer müsste eine Nicht-Nutzung belegen (siehe [Nutzungsausfall](/haftpflicht/nutzungsausfall)). Worum es hier geht, ist etwas anderes: die **Dauer** des Ausfalls.
 
-Rechnest du fiktiv ab, sieht die Versicherung keinen Reparaturzeitraum und bestreitet regelmäßig, wie lange das Fahrzeug überhaupt ausgefallen ist. Die Bestätigung belegt genau das – nicht deinen Nutzungswillen.
+Rechnen Sie fiktiv ab, sieht die Versicherung keinen Reparaturzeitraum und bestreitet regelmäßig, wie lange das Fahrzeug überhaupt ausgefallen ist. Die Bestätigung belegt genau das – nicht Ihren Nutzungswillen.
 
 ### 130-Prozent-Fälle
 
 Liegen die Reparaturkosten über dem Wiederbeschaffungswert, aber innerhalb der 130-Prozent-Grenze, ist die Erstattung an zwei Bedingungen geknüpft: **sachgerechte Reparatur** und **Weiterbenutzung**. Beides muss belegt werden – die Bestätigung ist dafür der übliche Weg. Grundlagen unter [Reparaturkosten](/haftpflicht/reparaturkosten) und [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert).
 
-### Wann du sie *nicht* brauchst
+### Wann Sie sie *nicht* brauchen
 
 - Es liegt eine **vollständige Werkstattrechnung** über den kalkulierten Umfang vor
-- Du rechnest fiktiv ab und machst **keine** Ansprüche geltend, die an der Reparatur hängen
+- Sie rechnen fiktiv ab und machen **keine** Ansprüche geltend, die an der Reparatur hängen
 - Der Schaden war ein reiner Sachschaden ohne Nutzungsausfall und ohne 130-Prozent-Konstellation
 
 ## Was geprüft wird – und was nicht
@@ -104,7 +104,7 @@ Wichtig ist die Unabhängigkeit – eine Bestätigung der reparierenden Werkstat
 
 ## Wer die Kosten trägt
 
-Die Bestätigung ist Teil der Rechtsverfolgung: Sie entsteht, weil du deinen Anspruch belegen musst. Damit ist sie dem Grunde nach vom Schädiger zu erstatten – nach derselben Systematik wie die Kosten des Gutachtens selbst, ausführlich unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
+Die Bestätigung ist Teil der Rechtsverfolgung: Sie entsteht, weil Sie Ihren Anspruch belegen müssen. Damit ist sie dem Grunde nach vom Schädiger zu erstatten – nach derselben Systematik wie die Kosten des Gutachtens selbst, ausführlich unter [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
 
 Typische Kürzungsversuche:
 
@@ -114,16 +114,16 @@ Typische Kürzungsversuche:
 | „Nachbesichtigung nicht erforderlich" | Ohne sie verweigert dieselbe Versicherung den Nutzungsausfall |
 | „Reparaturweg nicht nachgewiesen" | Genau das leistet die Bestätigung – sie ist die Antwort, nicht das Problem |
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
-1. **Vor der Reparatur klären**, ob du Ansprüche geltend machst, die an ihr hängen – Nutzungsausfall oder 130 Prozent. Dann Termin zur Nachbesichtigung einplanen.
+1. **Vor der Reparatur klären**, ob Sie Ansprüche geltend machen, die an ihr hängen – Nutzungsausfall oder 130 Prozent. Dann Termin zur Nachbesichtigung einplanen.
 2. **Nicht wegwerfen:** Ersatzteil-Belege, Fotos vom Reparaturverlauf, Werkstattnotizen. Sie helfen dem Sachverständigen, auch wenn sie ihn nicht ersetzen.
 3. **Denselben Sachverständigen beauftragen**, der das Gutachten erstellt hat.
 4. **Bestätigung mit der Anspruchsaufstellung einreichen**, nicht nachgereicht auf Nachfrage – das verkürzt die Regulierung.
 
 ### 💡 Die wichtigste Regel
 
-Die Reparaturbestätigung ist **kein zusätzlicher Aufwand, den du dir aufhalsen lässt** – sie ist die Antwort auf eine Beweisforderung, die die Versicherung selbst stellt. Wer sie hat, nimmt dem häufigsten Kürzungsargument bei fiktiver Abrechnung die Grundlage.
+Die Reparaturbestätigung ist **kein zusätzlicher Aufwand, den Sie sich aufhalsen lassen** – sie ist die Antwort auf eine Beweisforderung, die die Versicherung selbst stellt. Wer sie hat, nimmt dem häufigsten Kürzungsargument bei fiktiver Abrechnung die Grundlage.
 
 ```json
 {

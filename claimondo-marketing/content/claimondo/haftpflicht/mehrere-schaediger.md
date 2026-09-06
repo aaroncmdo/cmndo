@@ -30,7 +30,7 @@ meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtsc
 
 # Mehrere Schädiger / Kettenunfall – Gesamtschuldnerschaft nach § 421 BGB
 
-> **Kurz erklärt:** Sind mehrere Fahrzeuge beteiligt (Kettenunfall, Massen­kollision) und haben mehrere Halter zum Schaden beigetragen, haften sie nach § 421 BGB als **Gesamtschuldner** – jeder Geschädigte kann von **jedem** der Schädiger den **vollen** Schadensbetrag fordern. Die Quotelung zwischen den Schädigern erfolgt im **Innen-Ausgleich** (§ 426 BGB) – das ist nicht dein Problem. Du wählst, gegen welchen du primär forderst – typisch den am ehesten zahlungsfähigen / klar identifizierbaren.
+> **Kurz erklärt:** Sind mehrere Fahrzeuge beteiligt (Kettenunfall, Massen­kollision) und haben mehrere Halter zum Schaden beigetragen, haften sie nach § 421 BGB als **Gesamtschuldner** – jeder Geschädigte kann von **jedem** der Schädiger den **vollen** Schadensbetrag fordern. Die Quotelung zwischen den Schädigern erfolgt im **Innen-Ausgleich** (§ 426 BGB) – das ist nicht Ihr Problem. Sie wählen, gegen welchen Sie primär fordern – typisch den am ehesten zahlungsfähigen / klar identifizierbaren.
 
 ## Auch bekannt als
 
@@ -41,7 +41,7 @@ meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtsc
 | Position | Geschädigte |
 |---|---|
 | Ansprüche gegen mehrere Schädiger | Vollständig (gesamtschuldnerisch) |
-| Wahlrecht | Du wählst, gegen welchen du klagst |
+| Wahlrecht | Sie wählen, gegen welchen Sie klagen |
 | Bei Teilzahlung eines Schädigers | Restbetrag gegen übrige geltend zu machen |
 | Innen-Ausgleich (§ 426 BGB) | Sache der Schädiger / ihrer Versicherer |
 
@@ -63,15 +63,15 @@ meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtsc
 
 ## Praktische Folge
 
-Du forderst typisch beim **stärksten Schädiger** (klarste Schuld, identifizierbar):
-- Versicherer reguliert dir gegenüber voll
+Sie fordern typisch beim **stärksten Schädiger** (klarste Schuld, identifizierbar):
+- Versicherer reguliert Ihnen gegenüber voll
 - Versicherer holt sich Anteile von Mit-Schädigern per Innen-Ausgleich
-- Du musst nicht selbst gegen mehrere klagen
+- Sie müssen nicht selbst gegen mehrere klagen
 
 ## Häufige Fragen
 
 **Wer haftet bei Kettenunfall?**
-Alle beteiligten Schädiger als Gesamtschuldner (§ 421 BGB). Du forderst von einem, dieser regelt intern.
+Alle beteiligten Schädiger als Gesamtschuldner (§ 421 BGB). Sie fordern von einem, dieser regelt intern.
 
 **Was ist Gesamtschuldnerschaft?**
 Mehrere Schuldner haften gemeinsam, jeder einzelne auf das Volle. Geschädigter wählt, gegen wen er fordert.
@@ -127,7 +127,7 @@ Selten. Standard: gegen einen Schädiger (typisch zahlungsfähig + klar identifi
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Wer haftet bei Kettenunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Alle beteiligten Schädiger haften als Gesamtschuldner nach § 421 BGB. Du forderst von einem, dieser regelt intern."}},
+        {"@type": "Question", "name": "Wer haftet bei Kettenunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Alle beteiligten Schädiger haften als Gesamtschuldner nach § 421 BGB. Sie fordern von einem, dieser regelt intern."}},
         {"@type": "Question", "name": "Was ist Gesamtschuldnerschaft?", "acceptedAnswer": {"@type": "Answer", "text": "Mehrere Schuldner haften gemeinsam, jeder einzelne auf das Volle. Der Geschädigte wählt, gegen wen er fordert."}},
         {"@type": "Question", "name": "Was ist der Innen-Ausgleich?", "acceptedAnswer": {"@type": "Answer", "text": "Die Verteilung zwischen den Schuldnern nach § 426 BGB — abhängig von den Verursachungsbeiträgen."}},
         {"@type": "Question", "name": "Lohnt sich Klage gegen alle?", "acceptedAnswer": {"@type": "Answer", "text": "Selten. Standard ist die Forderung gegen einen Schädiger, der typisch zahlungsfähig und klar identifiziert ist; dieser holt sich Anteile zurück."}}

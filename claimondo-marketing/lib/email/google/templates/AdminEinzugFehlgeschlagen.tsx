@@ -38,7 +38,7 @@ export function AdminEinzugFehlgeschlagenEmail(props: Props) {
 
         <Button href={`${APP_URL}/admin/abrechnungen`}>Zum Admin-Panel: Abrechnungen</Button>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </Card>
       <Footer />
     </EmailShell>

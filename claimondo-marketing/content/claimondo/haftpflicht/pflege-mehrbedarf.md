@@ -48,7 +48,7 @@ Pflege-Mehrbedarf ist die Erstattung aller Pflege-Kosten als Folge unfallbedingt
 
 ## In drei Sätzen erklärt
 
-Bei unfallbedingter Pflegebedürftigkeit hast du Anspruch auf Erstattung des **gesamten Pflege-Mehrbedarfs** über § 843 BGB – von der täglichen Grundpflege über medizinische Behandlungspflege bis zur 24-Stunden-Assistenz bei Schwerstpflege. Die gesetzliche Pflegekasse zahlt nach festgelegten Pflegegrad-Sätzen und macht anschließend Regress nach § 116 SGB X beim Versicherer; alle Mehrkosten darüber hinaus (Privat-Pflege, hochwertige Assistenz, professionelle Schwerstpflege) sind eigenständig erstattbar. Auch **Angehörigen-Pflege** ist erstattungsfähig – fiktive Vergütung 10–14 €/Std bei häuslicher Pflege nach BGH-Rechtsprechung, auch ohne dass die Angehörigen tatsächlich Geld bekommen.
+Bei unfallbedingter Pflegebedürftigkeit haben Sie Anspruch auf Erstattung des **gesamten Pflege-Mehrbedarfs** über § 843 BGB – von der täglichen Grundpflege über medizinische Behandlungspflege bis zur 24-Stunden-Assistenz bei Schwerstpflege. Die gesetzliche Pflegekasse zahlt nach festgelegten Pflegegrad-Sätzen und macht anschließend Regress nach § 116 SGB X beim Versicherer; alle Mehrkosten darüber hinaus (Privat-Pflege, hochwertige Assistenz, professionelle Schwerstpflege) sind eigenständig erstattbar. Auch **Angehörigen-Pflege** ist erstattungsfähig – fiktive Vergütung 10–14 €/Std bei häuslicher Pflege nach BGH-Rechtsprechung, auch ohne dass die Angehörigen tatsächlich Geld bekommen.
 
 ## Die fünf Schlüsselzahlen
 
@@ -79,7 +79,7 @@ Bei unfallbedingter Pflegebedürftigkeit hast du Anspruch auf Erstattung des **g
 
 ---
 
-## Angehörigen-Pflege – du musst keine Rechnung haben
+## Angehörigen-Pflege – Sie müssen keine Rechnung haben
 
 Wichtige BGH-Linie: Auch wenn Familienmitglieder die Pflege **unentgeltlich** leisten, ist der pflegerische Mehrbedarf **fiktiv** zu bewerten und vom Versicherer zu erstatten.
 
@@ -106,11 +106,11 @@ Die gesetzliche Pflegekasse zahlt zunächst nach Pflegegrad:
 
 (Werte 2024 – werden regelmäßig angepasst.)
 
-Die Pflegekasse holt sich diese Beträge per § 116 SGB X-Regress beim Versicherer zurück – du forderst **nur die Mehrkosten** darüber hinaus.
+Die Pflegekasse holt sich diese Beträge per § 116 SGB X-Regress beim Versicherer zurück – Sie fordern **nur die Mehrkosten** darüber hinaus.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Bei dauerhaftem Pflege-Bedarf spezialisierten Anwalt zwingend einschalten – die Bemessung ist komplex, Versicherer-Erstangebote liegen typisch 30–50 % unter dem rechnerisch Berechtigten.
@@ -159,7 +159,7 @@ Bei dauerhafter Pflegebedürftigkeit ja – Beträge schnell sechsstellig.
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Pflege-Mehrbedarf ist der teuerste Einzel-Posten bei schweren Verletzungen – und der komplexeste in der Berechnung.
 

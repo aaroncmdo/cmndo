@@ -48,11 +48,11 @@ export function SvMahnungSaeumnisEmail(props: Props) {
           <>
             <Paragraph>
               unsere Abrechnung <strong>{props.abrechnungs_nr}</strong> ist seit <strong>{props.tage_ueberfaellig} Tagen</strong> überfällig.
-              Falls die Lastschrift bei dir fehlgeschlagen ist oder du den offenen Betrag manuell überwiesen hast, prüfe bitte deine
-              Zahlungsmethode im Portal oder melde dich bei uns.
+              Falls die Lastschrift bei Ihnen fehlgeschlagen ist oder Sie den offenen Betrag manuell überwiesen haben, prüfen Sie bitte Ihre
+              Zahlungsmethode im Portal oder melde Sie bei uns.
             </Paragraph>
             <Paragraph>
-              Bitte überweise den offenen Betrag oder hinterlege eine funktionierende Zahlungsmethode innerhalb der nächsten 7 Tage,
+              Bitte überweisen Sie den offenen Betrag oder hinterlegen Sie eine funktionierende Zahlungsmethode innerhalb der nächsten 7 Tage,
               damit wir keine weiteren Schritte einleiten müssen.
             </Paragraph>
           </>
@@ -66,7 +66,7 @@ export function SvMahnungSaeumnisEmail(props: Props) {
             </Paragraph>
             <Paragraph>
               Falls bis zum {formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())} keine Zahlung eingeht,
-              setzen wir deinen Portal-Zugang aus und übergeben den Fall an unser Inkasso.
+              setzen wir Ihren Portal-Zugang aus und übergeben den Fall an unser Inkasso.
             </Paragraph>
           </>
         )
@@ -75,12 +75,12 @@ export function SvMahnungSaeumnisEmail(props: Props) {
           <>
             <Paragraph>
               <strong>Letzte Mahnung.</strong> Die Abrechnung <strong>{props.abrechnungs_nr}</strong> ist seit
-              <strong> {props.tage_ueberfaellig} Tagen</strong> überfällig und wir haben dich bereits mehrfach erinnert.
+              <strong> {props.tage_ueberfaellig} Tagen</strong> überfällig und wir haben sich bereits mehrfach erinnert.
             </Paragraph>
             <Paragraph>
               Wenn bis zum {formatDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString())} keine Zahlung eingeht,
-              übergeben wir den Vorgang an unser Inkasso und setzen deinen Portal-Zugang aus.
-              Etwaige zusätzliche Kosten gehen zu deinen Lasten.
+              übergeben wir den Vorgang an unser Inkasso und setzen Ihren Portal-Zugang aus.
+              Etwaige zusätzliche Kosten gehen zu Ihren Lasten.
             </Paragraph>
           </>
         )

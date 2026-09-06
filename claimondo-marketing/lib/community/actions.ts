@@ -74,7 +74,7 @@ export async function submitComment(
     .gte('created_at', since)
   if ((count ?? 0) >= 5) return { ok: false, error: 'Zu viele Kommentare in kurzer Zeit – bitte später erneut.' }
   if (containsLink(body) && !id?.trusted) {
-    return { ok: false, error: 'Links sind erst nach Freischaltung deines Kontos möglich.' }
+    return { ok: false, error: 'Links sind erst nach Freischaltung Ihres Kontos möglich.' }
   }
 
   // author_display denormalisiert (Migration 20260706222056), noch nicht in den Marketing-Typen.
