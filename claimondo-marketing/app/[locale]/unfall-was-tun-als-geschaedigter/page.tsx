@@ -8,6 +8,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
+import { SchadenBild } from '@/components/content/SchadenBild'
 import {
   articleSchema, howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
@@ -189,6 +190,17 @@ export default function Page() {
             </div>
           </div>
         </header>
+
+        {/* Bild direkt nach der Ueberschrift: beantwortet die Frage beim Landen
+            ("betrifft mich das?"), bevor der erste Textblock kommt. Nennung von
+            Urheber und Lizenz steckt in SchadenBild — sie ist bei CC BY/BY-SA
+            Bedingung der Nutzung, nicht Hoeflichkeit. */}
+        <SchadenBild
+          datei="unfall-mehrere-fahrzeuge-kreuzung"
+          alt="Mehrere beschädigte Fahrzeuge nach einem Zusammenstoß an einer Kreuzung, Menschen stehen daneben"
+          bildunterschrift="Die ersten Minuten nach dem Unfall entscheiden, was später belegbar ist."
+          prioritaet
+        />
 
         {/* Antwort-zuerst */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
