@@ -64,7 +64,6 @@ export default function GutachterPartnerClient() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const markerRef = useRef<mapboxgl.Marker | null>(null)
-  const pinMarkersRef = useRef<mapboxgl.Marker[]>([])
 
   const [radiusKm] = useState(30)
   const [coord, setCoord] = useState<Coord | null>(null)
@@ -89,6 +88,100 @@ export default function GutachterPartnerClient() {
         map.addSource('radius-fill', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
         map.addLayer({ id: 'radius-fill', type: 'fill', source: 'radius-fill', paint: { 'fill-color': COL_NAVY, 'fill-opacity': 0.12 } })
         map.addLayer({ id: 'radius-stroke', type: 'line', source: 'radius-fill', paint: { 'line-color': '#4573A2', 'line-width': 2, 'line-dasharray': [4, 2] } })
+
+        // Cold-Pins als GEOJSON-QUELLE, nicht als DOM-Marker.
+        //
+        // Vorher lief hier eine Schleife, die je Pin ein <div> baute und daraus einen
+        // mapboxgl.Marker machte. Auf prod gemessen (05.09., 1440x900): 10.018 Marker,
+        // 30.490 DOM-Knoten, 12,3 s bis die Seite stand, Hauptthread 1,7 s blockiert.
+        // Ein Marker ist ein absolut positioniertes DOM-Element, das der Browser bei
+        // JEDER Kartenbewegung neu platziert — bei fuenfstelligen Mengen ist das nicht
+        // optimierbar, sondern der falsche Mechanismus.
+        //
+        // Eine geclusterte Quelle rendert dieselben Punkte im Canvas (GPU): der DOM
+        // bleibt leer, das Clustering fasst dichte Gebiete zusammen, und beim Hineinzoomen
+        // loesen sich die Buendel auf. `clusterMaxZoom: 11` — ab da zeigen wir Einzelpunkte,
+        // weil dort die Standortwahl stattfindet.
+        map.addSource('sv-pins', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+          cluster: true,
+          clusterRadius: 45,
+          clusterMaxZoom: 11,
+        })
+        map.addLayer({
+          id: 'sv-pins-cluster',
+          type: 'circle',
+          source: 'sv-pins',
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': COL_NAVY,
+            'circle-opacity': 0.9,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+            // Radius waechst mit der Menge, damit ein Buendel aus 2 anders aussieht als eines aus 2.000.
+            'circle-radius': ['step', ['get', 'point_count'], 14, 25, 18, 100, 22, 1000, 28],
+          },
+        })
+        map.addLayer({
+          id: 'sv-pins-cluster-zahl',
+          type: 'symbol',
+          source: 'sv-pins',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': ['get', 'point_count_abbreviated'],
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12,
+          },
+          paint: { 'text-color': '#ffffff' },
+        })
+        map.addLayer({
+          id: 'sv-pins-einzel',
+          type: 'circle',
+          source: 'sv-pins',
+          filter: ['!', ['has', 'point_count']],
+          paint: {
+            'circle-color': COL_NAVY,
+            'circle-radius': 9,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+          },
+        })
+        map.addLayer({
+          id: 'sv-pins-einzel-c',
+          type: 'symbol',
+          source: 'sv-pins',
+          filter: ['!', ['has', 'point_count']],
+          layout: {
+            'text-field': 'C',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 10,
+            'text-allow-overlap': true,
+          },
+          paint: { 'text-color': '#ffffff' },
+        })
+
+        // Klick auf ein Buendel: hineinzoomen, bis es sich aufloest.
+        map.on('click', 'sv-pins-cluster', (e) => {
+          const f = map.queryRenderedFeatures(e.point, { layers: ['sv-pins-cluster'] })[0]
+          const id = f?.properties?.cluster_id
+          if (id == null) return
+          const src = map.getSource('sv-pins') as mapboxgl.GeoJSONSource
+          src.getClusterExpansionZoom(id, (err, zoom) => {
+            if (err || zoom == null) return
+            map.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom })
+          })
+        })
+        // Klick auf einen Einzelpunkt: derselbe Weg wie vorher beim DOM-Marker.
+        map.on('click', 'sv-pins-einzel', (e) => {
+          const c = (e.features?.[0]?.geometry as GeoJSON.Point | undefined)?.coordinates
+          if (c) onPinClickRef.current(c[1], c[0])
+        })
+        for (const id of ['sv-pins-cluster', 'sv-pins-einzel']) {
+          map.on('mouseenter', id, () => { map.getCanvas().style.cursor = 'pointer' })
+          map.on('mouseleave', id, () => { map.getCanvas().style.cursor = '' })
+        }
+
         mapRef.current = map
         setMapReady(true)
       })
@@ -157,29 +250,25 @@ export default function GutachterPartnerClient() {
   const onPinClickRef = useRef<(lat: number, lng: number) => void>(() => {})
   onPinClickRef.current = (lat, lng) => { void handlePinClick(lat, lng) }
 
-  // Klickbare Cold-Pins rendern, sobald Karte + Pins bereit sind.
+  // Cold-Pins in die Karten-Quelle schreiben. Ein setData statt 10.018 DOM-Knoten;
+  // Clustering und Darstellung uebernimmt Mapbox im Canvas (siehe Layer oben).
+  //
+  // ⚠ Barrierefreiheit: die alten DOM-Marker trugen `role="button"` und ein aria-label.
+  // Das faellt hier weg — 10.018 Buttons sind fuer eine Screenreader-Ausgabe aber ohnehin
+  // unbrauchbar. Der bedienbare Weg zum selben Ziel ist die PLZ-Suche darueber, die
+  // dieselbe `drawRadius`-Funktion aufruft.
   useEffect(() => {
     if (!mapReady || !mapRef.current || pins.length === 0) return
-    let cancelled = false
-    const store = pinMarkersRef.current
-    import('mapbox-gl').then(({ default: mapboxgl }) => {
-      if (cancelled || !mapRef.current) return
-      for (const p of pins) {
-        const el = document.createElement('div')
-        el.style.cursor = 'pointer'
-        el.setAttribute('role', 'button')
-        el.setAttribute('aria-label', 'Diesen Standort beanspruchen')
-        el.innerHTML = `<div style="width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:${COL_NAVY};box-shadow:0 2px 6px rgba(13,27,62,0.30);border:2px solid #fff"><span style="font-family:Montserrat,system-ui,sans-serif;font-size:9px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em">C</span></div>`
-        el.addEventListener('click', () => onPinClickRef.current(p.lat, p.lng))
-        const m = new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat([p.lng, p.lat]).addTo(mapRef.current!)
-        store.push(m)
-      }
+    const src = mapRef.current.getSource('sv-pins') as mapboxgl.GeoJSONSource | undefined
+    if (!src) return
+    src.setData({
+      type: 'FeatureCollection',
+      features: pins.map((p) => ({
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+        properties: { id: p.id },
+      })),
     })
-    return () => {
-      cancelled = true
-      store.forEach((m) => m.remove())
-      pinMarkersRef.current = []
-    }
   }, [mapReady, pins])
 
   return (
