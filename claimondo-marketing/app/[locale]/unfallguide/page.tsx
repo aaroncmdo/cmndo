@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import { Phone } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import {
@@ -10,6 +9,7 @@ import {
 } from '@/lib/seo/jsonld'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { GuideFormClient } from './GuideFormClient'
+import { GuideTeaser } from './GuideTeaser'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -160,25 +160,24 @@ export default async function UnfallguidePage() {
               {t('kopf.intro')}
             </p>
 
-            <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center">
-              <Image
-                src="/brand/unfallguide-cover.jpg"
-                alt={t('kopf.bild_alt')}
-                width={760}
-                height={1075}
-                priority
-                className="w-36 rounded-lg shadow-2xl ring-1 ring-white/15 sm:w-44"
-              />
-              <ul className="space-y-2 text-base text-white/80">
-                <li>{t('kopf.punkt_1')}</li>
-                <li>{t('kopf.punkt_2')}</li>
-                <li>{t('kopf.punkt_3')}</li>
-              </ul>
-            </div>
+            {/* Das kleine Vorschaubild ist entfallen: der Teaser rechts IST das
+                Cover, nur gross und lesbar. Zwei Abbildungen desselben Dokuments
+                nebeneinander waeren Doppelung. */}
+            <ul className="mt-8 space-y-2 text-base text-white/80">
+              <li>{t('kopf.punkt_1')}</li>
+              <li>{t('kopf.punkt_2')}</li>
+              <li>{t('kopf.punkt_3')}</li>
+            </ul>
           </div>
 
+          {/* Erst lesen, dann fordern (PRODUCT.md §1): an dieser Stelle steht
+              zuerst die halbe Seite 2 des Guides. Wer freischaltet, bekommt das
+              Formular AN DERSELBEN STELLE — kein Dialog, keine Ebene darueber.
+              Begruendung ausfuehrlich im Kopf von GuideTeaser.tsx. */}
           <div className="lg:pl-4">
-            <GuideFormClient />
+            <GuideTeaser>
+              <GuideFormClient />
+            </GuideTeaser>
           </div>
         </div>
       </section>
