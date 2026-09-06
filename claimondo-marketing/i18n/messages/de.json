@@ -4862,6 +4862,10 @@
     "fehler_einwilligung": "Bitte bestätigen Sie, dass wir Sie zurückrufen dürfen",
     "fehler_allgemein": "Bitte prüfen Sie Ihre Eingaben",
     "fehler_speichern": "Wir konnten Ihre Anfrage nicht speichern. Der Guide steht trotzdem bereit, und unter 0151 5360 8515 erreichen Sie uns direkt.",
-    "hinweis_verarbeitung": "Ihre Anfrage ist angekommen, die Verarbeitung läuft noch. Wir melden uns."
+    "hinweis_verarbeitung": "Ihre Anfrage ist angekommen, die Verarbeitung läuft noch. Wir melden uns.",
+    "teaser_aria": "Unfallguide freischalten und ansehen",
+    "teaser_hinweis": "Die zwei Positionen, die am seltensten gefordert werden, liegen im unscharfen Teil.",
+    "teaser_regler": "Zum Freischalten ziehen",
+    "wa_kein_konto": "Zu dieser Nummer finden wir kein WhatsApp. Der Guide öffnet sich trotzdem sofort hier."
   }
 }

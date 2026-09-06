@@ -4858,6 +4858,10 @@
     "fehler_einwilligung": "Proszę potwierdzić, że możemy oddzwonić",
     "fehler_allgemein": "Proszę sprawdzić wprowadzone dane",
     "fehler_speichern": "Nie udało się zapisać Pana/Pani zgłoszenia. Przewodnik mimo to jest gotowy, a pod numerem 0151 5360 8515 można się z nami skontaktować bezpośrednio.",
-    "hinweis_verarbeitung": "Zgłoszenie do nas dotarło, przetwarzanie jeszcze trwa. Odezwiemy się."
+    "hinweis_verarbeitung": "Zgłoszenie do nas dotarło, przetwarzanie jeszcze trwa. Odezwiemy się.",
+    "teaser_aria": "Odblokuj przewodnik po wypadku",
+    "teaser_hinweis": "Dwie pozycje, o które wnioskuje się najrzadziej, są w rozmytej części.",
+    "teaser_regler": "Przesuń, aby odblokować",
+    "wa_kein_konto": "Nie znajdujemy WhatsAppa dla tego numeru. Przewodnik i tak otworzy się od razu tutaj."
   }
 }

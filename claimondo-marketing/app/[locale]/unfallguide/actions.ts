@@ -8,7 +8,7 @@ import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
 import { isWhatsAppAvailable } from '@/lib/whatsapp/availability'
-import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { sendWhatsAppText, sendWhatsAppDocument } from '@/lib/whatsapp/baileys-client'
 import { sendEmail } from '@/lib/email/google/client'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -557,6 +557,27 @@ async function sendeWillkommen(opts: {
         '',
         t('kostenlos'),
       ].join('\n')
+      // Aaron 06.09.2026: „der guide soll per whatsapp versendet werden."
+      // Bis dahin ging hier ein LINK raus. Wer keine E-Mail angab — und die ist
+      // optional — bekam die Datei damit nie, nur einen Verweis darauf.
+      //
+      // Die Reihenfolge ist Absicht: erst die Datei, und NUR wenn das scheitert
+      // der Link. Ein Ausfall des Dienstes darf den Guide nicht kosten.
+      try {
+        const pdf = await readFile(join(process.cwd(), 'public', GUIDE_PFAD))
+        const dok = await sendWhatsAppDocument(
+          opts.telefon,
+          { inhalt: pdf, dateiname: 'Claimondo-Unfallguide.pdf', mimetype: 'application/pdf' },
+          text,
+        )
+        if (dok.ok) {
+          return { kanal: 'whatsapp', text, empfaenger: opts.telefon, hatAnhang: true }
+        }
+        console.error('[unfallguide] WhatsApp-Dokument:', dok.error, '— faellt auf den Link zurueck')
+      } catch (err) {
+        console.error('[unfallguide] Guide-PDF fuer WhatsApp nicht lesbar:', (err as Error).message)
+      }
+
       const r = await sendWhatsAppText(opts.telefon, text)
       if (r.ok) {
         return { kanal: 'whatsapp', text, empfaenger: opts.telefon, hatAnhang: false }

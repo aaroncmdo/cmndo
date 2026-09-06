@@ -4858,6 +4858,10 @@
     "fehler_einwilligung": "Sizi arayabileceğimizi lütfen onaylayın",
     "fehler_allgemein": "Lütfen girdiğiniz bilgileri kontrol edin",
     "fehler_speichern": "Talebinizi kaydedemedik. Rehber yine de hazır; 0151 5360 8515 numarasından bize doğrudan ulaşabilirsiniz.",
-    "hinweis_verarbeitung": "Talebiniz bize ulaştı, işleme alınıyor. Sizinle iletişime geçeceğiz."
+    "hinweis_verarbeitung": "Talebiniz bize ulaştı, işleme alınıyor. Sizinle iletişime geçeceğiz.",
+    "teaser_aria": "Kaza rehberini açın ve okuyun",
+    "teaser_hinweis": "En seyrek talep edilen iki kalem, bulanık bölümde duruyor.",
+    "teaser_regler": "Açmak için kaydırın",
+    "wa_kein_konto": "Bu numarada WhatsApp bulamadık. Rehber yine de hemen burada açılıyor."
   }
 }

@@ -371,6 +371,94 @@ app.post('/send', authenticate, async (req, res) => {
   }
 })
 
+// Ein Dokument senden — der Unfallguide als DATEI, nicht als Link.
+//
+// Warum ein eigener Endpunkt und nicht ein Zweig in /send: /send hat einen
+// festen Vertrag und mehrere Aufrufer. Ein optionales Feld dort haette bei
+// jedem kuenftigen Leser die Frage aufgeworfen, welcher Zweig gerade laeuft.
+//
+// ⚠ Die Datei kommt als Base64 IM RUMPF, nicht als URL. Eine URL waere weniger
+// Nutzlast, wuerde den Dienst aber zu einem Abrufer beliebiger Adressen machen
+// (SSRF). Der Rumpf ist auf 1 MB begrenzt (express.json oben); der Guide misst
+// rund 200 KB, als Base64 etwa 270 KB.
+app.post('/send-document', authenticate, async (req, res) => {
+  if (connectionState !== 'open') {
+    return res.status(503).json({ error: 'baileys_not_connected', state: connectionState })
+  }
+  const phone = normalizePhone(req.body?.phone)
+  const fileName = String(req.body?.fileName ?? '').trim()
+  const mimetype = String(req.body?.mimetype ?? '').trim()
+  const caption = String(req.body?.caption ?? '').trim()
+  const dataBase64 = String(req.body?.dataBase64 ?? '')
+
+  if (!phone || phone.length < 8) {
+    return res.status(400).json({ error: 'invalid_phone' })
+  }
+  // Dateiname ohne Pfadanteile: er landet unveraendert im Chat des Empfaengers.
+  if (!fileName || fileName.length > 120 || /[/\ ]/.test(fileName)) {
+    return res.status(400).json({ error: 'invalid_file_name' })
+  }
+  if (!mimetype || mimetype.length > 100) {
+    return res.status(400).json({ error: 'invalid_mimetype' })
+  }
+  if (!dataBase64) {
+    return res.status(400).json({ error: 'empty_document' })
+  }
+  if (caption.length > 1024) {
+    return res.status(400).json({ error: 'caption_too_long', max: 1024 })
+  }
+
+  let document
+  try {
+    document = Buffer.from(dataBase64, 'base64')
+  } catch {
+    return res.status(400).json({ error: 'invalid_base64' })
+  }
+  // Base64 ist nachsichtig: Unfug ergibt einen kurzen Puffer statt eines
+  // Fehlers. Eine Untergrenze faengt genau das ab.
+  if (document.length < 512) {
+    return res.status(400).json({ error: 'document_too_small', bytes: document.length })
+  }
+  const MAX_BYTES = 700 * 1024
+  if (document.length > MAX_BYTES) {
+    return res.status(413).json({ error: 'document_too_large', bytes: document.length, max: MAX_BYTES })
+  }
+
+  try {
+    // Derselbe Vorab-Check wie in /send: ohne ihn schluckt Baileys den Versand
+    // an eine Nummer ohne WhatsApp stillschweigend.
+    const candidateJid = phone + '@s.whatsapp.net'
+    const checkResult = await sock.onWhatsApp(candidateJid)
+    const exists =
+      Array.isArray(checkResult) && checkResult.length > 0 && checkResult[0]?.exists === true
+    if (!exists) {
+      return res.status(404).json({ error: 'recipient_not_on_whatsapp', phone })
+    }
+    const targetJid = checkResult[0].jid
+    const message = await sock.sendMessage(targetJid, {
+      document,
+      mimetype,
+      fileName,
+      ...(caption ? { caption } : {}),
+    })
+    logger.info(
+      { phone, jid: targetJid, message_id: message?.key?.id, bytes: document.length, fileName },
+      '/send-document ok',
+    )
+    res.json({
+      ok: true,
+      phone,
+      jid: targetJid,
+      message_id: message?.key?.id ?? null,
+      bytes: document.length,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (err) {
+    logger.error({ err, phone, fileName }, '/send-document failed')
+    res.status(500).json({ error: 'send_failed', message: err?.message })
+  }
+})
+
 app.get('/qr', authenticate, (req, res) => {
   if (!lastQr) {
     return res.status(404).json({ error: 'no_qr_pending', state: connectionState })

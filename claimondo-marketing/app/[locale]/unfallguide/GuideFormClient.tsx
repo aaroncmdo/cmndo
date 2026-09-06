@@ -38,6 +38,9 @@ export function GuideFormClient({
   const ersteEingabe = useRef(false)
   const erfolgRef = useRef<HTMLDivElement>(null)
   const [utm, setUtm] = useState<Record<string, string>>({})
+  // Lebendpruefung der Telefonnummer. `null` = noch nichts zu sagen.
+  const [waKonto, setWaKonto] = useState<null | 'ja' | 'nein'>(null)
+  const [telefon, setTelefon] = useState('')
 
   useEffect(() => {
     track('guide_form_eingeblendet', { quelle })
@@ -52,6 +55,41 @@ export function GuideFormClient({
     // Sie aendert sich im Leben einer Instanz nie — der Effekt laeuft trotzdem
     // genau einmal, und die Liste bleibt vollstaendig statt unterdrueckt.
   }, [quelle])
+
+  // Prueft beim Tippen, ob die Nummer bei WhatsApp erreichbar ist.
+  //
+  // ⭐ Diese Pruefung darf das Formular NIE aufhalten (Regel der Referenz, und
+  // richtig so): sie laeuft verzoegert, ihr Ergebnis ist nur ein Hinweis, und
+  // jeder Fehler endet als „nichts zu sagen". Der Guide oeffnet sich ohnehin
+  // sofort auf der Seite — die Nummer entscheidet nur ueber den ZUSATZweg.
+  useEffect(() => {
+    const ziffern = telefon.replace(/\D/g, '')
+    if (ziffern.length < 8) {
+      setWaKonto(null)
+      return
+    }
+    const abbruch = new AbortController()
+    // 700 ms: lang genug, dass niemand bei jeder Ziffer eine Anfrage ausloest,
+    // kurz genug, dass die Antwort noch zum Tippen gehoert.
+    const timer = window.setTimeout(async () => {
+      try {
+        const r = await fetch('/api/wa-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: telefon }),
+          signal: abbruch.signal,
+        })
+        const d = (await r.json()) as { status?: string }
+        setWaKonto(d.status === 'ja' ? 'ja' : d.status === 'nein' ? 'nein' : null)
+      } catch {
+        setWaKonto(null)
+      }
+    }, 700)
+    return () => {
+      window.clearTimeout(timer)
+      abbruch.abort()
+    }
+  }, [telefon])
 
   // Nach dem Absenden gehoert der Fokus dorthin, wo die Antwort steht.
   // Sonst steht ein Screenreader-Nutzer weiter im abgeschickten Formular.
@@ -159,8 +197,14 @@ export function GuideFormClient({
           autoComplete="tel"
           hinweis={t('telefon_hinweis')}
           fehler={fehlerFeld === 'telefon' ? fehlerText : null}
+          onChange={setTelefon}
           required
         />
+        {/* Kein Fehler-Rot: der Nutzer hat nichts falsch gemacht, und das
+            Absenden bleibt jederzeit moeglich. */}
+        {waKonto === 'nein' && (
+          <p className="-mt-2 text-sm text-slate-500">{t('wa_kein_konto')}</p>
+        )}
         <Feld
           id="guide-email"
           name="email"
@@ -228,6 +272,8 @@ type FeldProps = {
   autoComplete?: string
   hinweis?: string
   optional?: boolean
+  /** Wird beim Tippen gerufen. Nur dort gesetzt, wo der Wert live gebraucht wird. */
+  onChange?: (wert: string) => void
   /** Beschriftung fuer den optional-Zusatz. Kommt von aussen, damit `Feld`
       rein darstellend bleibt und keine eigene Uebersetzung zieht. */
   optionalLabel?: string
@@ -248,6 +294,7 @@ function Feld({
   hinweis,
   optional,
   optionalLabel,
+  onChange,
   required,
   fehler,
 }: FeldProps) {
@@ -267,6 +314,7 @@ function Feld({
         type={type}
         inputMode={inputMode}
         autoComplete={autoComplete}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         required={required}
         aria-describedby={[hinweisId, fehlerId].filter(Boolean).join(' ') || undefined}
         aria-invalid={fehler ? true : undefined}

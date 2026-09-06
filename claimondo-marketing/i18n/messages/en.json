@@ -4858,6 +4858,10 @@
     "fehler_einwilligung": "Please confirm that we may call you back",
     "fehler_allgemein": "Please check your entries",
     "fehler_speichern": "We could not save your request. The guide is ready anyway, and you can reach us directly on 0151 5360 8515.",
-    "hinweis_verarbeitung": "Your request has arrived, processing is still running. We will get in touch."
+    "hinweis_verarbeitung": "Your request has arrived, processing is still running. We will get in touch.",
+    "teaser_aria": "Unlock and read the accident guide",
+    "teaser_hinweis": "The two items claimed least often are in the blurred part.",
+    "teaser_regler": "Slide to unlock",
+    "wa_kein_konto": "We can't find WhatsApp for this number. The guide still opens right here."
   }
 }
