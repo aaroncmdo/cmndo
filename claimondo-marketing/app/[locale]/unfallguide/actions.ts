@@ -573,9 +573,9 @@ async function sendeWillkommen(opts: {
         if (dok.ok) {
           return { kanal: 'whatsapp', text, empfaenger: opts.telefon, hatAnhang: true }
         }
-        console.error('[unfallguide] WhatsApp-Dokument:', dok.error, '— faellt auf den Link zurueck')
+        console.error('[unfallguide] WhatsApp-Dokument:', dok.error, '— fällt auf den Link zurück')
       } catch (err) {
-        console.error('[unfallguide] Guide-PDF fuer WhatsApp nicht lesbar:', (err as Error).message)
+        console.error('[unfallguide] Guide-PDF für WhatsApp nicht lesbar:', (err as Error).message)
       }
 
       const r = await sendWhatsAppText(opts.telefon, text)
