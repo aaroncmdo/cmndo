@@ -47,9 +47,6 @@ type Props = {
   /** Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron): JEDER verifizierte,
    * aktive SV ist klickbar mit anonymem Profil-Popup (RLS-gegated). */
   aktiveSVs?: AktiverSVPublic[]
-  /** Server-seitig vorberechnete Union der Partner-Isochronen (Perf: die ~10k-Vertex-
-   * Isochronen wuerden sonst client-seitig via @turf/union unioniert -> Freeze). */
-  coverageUnion?: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null
   /** Slot für den Inline-Wizard (WS4 — FlowSlotStep). WS1b: Platzhalter aus der Page. */
   wizardSlot?: React.ReactNode
   /** Doc 34 0a.3: Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng),
@@ -239,7 +236,7 @@ function GutachterPill({
   )
 }
 
-export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
+export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -492,29 +489,54 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
         setzeDeadPinEbene(map, svLeads, COL_NAVY)
       }
 
-      // ── Partner-Einsatzgebiet (kräftig, OBEN) — server-seitig vorberechnete Union ──
-      // Perf: die ~10k-Vertex-Isochronen werden in page.tsx (Server) via @turf/union
-      // zu EINER Flaeche vereint + als coverageUnion-Prop gereicht -> kein Client-turf.
-      if (coverageUnion) {
-        const coveragePartnersData: GeoJSON.FeatureCollection = {
-          type: 'FeatureCollection',
-          features: [{ ...coverageUnion, properties: {} }],
+      // ── Partner-Einsatzgebiet (kräftig, OBEN) — NACHGELADEN, nicht mitgeliefert ──
+      //
+      // Die Flaeche kam bis 06.09.2026 als `coverageUnion`-Prop aus page.tsx und lag
+      // damit im RSC-Payload der Seite. Auf prod gemessen: 1.605 kB von 1.653 kB HTML
+      // waren dieser Payload, darin 19.252 Koordinaten-Paare. Bei gedrosseltem Mobilfunk
+      // (~400 kbit/s) braucht allein das Dokument dann ~33 Sekunden — nach 10 Sekunden
+      // war genau EIN Element auf dem Schirm sichtbar (der Sprung-Link), der Rest
+      // Ladespinner. Der Nutzer konnte nicht einmal eine Adresse eintippen.
+      //
+      // Die Flaeche ist Kontext, kein Bedienelement: sie zeigt, wo Partner arbeiten.
+      // Sie darf deshalb nachkommen, sobald die Oberflaeche bedienbar ist. Dass sie
+      // dabei ZULETZT hinzugefuegt wird, ist kein Nachteil — sie soll ohnehin oben
+      // liegen (siehe Ueberschrift).
+      void (async () => {
+        try {
+          const antwort = await fetch('/api/embed/finder-abdeckung')
+          if (!antwort.ok) return
+          const { abdeckung } = (await antwort.json()) as {
+            abdeckung: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null
+          }
+          if (!abdeckung) return
+          // Zwischen fetch-Start und -Ende kann die Karte abgeraeumt worden sein
+          // (Nutzer navigiert weiter). `getSource` wuerde sonst auf einer toten
+          // Map-Instanz laufen.
+          if (!map.getStyle() || map.getSource('coverage-partners')) return
+
+          map.addSource('coverage-partners', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [{ ...abdeckung, properties: {} }] },
+          })
+          map.addLayer({
+            id: 'coverage-partners-fill',
+            type: 'fill',
+            source: 'coverage-partners',
+            paint: { 'fill-color': COL_ONDO, 'fill-opacity': 0.16 },
+          })
+          map.addLayer({
+            id: 'coverage-partners-outline',
+            type: 'line',
+            source: 'coverage-partners',
+            // Union → nur noch der glatte Außen-Umriss (keine inneren SV-Grenzen mehr).
+            paint: { 'line-color': COL_ONDO, 'line-width': 2, 'line-opacity': 0.55 },
+          })
+        } catch {
+          // Ohne Abdeckungsflaeche ist die Karte voll bedienbar — ein Netzfehler hier
+          // darf den Finder nicht als kaputt erscheinen lassen.
         }
-        map.addSource('coverage-partners', { type: 'geojson', data: coveragePartnersData })
-        map.addLayer({
-          id: 'coverage-partners-fill',
-          type: 'fill',
-          source: 'coverage-partners',
-          paint: { 'fill-color': COL_ONDO, 'fill-opacity': 0.16 },
-        })
-        map.addLayer({
-          id: 'coverage-partners-outline',
-          type: 'line',
-          source: 'coverage-partners',
-          // Union → nur noch der glatte Außen-Umriss (keine inneren SV-Grenzen mehr).
-          paint: { 'line-color': COL_ONDO, 'line-width': 2, 'line-opacity': 0.55 },
-        })
-      }
+      })()
 
       // ─── Tier-1 Marker ─────────────────────────────────────────────
       // 2026-06-02 (Aaron: "die Profile sollen public sein"): ALLE verifizierten,
