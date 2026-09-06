@@ -97,7 +97,7 @@ Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 A
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Hinterbliebenengeld ist pauschal – Anspruch besteht **automatisch** bei naher Angehörigen-Beziehung und tödlichem Verkehrsunfall. Keine Diagnose erforderlich.
@@ -146,7 +146,7 @@ Hinterbliebenengeld besteht nur bei tödlichem Verlauf. Bei schwerer dauerhafter
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

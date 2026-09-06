@@ -34,7 +34,7 @@ meta_description: "Mietwagen nach unverschuldetem Unfall zahlt die gegnerische H
 
 # Mietwagen-Erstattung beim Verkehrsunfall
 
-> **Kurz erklärt:** Wenn dein Fahrzeug nach unverschuldetem Unfall in Reparatur ist oder du auf Wiederbeschaffung wartest, hast du Anspruch auf einen Mietwagen – die Kosten trägt der gegnerische Haftpflichtversicherer (§ 249 BGB). Der **„ortsübliche Normaltarif"** ist maßgeblich, gerichtlich oft als Misch-Mittel aus Schwacke-Liste und Fraunhofer-Mietpreisspiegel berechnet. Mietwagen-Klasse maximal **eine Stufe unter** deinem eigenen Fahrzeug. Dauer entspricht der **tatsächlichen Reparatur- oder Wiederbeschaffungs-Zeit**.
+> **Kurz erklärt:** Wenn Ihr Fahrzeug nach unverschuldetem Unfall in Reparatur ist oder Sie auf Wiederbeschaffung warten, haben Sie Anspruch auf einen Mietwagen – die Kosten trägt der gegnerische Haftpflichtversicherer (§ 249 BGB). Der **„ortsübliche Normaltarif"** ist maßgeblich, gerichtlich oft als Misch-Mittel aus Schwacke-Liste und Fraunhofer-Mietpreisspiegel berechnet. Mietwagen-Klasse maximal **eine Stufe unter** Ihrem eigenen Fahrzeug. Dauer entspricht der **tatsächlichen Reparatur- oder Wiederbeschaffungs-Zeit**.
 
 ## Auch bekannt als
 
@@ -44,11 +44,11 @@ Mietwagen-Anspruch · Ersatzfahrzeug · Leihwagen-Erstattung · UET (Unfall-Ersa
 
 ## In einem Satz erklärt
 
-Mietwagen sind erstattbar, wenn dein Fahrzeug unfall-bedingt nicht nutzbar ist – Tagessatz nach ortsüblichem Normaltarif, Klasse maximal eine Stufe unter deinem Fahrzeug, Dauer der tatsächlichen Reparatur.
+Mietwagen sind erstattbar, wenn Ihr Fahrzeug unfall-bedingt nicht nutzbar ist – Tagessatz nach ortsüblichem Normaltarif, Klasse maximal eine Stufe unter Ihrem Fahrzeug, Dauer der tatsächlichen Reparatur.
 
 ## In drei Sätzen erklärt
 
-Bei einem unverschuldeten Unfall mit Fahrzeug-Ausfall hast du Anspruch auf einen Mietwagen als Ersatz-Mobilität – Voraussetzungen: Reparatur-Dauer oder Wiederbeschaffungs-Zeit, kein verfügbarer Zweitwagen, angemessene Mietwagen-Klasse (BGH-Linie). Der erstattbare Tagessatz orientiert sich am **„ortsüblichen Normaltarif"**, in der gerichtlichen Praxis oft als arithmetisches Mittel aus **Schwacke-Liste** (höhere Tagessätze) und **Fraunhofer-Mietpreisspiegel** (niedrigere Tagessätze) berechnet. Maximale Mietwagen-Klasse: dein eigenes Fahrzeug – eine Klasse darunter ist Schadensminderungs-zumutbar, mehrere nicht.
+Bei einem unverschuldeten Unfall mit Fahrzeug-Ausfall haben Sie Anspruch auf einen Mietwagen als Ersatz-Mobilität – Voraussetzungen: Reparatur-Dauer oder Wiederbeschaffungs-Zeit, kein verfügbarer Zweitwagen, angemessene Mietwagen-Klasse (BGH-Linie). Der erstattbare Tagessatz orientiert sich am **„ortsüblichen Normaltarif"**, in der gerichtlichen Praxis oft als arithmetisches Mittel aus **Schwacke-Liste** (höhere Tagessätze) und **Fraunhofer-Mietpreisspiegel** (niedrigere Tagessätze) berechnet. Maximale Mietwagen-Klasse: Ihr eigenes Fahrzeug – eine Klasse darunter ist Schadensminderungs-zumutbar, mehrere nicht.
 
 ## Die fünf Schlüsselzahlen
 
@@ -56,7 +56,7 @@ Bei einem unverschuldeten Unfall mit Fahrzeug-Ausfall hast du Anspruch auf einen
 - **14 Tage** Standard-Wiederbeschaffungs-Dauer bei Totalschaden
 - **Misch-Mittel** aus Schwacke + Fraunhofer als BGH-Bezug
 - **1 Klasse** Reduktion zumutbar (Schadensminderung)
-- **0 € Kosten** für dich bei unverschuldetem Unfall
+- **0 € Kosten** für Sie bei unverschuldetem Unfall
 
 ---
 
@@ -96,7 +96,7 @@ Die BGH-Linie zur „angemessenen Klasse":
 - **Mehrere Klassen darunter** nicht zumutbar
 - **Premium-Fahrzeug (Klasse E+)** → ggf. nur Mittelklasse erstattbar (oberer Wert der zumutbaren Reduktion)
 
-→ Praktisch: Wenn du ein Mittelklasse-Auto fährst, ist Mittelklasse-Mietwagen voll erstattbar. Versicherer-Druck zu Kleinstwagen ist nicht zulässig.
+→ Praktisch: Wenn Sie ein Mittelklasse-Auto fahren, ist Mittelklasse-Mietwagen voll erstattbar. Versicherer-Druck zu Kleinstwagen ist nicht zulässig.
 
 ---
 
@@ -113,9 +113,9 @@ Versicherer-Kürzungen mit „pauschal nur 7 Tage" oder „Reparatur hätte schn
 
 ---
 
-## Mietwagen oder Nutzungsausfall – du wählst
+## Mietwagen oder Nutzungsausfall – Sie wählen
 
-Du kannst entweder einen Mietwagen anmieten oder pauschalierten [Nutzungsausfall](/haftpflicht/nutzungsausfall) geltend machen – beides zusammen geht nicht. Praktischer Vergleich:
+Sie können entweder einen Mietwagen anmieten oder pauschalierten [Nutzungsausfall](/haftpflicht/nutzungsausfall) geltend machen – beides zusammen geht nicht. Praktischer Vergleich:
 
 | | Mietwagen | Nutzungsausfall |
 |---|---|---|
@@ -125,11 +125,11 @@ Du kannst entweder einen Mietwagen anmieten oder pauschalierten [Nutzungsausfall
 | Aufwand | Anmietung, Abwicklung | Keiner |
 | Bei Zweitwagen | Reduziert | Reduziert |
 
-→ Entscheidung im Einzelfall: Wenn du Mobilität brauchst, ist Mietwagen besser. Wenn du Mobilität durch Zweitwagen, ÖPNV oder Fahrrad ausgleichen kannst, ist Nutzungsausfall oft wirtschaftlich besser (Pauschale ohne tatsächliche Kosten).
+→ Entscheidung im Einzelfall: Wenn Sie Mobilität brauchen, ist Mietwagen besser. Wenn Sie Mobilität durch Zweitwagen, ÖPNV oder Fahrrad ausgleichen können, ist Nutzungsausfall oft wirtschaftlich besser (Pauschale ohne tatsächliche Kosten).
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Mietwagen-Anmietung mit Verfügbarkeits-Nachweis. Wenn ein günstigerer Tarif zum Anmietzeitpunkt nicht verfügbar war, ist der tatsächlich gezahlte höhere Tarif erstattbar.
@@ -153,13 +153,13 @@ Bei Kürzung über 100 € siehe [Decoder „Mietwagen-Tagessatz zu hoch"](/deco
 ## Häufige Fragen
 
 **Wer zahlt den Mietwagen nach Unfall?**
-Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung als Schadensposition nach § 249 BGB. Du gehst kein finanzielles Risiko ein.
+Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung als Schadensposition nach § 249 BGB. Sie gehen kein finanzielles Risiko ein.
 
 **Wie lange darf der Mietwagen-Zeitraum sein?**
 Für die tatsächliche Reparatur-Dauer (Werkstatt-Belege) oder bei Totalschaden typisch 14 Tage Wiederbeschaffungs-Dauer.
 
 **Welche Mietwagen-Klasse darf ich nehmen?**
-Maximal die Klasse deines eigenen Fahrzeugs, eine Klasse darunter ist Schadensminderungs-zumutbar.
+Maximal die Klasse Ihres eigenen Fahrzeugs, eine Klasse darunter ist Schadensminderungs-zumutbar.
 
 **Was ist der Unfall-Ersatz-Tarif (UET)?**
 Höherer Mietwagen-Tarif speziell für Unfall-Geschädigte (Vermieter trägt Vorfinanzierungs-Risiko). Erstattbar nur, wenn ein günstigerer Tarif zum Anmietzeitpunkt **nicht verfügbar** war.
@@ -168,7 +168,7 @@ Höherer Mietwagen-Tarif speziell für Unfall-Geschädigte (Vermieter trägt Vor
 Bei tatsächlicher Verfügbarkeit des Zweitwagens kann der Mietwagen-Anspruch reduziert oder ausgeschlossen sein – abhängig von der konkreten Familien-Konstellation.
 
 **Kann ich auch ohne Anmietung etwas bekommen?**
-Ja – alternativ [Nutzungsausfall](/haftpflicht/nutzungsausfall) (Sanden-Danner-Pauschale). Du wählst eines von beidem.
+Ja – alternativ [Nutzungsausfall](/haftpflicht/nutzungsausfall) (Sanden-Danner-Pauschale). Sie wählen eines von beidem.
 
 ---
 
@@ -181,7 +181,7 @@ Ja – alternativ [Nutzungsausfall](/haftpflicht/nutzungsausfall) (Sanden-Danner
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Mietwagen-Streit ist Standard-Eskalations-Feld. Differenz zur Versicherer-Bewertung typisch 200–600 € pro Fall – leicht zurückzuholen mit Anwalt.
 
@@ -229,7 +229,7 @@ Mietwagen-Streit ist Standard-Eskalations-Feld. Differenz zur Versicherer-Bewert
       "mainEntity": [
         {"@type": "Question", "name": "Wer zahlt den Mietwagen nach Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung als Schadensposition nach § 249 BGB."}},
         {"@type": "Question", "name": "Wie lange darf der Mietwagen-Zeitraum sein?", "acceptedAnswer": {"@type": "Answer", "text": "Für die tatsächliche Reparatur-Dauer oder bei Totalschaden typisch 14 Tage Wiederbeschaffungs-Dauer."}},
-        {"@type": "Question", "name": "Welche Mietwagen-Klasse darf ich nehmen?", "acceptedAnswer": {"@type": "Answer", "text": "Maximal die Klasse deines eigenen Fahrzeugs, eine Klasse darunter ist Schadensminderungs-zumutbar."}}
+        {"@type": "Question", "name": "Welche Mietwagen-Klasse darf ich nehmen?", "acceptedAnswer": {"@type": "Answer", "text": "Maximal die Klasse Ihres eigenen Fahrzeugs, eine Klasse darunter ist Schadensminderungs-zumutbar."}}
       ]
     }
   ]

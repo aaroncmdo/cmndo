@@ -147,7 +147,7 @@ Diese Tendenz ist relevant: Frühere Urteile aus den 2000er Jahren spiegeln nich
 
 ## Beweis-Anforderungen
 
-Für die Schmerzensgeld-Bemessung brauchst du:
+Für die Schmerzensgeld-Bemessung brauchen Sie:
 
 1. **ICD-Diagnose** vom Hausarzt oder Facharzt
 2. **Lückenlose Behandlungs-Kette** (Notaufnahme → Hausarzt → Facharzt → ggf. Reha → Therapie)
@@ -160,7 +160,7 @@ Für die Schmerzensgeld-Bemessung brauchst du:
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Schmerzensgeld niemals alleine verhandeln. Versicherer-Erstangebote liegen typisch 60–80 % unter dem rechnerisch Berechtigten. Anwalt mit Hacks/Wellner-Bezug ist der Hebel.
@@ -171,7 +171,7 @@ Schmerzensgeld niemals alleine verhandeln. Versicherer-Erstangebote liegen typis
 ICD-Diagnose, ärztliche Atteste, Behandlungs-Verlauf, Operationen, Funktions-Einschränkungen, psychische Folgen, berufliche Auswirkungen.
 
 **2. Anwalt mit Hacks/Wellner-Recherche**
-Verkehrsrechts-Anwalt prüft, welche Vergleichs-Urteile für deinen Fall einschlägig sind. Konkrete Bezifferung.
+Verkehrsrechts-Anwalt prüft, welche Vergleichs-Urteile für Ihren Fall einschlägig sind. Konkrete Bezifferung.
 
 **3. Spätfolge-Vorbehalt bei Vergleich zwingend**
 Kein Vergleich ohne Vorbehalt – siehe [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung).
@@ -193,7 +193,7 @@ Nach Schwere, Dauer, Intensität, Folgen, Operationen, psychischen Auswirkungen,
 Ja. PTBS, Anpassungsstörungen, Fahrangst, Depression sind eigenständig schmerzensgeldfähig. Spannen 2.000–80.000 € je nach Schwere und Chronifizierung.
 
 **Wie lange habe ich Zeit für Schmerzensgeld-Anspruch?**
-3 Jahre ab Ende des Jahres, in dem du Kenntnis von Schaden und Schädiger hattest (§ 195 BGB). Bei Spätfolgen 30 Jahre Höchstfrist (§ 199 Abs. 2 BGB).
+3 Jahre ab Ende des Jahres, in dem Sie Kenntnis von Schaden und Schädiger hatten (§ 195 BGB). Bei Spätfolgen 30 Jahre Höchstfrist (§ 199 Abs. 2 BGB).
 
 **Was, wenn meine Verletzung nicht in Hacks/Wellner steht?**
 Anwalt sucht analoge Urteile – die Tabelle ist Orientierung, nicht abschließend.
@@ -213,7 +213,7 @@ Bei Mitverschulden anteilige Kürzung – 30 % Mitverschulden = 70 % Schmerzensg
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Schmerzensgeld ist die wirtschaftlich riskanteste Position der Schadensregulierung. Wer ohne Anwalt akzeptiert, lässt typischerweise 60–80 % auf dem Tisch liegen. Anwaltskosten zahlt der Versicherer (BGH VI ZR 235/13).
 

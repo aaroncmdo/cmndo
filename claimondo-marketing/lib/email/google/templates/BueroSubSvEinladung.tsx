@@ -18,20 +18,20 @@ export function subject(p: Props) {
 export function BueroSubSvEinladungEmail(props: Props) {
   return (
     <EmailLayout preview={`Vertrag für ${props.bueroName} unterzeichnet – nächster Schritt: Anzahlung`}>
-      <Heading>Vielen Dank für deine Unterschrift!</Heading>
+      <Heading>Vielen Dank für Ihre Unterschrift!</Heading>
 
       <Paragraph>
         Hallo {props.vorname ?? 'Partner'},
       </Paragraph>
       <Paragraph>
-        vielen Dank für die Unterzeichnung. Im Anhang findest du das Vertragsdokument
-        für dein Büro <strong>{props.bueroName}</strong>.
+        vielen Dank für die Unterzeichnung. Im Anhang finden Sie das Vertragsdokument
+        für Ihr Büro <strong>{props.bueroName}</strong>.
       </Paragraph>
 
       <Divider />
 
       <Paragraph>
-        <strong>Nächster Schritt:</strong> Bitte leiste die zentrale Anzahlung über den
+        <strong>Nächster Schritt:</strong> Bitte leisten Sie die zentrale Anzahlung über den
         Stripe-Checkout im Büro-Onboarding. Sobald die Zahlung eingegangen ist, werden
         alle Standorte freigeschaltet.
       </Paragraph>
@@ -45,7 +45,7 @@ export function BueroSubSvEinladungEmail(props: Props) {
 
       <Button href={props.portalUrl}>Zum Büro-Onboarding</Button>
 
-      <Paragraph>Dein Claimondo-Team</Paragraph>
+      <Paragraph>Ihr Claimondo-Team</Paragraph>
     </EmailLayout>
   )
 }

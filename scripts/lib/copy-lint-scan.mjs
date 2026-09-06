@@ -69,3 +69,67 @@ export function scanHeadingCode(headingText) {
 export function scanTitleBrandTwice(title) {
   return /\|\s*Claimondo\s*\|\s*Claimondo/i.test(title || '')
 }
+
+// ---------------------------------------------------------------------------------------------
+// 5. Anrede — die Seite siezt. Ueberall.
+//
+// Aaron 06.09.2026: "das soll auf Sie bleiben. Weil wenn das auch Du ist, haben wir meistens die
+// Schwierigkeit, dass sich einheitlich ist. Also es soll die einheitliche Ansprache."
+//
+// Vorgeschichte: 942 Du-Formen in 65 Content-Markdowns, waehrend Formulare, CTAs und
+// Bestaetigungen durchgehend siezten. Wer ueber "Ihre Telefonnummer" in einen Ratgeber mit
+// "dein Auto" kam, las zwei Absender. Umgestellt in #5899 — dieser Detektor haelt es so.
+//
+// ⚠ NUR DEUTSCH. "du" ist auch Franzoesisch ("chef du service") und in tuerkischen Texten
+// haeufig; die 5 Fremdsprach-Locales haben eigene Hoeflichkeitsformen und werden vom
+// Aufrufer (check-copy-lint.mjs) ohnehin nur fuer de.json geprueft.
+//
+// ⚠ NICHT geflaggt werden: Code-Bezeichner (`const dir = …`), Kommentare (strippt der
+// Aufrufer), Dateipfade und die Wortteile in "Individuum", "Reduktion" — die Wortgrenze
+// allein reicht dafuer nicht, deshalb die Ausschluesse unten.
+
+const ANREDE_DU = /\b(du|dir|dich|dein|deine|deinem|deinen|deiner|deines)\b/gi
+
+// Stellen, an denen dieselbe Buchstabenfolge kein deutsches Duzen ist.
+const ANREDE_AUSNAHMEN = [
+  /\bchef\s+du\b/i,          // franzoesisch
+  /\bdu\s+jour\b/i,          // franzoesisch
+  /\bcode\s+du\b/i,
+  /\bdir\s*[=:)\]]/,         // Code: dir = …, dir: …, dir)
+  /\b(const|let|var|function|import|export)\s+\w*dir\b/,
+  /\bdirname\b|\breaddir\b|\bmkdir\b|\brmdir\b|\bdir\/|\/dir\b/i,
+  // Kfz-Kennzeichen und Ortsteile: "DU Beeckerwerth" ist Duisburg, kein Duzen.
+  /(DU|DD|DO|DA|HD|KA)\s+[A-ZÄÖÜ][a-zäöüß]/,
+]
+
+/**
+ * Deutsche Du-Anrede in einem nutzersichtbaren Text.
+ * @returns {string[]} die gefundenen Formen (leer = siezt)
+ */
+// ⚠ ZWEI STELLEN, an denen "du" KEINE Anrede an den Leser ist. Beide gemeldet von der
+// Abnahme-Session am 06.09., beide in src/** (dort scannt dieser Detektor heute nicht —
+// die Ausnahmen stehen trotzdem schon hier, damit sie nicht fehlen, sobald jemand die
+// Wurzeln erweitert):
+//
+//   1. PROMPTS AN DAS MODELL. "Du schreibst einen Wissens-Artikel" (lib/wissen/generate.ts)
+//      ist eine Anweisung, keine Kundenansprache. "Sie schreiben" waere sinnentstellend.
+//
+//   2. ERKENNUNGSMUSTER FUER NUTZEREINGABEN. In lib/faq-bot/off-topic-guard.ts steht
+//      "bist du eine ki" als Muster, das eine Frage ERKENNEN soll — nicht als Ausgabe.
+//      Wer das auf Sie umstellt, macht den Guard fuer genau die Frage blind, die er
+//      abfangen soll. Ein stiller Ausfall: die Antwort daneben siezt korrekt weiter,
+//      also faellt nichts auf.
+const ANREDE_KONTEXT_AUSNAHMEN = [
+  // Prompt-Rollen und -Anweisungen an ein Modell
+  /\b(prompt|system[_ ]?(prompt|message)|anweisung|instruction)\b/i,
+  /\bDu (bist|schreibst|antwortest|formulierst|erstellst|erhaeltst|erhältst) /,
+  // Erkennungsmuster: Listen von Nutzer-Eingaben, gegen die geprueft wird
+  /\b(muster|pattern|keywords?|erkennung|matche?[sn]?|includes|test\()\b/i,
+]
+
+export function scanAnrede(text) {
+  if (!text) return []
+  for (const aus of ANREDE_AUSNAHMEN) if (aus.test(text)) return []
+  for (const aus of ANREDE_KONTEXT_AUSNAHMEN) if (aus.test(text)) return []
+  return [...new Set((text.match(ANREDE_DU) || []).map((w) => w.toLowerCase()))]
+}

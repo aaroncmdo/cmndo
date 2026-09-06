@@ -35,7 +35,7 @@ meta_description: "Nutzungsausfall ohne Mietwagen: 27–175 €/Tag nach Sanden-
 
 # Nutzungsausfallentschädigung: Höhe, Anspruch und Tabelle nach dem Unfall
 
-> **Kurz erklärt:** Wenn dein Fahrzeug nach unverschuldetem Unfall in Reparatur oder Wiederbeschaffung steht und du **keinen Mietwagen** anmietest, hast du Anspruch auf **pauschalierte Nutzungsausfall-Entschädigung** (NAE) – gerichtlich anerkannt seit BGH GSZ 1/86. Tagessätze nach der **Sanden-Danner-Tabelle** zwischen **27 €** (Kleinwagen) und **175 € pro Tag** (Oberklasse). Beweis: keine konkreten Fahrten nötig – Eigennutzungs-Vermutung bei Privatfahrzeugen.
+> **Kurz erklärt:** Wenn Ihr Fahrzeug nach unverschuldetem Unfall in Reparatur oder Wiederbeschaffung steht und Sie **keinen Mietwagen** anmieten, haben Sie Anspruch auf **pauschalierte Nutzungsausfall-Entschädigung** (NAE) – gerichtlich anerkannt seit BGH GSZ 1/86. Tagessätze nach der **Sanden-Danner-Tabelle** zwischen **27 €** (Kleinwagen) und **175 € pro Tag** (Oberklasse). Beweis: keine konkreten Fahrten nötig – Eigennutzungs-Vermutung bei Privatfahrzeugen.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ NAE · Nutzungsausfallentschädigung · Pauschale Mobilitäts-Entschädigung · 
 
 ## In einem Satz erklärt
 
-Nutzungsausfall ist die pauschalierte Geldentschädigung dafür, dass dein Fahrzeug unfall-bedingt nicht genutzt werden konnte – Höhe nach Sanden-Danner-Tabelle und Reparatur-Dauer.
+Nutzungsausfall ist die pauschalierte Geldentschädigung dafür, dass Ihr Fahrzeug unfall-bedingt nicht genutzt werden konnte – Höhe nach Sanden-Danner-Tabelle und Reparatur-Dauer.
 
 ## In drei Sätzen erklärt
 
-Statt eines Mietwagens kannst du pauschalierte Nutzungsausfall-Entschädigung beanspruchen (BGH GSZ 1/86) – sie deckt den Wertverlust ab, der dir durch die Vorenthaltung deines Fahrzeugs entstanden ist, **ohne** dass du konkrete Fahrten oder tatsächliche Mehrkosten nachweisen musst. Maßgeblich sind die **Sanden-Danner-Tabellen** mit Tagessätzen je Fahrzeug-Klasse – typisch 27 € (Kleinwagen) bis 175 € (Oberklasse), multipliziert mit der **tatsächlichen Ausfall-Dauer**. Bei privat genutzten Fahrzeugen greift die **Eigennutzungs-Vermutung**: Der Versicherer muss eine Nicht-Nutzung beweisen, nicht du die Nutzung.
+Statt eines Mietwagens können Sie pauschalierte Nutzungsausfall-Entschädigung beanspruchen (BGH GSZ 1/86) – sie deckt den Wertverlust ab, der Ihnen durch die Vorenthaltung Ihres Fahrzeugs entstanden ist, **ohne** dass Sie konkrete Fahrten oder tatsächliche Mehrkosten nachweisen müssen. Maßgeblich sind die **Sanden-Danner-Tabellen** mit Tagessätzen je Fahrzeug-Klasse – typisch 27 € (Kleinwagen) bis 175 € (Oberklasse), multipliziert mit der **tatsächlichen Ausfall-Dauer**. Bei privat genutzten Fahrzeugen greift die **Eigennutzungs-Vermutung**: Der Versicherer muss eine Nicht-Nutzung beweisen, nicht Sie die Nutzung.
 
 ## Die fünf Schlüsselzahlen
 
@@ -67,9 +67,9 @@ Drei Bedingungen müssen vorliegen:
 
 1. **Fahrzeug-Ausfall** durch unverschuldeten Unfall (Reparatur oder Wiederbeschaffung)
 2. **Keine Anmietung** eines Mietwagens (Alternative: [Mietwagen-Erstattung](/haftpflicht/mietwagen))
-3. **Nutzungs-Möglichkeit** dem Grunde nach (du hattest das Fahrzeug zur Nutzung beabsichtigt)
+3. **Nutzungs-Möglichkeit** dem Grunde nach (Sie hatten das Fahrzeug zur Nutzung beabsichtigt)
 
-→ Mietwagen UND Nutzungsausfall **schließen sich aus** – du wählst eine Option.
+→ Mietwagen UND Nutzungsausfall **schließen sich aus** – Sie wählen eine Option.
 
 ---
 
@@ -118,15 +118,15 @@ Nutzungsausfall = Tagessatz × Reparatur-/Wiederbeschaffungs-Dauer
 
 ---
 
-## Eigennutzungs-Vermutung – du beweist nichts
+## Eigennutzungs-Vermutung – Sie beweisen nichts
 
 Der BGH stellt in ständiger Rechtsprechung klar: Bei privat genutzten Fahrzeugen wird die **Nutzungsabsicht und tatsächliche Nutzung vermutet**. Konkret:
 
-- **Du musst keine Fahrten nachweisen** (keine Tankquittungen, kein Fahrtenbuch)
+- **Sie müssen keine Fahrten nachweisen** (keine Tankquittungen, kein Fahrtenbuch)
 - **Eine eidesstattliche Versicherung** über die typische Nutzung reicht
 - **Der Versicherer muss eine Nicht-Nutzung beweisen** (z. B. längerer Auslands-Aufenthalt) – schwierig in der Praxis
 
-→ Diese Vermutung schützt dich vor Versicherer-Argumenten wie „nicht nachgewiesen" – siehe [Decoder „Nutzungsausfall nicht erstattbar"](/decoder/nutzungsausfall-nicht).
+→ Diese Vermutung schützt Sie vor Versicherer-Argumenten wie „nicht nachgewiesen" – siehe [Decoder „Nutzungsausfall nicht erstattbar"](/decoder/nutzungsausfall-nicht).
 
 ---
 
@@ -152,14 +152,14 @@ Ein vorhandener Zweitwagen kann den Nutzungsausfall reduzieren oder ausschließe
 | Aufwand | Anmietung, Abwicklung | Keiner |
 | Typische Höhe (Mittelklasse, 14 Tage) | ~700–1.000 € | ~770 € |
 
-→ Faustregel: Wenn du Mobilität durch Zweitwagen, ÖPNV, Fahrrad oder Home-Office ausgleichen kannst, ist Nutzungsausfall meist wirtschaftlich besser. Wenn du Mobilität brauchst, ist Mietwagen die richtige Wahl.
+→ Faustregel: Wenn Sie Mobilität durch Zweitwagen, ÖPNV, Fahrrad oder Home-Office ausgleichen können, ist Nutzungsausfall meist wirtschaftlich besser. Wenn Sie Mobilität brauchen, ist Mietwagen die richtige Wahl.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Nutzungsausfall ist eigenständige Position. Wenn du keinen Mietwagen nimmst, **immer** Nutzungsausfall beantragen – nicht „vergessen". Der Versicherer wartet ab, ob du danach fragst.
+Nutzungsausfall ist eigenständige Position. Wenn Sie keinen Mietwagen nehmen, **immer** Nutzungsausfall beantragen – nicht „vergessen". Der Versicherer wartet ab, ob Sie danach fragen.
 
 ### 🛠 Drei Schritte
 
@@ -180,7 +180,7 @@ Im Anspruchsschreiben Nutzungsausfall separat aufführen. Konkrete Bezifferung (
 Je nach Fahrzeug-Klasse 27–175 € pro Tag nach Sanden-Danner-Tabelle. Mittelklasse-Fahrzeug typisch 45–65 €/Tag.
 
 **Wer berechnet die Klasse meines Fahrzeugs?**
-Der Sachverständige im Gutachten – oder du nach Modell-Vergleich mit der Sanden-Danner-Tabelle. BVSK-SV ordnet die Klasse routinemäßig ein.
+Der Sachverständige im Gutachten – oder Sie nach Modell-Vergleich mit der Sanden-Danner-Tabelle. BVSK-SV ordnet die Klasse routinemäßig ein.
 
 **Muss ich Nutzungsausfall beantragen oder kommt das automatisch?**
 Aktiv beantragen. Versicherer regulieren oft nur die explizit gestellten Positionen – Nutzungsausfall „vergessen" zu nennen ist eine häufige Lücke.
@@ -189,7 +189,7 @@ Aktiv beantragen. Versicherer regulieren oft nur die explizit gestellten Positio
 Für die tatsächliche Reparatur- oder Wiederbeschaffungs-Dauer. Bei Totalschaden 14 Tage als BGH-Standard.
 
 **Kann ich Mietwagen UND Nutzungsausfall bekommen?**
-Nein – beide schließen sich aus. Du wählst eine Position.
+Nein – beide schließen sich aus. Sie wählen eine Position.
 
 **Was, wenn ich im Ausfall-Zeitraum Urlaub hatte?**
 Kann den Anspruch reduzieren, wenn der Versicherer den Auslands-Aufenthalt beweisen kann. Eine eigene Urlaubs-Erwähnung bei der Schadensanzeige sollte vermieden werden.
@@ -205,9 +205,9 @@ Kann den Anspruch reduzieren, wenn der Versicherer den Auslands-Aufenthalt bewei
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Nutzungsausfall ist eine der häufig „vergessenen" Positionen. Bei Mittelklasse-Fahrzeug + 14 Tagen sind das schnell 800 €+, die du sonst stehen lässt.
+Nutzungsausfall ist eine der häufig „vergessenen" Positionen. Bei Mittelklasse-Fahrzeug + 14 Tagen sind das schnell 800 €+, die Sie sonst stehen lassen.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -253,7 +253,7 @@ Nutzungsausfall ist eine der häufig „vergessenen" Positionen. Bei Mittelklass
       "mainEntity": [
         {"@type": "Question", "name": "Wie hoch ist Nutzungsausfall pro Tag?", "acceptedAnswer": {"@type": "Answer", "text": "Je nach Fahrzeug-Klasse 27–175 € pro Tag nach Sanden-Danner-Tabelle. Mittelklasse-Fahrzeug typisch 45–65 €/Tag."}},
         {"@type": "Question", "name": "Muss ich Nutzungsausfall beantragen?", "acceptedAnswer": {"@type": "Answer", "text": "Aktiv beantragen. Versicherer regulieren oft nur die explizit gestellten Positionen — Nutzungsausfall vergessen zu nennen ist eine häufige Lücke."}},
-        {"@type": "Question", "name": "Kann ich Mietwagen und Nutzungsausfall bekommen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein — beide schließen sich aus. Du wählst eine Position."}}
+        {"@type": "Question", "name": "Kann ich Mietwagen und Nutzungsausfall bekommen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein — beide schließen sich aus. Sie wählen eine Position."}}
       ]
     }
   ]

@@ -134,7 +134,7 @@ export default function Page() {
             Melden &amp; Moderation
           </h2>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-claimondo-shield">
-            Jeden Beitrag und jeden Kommentar kannst du über die Funktion{' '}
+            Jeden Beitrag und jeden Kommentar können Sie über die Funktion{' '}
             <strong className="text-claimondo-navy">„Melden"</strong> kennzeichnen. Mehrfach
             gemeldete Inhalte werden automatisch vorübergehend ausgeblendet, bis die Redaktion sie
             geprüft hat (Notice-and-Takedown). Die Redaktion kann Beiträge verbergen oder entfernen

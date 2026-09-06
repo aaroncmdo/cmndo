@@ -30,7 +30,7 @@ meta_description: "Auslandsunfall (EU/EWR/Schweiz): Regulierung über die Grüne
 
 # Auslandsunfall – Schadensregulierung über die Grüne Karte
 
-> **Kurz erklärt:** Bei Verkehrsunfällen im **Ausland** (EU + Schweiz, Liechtenstein, Norwegen) erfolgt die Schadensregulierung über das **Grüne-Karte-System** und das deutsche **„Büro Grüne Karte"** – du musst nicht im Ausland klagen. Bei Unfall **in Deutschland** mit ausländischem Fahrzeug ist der **Deutsche Verkehrsversicherer e.V. (DVS)** der Eintritts-Punkt für die Regulierung. Verfahren komplex, längere Bearbeitungszeiten (3–6 Monate), spezialisierter Anwalt empfohlen.
+> **Kurz erklärt:** Bei Verkehrsunfällen im **Ausland** (EU + Schweiz, Liechtenstein, Norwegen) erfolgt die Schadensregulierung über das **Grüne-Karte-System** und das deutsche **„Büro Grüne Karte"** – Sie müssen nicht im Ausland klagen. Bei Unfall **in Deutschland** mit ausländischem Fahrzeug ist der **Deutsche Verkehrsversicherer e.V. (DVS)** der Eintritts-Punkt für die Regulierung. Verfahren komplex, längere Bearbeitungszeiten (3–6 Monate), spezialisierter Anwalt empfohlen.
 
 ## Auch bekannt als
 
@@ -38,7 +38,7 @@ Grüne-Karte-System · IB-Verfahren · ZB Grüne Karte · Auslandsschadens-Regul
 
 ## Zwei Hauptkonstellationen
 
-### 1. Du im Ausland, Schädiger ausländisch
+### 1. Sie im Ausland, Schädiger ausländisch
 - Polizei rufen, Unfall-Protokoll im jeweiligen Land
 - **Europäischer Unfallbericht** (mehrsprachig) ausfüllen
 - Schädiger-Versicherung: über Grüne Karte oder Schadens-Regulierungs-Beauftragten in Deutschland

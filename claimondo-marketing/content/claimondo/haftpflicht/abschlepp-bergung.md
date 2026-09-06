@@ -34,7 +34,7 @@ meta_description: "Abschlepp- und Bergungskosten nach Unfall sind nach §249 BGB
 
 # Abschlepp- und Bergungskosten beim Verkehrsunfall
 
-> **Kurz erklärt:** Abschleppkosten sind nach § 249 BGB voll erstattbar, wenn dein Fahrzeug **fahruntüchtig oder verkehrsunsicher** ist. Bergungskosten umfassen darüber hinaus aufwändigere Maßnahmen (Bergung von der Fahrbahn, Spezialgerät, Krananbringung). **Standkosten** in der Werkstatt sind erstattbar, solange du auf das Gutachten oder Reparatur-Freigabe wartest. Typische Spannen: 150–400 € Abschleppen, 200–800 € Bergung, 15–30 €/Tag Standkosten.
+> **Kurz erklärt:** Abschleppkosten sind nach § 249 BGB voll erstattbar, wenn Ihr Fahrzeug **fahruntüchtig oder verkehrsunsicher** ist. Bergungskosten umfassen darüber hinaus aufwändigere Maßnahmen (Bergung von der Fahrbahn, Spezialgerät, Krananbringung). **Standkosten** in der Werkstatt sind erstattbar, solange Sie auf das Gutachten oder Reparatur-Freigabe warten. Typische Spannen: 150–400 € Abschleppen, 200–800 € Bergung, 15–30 €/Tag Standkosten.
 
 ## Auch bekannt als
 
@@ -48,7 +48,7 @@ Abschlepp- und Bergungskosten sind die direkten Mobilisierungs-Kosten nach Unfal
 
 ## In drei Sätzen erklärt
 
-Wenn dein Fahrzeug nach Unfall nicht mehr fahrtauglich oder verkehrssicher ist, hast du Anspruch auf Erstattung der **Abschleppkosten** zur nächstgelegenen geeigneten Werkstatt – bei aufwändigeren Konstellationen (Bergung von der Fahrbahn, Einsatz von Spezialgerät, Krananbringung) der höheren **Bergungskosten**. Während dein Fahrzeug auf das Sachverständigen-Gutachten oder die Reparatur-Freigabe wartet, sind außerdem **Standkosten** der Werkstatt erstattbar – typisch 15–30 € pro Tag. Maßgeblich ist der **ortsübliche Tarif** und die Angemessenheit der konkreten Maßnahmen – der gegnerische Haftpflichtversicherer trägt nach § 249 BGB die volle Erstattung.
+Wenn Ihr Fahrzeug nach Unfall nicht mehr fahrtauglich oder verkehrssicher ist, haben Sie Anspruch auf Erstattung der **Abschleppkosten** zur nächstgelegenen geeigneten Werkstatt – bei aufwändigeren Konstellationen (Bergung von der Fahrbahn, Einsatz von Spezialgerät, Krananbringung) der höheren **Bergungskosten**. Während Ihr Fahrzeug auf das Sachverständigen-Gutachten oder die Reparatur-Freigabe wartet, sind außerdem **Standkosten** der Werkstatt erstattbar – typisch 15–30 € pro Tag. Maßgeblich ist der **ortsübliche Tarif** und die Angemessenheit der konkreten Maßnahmen – der gegnerische Haftpflichtversicherer trägt nach § 249 BGB die volle Erstattung.
 
 ## Die fünf Schlüsselzahlen
 
@@ -89,11 +89,11 @@ Ortsüblicher Tarif als Maßstab. Bei extrem hohen Rechnungen (z. B. nächtliche
 
 > *„Standkosten nicht erforderlich – Sie hätten schneller entscheiden müssen."*
 
-Bei ausstehendem Gutachten oder Versicherer-Klärung sind Standkosten erstattbar – du kannst nicht entscheiden, bevor die Bewertung steht.
+Bei ausstehendem Gutachten oder Versicherer-Klärung sind Standkosten erstattbar – Sie können nicht entscheiden, bevor die Bewertung steht.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Abschlepp-Rechnung sofort an den Versicherer einreichen – Werkstatt-Rechnung enthält oft Standkosten in der Pauschal-Position.
@@ -133,7 +133,7 @@ Nein – in der akuten Unfall-Situation gilt die Verhältnismäßigkeit. Schaden
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

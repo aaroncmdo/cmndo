@@ -36,7 +36,7 @@ meta_description: "„Werkstatt aus unserem Partner-Netz“? Warum Sie die Werks
 
 # „Werkstatt aus unserem Partner-Netz" – Decoder
 
-> **Kurz erklärt:** Versicherer-Empfehlungen von Partner-Werkstätten („Premium-Partner-Netz", „Kooperations-Werkstatt") sind eine der häufigsten Kürzungs-Strategien: Pauschal-Konditionen mit niedrigeren Stundensätzen, Identteile statt Original-Ersatzteilen, kein Markenwerkstatt-Recht. Nach ständiger BGH-Rechtsprechung hast du **freie Werkstattwahl** – bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie sogar **Anspruch auf Markenwerkstatt-Reparatur einschließlich Original-Ersatzteilen und Marken-Stundensätzen**.
+> **Kurz erklärt:** Versicherer-Empfehlungen von Partner-Werkstätten („Premium-Partner-Netz", „Kooperations-Werkstatt") sind eine der häufigsten Kürzungs-Strategien: Pauschal-Konditionen mit niedrigeren Stundensätzen, Identteile statt Original-Ersatzteilen, kein Markenwerkstatt-Recht. Nach ständiger BGH-Rechtsprechung haben Sie **freie Werkstattwahl** – bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie sogar **Anspruch auf Markenwerkstatt-Reparatur einschließlich Original-Ersatzteilen und Marken-Stundensätzen**.
 
 ## Auch bekannt als
 
@@ -44,7 +44,7 @@ Werkstattbindung · Werkstatt-Verweisung · Partner-Werkstatt · Premium-Werksta
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -60,7 +60,7 @@ Drei Merkmale, die fast immer dabei sind:
 
 - **Empfehlung als Service verpackt** („zur Beschleunigung", „mit Hol-Bring-Service")
 - **Implizite Drohung** mit Mehrkosten bei Eigen-Wahl
-- **Kein Hinweis auf dein Recht** zur freien Werkstattwahl
+- **Kein Hinweis auf Ihr Recht** zur freien Werkstattwahl
 
 ---
 
@@ -70,20 +70,20 @@ Drei Merkmale, die fast immer dabei sind:
 Versicherer schließen Rahmenverträge mit ausgewählten Werkstätten – niedrigere Stundensätze, festgelegte Ersatzteil-Konditionen, oft Identteile (gleichwertige Nachbauteile) statt Original-Ersatzteilen. Differenz zur Markenwerkstatt-Rechnung: typischerweise **15–30 %**.
 
 ### 2. Markenwerkstatt-Recht umgehen
-Die BGH-Linie schützt deinen Anspruch auf Markenwerkstatt-Reparatur bei jungen oder lückenlos markengewarteten Fahrzeugen. Wer auf die Versicherer-Empfehlung eingeht, verzichtet faktisch auf dieses Recht – auch wenn er es kannte.
+Die BGH-Linie schützt Ihren Anspruch auf Markenwerkstatt-Reparatur bei jungen oder lückenlos markengewarteten Fahrzeugen. Wer auf die Versicherer-Empfehlung eingeht, verzichtet faktisch auf dieses Recht – auch wenn er es kannte.
 
 ### 3. Restwert und Wertminderung
-Eine Reparatur in einer Nicht-Markenwerkstatt wirkt sich auf die [merkantile Wertminderung](/haftpflicht/wertminderung) aus – der Folgeschaden bleibt bei dir. Bei jungen Fahrzeugen kann die Differenz mehrere tausend Euro ausmachen.
+Eine Reparatur in einer Nicht-Markenwerkstatt wirkt sich auf die [merkantile Wertminderung](/haftpflicht/wertminderung) aus – der Folgeschaden bleibt bei Ihnen. Bei jungen Fahrzeugen kann die Differenz mehrere tausend Euro ausmachen.
 
 ### 4. Kontrolle über die Reparatur
-In der Partner-Werkstatt hat der Versicherer Einblick in den Reparaturverlauf, kann Reparaturmaßnahmen mitsteuern und potenzielle Diskussionen über Reparatur-Notwendigkeit direkt mit der Werkstatt klären – alles zu deinem Nachteil.
+In der Partner-Werkstatt hat der Versicherer Einblick in den Reparaturverlauf, kann Reparaturmaßnahmen mitsteuern und potenzielle Diskussionen über Reparatur-Notwendigkeit direkt mit der Werkstatt klären – alles zu Ihrem Nachteil.
 
 ---
 
 ## Was die Rechtsprechung dazu sagt
 
 ### Grundsatz: Freie Werkstattwahl
-Der BGH stellt in ständiger Rechtsprechung klar: Geschädigte haben **freie Werkstattwahl**. Die Empfehlung des Versicherers ist **keine Pflicht** – du darfst sie ablehnen, ohne dass der Versicherer das Recht hat, Erstattungen zu kürzen.
+Der BGH stellt in ständiger Rechtsprechung klar: Geschädigte haben **freie Werkstattwahl**. Die Empfehlung des Versicherers ist **keine Pflicht** – Sie dürfen sie ablehnen, ohne dass der Versicherer das Recht hat, Erstattungen zu kürzen.
 
 ### Markenwerkstatt-Recht – die Schlüssel-Linie
 Bei zwei Konstellationen besteht **Anspruch auf Reparatur in der markengebundenen Werkstatt** (BGH, Urteil vom 20.10.2009, VI ZR 53/09 – sog. „Porsche-Urteil" und Folgerechtsprechung):
@@ -97,14 +97,14 @@ In diesen Konstellationen gelten:
 - **Verbringungskosten und UPE-Aufschläge** der Markenwerkstatt erstattbar
 
 ### Reichweite des Anspruchs
-Selbst wenn die Markenwerkstatt-Reparatur teurer ist als das Partner-Werkstatt-Angebot, sind die **vollen Mehrkosten erstattbar** – solange du das Markenwerkstatt-Recht hast.
+Selbst wenn die Markenwerkstatt-Reparatur teurer ist als das Partner-Werkstatt-Angebot, sind die **vollen Mehrkosten erstattbar** – solange Sie das Markenwerkstatt-Recht haben.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Du entscheidest, wo dein Auto repariert wird – nicht der Versicherer. Bei jungen oder markengewarteten Fahrzeugen: Markenwerkstatt unbedingt nutzen.
+Sie entscheiden, wo Ihr Auto repariert wird – nicht der Versicherer. Bei jungen oder markengewarteten Fahrzeugen: Markenwerkstatt unbedingt nutzen.
 
 ### 🛠 Vier Schritte
 
@@ -163,41 +163,41 @@ Mit freundlichen Grüßen
 ### Reaktion A – Mehrkosten-Drohung
 > *„Die Mehrkosten zur Markenwerkstatt müssen Sie selbst tragen."*
 
-**Deine Antwort:** Nicht akzeptieren. Bei nachgewiesenem Markenwerkstatt-Anspruch sind die Mehrkosten vollständig zu erstatten. BGH-Linie schriftlich zitieren.
+**Ihre Antwort:** Nicht akzeptieren. Bei nachgewiesenem Markenwerkstatt-Anspruch sind die Mehrkosten vollständig zu erstatten. BGH-Linie schriftlich zitieren.
 
 ### Reaktion B – „Fachgerecht reicht"
 > *„Eine fachgerechte Reparatur in unserer Partner-Werkstatt erfüllt alle Anforderungen."*
 
-**Deine Antwort:** Markenwerkstatt-Anspruch besteht trotzdem. „Fachgerecht" ist nicht das gleiche wie „markenwerkstatt-konform" – Original-Ersatzteile und Marken-Stundensätze sind Teil des Anspruchs.
+**Ihre Antwort:** Markenwerkstatt-Anspruch besteht trotzdem. „Fachgerecht" ist nicht das gleiche wie „markenwerkstatt-konform" – Original-Ersatzteile und Marken-Stundensätze sind Teil des Anspruchs.
 
 ### Reaktion C – Identteile-Argument
 > *„Wir erstatten nur Identteile-Preise – Original-Ersatzteile sind nicht erforderlich."*
 
-**Deine Antwort:** Bei Markenwerkstatt-Anspruch sind Original-Ersatzteile maßgeblich. BGH-Linie eindeutig.
+**Ihre Antwort:** Bei Markenwerkstatt-Anspruch sind Original-Ersatzteile maßgeblich. BGH-Linie eindeutig.
 
 ### Reaktion D – Stundensatz-Kürzung auf Schwacke-Durchschnitt
 > *„Der Markenwerkstatt-Stundensatz ist überhöht – wir erstatten nur den regionalen Durchschnitt nach Schwacke."*
 
-**Deine Antwort:** Bei Markenwerkstatt-Anspruch ist der „übliche" Stundensatz der Markenwerkstatt-Satz, nicht der regional gemittelte Schwacke-Wert. Kürzung schriftlich zurückweisen.
+**Ihre Antwort:** Bei Markenwerkstatt-Anspruch ist der „übliche" Stundensatz der Markenwerkstatt-Satz, nicht der regional gemittelte Schwacke-Wert. Kürzung schriftlich zurückweisen.
 
 ---
 
 ## Häufige Fragen
 
 **Darf die Versicherung mir die Werkstatt vorschreiben?**
-Nein. Du hast nach ständiger BGH-Rechtsprechung freie Werkstattwahl. Die Versicherer-Empfehlung ist eine Empfehlung, keine Pflicht.
+Nein. Sie haben nach ständiger BGH-Rechtsprechung freie Werkstattwahl. Die Versicherer-Empfehlung ist eine Empfehlung, keine Pflicht.
 
 **Wann habe ich Anspruch auf Markenwerkstatt-Reparatur?**
 Bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie (BGH VI ZR 53/09). In diesen Konstellationen erstattet die Versicherung die vollen Markenwerkstatt-Kosten.
 
 **Was sind Identteile vs. Original-Ersatzteile?**
-Original-Ersatzteile stammen direkt vom Hersteller und werden in der Markenwerkstatt verbaut. Identteile sind gleichwertige Nachbauteile (oft billiger). Bei Markenwerkstatt-Anspruch hast du Anspruch auf Original-Ersatzteile.
+Original-Ersatzteile stammen direkt vom Hersteller und werden in der Markenwerkstatt verbaut. Identteile sind gleichwertige Nachbauteile (oft billiger). Bei Markenwerkstatt-Anspruch haben Sie Anspruch auf Original-Ersatzteile.
 
 **Was kostet mich die Markenwerkstatt-Reparatur?**
 Bei Anspruch: nichts – die Markenwerkstatt-Kosten werden voll vom Versicherer getragen. Selbst die Mehrkosten gegenüber Partner-Werkstätten.
 
 **Was, wenn mein Auto älter als 3 Jahre ist?**
-Bei lückenloser Markenwerkstatt-Wartung trotzdem Anspruch. Ohne Wartungshistorie: freie Werkstattwahl ja, Markenwerkstatt-Recht nein. Trotzdem: Partner-Werkstatt nicht zwingend – du wählst frei.
+Bei lückenloser Markenwerkstatt-Wartung trotzdem Anspruch. Ohne Wartungshistorie: freie Werkstattwahl ja, Markenwerkstatt-Recht nein. Trotzdem: Partner-Werkstatt nicht zwingend – Sie wählen frei.
 
 **Wie wirkt sich die Werkstattwahl auf die Wertminderung aus?**
 Reparatur in einer Nicht-Markenwerkstatt führt typischerweise zu höherer merkantiler [Wertminderung](/haftpflicht/wertminderung). Bei jungen Fahrzeugen kann das mehrere tausend Euro Differenz bedeuten.
@@ -214,7 +214,7 @@ Reparatur in einer Nicht-Markenwerkstatt führt typischerweise zu höherer merka
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Werkstattbindung ist eine der häufigsten Versicherer-Strategien und gleichzeitig eine der leichtesten zu kontern – die BGH-Linie ist klar. Spezialisierte Verkehrsrechts-Anwälte setzen den Markenwerkstatt-Anspruch routiniert durch, Anwaltskosten zahlt der Versicherer.
 
@@ -255,7 +255,7 @@ Werkstattbindung ist eine der häufigsten Versicherer-Strategien und gleichzeiti
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Darf die Versicherung mir die Werkstatt vorschreiben?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Du hast nach ständiger BGH-Rechtsprechung freie Werkstattwahl. Die Versicherer-Empfehlung ist eine Empfehlung, keine Pflicht."}},
+        {"@type": "Question", "name": "Darf die Versicherung mir die Werkstatt vorschreiben?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Sie haben nach ständiger BGH-Rechtsprechung freie Werkstattwahl. Die Versicherer-Empfehlung ist eine Empfehlung, keine Pflicht."}},
         {"@type": "Question", "name": "Wann habe ich Anspruch auf Markenwerkstatt-Reparatur?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie (BGH VI ZR 53/09). In diesen Konstellationen erstattet die Versicherung die vollen Markenwerkstatt-Kosten."}},
         {"@type": "Question", "name": "Was kostet mich die Markenwerkstatt-Reparatur?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Anspruch nichts — die Markenwerkstatt-Kosten einschließlich Original-Ersatzteilen und Marken-Stundensätzen werden voll vom Versicherer getragen."}}
       ]

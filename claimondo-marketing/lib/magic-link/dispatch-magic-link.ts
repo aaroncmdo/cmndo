@@ -54,17 +54,20 @@ export function buildWhatsAppText(opts: {
   vorname: string | null
   flowUrl: string
 }): string {
-  const greet = opts.vorname ? `Hi ${opts.vorname}` : 'Hi'
+  // ⚠ „Hallo", nicht „Hi". Seit der Umstellung auf die Sie-Anrede (Aaron 06.09.) stand hier
+  // „Hi Ernest, danke für Ihre Schadenmeldung" — vertrauliche Begrüßung, förmlicher Rest.
+  // Ein Stilbruch im ersten Satz der ersten Nachricht, die ein Geschädigter von uns bekommt.
+  const greet = opts.vorname ? `Hallo ${opts.vorname}` : 'Hallo'
   return [
-    `${greet}, danke für deine Schadenmeldung bei Claimondo.`,
+    `${greet}, danke für Ihre Schadenmeldung bei Claimondo.`,
     '',
-    'Hier ist dein persönlicher Link (gültig 72 Stunden):',
+    'Hier ist Ihr persönlicher Link (gültig 72 Stunden):',
     opts.flowUrl,
     '',
-    'Dort unterschreibst du Vollmacht und Sicherungsabtretung — damit dürfen wir den ' +
-      'Schaden für dich abwickeln. Danach siehst du in deinem Portal jederzeit, wie es weitergeht.',
+    'Dort unterschreiben Sie Vollmacht und Sicherungsabtretung — damit dürfen wir den ' +
+      'Schaden für Sie abwickeln. Danach sehen Sie in Ihrem Portal jederzeit, wie es weitergeht.',
     '',
-    'Unser Service ist für dich kostenlos.',
+    'Unser Service ist für Sie kostenlos.',
   ].join('\n')
 }
 

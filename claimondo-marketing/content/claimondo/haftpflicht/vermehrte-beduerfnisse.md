@@ -35,7 +35,7 @@ meta_description: "Vermehrte Bedürfnisse nach §843 BGB: laufende Mehrkosten be
 
 # Vermehrte Bedürfnisse nach § 843 BGB – laufende Mehrkosten bei Dauer-Folgen
 
-> **Kurz erklärt:** Vermehrte Bedürfnisse sind alle laufenden Mehrkosten, die du als Folge dauerhafter Verletzungen lebenslang oder über einen längeren Zeitraum hast – z. B. Medikamente, Therapien, Pflege, Assistenz, behindertengerechter Umbau, spezielle Mobilität. Anspruch nach § 843 BGB als **Geldrente** oder Kapitalisierung. Hoch komplexer Posten, spezialisierte Anwalts-Vertretung zwingend.
+> **Kurz erklärt:** Vermehrte Bedürfnisse sind alle laufenden Mehrkosten, die Sie als Folge dauerhafter Verletzungen lebenslang oder über einen längeren Zeitraum haben – z. B. Medikamente, Therapien, Pflege, Assistenz, behindertengerechter Umbau, spezielle Mobilität. Anspruch nach § 843 BGB als **Geldrente** oder Kapitalisierung. Hoch komplexer Posten, spezialisierte Anwalts-Vertretung zwingend.
 
 ## Auch bekannt als
 
@@ -49,7 +49,7 @@ Vermehrte Bedürfnisse sind laufende lebenslange oder mehrjährige Mehrkosten al
 
 ## In drei Sätzen erklärt
 
-Wenn du nach Verkehrsunfall dauerhaft eingeschränkt bist, hast du nach § 843 BGB Anspruch auf eine **Geldrente** für die mit deiner Verletzungs-Folge dauerhaft verbundenen Mehrkosten – von der medikamentösen Dauer-Therapie über persönliche Assistenz bis zum behindertengerechten Umbau von Wohnung und Fahrzeug. Die Rente wird **kapitalisiert** oder als laufende Zahlung gewährt; die Höhe ergibt sich aus den **konkreten Bedürfnis-Posten** mit ihrer jeweiligen Jahres-Summe, multipliziert mit der voraussichtlichen Bestands-Dauer. Berechnung ist hoch komplex (Versicherungs-Mathematik, Lebenserwartung, Inflations-Faktor) – bei Polytrauma, schwerer Behinderung, Querschnittlähmung gehen Gesamt-Ansprüche schnell in den **sechsstelligen Bereich**.
+Wenn Sie nach Verkehrsunfall dauerhaft eingeschränkt sind, haben Sie nach § 843 BGB Anspruch auf eine **Geldrente** für die mit Ihrer Verletzungs-Folge dauerhaft verbundenen Mehrkosten – von der medikamentösen Dauer-Therapie über persönliche Assistenz bis zum behindertengerechten Umbau von Wohnung und Fahrzeug. Die Rente wird **kapitalisiert** oder als laufende Zahlung gewährt; die Höhe ergibt sich aus den **konkreten Bedürfnis-Posten** mit ihrer jeweiligen Jahres-Summe, multipliziert mit der voraussichtlichen Bestands-Dauer. Berechnung ist hoch komplex (Versicherungs-Mathematik, Lebenserwartung, Inflations-Faktor) – bei Polytrauma, schwerer Behinderung, Querschnittlähmung gehen Gesamt-Ansprüche schnell in den **sechsstelligen Bereich**.
 
 ## Die fünf Schlüsselzahlen
 
@@ -109,7 +109,7 @@ Häufig wird kapitalisiert – der Vergleich enthält dann einen einmaligen Geld
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Vermehrte Bedürfnisse sind **kein DIY**. Komplexe Materie, spezialisierter Verkehrsrechts- oder Sozialrechts-Anwalt zwingend.
@@ -155,7 +155,7 @@ Bei Geldrente: Anpassung möglich. Bei Kapitalisierung: nur mit Spätfolge-Vorbe
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Vermehrte Bedürfnisse sind der größte Einzel-Posten bei schweren Verletzungen – Gesamt-Ansprüche schnell sechsstellig. Spezialisierter Anwalt zwingend.
 

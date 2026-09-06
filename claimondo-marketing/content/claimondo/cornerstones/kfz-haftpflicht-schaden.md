@@ -22,19 +22,19 @@ meta_description: "Kfz-Haftpflichtschaden – das Handbuch: Ihre Ansprüche nach
 
 # Kfz-Haftpflichtschaden – das vollständige Handbuch für Geschädigte
 
-> **Kurz erklärt:** Wer durch einen unverschuldeten Verkehrsunfall geschädigt wird, hat in Deutschland sehr umfangreiche Ansprüche – von Reparaturkosten und Wertminderung über Schmerzensgeld und Verdienstausfall bis hin zu lebenslangen Geldrenten bei Schwerverletzungen. Die Anwaltskosten zahlt der gegnerische Versicherer (BGH VI ZR 235/13), du gehst kein finanzielles Risiko ein. Dieses Handbuch führt dich systematisch durch alle Anspruchsarten, Fristen, typischen Konflikte mit der Versicherung und die richtigen Antworten auf jeden Versicherer-Brief.
+> **Kurz erklärt:** Wer durch einen unverschuldeten Verkehrsunfall geschädigt wird, hat in Deutschland sehr umfangreiche Ansprüche – von Reparaturkosten und Wertminderung über Schmerzensgeld und Verdienstausfall bis hin zu lebenslangen Geldrenten bei Schwerverletzungen. Die Anwaltskosten zahlt der gegnerische Versicherer (BGH VI ZR 235/13), Sie gehen kein finanzielles Risiko ein. Dieses Handbuch führt Sie systematisch durch alle Anspruchsarten, Fristen, typischen Konflikte mit der Versicherung und die richtigen Antworten auf jeden Versicherer-Brief.
 
 ## Auch bekannt als
 
 Schadensregulierung Kfz-Haftpflicht · Verkehrsunfall-Ansprüche · Schadensersatz Autounfall · Haftpflichtschaden-Handbuch
 
-**Gerade erst passiert?** Wenn du unmittelbar nach dem Unfall die ersten Schritte suchst, führt dich die Schritt-für-Schritt-Anleitung [Unfall – was tun als Geschädigter?](/unfall-was-tun-als-geschaedigter) sicher durch die ersten 48 Stunden. Dieses Handbuch erklärt dir anschließend deine Ansprüche im Detail.
+**Gerade erst passiert?** Wenn Sie unmittelbar nach dem Unfall die ersten Schritte suchen, führt sich die Schritt-für-Schritt-Anleitung [Unfall – was tun als Geschädigter?](/unfall-was-tun-als-geschaedigter) sicher durch die ersten 48 Stunden. Dieses Handbuch erklärt Ihnen anschließend Ihre Ansprüche im Detail.
 
 ---
 
 ## In einem Satz erklärt
 
-Bei unverschuldetem Verkehrsunfall stehen dir Schadensersatz für Auto, Personenschaden und Folgekosten zu – die gegnerische Haftpflichtversicherung zahlt vollständig, Anwaltskosten inklusive.
+Bei unverschuldetem Verkehrsunfall stehen Ihnen Schadensersatz für Auto, Personenschaden und Folgekosten zu – die gegnerische Haftpflichtversicherung zahlt vollständig, Anwaltskosten inklusive.
 
 ## In drei Sätzen erklärt
 
@@ -59,8 +59,8 @@ Das deutsche Schadensersatzrecht gibt Verkehrsunfall-Geschädigten ein umfassend
 5. [Fristen – Verzug, Verjährung, Anerkenntnis](#fristen)
 6. [Standard-Unfall-Szenarien und ihre Quoten](#szenarien)
 7. [Komplexe Konstellationen](#komplex)
-8. [Wie die Versicherung typisch agiert – und wie du dagegen vorgehst](#decoder)
-9. [Was du jetzt machst – Schritt-für-Schritt](#aktionsplan)
+8. [Wie die Versicherung typisch agiert – und wie Sie dagegen vorgehen](#decoder)
+9. [Was Sie jetzt machen – Schritt-für-Schritt](#aktionsplan)
 10. [Wann Anwalt zwingend](#anwalt)
 11. [Häufige Fragen](#faq)
 12. [Quellen-Verzeichnis](#quellen)
@@ -68,7 +68,6 @@ Das deutsche Schadensersatzrecht gibt Verkehrsunfall-Geschädigten ein umfassend
 ---
 
 ## 1. Die ersten 72 Stunden – Sofort-Maßnahmen {#akut}
-In den ersten Stunden und Tagen nach dem Unfall entscheidet sich, wie stark deine spätere Verhandlungsposition ist. Adrenalin maskiert Schmerz, Beweise verlieren schnell ihre Beweiskraft. Folgende Schritte sind Pflicht:
 
 ### Direkt am Unfallort
 1. **Sicherheit**: Warnblinker, Warndreieck, Verletzte versorgen
@@ -116,12 +115,12 @@ Sind mehrere Kfz beteiligt, erfolgt die Haftung nach Verursachungs-Anteilen – 
 → [Detail: § 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17)
 
 ### Der entscheidende Hebel: Anscheinsbeweis
-In Standard-Konstellationen ([Auffahrunfall](/haftpflicht/auffahrunfall), [Vorfahrt](/haftpflicht/vorfahrt-rechts-vor-links), [Rotlicht](/haftpflicht/rotlicht)) spricht der **Anscheinsbeweis automatisch zu deinen Gunsten** – du musst nichts beweisen, der Gegner muss erschüttern. In den meisten typischen Verkehrsunfall-Konstellationen ist das die rechtliche Schlüssel-Information.
+In Standard-Konstellationen ([Auffahrunfall](/haftpflicht/auffahrunfall), [Vorfahrt](/haftpflicht/vorfahrt-rechts-vor-links), [Rotlicht](/haftpflicht/rotlicht)) spricht der **Anscheinsbeweis automatisch zu Ihren Gunsten** – Sie müssen nichts beweisen, der Gegner muss erschüttern. In den meisten typischen Verkehrsunfall-Konstellationen ist das die rechtliche Schlüssel-Information.
 
 → [Detail: Anscheinsbeweis](/haftpflicht/anscheinsbeweis)
 
 ### Direktanspruch gegen die Versicherung – § 115 VVG
-Du kommunizierst **direkt** mit der Haftpflichtversicherung des Schädigers, nicht über den Halter. Praktisch wichtigste Vorschrift für die Schadensabwicklung.
+Sie kommuniziern **direkt** mit der Haftpflichtversicherung des Schädigers, nicht über den Halter. Praktisch wichtigste Vorschrift für die Schadensabwicklung.
 
 ---
 
@@ -145,7 +144,7 @@ Geschädigter ist **jede Person**, deren Körper, Gesundheit, Eigentum oder gesc
 - **[Schockschaden](/haftpflicht/schockschaden-rechtlich)** – bei eigener psychischer Erkrankung der Angehörigen
 
 ### Sozialträger-Regress
-Die Krankenkasse, Berufsgenossenschaft oder Rentenversicherung holen sich ihre Leistungen automatisch zurück – du behältst nur die nicht-abgedeckten Ansprüche.
+Die Krankenkasse, Berufsgenossenschaft oder Rentenversicherung holen sich ihre Leistungen automatisch zurück – Sie behalten nur die nicht-abgedeckten Ansprüche.
 
 → [Detail: Sozialträger-Regress § 116 SGB X](/haftpflicht/sozialtraeger-regress)
 
@@ -202,14 +201,13 @@ Bei klarer Haftung und vollständigen Unterlagen muss der Versicherer **innerhal
 → [Detail: § 195 BGB Verjährung](/haftpflicht/verjaehrung-bgb195)
 
 ### Anerkenntnis und Vergleich – wichtigste juristische Unterscheidung
-Anerkenntnis (§ 212 BGB) startet die Verjährung neu – gut für dich. Vergleich (§ 779 BGB) beendet den Streit endgültig – **niemals ohne Spätfolge-Vorbehalt** unterschreiben.
+Anerkenntnis (§ 212 BGB) startet die Verjährung neu – gut für Sie. Vergleich (§ 779 BGB) beendet den Streit endgültig – **niemals ohne Spätfolge-Vorbehalt** unterschreiben.
 
 → [Detail: § 212 BGB Anerkenntnis / § 779 BGB Vergleich](/haftpflicht/anerkenntnis-bgb212)
 
 ---
 
 ## 6. Standard-Unfall-Szenarien und ihre Quoten {#szenarien}
-In den allermeisten Verkehrsunfall-Konstellationen ist die Quote durch Anscheinsbeweis bereits klar – du musst nicht jedes Mal neu beweisen.
 
 ### Klare Anscheinsbeweis-Konstellationen (100 : 0)
 - [Auffahrunfall](/haftpflicht/auffahrunfall) – Anscheinsbeweis gegen Auffahrenden
@@ -246,7 +244,7 @@ Manche Unfälle weichen vom Standard ab und brauchen Spezial-Wissen:
 
 ---
 
-## 8. Wie die Versicherung typisch agiert – und wie du dagegen vorgehst {#decoder}
+## 8. Wie die Versicherung typisch agiert – und wie Sie dagegen vorgehen {#decoder}
 Versicherer arbeiten mit standardisierten Brief-Vorlagen und Strategien. Für jede haben wir einen Decoder mit konkreter Antwort-Vorlage:
 
 | Versicherer-Brief / Strategie | Antwort-Decoder |
@@ -266,7 +264,7 @@ Versicherer arbeiten mit standardisierten Brief-Vorlagen und Strategien. Für je
 
 ---
 
-## 9. Was du jetzt machst – Schritt-für-Schritt {#aktionsplan}
+## 9. Was Sie jetzt machen – Schritt-für-Schritt {#aktionsplan}
 ### Phase 1: Akut (0–72 Stunden)
 1. Polizei, Foto-Dokumentation, Zeugen-Adressen sichern
 2. Ärztliche Vorstellung (auch wenn „okay" gefühlt)
@@ -311,7 +309,7 @@ Versicherer arbeiten mit standardisierten Brief-Vorlagen und Strategien. Für je
 - **Vollständig regulierter Schaden** ohne Kürzungen
 
 ### Kosten
-Bei unverschuldetem Unfall: **0 €** für dich. Anwaltskosten zahlt der gegnerische Versicherer als Verzugsschaden (BGH VI ZR 235/13).
+Bei unverschuldetem Unfall: **0 €** für Sie. Anwaltskosten zahlt der gegnerische Versicherer als Verzugsschaden (BGH VI ZR 235/13).
 
 → [Detail: Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung)
 
@@ -337,10 +335,10 @@ Nein. Freie Werkstattwahl. Bei Markenwerkstatt-Anspruch (Auto < 3 Jahre oder lü
 3 Jahre ab Ende des Jahres mit Kenntnis von Schaden und Schädiger. Bei Personenschäden 30-Jahre-Höchstfrist.
 
 **7. Was bedeutet die 130 %-Regel?**
-Reparaturkosten bis 130 % des Wiederbeschaffungswerts erstattbar – wenn du das Fahrzeug behältst und sach- und fachgerecht reparieren lässt (BGH VI ZR 70/04).
+Reparaturkosten bis 130 % des Wiederbeschaffungswerts erstattbar – wenn Sie das Fahrzeug behalten und sach- und fachgerecht reparieren lassen (BGH VI ZR 70/04).
 
 **8. Bekomme ich Nutzungsausfall auch ohne Mietwagen?**
-Ja. Pauschalierte Sanden-Danner-Tagessätze 27–175 €/Tag – Eigennutzungs-Vermutung greift, du musst keine Fahrten beweisen.
+Ja. Pauschalierte Sanden-Danner-Tagessätze 27–175 €/Tag – Eigennutzungs-Vermutung greift, Sie müssen keine Fahrten beweisen.
 
 **9. Sind Spätfolgen nach Vergleich noch möglich?**
 Nur mit ausdrücklichem Spätfolge-Vorbehalt im Vergleichstext. Ohne Vorbehalt: alle Spätfolgen erledigt.
@@ -355,10 +353,10 @@ Aus der Kasko-Versicherung (Teil- oder Vollkasko), nicht aus der Haftpflicht. Es
 Verkehrsopferhilfe (VOH) tritt ein, wenn der Verursacher unbekannt oder unversichert ist. Antrag binnen 3 Jahren.
 
 **13. Was passiert mit Lohnfortzahlung und Krankengeld?**
-Krankenkasse und Arbeitgeber machen direkten Regress beim Versicherer (§ 116 SGB X, § 6 EFZG). Du forderst nur die nicht-abgedeckte Differenz (Netto minus Krankengeld) plus Schmerzensgeld direkt.
+Krankenkasse und Arbeitgeber machen direkten Regress beim Versicherer (§ 116 SGB X, § 6 EFZG). Sie fordern nur die nicht-abgedeckte Differenz (Netto minus Krankengeld) plus Schmerzensgeld direkt.
 
 **14. Kann ich gegen mein eigenes Familienmitglied klagen?**
-Du klagst gegen dessen Haftpflichtversicherung, nicht persönlich. Die Versicherung zahlt objektiv, ohne persönlichen Konflikt.
+Sie klagen gegen dessen Haftpflichtversicherung, nicht persönlich. Die Versicherung zahlt objektiv, ohne persönlichen Konflikt.
 
 **15. Was ist Hinterbliebenengeld?**
 Pauschale Entschädigung 5.000–15.000 € für nahe Angehörige bei tödlichem Unfall (§ 844 Abs. 3 BGB). Eingeführt 2017, parallel zu Schockschaden und Unterhaltsschaden.
@@ -424,9 +422,9 @@ Pauschale Entschädigung 5.000–15.000 € für nahe Angehörige bei tödlichem
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Bei jedem unverschuldeten Verkehrsunfall gilt: Anwalt ist dein Hebel, Anwaltskosten kosten dich nichts. Wer mit einer spezialisierten Verkehrsrechts-Kanzlei verhandelt, holt statistisch 20–80 % mehr aus der Versicherung als ohne – gerade bei Schmerzensgeld, Wertminderung und Folgeschäden.
+Bei jedem unverschuldeten Verkehrsunfall gilt: Anwalt ist Ihr Hebel, Anwaltskosten kosten Sie nichts. Wer mit einer spezialisierten Verkehrsrechts-Kanzlei verhandelt, holt statistisch 20–80 % mehr aus der Versicherung als ohne – gerade bei Schmerzensgeld, Wertminderung und Folgeschäden.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

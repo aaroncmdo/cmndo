@@ -33,7 +33,7 @@ meta_description: "Verjährung von Unfall-Ansprüchen: 3 Jahre nach §195 BGB ab
 
 # Verjährung von Verkehrsunfall-Ansprüchen nach § 195 BGB
 
-> **Kurz erklärt:** Schadensersatz-Ansprüche aus einem Verkehrsunfall verjähren nach § 195 BGB grundsätzlich in **3 Jahren** – beginnend mit dem **Ende des Jahres**, in dem der Anspruch entstanden ist und du von Schaden und Schädiger Kenntnis hattest (§ 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen gilt eine **30-Jahre-Höchstfrist**, bei verdeckten Sachschäden 10 Jahre. Verzögert die Versicherung absichtlich, läuft die Frist gegen dich – aber Verhandlungen, Anerkenntnis und Klage können die Verjährung hemmen oder neu starten.
+> **Kurz erklärt:** Schadensersatz-Ansprüche aus einem Verkehrsunfall verjähren nach § 195 BGB grundsätzlich in **3 Jahren** – beginnend mit dem **Ende des Jahres**, in dem der Anspruch entstanden ist und Sie von Schaden und Schädiger Kenntnis hatten (§ 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen gilt eine **30-Jahre-Höchstfrist**, bei verdeckten Sachschäden 10 Jahre. Verzögert die Versicherung absichtlich, läuft die Frist gegen Sie – aber Verhandlungen, Anerkenntnis und Klage können die Verjährung hemmen oder neu starten.
 
 ## Auch bekannt als
 
@@ -43,11 +43,11 @@ Anspruchsverjährung · Regelverjährung · 3-Jahres-Frist · Verjährungsfrist 
 
 ## In einem Satz erklärt
 
-Verjährung nach § 195 BGB bedeutet: Ohne aktive Geltendmachung verlierst du nach 3 Jahren das Recht, deinen Anspruch durchzusetzen.
+Verjährung nach § 195 BGB bedeutet: Ohne aktive Geltendmachung verlieren Sie nach 3 Jahren das Recht, Ihren Anspruch durchzusetzen.
 
 ## In drei Sätzen erklärt
 
-Die regelmäßige Verjährungsfrist von **3 Jahren** läuft nach § 199 Abs. 1 BGB ab dem **Ende des Jahres**, in dem du Schaden und Schädiger erkannt hast – nicht ab dem Unfalltag. Bei Personenschäden mit nicht erkennbaren Spätfolgen schützt § 199 Abs. 2 BGB durch eine **30-Jahres-Höchstfrist**, bei verdeckten Sachschäden gilt § 199 Abs. 3 BGB mit **10 Jahren**. Verjährung lässt sich durch Verhandlungen hemmen und durch ein [Anerkenntnis des Versicherers](/haftpflicht/anerkenntnis-bgb212) komplett neu starten – sie ist also kein passiver Countdown, sondern ein aktiv steuerbares Risiko.
+Die regelmäßige Verjährungsfrist von **3 Jahren** läuft nach § 199 Abs. 1 BGB ab dem **Ende des Jahres**, in dem Sie Schaden und Schädiger erkannt haben – nicht ab dem Unfalltag. Bei Personenschäden mit nicht erkennbaren Spätfolgen schützt § 199 Abs. 2 BGB durch eine **30-Jahres-Höchstfrist**, bei verdeckten Sachschäden gilt § 199 Abs. 3 BGB mit **10 Jahren**. Verjährung lässt sich durch Verhandlungen hemmen und durch ein [Anerkenntnis des Versicherers](/haftpflicht/anerkenntnis-bgb212) komplett neu starten – sie ist also kein passiver Countdown, sondern ein aktiv steuerbares Risiko.
 
 ## Die fünf Schlüsselzahlen
 
@@ -107,7 +107,7 @@ Die Verjährung ist nicht **gerichtlich von Amts wegen** zu beachten – der Ver
 ## Wie sich Verjährung hemmen oder neu starten lässt
 
 ### Hemmung durch Verhandlungen (§ 203 BGB)
-Solange du mit dem Versicherer in Verhandlungen stehst, ist die Verjährung **gehemmt** – die Zeit läuft nicht. Nach Verhandlungs-Abbruch hast du noch mindestens 3 weitere Monate zur Klage-Erhebung. Praktisch bedeutet das: Aktive Korrespondenz mit dem Versicherer schützt vor Verjährung – Schweigen nicht.
+Solange Sie mit dem Versicherer in Verhandlungen stehen, ist die Verjährung **gehemmt** – die Zeit läuft nicht. Nach Verhandlungs-Abbruch haben Sie noch mindestens 3 weitere Monate zur Klage-Erhebung. Praktisch bedeutet das: Aktive Korrespondenz mit dem Versicherer schützt vor Verjährung – Schweigen nicht.
 
 ### Hemmung bei Minderjährigen (§ 207 BGB)
 Bei minderjährigen Geschädigten ist die Verjährung bis zum 21. Lebensjahr gehemmt. Praktisch wichtig bei verletzten Kindern als Beifahrer.
@@ -120,10 +120,10 @@ Klage-Erhebung und Mahnbescheid unterbrechen die Verjährung dauerhaft. Nach rec
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Verjährung läuft, ob du daran denkst oder nicht. Versicherer warten teilweise gezielt – wer Verjährung ungenutzt verstreichen lässt, verliert die Forderung vollständig.
+Verjährung läuft, ob Sie daran denken oder nicht. Versicherer warten teilweise gezielt – wer Verjährung ungenutzt verstreichen lässt, verliert die Forderung vollständig.
 
 ### 🛠 Vier Schritte zur Verjährungs-Sicherheit
 
@@ -137,7 +137,7 @@ Wenn nach 24 Monaten noch keine vollständige Regulierung vorliegt, Anwalt prüf
 Ein Online-Mahnbescheid kostet typischerweise 36–80 € (abhängig vom Streitwert) und unterbricht die Verjährung dauerhaft.
 
 **4. Bei Spätfolgen Anwalt für Spätfolge-Vorbehalt einschalten**
-Wenn du ein Vergleichsangebot erhältst, kann ein Spätfolge-Vorbehalt im Vergleich vereinbart werden – damit bleiben spätere unbekannte Folgen anspruchsfähig.
+Wenn Sie ein Vergleichsangebot erhalten, kann ein Spätfolge-Vorbehalt im Vergleich vereinbart werden – damit bleiben spätere unbekannte Folgen anspruchsfähig.
 
 ---
 
@@ -160,13 +160,13 @@ Interne Versicherer-Fristen sind rechtlich nicht bindend. Gesetzliche Verjährun
 ## Häufige Fragen
 
 **Wann verjähren meine Ansprüche aus einem Verkehrsunfall?**
-Regulär 3 Jahre ab Ende des Jahres, in dem du Kenntnis von Schaden und Schädiger hattest (§ 195, § 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen bis zu 30 Jahre, bei verdeckten Sachschäden bis zu 10 Jahre.
+Regulär 3 Jahre ab Ende des Jahres, in dem Sie Kenntnis von Schaden und Schädiger hatten (§ 195, § 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen bis zu 30 Jahre, bei verdeckten Sachschäden bis zu 10 Jahre.
 
 **Beginnt die Frist am Unfalltag?**
-Nein. Sie beginnt am **31. Dezember** des Jahres, in dem der Anspruch entstanden und dir bekannt war. Ein Unfall am 15. März und einer am 15. Dezember haben dieselbe Verjährungs-Endposition.
+Nein. Sie beginnt am **31. Dezember** des Jahres, in dem der Anspruch entstanden und Ihnen bekannt war. Ein Unfall am 15. März und einer am 15. Dezember haben dieselbe Verjährungs-Endposition.
 
 **Was, wenn ich Spätfolgen erst nach Jahren bemerke?**
-Bei Personenschäden bist du durch die 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) geschützt. Die 3-Jahres-Regelfrist beginnt erst mit konkreter Kenntnis der Spätfolge – Vorbehalts-Vereinbarungen im Vergleich sind sinnvoll.
+Bei Personenschäden sind Sie durch die 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) geschützt. Die 3-Jahres-Regelfrist beginnt erst mit konkreter Kenntnis der Spätfolge – Vorbehalts-Vereinbarungen im Vergleich sind sinnvoll.
 
 **Hemmt eine Schadensmeldung die Verjährung?**
 Die bloße Meldung nicht. Aber **aktive Verhandlungen** mit dem Versicherer hemmen die Verjährung nach § 203 BGB – solange ihr ein „Gespräch" führt, läuft die Zeit nicht.
@@ -186,9 +186,9 @@ Mindestens 3 Monate (§ 203 Satz 2 BGB), oft länger, abhängig von der Dauer de
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Schadensregulierung – wer einmal verjährt, hat alles verloren. Spezialisierte Verkehrsrechts-Kanzleien prüfen kostenfrei (bei unverschuldetem Unfall trägt der Versicherer alle Anwaltskosten), wo deine Frist konkret läuft.
+Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Schadensregulierung – wer einmal verjährt, hat alles verloren. Spezialisierte Verkehrsrechts-Kanzleien prüfen kostenfrei (bei unverschuldetem Unfall trägt der Versicherer alle Anwaltskosten), wo Ihre Frist konkret läuft.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -235,9 +235,9 @@ Verjährungs-Streitigkeiten gehören zu den verlustreichsten Fehlern in der Scha
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Wann verjähren meine Ansprüche aus einem Verkehrsunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Regulär 3 Jahre ab Ende des Jahres, in dem du Kenntnis von Schaden und Schädiger hattest (§ 195, § 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen bis zu 30 Jahre."}},
-        {"@type": "Question", "name": "Beginnt die Frist am Unfalltag?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Sie beginnt am 31. Dezember des Jahres, in dem der Anspruch entstanden und dir bekannt war. Ein Unfall am 15. März und einer am 15. Dezember haben dieselbe Verjährungs-Endposition."}},
-        {"@type": "Question", "name": "Was, wenn ich Spätfolgen erst nach Jahren bemerke?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Personenschäden bist du durch die 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) geschützt. Die 3-Jahres-Regelfrist beginnt erst mit konkreter Kenntnis der Spätfolge."}},
+        {"@type": "Question", "name": "Wann verjähren meine Ansprüche aus einem Verkehrsunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Regulär 3 Jahre ab Ende des Jahres, in dem Sie Kenntnis von Schaden und Schädiger hatten (§ 195, § 199 Abs. 1 BGB). Bei Personenschäden mit Spätfolgen bis zu 30 Jahre."}},
+        {"@type": "Question", "name": "Beginnt die Frist am Unfalltag?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Sie beginnt am 31. Dezember des Jahres, in dem der Anspruch entstanden und Ihnen bekannt war. Ein Unfall am 15. März und einer am 15. Dezember haben dieselbe Verjährungs-Endposition."}},
+        {"@type": "Question", "name": "Was, wenn ich Spätfolgen erst nach Jahren bemerke?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Personenschäden sind Sie durch die 30-Jahre-Höchstfrist (§ 199 Abs. 2 BGB) geschützt. Die 3-Jahres-Regelfrist beginnt erst mit konkreter Kenntnis der Spätfolge."}},
         {"@type": "Question", "name": "Hemmt eine Schadensmeldung die Verjährung?", "acceptedAnswer": {"@type": "Answer", "text": "Die bloße Meldung nicht. Aber aktive Verhandlungen mit dem Versicherer hemmen die Verjährung nach § 203 BGB."}}
       ]
     }

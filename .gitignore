@@ -155,3 +155,13 @@ scripts/.bast-cache/
 
 # Backfill-Backups enthalten echte Kundendaten (Telefonnummern) — nie committen
 scripts/.backfill-*-backup-*.json
+
+# Build- und Testprotokolle. Ohne dieses Sammelmuster standen nur EINZELNE Logs hier
+# (dev-server.log, db-watcher-*.log) und ein `git add -A` zog 15 Build-Logs in einen
+# Anrede-Commit — 41 statt 26 Dateien, unbemerkt bis zur Kontrolle der Commit-Statistik.
+#
+# ⚠ docs/ ist ausgenommen: dort liegen 13 ABSICHTLICH archivierte Smoke-Protokolle aus
+# Mai 2026 (docs/15.05.2026/smoke-*.log). Ein pauschales *.log wuerde kuenftige
+# Testprotokolle als Doku unmoeglich machen — genau die Belege, auf die sich Regel 4 stuetzt.
+*.log
+!docs/**/*.log

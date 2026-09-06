@@ -62,7 +62,7 @@ In aller Regel der Linksabbieger – Anscheinsbeweis. Standard-Quote 100 : 0.
 Bei nachweisbar erheblicher Geschwindigkeitsüberschreitung Mit-Quote 20–40 %.
 
 **Was bei grünem Linkspfeil?**
-Mit grünem Linkspfeil hast du Vorrang. Bei Entgegenkommer-Rotlichtverstoß: 0 : 100.
+Mit grünem Linkspfeil haben Sie Vorrang. Bei Entgegenkommer-Rotlichtverstoß: 0 : 100.
 
 ---
 
@@ -109,7 +109,7 @@ Mit grünem Linkspfeil hast du Vorrang. Bei Entgegenkommer-Rotlichtverstoß: 0 :
       "mainEntity": [
         {"@type": "Question", "name": "Wer ist schuld bei Linksabbieger-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "In aller Regel der Linksabbieger — der Anscheinsbeweis spricht gegen ihn. Standard-Quote 100 : 0."}},
         {"@type": "Question", "name": "Was, wenn der Entgegenkommer zu schnell war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei nachweisbar erheblicher Geschwindigkeitsüberschreitung ergibt sich eine Mit-Quote von 20 bis 40 %."}},
-        {"@type": "Question", "name": "Was bei grünem Linkspfeil?", "acceptedAnswer": {"@type": "Answer", "text": "Mit grünem Linkspfeil hast du Vorrang. Bei einem Rotlichtverstoß des Entgegenkommers gilt 0 : 100 zu dessen Lasten."}}
+        {"@type": "Question", "name": "Was bei grünem Linkspfeil?", "acceptedAnswer": {"@type": "Answer", "text": "Mit grünem Linkspfeil haben Sie Vorrang. Bei einem Rotlichtverstoß des Entgegenkommers gilt 0 : 100 zu dessen Lasten."}}
       ]
     }
   ]

@@ -116,7 +116,7 @@ const CONFIG: Record<RechnerType, RechnerConfig> = {
             : '<b>Grenzfall</b> — beim Versicherer den genauen Wiederaufstiegs-Effekt anfragen (kostenlos). Faustregel: Schaden unter ~800 € bei hoher SF → eher selbst zahlen.'
       return (
         `Rückstufung ca. SF ${sfv} → SF ${sn}. Mehrbeitrag über ~${j} Jahre: <b>${eur(lo)}–${eur(hi)} €</b>. ${rec}` +
-        `<span class="aur-note">Richtwert — exakt nur über deinen Versicherer. ` +
+        `<span class="aur-note">Richtwert — exakt nur über Ihren Versicherer. ` +
         `Bei <b>unverschuldetem</b> Unfall entfällt die Rückstufung ganz: dann reguliert die gegnerische Haftpflicht.</span>`
       )
     },
@@ -205,7 +205,7 @@ const CONFIG: Record<RechnerType, RechnerConfig> = {
       const satz = (isNaN(B) ? 3.37 : B) + 5
       const z = F * (satz / 100) * (T / 365)
       return (
-        `Verzugszinssatz: <b>${satz.toFixed(2).replace('.', ',')} %</b> p.a. · Verzugszinsen: <b>${eur(z)} €</b> (auf ${T} Tage) — die kannst du zusätzlich fordern.` +
+        `Verzugszinssatz: <b>${satz.toFixed(2).replace('.', ',')} %</b> p.a. · Verzugszinsen: <b>${eur(z)} €</b> (auf ${T} Tage) — die können Sie zusätzlich fordern.` +
         `<span class="aur-note">Richtwert; maßgeblich ist der Verzugsbeginn im Einzelfall.</span>`
       )
     },

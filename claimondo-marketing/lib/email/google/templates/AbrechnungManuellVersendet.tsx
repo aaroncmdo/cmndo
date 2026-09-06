@@ -56,10 +56,10 @@ export function AbrechnungManuellVersendetEmail(props: Props) {
         )}
 
         <Paragraph>
-          Bei Fragen wende dich an <strong>aaron.sprafke@claimondo.de</strong>.
+          Bei Fragen wende sich an <strong>aaron.sprafke@claimondo.de</strong>.
         </Paragraph>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </EmailLayout>
     )
   }
@@ -72,7 +72,7 @@ export function AbrechnungManuellVersendetEmail(props: Props) {
         Hallo {props.empfaengerVorname ?? ''},
       </Paragraph>
       <Paragraph>
-        im Anhang bzw. über dein Portal steht deine Abrechnung bereit.
+        im Anhang bzw. über Ihr Portal steht Ihre Abrechnung bereit.
       </Paragraph>
 
       <InfoTable rows={[
@@ -84,10 +84,10 @@ export function AbrechnungManuellVersendetEmail(props: Props) {
       <Divider />
 
       <Paragraph>
-        Bei Fragen wende dich an <strong>aaron.sprafke@claimondo.de</strong>.
+        Bei Fragen wende sich an <strong>aaron.sprafke@claimondo.de</strong>.
       </Paragraph>
 
-      <Paragraph>Dein Claimondo-Team</Paragraph>
+      <Paragraph>Ihr Claimondo-Team</Paragraph>
     </EmailLayout>
   )
 }

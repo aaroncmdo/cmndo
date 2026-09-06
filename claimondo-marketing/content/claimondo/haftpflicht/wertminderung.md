@@ -45,7 +45,7 @@ Merkantile Wertminderung · Minderwert · Wertverlust nach Unfall · Mercantil-W
 
 ## In einem Satz erklärt
 
-Wertminderung ist der Verkaufswert-Verlust deines Fahrzeugs allein durch den Unfall – auch nach Reparatur – und eigenständige Schadensposition nach § 249 BGB.
+Wertminderung ist der Verkaufswert-Verlust Ihres Fahrzeugs allein durch den Unfall – auch nach Reparatur – und eigenständige Schadensposition nach § 249 BGB.
 
 ## In drei Sätzen erklärt
 
@@ -115,10 +115,10 @@ Der BGH lehnt eine starre Altersgrenze ab – die Einzelfallprüfung entscheidet
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Wertminderung steht im Sachverständigen-Gutachten. Ohne explizite Bezifferung im Gutachten wird sie **nicht** automatisch erstattet – du musst sie aktiv geltend machen.
+Wertminderung steht im Sachverständigen-Gutachten. Ohne explizite Bezifferung im Gutachten wird sie **nicht** automatisch erstattet – Sie müssen sie aktiv geltend machen.
 
 ### 🛠 Drei Schritte
 
@@ -145,10 +145,10 @@ Möglich. Die Faustregel „ab 5 Jahre keine Wertminderung" ist keine BGH-Linie.
 Nein. Wertminderung ist Schadensersatz und steuerfrei – wie auch Schmerzensgeld.
 
 **Bekomme ich Wertminderung bei fiktiver Abrechnung?**
-Ja. Wertminderung ist unabhängig davon, ob du tatsächlich reparierst – sie spiegelt den Marktwert-Verlust.
+Ja. Wertminderung ist unabhängig davon, ob Sie tatsächlich repariern – sie spiegelt den Marktwert-Verlust.
 
 **Kann der Versicherer mit eigenem SV-Gutachten widersprechen?**
-Ja, aber dein eigenes SV-Gutachten bleibt gleichwertige Schätzungsgrundlage. Bei Streit entscheidet ein Gerichts-Sachverständiger.
+Ja, aber Ihr eigenes SV-Gutachten bleibt gleichwertige Schätzungsgrundlage. Bei Streit entscheidet ein Gerichts-Sachverständiger.
 
 **Lohnt sich Klage bei verweigerter Wertminderung?**
 Ab Differenz von 500 € typisch ja. Anwaltskosten zahlt der Versicherer, BGH-Linie ist klar etabliert.
@@ -165,7 +165,7 @@ Ab Differenz von 500 € typisch ja. Anwaltskosten zahlt der Versicherer, BGH-Li
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Wertminderung ist eine der häufig „vergessenen" Positionen – Versicherer setzen sie automatisch niedrig oder ganz auf null an. Eigener SV + Anwalt machen den Unterschied von typisch 1.000–3.000 €.
 
@@ -214,7 +214,7 @@ Wertminderung ist eine der häufig „vergessenen" Positionen – Versicherer se
       "mainEntity": [
         {"@type": "Question", "name": "Wie wird die Wertminderung berechnet?", "acceptedAnswer": {"@type": "Answer", "text": "Durch einen Sachverständigen nach einer der vier anerkannten Methoden (Ruhkopf-Sahm, Halbgewachs-Höning, MFM, Berens-Hettberg-Strunk). Die gewählte Methode muss im Gutachten begründet sein."}},
         {"@type": "Question", "name": "Bekomme ich Wertminderung bei einem 7 Jahre alten Auto?", "acceptedAnswer": {"@type": "Answer", "text": "Möglich. Die Faustregel ab 5 Jahre ist keine BGH-Linie. Bei hochwertigen Marken, guter Pflege und Markenwerkstatt-Wartung auch jenseits 5 Jahren."}},
-        {"@type": "Question", "name": "Bekomme ich Wertminderung bei fiktiver Abrechnung?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Wertminderung ist unabhängig davon, ob du tatsächlich reparierst — sie spiegelt den Marktwert-Verlust."}}
+        {"@type": "Question", "name": "Bekomme ich Wertminderung bei fiktiver Abrechnung?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Wertminderung ist unabhängig davon, ob Sie tatsächlich repariern — sie spiegelt den Marktwert-Verlust."}}
       ]
     }
   ]

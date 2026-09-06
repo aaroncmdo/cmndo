@@ -38,7 +38,7 @@ meta_description: "Wiederbeschaffungswert: Marktwert eines gleichwertigen Fahrze
 
 # Wiederbeschaffungswert beim Verkehrsunfall – was er ist und wie er berechnet wird
 
-> **Kurz erklärt:** Der Wiederbeschaffungswert (WBW) ist der **Marktwert eines gleichwertigen Fahrzeugs** zum Schadens-Zeitpunkt – die Summe, die du brauchst, um ein vergleichbares Auto am Markt zu kaufen. Bei wirtschaftlichem Totalschaden (Reparatur > 130 % WBW) erstattet die Haftpflicht den **Wiederbeschaffungsaufwand** (WBW − Restwert). Bei Privatpersonen gilt grundsätzlich der **Brutto-WBW mit Mehrwertsteuer**, der Restwert wird nach BGH-Linie **regional realistisch** und nicht über Versicherer-Online-Plattformen bestimmt.
+> **Kurz erklärt:** Der Wiederbeschaffungswert (WBW) ist der **Marktwert eines gleichwertigen Fahrzeugs** zum Schadens-Zeitpunkt – die Summe, die Sie brauchen, um ein vergleichbares Auto am Markt zu kaufen. Bei wirtschaftlichem Totalschaden (Reparatur > 130 % WBW) erstattet die Haftpflicht den **Wiederbeschaffungsaufwand** (WBW − Restwert). Bei Privatpersonen gilt grundsätzlich der **Brutto-WBW mit Mehrwertsteuer**, der Restwert wird nach BGH-Linie **regional realistisch** und nicht über Versicherer-Online-Plattformen bestimmt.
 
 ## Auch bekannt als
 
@@ -52,7 +52,7 @@ Der Wiederbeschaffungswert ist der Marktpreis eines gleichwertigen Ersatzfahrzeu
 
 ## In drei Sätzen erklärt
 
-Bei einem wirtschaftlichen Totalschaden – Reparaturkosten überschreiten den Wiederbeschaffungswert um mehr als 30 % – wird statt der Reparatur der Wiederbeschaffungsaufwand erstattet: das ist der **Wiederbeschaffungswert minus Restwert**. Der Wiederbeschaffungswert orientiert sich am tatsächlichen Marktpreis eines vergleichbaren Fahrzeugs (gleiche Marke, Modell, Alter, Kilometerstand, Ausstattung, Zustand vor Unfall) und wird durch ein Sachverständigen-Gutachten festgestellt – bei Privatpersonen grundsätzlich brutto, also einschließlich Mehrwertsteueranteil. Der **Restwert** wird nach BGH-Rechtsprechung anhand des regional realistisch erzielbaren Marktpreises ermittelt – Versicherer-Online-Plattformen mit überdurchschnittlich hohen Angeboten zwingen dich nicht zum Verkauf an diese Verwerter.
+Bei einem wirtschaftlichen Totalschaden – Reparaturkosten überschreiten den Wiederbeschaffungswert um mehr als 30 % – wird statt der Reparatur der Wiederbeschaffungsaufwand erstattet: das ist der **Wiederbeschaffungswert minus Restwert**. Der Wiederbeschaffungswert orientiert sich am tatsächlichen Marktpreis eines vergleichbaren Fahrzeugs (gleiche Marke, Modell, Alter, Kilometerstand, Ausstattung, Zustand vor Unfall) und wird durch ein Sachverständigen-Gutachten festgestellt – bei Privatpersonen grundsätzlich brutto, also einschließlich Mehrwertsteueranteil. Der **Restwert** wird nach BGH-Rechtsprechung anhand des regional realistisch erzielbaren Marktpreises ermittelt – Versicherer-Online-Plattformen mit überdurchschnittlich hohen Angeboten zwingen Sie nicht zum Verkauf an diese Verwerter.
 
 ## Die fünf Schlüsselzahlen
 
@@ -108,13 +108,13 @@ Wiederbeschaffungsaufwand = WBW (Brutto) − Restwert
 | Restwert (regional realistisch, laut SV) | 3.500 € |
 | **Wiederbeschaffungsaufwand** | **11.500 €** |
 
-Der Restwert reduziert die Erstattung, weil du das Wrack noch verkaufen kannst. Aber: Du musst es **nicht** verkaufen – du kannst es behalten, weiterverwenden oder verschrotten. Der maßgebliche Restwert ist der Marktwert, nicht ein konkretes Verkaufs-Angebot.
+Der Restwert reduziert die Erstattung, weil Sie das Wrack noch verkaufen können. Aber: Sie müssen es **nicht** verkaufen – Sie können es behalten, weiterverwenden oder verschrotten. Der maßgebliche Restwert ist der Marktwert, nicht ein konkretes Verkaufs-Angebot.
 
 ---
 
 ## Restwert – wo der Streit beginnt
 
-Der häufigste Streit beim wirtschaftlichen Totalschaden ist der Restwert. Versicherer arbeiten mit eigenen Online-Verwertungs-Plattformen, die für dein verunfalltes Fahrzeug oft Angebote von gewerblichen Aufkäufern aggregieren – und diese liegen typischerweise **deutlich über** dem regional realistischen Restwert.
+Der häufigste Streit beim wirtschaftlichen Totalschaden ist der Restwert. Versicherer arbeiten mit eigenen Online-Verwertungs-Plattformen, die für Ihr verunfalltes Fahrzeug oft Angebote von gewerblichen Aufkäufern aggregieren – und diese liegen typischerweise **deutlich über** dem regional realistischen Restwert.
 
 ### Was die Rechtsprechung sagt
 
@@ -134,7 +134,7 @@ Diese Differenz wird in jedem zweiten Totalschaden-Fall auflaufen – und genau 
 
 ## Wiederbeschaffungs-Dauer und Folge-Ansprüche
 
-Während du dir ein Ersatzfahrzeug suchst, hast du Anspruch auf:
+Während Sie sich ein Ersatzfahrzeug suchen, haben Sie Anspruch auf:
 
 - **Mietwagen-Kosten** (sofern angemietet) – Details: [Mietwagen-Erstattung](/haftpflicht/mietwagen)
 - ODER **Nutzungsausfall-Entschädigung** (Sanden-Danner-Tabelle) – Details: [Nutzungsausfall](/haftpflicht/nutzungsausfall)
@@ -143,7 +143,7 @@ Während du dir ein Ersatzfahrzeug suchst, hast du Anspruch auf:
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Eigener Sachverständiger ist Pflicht. Versicherer-Gutachten setzen WBW tendenziell niedriger und Restwert tendenziell höher an – die Differenz kann mehrere tausend Euro ausmachen.
@@ -157,7 +157,7 @@ BVSK-Mitglied, frei wählbar. SV-Kosten zahlt der Versicherer (bei unverschuldet
 Eigener SV vs. Versicherer-Gutachten. Bei Differenz > 1.000 € (WBW) oder > 500 € (Restwert): anwaltliche Prüfung.
 
 **3. Plattform-Restwerte schriftlich zurückweisen**
-Mit BGH-Linie zur regionalen Erzielbarkeit argumentieren. Versicherer darf dich nicht zwingen, an Plattform-Käufer zu verkaufen.
+Mit BGH-Linie zur regionalen Erzielbarkeit argumentieren. Versicherer darf Sie nicht zwingen, an Plattform-Käufer zu verkaufen.
 
 **4. Mietwagen / Nutzungsausfall für Wiederbeschaffungs-Dauer einfordern**
 14 Tage Standard, bei Sonderlage länger.
@@ -196,10 +196,10 @@ Durch einen Kfz-Sachverständigen anhand von Marktanalyse, Schwacke-Liste und ko
 Bei Privatpersonen brutto (mit Mehrwertsteuer) nach BGH-Linie. Begründung: Privatpersonen zahlen am Markt den vollen Bruttopreis, ohne Vorsteuerabzug.
 
 **Wer bestimmt den Restwert?**
-Maßgeblich ist der regional realistisch erzielbare Restwert nach BGH-Linie. Ermittlung durch eigenen Sachverständigen. Versicherer-Online-Plattformen mit überdurchschnittlichen Angeboten zwingen dich nicht zum Verkauf an diese Verwerter.
+Maßgeblich ist der regional realistisch erzielbare Restwert nach BGH-Linie. Ermittlung durch eigenen Sachverständigen. Versicherer-Online-Plattformen mit überdurchschnittlichen Angeboten zwingen Sie nicht zum Verkauf an diese Verwerter.
 
 **Was ist der Wiederbeschaffungsaufwand?**
-Der Betrag, den du vom Versicherer bekommst, wenn du nicht reparierst: Wiederbeschaffungswert minus Restwert. Im Beispiel: 15.000 € WBW − 3.500 € Restwert = 11.500 € Erstattung.
+Der Betrag, den Sie vom Versicherer bekommen, wenn Sie nicht repariern: Wiederbeschaffungswert minus Restwert. Im Beispiel: 15.000 € WBW − 3.500 € Restwert = 11.500 € Erstattung.
 
 **Wie lange habe ich für die Wiederbeschaffung Zeit?**
 14 Tage Standard nach BGH-Linie. In dieser Zeit Mietwagen oder Nutzungsausfall. Bei Sonder-Fahrzeugen mit längerer Marktsuche entsprechend länger.
@@ -217,7 +217,7 @@ Der Betrag, den du vom Versicherer bekommst, wenn du nicht reparierst: Wiederbes
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Totalschaden-Fälle sind eines der ergebnisreichsten Felder der Schadensregulierung – Differenzen von 2.000–5.000 € sind keine Seltenheit. Eigenes SV-Gutachten zahlt der Versicherer, Anwaltskosten ebenfalls bei unverschuldetem Unfall.
 

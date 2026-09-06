@@ -33,9 +33,9 @@ related:
 meta_description: "Anscheinsbeweis: Bei Auffahrunfall, Vorfahrt- oder Rotlichtverstoß schließt das Gericht auf das Verschulden des anderen. Wann er für Sie spielt."
 ---
 
-# Anscheinsbeweis im Verkehrsunfall – wann er für dich spielt
+# Anscheinsbeweis im Verkehrsunfall – wann er für Sie spielt
 
-> **Kurz erklärt:** Der Anscheinsbeweis (lat.: prima facie) ist eine Beweis-Erleichterung im Zivilprozess. In Standard-Konstellationen – Auffahrunfall, Vorfahrtsverletzung, Rotlichtverstoß – spricht der erste Anschein für ein typisches Verschulden des einen Beteiligten. Du musst dann **nichts** beweisen; der Gegner muss den Anscheinsbeweis durch konkrete Tatsachen erschüttern. In vielen Verkehrsunfall-Konstellationen ist der Anscheinsbeweis dein wichtigster prozessualer Vorteil.
+> **Kurz erklärt:** Der Anscheinsbeweis (lat.: prima facie) ist eine Beweis-Erleichterung im Zivilprozess. In Standard-Konstellationen – Auffahrunfall, Vorfahrtsverletzung, Rotlichtverstoß – spricht der erste Anschein für ein typisches Verschulden des einen Beteiligten. Sie müssen dann **nichts** beweisen; der Gegner muss den Anscheinsbeweis durch konkrete Tatsachen erschüttern. In vielen Verkehrsunfall-Konstellationen ist der Anscheinsbeweis Ihr wichtigster prozessualer Vorteil.
 
 ## Auch bekannt als
 
@@ -57,13 +57,13 @@ Bei klar typisierten Verkehrsunfall-Konstellationen (Auffahrunfall, Vorfahrtsver
 - **100 % zu 0 %** typische Quote bei Vorfahrtsverletzung
 - **100 % zu 0 %** typische Quote bei Rotlichtverstoß
 - **70–100 %** zu Lasten Spurwechsler bei Spurwechsel-Kollision
-- **0 %** Beweis-Aufwand für dich – der Gegner muss erschüttern
+- **0 %** Beweis-Aufwand für Sie – der Gegner muss erschüttern
 
 ---
 
 ## Was Anscheinsbeweis bedeutet – juristisch
 
-Im Zivilprozess gilt der Grundsatz: Wer einen Anspruch geltend macht, muss alle anspruchsbegründenden Tatsachen beweisen ([Beweislast](/haftpflicht/beweislast)). Bei Verkehrsunfällen wäre das oft schwer – du müsstest minutiös belegen, wer welche Manöver mit welcher Geschwindigkeit zu welchem Zeitpunkt gefahren hat.
+Im Zivilprozess gilt der Grundsatz: Wer einen Anspruch geltend macht, muss alle anspruchsbegründenden Tatsachen beweisen ([Beweislast](/haftpflicht/beweislast)). Bei Verkehrsunfällen wäre das oft schwer – Sie müssten minutiös belegen, wer welche Manöver mit welcher Geschwindigkeit zu welchem Zeitpunkt gefahren hat.
 
 Die Rechtsprechung hat deshalb für **typische Geschehensabläufe** den Anscheinsbeweis entwickelt: Steht der äußere Sachverhalt fest, schließt das Gericht **erfahrungsgesetzlich** auf eine bestimmte Ursache. Beispiel:
 
@@ -111,16 +111,16 @@ Der Gegner kann den Anscheinsbeweis nur **erschüttern**, indem er **konkrete Ta
 
 ---
 
-## Was es konkret für deine Schadensregulierung bedeutet
+## Was es konkret für Ihre Schadensregulierung bedeutet
 
 ### Vorteil 1 – Keine eigene Beweisführung
-In Anscheinsbeweis-Konstellationen musst du das Verschulden des Gegners **nicht** beweisen. Es reicht, den äußeren Sachverhalt zu belegen – etwa per Polizeibericht oder Zeugen, dass es sich um einen Auffahrunfall handelte.
+In Anscheinsbeweis-Konstellationen müssen Sie das Verschulden des Gegners **nicht** beweisen. Es reicht, den äußeren Sachverhalt zu belegen – etwa per Polizeibericht oder Zeugen, dass es sich um einen Auffahrunfall handelte.
 
 ### Vorteil 2 – Versicherer muss erschüttern
 Der gegnerische Versicherer kann pauschale Mitverschuldens-Quoten nur dann durchsetzen, wenn er den Anscheinsbeweis durch **konkrete Tatsachen** erschüttert. Bloße Behauptungen reichen rechtlich nicht.
 
 ### Vorteil 3 – Quick-Win bei Klage
-Bei klarer Anscheinsbeweis-Konstellation entscheidet das Gericht oft **ohne Beweisaufnahme** zu deinen Gunsten – Klage-Dauer kurz, Erfolgswahrscheinlichkeit hoch.
+Bei klarer Anscheinsbeweis-Konstellation entscheidet das Gericht oft **ohne Beweisaufnahme** zu Ihren Gunsten – Klage-Dauer kurz, Erfolgswahrscheinlichkeit hoch.
 
 ---
 
@@ -140,10 +140,10 @@ Aufforderung: Womit konkret? Welcher Beweis, welche Tatsache? Pauschal-Behauptun
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Anscheinsbeweis ist **automatisch** zu deinen Gunsten in den Standard-Konstellationen. Du musst nicht „kämpfen" – du musst die Konstellation klar darstellen.
+Anscheinsbeweis ist **automatisch** zu Ihren Gunsten in den Standard-Konstellationen. Sie müssen nicht „kämpfen" – Sie müssen die Konstellation klar darstellen.
 
 ### 🛠 Drei Punkte
 
@@ -161,13 +161,13 @@ Bei Versicherer-Argumenten gegen den Anscheinsbeweis: konkrete Tatsachen und kon
 ## Häufige Fragen
 
 **Was ist Anscheinsbeweis?**
-Eine Beweis-Erleichterung im Zivilprozess: Bei typischen Geschehensabläufen schließt das Gericht erfahrungsgesetzlich auf eine bestimmte Ursache. Du musst nicht beweisen – der Gegner muss konkret erschüttern.
+Eine Beweis-Erleichterung im Zivilprozess: Bei typischen Geschehensabläufen schließt das Gericht erfahrungsgesetzlich auf eine bestimmte Ursache. Sie müssen nicht beweisen – der Gegner muss konkret erschüttern.
 
 **Wer ist schuld bei einem Auffahrunfall?**
 In aller Regel der Auffahrende – Anscheinsbeweis wegen Abstandsverletzung oder Unaufmerksamkeit (§ 4 StVO). Quote typisch 100 % zu Lasten des Auffahrenden.
 
 **Muss ich beweisen, dass ich nicht schuld bin?**
-Nein. In Anscheinsbeweis-Konstellationen liegt die Beweis-Last auf dem Gegner. Du musst lediglich den äußeren Sachverhalt belegen.
+Nein. In Anscheinsbeweis-Konstellationen liegt die Beweis-Last auf dem Gegner. Sie müssen lediglich den äußeren Sachverhalt belegen.
 
 **Wie erschüttert man einen Anscheinsbeweis?**
 Mit konkreten Tatsachen, die einen atypischen Geschehensablauf nahelegen. Eine bloße Möglichkeit oder Behauptung reicht nicht – es müssen Tatsachen vorgetragen und gegebenenfalls bewiesen werden.
@@ -189,9 +189,9 @@ Ja – Anwaltskosten zahlt der Versicherer (BGH VI ZR 235/13). Außerdem wird de
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-In Anscheinsbeweis-Konstellationen ist die Rechtslage so klar, dass Anwälte häufig in wenigen Wochen die volle Regulierung durchsetzen. Anwaltskosten zahlt der Versicherer, du hast kein Kostenrisiko.
+In Anscheinsbeweis-Konstellationen ist die Rechtslage so klar, dass Anwälte häufig in wenigen Wochen die volle Regulierung durchsetzen. Anwaltskosten zahlt der Versicherer, Sie haben kein Kostenrisiko.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -222,7 +222,7 @@ In Anscheinsbeweis-Konstellationen ist die Rechtslage so klar, dass Anwälte hä
     },
     {
       "@type": "Article",
-      "headline": "Anscheinsbeweis im Verkehrsunfall — wann er für dich spielt",
+      "headline": "Anscheinsbeweis im Verkehrsunfall — wann er für Sie spielt",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

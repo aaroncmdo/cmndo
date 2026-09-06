@@ -36,7 +36,7 @@ meta_description: "„Nutzungsausfall nicht erstattbar“? Die 3 Standard-Argume
 
 # „Den Nutzungsausfall können wir nicht erstatten" – Decoder
 
-> **Kurz erklärt:** Versicherer verweigern Nutzungsausfall mit drei Standard-Argumenten: „nicht nachgewiesen", „Sie hatten einen Zweitwagen", „Sanden-Danner-Tabelle nicht anwendbar". Nach BGH-Linie greift bei privaten Fahrzeugen die **Eigennutzungs-Vermutung** – du musst konkrete Fahrten **nicht** nachweisen. Die Sanden-Danner-Tabelle ist gerichtsfest etabliert: typische Tagessätze 27–175 € je nach Fahrzeug-Klasse, multipliziert mit der Reparatur-Dauer.
+> **Kurz erklärt:** Versicherer verweigern Nutzungsausfall mit drei Standard-Argumenten: „nicht nachgewiesen", „Sie hatten einen Zweitwagen", „Sanden-Danner-Tabelle nicht anwendbar". Nach BGH-Linie greift bei privaten Fahrzeugen die **Eigennutzungs-Vermutung** – Sie müssen konkrete Fahrten **nicht** nachweisen. Die Sanden-Danner-Tabelle ist gerichtsfest etabliert: typische Tagessätze 27–175 € je nach Fahrzeug-Klasse, multipliziert mit der Reparatur-Dauer.
 
 ## Auch bekannt als
 
@@ -44,7 +44,7 @@ Nutzungsausfall-Entschädigung · Nutzungsausfallentschädigung · NAE · Pausch
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -58,7 +58,7 @@ Typische Varianten:
 
 Vier wiederkehrende Argumentationen:
 
-- **„Nicht nachgewiesen"** – als ob du Nutzungs-Beleg liefern müsstest
+- **„Nicht nachgewiesen"** – als ob Sie Nutzungs-Beleg liefern müssten
 - **„Zweitwagen-Argument"** – oft konstruiert, ohne konkrete Familien-Konstellation zu prüfen
 - **„Sanden-Danner nicht anwendbar"** – die anerkannte Pauschal-Tabelle abgelehnt
 - **„Keine Nutzung möglich"** – bei Urlaub, Krankheit oder Auslandsaufenthalt
@@ -71,7 +71,7 @@ Vier wiederkehrende Argumentationen:
 Nutzungsausfall beträgt typischerweise 30–100 €/Tag. Bei 14 Tagen Reparatur sind das **420–1.400 € pro Fall** – eine erhebliche Position, die der Versicherer durch Verweigerung komplett spart.
 
 ### 2. Beweislast-Umkehr inszenieren
-Versicherer formulieren so, als müsstest **du** die Nutzung beweisen. Tatsächlich ist es genau umgekehrt: Bei privaten Fahrzeugen wird die Nutzung **vermutet** (BGH-Linie). Der Versicherer müsste die Nicht-Nutzung beweisen – kann er das nicht, ist der Anspruch begründet.
+Versicherer formulieren so, als müssten **Sie** die Nutzung beweisen. Tatsächlich ist es genau umgekehrt: Bei privaten Fahrzeugen wird die Nutzung **vermutet** (BGH-Linie). Der Versicherer müsste die Nicht-Nutzung beweisen – kann er das nicht, ist der Anspruch begründet.
 
 ### 3. Zweitwagen-Argument konstruieren
 Wenn in der Familie zwei Fahrzeuge zugelassen sind, behauptet der Versicherer pauschal „Sie hatten ein anderes Auto". Tatsächlich entscheidet die **konkrete Nutzungs-Konstellation**: Bei zwei berufstätigen Personen wird jedes Fahrzeug von einer Person genutzt – der Ausfall bleibt.
@@ -119,15 +119,15 @@ Maßgeblich ist die **tatsächliche** Reparatur-Dauer (Werkstatt-Auftrag, Ersatz
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Du beweist nichts – du erklärst nur die Nutzungs-Konstellation. Die Eigennutzungs-Vermutung schützt dich.
+Sie beweisen nichts – Sie erklären nur die Nutzungs-Konstellation. Die Eigennutzungs-Vermutung schützt Sie.
 
 ### 🛠 Vier Schritte
 
 **1. Fahrzeug-Klasse einordnen**
-Sanden-Danner-Klasse für dein Fahrzeug. Bei Unsicherheit: Anwalt oder Sachverständiger.
+Sanden-Danner-Klasse für Ihr Fahrzeug. Bei Unsicherheit: Anwalt oder Sachverständiger.
 
 **2. Reparatur-Dauer dokumentieren**
 Werkstatt-Auftrag, Datum der Rückgabe, ggf. Ersatzteil-Wartezeiten.
@@ -187,22 +187,22 @@ Mit freundlichen Grüßen
 ### Reaktion A – Tagessatz reduzieren
 > *„Der Tagessatz ist zu hoch – wir bieten 30 €/Tag statt 65 €."*
 
-**Deine Antwort:** Sanden-Danner-Tabelle als Bezug. Fahrzeug-Klasse konkret bestimmen. Bei Streit Anwalt.
+**Ihre Antwort:** Sanden-Danner-Tabelle als Bezug. Fahrzeug-Klasse konkret bestimmen. Bei Streit Anwalt.
 
 ### Reaktion B – Reparatur-Dauer kürzen
 > *„Die Reparatur hätte in 7 Tagen erfolgen können – wir erstatten nur diese Dauer."*
 
-**Deine Antwort:** Werkstatt-Auftrag und Reparatur-Bericht beifügen. Ersatzteil-Wartezeiten dokumentieren. BGH-Linie zur tatsächlichen Dauer.
+**Ihre Antwort:** Werkstatt-Auftrag und Reparatur-Bericht beifügen. Ersatzteil-Wartezeiten dokumentieren. BGH-Linie zur tatsächlichen Dauer.
 
 ### Reaktion C – Eidesstattliche Versicherung ablehnen
 > *„Eine eidesstattliche Versicherung reicht uns nicht – wir brauchen Tankkarten und Routen."*
 
-**Deine Antwort:** BGH-Linie zur Eigennutzungs-Vermutung. Eidesstattliche Versicherung ist ausreichendes Beweis-Niveau. Bei Streit Klage.
+**Ihre Antwort:** BGH-Linie zur Eigennutzungs-Vermutung. Eidesstattliche Versicherung ist ausreichendes Beweis-Niveau. Bei Streit Klage.
 
 ### Reaktion D – Zweitwagen-Konstruktion
 > *„In Ihrer Familie ist ein Zweitwagen vorhanden – kein Anspruch."*
 
-**Deine Antwort:** Konkrete Familien-Konstellation darlegen. Wer nutzt welches Fahrzeug wofür. BGH-Linie zur Mehrwagen-Familie.
+**Ihre Antwort:** Konkrete Familien-Konstellation darlegen. Wer nutzt welches Fahrzeug wofür. BGH-Linie zur Mehrwagen-Familie.
 
 ---
 
@@ -221,7 +221,7 @@ Möglich. Maßgeblich ist die konkrete Familien-Konstellation. Wenn der Zweitwag
 Für die tatsächliche Reparatur-Dauer (Werkstatt-Auftrag, Ersatzteil-Wartezeiten). Bei Totalschaden typisch 14 Tage Wiederbeschaffungs-Dauer.
 
 **Was, wenn ich gleichzeitig einen Mietwagen genutzt habe?**
-Dann gibt's **keinen** Nutzungsausfall – Mietwagen-Kosten und Nutzungsausfall schließen sich aus (Schadensminderungs-Pflicht). Du entscheidest, welche Position du geltend machst.
+Dann gibt's **keinen** Nutzungsausfall – Mietwagen-Kosten und Nutzungsausfall schließen sich aus (Schadensminderungs-Pflicht). Sie entscheiden, welche Position Sie geltend machen.
 
 **Lohnt sich Klage bei verweigerten 500 €?**
 Wirtschaftlich ja, Anwaltskosten zahlt der Versicherer. BGH-Linie zur Eigennutzungs-Vermutung ist klar etabliert – gute Klage-Chancen.
@@ -237,7 +237,7 @@ Wirtschaftlich ja, Anwaltskosten zahlt der Versicherer. BGH-Linie zur Eigennutzu
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Nutzungsausfall-Verweigerungen lassen sich bei sauberer Argumentation in 80–90 % der Fälle kippen oder reduzieren. Anwaltskosten zahlt der Versicherer bei unverschuldetem Unfall.
 

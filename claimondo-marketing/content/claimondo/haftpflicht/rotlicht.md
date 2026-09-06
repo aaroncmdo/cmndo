@@ -72,7 +72,7 @@ Beim Rotlicht-Verstoß greift der Anscheinsbeweis gegen den Rotlichtsünder – 
 
 ---
 
-## Welche Ansprüche du hast
+## Welche Ansprüche Sie haben
 
 Identisch zu Standard-Konstellationen – volle Erstattung aller Sach- und Personenschäden ohne Mitverschulden:
 
@@ -86,7 +86,7 @@ Identisch zu Standard-Konstellationen – volle Erstattung aller Sach- und Perso
 
 ## Was bei Rotlicht-Behauptung der Gegenseite
 
-Wenn die Gegenseite behauptet, du seist über Rot gefahren – und du sagst Grün —, entscheidet:
+Wenn die Gegenseite behauptet, Sie seien über Rot gefahren – und Sie sagen Grün —, entscheidet:
 
 1. **Polizeibericht** + Zeugen
 2. **Ampel-Phasen-Plan** – bei einigen Ampeln rekonstruierbar
@@ -119,7 +119,7 @@ Ja, oft sogar erhöht durch die Genugtuungs-Funktion (grobe Fahrlässigkeit der 
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

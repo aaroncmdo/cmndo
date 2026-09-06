@@ -619,7 +619,7 @@
       "read_guide": "Unfallguide lesen"
     },
     "cluster": {
-      "heading": "Wähle dein Thema",
+      "heading": "Wählen Sie Ihr Thema",
       "cluster_prefix": "Cluster",
       "all_glossary": "Alle Begriffe im Haftpflicht-Glossar ansehen →",
       "short": {
@@ -640,18 +640,18 @@
       "decoder_eyebrow": "Versicherer-Brief-Decoder"
     },
     "cta_band": {
-      "headline_default": "Unverschuldeter Unfall? Hol dir, was dir zusteht.",
+      "headline_default": "Unverschuldeter Unfall? Holen Sie sich, was Ihnen zusteht.",
       "headline_decoder": "Genau diesen Brief bekommen? Wir antworten kostenfrei für Sie.",
       "headline_ratgeber": "Unverschuldeter Unfall? Wir regeln Ihren ganzen Schaden.",
       "headline_haftpflicht": "Unklar, welcher Anspruch Ihnen zusteht? Wir prüfen Ihren Fall kostenfrei.",
       "headline_sachverstaendige": "Eigenen Sachverständigen finden – bundesweit, in unter 48 Stunden.",
-      "headline_kfz_haftpflicht": "Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden.",
+      "headline_kfz_haftpflicht": "Unverschuldeter Unfall? Wir regeln Ihren ganzen Schaden.",
       "subline": "Anonyme Erst-Einschätzung. Antwort in unter 15 Minuten. Bei unverschuldetem Unfall trägt der Gegner die Anwaltskosten.",
       "report_online": "Schaden online melden"
     },
     "inline_check": {
       "heading": "Frist schon abgelaufen?",
-      "text": "Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst. Ohne Kostenrisiko.",
+      "text": "Wir prüfen kostenfrei, wo Sie in Ihrem Schadensfall stehen. Ohne Kostenrisiko.",
       "button": "Anspruch prüfen ›"
     }
   },
@@ -1052,7 +1052,7 @@
       "clearButton": "Löschen",
       "stepProgress": "{step} / 2",
       "successTitle": "Vielen Dank!",
-      "successBody": "Wir melden uns innerhalb von 24 Stunden bei dir. Deine Dokumente wurden sicher übermittelt.",
+      "successBody": "Wir melden uns innerhalb von 24 Stunden bei Ihnen. Ihre Dokumente wurden sicher übermittelt.",
       "errorFallback": "Fehler beim Hochladen",
       "abtretungstext": "ABTRETUNGSERKLÄRUNG\n\nIch, der/die Unterzeichnende, trete hiermit alle mir gegen den Schädiger sowie dessen Haftpflichtversicherer zustehenden Schadensersatzansprüche aus dem gemeldeten Schadensfall vollumfänglich an die Claimondo GmbH ab.\n\nDie Abtretung umfasst insbesondere:\n• Ansprüche auf Ersatz des Sachschadens\n• Kosten für Sachverständigengutachten\n• Sämtliche Schadensnebenkosten und Rechtsverfolgungskosten\n\nClaimondo GmbH ist berechtigt, die abgetretenen Forderungen im eigenen Namen geltend zu machen und einzuziehen. Die Abtretung erfolgt erfüllungshalber. Im Falle der Nichteintreibung fallen die Forderungen an den Abtretenden zurück.",
       "vollmachttext": "VOLLMACHT & ANWALTSMANDAT\n\nIch, der/die Unterzeichnende, erteile hiermit der Claimondo GmbH sowie den von ihr beauftragten Rechtsanwältinnen und Rechtsanwälten Vollmacht, mich in allen Belangen des gemeldeten Schadensfalles umfassend zu vertreten.\n\nDie Vollmacht umfasst insbesondere:\n• Außergerichtliche Geltendmachung aller Ansprüche gegenüber Schädigern und Versicherern\n• Gerichtliche Durchsetzung im eigenen und fremden Namen\n• Abschluss von Vergleichen und Entgegennahme von Zahlungen\n• Beauftragung von Sachverständigen und weiteren Fachleuten\n• Einleitung und Durchführung von Zwangsvollstreckungsmaßnahmen\n\nDiese Vollmacht gilt bis zu ihrem ausdrücklichen schriftlichen Widerruf."
@@ -4101,7 +4101,7 @@
     "speichern_laeuft": "Speichern…",
     "oder": "oder",
     "pflichtfeld": "\"{label}\" ist ein Pflichtfeld",
-    "anfrage_weg": "Deine vorherige Anfrage ist nicht mehr verfügbar. Bitte fülle die Felder noch einmal aus – danach landest du direkt auf der letzten Phase.",
+    "anfrage_weg": "Ihre vorherige Anfrage ist nicht mehr verfügbar. Bitte füllen Sie die Felder noch einmal aus – danach landen Sie direkt auf der letzten Phase.",
     "restore_wiederhergestellt": "Fortschritt von {zeit} Uhr wiederhergestellt",
     "restore_fortsetzen": "Fortsetzen",
     "restore_neustarten": "Neu starten",
@@ -4304,7 +4304,7 @@
     "methodik_kuerzung_text": ": Branchenpublikationen ControlExpert / K-Expert / DEKRA + Auswertung veröffentlichter Versicherer-Geschäftsberichte HUK / LVM / AXA 2024–2025.",
     "methodik_hinweis_strong": "Hinweis",
     "methodik_hinweis_text": ": Dieser Report ersetzt keine Rechtsberatung. Die Werte sind Durchschnitte – der konkrete Anspruch hängt vom Einzelfall ab. Für Ihre konkrete Situation: ",
-    "cta_h2": "Was du gegen Kürzungen tun kannst",
+    "cta_h2": "Was Sie gegen Kürzungen tun können",
     "cta_p": "Die Daten zeigen das Muster – diese Seiten zeigen den konkreten Gegenzug:",
     "cta_crosslinks": [
       "Die gegnerische Versicherung zahlt nicht – was tun?",
@@ -4667,8 +4667,8 @@
     "cta_schaden": "Jetzt Schaden melden"
   },
   "wertminderung_rechner": {
-    "titel": "Wertminderung mit deinen Werten berechnen",
-    "intro": "Die Tabelle oben zeigt die Faustregel. Rechne hier mit deinen eigenen Zahlen:",
+    "titel": "Wertminderung mit Ihren Werten berechnen",
+    "intro": "Die Tabelle oben zeigt die Faustregel. Rechnen Sie hier mit Ihren eigenen Zahlen:",
     "label_reparaturkosten": "Reparaturkosten (€)",
     "label_alter": "Fahrzeugalter (Jahre)",
     "label_km": "Laufleistung (km, optional)",

@@ -70,10 +70,10 @@ Mitverschulden nach § 254 BGB ist der Anteil eigener Mitverursachung am Schaden
 Diese Vorschrift greift in zwei Varianten:
 
 ### Variante 1 – Mitwirkung an der Schadensentstehung (Abs. 1)
-Beispiel: Du fährst mit überhöhter Geschwindigkeit auf einer Ortsstraße, ein anderer Fahrer übersieht dich beim Linksabbiegen. Hauptverschulden liegt beim Linksabbieger – aber wenn Beweise vorliegen, dass ein einhaltendes Tempo den Unfall verhindert hätte, kann eine Mitverschuldensquote (z. B. 20 %) anerkannt werden.
+Beispiel: Sie fahren mit überhöhter Geschwindigkeit auf einer Ortsstraße, ein anderer Fahrer übersieht Sie beim Linksabbiegen. Hauptverschulden liegt beim Linksabbieger – aber wenn Beweise vorliegen, dass ein einhaltendes Tempo den Unfall verhindert hätte, kann eine Mitverschuldensquote (z. B. 20 %) anerkannt werden.
 
 ### Variante 2 – Verletzung der Schadensminderungspflicht (Abs. 2)
-Beispiel: Nach dem Unfall verzichtest du auf eine medizinisch indizierte Behandlung, dadurch verschlimmert sich der Schaden. Der Versicherer haftet dann nicht für die Verschlimmerung.
+Beispiel: Nach dem Unfall verzichten Sie auf eine medizinisch indizierte Behandlung, dadurch verschlimmert sich der Schaden. Der Versicherer haftet dann nicht für die Verschlimmerung.
 
 In beiden Varianten ist die Rechtsfolge dieselbe: **anteilige Kürzung** der Erstattung entsprechend der festgestellten Quote.
 
@@ -106,14 +106,14 @@ Der Versicherer, der sich auf § 254 BGB beruft, muss **alle Tatsachen** beweise
 
 Fehlt nur **einer** dieser drei Punkte, ist die Mitverschuldensquote nicht begründet – und unsere [Decoder-Strategie](/decoder/mitverschulden-30-prozent) setzt genau hier an.
 
-### Beweislast für deine Schuldfreiheit: keine
-Du musst **nicht** deine Schuldfreiheit beweisen. Das ist eine häufige Versicherer-Trick-Formulierung. Anlässlich klarer Anscheinsbeweis-Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) ist die Beweislage sogar zu deinen Gunsten verlagert (siehe [Anscheinsbeweis](/haftpflicht/anscheinsbeweis)).
+### Beweislast für Ihre Schuldfreiheit: keine
+Sie müssen **nicht** Ihre Schuldfreiheit beweisen. Das ist eine häufige Versicherer-Trick-Formulierung. Anlässlich klarer Anscheinsbeweis-Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) ist die Beweislage sogar zu Ihren Gunsten verlagert (siehe [Anscheinsbeweis](/haftpflicht/anscheinsbeweis)).
 
 ---
 
-## Wie sich Mitverschuldens-Quoten auf deine Forderung auswirken
+## Wie sich Mitverschuldens-Quoten auf Ihre Forderung auswirken
 
-Eine Quote von 30 % zu deinen Lasten reduziert **alle** Schadenspositionen um 30 %:
+Eine Quote von 30 % zu Ihren Lasten reduziert **alle** Schadenspositionen um 30 %:
 
 | Position | Volle Forderung | Bei 30 % Quote |
 |---|---|---|
@@ -128,10 +128,10 @@ Differenz: **4.140 €** Versicherer-Ersparnis. Bei Millionen-Schadensfällen pr
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Keine Pauschal-Quote ohne konkrete Tatsachen akzeptieren. Schon eine vorschnell akzeptierte 30 %-Quote ist **rechtskräftig** und kostet dich Tausende.
+Keine Pauschal-Quote ohne konkrete Tatsachen akzeptieren. Schon eine vorschnell akzeptierte 30 %-Quote ist **rechtskräftig** und kostet Sie Tausende.
 
 ### 🛠 Drei Punkte
 
@@ -142,7 +142,7 @@ Konkrete Tatsachen, konkrete Kausalität, konkrete Beweismittel verlangen – si
 Polizeibericht anfordern, Zeugen-Kontakte sichern, Lichtbilder und Skizzen vom Unfallort, ggf. Dashcam-Auswertung. Vor dem Streit über Quoten ist die Beweissicherung wichtiger als die juristische Argumentation.
 
 **3. Anscheinsbeweis-Logik prüfen**
-Bei klaren Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) spielt der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) **für dich** – Versicherer muss konkret erschüttern, du musst gar nichts beweisen.
+Bei klaren Konstellationen (Auffahrunfall, Rotlicht, Vorfahrt) spielt der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) **für Sie** – Versicherer muss konkret erschüttern, Sie müssen gar nichts beweisen.
 
 ---
 
@@ -189,11 +189,11 @@ Beim klassischen Auffahrunfall greift der Anscheinsbeweis: **100 %** Schuld des 
 - [§ 17 StVG Mitverursachung](/haftpflicht/mitverschulden-stvg17) – Spezialfall zwischen Fahrzeugen
 - [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) – Beweislast-Vorteil bei Standard-Konstellationen
 - [Beweislast](/haftpflicht/beweislast) – Wer muss was beweisen
-- [Decoder Mitverschulden 30 %](/decoder/mitverschulden-30-prozent) – So antwortest du auf Pauschal-Quoten
+- [Decoder Mitverschulden 30 %](/decoder/mitverschulden-30-prozent) – So antworten Sie auf Pauschal-Quoten
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Mitverschuldens-Streitigkeiten sind ein Kerngeschäft spezialisierter Verkehrsrechts-Kanzleien. Statistisch lassen sich 60–80 % aller pauschal angesetzten Quoten entweder ganz kippen oder deutlich reduzieren. Anwaltskosten zahlt der Versicherer bei unverschuldetem oder überwiegend nicht selbst verschuldetem Unfall.
 

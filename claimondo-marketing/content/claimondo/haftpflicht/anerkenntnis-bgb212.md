@@ -45,7 +45,7 @@ Schuldanerkenntnis · § 212 BGB Neubeginn · Vergleichs-Abgeltung · Abgeltungs
 
 ## In einem Satz erklärt
 
-Ein Anerkenntnis nach § 212 BGB konserviert deinen Anspruch und startet die Verjährung neu – ein Vergleich nach § 779 BGB erledigt den Anspruch endgültig.
+Ein Anerkenntnis nach § 212 BGB konserviert Ihren Anspruch und startet die Verjährung neu – ein Vergleich nach § 779 BGB erledigt den Anspruch endgültig.
 
 ## In drei Sätzen erklärt
 
@@ -57,7 +57,7 @@ Versicherer formulieren Vergleichsangebote und Anerkenntnisse häufig so, dass d
 - **§ 779 BGB** – Vergleich mit gegenseitigem Nachgeben
 - **3 Jahre** neue Verjährungsfrist ab Anerkenntnis-Datum
 - **0** Spätfolgen erstattbar nach Vergleich ohne Vorbehalt
-- **Standard-Klausel** „Mit Zahlung sind alle Ansprüche abgegolten" – die wichtigste Klausel deines Lebens
+- **Standard-Klausel** „Mit Zahlung sind alle Ansprüche abgegolten" – die wichtigste Klausel Ihres Lebens
 
 ---
 
@@ -85,7 +85,7 @@ Versicherer formulieren Vergleichsangebote und Anerkenntnisse häufig so, dass d
 
 ### Drei Rechtsfolgen
 1. **Verjährungs-Neubeginn** nach § 212 Abs. 1 Nr. 1 BGB – 3 Jahre ab Anerkenntnis. Damit ist die [Verjährungs-Sorge](/haftpflicht/verjaehrung-bgb195) sofort entschärft.
-2. **Höhe bleibt verhandelbar** – du behältst die volle Verhandlungsspanne für jede einzelne Schadensposition.
+2. **Höhe bleibt verhandelbar** – Sie behalten die volle Verhandlungsspanne für jede einzelne Schadensposition.
 3. **Beweislast verlagert** – wer den Grund anerkannt hat, kann ihn später nicht mehr generell bestreiten.
 
 ### Konkludentes Anerkenntnis
@@ -100,7 +100,7 @@ Auch ohne ausdrückliche Worte kann der Versicherer durch sein Verhalten anerken
 
 ## Was ein Vergleich konkret bedeutet
 
-### Die Standard-Klausel – die wichtigste Klausel deines Lebens
+### Die Standard-Klausel – die wichtigste Klausel Ihres Lebens
 
 > *„Mit dieser Zahlung sind alle Ansprüche aus dem Schadensereignis vom [Datum] abgegolten."*
 
@@ -110,7 +110,7 @@ Bei Erfüllung dieser Klausel:
 - Keine Möglichkeit zur Nachforderung
 - Anfechtung nur in extremen Ausnahmefällen (z. B. arglistige Täuschung)
 
-### Wann ein Vergleich für dich sinnvoll sein kann
+### Wann ein Vergleich für Sie sinnvoll sein kann
 - Wenn der Schaden vollständig abgewickelt und alle Folgen medizinisch konsolidiert sind
 - Wenn ein anwaltlicher Spätfolge-Vorbehalt vereinbart wird
 - Wenn die angebotene Summe nachweisbar fair ist (Vergleichs-Tabellen, BGH-Linie)
@@ -118,7 +118,7 @@ Bei Erfüllung dieser Klausel:
 ### Wann ein Vergleich problematisch ist
 - Bei Personenschäden in den ersten 24 Monaten – Spätfolgen treten oft erst später auf
 - Wenn keine ärztliche Konsolidierungs-Bescheinigung vorliegt
-- Wenn du unter Verhandlungs-Erschöpfung leidest
+- Wenn Sie unter Verhandlungs-Erschöpfung leiden
 - Wenn der Versicherer auf schnelle Annahme drängt („Sonderaktion", „Aktion zum Jahresende")
 
 ---
@@ -141,14 +141,14 @@ ausdrücklich AUSGENOMMEN und können geltend gemacht werden,
 sobald sie sich zeigen.
 ```
 
-Ohne diesen Vorbehalt: alle zukünftigen Folgen, die du heute noch nicht ahnst (z. B. chronisches Schmerzsyndrom, posttraumatische Belastungsstörung, Spätarthrose), sind vom Vergleich erfasst und verloren.
+Ohne diesen Vorbehalt: alle zukünftigen Folgen, die Sie heute noch nicht ahnen (z. B. chronisches Schmerzsyndrom, posttraumatische Belastungsstörung, Spätarthrose), sind vom Vergleich erfasst und verloren.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Versicherer schickt Vergleichsangebot → **nicht unterschreiben, bevor Anwalt geprüft hat**. Versicherer formuliert Anerkenntnis → schriftlich bestätigen lassen und in Akte ablegen. Diese zwei Schritte schützen dich vor den teuersten Fehlern im Schadensrecht.
+Versicherer schickt Vergleichsangebot → **nicht unterschreiben, bevor Anwalt geprüft hat**. Versicherer formuliert Anerkenntnis → schriftlich bestätigen lassen und in Akte ablegen. Diese zwei Schritte schützen Sie vor den teuersten Fehlern im Schadensrecht.
 
 ### 🛠 Vier Schritte bei Vergleichs-Angebot
 
@@ -166,7 +166,7 @@ Bei Personenschäden zwingend, bei verdeckten Sachschaden-Folgen sinnvoll.
 
 ### 🛠 Bei Anerkenntnis
 
-**Schriftliche Bestätigung anfordern.** Versicherer-Anerkenntnisse werden oft per Telefon oder vage in Briefen ausgesprochen. Du brauchst eine konkrete schriftliche Form für deine Akte:
+**Schriftliche Bestätigung anfordern.** Versicherer-Anerkenntnisse werden oft per Telefon oder vage in Briefen ausgesprochen. Sie brauchen eine konkrete schriftliche Form für Ihre Akte:
 
 ```
 Sehr geehrte Damen und Herren,
@@ -208,7 +208,7 @@ Mögliche Verzögerungs-Strategie. Konkludente Anerkenntnis-Handlungen (Teilzahl
 Nicht ohne anwaltliche Prüfung. Erstangebote liegen statistisch 40–60 % unter dem rechnerisch Berechtigten. Außerdem: Ohne Spätfolge-Vorbehalt sind zukünftige Folgen verloren.
 
 **Was bedeutet eine Anerkenntnis-Erklärung des Versicherers?**
-Eine sehr gute Nachricht. Der Anspruch ist dem Grunde nach anerkannt, die Verjährungs-Frist startet neu – du kannst in Ruhe verhandeln, ohne Zeit-Druck.
+Eine sehr gute Nachricht. Der Anspruch ist dem Grunde nach anerkannt, die Verjährungs-Frist startet neu – Sie können in Ruhe verhandeln, ohne Zeit-Druck.
 
 **Sind Spätfolgen nach einem Vergleich noch möglich?**
 Nur mit ausdrücklichem Spätfolge-Vorbehalt im Vergleichs-Text. Ohne Vorbehalt: alle Spätfolgen erledigt.
@@ -232,7 +232,7 @@ Vergleiche mit minderjährigen Geschädigten brauchen oft die Genehmigung des Fa
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Vergleichsverhandlungen sind das wirtschaftlich gefährlichste Stadium der Schadensregulierung – hier werden die teuersten Fehler gemacht. Spezialisierte Verkehrsrechts-Kanzleien prüfen Vergleichs-Angebote routinemäßig und verhandeln den Spätfolge-Vorbehalt. Bei unverschuldetem Unfall trägt der Versicherer die Anwaltskosten.
 

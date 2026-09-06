@@ -32,7 +32,7 @@ meta_description: "Kasko oder Haftpflicht? Bei unverschuldetem Unfall immer der 
 
 # Kasko-Versicherung vs. gegnerische Haftpflicht – wann was
 
-> **Kurz erklärt:** **Eigene Kasko** (Teil- oder Vollkasko) versichert dein eigenes Fahrzeug – sie zahlt unabhängig von der Schuldfrage, **belastet aber deine SF-Klasse** (Rückstufung). **Gegnerische Haftpflicht** zahlt bei unverschuldetem Unfall vollständig, ohne SF-Belastung für dich. Daher: bei klarer Fremd-Schuld immer den **Direktanspruch gegen die gegnerische Haftpflicht** (§ 115 VVG) nutzen – nicht die eigene Kasko. **Quasi-Deckung**: Kasko zahlt vor, holt sich Geld dann von gegnerischem Versicherer zurück (Regress § 86 VVG analog).
+> **Kurz erklärt:** **Eigene Kasko** (Teil- oder Vollkasko) versichert Ihr eigenes Fahrzeug – sie zahlt unabhängig von der Schuldfrage, **belastet aber Ihre SF-Klasse** (Rückstufung). **Gegnerische Haftpflicht** zahlt bei unverschuldetem Unfall vollständig, ohne SF-Belastung für Sie. Daher: bei klarer Fremd-Schuld immer den **Direktanspruch gegen die gegnerische Haftpflicht** (§ 115 VVG) nutzen – nicht die eigene Kasko. **Quasi-Deckung**: Kasko zahlt vor, holt sich Geld dann von gegnerischem Versicherer zurück (Regress § 86 VVG analog).
 
 ## Auch bekannt als
 
@@ -65,7 +65,7 @@ Eigene Kasko · Vollkasko · Teilkasko · Quasi-Deckung · SF-Klassen-Rückstufu
 
 ## Wichtig: Quasi-Deckung
 
-Wenn die gegnerische Versicherung verzögert oder ablehnt, kann deine Kasko vorab regulieren (**Quasi-Deckung**) – sie holt sich später per Regress von der Gegen-Seite Geld zurück. Vorteil: schnelle Auszahlung. Nachteil: SF-Rückstufung – die später bei erfolgreicher Regress-Klärung **zurückgenommen** wird (BGH-Rechtsprechung).
+Wenn die gegnerische Versicherung verzögert oder ablehnt, kann Ihre Kasko vorab regulieren (**Quasi-Deckung**) – sie holt sich später per Regress von der Gegen-Seite Geld zurück. Vorteil: schnelle Auszahlung. Nachteil: SF-Rückstufung – die später bei erfolgreicher Regress-Klärung **zurückgenommen** wird (BGH-Rechtsprechung).
 
 ## SF-Klassen-Rückstufung
 
@@ -85,7 +85,7 @@ Nur bei eigener Schuld oder bei kasko-spezifischen Schäden (Wild, Brand, Diebst
 Kasko zahlt vor, holt sich später von gegnerischer Versicherung zurück. Schnelle Liquidität, mit Rückstellungs-Risiko bei SF-Klassen.
 
 **Wann wird die SF-Klasse rückgesetzt?**
-Bei erfolgreicher Regress-Klärung mit der Gegen-Versicherung – die Vollkasko stellt deine SF-Klasse wieder her.
+Bei erfolgreicher Regress-Klärung mit der Gegen-Versicherung – die Vollkasko stellt Ihre SF-Klasse wieder her.
 
 **Lohnt sich Vollkasko bei Neuwagen?**
 Bei Neuwagen ≤ 5 Jahre und ≤ 80.000 km typisch ja. Danach Wirtschaftlichkeits-Rechnung – bei alten Autos oft unrentabel.

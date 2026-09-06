@@ -29,11 +29,11 @@ meta_description: "„Reparatur wirtschaftlich nicht sinnvoll“? Wann der Total
 
 # „Eine Reparatur ist wirtschaftlich nicht sinnvoll" – Decoder
 
-> **Kurz erklärt:** Versicherer bezeichnen den Schaden gerne als „wirtschaftlich nicht reparabel", sobald die Reparaturkosten in die Nähe des Wiederbeschaffungswertes kommen. Die BGH-Rechtsprechung kennt aber die **130 %-Regel** (BGH VI ZR 132/00 ff.): Liegen die Reparaturkosten bis zu 30 % über dem Wiederbeschaffungswert, hast du Anspruch auf Reparatur in deiner Werkstatt – sofern du das Fahrzeug behältst und sach- und fachgerecht reparieren lässt.
+> **Kurz erklärt:** Versicherer bezeichnen den Schaden gerne als „wirtschaftlich nicht reparabel", sobald die Reparaturkosten in die Nähe des Wiederbeschaffungswertes kommen. Die BGH-Rechtsprechung kennt aber die **130 %-Regel** (BGH VI ZR 132/00 ff.): Liegen die Reparaturkosten bis zu 30 % über dem Wiederbeschaffungswert, haben Sie Anspruch auf Reparatur in Ihrer Werkstatt – sofern Sie das Fahrzeug behalten und sach- und fachgerecht reparieren lassen.
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -53,21 +53,21 @@ Drei Mechaniken, die fast immer enthalten sind:
 
 ## Was wirklich dahintersteht
 
-### 1. Drei Wege, deine Erstattung zu senken
+### 1. Drei Wege, Ihre Erstattung zu senken
 
 Bei Schäden im Grenzbereich zum Totalschaden hat der Versicherer drei Stellschrauben – und nutzt typischerweise alle drei:
 
-1. **Wiederbeschaffungswert niedrig** setzen (deine vergleichbare Auto wäre billiger).
+1. **Wiederbeschaffungswert niedrig** setzen (Ihre vergleichbare Auto wäre billiger).
 2. **Restwert hoch** setzen (über Versicherer-Verwertungsplattformen).
 3. **130 %-Regel** wegdefinieren.
 
-Jede Stellschraube für sich kann ein paar Tausend Euro Differenz machen. Zusammen entscheiden sie, ob du am Ende Reparatur oder pauschale Auszahlung bekommst.
+Jede Stellschraube für sich kann ein paar Tausend Euro Differenz machen. Zusammen entscheiden sie, ob Sie am Ende Reparatur oder pauschale Auszahlung bekommen.
 
 ### 2. Restwert-Plattform-Trick
 
-Versicherer arbeiten mit speziellen Online-Restwertbörsen zusammen, die für dein verunfalltes Fahrzeug oft Angebote von **gewerblichen Aufkäufern** generieren – die du als Privatperson **gar nicht realisieren** kannst, ohne erheblichen Aufwand und Risiken. Der BGH hat klargestellt: Maßgeblich ist der **regional realistisch erzielbare** Restwert – nicht ein theoretischer Plattform-Wert.
+Versicherer arbeiten mit speziellen Online-Restwertbörsen zusammen, die für Ihr verunfalltes Fahrzeug oft Angebote von **gewerblichen Aufkäufern** generieren – die Sie als Privatperson **gar nicht realisieren** können, ohne erheblichen Aufwand und Risiken. Der BGH hat klargestellt: Maßgeblich ist der **regional realistisch erzielbare** Restwert – nicht ein theoretischer Plattform-Wert.
 
-### 3. Reparatur in deiner Werkstatt verhindern
+### 3. Reparatur in Ihrer Werkstatt verhindern
 
 Wenn der Versicherer Wiederbeschaffung erzwingt, hat er **keinen Stress** mit Markenwerkstatt-Auseinandersetzungen, mit UPE-Aufschlägen, mit Original-Ersatzteilen. Eine pauschale Auszahlung ist für den Versicherer der bequemste Weg.
 
@@ -79,9 +79,9 @@ Wenn der Versicherer Wiederbeschaffung erzwingt, hat er **keinen Stress** mit Ma
 
 Der Geschädigte kann auch dann Reparaturkosten erstattet verlangen, **wenn diese den Wiederbeschaffungswert um bis zu 30 % übersteigen** – vorausgesetzt:
 
-1. **Integritätsinteresse** – du willst dein Fahrzeug behalten (kein Verkauf direkt nach Reparatur).
+1. **Integritätsinteresse** – Sie wollen Ihr Fahrzeug behalten (kein Verkauf direkt nach Reparatur).
 2. **Sachgerechte Reparatur** – fachmännisch, nach Sachverständigen-Vorgabe.
-3. **6-Monats-Behaltefrist** – du nutzt das Fahrzeug nach Reparatur mindestens 6 Monate weiter (BGH-Linie zur Weiternutzung).
+3. **6-Monats-Behaltefrist** – Sie nutzt das Fahrzeug nach Reparatur mindestens 6 Monate weiter (BGH-Linie zur Weiternutzung).
 
 ### Konkretes Rechenbeispiel
 
@@ -97,23 +97,23 @@ Im Gegenbeispiel bei Reparaturkosten von 20.000 €: 130 %-Grenze gerissen → n
 
 ### Restwert – BGH-Linie
 
-Maßgeblich ist der **regional realistisch erzielbare** Restwert auf dem allgemeinen Markt – nicht Sonder-Angebote spezialisierter Verwerter. Der von **deinem eigenen Sachverständigen** ermittelte regionale Restwert ist Beweis-Grundlage. Verlangt der Versicherer, dass du das Fahrzeug an seine Plattform-Angebote weiterverkaufst, hast du im Grundsatz **keine Verpflichtung dazu** – du darfst es selbst veräußern oder behalten.
+Maßgeblich ist der **regional realistisch erzielbare** Restwert auf dem allgemeinen Markt – nicht Sonder-Angebote spezialisierter Verwerter. Der von **Ihrem eigenen Sachverständigen** ermittelte regionale Restwert ist Beweis-Grundlage. Verlangt der Versicherer, dass Sie das Fahrzeug an seine Plattform-Angebote weiterverkaufen, haben Sie im Grundsatz **keine Verpflichtung dazu** – Sie dürfen es selbst veräußern oder behalten.
 
 ### Markenwerkstatt-Recht
 
-Bei Fahrzeugen, die jünger als 3 Jahre sind oder lückenlose Markenwerkstatt-Wartungshistorie haben, hast du nach BGH-Rechtsprechung Anspruch auf Reparatur in einer **markengebundenen Werkstatt**. Eine vom Versicherer „empfohlene" Partnerwerkstatt musst du nicht akzeptieren (Details: [Werkstattbindung-Decoder](/decoder/werkstatt-netz)).
+Bei Fahrzeugen, die jünger als 3 Jahre sind oder lückenlose Markenwerkstatt-Wartungshistorie haben, haben Sie nach BGH-Rechtsprechung Anspruch auf Reparatur in einer **markengebundenen Werkstatt**. Eine vom Versicherer „empfohlene" Partnerwerkstatt müssen Sie nicht akzeptieren (Details: [Werkstattbindung-Decoder](/decoder/werkstatt-netz)).
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Eigenes Sachverständigen-Gutachten beauftragen – **bevor** du auf den Versicherer-Brief antwortest. Die Sachverständigen-Kosten zahlt der Versicherer (bei unverschuldetem Unfall).
+Eigenes Sachverständigen-Gutachten beauftragen – **bevor** Sie auf den Versicherer-Brief antworten. Die Sachverständigen-Kosten zahlt der Versicherer (bei unverschuldetem Unfall).
 
 ### 🛠 Vier-Schritte-Strategie
 
 **1. Sachverständigen-Gutachten beauftragen**
-BVSK-Mitglied, frei wählbar. Dein SV ermittelt Wiederbeschaffungswert, Reparaturkosten, Restwert (regional, realistisch), Wertminderung. Plus: 130 %-Prüfung.
+BVSK-Mitglied, frei wählbar. Ihr SV ermittelt Wiederbeschaffungswert, Reparaturkosten, Restwert (regional, realistisch), Wertminderung. Plus: 130 %-Prüfung.
 
 **2. 130 %-Berechnung durchführen**
 Wiederbeschaffungswert × 1,30 = Grenze. Reparaturkosten darunter? → Anspruch auf Reparatur. Knapp darüber? Detail-Gespräch mit SV.
@@ -174,47 +174,47 @@ Mit freundlichen Grüßen
 ### Reaktion A – „130 %-Regel nicht anwendbar"
 > *„Die 130 %-Regel greift nur unter bestimmten Voraussetzungen, die hier nicht erfüllt sind."*
 
-**Deine Antwort:** Welche Voraussetzung soll konkret fehlen? Integritätsinteresse: ja. 6-Monats-Behalten: zugesichert. Sach- und fachgerechte Reparatur: ja. Bei drei Ja: Regel greift.
+**Ihre Antwort:** Welche Voraussetzung soll konkret fehlen? Integritätsinteresse: ja. 6-Monats-Behalten: zugesichert. Sach- und fachgerechte Reparatur: ja. Bei drei Ja: Regel greift.
 
 ### Reaktion B – Restwert-Streit
 > *„Unser Plattform-Restwert ist 8.500 € – höher als Ihre SV-Bewertung."*
 
-**Deine Antwort:** BGH-Linie zur regionalen Erzielbarkeit. Plattform-Angebote sind keine reguläre Marktbewertung. Eigenes SV-Gutachten ist maßgeblich.
+**Ihre Antwort:** BGH-Linie zur regionalen Erzielbarkeit. Plattform-Angebote sind keine reguläre Marktbewertung. Eigenes SV-Gutachten ist maßgeblich.
 
 ### Reaktion C – Markenwerkstatt verweigern
 > *„Eine Reparatur in der Markenwerkstatt ist nicht erforderlich – eine Partnerwerkstatt reicht."*
 
-**Deine Antwort:** Bei Fahrzeugen < 3 Jahre oder lückenloser Markenwerkstatt-Wartung greift das Markenwerkstatt-Recht (siehe [Werkstattbindung-Decoder](/decoder/werkstatt-netz)).
+**Ihre Antwort:** Bei Fahrzeugen < 3 Jahre oder lückenloser Markenwerkstatt-Wartung greift das Markenwerkstatt-Recht (siehe [Werkstattbindung-Decoder](/decoder/werkstatt-netz)).
 
 ### Reaktion D – Vergleichs-Druck
 > *„Akzeptieren Sie unsere Wiederbeschaffungs-Lösung – Sie haben Ruhe und schnelle Auszahlung."*
 
-**Deine Antwort:** Schnellere Auszahlung ist kein Argument gegen rechtlich begründete Ansprüche. Bei Reparaturwille: nicht akzeptieren, eigene Wahl behalten.
+**Ihre Antwort:** Schnellere Auszahlung ist kein Argument gegen rechtlich begründete Ansprüche. Bei Reparaturwille: nicht akzeptieren, eigene Wahl behalten.
 
 ---
 
 ## Häufige Fragen
 
 **Was, wenn die Reparaturkosten genau 130,5 % betragen?**
-Knapp über der Grenze → grundsätzlich nur Wiederbeschaffung. Aber: Sachverständigen-Bewertung hat Toleranzen. Sprich mit deinem SV – oft lassen sich Positionen so reorganisieren, dass die 130 % gehalten werden, ohne unsachgerechte Reparatur.
+Knapp über der Grenze → grundsätzlich nur Wiederbeschaffung. Aber: Sachverständigen-Bewertung hat Toleranzen. Sprich mit Ihrem SV – oft lassen sich Positionen so reorganisieren, dass die 130 % gehalten werden, ohne unsachgerechte Reparatur.
 
 **Muss ich wirklich 6 Monate behalten?**
 Das ist die BGH-Linie. Ein Verkauf vor Ablauf der 6 Monate kann zur **Rückzahlungspflicht** des über dem Wiederbeschaffungswert hinausgehenden Betrags führen. Plane das ein.
 
 **Was, wenn ich nicht reparieren lassen will?**
-Dann hast du nur Anspruch auf **Wiederbeschaffungswert minus Restwert** – auch bei prinzipiell anwendbarer 130 %-Regel. Die Wahl liegt bei dir.
+Dann haben Sie nur Anspruch auf **Wiederbeschaffungswert minus Restwert** – auch bei prinzipiell anwendbarer 130 %-Regel. Die Wahl liegt bei Ihnen.
 
 **Restwert – muss ich an den Versicherer-Anbieter verkaufen?**
-Nein. Du darfst das Fahrzeug behalten, selbst verkaufen oder verschrotten. Der maßgebliche Restwert für die Versicherer-Erstattung ist der regional übliche, nicht ein konkretes Angebot.
+Nein. Sie dürfen das Fahrzeug behalten, selbst verkaufen oder verschrotten. Der maßgebliche Restwert für die Versicherer-Erstattung ist der regional übliche, nicht ein konkretes Angebot.
 
 **Was, wenn ich keinen eigenen SV beauftrage?**
-Du gehst ein erhebliches Risiko ein. Versicherer-Gutachten neigen zu höherem Restwert und niedrigerem Wiederbeschaffungswert – das verschiebt die Erstattung um teilweise mehrere Tausend Euro zu deinem Nachteil.
+Sie gehen ein erhebliches Risiko ein. Versicherer-Gutachten neigen zu höherem Restwert und niedrigerem Wiederbeschaffungswert – das verschiebt die Erstattung um teilweise mehrere Tausend Euro zu Ihrem Nachteil.
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder im Verkehrsrecht. Eigene Sachverständigen-Gutachten kosten dich nichts (Versicherer trägt die Kosten bei unverschuldetem Unfall), und sie verschieben die Verhandlungsposition messbar zu deinen Gunsten.
+Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder im Verkehrsrecht. Eigene Sachverständigen-Gutachten kosten Sie nichts (Versicherer trägt die Kosten bei unverschuldetem Unfall), und sie verschieben die Verhandlungsposition messbar zu Ihren Gunsten.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -268,7 +268,7 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
         {
           "@type": "Question",
           "name": "Muss ich in einer Partnerwerkstatt des Versicherers reparieren lassen?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Nein. Bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie hast du Anspruch auf Reparatur in einer markengebundenen Werkstatt (BGH VI ZR 320/12). Eine Partnerwerkstatt musst du nicht akzeptieren."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Nein. Bei Fahrzeugen unter 3 Jahren oder mit lückenloser Markenwerkstatt-Wartungshistorie haben Sie Anspruch auf Reparatur in einer markengebundenen Werkstatt (BGH VI ZR 320/12). Eine Partnerwerkstatt müssen Sie nicht akzeptieren."}
         }
       ]
     }

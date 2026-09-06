@@ -45,7 +45,7 @@ Versicherer streicht Wertminderung · Merkantiler Minderwert verweigert · Wertm
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -120,10 +120,10 @@ Jeder Methode liegen unterschiedliche Berechnungs-Logiken zugrunde. Im Gutachten
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Eigener Sachverständiger ist nicht verhandelbar. Sein Gutachten enthält die Wertminderungs-Berechnung – ohne dieses Gutachten hast du keine belastbare Position gegen die Versicherer-Verweigerung.
+Eigener Sachverständiger ist nicht verhandelbar. Sein Gutachten enthält die Wertminderungs-Berechnung – ohne dieses Gutachten haben Sie keine belastbare Position gegen die Versicherer-Verweigerung.
 
 ### 🛠 Vier Schritte
 
@@ -181,22 +181,22 @@ Mit freundlichen Grüßen
 ### Reaktion A – „Unser SV sieht weniger"
 > *„Unser Sachverständiger sieht maximal 200 € Wertminderung."*
 
-**Deine Antwort:** Methodik-Vergleich verlangen. Dein eigenes SV-Gutachten ist gleichwertig. Bei Streit entscheidet ein Gerichts-SV.
+**Ihre Antwort:** Methodik-Vergleich verlangen. Ihr eigenes SV-Gutachten ist gleichwertig. Bei Streit entscheidet ein Gerichts-SV.
 
 ### Reaktion B – Alter-Argument verschärfen
 > *„Bei 7 Jahren Alter ist Wertminderung ausgeschlossen."*
 
-**Deine Antwort:** BGH-Linie zur Einzelfall-Prüfung. Hochwertige Marke / gute Pflege / vollständige Wartungshistorie sind valide Argumente gegen die starre Altersgrenze.
+**Ihre Antwort:** BGH-Linie zur Einzelfall-Prüfung. Hochwertige Marke / gute Pflege / vollständige Wartungshistorie sind valide Argumente gegen die starre Altersgrenze.
 
 ### Reaktion C – Bagatell-Schwelle verschieben
 > *„Bei Schäden unter 3.000 € fällt keine Wertminderung an."*
 
-**Deine Antwort:** BGH-Linie zur Bagatell-Schwelle. Sie liegt typischerweise bei 500–1.500 €, nicht bei 3.000 €. Konkreten Schadensumfang anführen (Strukturschaden vs. Lackschaden ist ein großer Unterschied).
+**Ihre Antwort:** BGH-Linie zur Bagatell-Schwelle. Sie liegt typischerweise bei 500–1.500 €, nicht bei 3.000 €. Konkreten Schadensumfang anführen (Strukturschaden vs. Lackschaden ist ein großer Unterschied).
 
 ### Reaktion D – Vorschaden-Argument
 > *„Das Fahrzeug hatte ohnehin Vorschäden – keine zusätzliche Wertminderung."*
 
-**Deine Antwort:** Eierschalen-Schädel-Doktrin. Vorschäden mindern den Anspruch nicht – der **Verursachungs-Beitrag** des aktuellen Unfalls ist eigenständig zu bewerten.
+**Ihre Antwort:** Eierschalen-Schädel-Doktrin. Vorschäden mindern den Anspruch nicht – der **Verursachungs-Beitrag** des aktuellen Unfalls ist eigenständig zu bewerten.
 
 ---
 
@@ -212,7 +212,7 @@ Möglich – die Faustregel „ab 5 Jahre keine Wertminderung" ist keine BGH-Lin
 Typischerweise ab 1.500 € Reparaturkosten – die Bagatell-Schwelle liegt nicht bei 3.000 €, wie Versicherer oft behaupten. Bei Strukturschäden bereits ab geringeren Beträgen möglich.
 
 **Wer berechnet die Wertminderung?**
-Dein eigener Sachverständiger im Schadensgutachten, anhand anerkannter Methoden (Ruhkopf-Sahm, Halbgewachs, MFM). Versicherer-Gutachten setzen Wertminderung tendenziell deutlich niedriger an.
+Ihr eigener Sachverständiger im Schadensgutachten, anhand anerkannter Methoden (Ruhkopf-Sahm, Halbgewachs, MFM). Versicherer-Gutachten setzen Wertminderung tendenziell deutlich niedriger an.
 
 **Was kostet das Sachverständigen-Gutachten?**
 Bei unverschuldetem Unfall zahlt der Versicherer – siehe [Sachverständigen-Kosten](/haftpflicht/sv-kosten).
@@ -232,7 +232,7 @@ Ab einer Differenz von 500 € typischerweise ja. Anwaltskosten zahlt der Versic
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Wertminderungs-Streitigkeiten sind eines der ertragreichsten Felder der Schadensregulierung – Differenzen zwischen Versicherer-Position und tatsächlich Berechtigtem von 1.000–3.000 € sind keine Seltenheit. Eigenes SV-Gutachten + Anwalts-Vertretung trägt der Versicherer.
 

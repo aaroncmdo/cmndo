@@ -36,7 +36,7 @@ meta_description: "„Wir schicken unseren Vertrauens-Gutachter“? Warum Versic
 
 # „Wir schicken Ihnen unseren Vertrauens-Sachverständigen" – Decoder
 
-> **Kurz erklärt:** Versicherer-Sachverständige sind nicht neutral – ihr Auftraggeber ist der Versicherer, ihre Bewertung tendiert systematisch zu **niedrigerem Wiederbeschaffungswert, höherem Restwert, niedrigerer Wertminderung**. Du hast nach ständiger BGH-Rechtsprechung **freie Sachverständigen-Wahl** und Anspruch auf einen unabhängigen BVSK-zertifizierten Gutachter – die Kosten zahlt der Versicherer vollständig. Das Kosten-Argument („Sie sparen Geld") ist faktisch falsch.
+> **Kurz erklärt:** Versicherer-Sachverständige sind nicht neutral – ihr Auftraggeber ist der Versicherer, ihre Bewertung tendiert systematisch zu **niedrigerem Wiederbeschaffungswert, höherem Restwert, niedrigerer Wertminderung**. Sie haben nach ständiger BGH-Rechtsprechung **freie Sachverständigen-Wahl** und Anspruch auf einen unabhängigen BVSK-zertifizierten Gutachter – die Kosten zahlt der Versicherer vollständig. Das Kosten-Argument („Sie sparen Geld") ist faktisch falsch.
 
 ## Auch bekannt als
 
@@ -44,7 +44,7 @@ Vertrauens-Sachverständiger · Versicherer-Gutachter · SV-Vorschlag · Schaden
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -76,17 +76,17 @@ Wertminderung ist eine der größten Streitpositionen ([Decoder „Wertminderung
 Höherer Restwert → niedrigere Wiederbeschaffungs-Erstattung. Differenz pro Fall: oft 1.000–3.000 €.
 
 ### 4. Reparatur-Empfehlung beeinflussen
-Versicherer-SVs neigen dazu, Reparaturkosten und Wiederbeschaffungswert so zu bewerten, dass die [130 %-Regel](/decoder/reparatur-unwirtschaftlich) zugunsten Wiederbeschaffung ausgelegt wird. Damit verlierst du die Reparatur-Option.
+Versicherer-SVs neigen dazu, Reparaturkosten und Wiederbeschaffungswert so zu bewerten, dass die [130 %-Regel](/decoder/reparatur-unwirtschaftlich) zugunsten Wiederbeschaffung ausgelegt wird. Damit verlieren Sie die Reparatur-Option.
 
 ### 5. Kosten-Argument als Köder
-„Sie sparen Kosten" ist faktisch falsch – bei unverschuldetem Unfall sind SV-Kosten **vollständig erstattbar** (BGH-Linie). Du zahlst nichts, egal ob du den Versicherer-SV oder einen eigenen BVSK-SV beauftragst.
+„Sie sparen Kosten" ist faktisch falsch – bei unverschuldetem Unfall sind SV-Kosten **vollständig erstattbar** (BGH-Linie). Sie zahlen nichts, egal ob Sie den Versicherer-SV oder einen eigenen BVSK-SV beauftragen.
 
 ---
 
 ## Was die Rechtsprechung dazu sagt
 
 ### Freie Sachverständigen-Wahl
-Der BGH stellt in ständiger Rechtsprechung klar: Geschädigte haben das Recht auf **freie Sachverständigen-Wahl**. Die Versicherer-Empfehlung ist Empfehlung, keine Pflicht – du kannst sie ohne Begründung ablehnen.
+Der BGH stellt in ständiger Rechtsprechung klar: Geschädigte haben das Recht auf **freie Sachverständigen-Wahl**. Die Versicherer-Empfehlung ist Empfehlung, keine Pflicht – Sie können sie ohne Begründung ablehnen.
 
 ### SV-Kosten als Schadensposition
 Sachverständigen-Kosten sind nach § 249 BGB eigenständige Schadensposition. Bei unverschuldetem Unfall trägt sie der gegnerische Haftpflichtversicherer **vollständig** – die Höhe orientiert sich an der BVSK-Honorartabelle und ist nach BGH-Linie auch dann erstattbar, wenn das Gutachten letztlich nicht zur Klage führt.
@@ -99,7 +99,7 @@ Ein eigenes SV-Gutachten ist **prozessfest** und wird von Gerichten als Schätzg
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Eigene Sachverständigen-Wahl immer – Versicherer-SV nie. Kosten zahlt der Versicherer in beiden Fällen, aber die Bewertung kann mehrere tausend Euro Differenz machen.
@@ -158,29 +158,29 @@ Mit freundlichen Grüßen
 ### Reaktion A – SV-Kosten kürzen
 > *„Die SV-Kosten sind überhöht – wir erstatten nur [niedriger Betrag]."*
 
-**Deine Antwort:** BVSK-Honorartabelle als Referenz. Pauschalierung typisch zulässig, BGH-Linie zur Erstattbarkeit. Bei Differenz: Anwalt.
+**Ihre Antwort:** BVSK-Honorartabelle als Referenz. Pauschalierung typisch zulässig, BGH-Linie zur Erstattbarkeit. Bei Differenz: Anwalt.
 
 ### Reaktion B – Eigenes Zweit-Gutachten erstellen
 > *„Unser SV kommt zu anderen Ergebnissen – wir gehen davon aus."*
 
-**Deine Antwort:** BVSK-SV-Gutachten ist gleichwertige Schätzgrundlage. Bei Streit entscheidet Gerichts-SV – Versicherer-Gutachten hat dort niedrigeres Gewicht.
+**Ihre Antwort:** BVSK-SV-Gutachten ist gleichwertige Schätzgrundlage. Bei Streit entscheidet Gerichts-SV – Versicherer-Gutachten hat dort niedrigeres Gewicht.
 
 ### Reaktion C – Verzögerungs-Argument
 > *„Erst nach unserem SV-Termin können wir regulieren."*
 
-**Deine Antwort:** Eigenes Gutachten beschleunigt – Versicherer kann auf dieser Basis regulieren. Keine doppelte Begutachtung erforderlich.
+**Ihre Antwort:** Eigenes Gutachten beschleunigt – Versicherer kann auf dieser Basis regulieren. Keine doppelte Begutachtung erforderlich.
 
 ### Reaktion D – Pseudo-Hilfsbereitschaft
 > *„Wir wollen Ihnen helfen – unser SV vereinfacht alles."*
 
-**Deine Antwort:** Höflich ablehnen, eigene Wahl mitteilen. „Hilfsbereitschaft" ist Strategie, nicht Service.
+**Ihre Antwort:** Höflich ablehnen, eigene Wahl mitteilen. „Hilfsbereitschaft" ist Strategie, nicht Service.
 
 ---
 
 ## Häufige Fragen
 
 **Darf ich den Gutachter selbst aussuchen?**
-Ja. Du hast freie Sachverständigen-Wahl nach ständiger BGH-Rechtsprechung. Die Versicherer-Empfehlung ist eine Empfehlung, keine Pflicht.
+Ja. Sie haben freie Sachverständigen-Wahl nach ständiger BGH-Rechtsprechung. Die Versicherer-Empfehlung ist eine Empfehlung, keine Pflicht.
 
 **Was kostet ein eigener Sachverständiger?**
 Bei unverschuldetem Unfall: nichts. Die Sachverständigen-Kosten trägt die gegnerische Haftpflichtversicherung als eigenständige Schadensposition (§ 249 BGB). Honorar nach BVSK-Tabelle, typisch 300–1.200 € je nach Schaden.
@@ -195,7 +195,7 @@ Das Gutachten bleibt Schätzgrundlage für eine Klage. Bei strittiger Bewertung 
 Innerhalb von 7 Tagen nach Unfall, jedenfalls vor Reparatur-Beginn. Spätere Beauftragung ist möglich, aber Bewertungs-Genauigkeit leidet.
 
 **Was, wenn der Versicherer-SV schon am Auto war?**
-Du kannst trotzdem eigenen SV beauftragen. Das eigene Gutachten ist gleichwertig – keine Zweit-Bewertung im Sinne einer Bestätigung des Versicherer-Gutachtens.
+Sie können trotzdem eigenen SV beauftragen. Das eigene Gutachten ist gleichwertig – keine Zweit-Bewertung im Sinne einer Bestätigung des Versicherer-Gutachtens.
 
 ---
 
@@ -209,7 +209,7 @@ Du kannst trotzdem eigenen SV beauftragen. Das eigene Gutachten ist gleichwertig
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Eigener Sachverständiger ist die wichtigste einzelne Entscheidung in der Schadensregulierung. Differenz zur Versicherer-Bewertung typisch 15–40 % der Gesamterstattung. Kosten zahlt der Versicherer.
 

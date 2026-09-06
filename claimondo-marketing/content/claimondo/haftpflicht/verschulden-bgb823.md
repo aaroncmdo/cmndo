@@ -126,7 +126,7 @@ Verstoß gegen ein **Schutzgesetz**, das einem anderen schützen soll. Im Verkeh
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Bei Kfz-Verkehrsunfall reicht meist § 7 StVG. § 823 BGB ist Auffangtatbestand bei besonderen Konstellationen oder verschärfter Haftung.
@@ -166,7 +166,7 @@ Bei klassischem Kfz-Unfall: § 7 StVG (Halter) + § 18 StVG (Fahrer). Bei Sonder
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

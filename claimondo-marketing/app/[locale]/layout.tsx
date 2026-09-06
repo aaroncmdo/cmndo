@@ -33,15 +33,28 @@ import '../globals.css'
 // Stream 6: Tracking/Consent (host-gated ueber lib/analytics/consent) — GA4/gtag
 // mit Google Consent Mode v2 (Default 'denied'), Ahrefs (cookielos),
 // ConsentManager, ClarityInit, PhoneClickTracker.
+// ⚠ `cyrillic` MUSS mit in die Subsets. `next/font` laedt AUSSCHLIESSLICH die hier
+// deklarierten Subsets — beide Familien tragen Kyrillisch, ohne die Angabe kommt es aber
+// nie beim Browser an. Auf prod gemessen (06.09., document.fonts.check gegen die
+// deklarierte Familie): latein JA · arabisch JA · tuerkisch JA · **kyrillisch NEIN**.
+// Russischer Text war dadurch lesbar, aber in der System-Schrift (Segoe UI, SF Pro,
+// Roboto tragen alle Kyrillisch) — kein Funktionsfehler, ein Markenfehler.
+//
+// Bei drei russischen Seiten sah das niemand. Mit den 92 uebersetzten Fachtexten
+// (Content-i18n, 06.09.) ist es sichtbare Flaeche.
+//
+// KOSTET NICHTS auf den uebrigen Seiten: Google Fonts liefert je Subset eine eigene
+// Datei mit `unicode-range`; der Browser holt das kyrillische Paket nur, wenn auf der
+// Seite auch kyrillische Zeichen stehen. Deutsche und englische Seiten laden unveraendert.
 const montserrat = Montserrat({
-  subsets: ['latin'],
+  subsets: ['latin', 'cyrillic'],
   weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-montserrat',
 })
 
 const notoSans = Noto_Sans({
-  subsets: ['latin'],
+  subsets: ['latin', 'cyrillic'],
   weight: ['400', '500', '600'],
   display: 'swap',
   variable: '--font-noto-sans',
