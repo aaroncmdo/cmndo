@@ -31,7 +31,7 @@ export function KundenstoryEmail({ copy, merge }: Props) {
         <Button href={merge.portalLink}>{copy.cta_label}</Button>
 
         <Paragraph>
-          Fragen? {merge.ansprechpartner} hilft dir gerne weiter unter{' '}
+          Fragen? {merge.ansprechpartner} hilft Ihnen gerne weiter unter{' '}
           <a href={`tel:${merge.tel}`} style={{ color: email.color.ondo }}>{merge.tel}</a>.
         </Paragraph>
       </Card>

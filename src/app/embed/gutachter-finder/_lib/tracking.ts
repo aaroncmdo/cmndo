@@ -84,7 +84,7 @@ export function track(event: GfEvent, extra?: Record<string, unknown>): void {
 
 /**
  * Enhanced-Conversions-User-Data: ROHE (ungehashte) E-Mail/Telefon/Name in den dataLayer — GTM
- * hasht clientseitig SHA-256, BEVOR es an Google geht (und nur wenn dein Consent es zulässt).
+ * hasht clientseitig SHA-256, BEVOR es an Google geht (und nur wenn Ihr Consent es zulässt).
  * Struktur = Googles `user_data` (email + phone_number E.164 + address{first/last_name}). Nur
  * nicht-leere Felder; `undefined` wenn nichts da ist (dann kein user_data im Push).
  */

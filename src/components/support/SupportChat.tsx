@@ -66,7 +66,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
         {messages.length === 0 && !error && (
           <div className="text-sm text-claimondo-ondo">
             <p className="font-medium text-claimondo-navy mb-1">
-              Hi{userName ? ' ' + userName.split(' ')[0] : ''} — was kann ich für dich tun?
+              Hi{userName ? ' ' + userName.split(' ')[0] : ''} — was kann ich für Sie tun?
             </p>
             <p className="text-xs text-claimondo-ondo">
               Beschreibe das Problem oder den Wunsch — ich prüfe, ob es schon ein Ticket gibt,

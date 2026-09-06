@@ -66,7 +66,7 @@ export function SvMahnungSaeumnisEmail(props: Props) {
             </Paragraph>
             <Paragraph>
               Falls bis zum {formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())} keine Zahlung eingeht,
-              setzen wir deinen Portal-Zugang aus und übergeben den Fall an unser Inkasso.
+              setzen wir Ihren Portal-Zugang aus und übergeben den Fall an unser Inkasso.
             </Paragraph>
           </>
         )
@@ -79,8 +79,8 @@ export function SvMahnungSaeumnisEmail(props: Props) {
             </Paragraph>
             <Paragraph>
               Wenn bis zum {formatDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString())} keine Zahlung eingeht,
-              übergeben wir den Vorgang an unser Inkasso und setzen deinen Portal-Zugang aus.
-              Etwaige zusätzliche Kosten gehen zu deinen Lasten.
+              übergeben wir den Vorgang an unser Inkasso und setzen Ihren Portal-Zugang aus.
+              Etwaige zusätzliche Kosten gehen zu Ihren Lasten.
             </Paragraph>
           </>
         )
