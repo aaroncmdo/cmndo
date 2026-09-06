@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -23,7 +24,7 @@ import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   metaDescriptionFromSnippet,
-  getHaftpflichtSpokes,
+  getLocalizedHaftpflichtSpoke,
   clusterLabel,
   extractSchemaJson,
   stripSchemaSection,
@@ -41,14 +42,12 @@ const WA = WHATSAPP_HREF
 // Unbekannte Slugs -> echter 404 am Router (kein Soft-404), statt die Seite zu rendern.
 // Voll dynamisch: das [locale]-Layout nutzt headers() (Tracking) -> SSG nicht moeglich (DYNAMIC_SERVER_USAGE). Daher KEIN generateStaticParams; notFound() unten faengt unbekannte Slugs (404). On-demand-Render aus STAEDTE/MDX.
 
-function getAsset(slug: string) {
-  return getHaftpflichtSpokes().find((a) => a.slug === slug)
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const a = getAsset(slug)
-  if (!a) return {}
+  const locale = await getLocale()
+  const res = getLocalizedHaftpflichtSpoke(slug, locale)
+  if (!res) return {}
+  const a = res.asset
   return {
     // Kurzer SERP-Titel wenn im Frontmatter gesetzt; sonst die H1 (= a.title).
     // openGraph.title unten behaelt bewusst den vollen Titel — dort ist mehr Platz.
@@ -70,8 +69,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const a = getAsset(slug)
-  if (!a) notFound()
+  const locale = await getLocale()
+  const res = getLocalizedHaftpflichtSpoke(slug, locale)
+  if (!res) notFound()
+  // ⚠ OHNE DIESEN AUFRUF liegen die Uebersetzungen ungenutzt im Repo. `localizeAsset`
+  // existiert seit Doc 48 Phase 2 und hatte bis 06.09.2026 NULL Aufrufer — die Seite
+  // holte den deutschen Text und zeigte darueber den Sprachhinweis, unabhaengig davon,
+  // ob eine Uebersetzung vorlag. Gefunden erst durch den Regel-4-Smoke auf prod:
+  // /en/haftpflicht/nutzungsausfall trug lang="en" und einen komplett deutschen Artikel.
+  const { asset: a, translated } = res
 
   const cleaned = stripLeadingSnippet(stripSchemaSection(a.body))
   const headings = extractHeadings(cleaned)
@@ -91,7 +97,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1140px] px-6 py-10">
-        <MdxLanguageBanner />
+        <MdxLanguageBanner translated={translated} />
         <AssetHero
           title={a.title}
           snippet={a.snippet}
@@ -134,11 +140,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           (fixed bottom-4); zwei feste Leisten am unteren Rand wuerden sich
           gegenseitig verdecken. Auf Mobil fuehren Anker-Block und Fusszeile
           zum Guide. */}
-      {/* mobilBand: seit 06.09.2026 wieder an (Default `true`). Vorher stand hier `false`,
-          und zusammen mit dem Mobil-Riegel im Ausloeser kam auf dem Handy nie etwas — das
-          fertig gebaute Band war doppelt unerreichbar. Es ist eine Leiste am unteren Rand
-          (`md:hidden`), kein Overlay; der Dialog bleibt per `istDesktop` mobil ungemountet. */}
-      <GuidePopover cluster={a.cluster ?? null} />
+      <GuidePopover mobilBand={false} cluster={a.cluster ?? null} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>

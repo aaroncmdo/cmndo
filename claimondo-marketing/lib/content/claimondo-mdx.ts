@@ -313,6 +313,22 @@ export function getLocalizedDecoder(
   return localizeAsset(base, locale)
 }
 
+// ⚠ Das Pendant fuer die Haftpflicht-Spokes hat bis zum 06.09.2026 GEFEHLT — und damit
+// blieben die 95 uebersetzten Fachartikel unsichtbar. Der Decoder war verdrahtet, die
+// Haftpflicht-Route holte den deutschen Text direkt ueber getHaftpflichtSpokes() und
+// zeigte darueber den Sprachhinweis, unabhaengig davon, ob eine Uebersetzung vorlag.
+// Weil der Decoder funktionierte, sah die Sache von aussen intakt aus.
+// Gefunden hat es der Regel-4-Smoke auf prod: /en/haftpflicht/nutzungsausfall trug
+// lang="en" und einen vollstaendig deutschen Artikel.
+export function getLocalizedHaftpflichtSpoke(
+  slug: string,
+  locale: string,
+): { asset: ClaimondoAsset; translated: boolean } | null {
+  const base = getHaftpflichtSpokes().find((a) => a.slug === slug)
+  if (!base) return null
+  return localizeAsset(base, locale)
+}
+
 /** Spokes nach Cluster gruppieren (H1, H2, H3, H4, H6, H7) für llms.txt-Hierarchie. */
 export function groupSpokesByCluster(): Record<string, ClaimondoAsset[]> {
   const map: Record<string, ClaimondoAsset[]> = {}
