@@ -67,14 +67,14 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
   if (stage === 'sent')
     return (
       <p className="rounded-ios-md border border-claimondo-border bg-white p-4 text-sm text-claimondo-shield">
-        Wir haben dir einen Anmelde-Link per E-Mail geschickt. Bitte prüfe dein Postfach.
+        Wir haben Ihnen einen Anmelde-Link per E-Mail geschickt. Bitte prüfen Sie Ihr Postfach.
       </p>
     )
 
   if (stage === 'posted')
     return (
       <p className="rounded-ios-md border border-claimondo-border bg-white p-4 text-sm text-claimondo-shield">
-        Dein Beitrag wurde veröffentlicht. Danke für deine Beteiligung!
+        Ihr Beitrag wurde veröffentlicht. Danke für Ihre Beteiligung!
       </p>
     )
 
@@ -107,7 +107,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               name="email"
               type="email"
               required
-              placeholder="Deine E-Mail-Adresse"
+              placeholder="Ihre E-Mail-Adresse"
               className={input}
             />
           </>
@@ -115,7 +115,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
 
         {stage === 'username' && (
           <>
-            <p className="text-xs text-claimondo-shield">Bitte wähle einen Nutzernamen:</p>
+            <p className="text-xs text-claimondo-shield">Bitte wählen Sie einen Nutzernamen:</p>
             <input
               name="username"
               required
@@ -139,11 +139,11 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               onChange={(e) => setBody(e.target.value)}
               maxLength={5000}
               rows={4}
-              placeholder="Was möchtest du mit der Community teilen? (max. 5.000 Zeichen)"
+              placeholder="Was möchten Sie mit der Community teilen? (max. 5.000 Zeichen)"
               className={input}
             />
             <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/75">
-              Dein Beitrag erscheint <span className="font-medium">öffentlich</span> in der Community.
+              Ihr Beitrag erscheint <span className="font-medium">öffentlich</span> in der Community.
             </p>
             <div>
               <p className="mb-1.5 text-[0.75rem] font-medium text-claimondo-navy">Themen (optional):</p>
@@ -166,7 +166,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               </div>
             </div>
             <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/70">
-              Bitte beachte die{' '}
+              Bitte beachten Sie die{' '}
               <a href="/community-regeln" className="underline hover:text-claimondo-shield">
                 Community-Regeln
               </a>{' '}

@@ -30,8 +30,8 @@ export const metadata: Metadata = {
 
 const VERBOTEN: { titel: string; text: string }[] = [
   {
-    titel: 'Keine sensiblen Daten über dich selbst',
-    text: 'Verzichte auf Gesundheits- und Verletzungsdetails, Finanzangaben oder genaue Angaben zu deinem Fall. Kommentare sind öffentlich und werden von Suchmaschinen erfasst.',
+    titel: 'Keine sensiblen Daten über sich selbst',
+    text: 'Verzichten Sie auf Gesundheits- und Verletzungsdetails, Finanzangaben oder genaue Angaben zu Ihrem Fall. Kommentare sind öffentlich und werden von Suchmaschinen erfasst.',
   },
   {
     titel: 'Keine Daten über andere Personen',
@@ -39,7 +39,7 @@ const VERBOTEN: { titel: string; text: string }[] = [
   },
   {
     titel: 'Kein Rechtsrat',
-    text: 'Kommentare ersetzen keine anwaltliche Beratung. Bitte gib anderen keine verbindlichen rechtlichen Handlungsempfehlungen.',
+    text: 'Kommentare ersetzen keine anwaltliche Beratung. Bitte geben Sie anderen keine verbindlichen rechtlichen Handlungsempfehlungen.',
   },
   {
     titel: 'Keine Werbung, kein Spam, keine Links',
@@ -73,7 +73,7 @@ export default function Page() {
             Kommentar-Regeln
           </h1>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Unter unseren Wissens-Artikeln kannst du kommentieren, Fragen stellen und Erfahrungen
+            Unter unseren Wissens-Artikeln können Sie kommentieren, Fragen stellen und Erfahrungen
             teilen. Damit das ein hilfreicher und respektvoller Ort bleibt, gelten die folgenden
             Regeln. <strong className="text-claimondo-navy">Jeder Kommentar wird vor der
             Veröffentlichung geprüft.</strong>
@@ -126,7 +126,7 @@ export default function Page() {
             Prüfung &amp; Melden
           </h2>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-claimondo-shield">
-            Wir prüfen jeden Kommentar vor der Veröffentlichung. Veröffentlichte Kommentare kannst du
+            Wir prüfen jeden Kommentar vor der Veröffentlichung. Veröffentlichte Kommentare können Sie
             über die Funktion „Melden" kennzeichnen – wir sehen sie uns an und entfernen
             Regelverstöße. Konten, die wiederholt gegen diese Regeln verstoßen, können gesperrt
             werden.
@@ -135,7 +135,7 @@ export default function Page() {
 
         <p className="mt-9 border-t border-claimondo-border pt-6 text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
           Kommentare geben die Meinung der Verfasser:innen wieder, nicht die von Claimondo. Wie wir
-          deine Daten verarbeiten, steht in der{' '}
+          Ihre Daten verarbeiten, steht in der{' '}
           <Link href="/datenschutz" className="underline hover:text-claimondo-ondo">
             Datenschutzerklärung
           </Link>

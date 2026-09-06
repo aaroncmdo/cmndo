@@ -37,7 +37,7 @@ meta_description: "Anwaltskosten nach unverschuldetem Unfall zahlt die gegnerisc
 
 # Anwaltskosten beim Verkehrsunfall – wer sie zahlt und wie sie berechnet werden
 
-> **Kurz erklärt:** Bei unverschuldetem Verkehrsunfall sind Anwaltskosten **eigenständige Schadensposition** und vom gegnerischen Haftpflichtversicherer **vollständig zu erstatten** (BGH, Urteil vom 08.07.2014, VI ZR 235/13). Berechnung nach Rechtsanwaltsvergütungsgesetz (RVG): Geschäftsgebühr typischerweise **1,3** (Standard) bis **2,3** (bei besonderer Schwierigkeit), bezogen auf den Streitwert (Schadenshöhe). Für dich heißt das: Du zahlst faktisch 0 € für anwaltliche Vertretung – egal wie kompliziert die Sache wird.
+> **Kurz erklärt:** Bei unverschuldetem Verkehrsunfall sind Anwaltskosten **eigenständige Schadensposition** und vom gegnerischen Haftpflichtversicherer **vollständig zu erstatten** (BGH, Urteil vom 08.07.2014, VI ZR 235/13). Berechnung nach Rechtsanwaltsvergütungsgesetz (RVG): Geschäftsgebühr typischerweise **1,3** (Standard) bis **2,3** (bei besonderer Schwierigkeit), bezogen auf den Streitwert (Schadenshöhe). Für Sie heißt das: Sie zahlen faktisch 0 € für anwaltliche Vertretung – egal wie kompliziert die Sache wird.
 
 ## Auch bekannt als
 
@@ -51,7 +51,7 @@ Bei klarer Haftung sind Anwaltskosten beim Verkehrsunfall vollständig vom gegne
 
 ## In drei Sätzen erklärt
 
-Die Erstattung der Anwaltskosten ist eine der wichtigsten BGH-Linien für Geschädigte: Mit Urteil vom 08.07.2014 (VI ZR 235/13) hat der Bundesgerichtshof bestätigt, dass die Beauftragung eines Anwalts auch bei einfacher Sachlage **erforderlich** im Sinne von § 249 BGB ist und die Kosten daher voll erstattbar sind. Die Berechnung erfolgt nach RVG – Standard-Geschäftsgebühr 1,3 bezogen auf den Streitwert (= Schadenshöhe), bei besonders schwierigen Sachen (Personenschäden, Spätfolgen, mehrere Beteiligte) bis 2,3. Bei Mitverschulden anteilig – bei klarer Haftung vollständig: Du gehst kein Kostenrisiko ein, wenn du jetzt einen Anwalt einschaltest.
+Die Erstattung der Anwaltskosten ist eine der wichtigsten BGH-Linien für Geschädigte: Mit Urteil vom 08.07.2014 (VI ZR 235/13) hat der Bundesgerichtshof bestätigt, dass die Beauftragung eines Anwalts auch bei einfacher Sachlage **erforderlich** im Sinne von § 249 BGB ist und die Kosten daher voll erstattbar sind. Die Berechnung erfolgt nach RVG – Standard-Geschäftsgebühr 1,3 bezogen auf den Streitwert (= Schadenshöhe), bei besonders schwierigen Sachen (Personenschäden, Spätfolgen, mehrere Beteiligte) bis 2,3. Bei Mitverschulden anteilig – bei klarer Haftung vollständig: Sie gehen kein Kostenrisiko ein, wenn Sie jetzt einen Anwalt einschalten.
 
 ## Die fünf Schlüsselzahlen
 
@@ -59,13 +59,13 @@ Die Erstattung der Anwaltskosten ist eine der wichtigsten BGH-Linien für Gesch�
 - **BGH VI ZR 235/13** vom 08.07.2014 (Grundsatz-Entscheidung)
 - **1,3** Standard-Geschäftsgebühr (Schwellengebühr)
 - **2,3** Höchst-Geschäftsgebühr bei besonderer Schwierigkeit
-- **0 €** Kosten für dich bei unverschuldetem Unfall
+- **0 €** Kosten für Sie bei unverschuldetem Unfall
 
 ---
 
 ## Wie die Erstattung rechtlich begründet ist
 
-Nach § 249 BGB schuldet der Schädiger Naturalrestitution – er muss dich so stellen, wie du ohne Unfall stehen würdest. Anwaltskosten gehören dazu, wenn die Einschaltung **erforderlich** war.
+Nach § 249 BGB schuldet der Schädiger Naturalrestitution – er muss Sie so stellen, wie Sie ohne Unfall stehen würden. Anwaltskosten gehören dazu, wenn die Einschaltung **erforderlich** war.
 
 ### Der BGH-Maßstab – „erforderlich" ist weit
 
@@ -139,10 +139,10 @@ In diesen Fällen rechnet ein erfahrener Verkehrsrechts-Anwalt eine **1,5- bis 2
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Bei unverschuldetem Unfall: **Anwalt einschalten kostet dich nichts**. Du gehst kein finanzielles Risiko ein – der Versicherer zahlt. Wer das nicht nutzt, verschenkt im Schnitt 20–40 % der berechtigten Forderung.
+Bei unverschuldetem Unfall: **Anwalt einschalten kostet Sie nichts**. Sie gehen kein finanzielles Risiko ein – der Versicherer zahlt. Wer das nicht nutzt, verschenkt im Schnitt 20–40 % der berechtigten Forderung.
 
 ### 🛠 Wann Anwalt zwingend
 - Bei **jedem Personenschaden** – auch bei vermeintlich leichten Verletzungen (Spätfolgen!)
@@ -163,7 +163,7 @@ Bei unverschuldetem Unfall: **Anwalt einschalten kostet dich nichts**. Du gehst 
 1. **Vollmacht unterschreiben** – Bearbeitung kann beginnen
 2. **Akte übergeben** – Unfallbericht, Schadensanzeige, Gutachten, ärztliche Atteste
 3. **Anspruchsschreiben durch Anwalt** – mit 4-Wochen-Frist
-4. **Direktabrechnung** Anwalt ↔ Versicherer – du musst nicht vorfinanzieren
+4. **Direktabrechnung** Anwalt ↔ Versicherer – Sie müssen nicht vorfinanzieren
 
 ---
 
@@ -190,7 +190,7 @@ Bei tatsächlich festgestellter Quote: zutreffend. Aber: Eine pauschale Versiche
 ## Häufige Fragen
 
 **Wer zahlt den Anwalt bei einem Verkehrsunfall?**
-Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer – als eigenständige Schadensposition nach § 249 BGB und BGH VI ZR 235/13. Du gehst kein Kostenrisiko ein.
+Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer – als eigenständige Schadensposition nach § 249 BGB und BGH VI ZR 235/13. Sie gehen kein Kostenrisiko ein.
 
 **Wie hoch sind die Anwaltskosten?**
 Berechnung nach RVG: Geschäftsgebühr 1,3 (Standard) bis 2,3 (komplexe Sachen) auf den Streitwert, plus 20 € Pauschale und 19 % MwSt. Bei 15.000 € Schaden: ca. 1.178 € Gesamtkosten.
@@ -205,7 +205,7 @@ Bei festgestellter Mitverschuldensquote anteilige Erstattung. Beispiel: Bei 30 %
 Ja. Bei erfolgreicher Klage trägt der Versicherer Gerichtskosten und Anwaltskosten beider Instanzen. Bei teilweisem Erfolg anteilig nach Klagesumme-Verhältnis (§ 92 ZPO).
 
 **Was, wenn ich rechtsschutzversichert bin?**
-Bei eigener Verkehrs-Rechtsschutzversicherung: deine Versicherung übernimmt zunächst die Anwaltskosten, holt sich diese später vom gegnerischen Haftpflicht-Versicherer zurück (Forderungsübergang, § 86 VVG analog). Für dich ist die Wirkung gleich: kein Kostenrisiko.
+Bei eigener Verkehrs-Rechtsschutzversicherung: Ihre Versicherung übernimmt zunächst die Anwaltskosten, holt sich diese später vom gegnerischen Haftpflicht-Versicherer zurück (Forderungsübergang, § 86 VVG analog). Für Sie ist die Wirkung gleich: kein Kostenrisiko.
 
 ---
 
@@ -219,9 +219,9 @@ Bei eigener Verkehrs-Rechtsschutzversicherung: deine Versicherung übernimmt zun
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Anwaltskosten sind das stärkste Argument für eine spezialisierte Vertretung – sie kosten dich nichts, erhöhen aber die durchgesetzte Forderung statistisch um 20–40 %.
+Anwaltskosten sind das stärkste Argument für eine spezialisierte Vertretung – sie kosten Sie nichts, erhöhen aber die durchgesetzte Forderung statistisch um 20–40 %.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -267,11 +267,11 @@ Anwaltskosten sind das stärkste Argument für eine spezialisierte Vertretung �
     {
       "@type": "FAQPage",
       "mainEntity": [
-        {"@type": "Question", "name": "Wer zahlt den Anwalt bei einem Verkehrsunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer — als eigenständige Schadensposition nach § 249 BGB und BGH VI ZR 235/13. Du gehst kein Kostenrisiko ein."}},
+        {"@type": "Question", "name": "Wer zahlt den Anwalt bei einem Verkehrsunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer — als eigenständige Schadensposition nach § 249 BGB und BGH VI ZR 235/13. Sie gehen kein Kostenrisiko ein."}},
         {"@type": "Question", "name": "Wie hoch sind die Anwaltskosten?", "acceptedAnswer": {"@type": "Answer", "text": "Berechnung nach RVG: Geschäftsgebühr 1,3 (Standard) bis 2,3 (komplexe Sachen) auf den Streitwert, plus 20 € Pauschale und 19 % MwSt. Bei 15.000 € Schaden ca. 1.178 € Gesamtkosten."}},
         {"@type": "Question", "name": "Muss ich überhaupt einen Anwalt nehmen?", "acceptedAnswer": {"@type": "Answer", "text": "Pflicht nicht, aber dringend empfohlen: ohne Anwalt werden statistisch 20–40 % der berechtigten Forderungen abgeschnitten. Und die Kosten zahlt ohnehin der Versicherer."}},
         {"@type": "Question", "name": "Was, wenn ich Mitverschulden habe?", "acceptedAnswer": {"@type": "Answer", "text": "Bei festgestellter Mitverschuldensquote anteilige Erstattung. Bei 30 % Mitverschulden trägt der Versicherer 70 % der Anwaltskosten. Bei klarer Haftung gegen den Schädiger: 100 %."}},
-        {"@type": "Question", "name": "Was, wenn ich rechtsschutzversichert bin?", "acceptedAnswer": {"@type": "Answer", "text": "Die Rechtsschutzversicherung übernimmt zunächst die Anwaltskosten und holt sie sich später vom gegnerischen Haftpflicht-Versicherer zurück. Für dich ist die Wirkung gleich: kein Kostenrisiko."}}
+        {"@type": "Question", "name": "Was, wenn ich rechtsschutzversichert bin?", "acceptedAnswer": {"@type": "Answer", "text": "Die Rechtsschutzversicherung übernimmt zunächst die Anwaltskosten und holt sie sich später vom gegnerischen Haftpflicht-Versicherer zurück. Für Sie ist die Wirkung gleich: kein Kostenrisiko."}}
       ]
     }
   ]

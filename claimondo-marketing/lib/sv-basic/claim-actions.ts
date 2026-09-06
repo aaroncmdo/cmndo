@@ -193,7 +193,7 @@ export async function beanspracheSvLead(input: {
     return {
       ok: false,
       error:
-        'Zu dieser E-Mail existiert bereits ein Konto. Bitte melde dich an.',
+        'Zu dieser E-Mail existiert bereits ein Konto. Bitte melden Sie sich an.',
     }
   }
 
@@ -454,7 +454,7 @@ export async function registriereSvBasicNeu(input: {
   if (existingProfile) {
     return {
       ok: false,
-      error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melde dich an.',
+      error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melden Sie sich an.',
     }
   }
 

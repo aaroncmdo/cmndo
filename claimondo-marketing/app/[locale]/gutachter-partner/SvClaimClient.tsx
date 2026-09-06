@@ -91,10 +91,10 @@ function SucheSchritt({
   return (
     <Card p={6}>
       <h2 className="mb-1 text-lg font-bold text-claimondo-navy">
-        Finde deinen Eintrag
+        Finden Sie Ihren Eintrag
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Suche nach deinem Namen, deiner Firma, PLZ oder DAT-Nummer.
+        Suchen Sie nach Ihrem Namen, Ihrer Firma, PLZ oder DAT-Nummer.
       </p>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -233,7 +233,7 @@ function BeanspruchenSchritt({
         Eintrag beanspruchen
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Bestätige deine Kontaktdaten, um diesen Eintrag zu übernehmen.
+        Bestätigen Sie Ihre Kontaktdaten, um diesen Eintrag zu übernehmen.
       </p>
 
       {/* Gewählter Kandidat – read-only */}
@@ -258,7 +258,7 @@ function BeanspruchenSchritt({
             value={email}
             onChangeText={setEmail}
             inputType="email"
-            placeholder="deine@email.de"
+            placeholder="Ihre@email.de"
             size="sm"
             ariaLabel="E-Mail-Adresse"
           />
@@ -362,7 +362,7 @@ function NeuSchritt({
         Neu registrieren
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Lege ein neues Profil an. Nach unserer Prüfung schalten wir dich frei.
+        Legen Sie ein neues Profil an. Nach unserer Prüfung schalten wir Sie frei.
       </p>
 
       <div className="flex flex-col gap-4">
@@ -400,7 +400,7 @@ function NeuSchritt({
             value={email}
             onChangeText={setEmail}
             inputType="email"
-            placeholder="deine@email.de"
+            placeholder="Ihre@email.de"
             size="sm"
             ariaLabel="E-Mail-Adresse"
           />
@@ -455,7 +455,7 @@ function NeuSchritt({
             ariaLabel="DAT-Nummer"
           />
           <p className="mt-1.5 text-xs text-claimondo-shield">
-            Deine DAT-Sachverständigennummer – wird zur Identitätsprüfung benötigt.
+            Ihre DAT-Sachverständigennummer – wird zur Identitätsprüfung benötigt.
           </p>
         </label>
       </div>
@@ -476,7 +476,7 @@ function NeuSchritt({
       </div>
 
       <p className="mt-4 text-xs text-claimondo-shield">
-        Mit dem Absenden stimmst du unseren{' '}
+        Mit dem Absenden stimmen Sie unseren{' '}
         <a href="/agb" className="underline hover:text-claimondo-ondo">Nutzungsbedingungen</a>{' '}
         und der{' '}
         <a href="/datenschutz" className="underline hover:text-claimondo-ondo">Datenschutzerklärung</a>{' '}
@@ -513,23 +513,23 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
         <p className="text-sm text-claimondo-shield leading-relaxed max-w-sm">
           {emailSent ? (
             <>
-              Wir haben dir einen Link an{' '}
+              Wir haben Ihnen einen Link an{' '}
               <strong className="text-claimondo-navy">{email}</strong> geschickt —
-              damit legst du dein Passwort fest. Nach unserer Prüfung (innerhalb von
-              48 Stunden) schalten wir dein Profil frei.
+              damit legen Sie Ihr Passwort fest. Nach unserer Prüfung (innerhalb von
+              48 Stunden) schalten wir Ihr Profil frei.
             </>
           ) : (
             <>
-              Dein Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
-              nicht zugestellt werden – du kannst dein Passwort jederzeit über
+              Ihr Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
+              nicht zugestellt werden – Sie können Ihr Passwort jederzeit über
               „Passwort vergessen" mit der Adresse{' '}
               <strong className="text-claimondo-navy">{email}</strong> setzen. Nach
-              unserer Prüfung (innerhalb von 48 Stunden) schalten wir dein Profil frei.
+              unserer Prüfung (innerhalb von 48 Stunden) schalten wir Ihr Profil frei.
             </>
           )}
         </p>
         <p className="text-xs text-claimondo-shield/70">
-          Bitte prüfe auch deinen Spam-Ordner.
+          Bitte prüfen Sie auch Ihren Spam-Ordner.
         </p>
       </div>
     </Card>

@@ -121,7 +121,7 @@ Die [Verjährung](/haftpflicht/verjaehrung-bgb195) läuft **kontinuierlich weite
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Erben-Ansprüche **und** Hinterbliebenen-Ansprüche prüfen – sie sind unabhängig und kumulierbar.
@@ -168,7 +168,7 @@ Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche E
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

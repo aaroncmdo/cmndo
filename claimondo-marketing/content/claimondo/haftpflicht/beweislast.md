@@ -34,7 +34,7 @@ meta_description: "Beweislast im Verkehrsunfall: Sie beweisen Unfall, Schaden un
 
 # Beweislast im Verkehrsunfall – wer muss was beweisen
 
-> **Kurz erklärt:** Im Zivilprozess gilt: Jede Seite muss die für ihre Position günstigen Tatsachen beweisen. Für deine Schadensregulierung heißt das: Du beweist Unfall und Schadenshöhe – der Versicherer beweist behauptete Mitverschuldens-Anteile. In Anscheinsbeweis-Konstellationen ist die Beweis-Last sogar **zu deinen Gunsten** verlagert. Die saubere Beweissicherung in den ersten 48 Stunden nach Unfall entscheidet oft den späteren Streit.
+> **Kurz erklärt:** Im Zivilprozess gilt: Jede Seite muss die für ihre Position günstigen Tatsachen beweisen. Für Ihre Schadensregulierung heißt das: Sie beweisen Unfall und Schadenshöhe – der Versicherer beweist behauptete Mitverschuldens-Anteile. In Anscheinsbeweis-Konstellationen ist die Beweis-Last sogar **zu Ihren Gunsten** verlagert. Die saubere Beweissicherung in den ersten 48 Stunden nach Unfall entscheidet oft den späteren Streit.
 
 ## Auch bekannt als
 
@@ -48,11 +48,11 @@ Beweislast bedeutet: Wer eine ihm günstige Tatsache behauptet, muss sie auch be
 
 ## In drei Sätzen erklärt
 
-Im Schadensersatzprozess nach Verkehrsunfall trägt jede Partei die Beweislast für die ihr günstigen Tatsachen: der Geschädigte beweist Unfall-Geschehen und Schadenshöhe, der Versicherer beweist behauptete Mitverschuldens-Anteile oder Schadensminderungs-Verstöße. Bei typisierten Konstellationen ([Anscheinsbeweis](/haftpflicht/anscheinsbeweis)) ist die Beweis-Last umgekehrt – du musst nichts beweisen, der Gegner muss konkret erschüttern. Praktisch entscheidet die **Qualität der frühen Beweissicherung** (Polizeibericht, Zeugen, Fotos, Atteste) oft, wer am Ende durchsetzt – gut dokumentierte Sachverhalte werden in der außergerichtlichen Korrespondenz seltener strittig.
+Im Schadensersatzprozess nach Verkehrsunfall trägt jede Partei die Beweislast für die ihr günstigen Tatsachen: der Geschädigte beweist Unfall-Geschehen und Schadenshöhe, der Versicherer beweist behauptete Mitverschuldens-Anteile oder Schadensminderungs-Verstöße. Bei typisierten Konstellationen ([Anscheinsbeweis](/haftpflicht/anscheinsbeweis)) ist die Beweis-Last umgekehrt – Sie müssen nichts beweisen, der Gegner muss konkret erschüttern. Praktisch entscheidet die **Qualität der frühen Beweissicherung** (Polizeibericht, Zeugen, Fotos, Atteste) oft, wer am Ende durchsetzt – gut dokumentierte Sachverhalte werden in der außergerichtlichen Korrespondenz seltener strittig.
 
 ## Die fünf Schlüsselzahlen
 
-- **3 Säulen** deiner Beweislast: Unfall + Schadenshöhe + Kausalität
+- **3 Säulen** Ihrer Beweislast: Unfall + Schadenshöhe + Kausalität
 - **3 Säulen** der Versicherer-Beweislast: Mitverschulden + Schadensminderung + Entlastungsgründe
 - **§ 286 ZPO** Beweismaß: volle richterliche Überzeugung
 - **§ 287 ZPO** erleichtertes Beweismaß für Schadenshöhe
@@ -86,7 +86,7 @@ Für die **Höhe** des Schadens gilt erleichtert: Der Richter schätzt nach frei
 
 ---
 
-## Was deine Beweislast als Geschädigter umfasst
+## Was Ihre Beweislast als Geschädigter umfasst
 
 ### 1. Unfall-Geschehen
 Wer ist beteiligt, wann, wo, wie?
@@ -133,17 +133,17 @@ Will der Versicherer eine [Mitverschuldens-Quote](/haftpflicht/mitverschulden-bg
 Fehlt einer davon, ist die Quote unbegründet.
 
 ### 2. Schadensminderungs-Verstoß (§ 254 Abs. 2 BGB)
-Behauptet der Versicherer, du hättest den Schaden mindern können (z. B. zu lange Mietwagen-Anmietung, vernachlässigte Therapie), trägt er die Beweislast – was wäre die zumutbare Alternative gewesen, warum hast du sie nicht genutzt.
+Behauptet der Versicherer, Sie hätten den Schaden mindern können (z. B. zu lange Mietwagen-Anmietung, vernachlässigte Therapie), trägt er die Beweislast – was wäre die zumutbare Alternative gewesen, warum haben Sie sie nicht genutzt.
 
 ### 3. Entlastungsgründe (z. B. höhere Gewalt § 7 Abs. 2 StVG)
 Sehr selten erfolgreich – Wildunfälle oder unvermeidbare Wetter-Konstellationen werden im Verkehrsrecht eng ausgelegt.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall sind kritisch – alles, was du dort nicht dokumentierst, lässt sich später schwer rekonstruieren.
+Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall sind kritisch – alles, was Sie dort nicht dokumentiern, lässt sich später schwer rekonstruieren.
 
 ### 🛠 Vier Schritte zur sauberen Beweissicherung
 
@@ -154,7 +154,7 @@ Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall s
 - Unfall-Skizze
 
 **2. Am selben Tag (Stunden)**
-- Notaufnahme oder Hausarzt, **auch wenn du dich okay fühlst** – Adrenalin maskiert Schmerz
+- Notaufnahme oder Hausarzt, **auch wenn Sie sich okay fühlen** – Adrenalin maskiert Schmerz
 - Schaden-Anzeige an eigene Versicherung
 - Erstes Symptom-Tagebuch beginnen
 
@@ -174,7 +174,7 @@ Beweise verlieren mit der Zeit Beweis-Kraft. Die ersten 48 Stunden nach Unfall s
 
 > *„Sie müssen das beweisen – wir gehen davon aus, dass…"*
 
-Bei Anscheinsbeweis-Konstellation: Beweis-Last beim Versicherer, nicht bei dir. Schriftlich darauf hinweisen.
+Bei Anscheinsbeweis-Konstellation: Beweis-Last beim Versicherer, nicht bei Ihnen. Schriftlich darauf hinweisen.
 
 > *„Ohne Beweis keine Erstattung."*
 
@@ -195,7 +195,7 @@ In der Grundregel trägt der Geschädigte die Beweislast für das Verschulden de
 Polizeibericht, Sachverständigen-Gutachten, ärztliche Atteste, Lichtbilder, Zeugen-Adressen. Bei Personenschaden zusätzlich Krankschreibungen und Behandlungs-Belege.
 
 **Muss ich beweisen, dass ich nicht schuld bin?**
-Nein. Mitverschulden muss vom Versicherer bewiesen werden – du musst keine eigene Schuldfreiheit beweisen.
+Nein. Mitverschulden muss vom Versicherer bewiesen werden – Sie müssen keine eigene Schuldfreiheit beweisen.
 
 **Was ist erleichtertes Beweismaß nach § 287 ZPO?**
 Für die Schadens**höhe** reicht eine Schätzung durch den Richter – vollständige Beweisführung wie für die Schadens**entstehung** ist nicht nötig. Wichtig bei chronischen Schmerzen, psychischen Folgen, Schmerzensgeld.
@@ -216,7 +216,7 @@ Ja, der BGH (VI ZR 233/17) hat Dashcam-Aufnahmen als gerichtlich verwertbar aner
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit kommt – gut dokumentierte Sachverhalte regulieren Versicherer schneller. Bei strittiger Beweislage helfen spezialisierte Verkehrsrechts-Anwälte, die Beweis-Strategie auf Klage-Festigkeit zu prüfen.
 

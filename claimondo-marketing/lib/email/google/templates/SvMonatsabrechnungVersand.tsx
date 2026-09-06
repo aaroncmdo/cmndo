@@ -29,7 +29,7 @@ export function SvMonatsabrechnungVersandEmail(props: Props) {
         Hallo {props.vorname ?? 'Partner'},
       </Paragraph>
       <Paragraph>
-        deine Monatsabrechnung für {props.monat} ist erstellt.
+        Ihre Monatsabrechnung für {props.monat} ist erstellt.
       </Paragraph>
 
       <InfoTable rows={[
@@ -41,11 +41,11 @@ export function SvMonatsabrechnungVersandEmail(props: Props) {
       <Divider />
 
       <Paragraph>
-        Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von deinem
+        Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von Ihrem
         hinterlegten Zahlungsmittel eingezogen.
       </Paragraph>
 
-      <Paragraph>Dein Claimondo-Team</Paragraph>
+      <Paragraph>Ihr Claimondo-Team</Paragraph>
     </EmailLayout>
   )
 }

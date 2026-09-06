@@ -109,20 +109,20 @@ Primärer Geschädigter ist jede Person, deren Rechtsposition unmittelbar durch 
 
 ## Direktanspruch gegen die Versicherung – § 115 VVG
 
-Eine der wichtigsten Vorschriften für Geschädigte: **§ 115 VVG** erlaubt es dir, deine Forderung **direkt gegen die Haftpflichtversicherung** des Schädigers geltend zu machen – ohne den Umweg über den Halter. Konkret:
+Eine der wichtigsten Vorschriften für Geschädigte: **§ 115 VVG** erlaubt es Ihnen, Ihre Forderung **direkt gegen die Haftpflichtversicherung** des Schädigers geltend zu machen – ohne den Umweg über den Halter. Konkret:
 
 - Direkte Korrespondenz mit dem Versicherer
 - Direkter Klage-Anspruch
 - Versicherer steht im selben Verhältnis wie der Versicherungsnehmer
 
-→ Die Versicherung des Halters ist die Adresse für deine Forderungen – auch wenn Halter und Fahrer unterschiedliche Personen sind.
+→ Die Versicherung des Halters ist die Adresse für Ihre Forderungen – auch wenn Halter und Fahrer unterschiedliche Personen sind.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Du bist geschädigt, wenn der Unfall dich oder dein Eigentum direkt verletzt hat. Eigentumsverhältnisse am Fahrzeug, Führerschein-Besitz oder Versicherungs-Vertragsverhältnisse sind sekundär.
+Sie sind geschädigt, wenn der Unfall Sie oder Ihr Eigentum direkt verletzt hat. Eigentumsverhältnisse am Fahrzeug, Führerschein-Besitz oder Versicherungs-Vertragsverhältnisse sind sekundär.
 
 ### 🛠 Drei Schritte
 
@@ -133,7 +133,7 @@ Welche Schadenspositionen kommen in Frage? Sach + Person + Auslagen.
 Polizeibericht / Halter-Auskunft KBA. Versicherer-Direktanspruch nach § 115 VVG.
 
 **3. Anwalt einschalten**
-Anwaltskosten zahlt der Versicherer (BGH VI ZR 235/13). Du gehst kein Risiko ein.
+Anwaltskosten zahlt der Versicherer (BGH VI ZR 235/13). Sie gehen kein Risiko ein.
 
 ---
 
@@ -149,7 +149,7 @@ Ja, eigenständig – siehe [Beifahrer-Anspruch](/haftpflicht/beifahrer-anspruch
 Ja, der Anspruch besteht – kann aber durch [Mitverschulden](/haftpflicht/mitverschulden-bgb254) gemindert werden.
 
 **Habe ich Anspruch direkt gegen die Versicherung?**
-Ja, § 115 VVG gibt dir den Direktanspruch.
+Ja, § 115 VVG gibt Ihnen den Direktanspruch.
 
 **Was, wenn ich nicht der Eigentümer des Autos bin?**
 Eigentums-Verhältnis ist sekundär. Geschädigt ist, wer durch den Unfall direkt verletzt wurde – bei Sachschaden also der Eigentümer des Fahrzeugs (kann auch ein Dritter sein, z. B. Leasinggeber).
@@ -165,7 +165,7 @@ Eigentums-Verhältnis ist sekundär. Geschädigt ist, wer durch den Unfall direk
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -212,7 +212,7 @@ Eigentums-Verhältnis ist sekundär. Geschädigt ist, wer durch den Unfall direk
       "@type": "FAQPage",
       "mainEntity": [
         {"@type": "Question", "name": "Wer ist Geschädigter bei Autounfall?", "acceptedAnswer": {"@type": "Answer", "text": "Jede Person oder Rechtspersönlichkeit, deren Körper, Gesundheit, Eigentum oder sonstige geschützte Rechtsposition durch das Unfallereignis direkt verletzt wurde."}},
-        {"@type": "Question", "name": "Habe ich Anspruch direkt gegen die Versicherung?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, § 115 VVG gibt dir den Direktanspruch ggü. der Haftpflichtversicherung des Schädigers."}},
+        {"@type": "Question", "name": "Habe ich Anspruch direkt gegen die Versicherung?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, § 115 VVG gibt Ihnen den Direktanspruch ggü. der Haftpflichtversicherung des Schädigers."}},
         {"@type": "Question", "name": "Habe ich Anspruch als Fahrer ohne Führerschein?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, der Anspruch besteht — kann aber durch Mitverschulden gemindert werden."}}
       ]
     }

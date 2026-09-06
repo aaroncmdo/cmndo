@@ -35,7 +35,7 @@ meta_description: "Fahrerhaftung nach §18 StVG: Das Verschulden des Fahrers wir
 
 # Fahrerhaftung nach § 18 StVG – Verschuldensvermutung und Entlastungsbeweis
 
-> **Kurz erklärt:** § 18 StVG begründet die **persönliche Haftung des Fahrzeugführers** zusätzlich zur Halterhaftung (§ 7 StVG). Anders als beim Halter wird beim Fahrer **Verschulden vermutet** – er muss aktiv beweisen, dass ihn **kein Verschulden** trifft (Entlastungsbeweis nach § 18 Abs. 1 Satz 2 StVG). Praktisch greift fast immer mindestens eine der Vorschriften zugunsten des Geschädigten – § 7 StVG (Halter) und § 18 StVG (Fahrer) kombiniert ergeben starke Beweis-Lage zu deinen Gunsten.
+> **Kurz erklärt:** § 18 StVG begründet die **persönliche Haftung des Fahrzeugführers** zusätzlich zur Halterhaftung (§ 7 StVG). Anders als beim Halter wird beim Fahrer **Verschulden vermutet** – er muss aktiv beweisen, dass ihn **kein Verschulden** trifft (Entlastungsbeweis nach § 18 Abs. 1 Satz 2 StVG). Praktisch greift fast immer mindestens eine der Vorschriften zugunsten des Geschädigten – § 7 StVG (Halter) und § 18 StVG (Fahrer) kombiniert ergeben starke Beweis-Lage zu Ihren Gunsten.
 
 ## Auch bekannt als
 
@@ -102,16 +102,16 @@ In der Praxis ist der Entlastungsbeweis **schwer zu führen** – gerichtliche S
 ## Halter und Fahrer – wer haftet wie
 
 ### Identische Person
-Wenn Halter und Fahrer identisch sind (häufigster Fall), greifen § 7 StVG **und** § 18 StVG gleichzeitig zu deinen Gunsten – du hast doppelte Anspruchsgrundlage.
+Wenn Halter und Fahrer identisch sind (häufigster Fall), greifen § 7 StVG **und** § 18 StVG gleichzeitig zu Ihren Gunsten – Sie haben doppelte Anspruchsgrundlage.
 
 ### Verschiedene Personen
 Bei getrennten Personen (Leihwagen, Familienfahrzeug, Mietwagen) haftet:
 - Der **Halter** verschuldensunabhängig nach § 7 StVG
 - Der **Fahrer** unter vermutetem Verschulden nach § 18 StVG
-- Beide gesamtschuldnerisch (§ 421 BGB) – du kannst von jedem den vollen Betrag fordern
+- Beide gesamtschuldnerisch (§ 421 BGB) – Sie können von jedem den vollen Betrag fordern
 
 ### Praktische Konsequenz
-Du wendest dich am einfachsten direkt an die **Haftpflichtversicherung des Halters** (§ 115 VVG) – die deckt sowohl Halter- als auch Fahrer-Haftung ab.
+Sie wenden sich am einfachsten direkt an die **Haftpflichtversicherung des Halters** (§ 115 VVG) – die deckt sowohl Halter- als auch Fahrer-Haftung ab.
 
 ---
 
@@ -128,10 +128,10 @@ In der Praxis greifen die ersten beiden Vorschriften regelmäßig parallel – d
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Du musst **kein Fahrer-Verschulden beweisen**. § 18 StVG kehrt die Beweislast um – der Fahrer muss sich entlasten.
+Sie müssen **kein Fahrer-Verschulden beweisen**. § 18 StVG kehrt die Beweislast um – der Fahrer muss sich entlasten.
 
 ### 🛠 Drei Schritte
 
@@ -174,7 +174,7 @@ Nein. § 115 VVG erlaubt Direktanspruch gegen die Haftpflichtversicherung des Ha
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

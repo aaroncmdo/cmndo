@@ -102,7 +102,7 @@ Pauschal-Argument. Anscheinsbeweis greift gegen den Vorfahrtsverletzer – Ersch
 
 ---
 
-## Welche Ansprüche du als Vorfahrtsberechtigter hast
+## Welche Ansprüche Sie als Vorfahrtsberechtigter haben
 
 - [Reparaturkosten](/haftpflicht/reparaturkosten) – voll
 - [Wertminderung](/haftpflicht/wertminderung)
@@ -138,7 +138,7 @@ Bei stark überhöhter Geschwindigkeit Mit-Quote 20–30 %. Bei normaler Verkehr
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

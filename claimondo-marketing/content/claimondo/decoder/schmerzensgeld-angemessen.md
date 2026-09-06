@@ -44,7 +44,7 @@ Schmerzensgeld-Erstangebot · Anker-Angebot Versicherung · Pauschal-Schmerzensg
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -125,7 +125,7 @@ Seit den 2010er Jahren hat die deutsche Rechtsprechung tendenziell höhere Schme
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Erstangebote der Versicherung niemals ohne anwaltliche Prüfung akzeptieren. Statistisch liegt das angemessene Schmerzensgeld bei mittleren bis schweren Verletzungen oft beim **3- bis 5-fachen** des Versicherer-Erstangebots.
@@ -136,7 +136,7 @@ Erstangebote der Versicherung niemals ohne anwaltliche Prüfung akzeptieren. Sta
 ICD-Diagnose, ärztliche Atteste, Behandlungs-Verlauf, Operationen, Funktions-Einschränkungen, psychische Folgen, berufliche Auswirkungen. Je vollständiger, desto höher die Position.
 
 **2. Anwalt mit Hacks/Wellner-Recherche**
-Verkehrsrechts-Anwalt prüft, welche Vergleichs-Urteile für deinen Fall einschlägig sind und beziffert das angemessene Schmerzensgeld.
+Verkehrsrechts-Anwalt prüft, welche Vergleichs-Urteile für Ihren Fall einschlägig sind und beziffert das angemessene Schmerzensgeld.
 
 **3. Spätfolge-Vorbehalt zwingend**
 Kein Vergleich ohne Vorbehalt für unvorhersehbare Spätfolgen (siehe [Pauschal-Abgeltung-Decoder](/decoder/pauschal-abgeltung)).
@@ -197,22 +197,22 @@ Mit freundlichen Grüßen
 ### Reaktion A – Pauschal-Erhöhung
 > *„Wir erhöhen auf 2.500 € – letztes Angebot."*
 
-**Deine Antwort:** Bei zu niedriger Erhöhung ablehnen. Konkrete Vergleichs-Urteile vorlegen. Klage-Bereitschaft signalisieren.
+**Ihre Antwort:** Bei zu niedriger Erhöhung ablehnen. Konkrete Vergleichs-Urteile vorlegen. Klage-Bereitschaft signalisieren.
 
 ### Reaktion B – Klage-Risiko-Drohung
 > *„Bei Klage könnten Sie auch weniger bekommen."*
 
-**Deine Antwort:** Bei klarer Lage und Hacks/Wellner-Spannen ist das Klage-Risiko überschaubar. Anwalt prüft.
+**Ihre Antwort:** Bei klarer Lage und Hacks/Wellner-Spannen ist das Klage-Risiko überschaubar. Anwalt prüft.
 
 ### Reaktion C – Spätfolgen ablehnen
 > *„Wir gehen davon aus, dass keine Spätfolgen auftreten – daher Pauschal-Abgeltung."*
 
-**Deine Antwort:** Spätfolge-Vorbehalt zwingend. Bei Verweigerung kein Vergleich, Klage.
+**Ihre Antwort:** Spätfolge-Vorbehalt zwingend. Bei Verweigerung kein Vergleich, Klage.
 
 ### Reaktion D – Verhandlungs-Erschöpfung
 > *„Diese Verhandlung dauert schon lange – Zeit für eine Entscheidung."*
 
-**Deine Antwort:** Versicherer-Strategie. Pause einlegen, mit dem Anwalt sprechen, nicht aus Erschöpfung akzeptieren.
+**Ihre Antwort:** Versicherer-Strategie. Pause einlegen, mit dem Anwalt sprechen, nicht aus Erschöpfung akzeptieren.
 
 ---
 
@@ -247,7 +247,7 @@ Bei unverschuldetem Unfall: nichts. Anwaltskosten zahlt die gegnerische Versiche
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Schmerzensgeld-Verhandlungen sind das wirtschaftlich riskanteste Stadium der Schadensregulierung – wer hier ohne Anwalt agiert, lässt typischerweise 60–80 % auf dem Tisch liegen.
 

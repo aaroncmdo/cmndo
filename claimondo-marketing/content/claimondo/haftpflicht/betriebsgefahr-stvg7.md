@@ -104,7 +104,7 @@ Der **Halter** ist die Person, die das Fahrzeug **auf eigene Rechnung in Betrieb
 
 ## Beziehung zum Direktanspruch
 
-§ 7 StVG begründet die **Haftung des Halters** – der Geschädigte hat aber nach **§ 115 VVG** einen **eigenen Direktanspruch** gegen den **Haftpflichtversicherer** des Halters. Praktische Bedeutung: Du musst nicht erst den Halter verklagen, sondern kannst direkt mit dem Versicherer kommunizieren.
+§ 7 StVG begründet die **Haftung des Halters** – der Geschädigte hat aber nach **§ 115 VVG** einen **eigenen Direktanspruch** gegen den **Haftpflichtversicherer** des Halters. Praktische Bedeutung: Sie müssen nicht erst den Halter verklagen, sondern können direkt mit dem Versicherer kommunizieren.
 
 → Siehe auch [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung) für die kostenlose Eskalations-Möglichkeit.
 
@@ -112,18 +112,18 @@ Der **Halter** ist die Person, die das Fahrzeug **auf eigene Rechnung in Betrieb
 
 ## Beweislast und Anscheinsbeweis
 
-Bei § 7 StVG ist die Beweis-Lage für dich als Geschädigte sehr günstig:
+Bei § 7 StVG ist die Beweis-Lage für Sie als Geschädigte sehr günstig:
 
-- Du beweist: **Unfall + Schaden + Verursachungs-Zusammenhang mit dem Betrieb des Fahrzeugs**
+- Sie beweisen: **Unfall + Schaden + Verursachungs-Zusammenhang mit dem Betrieb des Fahrzeugs**
 - Der Versicherer beweist: **Höhere Gewalt oder Mitverschulden** (siehe [§ 17 StVG Mithaftung](/haftpflicht/mitverschulden-stvg17))
-- In typischen Verkehrsunfall-Konstellationen greift der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) zusätzlich zu deinen Gunsten
+- In typischen Verkehrsunfall-Konstellationen greift der [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) zusätzlich zu Ihren Gunsten
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Du musst **kein Verschulden** des gegnerischen Halters beweisen. Es reicht, dass sein Fahrzeug am Unfall „beim Betrieb" beteiligt war.
+Sie müssen **kein Verschulden** des gegnerischen Halters beweisen. Es reicht, dass sein Fahrzeug am Unfall „beim Betrieb" beteiligt war.
 
 ### 🛠 Drei Schritte
 
@@ -131,7 +131,7 @@ Du musst **kein Verschulden** des gegnerischen Halters beweisen. Es reicht, dass
 Zulassungsbescheinigung / Halter-Auskunft beim Kraftfahrt-Bundesamt. Im Polizeibericht steht der Halter meist drin.
 
 **2. Direktanspruch gegen Versicherer geltend machen**
-§ 115 VVG – du kommunizierst direkt mit der Haftpflichtversicherung des Halters.
+§ 115 VVG – Sie kommuniziern direkt mit der Haftpflichtversicherung des Halters.
 
 **3. Bei Versicherer-Berufung auf höhere Gewalt: Anwalt**
 Höhere-Gewalt-Argument ist selten erfolgreich – bei Versicherer-Berufung Anwalt einschalten.
@@ -156,7 +156,7 @@ Sehr selten und eng definiert: Naturkatastrophe, plötzlich umstürzender Baum d
 Der Leasingnehmer – nicht die Leasinggesellschaft. Wer das Fahrzeug auf eigene Rechnung in Betrieb nimmt und die Kosten trägt.
 
 **Kann ich direkt mit der Versicherung kommunizieren?**
-Ja. § 115 VVG gibt dir den Direktanspruch – du musst nicht den Halter verklagen.
+Ja. § 115 VVG gibt Ihnen den Direktanspruch – Sie müssen nicht den Halter verklagen.
 
 ---
 
@@ -170,7 +170,7 @@ Ja. § 115 VVG gibt dir den Direktanspruch – du musst nicht den Halter verklag
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

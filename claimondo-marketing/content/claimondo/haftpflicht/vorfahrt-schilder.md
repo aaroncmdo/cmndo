@@ -32,7 +32,7 @@ meta_description: "Vorfahrt-Schild missachtet: Stopp (Z 206) oder Vorfahrt achte
 
 # Vorfahrt-Schilder missachtet – Haftung bei Stopp, „Vorfahrt achten" und Vorfahrtsstraße
 
-> **Kurz erklärt:** Wer ein **Stopp-Schild (Z 206)** oder **Vorfahrt-achten-Schild (Z 205)** missachtet und in einen Unfall verwickelt wird, trägt nach Anscheinsbeweis die **volle Schuld (100 : 0)**. Bei der Vorfahrtsstraße (Z 306) bist du als bevorrechtigter Fahrer auf einer Straße mit Vorfahrt geschützt – Quote bei Vorfahrt-Verletzungen der Gegenseite ebenfalls typisch 100 : 0.
+> **Kurz erklärt:** Wer ein **Stopp-Schild (Z 206)** oder **Vorfahrt-achten-Schild (Z 205)** missachtet und in einen Unfall verwickelt wird, trägt nach Anscheinsbeweis die **volle Schuld (100 : 0)**. Bei der Vorfahrtsstraße (Z 306) sind Sie als bevorrechtigter Fahrer auf einer Straße mit Vorfahrt geschützt – Quote bei Vorfahrt-Verletzungen der Gegenseite ebenfalls typisch 100 : 0.
 
 ## Auch bekannt als
 
@@ -58,7 +58,7 @@ Wer Stopp- oder Vorfahrt-achten-Schild missachtet und kollidiert, trägt die vol
 
 - **Z 206 Stopp** – vollständiger Halt vor Linie zwingend
 - **Z 205 Vorfahrt achten** – Anhalten nur wenn nötig, Vorfahrt klar zu beachten
-- **Z 306 Vorfahrtsstraße** – du hast Vorfahrt auf gelb umrandeter Straße
+- **Z 306 Vorfahrtsstraße** – Sie haben Vorfahrt auf gelb umrandeter Straße
 - **Z 301 Vorfahrt** – Einzel-Kreuzung mit Vorfahrt-Schild
 
 ## Häufige Fragen
@@ -117,7 +117,7 @@ Bei objektiv nicht erkennbarem Schild ggf. Erschütterung des Anscheinsbeweises.
       "@type": "FAQPage",
       "mainEntity": [
         {"@type": "Question", "name": "Wer haftet bei Stopp-Schild-Missachtung?", "acceptedAnswer": {"@type": "Answer", "text": "In aller Regel der Schild-Missachter — der Anscheinsbeweis spricht gegen ihn, Quote 100 : 0."}},
-        {"@type": "Question", "name": "Habe ich als bevorrechtigter Fahrer Mit-Quote?", "acceptedAnswer": {"@type": "Answer", "text": "Nur bei nachweisbar erheblich überhöhter Geschwindigkeit (20–30 %). Bei Normal-Geschwindigkeit bist du voll geschützt."}},
+        {"@type": "Question", "name": "Habe ich als bevorrechtigter Fahrer Mit-Quote?", "acceptedAnswer": {"@type": "Answer", "text": "Nur bei nachweisbar erheblich überhöhter Geschwindigkeit (20–30 %). Bei Normal-Geschwindigkeit sind Sie voll geschützt."}},
         {"@type": "Question", "name": "Was, wenn das Schild verdeckt war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei objektiv nicht erkennbarem Schild kann der Anscheinsbeweis ggf. erschüttert werden. Die Beweis-Anforderungen sind hoch."}}
       ]
     }

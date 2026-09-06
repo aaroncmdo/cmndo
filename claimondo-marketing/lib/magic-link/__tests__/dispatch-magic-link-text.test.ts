@@ -14,12 +14,18 @@ describe('FlowLink-WhatsApp an den Kunden', () => {
     expect(t).toMatch(/72 Stunden/)
   })
 
-  it('spricht den Kunden mit Namen an und duzt', () => {
+  it('spricht den Kunden mit Namen an und siezt', () => {
     const t = buildWhatsAppText({ vorname: 'Ernest', flowUrl: URL })
     expect(t).toContain('Ernest')
-    expect(t).toMatch(/\bdu\b|\bdein\b|\bdich\b|\bdir\b/i)
-    // Kundensicht ist auf „du" umgestellt — ein „Sie/Ihr" waere ein Rueckfall.
-    expect(t).not.toMatch(/\bIhre[nmrs]?\b|\bIhnen\b/)
+    // ⚠ RICHTUNGSWECHSEL 06.09.2026. Hier stand das Gegenteil, mit der Begruendung
+    // „Kundensicht ist auf du umgestellt — ein Sie/Ihr waere ein Rueckfall".
+    // Aaron hat die Richtung umgedreht: „das soll auf Sie bleiben. Weil wenn das auch Du
+    // ist, haben wir meistens die Schwierigkeit, dass sich einheitlich ist. Also es soll
+    // die einheitliche Ansprache." Website, Portal und Nachrichten siezen jetzt durchgehend.
+    expect(t).toMatch(/\bIhre[nmrs]?\b|\bIhnen\b|\bSie\b/)
+    expect(t).not.toMatch(/\bdu\b|\bdein\b|\bdich\b|\bdir\b/i)
+    // Und die Begruessung passt zur Anrede: „Hi" neben „Ihre" war ein Stilbruch.
+    expect(t).toMatch(/^Hallo Ernest,/)
   })
 
   it('funktioniert ohne Vornamen (Lead ohne Namen)', () => {

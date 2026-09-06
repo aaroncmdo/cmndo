@@ -170,7 +170,7 @@ export default function GooglePlaceAutocomplete({
       />
       {loadError && (
         <p className="text-[11px] text-red-600 mt-1">
-          {loadError} — du kannst die Adresse trotzdem manuell eintippen, sie wird beim Speichern serverseitig geocoded.
+          {loadError} — Sie können die Adresse trotzdem manuell eintippen, sie wird beim Speichern serverseitig geocodiert.
         </p>
       )}
     </div>

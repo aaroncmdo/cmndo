@@ -131,7 +131,7 @@ Der Halter eines am Unfall beteiligten Kfz kann sich von der Betriebsgefahr-Quot
 
 ---
 
-## Quotelung – wie sich das auf deine Erstattung auswirkt
+## Quotelung – wie sich das auf Ihre Erstattung auswirkt
 
 Bei einer 80 : 20-Quote zu Lasten der Gegenseite:
 
@@ -148,7 +148,7 @@ Bei einer 80 : 20-Quote zu Lasten der Gegenseite:
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Bei pauschalen Mitverschuldens-/Quoten-Behauptungen des Versicherers nicht stillschweigend akzeptieren. § 17 StVG verlangt **konkrete Tatsachen** zur Verursachungs-Verteilung – nicht Pauschalen.
@@ -194,7 +194,7 @@ Bei klaren Anscheinsbeweis-Konstellationen (Auffahrunfall, Rotlichtverstoß, Vor
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Quotelung ist eine der wirtschaftlich relevantesten Streit-Fragen. Eine Quote-Verbesserung von 70:30 auf 100:0 macht bei 10.000 € Schaden 3.000 € aus – Anwalts-Eskalation lohnt sich.
 

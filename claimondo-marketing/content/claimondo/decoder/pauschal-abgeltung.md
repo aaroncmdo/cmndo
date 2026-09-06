@@ -44,7 +44,7 @@ Abgeltungsklausel · Erledigungsvergleich · Schlussfreischreibung · Vollerledi
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten:
 
@@ -73,7 +73,7 @@ Jeder dieser vier Marker sollte als juristisches Warnsignal verstanden werden.
 Spätfolgen sind das größte unkalkulierbare Risiko der Schadensregulierung. Eine PTBS, die erst nach 6 Monaten manifest wird; ein chronisches Schmerzsyndrom nach 2 Jahren; eine Berufsunfähigkeit nach 5 Jahren – alles möglich, alles teuer. Eine Pauschal-Abgeltung beendet dieses Risiko **vollständig** zugunsten des Versicherers.
 
 ### 2. Vergleichs-Falle nach § 779 BGB
-Sobald du eine Pauschal-Abgeltungs-Klausel unterschreibst, ist es ein bindender Vergleich. Du kannst rechtlich **nicht mehr nachfordern** – auch nicht, wenn medizinische Folgen erst Jahre später auftreten.
+Sobald Sie eine Pauschal-Abgeltungs-Klausel unterschreiben, ist es ein bindender Vergleich. Sie können rechtlich **nicht mehr nachfordern** – auch nicht, wenn medizinische Folgen erst Jahre später auftreten.
 
 ### 3. Niedriger Pauschal-Anker
 Die angebotene Summe liegt typischerweise **am unteren Rand** des rechnerisch Berechtigten – der Versicherer kalkuliert die Spätfolgen ein, ohne sie zu beziffern.
@@ -86,14 +86,14 @@ Die angebotene Summe liegt typischerweise **am unteren Rand** des rechnerisch Be
 ## Was die Rechtsprechung dazu sagt
 
 ### § 779 BGB – Bindender Vergleich
-Ein Vergleich ist ein Vertrag, der einen Streit oder eine Ungewissheit durch beidseitiges Nachgeben beendet. Sobald beide Parteien zugestimmt haben, ist der Inhalt **bindend** – egal, was du danach noch entdeckst.
+Ein Vergleich ist ein Vertrag, der einen Streit oder eine Ungewissheit durch beidseitiges Nachgeben beendet. Sobald beide Parteien zugestimmt haben, ist der Inhalt **bindend** – egal, was Sie danach noch entdecken.
 
 ### Strikte Auslegung von Abgeltungsklauseln
 Der BGH legt Abgeltungsklauseln **streng nach Wortlaut** aus. „Alle Ansprüche" heißt buchstäblich alle – bekannte wie unbekannte, gegenwärtige wie zukünftige. Ein impliziter Spätfolge-Vorbehalt existiert **nicht**.
 
 ### Anfechtungs-Möglichkeiten – theoretisch
-- **§ 119 BGB Irrtum** – Du hättest nicht unterschrieben, wenn du die wahre Sachlage gekannt hättest. Hohe Beweis-Anforderungen.
-- **§ 123 BGB Arglistige Täuschung** – Der Versicherer hat dich aktiv getäuscht. Nahezu unmöglich nachzuweisen.
+- **§ 119 BGB Irrtum** – Sie hätten nicht unterschrieben, wenn Sie die wahre Sachlage gekannt hätten. Hohe Beweis-Anforderungen.
+- **§ 123 BGB Arglistige Täuschung** – Der Versicherer hat Sie aktiv getäuscht. Nahezu unmöglich nachzuweisen.
 - **§ 138 BGB Sittenwidrigkeit** – Die Pauschal-Summe ist drastisch unter dem Berechtigten. Greift selten, weil Vergleichs-„Nachgeben" rechtlich erwartet ist.
 
 → Praktisch: Anfechtung ist nahezu wertlos als Sicherheitsnetz. Vorbeugung ist alles.
@@ -103,10 +103,10 @@ Die einzige rechtliche Möglichkeit, Spätfolgen zu schützen, ist eine **ausdr�
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
-Niemals – unter keinen Umständen – eine Abgeltungsklausel ohne ausdrücklichen Spätfolge-Vorbehalt unterschreiben. Auch nicht, wenn die Summe gerade attraktiv klingt. Was du heute siehst, ist nicht alles, was kommt.
+Niemals – unter keinen Umständen – eine Abgeltungsklausel ohne ausdrücklichen Spätfolge-Vorbehalt unterschreiben. Auch nicht, wenn die Summe gerade attraktiv klingt. Was Sie heute sehen, ist nicht alles, was kommt.
 
 ### 🛠 Fünf Schritte vor jeder Unterschrift
 
@@ -174,29 +174,29 @@ Mit freundlichen Grüßen
 ### Reaktion A – Vorbehalt komplett verweigern
 > *„Wir akzeptieren keinen Spätfolge-Vorbehalt – entweder vollständige Erledigung oder keine Pauschal-Summe."*
 
-**Deine Antwort:** Nicht akzeptieren. Bei klarer Haftungslage Klage einreichen. Spätfolge-Verzicht ist wirtschaftlich existenzbedrohend.
+**Ihre Antwort:** Nicht akzeptieren. Bei klarer Haftungslage Klage einreichen. Spätfolge-Verzicht ist wirtschaftlich existenzbedrohend.
 
 ### Reaktion B – Engen Vorbehalt anbieten
 > *„Wir akzeptieren Vorbehalt nur für ärztlich nachgewiesene Spätfolgen, nicht für Verschlimmerungen."*
 
-**Deine Antwort:** Konkretes Wording prüfen. Anwalt einbeziehen. Bei zu engem Vorbehalt: ablehnen – die meisten echten Spätfolgen sind Verschlimmerungen bestehender Befunde.
+**Ihre Antwort:** Konkretes Wording prüfen. Anwalt einbeziehen. Bei zu engem Vorbehalt: ablehnen – die meisten echten Spätfolgen sind Verschlimmerungen bestehender Befunde.
 
 ### Reaktion C – Mit höherer Pauschal-Summe drücken
 > *„Wir können den höheren Betrag nur bei Vollerledigung anbieten – sonst niedriger."*
 
-**Deine Antwort:** Verknappungs-Druck. Anwaltlich kalkulieren, welcher Wert dem Spätfolge-Risiko entspricht. Oft lohnt eine niedrigere Summe mit Vorbehalt mehr als eine höhere ohne.
+**Ihre Antwort:** Verknappungs-Druck. Anwaltlich kalkulieren, welcher Wert dem Spätfolge-Risiko entspricht. Oft lohnt eine niedrigere Summe mit Vorbehalt mehr als eine höhere ohne.
 
 ### Reaktion D – Vergleichs-Frist setzen
 > *„Dieses Angebot gilt nur bis [Datum] – danach reduzieren wir."*
 
-**Deine Antwort:** Künstliche Frist. Druck zurückweisen. Bei klarer Haftung verschlechtert sich deine Position nicht durch Zeit.
+**Ihre Antwort:** Künstliche Frist. Druck zurückweisen. Bei klarer Haftung verschlechtert sich Ihre Position nicht durch Zeit.
 
 ---
 
 ## Häufige Fragen
 
 **Was bedeutet „mit dieser Zahlung sind alle Ansprüche abgegolten"?**
-Es bedeutet, dass mit deiner Unterschrift **alle gegenwärtigen und zukünftigen Ansprüche** aus diesem Schadensereignis erlöschen – auch unbekannte Spätfolgen wie chronische Schmerzen, später diagnostizierte PTBS oder Berufsunfähigkeit.
+Es bedeutet, dass mit Ihrer Unterschrift **alle gegenwärtigen und zukünftigen Ansprüche** aus diesem Schadensereignis erlöschen – auch unbekannte Spätfolgen wie chronische Schmerzen, später diagnostizierte PTBS oder Berufsunfähigkeit.
 
 **Kann ich einen Erledigungsvergleich rückgängig machen?**
 Nur in extremen Ausnahmefällen (Anfechtung wegen Sittenwidrigkeit, arglistiger Täuschung oder Irrtum). In der Praxis fast nie erfolgreich. Vorbeugung ist die einzig zuverlässige Strategie.
@@ -224,9 +224,9 @@ Dann kein Vergleich. Klage einreichen – bei klarer Haftungslage gute Chancen. 
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Pauschal-Abgeltungs-Klauseln sind die wirtschaftlich riskantesten Dokumente, die du je unterschreiben kannst. Spezialisierte Verkehrsrechts-Anwälte verhandeln den Spätfolge-Vorbehalt routinemäßig – Anwaltskosten zahlt der Versicherer.
+Pauschal-Abgeltungs-Klauseln sind die wirtschaftlich riskantesten Dokumente, die Sie je unterschreiben können. Spezialisierte Verkehrsrechts-Anwälte verhandeln den Spätfolge-Vorbehalt routinemäßig – Anwaltskosten zahlt der Versicherer.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

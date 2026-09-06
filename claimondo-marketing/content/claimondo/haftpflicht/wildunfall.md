@@ -60,7 +60,7 @@ Wildschaden · Wildtier-Kollision · Reh-Unfall · Wildschwein-Unfall
 Nein. Wildunfall ist klassisch ein eigener Kasko-Fall – die eigene Teil- oder Vollkasko zahlt.
 
 **Was, wenn ich nur Haftpflicht habe?**
-Dann trägst du den Schaden selbst. Ausnahme: nachweisbare Fremdverursachung (z. B. ausgebrochenes Haustier eines Halters).
+Dann tragen Sie den Schaden selbst. Ausnahme: nachweisbare Fremdverursachung (z. B. ausgebrochenes Haustier eines Halters).
 
 **Brauche ich eine Wildunfall-Bescheinigung?**
 Ja. Polizei oder Jagdpächter stellen sie aus – Voraussetzung für Kasko-Erstattung.
@@ -114,7 +114,7 @@ Tier-Halter nach § 833 BGB. Anspruch direkt gegen Halter und seine Haftpflicht-
       "@type": "FAQPage",
       "mainEntity": [
         {"@type": "Question", "name": "Zahlt die Haftpflicht beim Wildunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Ein Wildunfall ist klassisch ein eigener Kasko-Fall — die eigene Teil- oder Vollkasko zahlt."}},
-        {"@type": "Question", "name": "Was, wenn ich nur Haftpflicht habe?", "acceptedAnswer": {"@type": "Answer", "text": "Dann trägst du den Schaden selbst. Ausnahme ist eine nachweisbare Fremdverursachung, etwa durch ein ausgebrochenes Haustier eines Halters."}},
+        {"@type": "Question", "name": "Was, wenn ich nur Haftpflicht habe?", "acceptedAnswer": {"@type": "Answer", "text": "Dann tragen Sie den Schaden selbst. Ausnahme ist eine nachweisbare Fremdverursachung, etwa durch ein ausgebrochenes Haustier eines Halters."}},
         {"@type": "Question", "name": "Brauche ich eine Wildunfall-Bescheinigung?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Polizei oder Jagdpächter stellen sie aus — sie ist Voraussetzung für die Kasko-Erstattung."}},
         {"@type": "Question", "name": "Wer haftet bei ausgebrochenem Pferd oder Hund?", "acceptedAnswer": {"@type": "Answer", "text": "Der Tier-Halter nach § 833 BGB. Der Anspruch richtet sich direkt gegen den Halter und seine Haftpflicht-Versicherung."}}
       ]

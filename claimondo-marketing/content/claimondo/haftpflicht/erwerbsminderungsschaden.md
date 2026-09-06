@@ -35,7 +35,7 @@ meta_description: "Erwerbsminderungs-Schaden nach §843 BGB: Rente oder Kapital 
 
 # Erwerbsminderungs-Schaden nach § 843 BGB – Rente bei Dauer-Folgen
 
-> **Kurz erklärt:** Bei dauerhafter unfallbedingter Erwerbsminderung hast du nach § 843 BGB Anspruch auf eine **Geldrente** für den Verlust deiner Erwerbsfähigkeit – entweder als laufende monatliche Zahlung oder als **kapitalisierter Einmalbetrag**. Berechnung über die Differenz zwischen vorausseh­barem Lebenseinkommen und tatsächlichem Einkommen, multipliziert mit der voraussichtlichen Erwerbszeit. Hochkomplexe Berechnung mit Versicherungs-Mathematik – Gesamt-Ansprüche bei jungen Schwerstverletzten regelmäßig im siebenstelligen Bereich.
+> **Kurz erklärt:** Bei dauerhafter unfallbedingter Erwerbsminderung haben Sie nach § 843 BGB Anspruch auf eine **Geldrente** für den Verlust Ihrer Erwerbsfähigkeit – entweder als laufende monatliche Zahlung oder als **kapitalisierter Einmalbetrag**. Berechnung über die Differenz zwischen vorausseh­barem Lebenseinkommen und tatsächlichem Einkommen, multipliziert mit der voraussichtlichen Erwerbszeit. Hochkomplexe Berechnung mit Versicherungs-Mathematik – Gesamt-Ansprüche bei jungen Schwerstverletzten regelmäßig im siebenstelligen Bereich.
 
 ## Auch bekannt als
 
@@ -45,11 +45,11 @@ meta_description: "Erwerbsminderungs-Schaden nach §843 BGB: Rente oder Kapital 
 
 ## In einem Satz erklärt
 
-Erwerbsminderungs-Schaden ist die lebenslange oder bis-Renteneintritt-Entschädigung für den unfallbedingten Verlust deiner Erwerbsfähigkeit – Geldrente oder Einmalbetrag nach § 843 BGB.
+Erwerbsminderungs-Schaden ist die lebenslange oder bis-Renteneintritt-Entschädigung für den unfallbedingten Verlust Ihrer Erwerbsfähigkeit – Geldrente oder Einmalbetrag nach § 843 BGB.
 
 ## In drei Sätzen erklärt
 
-Wenn du nach Verkehrsunfall dauerhaft (oder über mehrere Jahre) nicht mehr in deinem bisherigen Umfang erwerbstätig sein kannst, geht der klassische [Verdienstausfall](/haftpflicht/verdienstausfall) in einen **Erwerbsminderungs-Schaden** über (§ 843 BGB) – gezahlt als laufende Geldrente bis zum Renteneintritts-Alter oder lebenslang, oder als kapitalisierter Einmalbetrag im Vergleich. Die Bemessung basiert auf der **Differenz** zwischen dem voraussichtlichen Lebenseinkommen ohne Unfall und dem tatsächlich erzielten Einkommen nach Unfall – multipliziert mit der **Erwerbsminderung in Prozent** und der voraussichtlichen Restdauer der Erwerbsfähigkeit. Bei jungen Geschädigten mit schwerer Behinderung und langen Restzeiten sind **Gesamt-Ansprüche im siebenstelligen Bereich** keine Seltenheit – spezialisierter Anwalt mit aktuarieller Berechnung zwingend.
+Wenn Sie nach Verkehrsunfall dauerhaft (oder über mehrere Jahre) nicht mehr in Ihrem bisherigen Umfang erwerbstätig sein können, geht der klassische [Verdienstausfall](/haftpflicht/verdienstausfall) in einen **Erwerbsminderungs-Schaden** über (§ 843 BGB) – gezahlt als laufende Geldrente bis zum Renteneintritts-Alter oder lebenslang, oder als kapitalisierter Einmalbetrag im Vergleich. Die Bemessung basiert auf der **Differenz** zwischen dem voraussichtlichen Lebenseinkommen ohne Unfall und dem tatsächlich erzielten Einkommen nach Unfall – multipliziert mit der **Erwerbsminderung in Prozent** und der voraussichtlichen Restdauer der Erwerbsfähigkeit. Bei jungen Geschädigten mit schwerer Behinderung und langen Restzeiten sind **Gesamt-Ansprüche im siebenstelligen Bereich** keine Seltenheit – spezialisierter Anwalt mit aktuarieller Berechnung zwingend.
 
 ## Die fünf Schlüsselzahlen
 
@@ -138,7 +138,7 @@ In der Praxis: Bei langfristig schwer einschätzbaren Folgen oft laufende Rente;
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Erwerbsminderungs-Schaden ist **kein DIY**. Spezialisierter Verkehrsrechts-Anwalt mit aktuarieller Berechnung zwingend.
@@ -203,7 +203,7 @@ Strategische Entscheidung – bei Versicherer-Insolvenz-Risiko: Einmalbetrag. Be
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
 Erwerbsminderungs-Schaden ist der größte und komplexeste Schadensposten – bei schweren Verletzungen gehen Gesamt-Ansprüche schnell siebenstellig. Spezialisierter Anwalt zwingend.
 

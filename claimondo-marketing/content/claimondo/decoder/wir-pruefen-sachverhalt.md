@@ -28,11 +28,11 @@ meta_description: "„Wir prüfen den Sachverhalt“? Was dieser Versicherer-Bri
 
 # „Wir prüfen den Sachverhalt" – was dieser Versicherer-Brief wirklich bedeutet
 
-> **Kurz erklärt:** „Wir prüfen den Sachverhalt – bitte um Geduld" ist der häufigste Eröffnungsbrief von Kfz-Haftpflichtversicherern nach einer Schadensmeldung. Ohne konkrete Frist, ohne konkrete Liste fehlender Unterlagen. Die Funktion: Zeit gewinnen, ohne sich rechtlich zu binden. Reagierst du nicht aktiv, verschiebt sich die Verhandlungsmacht messbar zu deinen Ungunsten. Die richtige Antwort: Frist setzen und Verzug erzwingen.
+> **Kurz erklärt:** „Wir prüfen den Sachverhalt – bitte um Geduld" ist der häufigste Eröffnungsbrief von Kfz-Haftpflichtversicherern nach einer Schadensmeldung. Ohne konkrete Frist, ohne konkrete Liste fehlender Unterlagen. Die Funktion: Zeit gewinnen, ohne sich rechtlich zu binden. Reagiern Sie nicht aktiv, verschiebt sich die Verhandlungsmacht messbar zu Ihren Ungunsten. Die richtige Antwort: Frist setzen und Verzug erzwingen.
 
 ---
 
-## Was du gerade erhalten hast – wörtlich
+## Was Sie gerade erhalten haben – wörtlich
 
 Typische Varianten desselben Briefes:
 
@@ -51,7 +51,7 @@ Vier Merkmale, die in allen Varianten vorkommen:
 - **Höflich, scheinbar konstruktiv, vage**
 - **Kein Anerkenntnis und keine Ablehnung** – die Haftungslage bleibt offen
 
-Wenn dein Schreiben so aussieht, hast du nicht „die normale Bearbeitungszeit". Du hast ein juristisches Stillhalte-Manöver in der Post.
+Wenn Ihr Schreiben so aussieht, haben Sie nicht „die normale Bearbeitungszeit". Sie haben ein juristisches Stillhalte-Manöver in der Post.
 
 ---
 
@@ -59,11 +59,11 @@ Wenn dein Schreiben so aussieht, hast du nicht „die normale Bearbeitungszeit".
 
 ### 1. Zeit gewinnen ohne rechtliche Bindung
 
-Solange der Versicherer nicht anerkennt **und** nicht ablehnt, läuft die [Verjährungsfrist nach § 195 BGB](/haftpflicht/verjaehrung-bgb195) weiter – gegen dich. Jeder Tag, den du wartest, ist ein Tag, den der Versicherer aus deinem 3-Jahres-Fenster herausnimmt.
+Solange der Versicherer nicht anerkennt **und** nicht ablehnt, läuft die [Verjährungsfrist nach § 195 BGB](/haftpflicht/verjaehrung-bgb195) weiter – gegen Sie. Jeder Tag, den Sie warten, ist ein Tag, den der Versicherer aus Ihrem 3-Jahres-Fenster herausnimmt.
 
 ### 2. Anerkenntnis vermeiden
 
-Ein Anerkenntnis nach § 212 BGB würde die Verjährung neu starten – drei volle Jahre ab Anerkenntnis. Genau das will der Versicherer **nicht**. Die Formulierung „Wir prüfen" ist juristisch wertlos für dich, aber teuer, wenn du sie ernst nimmst.
+Ein Anerkenntnis nach § 212 BGB würde die Verjährung neu starten – drei volle Jahre ab Anerkenntnis. Genau das will der Versicherer **nicht**. Die Formulierung „Wir prüfen" ist juristisch wertlos für Sie, aber teuer, wenn Sie sie ernst nehmen.
 
 ### 3. Verhandlungs-Erschöpfung erzeugen
 
@@ -92,12 +92,12 @@ Nach Ablauf dieser Frist tritt Verzug ein – automatisch und ohne Mahnung, soba
 Mit Verzugs-Eintritt entstehen drei eigenständige Folgen, die alle dem Versicherer zur Last fallen:
 
 - **Verzugszinsen** in Höhe von **5 Prozentpunkten über dem Basiszinssatz** (§ 288 BGB) auf die berechtigte Forderung – ab Verzugs-Eintritt, nicht ab Mahnung.
-- **Anwaltskosten** als eigenständiger Verzugsschaden, **vollständig erstattbar**, auch wenn du den Anwalt erst nach Verzugs-Eintritt beauftragst (BGH VI ZR 235/13).
+- **Anwaltskosten** als eigenständiger Verzugsschaden, **vollständig erstattbar**, auch wenn Sie den Anwalt erst nach Verzugs-Eintritt beauftragen (BGH VI ZR 235/13).
 - **Mahnkosten und Klagekosten** als weitere Verzugsschäden.
 
 ---
 
-## Was du jetzt machst – konkret
+## Was Sie jetzt machen – konkret
 
 ### 💡 Die wichtigste Regel
 Nicht warten. Frist setzen. Das ist nicht aggressiv – es ist die rechtlich korrekte Reaktion.
@@ -106,11 +106,11 @@ Nicht warten. Frist setzen. Das ist nicht aggressiv – es ist die rechtlich kor
 
 **Stufe 1 – Frist-Setzungsschreiben (heute oder spätestens diese Woche)**
 
-Innerhalb von 7 Tagen nach Eingang des „Wir prüfen"-Briefs antwortest du schriftlich (per Einschreiben oder Fax mit Sendebericht – niemals nur per E-Mail) und setzt eine konkrete Frist.
+Innerhalb von 7 Tagen nach Eingang des „Wir prüfen"-Briefs antworten Sie schriftlich (per Einschreiben oder Fax mit Sendebericht – niemals nur per E-Mail) und setzt eine konkrete Frist.
 
 **Stufe 2 – Konkrete Nachfrage (parallel)**
 
-Frage konkret, was geprüft wird. Das zwingt den Versicherer, entweder zu konkretisieren oder zuzugeben, dass nichts mehr fehlt. Beides nützt dir.
+Frage konkret, was geprüft wird. Das zwingt den Versicherer, entweder zu konkretisieren oder zuzugeben, dass nichts mehr fehlt. Beides nützt Ihnen.
 
 **Stufe 3 – Mahnung mit Klage-Androhung (nach Frist-Ablauf)**
 
@@ -123,8 +123,8 @@ Lief die 4-Wochen-Frist ab? Mahnung mit 14-Tage-Nachfrist, dann Anwalt, dann Mah
 > Diese Vorlage ist juristisch belastbar und auf den BGH-Stand 2026 zugeschnitten. Kopieren, Lücken füllen, Einschreiben senden.
 
 ```
-[Dein Name]
-[Deine Adresse]
+[Ihr Name]
+[Ihre Adresse]
 
 [Versicherer]
 [Adresse]
@@ -170,31 +170,31 @@ Mit freundlichen Grüßen
 
 ## Was der Versicherer als nächstes wahrscheinlich tut
 
-Der Versicherer hat nach deiner Frist-Setzung vier Standard-Reaktionen. Erkenne sie, dann hast du den nächsten Zug bereits geplant.
+Der Versicherer hat nach Ihrer Frist-Setzung vier Standard-Reaktionen. Erkenne sie, dann haben Sie den nächsten Zug bereits geplant.
 
 ### Reaktion A – Pauschale Unterlagen-Anforderung
 > *„Bitte reichen Sie folgende Unterlagen ein: …"*
 
-**Was dahintersteht:** Verzögerung durch Bürokratie. Oft werden Unterlagen angefordert, die du bereits eingereicht hast.
-**Deine Antwort:** Verweise schriftlich auf die bereits eingereichten Dokumente mit Datumsangabe. Nur tatsächlich neue Unterlagen nachreichen.
+**Was dahintersteht:** Verzögerung durch Bürokratie. Oft werden Unterlagen angefordert, die Sie bereits eingereicht haben.
+**Ihre Antwort:** Verweise schriftlich auf die bereits eingereichten Dokumente mit Datumsangabe. Nur tatsächlich neue Unterlagen nachreichen.
 
 ### Reaktion B – Verlängerungs-Antrag
 > *„Aufgrund der Komplexität bitten wir um weitere 4 Wochen."*
 
 **Was dahintersteht:** Versuch, die Frist zurückzusetzen.
-**Deine Antwort:** Konkrete Begründung verlangen. Bei klarer Haftung: maximal 2 Wochen gewähren, schriftlich.
+**Ihre Antwort:** Konkrete Begründung verlangen. Bei klarer Haftung: maximal 2 Wochen gewähren, schriftlich.
 
 ### Reaktion C – Teilanerkenntnis dem Grunde nach
 > *„Eine Haftung dem Grunde nach kann anerkannt werden. Die Höhe ist weiter zu prüfen."*
 
 **Was dahintersteht:** Erfolg – und zwar ein juristisch wertvoller.
-**Deine Antwort:** Schriftliches Anerkenntnis bestätigen lassen und in deinen Unterlagen mit Datum verbuchen. Die [Verjährungsfrist beginnt nach § 212 BGB neu](/haftpflicht/anerkenntnis-bgb212). Druck auf Höhe-Anerkennung aufrechterhalten.
+**Ihre Antwort:** Schriftliches Anerkenntnis bestätigen lassen und in Ihren Unterlagen mit Datum verbuchen. Die [Verjährungsfrist beginnt nach § 212 BGB neu](/haftpflicht/anerkenntnis-bgb212). Druck auf Höhe-Anerkennung aufrechterhalten.
 
 ### Reaktion D – Plötzliche Ablehnung
 > *„Nach abschließender Prüfung sehen wir keine Eintrittspflicht."*
 
-**Was dahintersteht:** Versicherer kalkuliert, dass du nicht klagst.
-**Deine Antwort:** Sofort spezialisierten Verkehrsrechts-Anwalt einschalten. Die [Anwaltskosten sind bei unverschuldeten Unfällen vom gegnerischen Versicherer erstattbar](/haftpflicht/anwaltskosten-erstattung).
+**Was dahintersteht:** Versicherer kalkuliert, dass Sie nicht klagen.
+**Ihre Antwort:** Sofort spezialisierten Verkehrsrechts-Anwalt einschalten. Die [Anwaltskosten sind bei unverschuldeten Unfällen vom gegnerischen Versicherer erstattbar](/haftpflicht/anwaltskosten-erstattung).
 
 ---
 
@@ -210,17 +210,17 @@ Nein. Sobald alle zur Prüfung notwendigen Unterlagen vollständig vorlagen, tri
 Bei unverschuldetem Unfall: **nichts**. Anwaltskosten und Verzugszinsen sind eigenständige Verzugsschäden und in voller Höhe vom Versicherer zu tragen (BGH VI ZR 235/13).
 
 **Was, wenn der Versicherer behauptet, er bräuchte noch ein Gutachten?**
-Frage konkret: Welches Gutachten, wer beauftragt es, wann ist es fertig? Wenn der Versicherer auf eigene Kosten ein Gutachten einholt, ist das **seine** Frist – du bist nicht verpflichtet zu warten, wenn dein eigenes Gutachten bereits vorliegt.
+Frage konkret: Welches Gutachten, wer beauftragt es, wann ist es fertig? Wenn der Versicherer auf eigene Kosten ein Gutachten einholt, ist das **seine** Frist – Sie sind nicht verpflichtet zu warten, wenn Ihr eigenes Gutachten bereits vorliegt.
 
 **Kann ich auch ohne Anwalt eskalieren?**
-Ja, für die erste Frist-Setzung reicht das Brief-Skript oben. Spätestens bei Reaktion D (Ablehnung) oder bei Personenschäden ist ein spezialisierter Anwalt zwingend – und kostet dich nichts.
+Ja, für die erste Frist-Setzung reicht das Brief-Skript oben. Spätestens bei Reaktion D (Ablehnung) oder bei Personenschäden ist ein spezialisierter Anwalt zwingend – und kostet Sie nichts.
 
 **Was, wenn der Versicherer überhaupt nicht antwortet?**
 Nach Frist-Ablauf: schriftliche Mahnung mit 14-Tage-Frist. Bei weiterem Schweigen: Mahnbescheid (~50 € Gerichtskosten, später erstattet) oder direkt Klage. Schweigen ist nach Verzugs-Eintritt rechtlich identisch mit Ablehnung.
 
 ---
 
-## Was du **nicht** tun solltest
+## Was Sie **nicht** tun sollten
 
 - **Telefonisch verhandeln**, ohne anschließendes Bestätigungsschreiben. Mündliche Zusagen sind in der Praxis wertlos.
 - **„Aus Kulanz" Unterlagen pauschal nachreichen**, ohne zu prüfen, ob sie bereits vorliegen.
@@ -229,9 +229,9 @@ Nach Frist-Ablauf: schriftliche Mahnung mit 14-Tage-Frist. Bei weiterem Schweige
 
 ---
 
-## Wenn du nicht weiter weißt
+## Wenn Sie nicht weiter weißt
 
-Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht – Reparaturkosten, Wertminderung, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Wir vermitteln dir spezialisierte Verkehrsrechts-Anwälte, die deine Forderung **ohne Kostenrisiko für dich** durchsetzen.
+Wir prüfen kostenfrei und unverbindlich, was Ihnen nach Ihrem Unfall zusteht – Reparaturkosten, Wertminderung, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Wir vermitteln Ihnen spezialisierte Verkehrsrechts-Anwälte, die Ihre Forderung **ohne Kostenrisiko für Sie** durchsetzen.
 
 → [Kostenfreie Anspruchs-Prüfung](https://claimondo.de/check)
 
