@@ -190,18 +190,13 @@ test.describe('Regel-4: Anrede (#5909) + Teilkasko (#5888) auf prod', () => {
 
   // ── A3 · Die Kernprobe der Glas-Logik (E7) ────────────────────────────────────────────
   //
-  // ⚠ NOCH NICHT NACHGEWIESEN. Der Test laeuft bis zur Tarifwahl und scheitert danach, ohne
-  // die Messzeile zu erreichen — ein Aufbau-Problem, kein Produktbefund. Gegengeprueft mit
-  // einer isolierten Probe (scratchpad/glas-probe.mjs):  und  verhalten sich auf
-  // prod IDENTISCH, beide wechseln sauber in die Kasko-Strecke. Es liegt also nicht an der
-  // Schadenart, und die Vermutung 'die Glas-Ableitung haengt' ist damit widerlegt.
+  // ✓ Auf prod nachgewiesen (06.09.): glas -> "Ihr Kasko-Tarif enthaelt eine
+  // Werkstattbindung"; auffahrunfall am SELBEN Tarif -> Flow laeuft weiter, Claim traegt
+  // freie_werkstattwahl=true mit werkstattbindung_quelle='tarif'.
   //
-  // Was gesichert ist: der Glas-Only-Tarif existiert auf prod (9 Stueck, bindungsumfang =
-  // nur_glas), und die vierte Quali-Antwort ist live (A2). Was fehlt, ist der Klick-Nachweis,
-  // dass ein GLASschaden an diesem Tarif bindet und ein Karosserieschaden nicht.
-  //
-  // „Verdrahtet' ist eine andere Aussage als „gelaufen' — deshalb steht das hier und nicht
-  // als gruener Haken in der Abnahme.
+  // Zwei Testfallen lagen davor, jede kostete einen Fehlbefund: der unbelegte Tarif und
+  // der nicht verankerte Selektor (beide unten im Code kommentiert). Beide Male sah das
+  // Ergebnis nach einem Produktfehler aus und war einer im Messaufbau.
   test('A3 Glasschaden + Glas-Only-Tarif bindet, derselbe Tarif bei Karosserie nicht', async ({ browser }) => {
     test.skip(!RUN, 'Opt-in: RUN_ANREDE_TEILKASKO=1')
     test.setTimeout(240_000)
@@ -215,6 +210,10 @@ test.describe('Regel-4: Anrede (#5909) + Teilkasko (#5888) auf prod', () => {
       // information_schema, nicht erinnert.
       .select('id, anzeigename, bindungsumfang, marke_id')
       .eq('bindungsumfang', 'nur_glas')
+      // Der Tarif muss BELEGT sein: die fuenf KRAVAG-Glas-Tarife stehen auf 'nicht_belegt'
+      // und fuehren bewusst in den Unklar-Pfad statt in die harte Bindung. Der erste Lauf
+      // nahm einfach den ersten Treffer und mass deshalb etwas anderes als gedacht.
+      .eq('verlaesslichkeit', 'belegt')
       .limit(1)
       .maybeSingle()
     console.log('[A3] Glas-Only-Tarif aus prod:', JSON.stringify(tarif))
@@ -256,13 +255,17 @@ test.describe('Regel-4: Anrede (#5909) + Teilkasko (#5888) auf prod', () => {
       await page.getByRole('button', { name: /Kaskoversicherung wählen/i }).click({ timeout: 20_000 })
       await page.getByPlaceholder('Versicherung suchen …').fill(marke!.marke)
       await page.getByRole('option', { name: marke!.marke, exact: true }).click({ timeout: 15_000 })
-      await page.getByText(tarif!.anzeigename, { exact: true }).click({ timeout: 20_000 })
+      // Der Accessible Name traegt den Bindungshinweis mit, exact:true trifft also nie.
+      // Und 'Basis Sorglos Kasko' ist ein PRAEFIX von '... Glas' — ohne Anker waehlt man
+      // den Vollbindungs-Tarif und misst danach plausibel das Gegenteil.
+      await page.getByRole('button', { name: new RegExp('^' + tarif!.anzeigename) }).first().click({ timeout: 20_000 })
       await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {})
 
-      const gebunden = await page
-        .getByRole('heading', { name: /Kasko-Tarif enthält eine Werkstattbindung/i })
-        .isVisible({ timeout: 25_000 })
-        .catch(() => false)
+      // Bei Bindung erscheint die Endseite; ohne Bindung laeuft der Flow einfach weiter.
+      // Deshalb am TEXT messen, nicht auf eine Ueberschrift warten, die es nicht geben soll.
+      await page.waitForTimeout(4_000)
+      await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => {})
+      const gebunden = /enthält eine Werkstattbindung/i.test(await page.locator('body').innerText())
       console.log(`[A3] schadentyp=${schadentyp} -> gebunden=${gebunden} (erwartet ${erwartet})`)
       await ctx.close()
       expect(gebunden, `E7: ${schadentyp} am Glas-Only-Tarif`).toBe(erwartet)
