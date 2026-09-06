@@ -7,6 +7,7 @@ import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { getWissenData } from '@/lib/feed/wissen'
 import { SITE_URL, WHATSAPP_HREF, jsonLdScript, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import type { FeedItem } from '@/lib/feed/types'
+import { GuidePopover } from '@/components/content/GuidePopover'
 
 // Lesbare Wissens-Uebersicht — die menschliche Zwillingsseite des Maschinen-Feeds
 // (/feed.xml, /feed/katalog.xml). Gleiche Quelle (getWissenData -> Asset-Loader),
@@ -155,6 +156,9 @@ export default async function Page() {
         <SpokeCtaBand headline="Unverschuldet verunfallt? Wir regeln Ihren Schaden – kostenfrei nach § 249 BGB." />
       </main>
       <LandingFooter />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Ohne eigenen Selektor: die Seite
+          hat kein <article>, GuidePopover faellt auf den Seiteninhalt zurueck. */}
+      <GuidePopover />
       <StickyCallBar quelle="Hub: Wissen & Ratgeber" whatsappHref={WA} />
     </div>
   )

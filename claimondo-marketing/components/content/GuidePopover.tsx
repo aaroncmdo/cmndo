@@ -150,7 +150,36 @@ export function GuidePopover({
   useEffect(() => {
     if (!darfZeigen()) return
 
-    const artikel = document.querySelector<HTMLElement>(artikelSelector)
+    // Messgrundlage: der Artikel, sonst der Seiteninhalt.
+    //
+    // WARUM DER RUECKFALL: `artikelSelector` steht per Default auf 'article' —
+    // das passt fuer Ratgeber, Wissen und Decoder. Die uebrigen Marketing-Seiten
+    // sind aber aus <section>-Bloecken gebaute Landingpages OHNE <article> und
+    // ohne <main>; dort fand der Selektor nichts, und die Funktion kehrte hier
+    // zurueck: das Popover erschien NIE — still, ohne Fehler, ohne Log. Genau so
+    // waere jede neue Seite stillschweigend leer ausgegangen.
+    //
+    // Der Rueckfall macht die Einbindung wieder zu dem, wonach sie aussieht:
+    // <GuidePopover /> genuegt. Wer praeziser messen will, gibt weiterhin einen
+    // eigenen Selektor mit (die Stadtseite tut das ueber #stadtseite-inhalt).
+    // ⚠ Als letzte Stufe das HOECHSTE direkte Kind von <body>, nicht das erste:
+    // auf mehreren Seiten ist `body.firstElementChild` ein leeres <div> (Portal-
+    // bzw. Script-Container) mit **offsetHeight 0**. Damit bleibt `gelesen`
+    // rechnerisch 0, die Schwelle wird nie erreicht und das Popover erscheint
+    // nie — gemessen auf /kfz-gutachter/ablauf: h=0px, gelesen=0.000 nach
+    // 2.980px Scroll, waehrend /e-auto-gutachter ueber <main> (h=2353px) bei
+    // 0.278 sauber ausloest.
+    const hoechstesKind = () => {
+      let beste: HTMLElement | null = null
+      for (const kind of Array.from(document.body.children) as HTMLElement[]) {
+        if (!beste || kind.offsetHeight > beste.offsetHeight) beste = kind
+      }
+      return beste && beste.offsetHeight > 0 ? beste : null
+    }
+    const artikel =
+      document.querySelector<HTMLElement>(artikelSelector) ??
+      document.querySelector<HTMLElement>('main') ??
+      hoechstesKind()
     if (!artikel) return
 
     let letztesY = window.scrollY
