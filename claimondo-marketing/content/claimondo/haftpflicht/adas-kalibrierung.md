@@ -46,7 +46,7 @@ ADAS-Kalibrierung · Justage der Assistenzsysteme · Kamera-Einlernen · Sensorj
 
 ## In einem Satz erklärt
 
-Wenn bei der Reparatur ein Bauteil bewegt, getauscht oder ausgerichtet wurde, an dem ein Assistenzsensor sitzt, muss dieser Sensor anschließend neu kalibriert werden – sonst verlässt Sie Sie auf ein System, das seine eigene Blickrichtung nicht mehr kennt.
+Wenn bei der Reparatur ein Bauteil bewegt, getauscht oder ausgerichtet wurde, an dem ein Assistenzsensor sitzt, muss dieser Sensor anschließend neu kalibriert werden – sonst verlassen Sie sich auf ein System, das seine eigene Blickrichtung nicht mehr kennt.
 
 ## In drei Sätzen erklärt
 
