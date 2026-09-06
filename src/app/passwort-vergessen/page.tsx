@@ -56,7 +56,7 @@ export default function PasswortVergessenPage() {
                 </div>
                 <div>
                   <p className="text-claimondo-navy font-medium text-sm">Reset-Link anfordern</p>
-                  <p className="text-claimondo-ondo text-xs">Wir senden dir einen Link per E-Mail</p>
+                  <p className="text-claimondo-ondo text-xs">Wir senden Ihnen einen Link per E-Mail</p>
                 </div>
               </div>
 
@@ -100,7 +100,7 @@ export default function PasswortVergessenPage() {
                 zum Zurücksetzen versendet.
               </p>
               <p className="text-claimondo-ondo/70 text-xs mt-3">
-                Prüfe auch deinen Spam-Ordner.
+                Prüfen Sie auch Ihren Spam-Ordner.
               </p>
             </div>
           )}

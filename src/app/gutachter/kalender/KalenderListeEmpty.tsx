@@ -13,7 +13,7 @@ export default function KalenderListeEmpty() {
     <EmptyState
       icon={CalendarPlusIcon}
       title="Noch keine Termine"
-      description="Termine entstehen automatisch, wenn ein Kunde über den FlowLink einen Vorschlag bestätigt oder du selbst einen Vorschlag machst. In Heute siehst du deine Tagesplanung mit Tagesroute."
+      description="Termine entstehen automatisch, wenn ein Kunde über den FlowLink einen Vorschlag bestätigt oder Sie selbst einen Vorschlag machst. In Heute sehen Sie Ihre Tagesplanung mit Tagesroute."
       actions={[
         { label: 'Aufträge ansehen', href: '/gutachter/auftraege', variant: 'primary' },
         { label: 'Heute öffnen', href: '/gutachter/heute', variant: 'secondary' },

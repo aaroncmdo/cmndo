@@ -115,7 +115,7 @@ function WerkstattVorschlagReaktion({
     const res = await werkstattTerminPasstNicht(terminId, rueckrufzeit || undefined)
     setBusy(false)
     if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
-    toast.success('Die Werkstatt ruft dich zurück.')
+    toast.success('Die Werkstatt ruft Sie zurück.')
     startTransition(() => router.refresh())
   }
 
@@ -183,7 +183,7 @@ export default function WerkstattCard({ claimId, werkstatt, termin }: WerkstattC
         {/* Header */}
         <div className="flex items-center gap-2">
           <WrenchIcon className="w-5 h-5 text-claimondo-ondo" />
-          <h2 className="text-sm font-semibold text-claimondo-navy">Deine Werkstatt</h2>
+          <h2 className="text-sm font-semibold text-claimondo-navy">Ihre Werkstatt</h2>
         </div>
 
         {/* Werkstatt-Infos */}
@@ -229,7 +229,7 @@ export default function WerkstattCard({ claimId, werkstatt, termin }: WerkstattC
               <StatusBadge tone={badgeTone} size="xs">{phase.label}</StatusBadge>
             </div>
             <p className="text-body-sm text-claimondo-ondo">
-              Die Werkstatt konnte deinen Wunschtermin leider nicht annehmen.
+              Die Werkstatt konnte Ihren Wunschtermin leider nicht annehmen.
             </p>
             {termin.absage_grund && (
               <p className="text-body-sm text-claimondo-ondo">

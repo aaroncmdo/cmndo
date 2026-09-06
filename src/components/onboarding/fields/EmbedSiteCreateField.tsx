@@ -40,7 +40,7 @@ export function EmbedSiteCreateField({
       <div className="space-y-2">
         <p className="flex items-center gap-2 text-sm font-medium text-claimondo-navy">
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          Widget angelegt — du findest es jederzeit unter Einstellungen → Embed-Widget.
+          Widget angelegt — Sie finden es jederzeit unter Einstellungen → Embed-Widget.
         </p>
         {hostedSlug && (
           <p className="text-sm text-claimondo-navy">
@@ -64,7 +64,7 @@ export function EmbedSiteCreateField({
     setError(null)
     const dom = cleanDomain(domain)
     if (name.trim().length < 2) {
-      setError('Bitte gib deinem Widget einen Namen.')
+      setError('Bitte geben Sie Ihrem Widget einen Namen.')
       return
     }
     // Domain ist wie gelabelt optional: leer -> Hosted-Pfad (Prod-Smoke 05.08.:
@@ -94,7 +94,7 @@ export function EmbedSiteCreateField({
   async function hostedSeite() {
     setError(null)
     if (name.trim().length < 2) {
-      setError('Bitte gib einen Namen an — daraus wird deine Claimondo-Seite.')
+      setError('Bitte geben Sie einen Namen an — daraus wird Ihre Claimondo-Seite.')
       return
     }
     setSaving(true)
@@ -111,18 +111,18 @@ export function EmbedSiteCreateField({
   return (
     <div className="space-y-3">
       <TextField
-        label="Name deines Widgets"
+        label="Name Ihres Widgets"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="z. B. Kfz-Gutachter Müller"
         disabled={disabled || saving}
       />
       <TextField
-        label="Deine Website-Domain (optional)"
+        label="Ihre Website-Domain (optional)"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
         placeholder="z. B. gutachter-mueller.de"
-        hint="Keine eigene Website? Einfach leer lassen — wir hosten eine Seite für dich."
+        hint="Keine eigene Website? Einfach leer lassen — wir hosten eine Seite für Sie."
         disabled={disabled || saving}
       />
       {error && <p className="text-sm font-medium text-red-600">{error}</p>}

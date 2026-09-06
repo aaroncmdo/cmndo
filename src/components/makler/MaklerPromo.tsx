@@ -321,9 +321,9 @@ export function MaklerPromo({ code, landingUrl, qrSvg, stats, firma }: Props) {
               <span className="flex h-12 w-12 items-center justify-center rounded-full bg-claimondo-navy/10 transition-colors group-hover:bg-claimondo-navy/15">
                 <ExternalLinkIcon width={20} height={20} className="text-claimondo-navy" />
               </span>
-              <span className="text-sm font-medium text-claimondo-navy">Deine Landeseite ansehen</span>
+              <span className="text-sm font-medium text-claimondo-navy">Ihre Landeseite ansehen</span>
               <span className="max-w-xs text-xs text-claimondo-ondo">
-                So sehen deine Kunden die Seite. Sie öffnet in einem neuen Tab — eine eingebettete
+                So sehen Ihre Kunden die Seite. Sie öffnet in einem neuen Tab — eine eingebettete
                 Vorschau ist aus Sicherheitsgründen nicht möglich.
               </span>
             </a>

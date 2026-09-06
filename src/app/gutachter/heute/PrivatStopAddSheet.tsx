@@ -126,7 +126,7 @@ export default function PrivatStopAddSheet({
         <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border">
           <div>
             <h3 className="text-sm font-semibold text-claimondo-navy">Stop hinzufügen</h3>
-            <p className="text-[11px] text-claimondo-ondo">Privat-Termine aus deinem Kalender</p>
+            <p className="text-[11px] text-claimondo-ondo">Privat-Termine aus Ihrem Kalender</p>
           </div>
           <button
             type="button"

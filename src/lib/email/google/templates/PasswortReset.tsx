@@ -28,11 +28,11 @@ export function subject(_p: Props): string {
 export function PasswortResetEmail({ vorname, actionUrl }: Props) {
   const anrede = vorname ? `Hallo ${vorname},` : 'Hallo,'
   return (
-    <EmailShell preview="Setze jetzt ein neues Passwort für dein Claimondo-Konto.">
+    <EmailShell preview="Setze jetzt ein neues Passwort für Ihr Claimondo-Konto.">
       <Hero logoUrl={null} headline={anrede} />
       <Card>
         <Paragraph>
-          du hast ein neues Passwort für dein Claimondo-Konto angefordert. Klicke auf den
+          Sie haben ein neues Passwort für Ihr Claimondo-Konto angefordert. Klicken Sie auf den
           Button, um ein neues Passwort zu vergeben.
         </Paragraph>
         <Button href={actionUrl}>Neues Passwort festlegen</Button>
@@ -47,8 +47,8 @@ export function PasswortResetEmail({ vorname, actionUrl }: Props) {
           werden. Falls er nicht mehr funktioniert, fordere einfach einen neuen an.
         </Paragraph>
         <Paragraph>
-          Du hast kein neues Passwort angefordert? Dann kannst du diese E-Mail einfach
-          ignorieren — dein Passwort bleibt unverändert.
+          Sie haben kein neues Passwort angefordert? Dann können Sie diese E-Mail einfach
+          ignorieren — Ihr Passwort bleibt unverändert.
         </Paragraph>
         <Paragraph>
           Bei Fragen erreichst du uns unter{' '}

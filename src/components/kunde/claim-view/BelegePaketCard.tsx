@@ -30,8 +30,8 @@ export function BelegePaketCard({ vm }: { vm: KundeClaimViewModel }) {
   if (belege.length === 0) return null
   return (
     <Card p={4} className="space-y-3">
-      <h2 className="text-body-sm font-semibold text-claimondo-navy">Deine Belege</h2>
-      <p className="text-body-xs text-claimondo-ondo">Lade deine Unterlagen herunter — z.B. für deinen Versicherer.</p>
+      <h2 className="text-body-sm font-semibold text-claimondo-navy">Ihre Belege</h2>
+      <p className="text-body-xs text-claimondo-ondo">Laden Sie Ihre Unterlagen herunter — z.B. für Ihren Versicherer.</p>
       <ul className="space-y-1.5">
         {belege.map((b) => (
           <li key={b.url} className="flex items-center gap-2">

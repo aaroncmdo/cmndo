@@ -44,11 +44,11 @@ export async function GET(request: Request) {
     }
 
     const triggers: Array<{ tage: number; typ: string; emailSubject: string; emailBody: string; adminTask?: string }> = [
-      { tage: 3, typ: 'email_3d', emailSubject: 'Erinnerung: Anzahlung noch offen', emailBody: `<p>Hallo ${vorname},</p><p>deine Anzahlung ist noch offen. Bitte schließe den Zahlungsvorgang über dein Onboarding-Portal ab.</p>` },
+      { tage: 3, typ: 'email_3d', emailSubject: 'Erinnerung: Anzahlung noch offen', emailBody: `<p>Hallo ${vorname},</p><p>Ihre Anzahlung ist noch offen. Bitte schließen Sie den Zahlungsvorgang über Ihr Onboarding-Portal ab.</p>` },
       { tage: 3, typ: 'admin_task_call_3d', emailSubject: '', emailBody: '', adminTask: `SV ${vorname} hat noch nicht bezahlt — anrufen` },
-      { tage: 7, typ: 'email_7d', emailSubject: 'Dringende Erinnerung: Anzahlung ausstehend', emailBody: `<p>Hallo ${vorname},</p><p>deine Anzahlung ist seit 7 Tagen ausstehend. Ohne Zahlung können wir dir keine Fälle zuweisen. Bitte handle jetzt.</p>` },
+      { tage: 7, typ: 'email_7d', emailSubject: 'Dringende Erinnerung: Anzahlung ausstehend', emailBody: `<p>Hallo ${vorname},</p><p>Ihre Anzahlung ist seit 7 Tagen ausstehend. Ohne Zahlung können wir Ihnen keine Fälle zuweisen. Bitte handle jetzt.</p>` },
       { tage: 10, typ: 'admin_task_call_10d', emailSubject: '', emailBody: '', adminTask: `Zweiter Anruf-Versuch fällig: SV ${vorname}` },
-      { tage: 14, typ: 'email_14d', emailSubject: 'Letzte Mahnung — Vertrag droht zu verfallen', emailBody: `<p>Hallo ${vorname},</p><p>dies ist die letzte Erinnerung. Ohne Zahlung innerhalb der nächsten 7 Tage wird dein Vertrag aufgehoben.</p>` },
+      { tage: 14, typ: 'email_14d', emailSubject: 'Letzte Mahnung — Vertrag droht zu verfallen', emailBody: `<p>Hallo ${vorname},</p><p>dies ist die letzte Erinnerung. Ohne Zahlung innerhalb der nächsten 7 Tage wird Ihr Vertrag aufgehoben.</p>` },
       { tage: 14, typ: 'final_warnung', emailSubject: '', emailBody: '', adminTask: `Letzte Mahnung: SV ${vorname} — manuell entscheiden ob Vertrag aufgehoben wird` },
     ]
 

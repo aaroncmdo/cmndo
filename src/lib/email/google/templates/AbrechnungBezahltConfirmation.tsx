@@ -38,7 +38,7 @@ export function AbrechnungBezahltConfirmationEmail(props: Props) {
       <Card>
         <Heading>{greeting}</Heading>
         <Paragraph>
-          deine Zahlung für die Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist eingegangen.
+          Ihre Zahlung für die Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist eingegangen.
           Vielen Dank!
         </Paragraph>
 
@@ -51,8 +51,8 @@ export function AbrechnungBezahltConfirmationEmail(props: Props) {
         ) : null}
 
         <Paragraph>
-          Du kannst diese Bestätigung als Beleg für deine Buchhaltung aufbewahren.
-          Die offizielle Rechnung mit allen Positionen findest du jederzeit in deinem Portal.
+          Sie können diese Bestätigung als Beleg für Ihre Buchhaltung aufbewahren.
+          Die offizielle Rechnung mit allen Positionen finden Sie jederzeit in Ihrem Portal.
         </Paragraph>
         {props.manuell && (
           <Note>(Diese Zahlung wurde via manuellem Retry vom Claimondo-Team angestossen.)</Note>

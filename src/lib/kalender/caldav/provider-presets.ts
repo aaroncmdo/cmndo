@@ -24,7 +24,7 @@ export const CALDAV_PROVIDERS: CalDavProvider[] = [
     serverUrl: 'https://caldav.icloud.com',
     appPasswordHint: {
       kurz:
-        'Apple benötigt ein App-spezifisches Passwort — dein normales Apple-ID-Passwort funktioniert nicht.',
+        'Apple benötigt ein App-spezifisches Passwort — Ihr normales Apple-ID-Passwort funktioniert nicht.',
       url: 'https://support.apple.com/de-de/102654',
     },
   },

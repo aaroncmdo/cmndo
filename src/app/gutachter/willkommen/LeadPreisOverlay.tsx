@@ -88,11 +88,11 @@ export default function LeadPreisOverlay({
           <section className="bg-gradient-to-br from-[var(--brand-secondary)]/5 to-[var(--brand-accent)]/5 border border-[var(--brand-accent)]/30 rounded-ios-xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <CalculatorIcon className="w-4 h-4 text-[var(--brand-primary)]" />
-              <h3 className="text-sm font-semibold text-[var(--brand-primary)]">ROI-Rechner — was bleibt bei dir?</h3>
+              <h3 className="text-sm font-semibold text-[var(--brand-primary)]">ROI-Rechner — was bleibt bei Ihnen?</h3>
             </div>
             <p className="text-xs text-[var(--brand-primary)] mb-4">
-              Trage dein durchschnittliches Gutachter-Honorar ein. Wir ziehen den Claimondo-Lead-Preis
-              für die passende Schadenstufe ab und zeigen dir, was du netto pro Fall und pro Monat behältst.
+              Tragen Sie Ihr durchschnittliches Gutachter-Honorar ein. Wir ziehen den Claimondo-Lead-Preis
+              für die passende Schadenstufe ab und zeigen Ihnen, was Sie netto pro Fall und pro Monat behältst.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -111,7 +111,7 @@ export default function LeadPreisOverlay({
               </div>
               <div>
                 <label className="text-[10px] text-claimondo-ondo uppercase tracking-wider block mb-1">
-                  Dein Gutachter-Honorar pro Fall (netto, EUR)
+                  Ihr Gutachter-Honorar pro Fall (netto, EUR)
                 </label>
                 <input
                   type="number"
@@ -139,23 +139,23 @@ export default function LeadPreisOverlay({
               <div className="mt-3 flex items-center gap-2 text-[11px] text-[var(--brand-primary)]">
                 <TrendingUpIcon className="w-3.5 h-3.5" />
                 <span>
-                  Du verdienst das <strong>{roiFaktor}-fache</strong> deines Lead-Preises. Jeder Fall ist profitabel.
+                  Sie verdienen das <strong>{roiFaktor}-fache</strong> Ihres Lead-Preises. Jeder Fall ist profitabel.
                 </span>
               </div>
             ) : (
               <div className="mt-3 flex items-start gap-2 text-[11px] text-warning-strong">
                 <InfoIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <span>
-                  Bei dieser Honorar-Höhe deckt der Lead-Preis dein Honorar — prüfe ob dein Satz noch marktüblich ist
-                  oder ob du auf eine höhere Schadenstufe zielen kannst.
+                  Bei dieser Honorar-Höhe deckt der Lead-Preis Ihr Honorar — prüfen Sie ob Ihr Satz noch marktüblich ist
+                  oder ob Sie auf eine höhere Schadenstufe zielen kannst.
                 </span>
               </div>
             )}
 
             {/* Honorar-Upload Hinweis (Phase 2) */}
             <p className="mt-4 pt-3 border-t border-[var(--brand-accent)]/20 text-[10px] text-claimondo-ondo">
-              Tipp: Du kannst deine eigene Honorartabelle (pro Schadenstufe) später im Profil hinterlegen —
-              dann rechnen wir automatisch stufenweise und zeigen dir die exakte Marge je Fall.
+              Tipp: Sie können Ihre eigene Honorartabelle (pro Schadenstufe) später im Profil hinterlegen —
+              dann rechnen wir automatisch stufenweise und zeigen Ihnen die exakte Marge je Fall.
             </p>
           </section>
 
@@ -164,12 +164,12 @@ export default function LeadPreisOverlay({
             <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
             <ul className="text-xs text-claimondo-navy space-y-1.5 list-disc pl-4">
               <li>
-                Solange du innerhalb deines monatlichen Kontingents (<strong>{paketLabel}</strong>) bist, gilt
+                Solange Sie innerhalb Ihres monatlichen Kontingents (<strong>{paketLabel}</strong>) bist, gilt
                 der <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der <strong>Einzel-Preis</strong>.
               </li>
               <li>
-                Pro Fall im Kontingent werden <strong>150 EUR</strong> von deinem Werbebudget verrechnet
-                (solange Guthaben vorhanden), den Rest zahlst du in der Monatsabrechnung.
+                Pro Fall im Kontingent werden <strong>150 EUR</strong> von Ihrem Werbebudget verrechnet
+                (solange Guthaben vorhanden), den Rest zahlen Sie in der Monatsabrechnung.
               </li>
             </ul>
           </section>

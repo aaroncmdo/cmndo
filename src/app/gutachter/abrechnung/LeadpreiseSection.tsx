@@ -48,7 +48,7 @@ export async function LeadpreiseSection({ userId }: { userId: string }) {
           Stand: {standDatum} (Version {tabelle?.[0]?.version ?? 'v1'})
         </p>
         <p className="text-xs text-claimondo-ondo/70 mt-1">
-          Diese Tabelle ist Bestandteil deines Kooperationsvertrags (Anhang). Änderungen werden dir
+          Diese Tabelle ist Bestandteil Ihres Kooperationsvertrags (Anhang). Änderungen werden Ihnen
           vorab schriftlich mitgeteilt.
         </p>
       </div>
@@ -63,8 +63,8 @@ export async function LeadpreiseSection({ userId }: { userId: string }) {
             <strong>Einzel-Preis</strong>.
           </li>
           <li>
-            Pro Fall im Kontingent werden <strong>150 EUR</strong> von deinem Werbebudget verrechnet
-            (solange Guthaben vorhanden), den Rest zahlst du in der Monatsabrechnung.
+            Pro Fall im Kontingent werden <strong>150 EUR</strong> von Ihrem Werbebudget verrechnet
+            (solange Guthaben vorhanden), den Rest zahlen Sie in der Monatsabrechnung.
           </li>
         </ul>
         {/* Beispiel-Callout: shared/SectionCard statt hand-rolled bg-white-Card

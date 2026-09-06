@@ -65,7 +65,7 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
       } else {
         // Kein sauberer Cut moeglich (text-lastiges / bereits transparentes Logo)
         // -> Logo bleibt unveraendert, damit nichts zerschnitten wird.
-        setBgError('Hintergrund konnte nicht sauber entfernt werden — bei text-lastigen Logos passiert das. Dein Logo bleibt unverändert.')
+        setBgError('Hintergrund konnte nicht sauber entfernt werden — bei text-lastigen Logos passiert das. Ihr Logo bleibt unverändert.')
       }
     } catch (err) {
       setBgError(err instanceof Error ? err.message : 'Hintergrund-Entfernung fehlgeschlagen')

@@ -102,7 +102,7 @@ export async function createEmbedSite(form: EmbedSiteFormData): Promise<ActionRe
   // AAR-939 Part B: Variante B (kostenpflichtig, Dispatch-Qualifizierung) erst
   // nach Verifizierung durch Claimondo. Variante A bleibt jederzeit moeglich.
   if (form.variante === 'B' && !sv?.verifiziert) {
-    return { ok: false, error: 'Variante B ist erst nach deiner Verifizierung durch Claimondo freigeschaltet.' }
+    return { ok: false, error: 'Variante B ist erst nach Ihrer Verifizierung durch Claimondo freigeschaltet.' }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,7 +143,7 @@ export async function updateEmbedSite(id: string, form: EmbedSiteFormData): Prom
   )
   // AAR-939 Part B: Wechsel auf / Speichern mit Variante B erst nach Verifizierung.
   if (form.variante === 'B' && !sv?.verifiziert) {
-    return { ok: false, error: 'Variante B ist erst nach deiner Verifizierung durch Claimondo freigeschaltet.' }
+    return { ok: false, error: 'Variante B ist erst nach Ihrer Verifizierung durch Claimondo freigeschaltet.' }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -197,7 +197,7 @@ export async function createHostedEmbedSite(
 
   const trimmed = name.trim()
   if (trimmed.length < 2) {
-    return { ok: false, error: 'Bitte gib einen Namen an — daraus wird deine Claimondo-Seite.' }
+    return { ok: false, error: 'Bitte geben Sie einen Namen an — daraus wird Ihre Claimondo-Seite.' }
   }
 
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')

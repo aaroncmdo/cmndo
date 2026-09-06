@@ -24,7 +24,7 @@ export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   { kind: 'felder', id: 'unfalltyp', kapitel: 'Schaden', titel: 'Was ist passiert?', feldKeys: ['schadentyp', 'schadentyp_freitext'] },
   { kind: 'felder', id: 'hergang', kapitel: 'Schaden', titel: 'Wie ist es passiert?', sub: 'Schildere den Hergang so ausführlich wie möglich — Richtung, Tempo, Ampel/Vorfahrt, wer war wo. Daraus erstellen wir die präzise Unfallskizze.', feldKeys: ['unfallhergang', 'schaden_sichtbar'] },
   { kind: 'felder', id: 'folgeschaeden', kapitel: 'Schaden', titel: 'Verletzte oder weitere Schäden?', feldKeys: ['personenschaden_flag', 'sachschaden_flag', 'sachschaden_beschreibung'] },
-  // Reparaturwunsch (Abrechnungs-Intent) + Rueckfrage "hast du eine Werkstatt?" (conditional)
+  // Reparaturwunsch (Abrechnungs-Intent) + Rueckfrage "haben Sie eine Werkstatt?" (conditional)
   // + Extern-Name (conditional). Felder liegen in onboarding_felder (audience 'beide').
   { kind: 'felder', id: 'reparatur', kapitel: 'Schaden', titel: 'Reparatur oder Auszahlung?', feldKeys: ['reparaturwunsch', 'reparatur_vermittlung_status', 'reparatur_werkstatt_extern'] },
   // ② Unfall
@@ -35,7 +35,7 @@ export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   { kind: 'felder', id: 'gegner', kapitel: 'Unfall', titel: 'Daten des Unfallgegners', sub: 'Steht auf dem europäischen Unfallbericht oder der Visitenkarte.', feldKeys: ['gegner_kennzeichen', 'auslandskennzeichen', 'gegner_versicherung', 'gegner_telefon'] },
   // ③ Fahrzeug
   { kind: 'zb1', id: 'fahrzeugschein', kapitel: 'Fahrzeug', titel: 'Fahrzeugschein fotografieren', sub: 'Ein Foto füllt Marke, FIN und Halter automatisch aus.' },
-  { kind: 'felder', id: 'dein_fahrzeug', kapitel: 'Fahrzeug', titel: 'Dein Fahrzeug', feldKeys: ['kennzeichen', 'fahrzeug_fahrbereit', 'mietwagen_flag'] },
+  { kind: 'felder', id: 'dein_fahrzeug', kapitel: 'Fahrzeug', titel: 'Ihr Fahrzeug', feldKeys: ['kennzeichen', 'fahrzeug_fahrbereit', 'mietwagen_flag'] },
   { kind: 'felder', id: 'halter', kapitel: 'Fahrzeug', titel: 'Wem gehört das Fahrzeug?', feldKeys: ['ist_fahrzeughalter', 'halter_vorname', 'halter_nachname', 'halter_geburtsdatum', 'halter_strasse', 'halter_plz', 'halter_stadt'] },
   { kind: 'felder', id: 'vorschaeden', kapitel: 'Fahrzeug', titel: 'Vorschäden am Auto?', feldKeys: ['hat_vorschaeden'] },
   // ④ Service-/Kanzlei-Wahl (service_typ + kanzlei_wunsch) wandert in den Signatur-Step

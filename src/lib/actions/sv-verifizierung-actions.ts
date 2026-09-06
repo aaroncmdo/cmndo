@@ -70,7 +70,7 @@ export async function uploadSvPflichtdokument(
 
     const maxBytes = slot.max_mb * 1024 * 1024
     if (file.size > maxBytes) {
-      return { ok: false, error: `Datei zu groß — max ${slot.max_mb} MB, deine Datei: ${(file.size / 1024 / 1024).toFixed(1)} MB` }
+      return { ok: false, error: `Datei zu groß — max ${slot.max_mb} MB, Ihre Datei: ${(file.size / 1024 / 1024).toFixed(1)} MB` }
     }
     if (slot.akzeptierte_mime_types.length > 0 && file.type && !slot.akzeptierte_mime_types.includes(file.type)) {
       if (file.type !== 'application/octet-stream') {

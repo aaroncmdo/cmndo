@@ -46,7 +46,7 @@ export function GutachterCopilotPanel({ fallId }: { fallId: string }) {
       greeting={
         <>
           <p>
-            Hallo, ich bin dein <strong>Gutachter-Copilot</strong>. Ich kenne
+            Hallo, ich bin Ihr <strong>Gutachter-Copilot</strong>. Ich kenne
             den Fall — Fahrzeug, Schadenart, Vorschäden und die bereits
             erfassten Gutachten-Werte. Frag mich zur Kalkulation,
             Wertminderung, Nutzungsausfall oder Totalschaden-Bewertung.

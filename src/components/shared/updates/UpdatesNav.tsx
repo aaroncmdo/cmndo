@@ -3,7 +3,7 @@
 // AAR-725 / #updates-rebuild Phase 3 + A2: Globale Updates-Nav.
 // DB-getriebenes Modell (useUpdates). A2 Zwei-Stufen: die rote Zahl = UNGESEHENE offene Actions;
 // Oeffnen ("gesehen") schiebt den Action-Cursor vor -> Zahl faellt, Items werden grau, bleiben aber
-// bis erledigt (DB-State). Popover trennt "Braucht dich" (Action) von "Verlauf" (Info) + Typ-Filter.
+// bis erledigt (DB-State). Popover trennt "Braucht Sie" (Action) von "Verlauf" (Info) + Typ-Filter.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -187,7 +187,7 @@ export default function UpdatesNav({
 
             <div className="max-h-[400px] overflow-y-auto">
               <div className="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-danger">
-                Braucht dich
+                Braucht Sie
               </div>
               {filteredAction.length === 0 ? (
                 <div className="px-4 pb-3 text-xs text-claimondo-ondo/70">Nichts offen — alles erledigt. ✓</div>

@@ -15,8 +15,8 @@ import { speichereOrtFlow } from './self-service-actions'
 
 const TEXTE = {
   fahrzeug: {
-    titel: 'Wo steht dein Fahrzeug?',
-    hilfe: 'Damit wir dir eine passende Werkstatt in deiner Nähe vorschlagen können.',
+    titel: 'Wo steht Ihr Fahrzeug?',
+    hilfe: 'Damit wir Ihnen eine passende Werkstatt in Ihrer Nähe vorschlagen können.',
     platzhalter: 'Adresse, an der das Auto steht',
   },
   besichtigung: {

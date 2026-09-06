@@ -31,7 +31,7 @@ export function einladungEmailHtml(opts: EinladungEmailOpts): string {
     ? `<p><a href="${opts.magicLink}">Passwort setzen &amp; einloggen</a></p>` +
       `<p style="color:#64748b;font-size:13px">Der Link ist begrenzt gültig. Ist er abgelaufen, ` +
       `nutze „Passwort vergessen" auf der Login-Seite.</p>`
-    : `<p>Bitte setze dein Passwort über „Passwort vergessen" auf ` +
+    : `<p>Bitte setze Ihr Passwort über „Passwort vergessen" auf ` +
       `<a href="${opts.appUrl}/login">${opts.appUrl}/login</a>.</p>`
 
   // Optionales Initial-Passwort (nur wenn gesetzt) — zusaetzlich zum Magic-Link.

@@ -131,7 +131,7 @@ export default async function GutachterLayout({
       {sv?.verifizierung_status === 'ausstehend' && (
         <div className="bg-warning-soft border-b border-warning/30 px-4 py-2.5 text-center text-xs text-warning-strong font-medium">
           Berufshaftpflicht &amp; Gewerbeanmeldung fehlen{tier2TageText} —{' '}
-          <a href="/gutachter/verifizierung" className="underline font-semibold">jetzt hochladen</a>, sonst pausieren wir deine Fälle.
+          <a href="/gutachter/verifizierung" className="underline font-semibold">jetzt hochladen</a>, sonst pausieren wir Ihre Fälle.
         </div>
       )}
       {sv?.verifizierung_status === 'frist_ueberschritten' && (

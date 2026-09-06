@@ -39,7 +39,7 @@ export function BueroVerwalterAbrechnungInfoEmail(props: Props) {
           Hallo {props.verwalterVorname ?? props.svName},
         </Paragraph>
         <Paragraph>
-          die Sammelabrechnung für {isAkademie ? 'deine Akademie' : 'dein Büro'}{' '}
+          die Sammelabrechnung für {isAkademie ? 'Ihre Akademie' : 'Ihr Büro'}{' '}
           <strong>{props.bueroName}</strong> ist erstellt.
         </Paragraph>
 
@@ -55,7 +55,7 @@ export function BueroVerwalterAbrechnungInfoEmail(props: Props) {
           hinterlegten {isAkademie ? 'Akademie' : 'Büro'}-Zahlungsmethode eingezogen.
         </Paragraph>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </Card>
       <Footer />
     </EmailShell>

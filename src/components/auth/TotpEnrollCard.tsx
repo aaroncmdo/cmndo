@@ -195,7 +195,7 @@ export function TotpEnrollCard() {
             ) : (
               <>
                 <p className="text-xs text-claimondo-ondo">
-                  1. Scanne diesen QR-Code in deiner Authenticator-App:
+                  1. Scanne diesen QR-Code in Ihrer Authenticator-App:
                 </p>
                 <div className="flex justify-center">
                   {/* qr_code von Supabase ist bereits ein data:image/svg+xml — kein
@@ -283,7 +283,7 @@ export function TotpEnrollCard() {
           </div>
           <div className="p-4">
             <p className="text-xs text-claimondo-ondo">
-              Du verlierst diesen 2. Faktor. Falls keine SMS-Nummer hinterlegt ist, ist dein Konto
+              Sie verlieren diesen 2. Faktor. Falls keine SMS-Nummer hinterlegt ist, ist Ihr Konto
               danach nur noch per Passwort geschützt.
             </p>
             {error && (

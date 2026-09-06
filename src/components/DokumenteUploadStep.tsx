@@ -46,7 +46,7 @@ const GRUPPE_ABTRETUNG: SlotDef[] = [
   {
     slotId: 'sv_sicherungsabtretung',
     label: 'Sicherungsabtretung',
-    beschreibung: 'Dein Standard-Formular für die Abtretung des Schadenersatzanspruchs.',
+    beschreibung: 'Ihr Standard-Formular für die Abtretung des Schadenersatzanspruchs.',
   },
   {
     slotId: 'sv_honorarvereinbarung',
@@ -59,7 +59,7 @@ const GRUPPE_PFLICHT: SlotDef[] = [
   {
     slotId: 'sv_datenschutzerklaerung',
     label: 'Datenschutzerklärung',
-    beschreibung: 'Deine Datenschutzerklärung für Endkunden.',
+    beschreibung: 'Ihre Datenschutzerklärung für Endkunden.',
   },
   {
     slotId: 'sv_widerrufsbelehrung',
@@ -204,7 +204,7 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">
-        Die Dokumente werden von Claimondo geprüft. Du kannst sie später unter Profil → Verifizierung ersetzen.
+        Die Dokumente werden von Claimondo geprüft. Sie können sie später unter Profil → Verifizierung ersetzen.
       </p>
     </div>
   )

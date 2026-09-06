@@ -9,15 +9,15 @@ export const dynamic = 'force-dynamic'
 // ─── WhatsApp Template Builder ─────────────────────────────────────────────
 
 function buildKunde24hMsg(vorname: string, datum: string, uhrzeit: string, adresse: string, svName: string): string {
-  return `Hallo ${vorname}! Erinnerung an deine Fahrzeug-Besichtigung: ${datum} um ${uhrzeit} Uhr bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
+  return `Hallo ${vorname}! Erinnerung an Ihre Fahrzeug-Besichtigung: ${datum} um ${uhrzeit} Uhr bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
 }
 
 function buildKundeMorgenMsg(vorname: string, datum: string, uhrzeit: string, adresse: string, svName: string): string {
-  return `Guten Morgen ${vorname}! Heute findet die Besichtigung deines Fahrzeugs statt. Termin: ${datum} ${uhrzeit} bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
+  return `Guten Morgen ${vorname}! Heute findet die Besichtigung Ihres Fahrzeugs statt. Termin: ${datum} ${uhrzeit} bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
 }
 
 function buildKunde1hMsg(uhrzeit: string, adresse: string, svName: string): string {
-  return `In einer Stunde ist deine Besichtigung! ${uhrzeit} bei ${adresse}. ${svName} ist gleich vor Ort. Viele Grüße von Claimondo!`
+  return `In einer Stunde ist Ihre Besichtigung! ${uhrzeit} bei ${adresse}. ${svName} ist gleich vor Ort. Viele Grüße von Claimondo!`
 }
 
 function buildSvRouteMsg(

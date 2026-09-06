@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const aircallUserId = profile?.aircall_user_id ?? process.env.AIRCALL_DEFAULT_USER_ID
   if (!aircallUserId) {
     return NextResponse.json({
-      error: 'Kein Aircall-User zugeordnet. Bitte Admin kontaktieren, um aircall_user_id in deinem Profil zu setzen.',
+      error: 'Kein Aircall-User zugeordnet. Bitte Admin kontaktieren, um aircall_user_id in Ihrem Profil zu setzen.',
     }, { status: 400 })
   }
 

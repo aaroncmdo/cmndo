@@ -51,7 +51,7 @@ export default function TrustedDeviceList({ devices }: { devices: TrustedDevice[
   if (devices.length === 0) {
     return (
       <p className="text-sm text-claimondo-ondo/70">
-        Keine vertrauten Geräte. Beim Login kannst du „Diesem Gerät vertrauen" wählen, um die
+        Keine vertrauten Geräte. Beim Login können Sie „Diesem Gerät vertrauen" wählen, um die
         Zwei-Faktor-Abfrage auf diesem Gerät für eine Weile zu überspringen.
       </p>
     )

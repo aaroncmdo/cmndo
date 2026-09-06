@@ -443,7 +443,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     }
     await page.waitForLoadState('networkidle').catch(() => {})
     await expect(page.getByRole('heading', { name: /Werkstatt finden/i }).first()).toBeVisible({ timeout: 30_000 })
-    await expect(page.getByText(/Dein Kasko-Tarif/i)).toHaveCount(0)
+    await expect(page.getByText(/(Dein|Ihr) Kasko-Tarif/i)).toHaveCount(0)
     await shot(page, 't2-03-fallakte-finder')
   })
 
@@ -750,10 +750,12 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     console.log('[T7] Claim nach Meldung:', JSON.stringify(c0))
 
     // Tariffrage-Card VOR dem Finder
-    await expect(page.getByText(/Dein Kasko-Tarif/i)).toBeVisible({ timeout: 40_000 })
+    await expect(page.getByText(/(Dein|Ihr) Kasko-Tarif/i)).toBeVisible({ timeout: 40_000 })
     await expect(page.getByRole('heading', { name: /Werkstatt finden/i })).toHaveCount(0)
     const body = await page.locator('body').innerText()
-    console.log('[T7] Anrede-Mix Card: "Dein Kasko-Tarif" + "Ihr Fahrzeug":', /Dein Kasko-Tarif/.test(body) && /Ihr Fahrzeug kaskoversichert/.test(body))
+    // Frueher stand hier ein Anrede-MIX ("Dein Kasko-Tarif" neben "Ihr Fahrzeug"). Seit der
+    // Umstellung ist das ein Befund, kein Merkmal — deshalb geprueft statt nur geloggt.
+    console.log('[T7] Card duzt noch?', /(dein|deine|deinen)/i.test(body))
     await shot(page, 't7-02-tarif-card')
     await waehleMarke(page, 'HUK-COBURG')
     await page.getByText('Classic SELECT', { exact: true }).click()
@@ -891,12 +893,15 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await shot(page, 't16-01-werkstattliste')
     await ziel.click()
     await page.getByRole('button', { name: /^weiter|übernehmen|bestätigen/i }).first().click({ timeout: 10_000 }).catch(() => {})
-    // Nach der Wahl: „Wunschtermin vorschlagen" (optional, Lauf 8) -> ueberspringen. Nebenbefund: dieser Step duzt
-    // („Dein Fahrzeug wird zu … gebracht"), der restliche Flow siezt.
+    // Nach der Wahl: „Wunschtermin vorschlagen" (optional, Lauf 8) -> ueberspringen.
+    // Hier lag der Nebenbefund vom 05.09.: dieser Step duzte („Dein Fahrzeug wird zu … gebracht"),
+    // waehrend der restliche Flow siezte. Mit der Anrede-Umstellung ist das behoben; die Zeile
+    // unten prueft es jetzt, statt es nur zu protokollieren.
     const wunschtermin = page.getByRole('heading', { name: /Wunschtermin vorschlagen/i })
     if (await wunschtermin.isVisible({ timeout: 15_000 }).catch(() => false)) {
       const anrede = await page.locator('body').innerText()
-      console.log('[T16] Wunschtermin-Step Anrede du?', /Dein Fahrzeug|möchtest du/.test(anrede), '· Sie im selben Flow?', /Ihr Fahrzeug|Sie /.test(anrede))
+      const duzt = /(Dein Fahrzeug|möchtest du|deinen|deine)/i.test(anrede)
+      console.log('[T16] Wunschtermin-Step duzt noch?', duzt, '· siezt:', /Ihr Fahrzeug|Sie /.test(anrede))
       await shot(page, 't16-01b-wunschtermin')
       await page.getByRole('button', { name: /^überspringen$/i }).click()
     }
@@ -919,7 +924,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await expect(page.getByRole('heading', { name: /Werkstatt finden/i })).toHaveCount(0, { timeout: 30_000 })
     const body = await page.locator('body').innerText()
     const zeigtWerkstatt = gewaehlt !== '?' && body.includes(gewaehlt.slice(0, 12))
-    console.log('[T16] Fallakte zeigt gewählte Werkstatt:', zeigtWerkstatt, '· Aufgaben:', body.match(/Deine Aufgaben[\s\S]{0,160}/)?.[0]?.replace(/\n/g, ' | '))
+    console.log('[T16] Fallakte zeigt gewählte Werkstatt:', zeigtWerkstatt, '· Aufgaben:', body.match(/(Deine|Ihre) Aufgaben[\s\S]{0,160}/)?.[0]?.replace(/\n/g, ' | '))
     expect(zeigtWerkstatt, `Fallakte zeigt die gewählte Werkstatt „${gewaehlt}"`).toBe(true)
     await shot(page, 't16-02-fallakte-werkstatt')
   })
@@ -1039,8 +1044,8 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     const portalClaimId = page.url().match(/\/kunde\/faelle\/([0-9a-f-]+)/)![1]
     portalClaimIds.push(portalClaimId)
     await page.waitForLoadState('networkidle').catch(() => {})
-    await expect(page.getByText(/Dein Kasko-Tarif/i)).toBeVisible({ timeout: 40_000 })
-    const frageDu = page.getByRole('heading', { name: /Bei welcher Versicherung ist dein Fahrzeug kaskoversichert/i })
+    await expect(page.getByText(/(Dein|Ihr) Kasko-Tarif/i)).toBeVisible({ timeout: 40_000 })
+    const frageDu = page.getByRole('heading', { name: /Bei welcher Versicherung ist (dein|Ihr) Fahrzeug kaskoversichert/i })
     const frageSie = page.getByRole('heading', { name: /Bei welcher Versicherung ist Ihr Fahrzeug kaskoversichert/i })
     await expect(frageDu.or(frageSie)).toBeVisible({ timeout: 20_000 })
     const du = await frageDu.isVisible().catch(() => false)
@@ -1051,7 +1056,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await page.getByRole('option', { name: 'HUK-COBURG', exact: true }).click()
     await page.getByText('Classic SELECT', { exact: true }).click()
     await page.getByTestId('kasko-bestaetigen-ja').or(page.getByRole('button', { name: /Ja, das ist mein Tarif/i })).first().click()
-    await expect(page.getByText(/Dein Kasko-Tarif enthält eine Werkstattbindung/i)).toBeVisible({ timeout: 40_000 })
+    await expect(page.getByText(/(Dein|Ihr) Kasko-Tarif enthält eine Werkstattbindung/i)).toBeVisible({ timeout: 40_000 })
     await shot(page, 't13-02-bindungs-card-du')
     await page.getByTestId('kasko-bindung-korrigieren').or(page.getByRole('button', { name: /Angaben korrigieren/i })).first().click()
     await expect(frageDu).toBeVisible({ timeout: 20_000 })
@@ -1421,7 +1426,10 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await shot(page, 't19-01-portal-pruefcard')
     test.skip(!sichtbar, 'Phase 2 (Prüf-Card, Task 9) ist auf dem Ziel noch nicht live')
     const text = await card.innerText()
-    expect(text, 'du-Anrede').toMatch(/dein/i)
+    // Aaron 05./06.09.: durchgehend Sie. Bis dahin hielt diese Zeile die Du-Form fest —
+    // sie prueft jetzt das Gegenteil, und zwar streng: ein einziges „dein" ist ein Befund.
+    expect(text, 'Sie-Anrede').toMatch(/Ihr|Ihre|Ihren/)
+    expect(text, 'kein Du mehr').not.toMatch(/(dein|deine|deinen|dir|dich)/i)
     // Zwei Handlungen, wie im Soll-Blatt festgelegt.
     await expect(page.getByTestId('kasko-pruefung-korrigieren').or(page.getByRole('button', { name: /Angaben korrigieren/i })).first()).toBeVisible()
     await expect(page.getByTestId('kasko-pruefung-dokumente').or(page.getByRole('button', { name: /Zu den Dokumenten/i })).first()).toBeVisible()

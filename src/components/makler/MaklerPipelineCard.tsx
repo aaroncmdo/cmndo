@@ -33,7 +33,7 @@ function vermittlungLabel(n: number): string {
 
 export function MaklerPipelineCard({ offeneLeads, pipeline }: Props) {
   return (
-    <SectionCard title="Deine Pipeline">
+    <SectionCard title="Ihre Pipeline">
       <div className="flex items-center gap-1">
         <Stufe value={offeneLeads} label="Offene Leads" hint="noch offen" />
         <span className="text-claimondo-ondo shrink-0" aria-hidden>

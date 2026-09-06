@@ -209,7 +209,7 @@ export async function createTermin(
     if (!kbProfile.google_connected_at) {
       return {
         success: false,
-        error: 'Du musst zuerst dein Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.',
+        error: 'Sie müssen zuerst Ihr Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.',
       }
     }
 

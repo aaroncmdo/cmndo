@@ -25,8 +25,8 @@ export async function notifiziereNetzwerk(
   const titel = art === 'anfrage' ? 'Neue Netzwerk-Anfrage' : 'Netzwerk-Anfrage angenommen'
   const inhalt =
     art === 'anfrage'
-      ? `${absender.name} möchte sich mit dir vernetzen.`
-      : `${absender.name} hat deine Netzwerk-Anfrage angenommen.`
+      ? `${absender.name} möchte sich mit Ihnen vernetzen.`
+      : `${absender.name} hat Ihre Netzwerk-Anfrage angenommen.`
   await createMitteilung({
     empfaenger_id: empfaengerProfilId,
     empfaenger_rolle: rolle as EmpfaengerRolle,

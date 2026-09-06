@@ -108,7 +108,7 @@ function mapEventToMitteilung(
       return { titel: 'Neuer Fall', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     // Kunden-Nachzug: der Kunde sieht die Fall-Eröffnung erst, wenn sein Zugang steht.
     case 'kunde.account_bereit':
-      return { titel: 'Dein Fall wurde angelegt', inhalt: 'Dein Zugang ist bereit — hier siehst du jederzeit den Stand.', kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+      return { titel: 'Ihr Fall wurde angelegt', inhalt: 'Ihr Zugang ist bereit — hier sehen Sie jederzeit den Stand.', kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     case 'fall.sv_assigned':
       return { titel: 'Sachverständiger zugewiesen', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     case 'fall.status_changed': {

@@ -31,11 +31,11 @@ export default function KaskoPruefungCard({ claimId, dokumenteZielId = 'doks-ter
     <Card p={5} radius="lg" accentColor="warning" data-testid="kasko-pruefung-card">
       <div className="mb-2 flex items-center gap-2">
         <FileSearchIcon className="h-5 w-5 text-warning-strong" aria-hidden />
-        <h2 className="text-heading-sm text-claimondo-navy">Dein Versicherungsschein wird geprüft</h2>
+        <h2 className="text-heading-sm text-claimondo-navy">Ihr Versicherungsschein wird geprüft</h2>
       </div>
       <p className="text-body-sm text-claimondo-navy/80">
-        Du konntest die Werkstattbindung deines Kasko-Tarifs noch nicht angeben. Unser Team klärt mit dir, ob deine
-        Versicherung die Werkstatt vorschreibt, bevor eine Reparatur beauftragt wird. Halte dafür bitte deinen
+        Sie konnten die Werkstattbindung Ihres Kasko-Tarifs noch nicht angeben. Unser Team klärt mit Ihnen, ob Ihre
+        Versicherung die Werkstatt vorschreibt, bevor eine Reparatur beauftragt wird. Halten Sie dafür bitte Ihren
         Versicherungsschein bereit oder lade ihn unter „Dokumente" hoch.
       </p>
       <div className="mt-3 flex flex-wrap gap-2">

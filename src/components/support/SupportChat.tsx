@@ -54,7 +54,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
 
   const placeholder = messages.length === 0
     ? `Hi${userName ? ' ' + userName.split(' ')[0] : ''}! Beschreibe das Problem oder den Wunsch…`
-    : 'Deine Antwort…'
+    : 'Ihre Antwort…'
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -70,7 +70,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
             </p>
             <p className="text-xs text-claimondo-ondo">
               Beschreibe das Problem oder den Wunsch — ich prüfe, ob es schon ein Ticket gibt,
-              und lege sonst eines für dich an.
+              und lege sonst eines für Sie an.
             </p>
           </div>
         )}

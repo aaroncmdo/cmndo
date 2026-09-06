@@ -48,8 +48,8 @@ export function SvMahnungSaeumnisEmail(props: Props) {
           <>
             <Paragraph>
               unsere Abrechnung <strong>{props.abrechnungs_nr}</strong> ist seit <strong>{props.tage_ueberfaellig} Tagen</strong> überfällig.
-              Falls die Lastschrift bei dir fehlgeschlagen ist oder du den offenen Betrag manuell überwiesen hast, prüfe bitte deine
-              Zahlungsmethode im Portal oder melde dich bei uns.
+              Falls die Lastschrift bei Ihnen fehlgeschlagen ist oder Sie den offenen Betrag manuell überwiesen haben, prüfen Sie bitte Ihre
+              Zahlungsmethode im Portal oder melden Sie sich bei uns.
             </Paragraph>
             <Paragraph>
               Bitte überweise den offenen Betrag oder hinterlege eine funktionierende Zahlungsmethode innerhalb der nächsten 7 Tage,
@@ -75,7 +75,7 @@ export function SvMahnungSaeumnisEmail(props: Props) {
           <>
             <Paragraph>
               <strong>Letzte Mahnung.</strong> Die Abrechnung <strong>{props.abrechnungs_nr}</strong> ist seit
-              <strong> {props.tage_ueberfaellig} Tagen</strong> überfällig und wir haben dich bereits mehrfach erinnert.
+              <strong> {props.tage_ueberfaellig} Tagen</strong> überfällig und wir haben Sie bereits mehrfach erinnert.
             </Paragraph>
             <Paragraph>
               Wenn bis zum {formatDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString())} keine Zahlung eingeht,

@@ -62,7 +62,7 @@ export async function GET(request: Request) {
             email: p.email,
             vorname: p.vorname ?? 'Partner',
             subject: 'Zahlung Netzwerkpartner-Abo ausstehend',
-            html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>deine Netzwerkpartner-Zahlung ist noch offen. Bitte aktualisiere deine Zahlungsmethode im Portal (Einstellungen → Netzwerkpartner → „Abo verwalten"), damit dein Netzwerk-Vorteil aktiv bleibt.</p>`,
+            html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>Ihre Netzwerkpartner-Zahlung ist noch offen. Bitte aktualisieren Sie Ihre Zahlungsmethode im Portal (Einstellungen → Netzwerkpartner → „Abo verwalten"), damit Ihr Netzwerk-Vorteil aktiv bleibt.</p>`,
           })
           versandOk = res.ok
           if (!res.ok) console.error(`[netzwerk-dunning] Mahnung an SV ${abo.sv_id} NICHT zugestellt:`, res.error)

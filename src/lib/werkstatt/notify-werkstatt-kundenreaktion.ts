@@ -23,13 +23,13 @@ export async function notifyWerkstattKundenreaktion(
 
   const { titel, text } =
     args.ereignis === 'bestaetigt'
-      ? { titel: 'Termin vom Kunden bestätigt', text: 'Der Kunde hat deinen Terminvorschlag bestätigt.' }
+      ? { titel: 'Termin vom Kunden bestätigt', text: 'Der Kunde hat Ihren Terminvorschlag bestätigt.' }
       : args.ereignis === 'kva_abgelehnt'
         ? {
             titel: 'Kostenvoranschlag abgelehnt',
             text: args.grund
-              ? `Der Kunde hat deinen Kostenvoranschlag abgelehnt: ${args.grund}`
-              : 'Der Kunde hat deinen Kostenvoranschlag abgelehnt — bitte überarbeiten.',
+              ? `Der Kunde hat Ihren Kostenvoranschlag abgelehnt: ${args.grund}`
+              : 'Der Kunde hat Ihren Kostenvoranschlag abgelehnt — bitte überarbeiten.',
           }
         : {
             titel: 'Kunde bittet um Rückruf',

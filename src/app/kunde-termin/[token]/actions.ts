@@ -40,7 +40,7 @@ export async function getKundeTerminByToken(
     termin.kunde_response_token_expires_at &&
     new Date(termin.kunde_response_token_expires_at) < new Date()
   ) {
-    return { termin: null, error: 'Dieser Link ist abgelaufen. Bitte kontaktiere deinen Betreuer.' }
+    return { termin: null, error: 'Dieser Link ist abgelaufen. Bitte kontaktieren Sie Ihren Betreuer.' }
   }
 
   // SV-Name + Fall-Nummer + Kunden-Vorname laden

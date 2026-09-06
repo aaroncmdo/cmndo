@@ -52,7 +52,7 @@ export function SvBasicOnboardingClient({
             Willkommen bei Claimondo
           </h1>
           <p className="mt-2 text-claimondo-navy/70 text-base">
-            Dein Onboarding — nur wenige Schritte bis zu deinem ersten Auftrag.
+            Ihr Onboarding — nur wenige Schritte bis zu Ihrem ersten Auftrag.
           </p>
         </div>
 

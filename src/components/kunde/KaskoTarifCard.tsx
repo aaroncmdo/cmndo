@@ -29,7 +29,7 @@ export default function KaskoTarifCard({
       toast.error(r.error)
       return
     }
-    if (r.freieWerkstattwahl === null) toast.message('Bitte prüfe deinen Versicherungsschein vor der Reparatur – unser Team meldet sich.')
+    if (r.freieWerkstattwahl === null) toast.message('Bitte prüfen Sie Ihren Versicherungsschein vor der Reparatur – unser Team meldet sich.')
     onGespeichert?.(r.freieWerkstattwahl)
     router.refresh()
   }
@@ -38,10 +38,10 @@ export default function KaskoTarifCard({
     <Card p={5} radius="lg">
       <div className="mb-3 flex items-center gap-2">
         <ShieldCheckIcon className="h-5 w-5 text-claimondo-ondo" aria-hidden />
-        <h2 className="text-heading-sm text-claimondo-navy">Dein Kasko-Tarif</h2>
+        <h2 className="text-heading-sm text-claimondo-navy">Ihr Kasko-Tarif</h2>
       </div>
       {/* Kein Mail-Hinweis: der Portal-Pfad schickt keine E6-Mail (Review #5864, Befund 5). */}
-      <KaskoTarifFrage kompakt anrede="du" mitMailHinweis={false} onErgebnis={(auswahl) => void speichere(auswahl)} busy={busy} />
+      <KaskoTarifFrage kompakt anrede="Sie" mitMailHinweis={false} onErgebnis={(auswahl) => void speichere(auswahl)} busy={busy} />
     </Card>
   )
 }

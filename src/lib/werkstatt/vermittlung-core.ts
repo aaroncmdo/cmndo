@@ -40,7 +40,7 @@ export function brauchtWerkstattVermittlung(row: BedarfRow): boolean {
  * werden? (28.08.2026)
  *
  * Hintergrund: Der Werkstatt-Step im /flow laesst sich nicht wegkonfigurieren, wenn der Kunde
- * die Frage "Wie moechtest du den Schaden abrechnen?" uebersprungen hat — FlowWizardKfz friert
+ * die Frage "Wie moechten Sie den Schaden abrechnen?" uebersprungen hat — FlowWizardKfz friert
  * die Step-Sequenz beim Mount ein (gegen die Stale-Index-Falle), und `reparaturwunsch` wird
  * erst mitten im Flow erhoben. Der Schritt wird also angeboten; dann muss er auch bedienbar
  * sein. Prod-verifiziert war vorher: fuenf Werkstaetten sichtbar, jede Auswahl abgelehnt.

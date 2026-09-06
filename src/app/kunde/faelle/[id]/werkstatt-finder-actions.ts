@@ -103,7 +103,7 @@ export async function ladeWerkstaettenFuerClaim(
   const { findQualifizierteReparaturWerkstaetten } = await import('@/lib/werkstatt/vermittlung-server')
   const { resolveNetzwerkOwnerProfilId } = await import('@/lib/netzwerk/resolve-netzwerk-owner')
   // P2-T6 (Netzwerk): Owner-Knoten des Claims (per-Claim > Kunden-Default > null) fuer die
-  // relationale "Dein Netzwerk"-Partition — Freund-Werkstaetten des Owners floaten nach oben.
+  // relationale "Ihr Netzwerk"-Partition — Freund-Werkstaetten des Owners floaten nach oben.
   // Service-Client: netzwerk_owner-Spalten sind nicht kunden-RLS-lesbar. null = No-op.
   const ownerProfilId = await resolveNetzwerkOwnerProfilId(createServiceClient(), { claimId })
   // nurEchte: der Kunde darf keine Test-/internen Werkstaetten sehen (SSoT interne-identitaet).
