@@ -92,7 +92,7 @@ export async function chooseAssigneeForRolle(
         empfaenger_rolle: 'admin',
         kategorie: 'update',
         titel: `Rolle ohne aktive User: ${rolle}`,
-        inhalt: `Ein automatischer Task sollte an Rolle "${rolle}" gehen, aber es gibt keinen aktiven User. Fällt auf dich zurück.`,
+        inhalt: `Ein automatischer Task sollte an Rolle "${rolle}" gehen, aber es gibt keinen aktiven User. Fällt auf Sie zurück.`,
         prioritaet: 'dringend',
       })
     } catch (err) {

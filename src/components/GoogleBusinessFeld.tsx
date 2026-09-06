@@ -54,7 +54,7 @@ export default function GoogleBusinessFeld({
         </p>
       </div>
       <p className="text-[11px] text-claimondo-shield leading-relaxed">
-        Such deinen Betrieb so, wie er bei Google erscheint — das schaltet deine echte
+        Such Ihren Betrieb so, wie er bei Google erscheint — das schaltet Ihre echte
         Sterne-Bewertung im Gutachter-Finder frei. Kunden vertrauen Profilen mit Bewertungen eher.
       </p>
       <GooglePlaceAutocomplete

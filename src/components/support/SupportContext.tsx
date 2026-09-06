@@ -84,10 +84,10 @@ export function SupportProvider({ children }: { children: ReactNode }) {
           setError(
             'message' in data && data.message
               ? data.message
-              : 'Du hast das Stunden-Limit erreicht. Bitte in einer Stunde erneut versuchen.',
+              : 'Sie haben das Stunden-Limit erreicht. Bitte in einer Stunde erneut versuchen.',
           )
         } else if (res.status === 401 || res.status === 403) {
-          setError('Deine Session ist abgelaufen. Bitte die Seite neu laden.')
+          setError('Ihre Session ist abgelaufen. Bitte die Seite neu laden.')
         } else {
           setError(
             'error' in data && data.error

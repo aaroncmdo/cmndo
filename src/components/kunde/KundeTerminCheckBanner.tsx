@@ -1,6 +1,6 @@
 'use client'
 
-// AAR-939 — Kunde-Selbstauskunft "Kam dein Gutachter?" fuer nur_gutachter/embed-B.
+// AAR-939 — Kunde-Selbstauskunft "Kam Ihr Gutachter?" fuer nur_gutachter/embed-B.
 //
 // Erscheint im Kunde-Fall-Detail, wenn ein nur_gutachter-Termin ueberfaellig ist
 // und weder als durchgefuehrt noch als No-Show/Ablehnung geklaert wurde (Gating

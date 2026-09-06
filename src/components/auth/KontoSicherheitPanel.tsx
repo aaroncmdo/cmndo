@@ -33,7 +33,7 @@ export async function KontoSicherheitPanel() {
           </h2>
         </div>
         <p className="text-xs text-claimondo-ondo">
-          Schütze dein Konto mit einem zweiten Faktor — SMS-Code oder Authenticator-App. Beides ist
+          Schütze Ihr Konto mit einem zweiten Faktor — SMS-Code oder Authenticator-App. Beides ist
           optional und kann jederzeit geändert oder entfernt werden.
         </p>
         <TwoFaPhoneChange

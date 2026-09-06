@@ -47,7 +47,7 @@ export function parseFunde(text: string): ZustandFund[] {
 }
 
 const SYSTEM =
-  'Du bist ein KFZ-Schadengutachter. Erkenne aus den Fahrzeugfotos NUR eindeutig sichtbare Schäden (Delle, Kratzer, Riss, Rost, Bruch).'
+  'Sie sind ein KFZ-Schadengutachter. Erkenne aus den Fahrzeugfotos NUR eindeutig sichtbare Schäden (Delle, Kratzer, Riss, Rost, Bruch).'
 
 /** Fail-safe Vision-Call: bei fehlendem Client / keinen Fotos / Fehler -> []. */
 export async function analysiereFotos(fotos: { url: string; perspektive: string }[]): Promise<ZustandFund[]> {

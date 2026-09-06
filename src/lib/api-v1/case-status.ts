@@ -13,25 +13,25 @@ import { phaseForOperativeStatus } from '@/lib/claims/lifecycle'
 // die internen SUBPHASE_LABEL ("Filmcheck"/"QC-Pruefung"/"SA-Unterschrift offen") — die sind
 // Fachsprache, nicht kundentauglich. Unbekannter/fehlender/nicht-gemappter Status -> Fallback
 // (z.B. Lead noch nicht in einen Claim konvertiert).
-export const CASE_STATUS_FALLBACK = 'Deine Anfrage ist eingegangen und wird bearbeitet.'
+export const CASE_STATUS_FALLBACK = 'Ihre Anfrage ist eingegangen und wird bearbeitet.'
 
 const KUNDE_STATUS_BY_MAIN: Record<ClaimMainPhase, string> = {
-  erfassung: 'Deine Anfrage ist eingegangen — wir organisieren gerade einen passenden Gutachter.',
-  begutachtung: 'Ein Gutachter ist beauftragt — die Begutachtung deines Schadens läuft.',
-  regulierung: 'Wir regulieren deinen Schaden mit der gegnerischen Versicherung.',
-  abschluss: 'Dein Fall ist abgeschlossen.',
+  erfassung: 'Ihre Anfrage ist eingegangen — wir organisieren gerade einen passenden Gutachter.',
+  begutachtung: 'Ein Gutachter ist beauftragt — die Begutachtung Ihres Schadens läuft.',
+  regulierung: 'Wir regulieren Ihren Schaden mit der gegnerischen Versicherung.',
+  abschluss: 'Ihr Fall ist abgeschlossen.',
 }
 
 // Feinere kunde-Labels fuer die Abschluss-Ausgaenge: ein pauschales "abgeschlossen" waere fuer
 // eine Ablehnung/Stornierung/Klage irrefuehrend. Nur diese Sub-Phasen ueberschreiben das
 // Haupt-Label; alle anderen Sub-Phasen nutzen KUNDE_STATUS_BY_MAIN.
 const KUNDE_STATUS_BY_SUB: Partial<Record<ClaimSubPhase, string>> = {
-  erfolgreich_reguliert: 'Dein Fall ist erfolgreich abgeschlossen und reguliert.',
-  termin_durchgefuehrt: 'Der Gutachter-Termin ist erfolgt — dein Fall ist abgeschlossen.',
-  storniert: 'Dein Fall wurde gestoppt.',
+  erfolgreich_reguliert: 'Ihr Fall ist erfolgreich abgeschlossen und reguliert.',
+  termin_durchgefuehrt: 'Der Gutachter-Termin ist erfolgt — Ihr Fall ist abgeschlossen.',
+  storniert: 'Ihr Fall wurde gestoppt.',
   abgelehnt_final: 'Die gegnerische Versicherung hat den Anspruch abgelehnt.',
-  klage_rechtsstreit: 'Dein Fall wird gerichtlich geklärt (Rechtsstreit).',
-  an_externe_kanzlei: 'Dein Fall wurde an eine Rechtsanwaltskanzlei übergeben.',
+  klage_rechtsstreit: 'Ihr Fall wird gerichtlich geklärt (Rechtsstreit).',
+  an_externe_kanzlei: 'Ihr Fall wurde an eine Rechtsanwaltskanzlei übergeben.',
 }
 
 export function coarseKundeStatus(operativeStatus: string | null | undefined): string {

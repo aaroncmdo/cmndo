@@ -272,6 +272,14 @@ jobs:
       - name: Stumme-Waechter-Ratchet
         run: npm run check:stumme-waechter -- --ratchet
 
+      # Server-Actions-Gate: R1 blockt Value-Exports aus 'use server'-Files — die landen im
+      # Client-Bundle als `undefined` (AAR-664, Urgent-Crash). Das Skript existierte seit
+      # 13.05.2026 mit npm-Key, wurde aber von keinem Workflow aufgerufen und lief damit nie;
+      # gefunden von der zweiten Achse des Stumme-Waechter-Ratchets direkt darueber (#5879).
+      # R2 (Mutation ohne revalidatePath) sind Hinweise, kein Exit-Code.
+      - name: Server-Actions-Gate
+        run: npm run check:server-actions
+
       # Query-Drift-Bremse (Ratchet): blockt NEUE Queries auf nicht-existente Spalten —
       # Filter-/Order-Params (.order('created_at') auf flow_links/auftraege), insert/update-
       # Keys (pflichtdokumente.datei_url) und top-level select-Spalten — gg. database.types.ts
@@ -868,6 +876,28 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # J5-Delta Kasko-Werkstattbindung (#5857, Abnahme 04./05.09.): der Nutzerstrom ueber ALLE Eingaenge x
+      # Rollen — FlowLink gebunden/frei/unklar/Freitext (Endseite, Rueckruf, Dispatch-Task, Re-Visit),
+      # Embed-Werkstatt-Finder gebunden (keine Werkstatt, Rueckruf-Kontakt), Dispatch-Override wirkt auf
+      # Lead + Claim + Kundensicht, Kunde-Portal „Schaden melden" (Tarif-Card vor dem Finder), Admin-Liste,
+      # Marketing-Link. Der J10-Seed legt selbstzahler an und rendert die Kasko-Card nie — deshalb ein
+      # eigener Wegwerf-Lauf (Seed nur Lead + FlowLink, alles danach per UI, afterEach raeumt auf;
+      # @claimondo.test = Send-Isolation, E6-Mail bewusst nicht als email_log erwartet).
+      - name: J5-Delta — Kasko-Werkstattbindung (Eingaenge x Rollen)
+        run: npx playwright test kasko-werkstattbindung-abnahme-prod --project=chromium --reporter=line --retries=0 --workers=1
+        env:
+          RUN_KASKO_WB_ABNAHME: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          TEST_DISPATCH_PASSWORD: ${{ secrets.TEST_DISPATCH_PASSWORD }}
+          # Es gibt KEIN Secret TEST_KUNDE_PASSWORD (gh secret list 05.09.) — das Konto smoke-kunde@ liegt
+          # als SMOKE_KUNDE_PASS (gesetzt 31.08. nach der Rotation). Mapping wie #5847; T7 skippt sichtbar,
+          # wenn der Wert leer ankommt.
+          TEST_KUNDE_PASSWORD: ${{ secrets.SMOKE_KUNDE_PASS }}
 
       # Fundament Journey-Suite J3 (Unterschriften SA/Vollmacht) — der SA-Signatur-Weg konvertiert einen
       # Lead zu einem Claim mit sa_unterschrieben=true. Seed legt je Lauf einen Wegwerf-Lead im

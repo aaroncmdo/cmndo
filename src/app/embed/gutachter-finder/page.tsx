@@ -55,7 +55,7 @@ export default async function GutachterFinderEmbedPage({
 
   // Reuse: dieselben Loader wie die public sv-in-naehe-API + die Marketing-Karte.
   // P2-T7 (K11): ladeAktiveSVs traegt einen Owner-Injektions-Seam ({ ownerProfilId }) fuer den
-  // relationalen "Dein Netzwerk"-Boost. Diese Embed-URL hat v1 KEINE Attribution in den
+  // relationalen "Ihr Netzwerk"-Boost. Diese Embed-URL hat v1 KEINE Attribution in den
   // searchParams (lat/lng/zoom/fallback/schaetzung) und der anon-Finder keinen Session-Owner
   // -> bewusst OHNE Owner (nur das globale istNetzwerkpartner-Badge). Sobald ein attribuierter
   // Einstieg existiert (Werkstatt-QR ?werkstatt= / Makler-Link), dessen Entity -> profiles.id

@@ -40,7 +40,7 @@ export function ConsentManager() {
           de: {
             consentModal: {
               title: 'Wir verwenden Cookies',
-              description: 'Wir nutzen Cookies fuer Statistik und Marketing. Notwendige Cookies sind immer aktiv. Du kannst frei waehlen und jederzeit widerrufen.',
+              description: 'Wir nutzen Cookies fuer Statistik und Marketing. Notwendige Cookies sind immer aktiv. Sie können frei waehlen und jederzeit widerrufen.',
               acceptAllBtn: 'Alle akzeptieren',
               acceptNecessaryBtn: 'Ablehnen',
               showPreferencesBtn: 'Einstellungen',

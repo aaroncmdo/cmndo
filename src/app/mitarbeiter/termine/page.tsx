@@ -284,7 +284,7 @@ export default async function MitarbeiterTermine({
       <TermineTabs active="meine" />
       <PageHeader
         title="Zeitplan"
-        description={termine.length === 0 ? 'Rückrufe und Kundentermine, die dir zugewiesen sind.' : summaryParts.join(' · ')}
+        description={termine.length === 0 ? 'Rückrufe und Kundentermine, die Ihnen zugewiesen sind.' : summaryParts.join(' · ')}
         size="lg"
       />
 

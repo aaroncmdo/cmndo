@@ -14,6 +14,7 @@ import { createCase } from '@/lib/intake/create-case'
 import { ensureVehicleForClaim } from '@/lib/vehicles/ensure-vehicle'
 import { buildSchadenLeadInput, type SchadenMeldenForm } from '@/lib/kunde/schaden-melden'
 import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
+import { istInterneEmail } from '@/lib/testdaten/interne-identitaet'
 
 export async function meldeNeuenSchaden(
   form: SchadenMeldenForm,
@@ -63,6 +64,9 @@ export async function meldeNeuenSchaden(
   await notifyTeamNeuerLead({
     leadId: result.leadId,
     quelle: 'Kunde-Portal (Schaden melden)',
+    // Abnahme 05.09.: Test-/Mitarbeiter-Konten (smoke-kunde@, @claimondo.test) melden ueber diesen Weg
+    // jede Nacht einen Smoke-Schaden — als „🏢 (intern)" markiert, damit der Alert echte Kunden nicht verwaessert.
+    intern: istInterneEmail(user.email),
     name: [built.base.vorname, built.base.nachname].filter(Boolean).join(' '),
     telefon: built.base.telefon ?? null,
     email: built.base.email ?? null,

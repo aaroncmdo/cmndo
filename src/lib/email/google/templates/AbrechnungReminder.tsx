@@ -45,8 +45,8 @@ export function AbrechnungReminderEmail(props: Props) {
       <Card>
         <Heading>{greeting}</Heading>
         <Paragraph>
-          kurze Erinnerung: deine Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist <strong>{tageText}</strong> fällig.
-          Wir ziehen den Betrag automatisch von deiner hinterlegten Zahlungsmethode ein.
+          kurze Erinnerung: Ihre Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist <strong>{tageText}</strong> fällig.
+          Wir ziehen den Betrag automatisch von Ihrer hinterlegten Zahlungsmethode ein.
         </Paragraph>
 
         <Heading>Details</Heading>
@@ -55,11 +55,11 @@ export function AbrechnungReminderEmail(props: Props) {
         <InfoRow label="Endbetrag (brutto)" value={formatEuro(props.summe_brutto)} />
 
         <Paragraph>
-          Bitte stelle sicher dass dein hinterlegtes Zahlungsmittel ausreichend gedeckt ist.
-          Bei Rückfragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
+          Bitte stelle sicher dass Ihr hinterlegtes Zahlungsmittel ausreichend gedeckt ist.
+          Bei Rückfragen erreichen Sie uns unter <strong>aaron.sprafke@claimondo.de</strong>.
         </Paragraph>
         <Note>
-          Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhältst du eine separate Benachrichtigung.
+          Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhalten Sie eine separate Benachrichtigung.
         </Note>
         <Note>
           <Link href={`${APP_URL}/gutachter/abrechnung`} style={{ color: email.color.ondo }}>Zur Abrechnungs-Übersicht im Portal</Link>

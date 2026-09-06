@@ -70,7 +70,7 @@ describe('buildWerkstattMergeVars', () => {
     vi.mocked(planeTerminOeffentlich).mockResolvedValue([svProfil()])
     const wkOhneOrt = { ...wk, adresse_ort: null }
     const sv = await buildWerkstattMergeVars({ db: {} as never, werkstatt: wkOhneOrt, templateKey: 'sv_vorstellung', config })
-    expect(sv.sv?.region).toBe('deiner Region')
+    expect(sv.sv?.region).toBe('Ihrer Region')
   })
 
   it('setzt die statischen Merge-Vars aus config/werkstatt', async () => {

@@ -49,7 +49,7 @@ export default function KalenderConnectPanel({
   const [error, setError] = useState<string | null>(null)
 
   function handleDisconnectCaldav() {
-    if (!confirm('CalDAV-Verbindung wirklich trennen? Claimondo kann dann deine private Nicht-Verfügbarkeit nicht mehr berücksichtigen.')) {
+    if (!confirm('CalDAV-Verbindung wirklich trennen? Claimondo kann dann Ihre private Nicht-Verfügbarkeit nicht mehr berücksichtigen.')) {
       return
     }
     setError(null)
@@ -79,7 +79,7 @@ export default function KalenderConnectPanel({
           <div>
             <h2 className="text-base font-semibold text-claimondo-navy">Google Calendar</h2>
             <p className="text-xs text-claimondo-ondo">
-              OAuth — Claimondo liest Verfügbarkeit direkt aus deinem Google-Konto.
+              OAuth — Claimondo liest Verfügbarkeit direkt aus Ihrem Google-Konto.
             </p>
           </div>
           {googleConnected ? (
@@ -121,7 +121,7 @@ export default function KalenderConnectPanel({
           <div>
             <h2 className="text-base font-semibold text-claimondo-navy">Microsoft Outlook</h2>
             <p className="text-xs text-claimondo-ondo">
-              OAuth — Claimondo liest Verfügbarkeit aus deinem Outlook- / Microsoft-365-Konto.
+              OAuth — Claimondo liest Verfügbarkeit aus Ihrem Outlook- / Microsoft-365-Konto.
             </p>
           </div>
           {microsoftConnected ? (
@@ -163,7 +163,7 @@ export default function KalenderConnectPanel({
           <div>
             <h2 className="text-base font-semibold text-claimondo-navy">Apple iCloud / CalDAV</h2>
             <p className="text-xs text-claimondo-ondo">
-              App-spezifisches Passwort aus deiner Apple-ID — Claimondo liest Verfügbarkeit.
+              App-spezifisches Passwort aus Ihrer Apple-ID — Claimondo liest Verfügbarkeit.
             </p>
           </div>
           {caldav ? (
@@ -247,7 +247,7 @@ export default function KalenderConnectPanel({
       </section>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">
-        Credentials werden verschlüsselt gespeichert (AES-256-GCM). Claimondo berücksichtigt deine Kalender-Verfügbarkeit bei Terminvorschlägen.
+        Credentials werden verschlüsselt gespeichert (AES-256-GCM). Claimondo berücksichtigt Ihre Kalender-Verfügbarkeit bei Terminvorschlägen.
       </p>
 
       <CalDavConnectModal

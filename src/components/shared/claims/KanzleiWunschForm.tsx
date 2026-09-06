@@ -40,7 +40,7 @@ const OPTIONS: { value: KanzleiWunsch; label: string; sub: string; icon: typeof 
   {
     value: 'eigene_kanzlei',
     label: 'Ja, eine eigene Kanzlei',
-    sub:   'Du gibst Kontaktdaten an, wir senden das Paket',
+    sub:   'Sie geben Kontaktdaten an, wir senden das Paket',
     icon:  BuildingIcon,
   },
   {
@@ -119,8 +119,8 @@ export function KanzleiWunschForm({
     <form onSubmit={handleSubmit} className={containerCls}>
       {variant === 'card' && (
         <div>
-          <h3 className="text-sm font-semibold text-claimondo-navy">Möchtest du eine Kanzlei einbinden?</h3>
-          <p className="text-xs text-claimondo-light-blue mt-0.5">Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung.</p>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Möchten Sie eine Kanzlei einbinden?</h3>
+          <p className="text-xs text-claimondo-light-blue mt-0.5">Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung.</p>
         </div>
       )}
 

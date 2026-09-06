@@ -118,8 +118,8 @@ export default function StellungnahmeClient({
               {beauftragAm ? ` (${formatDatum(beauftragAm)})` : ''}.
             </p>
             <p className="text-xs text-warning mt-0.5">
-              Bitte lade deine technische Stellungnahme als PDF hoch und erläutere
-              kurz deine Einschätzung zu den strittigen Positionen.
+              Bitte laden Sie Ihre technische Stellungnahme als PDF hoch und erläutere
+              kurz Ihre Einschätzung zu den strittigen Positionen.
             </p>
           </div>
         </div>

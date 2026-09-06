@@ -161,7 +161,7 @@ export function FlowSlotStep({
             -> ladeMatchingFlow). Hardcoded-DE wie im Embed-Finder (per-Locale-JSON ohne
             Key-Fallback -> fehlender i18n-Key wuerde Nicht-de-Kunden crashen). */}
         <div className="mb-5">
-          <h2 className="text-base font-semibold text-claimondo-navy">Dein Wunschtermin</h2>
+          <h2 className="text-base font-semibold text-claimondo-navy">Ihr Wunschtermin</h2>
           <p className="mt-0.5 mb-2 text-sm text-claimondo-ondo">
             Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
           </p>

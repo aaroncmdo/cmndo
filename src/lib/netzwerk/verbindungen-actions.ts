@@ -37,7 +37,7 @@ async function meinAnzeigeName(profilId: string): Promise<string> {
 export async function sendeFreundAnfrage(zielProfilId: string): Promise<R> {
   const me = await meineProfilId()
   if (!me) return { ok: false, error: 'Nicht angemeldet.' }
-  if (zielProfilId === me) return { ok: false, error: 'Du kannst dich nicht mit dir selbst verbinden.' }
+  if (zielProfilId === me) return { ok: false, error: 'Sie können Sie nicht mit Ihnen selbst verbinden.' }
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('netzwerk_verbindungen')

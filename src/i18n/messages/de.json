@@ -5631,6 +5631,10 @@
         "eigenverantwortung": {
           "label": "Ich selbst",
           "hint": "Ich habe den Unfall selbst verursacht."
+        },
+        "kein_gegner": {
+          "label": "Kein Gegner beteiligt",
+          "hint": "Hagel, Marder, Glas, Wild, Diebstahl oder Sturm."
         }
       }
     },

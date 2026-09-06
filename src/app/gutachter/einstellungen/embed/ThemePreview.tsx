@@ -32,7 +32,7 @@ export default function ThemePreview({
         </div>
         <div className="p-4 space-y-3">
           <p className="text-sm" style={{ color: theme.text }}>
-            Beschreibe kurz deinen Schaden — wir melden uns.
+            Beschreibe kurz Ihren Schaden — wir melden uns.
           </p>
           <div className="h-9 rounded-md border border-claimondo-border bg-claimondo-bg" />
           <button

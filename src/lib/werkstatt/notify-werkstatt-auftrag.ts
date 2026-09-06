@@ -53,11 +53,11 @@ export function buildWerkstattAuftragEmailHtml(args: {
         <tr><td style="background:${NAVY};padding:20px 28px;color:#ffffff;font-size:18px;font-weight:700;">Claimondo</td></tr>
         <tr><td style="padding:28px;">
           <p style="margin:0 0 12px;font-size:15px;">Hallo ${name},</p>
-          <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">über Claimondo wurde Dir ein neuer Reparaturauftrag zugewiesen.</p>
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">über Claimondo wurde Ihnen ein neuer Reparaturauftrag zugewiesen.</p>
           ${kundeZeile}
           ${portalZeile}
-          <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Der Kunde wird sich für die Terminabstimmung bei Dir melden. Bei Fragen sind wir jederzeit für Dich da.</p>
-          <p style="margin:24px 0 0;font-size:15px;">Dein Claimondo-Team</p>
+          <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Der Kunde wird sich für die Terminabstimmung bei Ihnen melden. Bei Fragen sind wir jederzeit für Sie da.</p>
+          <p style="margin:24px 0 0;font-size:15px;">Ihr Claimondo-Team</p>
         </td></tr>
       </table>
     </td></tr>

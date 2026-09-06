@@ -50,7 +50,7 @@ export default function DomainListInput({
             }
           }}
           placeholder="z. B. meine-kanzlei.de"
-          hint="Leer lassen = dein Widget funktioniert auf jeder Domain. Einträge beschränken es auf genau diese Domains."
+          hint="Leer lassen = Ihr Widget funktioniert auf jeder Domain. Einträge beschränken es auf genau diese Domains."
           error={error}
           className="flex-1"
         />

@@ -15,25 +15,25 @@ export function KaskoUnklarHinweis({
   onWeiter: () => void
   busy?: boolean
   /** Kundensicht im Portal duzt (seit 31.08.), FlowLink siezt. Default 'sie'. */
-  anrede?: 'sie' | 'du'
+  anrede?: 'sie' | 'Sie'
 }) {
-  const du = anrede === 'du'
+  const du = anrede === 'Sie'
   return (
     <div className="max-w-md w-full flex flex-col gap-4" data-testid="kasko-unklar-hinweis">
       <div>
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">{du ? 'Bitte prüfe deinen Versicherungsschein' : 'Bitte prüfen Sie Ihren Versicherungsschein'}</h1>
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">{du ? 'Bitte prüfen Sie Ihren Versicherungsschein' : 'Bitte prüfen Sie Ihren Versicherungsschein'}</h1>
         <p className="text-body-sm text-claimondo-navy/80">
-          {du ? 'Wir konnten nicht klären, ob dein Kasko-Tarif' : 'Wir konnten nicht klären, ob Ihr Kasko-Tarif'}
+          {du ? 'Wir konnten nicht klären, ob Ihr Kasko-Tarif' : 'Wir konnten nicht klären, ob Ihr Kasko-Tarif'}
           {markeName ? ` bei ${markeName}` : ''}
           {du
-            ? ' eine Werkstattbindung enthält. Wir zeigen dir trotzdem passende Werkstätten – beauftrage die Reparatur aber erst, wenn du das geprüft hast.'
+            ? ' eine Werkstattbindung enthält. Wir zeigen Ihnen trotzdem passende Werkstätten – beauftragen Sie die Reparatur aber erst, wenn Sie das geprüft haben.'
             : ' eine Werkstattbindung enthält. Wir zeigen Ihnen trotzdem passende Werkstätten – beauftragen Sie die Reparatur aber erst, wenn Sie das geprüft haben.'}
         </p>
       </div>
       <Card p={4} radius="lg" accentColor="info">
         <p className="text-body-sm text-claimondo-navy/80">
           {du
-            ? 'Steht im Tarifnamen ein Zusatz wie „SELECT“, „mit Werkstattbonus“ oder „mit Werkstattservice“, benennt deine Versicherung die Werkstatt – bei freier Wahl droht eine Kürzung. Unser Team meldet sich dazu bei dir.'
+            ? 'Steht im Tarifnamen ein Zusatz wie „SELECT“, „mit Werkstattbonus“ oder „mit Werkstattservice“, benennt Ihre Versicherung die Werkstatt – bei freier Wahl droht eine Kürzung. Unser Team meldet sich dazu bei Ihnen.'
             : 'Steht im Tarifnamen ein Zusatz wie „SELECT“, „mit Werkstattbonus“ oder „mit Werkstattservice“, benennt Ihre Versicherung die Werkstatt – bei freier Wahl droht eine Kürzung. Unser Team meldet sich dazu bei Ihnen.'}
         </p>
       </Card>

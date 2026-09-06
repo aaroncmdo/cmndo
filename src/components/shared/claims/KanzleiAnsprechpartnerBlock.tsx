@@ -54,14 +54,14 @@ export function KanzleiAnsprechpartnerBlock({
         <div className="bg-warning-soft border border-warning/30 rounded-ios-lg p-3 flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-warning-strong shrink-0 mt-0.5" />
           <p className="text-xs text-warning-strong">
-            Die Versicherung hat abgelehnt — sprich mit deiner Kanzlei. Sie übernimmt jetzt die rechtliche Vertretung.
+            Die Versicherung hat abgelehnt — sprechen Sie mit Ihrer Kanzlei. Sie übernimmt jetzt die rechtliche Vertretung.
           </p>
         </div>
       )}
 
       <div className="flex items-center gap-2">
         <ScaleIcon className="w-5 h-5 text-claimondo-ondo" />
-        <h2 className="text-sm font-semibold text-claimondo-navy">Dein Ansprechpartner Kanzlei</h2>
+        <h2 className="text-sm font-semibold text-claimondo-navy">Ihr Ansprechpartner Kanzlei</h2>
       </div>
 
       <div className="space-y-3">

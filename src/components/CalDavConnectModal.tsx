@@ -158,7 +158,7 @@ export default function CalDavConnectModal({
                     type="url"
                     value={serverUrl}
                     onChange={(e) => setServerUrl(e.target.value)}
-                    placeholder="https://dein-caldav-server.de/dav"
+                    placeholder="https://Ihr-caldav-server.de/dav"
                     className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
                   />
                 </div>

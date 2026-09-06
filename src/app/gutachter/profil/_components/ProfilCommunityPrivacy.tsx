@@ -65,8 +65,8 @@ export function ProfilCommunityPrivacy({ svId, initial }: { svId: string; initia
     <SectionCard className="p-6 mt-5">
       <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Community-Privatsphäre</h2>
       <p className="text-xs text-claimondo-ondo/70 mb-4">
-        Wenn aktiv, sehen andere Community-Mitglieder im Leaderboard „Anonym" statt deines Namens.
-        Deine Statistiken (Fälle, Umsatz) bleiben sichtbar — nur dein Name wird verborgen.
+        Wenn aktiv, sehen andere Community-Mitglieder im Leaderboard „Anonym" statt Ihres Namens.
+        Ihre Statistiken (Fälle, Umsatz) bleiben sichtbar — nur Ihr Name wird verborgen.
       </p>
       <PrivacyToggle svId={svId} initial={initial} />
     </SectionCard>

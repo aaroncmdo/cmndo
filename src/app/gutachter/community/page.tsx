@@ -152,7 +152,7 @@ export default async function CommunityDashboardPage() {
                       </Td>
                       <Td>
                         <div className={`text-sm ${isMe ? 'font-semibold text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}>
-                          {name}{isMe && <span className="ml-2 text-[10px] text-[var(--brand-secondary)]">(Du)</span>}
+                          {name}{isMe && <span className="ml-2 text-[10px] text-[var(--brand-secondary)]">(Sie)</span>}
                         </div>
                       </Td>
                       <Td className="text-right font-medium">{row.faelle_count}</Td>

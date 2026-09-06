@@ -100,7 +100,7 @@ export const SUPPORT_TOOLS: Anthropic.Messages.Tool[] = [
             '2 (high) = einzelne Seite/Feature blockiert, wichtiger Workflow stark eingeschränkt, Performance die produktives Arbeiten verhindert. ' +
             '3 (medium) = störend aber umgehbar, UX-Schwäche ohne Workflow-Blockade. ' +
             '4 (low) = kosmetisch, nice-to-have. ' +
-            'Default 3. Wenn du "backend-kritisch" oder "ux-kritisch" setzt, muss priority ≤ 2 sein.',
+            'Default 3. Wenn Sie "backend-kritisch" oder "ux-kritisch" setzt, muss priority ≤ 2 sein.',
           minimum: 0,
           maximum: 4,
         },

@@ -534,7 +534,7 @@ async function sendSvKonfrontationsAnfrage(
     kategorie: 'update',
     titel: 'Konfrontations-Begleitung angefragt',
     inhalt:
-      `Der Kunde wünscht deine Begleitung bei der Nachbesichtigung am ${terminLabel}. ` +
+      `Der Kunde wünscht Ihre Begleitung bei der Nachbesichtigung am ${terminLabel}. ` +
       'Kein neuer Auftrag — Begleitung über bestehenden Fall. Bitte in der Fallakte annehmen oder ablehnen.',
     kontext_typ: 'fall',
     kontext_id: fallId,
@@ -610,8 +610,8 @@ async function sendKundeKonfrontationBestaetigt(
     empfaenger_id: claim.geschaedigter_user_id,
     empfaenger_rolle: 'kunde',
     kategorie: 'update',
-    titel: 'Dein Sachverständiger ist bei der Nachbesichtigung dabei',
-    inhalt: `Dein Sachverständiger hat bestätigt, dass er dich bei der Nachbesichtigung am ${datumLabel} begleitet.`,
+    titel: 'Ihr Sachverständiger ist bei der Nachbesichtigung dabei',
+    inhalt: `Ihr Sachverständiger hat bestätigt, dass er Sie bei der Nachbesichtigung am ${datumLabel} begleitet.`,
     kontext_typ: 'fall',
     kontext_id: fallId,
     prioritaet: 'normal',

@@ -14,7 +14,7 @@ export function subject(_p: Props) {
 
 export function ReklamationFristAbgelaufenEmail(props: Props) {
   return (
-    <EmailShell preview="Deine Reklamation wurde automatisch abgelehnt">
+    <EmailShell preview="Ihre Reklamation wurde automatisch abgelehnt">
       <MailHeader />
       <Card>
         <Heading>Reklamation abgelehnt</Heading>
@@ -23,15 +23,15 @@ export function ReklamationFristAbgelaufenEmail(props: Props) {
           Hallo {props.vorname ?? 'Partner'},
         </Paragraph>
         <Paragraph>
-          deine Reklamation wurde automatisch abgelehnt, da die 5-Werktage-Frist
+          Ihre Reklamation wurde automatisch abgelehnt, da die 5-Werktage-Frist
           überschritten wurde.
         </Paragraph>
 
         <Paragraph>
-          Bei Fragen wende dich bitte an <strong>aaron.sprafke@claimondo.de</strong>.
+          Bei Fragen wenden Sie sich bitte an <strong>aaron.sprafke@claimondo.de</strong>.
         </Paragraph>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </Card>
       <Footer />
     </EmailShell>

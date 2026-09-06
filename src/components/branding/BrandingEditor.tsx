@@ -330,7 +330,7 @@ export default function BrandingEditor({
         <div>
           <h1 className="text-xl font-semibold text-[var(--brand-primary)]">Branding</h1>
           <p className="text-sm text-[var(--brand-text-secondary)]">
-            Lade dein Logo hoch — Farben & Schriftart werden automatisch extrahiert.
+            Laden Sie Ihr Logo hoch — Farben & Schriftart werden automatisch extrahiert.
           </p>
         </div>
         {canSaveToOrg && (
@@ -372,7 +372,7 @@ export default function BrandingEditor({
       {saved && !dirty && (
         <div className="px-4 py-3 rounded-ios-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-2">
           <CheckIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
-          <span>Branding gespeichert. Beim nächsten Seitenwechsel siehst du dein neues Portal.</span>
+          <span>Branding gespeichert. Beim nächsten Seitenwechsel sehen Sie Ihr neues Portal.</span>
         </div>
       )}
 
@@ -412,9 +412,9 @@ export default function BrandingEditor({
           als Quick-Start. Klick → Server-Action + globale Brand-Transition. */}
       {logoUrl ? (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-[var(--brand-text-primary)]">Stile aus deinem Logo</h2>
+          <h2 className="text-sm font-semibold text-[var(--brand-text-primary)]">Stile aus Ihrem Logo</h2>
           <p className="text-xs text-[var(--brand-text-secondary)]">
-            Fünf Variationen mit deinen Logo-Farben in unterschiedlichen Rollen. Klick wendet sofort an.
+            Fünf Variationen mit Ihren Logo-Farben in unterschiedlichen Rollen. Klick wendet sofort an.
           </p>
           <BrandPresetPicker
             presets={generateLogoPresets({
@@ -452,7 +452,7 @@ export default function BrandingEditor({
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-[var(--brand-text-primary)]">Brand-Voreinstellungen</h2>
           <p className="text-xs text-[var(--brand-text-secondary)]">
-            Sechs Klick-Themes für KFZ-Werkstätten & Sachverständige. Wendet sich sofort an, du kannst danach noch feintunen.
+            Sechs Klick-Themes für KFZ-Werkstätten & Sachverständige. Wendet sich sofort an, Sie können danach noch feintunen.
           </p>
           <BrandPresetPicker
             activePresetId={

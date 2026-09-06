@@ -223,7 +223,7 @@ export async function convertLeadToFall(
       kundenbetreuerId,
       'fallback_kb_zuweisung',
       'Fall als KB-Fallback zugewiesen',
-      `Fall ${fallNummer} wurde dir als Fallback zugewiesen, weil aktuell kein Kundenbetreuer verfügbar ist.`,
+      `Fall ${fallNummer} wurde Ihnen als Fallback zugewiesen, weil aktuell kein Kundenbetreuer verfügbar ist.`,
       `/faelle/${fall.id}`,
     ).catch(() => {})
   } else if (kbAssignment.fallback_used === 'error') {

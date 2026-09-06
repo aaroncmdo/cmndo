@@ -76,7 +76,7 @@ export function VoiceDictation({
       {error && <p className="text-xs font-medium text-danger">{error}</p>}
 
       <p className="text-xs leading-relaxed text-claimondo-ondo">
-        Die Sprachaufnahme wird nur zur Transkription verarbeitet und nicht gespeichert. Du kannst den
+        Die Sprachaufnahme wird nur zur Transkription verarbeitet und nicht gespeichert. Sie können den
         Text danach frei bearbeiten.
       </p>
     </div>

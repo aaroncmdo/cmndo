@@ -70,7 +70,7 @@ export default function FiktiveAbrechnungCard({
         </div>
 
         <p className="border-t border-claimondo-border pt-2 text-[11px] leading-relaxed text-claimondo-ondo">
-          Du hast dich für die fiktive Abrechnung entschieden — die Auszahlung erfolgt auf
+          Sie haben Sie für die fiktive Abrechnung entschieden — die Auszahlung erfolgt auf
           Basis des Gutachtens (netto, ohne Mehrwertsteuer, da keine Reparaturrechnung; § 249 BGB),
           statt einer tatsächlichen Reparatur. Die endgültige Höhe legt die Versicherung fest.
         </p>

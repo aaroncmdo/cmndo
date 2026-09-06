@@ -188,7 +188,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
           <p className="text-sm font-semibold text-amber-900">Vorreservierung</p>
           <p className="text-xs text-amber-700 mt-1">
             Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben. Bitte warten bis der Termin
-            offiziell bestätigt wird — du erhältst dann eine zweite Mail. Bis dahin: nicht anfahren.
+            offiziell bestätigt wird — Sie erhalten dann eine zweite Mail. Bis dahin: nicht anfahren.
           </p>
         </div>
       )}

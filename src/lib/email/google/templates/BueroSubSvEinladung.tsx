@@ -20,14 +20,14 @@ export function BueroSubSvEinladungEmail(props: Props) {
     <EmailShell preview={`Vertrag für ${props.bueroName} unterzeichnet — nächster Schritt: Anzahlung`}>
       <MailHeader />
       <Card>
-        <Heading>Vielen Dank für deine Unterschrift!</Heading>
+        <Heading>Vielen Dank für Ihre Unterschrift!</Heading>
 
         <Paragraph>
           Hallo {props.vorname ?? 'Partner'},
         </Paragraph>
         <Paragraph>
-          vielen Dank für die Unterzeichnung. Im Anhang findest du das Vertragsdokument
-          für dein Büro <strong>{props.bueroName}</strong>.
+          vielen Dank für die Unterzeichnung. Im Anhang finden Sie das Vertragsdokument
+          für Ihr Büro <strong>{props.bueroName}</strong>.
         </Paragraph>
 
         <Paragraph>
@@ -45,7 +45,7 @@ export function BueroSubSvEinladungEmail(props: Props) {
 
         <Button href={props.portalUrl}>Zum Büro-Onboarding</Button>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </Card>
       <Footer />
     </EmailShell>

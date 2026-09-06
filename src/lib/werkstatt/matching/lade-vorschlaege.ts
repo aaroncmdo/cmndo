@@ -69,7 +69,7 @@ export async function ladeWerkstattVorschlaege(input: {
    */
   maxUmkreisKm?: number | null
   /**
-   * P2-T6 (Netzwerk): Owner-Knoten (profiles.id) fuer die relationale "Dein Netzwerk"-Partition.
+   * P2-T6 (Netzwerk): Owner-Knoten (profiles.id) fuer die relationale "Ihr Netzwerk"-Partition.
    * null/undefined = No-op (exakt dieselbe Rangfolge wie bisher). K12: die Partition laeuft als
    * ALLERLETZTER Schritt nach dem Ranking, K10: EIN Freund-Batch pro Aufruf.
    */

@@ -139,8 +139,8 @@ export default function VertragPage() {
             <div className="text-sm text-success-strong">
               <p className="font-semibold">Vertrag bereits unterzeichnet</p>
               <p className="text-xs text-success-strong mt-1">
-                Du hast den Kooperationsvertrag mit der Claimondo GmbH bereits digital signiert.
-                Bei Fragen wende dich an aaron.sprafke@claimondo.de.
+                Sie haben den Kooperationsvertrag mit der Claimondo GmbH bereits digital signiert.
+                Bei Fragen wenden Sie sich an aaron.sprafke@claimondo.de.
               </p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function VertragPage() {
           <ul className="list-disc pl-5 space-y-1">
             <li>Paket: <strong>{PAKET_LABEL[svData.paket] ?? svData.paket}</strong></li>
             <li>Leadpreis-Staffelung gemäß Anlage 1 (abhängig von Schadenshöhe)</li>
-            <li>Anzahlung: <strong>{svData.anzahlung}€</strong> (wird mit deinen Leadkosten verrechnet)</li>
+            <li>Anzahlung: <strong>{svData.anzahlung}€</strong> (wird mit Ihren Leadkosten verrechnet)</li>
             <li>Zahlungsfrist für Monatsrechnungen: 14 Tage</li>
             <li>Kündigungsfrist: 3 Monate zum Monatsende</li>
           </ul>

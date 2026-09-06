@@ -162,9 +162,9 @@ const STEP_LABELS: Record<StepId, string> = {
   ort_fahrzeug: 'Fahrzeugstandort',
   werkstattbindung_check: 'Werkstattwahl',
   werkstatt: 'Werkstatt',
-  werkstatt_anzeige: 'Deine Werkstatt',
+  werkstatt_anzeige: 'Ihre Werkstatt',
   termin: 'Termin',
-  gutachter: 'Dein Gutachter',
+  gutachter: 'Ihr Gutachter',
   rueckruf: 'Rückruf',
   sa: 'Beauftragung',
   account: 'Konto',
@@ -1167,7 +1167,7 @@ export default function FlowWizardKfz({
                   <>
                     <div className="rounded-ios-md border border-claimondo-border bg-white px-4 py-3 mb-5 flex items-center gap-3">
                       <div className="inline-block w-5 h-5 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin shrink-0" />
-                      <p className="text-sm text-claimondo-ondo">Du wirst sicher in dein Portal weitergeleitet …</p>
+                      <p className="text-sm text-claimondo-ondo">Sie werden sicher in Ihr Portal weitergeleitet …</p>
                     </div>
                     <form ref={loginFormRef} action={loginAfterFlowFormAction} className="hidden">
                       <input type="hidden" name="email" value={accountEmail} />

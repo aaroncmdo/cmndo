@@ -42,7 +42,7 @@ export default function FlowAiIntake({
   const [verlauf, setVerlauf] = useState<Turn[]>([
     {
       role: 'assistant',
-      content: 'Hallo! Ich helfe dir, deinen Unfall kurz zu schildern. Was ist passiert?',
+      content: 'Hallo! Ich helfe Ihnen, Ihren Unfall kurz zu schildern. Was ist passiert?',
     },
   ])
   const [eingabe, setEingabe] = useState('')

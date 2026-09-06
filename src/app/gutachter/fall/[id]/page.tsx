@@ -474,7 +474,7 @@ export default async function GutachterFallPage({
 
   // P4 T9 (Netzwerk): die SV-seitige Werkstatt-Empfehl-Vorauswahl (WerkstattEmpfehlenCard +
   // werkstatt_empfehlung_batches-Berechnung) ist ABGELOEST — der Kunde waehlt self-served im
-  // immer-an-Kunde-Finder (Locked Decision Epic §4; die "Dein Netzwerk"-Partition laeuft dort,
+  // immer-an-Kunde-Finder (Locked Decision Epic §4; die "Ihr Netzwerk"-Partition laeuft dort,
   // P2-T6). Netzwerk-Followup 03.08.: Route /werkstatt-empfehlung/[token] ENTFERNT (live 0
   // Batches/0 Empfehlungen je erzeugt = 0 offene Magic-Links; DB-Tabellen bleiben).
 
@@ -697,7 +697,7 @@ export default async function GutachterFallPage({
         <div className="rounded-2xl border-2 border-warning/30 bg-warning-soft p-4">
           <p className="text-sm font-semibold text-warning-strong">Termin durch Kunde verschoben</p>
           <p className="text-xs text-warning-strong mt-1">
-            Der Kunde hat den Termin selbst verlegt. Keine Bestätigung von dir nötig — der neue Slot ist bereits aktiv.
+            Der Kunde hat den Termin selbst verlegt. Keine Bestätigung von Ihnen nötig — der neue Slot ist bereits aktiv.
             Diese Markierung verschwindet beim nächsten Aufruf der Fallakte.
           </p>
         </div>
@@ -710,7 +710,7 @@ export default async function GutachterFallPage({
           </p>
           <p className="text-xs text-danger-strong mt-1">
             Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
-            Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
+            Folgetermin ein und stimme Sie ggf. mit dem Kundenbetreuer ab.
           </p>
         </div>
       )}
@@ -734,7 +734,7 @@ export default async function GutachterFallPage({
           <p className="text-sm font-semibold text-warning-strong">Stellungnahme angefordert</p>
           <p className="text-xs text-warning-strong mt-1">
             Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
-            Stimme dich bei Bedarf über den Chat mit dem Betreuer ab und reiche deine
+            Stimme Sie bei Bedarf über den Chat mit dem Betreuer ab und reiche Ihre
             Stellungnahme anschließend hier ein.
           </p>
           <Link

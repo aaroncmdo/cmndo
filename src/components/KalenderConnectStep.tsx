@@ -55,7 +55,7 @@ export default function KalenderConnectStep({
           <div className="text-sm text-emerald-900">
             <p className="font-semibold">{providerLabel} verbunden</p>
             <p className="text-xs text-emerald-700 mt-1">
-              Termine werden automatisch synchronisiert. Du kannst die Verbindung jederzeit im Profil ändern.
+              Termine werden automatisch synchronisiert. Sie können die Verbindung jederzeit im Profil ändern.
             </p>
           </div>
         </div>
@@ -76,8 +76,8 @@ export default function KalenderConnectStep({
         <div className="text-sm text-claimondo-navy">
           <p className="font-semibold">Kalender verbinden</p>
           <p className="text-xs text-claimondo-shield mt-1">
-            Verbinde deinen Kalender, damit wir dir nur Termine in freien Zeitslots vorschlagen.
-            Ohne Kalender bekommst du Termine manuell per E-Mail/WhatsApp.
+            Verbinde Ihren Kalender, damit wir Ihnen nur Termine in freien Zeitslots vorschlagen.
+            Ohne Kalender bekommen Sie Termine manuell per E-Mail/WhatsApp.
           </p>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function KalenderConnectStep({
         />
         <ProviderCard
           label="Ich nutze keines dieser Tools"
-          hint="Termine erhältst du manuell per E-Mail oder WhatsApp"
+          hint="Termine erhalten Sie manuell per E-Mail oder WhatsApp"
           selected={selected === 'keiner'}
           onSelect={() => setSelected('keiner')}
           enabled
@@ -132,7 +132,7 @@ export default function KalenderConnectStep({
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center flex items-center justify-center gap-1">
         <InfoIcon className="w-3 h-3" />
-        Kalender-Einstellung kannst du jederzeit im Profil ändern
+        Kalender-Einstellung können Sie jederzeit im Profil ändern
       </p>
 
       <CalDavConnectModal

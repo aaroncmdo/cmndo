@@ -161,7 +161,7 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   // AAR-864 T35: SV-WA — Kunde hat Termin proaktiv verschoben
   //   1=SV-Vorname, 2=alterDatum, 3=alterUhrzeit, 4=neuesDatum, 5=neuesUhrzeit
   termin_verschoben_durch_kunde: (v) =>
-    `Hallo ${v['1'] ?? ''}, ein Kunde hat den Termin vom ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr eigenständig auf ${v['4'] ?? ''} um ${v['5'] ?? ''} Uhr verschoben. Bitte denke daran, deine Route anzupassen.`,
+    `Hallo ${v['1'] ?? ''}, ein Kunde hat den Termin vom ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr eigenständig auf ${v['4'] ?? ''} um ${v['5'] ?? ''} Uhr verschoben. Bitte denke daran, Ihre Route anzupassen.`,
 
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,

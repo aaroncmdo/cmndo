@@ -45,7 +45,7 @@ export default async function LoginPage({
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight"><span className="text-claimondo-navy">Claim</span><span className="text-claimondo-ondo">ondo</span></h1>
-          <p className="mt-2 text-sm text-claimondo-ondo">Melde dich mit deinem Konto an</p>
+          <p className="mt-2 text-sm text-claimondo-ondo">Melden Sie sich mit Ihrem Konto an</p>
         </div>
 
         {/* Card */}

@@ -46,8 +46,8 @@ export function WerkstattCopilotPanel({ claimId }: { claimId: string }) {
         greeting={
           <>
             <p>
-              Hallo, ich bin dein <strong>Werkstatt-Copilot</strong>. Ich kenne den
-              Auftrag — Fahrzeug, Abrechnungsweg, Gutachten-Werte, deinen KVA und den
+              Hallo, ich bin Ihr <strong>Werkstatt-Copilot</strong>. Ich kenne den
+              Auftrag — Fahrzeug, Abrechnungsweg, Gutachten-Werte, Ihren KVA und den
               Reparaturtermin. Frag mich zu Abrechnung, Kalkulation oder dem Umgang mit
               dem Gutachten.
             </p>

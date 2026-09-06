@@ -43,19 +43,19 @@ const defaultDeps: NotifyKundeReparaturterminDeps = { sendEmail, createNotificat
 const INAPP_TEXT: Record<ReparaturterminEreignis, { titel: string; text: string }> = {
   werkstatt_vorschlag: {
     titel: 'Terminvorschlag der Werkstatt',
-    text: 'Deine Werkstatt hat einen Reparaturtermin vorgeschlagen — bitte bestätigen.',
+    text: 'Ihre Werkstatt hat einen Reparaturtermin vorgeschlagen — bitte bestätigen.',
   },
   bestaetigt: {
     titel: 'Reparaturtermin bestätigt',
-    text: 'Deine Werkstatt hat den vorgeschlagenen Termin bestätigt.',
+    text: 'Ihre Werkstatt hat den vorgeschlagenen Termin bestätigt.',
   },
   anruf_erbeten: {
     titel: 'Werkstatt meldet sich',
-    text: 'Deine Werkstatt möchte den Termin telefonisch mit dir abstimmen.',
+    text: 'Ihre Werkstatt möchte den Termin telefonisch mit Ihnen abstimmen.',
   },
   abgelehnt: {
     titel: 'Reparaturtermin abgelehnt',
-    text: 'Deine Werkstatt konnte den vorgeschlagenen Termin nicht annehmen.',
+    text: 'Ihre Werkstatt konnte den vorgeschlagenen Termin nicht annehmen.',
   },
   erledigt: {
     titel: 'Ihre Reparatur ist abgeschlossen',
@@ -124,7 +124,7 @@ export function buildKundeReparaturterminEmailHtml(args: {
         <tr><td style="padding:28px;">
           <p style="margin:0 0 12px;font-size:15px;">${anrede}</p>
           ${inhalt}
-          <p style="margin:24px 0 0;font-size:15px;">Dein Claimondo-Team</p>
+          <p style="margin:24px 0 0;font-size:15px;">Ihr Claimondo-Team</p>
         </td></tr>
       </table>
     </td></tr>

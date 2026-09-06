@@ -2,7 +2,7 @@
 // Kein turf-Dependency (nicht installiert) — self-contained + testbar. Wird client-
 // seitig in FinderMap genutzt, um (a) Dead-Pin-Reichweite als 15-km-Kreise zu einer
 // Flaeche zu rendern und (b) sofort zu pruefen, ob ein eingegebener Ort in der
-// gerenderten Abdeckung liegt ("in deinem Gebiet" vs. "ueberregional").
+// gerenderten Abdeckung liegt ("in Ihrem Gebiet" vs. "ueberregional").
 
 export type LngLat = [number, number] // [lng, lat] — Mapbox/GeoJSON-Reihenfolge
 

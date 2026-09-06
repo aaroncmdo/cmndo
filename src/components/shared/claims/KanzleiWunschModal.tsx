@@ -41,11 +41,11 @@ export function KanzleiWunschModal({
   const [isPending, startTransition] = useTransition()
 
   const defaultHeadline    = gefragtInPhase === 'phase_4_re_frage'
-    ? 'Möchtest du jetzt eine Kanzlei einbinden?'
-    : 'Möchtest du eine Kanzlei einbinden?'
+    ? 'Möchten Sie jetzt eine Kanzlei einbinden?'
+    : 'Möchten Sie eine Kanzlei einbinden?'
   const defaultDescription = gefragtInPhase === 'phase_4_re_frage'
-    ? 'Dein Gutachten ist da. Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung.'
-    : 'Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung — falls die VS Probleme macht.'
+    ? 'Ihr Gutachten ist da. Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung.'
+    : 'Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung — falls die VS Probleme macht.'
 
   function handleSpaeterFragen() {
     startTransition(async () => {

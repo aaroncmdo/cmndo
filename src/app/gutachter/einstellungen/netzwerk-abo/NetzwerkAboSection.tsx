@@ -69,7 +69,7 @@ export function NetzwerkAboSection({
     <div className="mt-5">
       {checkoutSuccess ? (
         <div className="mb-3 rounded-ios-md bg-success-soft text-success-strong px-4 py-3 text-sm">
-          Willkommen im Netzwerk! Dein Netzwerkpartner-Abo ist eingerichtet — der Vorteil
+          Willkommen im Netzwerk! Ihr Netzwerkpartner-Abo ist eingerichtet — der Vorteil
           greift, sobald die erste Zahlung bestätigt ist (in der Regel sofort).
         </div>
       ) : null}
@@ -88,7 +88,7 @@ export function NetzwerkAboSection({
           </p>
           {aboStatus === 'ueberfaellig' ? (
             <p className="text-body-xs text-warning-strong mt-1">
-              Die letzte Zahlung ist offen — bitte aktualisiere deine Zahlungsmethode, damit dein
+              Die letzte Zahlung ist offen — bitte aktualisieren Sie Ihre Zahlungsmethode, damit Ihr
               Netzwerk-Vorteil aktiv bleibt.
             </p>
           ) : null}

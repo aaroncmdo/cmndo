@@ -67,8 +67,8 @@ export default async function BrandingPage() {
       </Link>
       {brandingLive ? (
         <div className="rounded-ios-md bg-success-soft text-success-strong px-4 py-3 text-sm">
-          Dein Branding ist <span className="font-semibold">live</span> — Kunden, Magic-Links und
-          E-Mails erscheinen in deinem Design.
+          Ihr Branding ist <span className="font-semibold">live</span> — Kunden, Magic-Links und
+          E-Mails erscheinen in Ihrem Design.
         </div>
       ) : (
         <div className="rounded-ios-md bg-info-soft text-info-strong px-4 py-3 text-sm">

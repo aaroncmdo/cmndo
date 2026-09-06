@@ -51,13 +51,13 @@ export async function erstelleNetzwerkEinladung(
   try {
     await sendEmail({
       to: mail,
-      subject: `${einladerName} lädt dich ins Claimondo-Netzwerk ein`,
+      subject: `${einladerName} lädt Sie ins Claimondo-Netzwerk ein`,
       html: einladungEmailHtml({
         vorname: 'zusammen',
         email: mail,
         appUrl,
         magicLink: link,
-        introHtml: `<p><strong>${einladerName}</strong> möchte sich mit dir im Claimondo-Netzwerk verbinden. Registriere dich kostenlos über den Button — ihr seid danach automatisch vernetzt.</p>`,
+        introHtml: `<p><strong>${einladerName}</strong> möchte sich mit Ihnen im Claimondo-Netzwerk verbinden. Registriere Sie kostenlos über den Button — ihr seid danach automatisch vernetzt.</p>`,
       }),
     })
   } catch (e) {

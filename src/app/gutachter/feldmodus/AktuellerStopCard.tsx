@@ -90,7 +90,7 @@ export default function AktuellerStopCard({
   // verweigert, Tiefgarage). Frueher kollabierte das die Card PERMANENT → die
   // Primaeraktion „Ich bin angekommen" war versteckt, der SV konnte die Besichtigung
   // nie manuell starten. Deshalb: Unbekannt = ZEIGEN (expanded), nur echte grosse
-  // Distanz kollabiert. (Macht auch den statusHinweis „…bestaetige deine Ankunft
+  // Distanz kollabiert. (Macht auch den statusHinweis „…bestaetige Ihre Ankunft
   // unten…" wahr — der zeigte vorher auf einen ausgeblendeten Button.) Pure Regel +
   // Tests: src/lib/sv/should-auto-collapse.ts.
   const autoCompact = shouldAutoCollapseStopCard(distanceMeters, COMPACT_DISTANCE_THRESHOLD_M)
@@ -282,7 +282,7 @@ export default function AktuellerStopCard({
         besichtigungFiredRef.current = false
       })
       onArrived(svPosition?.lat ?? stop.lat ?? 0, svPosition?.lng ?? stop.lng ?? 0, 'manuell')
-      toast.success('Angekommen — wird synchronisiert sobald du online bist')
+      toast.success('Angekommen — wird synchronisiert sobald Sie online sind')
       return
     }
     startTransition(async () => {
@@ -329,11 +329,11 @@ export default function AktuellerStopCard({
   const statusHinweis = (() => {
     if (besichtigungLaeuft) return null
     if (svInGeofence && kundeTracking.aktiviert && !kundeTracking.angekommenAm) {
-      return 'Du bist vor Ort — warte auf Kunde'
+      return 'Sie sind vor Ort — warten auf Kunde'
     }
     if (svInGeofence) return 'Ankunft wird gleich bestätigt'
     if (permissionState === 'denied') {
-      return 'GPS verweigert — bestätige deine Ankunft unten mit „Ich bin angekommen".'
+      return 'GPS verweigert — bestätige Ihre Ankunft unten mit „Ich bin angekommen".'
     }
     return 'Auto-Ankunft bei Geofence (100 m) — oder unten manuell bestätigen.'
   })()

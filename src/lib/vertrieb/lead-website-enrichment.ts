@@ -73,7 +73,7 @@ export async function reichereAusWebsite(website: string, firma: string): Promis
   if (!apiKey) return null
 
   const system =
-    'Du extrahierst den HAUPT-Ansprechpartner (Geschäftsführer/Inhaber/verantwortliche ' +
+    'Sie extrahieren den HAUPT-Ansprechpartner (Geschäftsführer/Inhaber/verantwortliche ' +
     'Kontaktperson) einer Firma aus deren Website-/Impressum-Text. Antworte AUSSCHLIESSLICH mit ' +
     'einem JSON-Objekt, kein Fließtext. Setze ein Feld auf null, wenn es nicht eindeutig ' +
     'auffindbar ist — erfinde NICHTS. Bei der E-Mail bevorzuge eine persönliche Adresse ' +

@@ -208,7 +208,7 @@ export default function GutachtenUploadBanner({
           <p className={`text-xs ${colorTextSub} mt-0.5`}>
             {istReject
               ? 'Lade die korrigierte Version hoch. Beim nächsten Upload startet der QC-Prozess automatisch neu.'
-              : 'Lade hier dein Gutachten + zugehörige Fotos und Dokumente hoch. Die erste PDF gilt als Hauptgutachten und startet den QC-Prozess.'}
+              : 'Laden Sie hier Ihr Gutachten + zugehörige Fotos und Dokumente hoch. Die erste PDF gilt als Hauptgutachten und startet den QC-Prozess.'}
           </p>
           {/* CMM-32e: Konkret beanstandete Dokumente mit optionalem KB-Kommentar */}
           {istReject && abgelehnteDocsInfo.length > 0 && (

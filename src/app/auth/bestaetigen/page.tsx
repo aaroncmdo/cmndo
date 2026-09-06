@@ -24,8 +24,8 @@ export default async function BestaetigenPage({
 
   const istReset = type === 'recovery'
   const zielText = istReset
-    ? 'Danach kannst du dein neues Passwort festlegen.'
-    : 'Danach wirst du direkt angemeldet.'
+    ? 'Danach können Sie Ihr neues Passwort festlegen.'
+    : 'Danach werden Sie direkt angemeldet.'
 
   return (
     <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-claimondo-bg">

@@ -107,7 +107,7 @@ export default async function SVPortalAnfragen({
         <EmptyState
           icon={InboxIcon}
           title="Noch keine Anfragen"
-          description="Sobald über dein Widget eine Anfrage eingeht, erscheint sie hier."
+          description="Sobald über Ihr Widget eine Anfrage eingeht, erscheint sie hier."
         />
       ) : (
         <DataTableContainer variant="card">
