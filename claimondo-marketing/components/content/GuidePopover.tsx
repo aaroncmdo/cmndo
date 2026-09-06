@@ -113,11 +113,13 @@ export function GuidePopover({
   /** Themencluster des Artikels (H1–H7). Steuert die Ansprache, siehe ANSPRACHE. */
   cluster?: string | null
   /**
-   * Das Mobil-Band ist `fixed bottom-0`. Seiten, die bereits eine feste Leiste am
-   * unteren Rand tragen (StickyCallBar auf den Ratgeber-Artikeln: `fixed bottom-4`),
-   * schalten es ab — zwei Overlays uebereinander fressen sich gegenseitig die
-   * Klicks (Fixed-Overlay-Klasse, zweimal real passiert). Der Guide bleibt dort
-   * ueber Anker-Block und Fusszeile erreichbar.
+   * Notausschalter fuer das Mobil-Band. Seit 06.09.2026 normalerweise NICHT noetig:
+   * das Band legt sich zur Laufzeit UEBER eine bereits vorhandene Leiste am unteren
+   * Rand (siehe `bandAbstand` unten), statt sich mit ihr zu stapeln. Vorher galt hier
+   * "abschalten, wenn die Seite eine StickyCallBar traegt" — und weil das beim
+   * Aufmachen des Bands niemand tat, lag es auf ALLEN Ratgeber-Artikeln unter der
+   * Kontaktleiste: "Ansehen" und "Schliessen" waren auf dem Handy nicht anklickbar
+   * (auf prod gemessen, 3 von 8 Bedienelementen verdeckt).
    */
   mobilBand?: boolean
 }) {
@@ -126,11 +128,58 @@ export function GuidePopover({
   const [ergebnis, setErgebnis] = useState<GuideLeadErgebnis | null>(null)
   const [laeuft, starte] = useTransition()
   const begonnen = useRef(false)
+  /**
+   * Abstand des Mobil-Bands zum unteren Rand, in Pixeln.
+   *
+   * WARUM ZUR LAUFZEIT GEMESSEN UND NICHT FEST VERDRAHTET: das Band ist `fixed`,
+   * und die Seiten, auf denen es laeuft, tragen bereits die `StickyCallBar` —
+   * ebenfalls `fixed`, ebenfalls `z-40`. Bei gleichem z-Index gewinnt das spaeter
+   * im DOM stehende Element, und das ist die Kontaktleiste. Ergebnis auf prod
+   * (390x844, Ratgeber-Artikel): das Band lag DARUNTER, "Ansehen" und
+   * "Hinweis schliessen" waren nicht anklickbar.
+   *
+   * Ein hoeherer z-Index waere der falsche Fix — dann fraesse das Band die Klicks
+   * der Kontaktleiste, also "Sofort anrufen". Beide sollen bedienbar sein, also
+   * setzt sich das Band UEBER die vorhandene Leiste, statt sie zu ueberdecken.
+   *
+   * Gemessen wird generisch (jede fixe Leiste am unteren Rand zaehlt), damit der
+   * Vertrag auch haelt, wenn eine Seite eine andere Leiste mitbringt.
+   */
+  const [bandAbstand, setBandAbstand] = useState(0)
 
   useEffect(() => {
     if (!darfZeigen()) return
 
-    const artikel = document.querySelector<HTMLElement>(artikelSelector)
+    // Messgrundlage: der Artikel, sonst der Seiteninhalt.
+    //
+    // WARUM DER RUECKFALL: `artikelSelector` steht per Default auf 'article' —
+    // das passt fuer Ratgeber, Wissen und Decoder. Die uebrigen Marketing-Seiten
+    // sind aber aus <section>-Bloecken gebaute Landingpages OHNE <article> und
+    // ohne <main>; dort fand der Selektor nichts, und die Funktion kehrte hier
+    // zurueck: das Popover erschien NIE — still, ohne Fehler, ohne Log. Genau so
+    // waere jede neue Seite stillschweigend leer ausgegangen.
+    //
+    // Der Rueckfall macht die Einbindung wieder zu dem, wonach sie aussieht:
+    // <GuidePopover /> genuegt. Wer praeziser messen will, gibt weiterhin einen
+    // eigenen Selektor mit (die Stadtseite tut das ueber #stadtseite-inhalt).
+    // ⚠ Als letzte Stufe das HOECHSTE direkte Kind von <body>, nicht das erste:
+    // auf mehreren Seiten ist `body.firstElementChild` ein leeres <div> (Portal-
+    // bzw. Script-Container) mit **offsetHeight 0**. Damit bleibt `gelesen`
+    // rechnerisch 0, die Schwelle wird nie erreicht und das Popover erscheint
+    // nie — gemessen auf /kfz-gutachter/ablauf: h=0px, gelesen=0.000 nach
+    // 2.980px Scroll, waehrend /e-auto-gutachter ueber <main> (h=2353px) bei
+    // 0.278 sauber ausloest.
+    const hoechstesKind = () => {
+      let beste: HTMLElement | null = null
+      for (const kind of Array.from(document.body.children) as HTMLElement[]) {
+        if (!beste || kind.offsetHeight > beste.offsetHeight) beste = kind
+      }
+      return beste && beste.offsetHeight > 0 ? beste : null
+    }
+    const artikel =
+      document.querySelector<HTMLElement>(artikelSelector) ??
+      document.querySelector<HTMLElement>('main') ??
+      hoechstesKind()
     if (!artikel) return
 
     let letztesY = window.scrollY
@@ -173,6 +222,86 @@ export function GuidePopover({
     return () => window.removeEventListener('scroll', pruefe)
   }, [artikelSelector, cluster])
 
+  // Platz fuer eine bereits vorhandene Leiste am unteren Rand freimessen.
+  // Laeuft erst, wenn das Band wirklich sichtbar ist — vorher gibt es nichts zu
+  // positionieren, und der Beobachter soll nicht auf jeder Seite mitlaufen.
+  useEffect(() => {
+    if (!offen || !mobilBand) return
+
+    // Die Leisten, die wir zuletzt gefunden haben — der Beobachter haengt an
+    // IHNEN, nicht an <body>: eine `fixed` Leiste, die ein- oder ausklappt,
+    // aendert die Body-Hoehe NICHT. Ein Beobachter auf <body> bekaeme davon
+    // nichts mit, und das Band bliebe in der Luft haengen.
+    let beobachtet: HTMLElement[] = []
+
+    const messen = () => {
+      const viewport = window.innerHeight
+      const mindestBreite = window.innerWidth * 0.5
+      const gefunden: HTMLElement[] = []
+      let hoechste = 0
+      for (const el of Array.from(document.querySelectorAll<HTMLElement>('body *'))) {
+        // Sich selbst nie mitmessen, sonst schiebt sich das Band Schritt fuer
+        // Schritt aus dem Bild.
+        if (el.dataset.guideBand === '1') continue
+        // Geometrie ZUERST: `getBoundingClientRect` ist deutlich billiger als
+        // `getComputedStyle`, und die Form schliesst die grosse Mehrheit der
+        // Knoten sofort aus. Nur echte Leisten bleiben uebrig: breit, am unteren
+        // Rand, und nicht die Vollflaeche eines Modal-Hintergrunds (die wuerde
+        // das Band sonst ans Seitenende schieben).
+        const box = el.getBoundingClientRect()
+        if (box.height < 24 || box.height > 320) continue
+        if (box.width < mindestBreite) continue
+        if (box.bottom < viewport - 24 || box.top > viewport) continue
+        const stil = getComputedStyle(el)
+        if (stil.position !== 'fixed' || stil.display === 'none' || stil.visibility === 'hidden') continue
+        if (el.closest('[data-guide-band="1"]')) continue
+        gefunden.push(el)
+        hoechste = Math.max(hoechste, viewport - box.top)
+      }
+
+      // Beobachtung auf die gerade gefundenen Leisten umhaengen. Der Vergleich
+      // verhindert, dass jedes Messen den Beobachter neu verdrahtet — sonst
+      // loeste er sich selbst wieder aus.
+      if (
+        beobachter &&
+        (gefunden.length !== beobachtet.length || gefunden.some((el, i) => el !== beobachtet[i]))
+      ) {
+        beobachter.disconnect()
+        for (const el of gefunden) beobachter.observe(el)
+        beobachtet = gefunden
+      }
+
+      // Kein Rand, wenn nichts da ist: dann sitzt das Band wie bisher unten.
+      setBandAbstand(hoechste > 0 ? Math.round(hoechste) : 0)
+    }
+
+    // Auf einen Frame zusammenfassen: eine Hoehenaenderung der Leiste kann
+    // mehrere Beobachter-Aufrufe ausloesen. Ohne Drosselung liefe die Schleife
+    // dabei mehrfach pro Frame.
+    let angefordert = 0
+    const messenGedrosselt = () => {
+      if (angefordert) return
+      angefordert = requestAnimationFrame(() => {
+        angefordert = 0
+        messen()
+      })
+    }
+
+    const beobachter =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(messenGedrosselt) : null
+    messen()
+    window.addEventListener('resize', messenGedrosselt)
+    // BEWUSST KEIN MutationObserver auf <body>: mit `subtree: true` feuerte er
+    // bei jedem React-Render und triebe die Schleife dauernd an. Die
+    // Kontaktleiste ist montiert, lange bevor das Band bei 15 % Lesetiefe
+    // erscheint — nachtraeglich auftauchende Leisten sind kein reales Szenario.
+    return () => {
+      if (angefordert) cancelAnimationFrame(angefordert)
+      beobachter?.disconnect()
+      window.removeEventListener('resize', messenGedrosselt)
+    }
+  }, [offen, mobilBand])
+
   const schliessen = (grund: 'weggeklickt' | 'erledigt') => {
     setOffen(false)
     try {
@@ -194,7 +323,11 @@ export function GuidePopover({
         <div
           role="region"
           aria-label="Unfallguide"
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-white/15 bg-claimondo-navy px-4 py-3 md:hidden motion-safe:animate-in motion-safe:slide-in-from-bottom-4"
+          data-guide-band="1"
+          // `bottom` kommt aus der Messung oben, nicht aus einer Utility-Klasse:
+          // die vorhandene Leiste ist unterschiedlich hoch (ein-/ausgeklappt).
+          style={{ bottom: bandAbstand }}
+          className="fixed inset-x-0 z-40 border-t border-white/15 bg-claimondo-navy px-4 py-3 md:hidden motion-safe:animate-in motion-safe:slide-in-from-bottom-4"
         >
           <div className="flex items-center gap-3">
             <p className="min-w-0 flex-1 text-sm leading-snug text-white">

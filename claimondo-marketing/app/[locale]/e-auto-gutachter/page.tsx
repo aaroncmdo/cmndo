@@ -16,6 +16,7 @@ import {
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
+import { GuidePopover } from '@/components/content/GuidePopover'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „E-Auto-Gutachter". Konversions-Framing
 // mit e-auto-spezifischen USPs: Hochvolt-Batterie-Diagnose, schnellerer
@@ -215,6 +216,9 @@ export default function Page() {
           fuer ein LLM existierte das Datum bisher nicht. */}
       <ReviewerByline rolle="verantwortlich" datum={getRouteLastUpdatedISO('/e-auto-gutachter').slice(0, 10)} />
       <LandingFooter />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Ohne eigenen Selektor: die Seite
+          hat kein <article>, GuidePopover faellt auf den Seiteninhalt zurueck. */}
+      <GuidePopover />
       <StickyCallBar quelle="Konversion: E-Auto-Gutachter" whatsappHref={WA} />
     </div>
   )

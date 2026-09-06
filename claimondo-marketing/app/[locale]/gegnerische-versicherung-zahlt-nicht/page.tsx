@@ -16,6 +16,7 @@ import {
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
+import { GuidePopover } from '@/components/content/GuidePopover'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Gegnerische Versicherung zahlt nicht".
 // Faengt die Verzugs-/Kuerzungs-Keywords (versicherung zahlt nicht / reagiert
@@ -255,6 +256,9 @@ export default function Page() {
           fuer ein LLM existierte das Datum bisher nicht. */}
       <ReviewerByline rolle="verantwortlich" datum={getRouteLastUpdatedISO('/gegnerische-versicherung-zahlt-nicht').slice(0, 10)} />
       <LandingFooter />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Ohne eigenen Selektor: die Seite
+          hat kein <article>, GuidePopover faellt auf den Seiteninhalt zurueck. */}
+      <GuidePopover />
       <StickyCallBar quelle="Konversion: Versicherung zahlt nicht" whatsappHref={WA} />
     </div>
   )
