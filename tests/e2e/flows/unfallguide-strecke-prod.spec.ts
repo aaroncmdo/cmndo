@@ -31,9 +31,13 @@
 //   Log oder Statuscode es zeigen. Es geht nichts an echte Kunden.
 //
 // Aufruf (nie in CI):
-//   RUN_UNFALLGUIDE_SMOKE=1 CI=1 npx playwright test unfallguide-strecke-prod \
-//     --config=playwright.config.ts --project=chromium
+//   RUN_UNFALLGUIDE_SMOKE=1 npx playwright test --config=playwright.manual.config.ts
 //   Fuer die DB-Gegenprobe zusaetzlich NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
+//
+// ⚠ NICHT ueber die normale playwright.config.ts aufrufen — auch nicht mit explizitem
+// Dateinamen. Diese Spec steht in deren MANUELLE_LIVE_SMOKES, und `testIgnore` greift
+// auch dann: der Lauf meldet "0 tests" statt zu laufen, und ein stiller Skip sieht aus
+// wie ein gruener Lauf. Genau dafuer gibt es playwright.manual.config.ts.
 
 import { test, expect } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
@@ -137,9 +141,12 @@ test('Landeseite: Gegenwert zuerst, Guide sofort, und der Vorgang entsteht volls
   expect(titel.join(' | '), 'Die Aktivitaetsspur muss den Eingang zeigen').toContain(
     'Unfallguide angefordert',
   )
+  // ⚠ NICHT auf "Willkommensnachricht" allein pruefen: dieser Teilstring trifft auch
+  // den Titel "Willkommensnachricht NICHT versendet". Der Test waere gruen geblieben,
+  // waehrend gar nichts rausging. Gefordert ist der VERSENDET-Fall.
   expect(
-    titel.some((t) => t.includes('Willkommensnachricht')),
-    `Die Willkommensnachricht muss protokolliert sein, gefunden: ${titel.join(' | ')}`,
+    titel.some((t) => /Willkommensnachricht per (WhatsApp|E-Mail) versendet/.test(t)),
+    `Die Willkommensnachricht muss VERSENDET protokolliert sein, gefunden: ${titel.join(' | ')}`,
   ).toBe(true)
 
   // Der versprochene Rueckruf braucht einen Arbeitsanker, keine blosse Benachrichtigung.
@@ -168,12 +175,40 @@ test('Landeseite: Gegenwert zuerst, Guide sofort, und der Vorgang entsteht volls
     'Der FlowLink darf NICHT ueber den Schadenmeldungs-Text versendet worden sein',
   ).toBeFalsy()
 
-  // Die Willkommens-E-Mail: erst das Protokoll, dann das Postfach.
-  const { data: mails } = await sb!
+  // Die Willkommens-E-Mail: erst das Protokoll, dann der Anhang, dann das Postfach.
+  //
+  // ⚠ Hier stand `betreff` statt `subject`. Die Spalte gibt es nicht, PostgREST gab
+  // einen Fehler zurueck, und weil nur `data` destrukturiert wurde, las der Test die
+  // entstandene Null als "keine Mail protokolliert" — ein Fehlbefund gegen ein
+  // funktionierendes Produkt. Deshalb wird der Fehler jetzt GELESEN.
+  const { data: mails, error: mailErr } = await sb!
     .from('email_log')
-    .select('status, betreff, empfaenger')
+    .select('status, subject, empfaenger, attachments, fehler')
     .eq('lead_id', leadId)
+  expect(mailErr, `email_log-Abfrage fehlgeschlagen: ${mailErr?.message}`).toBeNull()
   expect((mails ?? []).length, 'Die Willkommens-E-Mail muss protokolliert sein').toBeGreaterThan(0)
+
+  const mail = (mails ?? [])[0] as {
+    status: string
+    subject: string
+    attachments: { filename?: string; contentType?: string }[] | null
+    fehler: string | null
+  }
+  expect(
+    mail.status,
+    `Die Mail darf nicht fehlgeschlagen sein (${mail.status}, ${mail.fehler ?? 'kein Fehler'})`,
+  ).not.toBe('failed')
+
+  // ⭐ Der Anhang ist SCHON HIER nachweisbar — ohne Postfach. `email_log.attachments`
+  // haelt fest, was mitgegeben wurde. Das beweist zugleich, dass der Lesezugriff auf
+  // die PDF-Datei im `public/`-Ordner des Standalone-Servers geklappt hat; waere er
+  // fehlgeschlagen, waere der Versand vorher abgebrochen.
+  // Was es NICHT beweist: dass die Mail beim Empfaenger ankam. Das braucht IMAP (unten).
+  const angehaengt = (mail.attachments ?? []).map((a) => `${a.filename} (${a.contentType})`)
+  expect(
+    angehaengt.some((a) => a.toLowerCase().includes('pdf')),
+    `Die Willkommens-Mail muss den Guide als PDF anhaengen. Protokolliert: ${JSON.stringify(angehaengt)}`,
+  ).toBe(true)
 
   // Die Nachricht steht im NACHRICHTENVERLAUF, nicht nur im Postfach des Kunden.
   // Ohne diese Zeile saehe der Dispatcher nur "versendet", nicht den Wortlaut —
@@ -191,14 +226,13 @@ test('Landeseite: Gegenwert zuerst, Guide sofort, und der Vorgang entsteht volls
     'Der Eintrag muss den Wortlaut tragen, nicht nur einen Vermerk',
   ).toContain('Unfallguide')
 
-  // ⭐ DER EIGENTLICHE NACHWEIS: das PDF liegt im Postfach, nicht nur im Log.
-  // „versendet" und „angekommen mit Anhang" sind zwei Aussagen — die zweite ist die,
-  // an der die Strecke haengt, und sie kann still scheitern (der Anhang wird zur
-  // Laufzeit aus public/ des Standalone-Servers gelesen).
+  // Die letzte offene Stufe: kam die Mail beim Empfaenger AN? Das Protokoll oben
+  // belegt "abgeschickt, mit PDF im Gepaeck" — die Zustellung belegt es nicht.
   if (!abnahmeInboxKonfiguriert()) {
     console.warn(
-      '[unfallguide-smoke] ABNAHME_INBOX_USER/_PASS fehlen — der PDF-Anhang ist damit ' +
-        'AUSDRUECKLICH NICHT NACHGEWIESEN, nur der email_log-Eintrag.',
+      '[unfallguide-smoke] ABNAHME_INBOX_USER/_PASS fehlen — die ZUSTELLUNG ist damit ' +
+        'AUSDRUECKLICH NICHT NACHGEWIESEN. Belegt ist: abgeschickt, Status nicht failed, ' +
+        'PDF laut email_log.attachments mitgegeben.',
     )
   } else {
     const mail = await warteAufMail({
@@ -248,17 +282,43 @@ test('Ratgeber-Artikel mobil: Karte im Textfluss, Anruf-Leiste bleibt klickbar',
   expect(getroffen, `Klick auf die Anruf-Leiste trifft: ${getroffen}`).toContain('tel:')
 
   // Kein Overlay, das den Artikeltext verdeckt (Google-Interstitial-Kriterium).
+  //
+  // ⚠ `elementFromPoint` arbeitet in VIEWPORT-Koordinaten und liefert null fuer alles
+  // ausserhalb des sichtbaren Bereichs. Ohne das Hereinscrollen lag die H1 auf einem
+  // 390x844-Schirm unter der Falz, die Probe gab "nichts" zurueck, und der Test meldete
+  // einen Overlay-Befund gegen eine saubere Seite. Erst in den Blick holen, dann messen.
   const h1 = page.locator('h1').first()
+  await h1.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(400)
   const hbox = await h1.boundingBox()
+  const schirm = page.viewportSize()
+  const mitteSichtbar =
+    !!hbox && !!schirm && hbox.y + hbox.height / 2 > 0 && hbox.y + hbox.height / 2 < schirm.height
+  expect(
+    mitteSichtbar,
+    'Die Ueberschrift liess sich nicht in den sichtbaren Bereich holen — die Overlay-Probe waere blind',
+  ).toBe(true)
   if (hbox) {
-    const ueberDerUeberschrift = await page.evaluate(([x, y]) => {
+    // ⚠ Auf den TAGNAMEN zu pruefen war falsch. Der Punkt in der Mitte der Ueberschrift
+    // faellt bei mehrzeiligen Ueberschriften in die Zeilenluecke, und dort ist das
+    // oberste Element der UMSCHLAG der H1 — ein DIV. Das ist kein Overlay, sondern der
+    // eigene Elternknoten. Eine Liste erlaubter Tags kann beides nicht unterscheiden.
+    // Richtig ist die VERWANDTSCHAFT: alles, was die H1 enthaelt oder von ihr enthalten
+    // wird, gehoert zur Ueberschrift. Nur ein Element, das weder das eine noch das
+    // andere ist, liegt wirklich DARUEBER.
+    const befund = await page.evaluate(([x, y]) => {
+      const h1 = document.querySelector('h1')
       const el = document.elementFromPoint(x as number, y as number)
-      return el?.tagName ?? 'nichts'
+      if (!h1) return { ok: false, was: 'keine H1 im Dokument' }
+      if (!el) return { ok: false, was: 'nichts an dieser Stelle' }
+      const verwandt = el === h1 || h1.contains(el) || el.contains(h1)
+      const klasse = (el.className || '').toString().slice(0, 60)
+      return { ok: verwandt, was: `${el.tagName}${klasse ? '.' + klasse : ''}` }
     }, [hbox.x + hbox.width / 2, hbox.y + hbox.height / 2])
     expect(
-      ['H1', 'SPAN', 'A', 'EM', 'STRONG'],
-      `Etwas liegt ueber der Ueberschrift: ${ueberDerUeberschrift}`,
-    ).toContain(ueberDerUeberschrift)
+      befund.ok,
+      `Ueber der Ueberschrift liegt ein fremdes Element: ${befund.was}`,
+    ).toBe(true)
   }
   await kontext.close()
 })
