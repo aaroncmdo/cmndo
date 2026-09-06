@@ -62,7 +62,7 @@ export default async function BestaetigenPage({
                 </div>
               </div>
               <p className="text-claimondo-ondo text-sm leading-relaxed mb-6">
-                Bitte bestätigen Sie zu Ihrer Sicherheit, dass Sie diesen Link selbst geöffnet hast.
+                Bitte bestätigen Sie zu Ihrer Sicherheit, dass Sie diesen Link selbst geöffnet haben.
                 {' '}{zielText}
               </p>
               <BestaetigenForm tokenHash={tokenHash} type={type} next={next} />
