@@ -37,7 +37,7 @@ export function PasswortResetEmail({ vorname, actionUrl }: Props) {
         </Paragraph>
         <Button href={actionUrl}>Neues Passwort festlegen</Button>
         <Paragraph>
-          Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:{' '}
+          Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:{' '}
           <a href={actionUrl} style={{ color: email.color.ondo, wordBreak: 'break-all' as const }}>
             {actionUrl}
           </a>
@@ -51,7 +51,7 @@ export function PasswortResetEmail({ vorname, actionUrl }: Props) {
           ignorieren — Ihr Passwort bleibt unverändert.
         </Paragraph>
         <Paragraph>
-          Bei Fragen erreichst du uns unter{' '}
+          Bei Fragen erreichen Sie uns unter{' '}
           <a href={APP_URL} style={{ color: email.color.ondo }}>
             {APP_URL}
           </a>

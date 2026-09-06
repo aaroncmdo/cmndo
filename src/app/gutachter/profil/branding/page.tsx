@@ -72,7 +72,7 @@ export default async function BrandingPage() {
         </div>
       ) : (
         <div className="rounded-ios-md bg-info-soft text-info-strong px-4 py-3 text-sm">
-          Du kannst dein Branding hier konfigurieren und in der Vorschau sehen —{' '}
+          Sie können Ihr Branding hier konfigurieren und in der Vorschau sehen —{' '}
           <span className="font-semibold">live geht es als Netzwerkpartner</span> (oder mit einem
           bezahlten Paket).{' '}
           <Link href="/gutachter/einstellungen" className="underline font-semibold">

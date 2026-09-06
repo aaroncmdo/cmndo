@@ -580,7 +580,7 @@ function NeuSchritt({
       </div>
 
       <p className="mt-4 text-xs text-claimondo-shield">
-        Mit dem Absenden stimmst du unseren{' '}
+        Mit dem Absenden stimmen Sie unseren{' '}
         <a href="/agb" className="underline hover:text-claimondo-ondo">Nutzungsbedingungen</a>{' '}
         und der{' '}
         <a href="/datenschutz" className="underline hover:text-claimondo-ondo">Datenschutzerklärung</a>{' '}
@@ -617,15 +617,15 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
         <p className="text-sm text-claimondo-shield leading-relaxed max-w-sm">
           {emailSent ? (
             <>
-              Wir haben dir einen Link an{' '}
+              Wir haben Ihnen einen Link an{' '}
               <strong className="text-claimondo-navy">{email}</strong> geschickt —
               damit legen Sie Ihr Passwort fest. Danach führt Sie unser Onboarding
               in wenigen Minuten zur Freischaltung Ihres Profils.
             </>
           ) : (
             <>
-              Dein Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
-              nicht zugestellt werden — du kannst dein Passwort jederzeit über
+              Ihr Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
+              nicht zugestellt werden — Sie können Ihr Passwort jederzeit über
               „Passwort vergessen" mit der Adresse{' '}
               <strong className="text-claimondo-navy">{email}</strong> setzen. Danach
               führt Sie unser Onboarding in wenigen Minuten zur Freischaltung Ihres

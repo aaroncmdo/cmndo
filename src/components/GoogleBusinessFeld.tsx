@@ -49,7 +49,7 @@ export default function GoogleBusinessFeld({
       <div className="flex items-center gap-2">
         <StarIcon className="w-4 h-4 text-claimondo-ondo" />
         <p className="text-sm font-semibold text-claimondo-navy">
-          Dein Google-Business-Profil{' '}
+          Ihr Google-Business-Profil{' '}
           <span className="text-[11px] font-normal text-claimondo-shield">(optional)</span>
         </p>
       </div>

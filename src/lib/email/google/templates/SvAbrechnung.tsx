@@ -23,9 +23,9 @@ export function SvAbrechnungEmail(props: Props) {
     <EmailShell preview={`Abrechnung ${props.fallNummer} — ${props.gesamtbetrag}`}>
       <MailHeader />
       <Card>
-        <Heading>Deine Abrechnung für Fall {props.fallNummer}</Heading>
+        <Heading>Ihre Abrechnung für Fall {props.fallNummer}</Heading>
         <Paragraph>
-          Hallo {props.svVorname}, hier ist die Abrechnung für deinen Auftrag:
+          Hallo {props.svVorname}, hier ist die Abrechnung für Ihren Auftrag:
         </Paragraph>
 
         <PositionsTable positionen={props.positionen} gesamt={props.gesamtbetrag} />
