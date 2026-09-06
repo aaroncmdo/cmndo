@@ -18,7 +18,19 @@
 // (afterEach, NICHT finally: bei Test-Timeout laeuft ein finally nicht mehr).
 //
 // Lauf (Zugangsdaten in .env.local, nie im Repo — das Repo ist oeffentlich):
-//   PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test tests/e2e/flows/kasko-e6-mail-zustellnachweis.spec.ts
+//
+//   MANUAL_SPEC=kasko-e6-mail-zustellnachweis PLAYWRIGHT_BASE_URL=https://app.claimondo.de \
+//     npx playwright test --config=playwright.manual.config.ts
+//
+// ⚠ Der naheliegende Befehl `npx playwright test <diese-datei>` liefert "No tests found" —
+// das testIgnore der playwright.config.ts greift AUCH bei explizit genanntem Pfad. Genau das
+// stand hier bis zum 06.09.2026 als Startbefehl, und zwar zusaetzlich in einem PR, einem
+// Marker und einer Uebergabe an die naechste Session: die Spec war fuer niemanden startbar.
+//
+// GEMESSEN beim ersten echten Lauf (06.09.2026, prod): Die Kette braucht nur SEKUNDEN —
+// 'sent' um 17:22:02, terminaler Status um 17:22:05. Wer hier lange Wartezeiten erwartet,
+// misst am falschen Ende. Und: das Postfach abnahme@claimondo.de nimmt Mail NICHT zuverlaessig
+// an (2 von 3 Laeufen zugestellt, einer 'bounced'), der Bounce-Grund wird noch nicht gespeichert.
 
 import { test, expect, type Page } from '@playwright/test'
 import { ZIEL } from '../lib/ziel'
