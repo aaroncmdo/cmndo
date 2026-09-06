@@ -122,6 +122,48 @@ export function nurZustellbareEmpfaenger(to: string | string[]): string[] {
 }
 
 /**
+ * Endungen, die im oeffentlichen DNS per Norm NIE existieren: RFC 2606 (test/example/invalid/
+ * localhost + die drei example-Domains) und RFC 6762 (.local, mDNS). Eine Mail dorthin kann nicht
+ * ankommen — sie erzeugt garantiert einen Rueckläufer.
+ */
+const UNZUSTELLBARE_TLDS = ['test', 'example', 'invalid', 'localhost', 'local'] as const
+const UNZUSTELLBARE_DOMAINS = ['example.com', 'example.net', 'example.org'] as const
+
+/**
+ * true, wenn die Adresse auf einer Domain liegt, die per Norm keine Post empfangen kann.
+ *
+ * ⚠ ABGRENZUNG zu istInterneEmail: Das sind zwei verschiedene Fragen.
+ *   istInterneEmail       — "DARF diese Person angeschrieben werden?" (Test-Isolation, per
+ *                           allowInternalRecipient bewusst abschaltbar)
+ *   istUnzustellbareDomain — "KANN diese Adresse ueberhaupt Post empfangen?" (nicht abschaltbar)
+ *
+ * Warum es das gibt (gemessen 06.09.2026): Der Werkstatt-Auftrags-Versand setzt bewusst
+ * allowInternalRecipient, damit eine Werkstatt mit interner @claimondo.de-Adresse ihre Mail
+ * bekommt. Fuer @claimondo.test greift dieselbe Ausnahme — dort ist sie aber sinnlos:
+ * 223 Mails an 214 solcher Adressen seit dem 14.07., alle zwangslaeufig zurueckgeprallt.
+ * Dauerhafte Rueckläufer senken die Absender-Reputation und treffen damit ECHTE Kundenmails.
+ *
+ * Nur die ENDUNG zaehlt: example.de, testfirma.de und localhost.de sind registrierbar und
+ * empfangen Post — ein Substring-Vergleich waere hier der Fehler.
+ */
+export function istUnzustellbareDomain(email: string | null | undefined): boolean {
+  if (!email) return false
+  const e = email.trim().toLowerCase()
+  const at = e.lastIndexOf('@')
+  if (at < 0) return false
+  const domain = e.slice(at + 1)
+  if (!domain) return false
+  if (UNZUSTELLBARE_DOMAINS.some((d) => domain === d)) return true
+  return UNZUSTELLBARE_TLDS.some((tld) => domain === tld || domain.endsWith(`.${tld}`))
+}
+
+/** Behaelt nur die Empfaenger, deren Domain ueberhaupt Post empfangen kann. */
+export function ohneUnzustellbareEmpfaenger(to: string | string[]): string[] {
+  const list = Array.isArray(to) ? to : [to]
+  return list.filter((r): r is string => !!r && !istUnzustellbareDomain(r))
+}
+
+/**
  * Letzte 9 Ziffern einer Telefonnummer (formatunabhaengig) — robuster Match-Key gegen
  * Schreibweisen (+49 / 0049 / 0-Praefix / Leerzeichen). Leerer String bei < 9 Ziffern
  * (zu kurz -> kein verlaesslicher Match, lieber nicht suppressen).
