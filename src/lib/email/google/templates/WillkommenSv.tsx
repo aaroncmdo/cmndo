@@ -87,7 +87,7 @@ export function WillkommenSvEmail(props: Props) {
         )}
 
         <Paragraph>
-          <strong>2.</strong> Sie sehen Ihre vollständigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
+          <strong>2.</strong> Sie sehen Ihre vollständigen Konditionen, können den Vertrag unterzeichnen und die Anzahlung leisten.
         </Paragraph>
 
         {!isSubSv && (

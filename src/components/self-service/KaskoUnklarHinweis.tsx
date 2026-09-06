@@ -26,7 +26,7 @@ export function KaskoUnklarHinweis({
           {du ? 'Wir konnten nicht klären, ob Ihr Kasko-Tarif' : 'Wir konnten nicht klären, ob Ihr Kasko-Tarif'}
           {markeName ? ` bei ${markeName}` : ''}
           {du
-            ? ' eine Werkstattbindung enthält. Wir zeigen Ihnen trotzdem passende Werkstätten – beauftrage die Reparatur aber erst, wenn Sie das geprüft hast.'
+            ? ' eine Werkstattbindung enthält. Wir zeigen Ihnen trotzdem passende Werkstätten – beauftragen Sie die Reparatur aber erst, wenn Sie das geprüft haben.'
             : ' eine Werkstattbindung enthält. Wir zeigen Ihnen trotzdem passende Werkstätten – beauftragen Sie die Reparatur aber erst, wenn Sie das geprüft haben.'}
         </p>
       </div>

@@ -38,7 +38,7 @@ export function WillkommenSvAnBueroEmail(props: Props) {
 
         <Paragraph>
           Er erhält seinen Login per separater Welcome-Mail. Sobald er sich eingeloggt hat
-          und Sie als Inhaber den Vertrag unterzeichnet + die Anzahlung geleistet hast, kann
+          und Sie als Inhaber den Vertrag unterzeichnet + die Anzahlung geleistet haben, kann
           er Aufträge erhalten.
         </Paragraph>
 

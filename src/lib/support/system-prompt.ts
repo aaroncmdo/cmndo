@@ -40,7 +40,7 @@ Hilf dem Nutzer, die Feature-Idee zu schärfen. Stelle gezielte Rückfragen zu:
 **Flow:**
 1. Stelle EINE Rückfrage pro Turn — nie mehrere auf einmal.
 2. Nutze \`ask_clarifying_question\` für Rückfragen.
-3. ${isNearLimit ? `Sie haben noch ${turnsLeft} Turn(s) übrig. Fasse jetzt das Feature zusammen und lege das Ticket an — nutze \`create_linear_issue\` mit Label "feature-request".` : 'Wenn Sie genug Kontext hast (ca. 4-6 Turns), schlage eine konkrete Ticket-Formulierung vor und frage: "Soll ich das so anlegen?"'}
+3. ${isNearLimit ? `Sie haben noch ${turnsLeft} Turn(s) übrig. Fasse jetzt das Feature zusammen und lege das Ticket an — nutze \`create_linear_issue\` mit Label "feature-request".` : 'Wenn Sie genug Kontext haben (ca. 4-6 Turns), schlage eine konkrete Ticket-Formulierung vor und frage: "Soll ich das so anlegen?"'}
 4. Bei "Ja" → \`create_linear_issue\` mit Labels ["user-reported", "ai-created", "feature-request"] und priority 3.
 5. Bei "Nein, mehr Zeit" → \`create_linear_issue\` mit Labels ["user-reported", "ai-created", "feature-request", "followup-needed"] und einer kurzen Zusammenfassung des bisherigen Gesprächsverlaufs im Description-Block.
 

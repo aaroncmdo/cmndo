@@ -147,7 +147,7 @@ export default function LeadPreisOverlay({
                 <InfoIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <span>
                   Bei dieser Honorar-Höhe deckt der Lead-Preis Ihr Honorar — prüfen Sie ob Ihr Satz noch marktüblich ist
-                  oder ob Sie auf eine höhere Schadenstufe zielen kannst.
+                  oder ob Sie auf eine höhere Schadenstufe zielen können.
                 </span>
               </div>
             )}
@@ -164,7 +164,7 @@ export default function LeadPreisOverlay({
             <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
             <ul className="text-xs text-claimondo-navy space-y-1.5 list-disc pl-4">
               <li>
-                Solange Sie innerhalb Ihres monatlichen Kontingents (<strong>{paketLabel}</strong>) bist, gilt
+                Solange Sie innerhalb Ihres monatlichen Kontingents (<strong>{paketLabel}</strong>) sind, gilt
                 der <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der <strong>Einzel-Preis</strong>.
               </li>
               <li>

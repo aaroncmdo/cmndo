@@ -17,7 +17,7 @@ export default function WerkstattVermittlungHoldingCard() {
           <h2 className="text-sm font-semibold text-claimondo-navy">Werkstatt wird vermittelt</h2>
           <p className="text-body-sm text-claimondo-ondo">
             Wir vermitteln gerade eine passende Werkstatt für Ihre Reparatur. Sobald sie feststeht,
-            finden Sie hier die Details und kannst einen Reparaturtermin vereinbaren.
+            finden Sie hier die Details und können einen Reparaturtermin vereinbaren.
           </p>
         </div>
       </div>

@@ -60,7 +60,7 @@ export function LeadAblehnenCard({ fallId, status }: Props) {
       {!open ? (
         <>
           <p className="text-xs text-claimondo-ondo/80">
-            Wenn Sie diesen Lead nicht annehmen kannst, lehne ihn jetzt ab. Dispatch sucht dann
+            Wenn Sie diesen Lead nicht annehmen können, lehnen Sie ihn jetzt ab. Dispatch sucht dann
             sofort einen neuen Sachverständigen. Sie werden nicht abgerechnet.
           </p>
           <Button variant="ghost" size="sm" onClick={() => setOpen(true)} iconLeft={<XCircleIcon className="w-4 h-4" />}>
