@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useTransition } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { Check, Download, Phone } from 'lucide-react'
 import { fordereUnfallguideAn } from './actions'
 import type { GuideLeadErgebnis } from './constants'
@@ -17,6 +18,11 @@ function track(name: string, params?: Record<string, unknown>): void {
 const UTM_FELDER = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'] as const
 
 export function GuideFormClient() {
+  const t = useTranslations('unfallguide.formular')
+  // Die Sprache faehrt als verstecktes Feld mit. Die Server-Action kann sie
+  // NICHT selbst ermitteln: sie laeuft nicht unter der Seiten-URL, dort ist
+  // `requestLocale` leer und next-intl faellt still auf 'de' zurueck.
+  const locale = useLocale()
   const [ergebnis, setErgebnis] = useState<GuideLeadErgebnis | null>(null)
   const [laeuft, starte] = useTransition()
   const ersteEingabe = useRef(false)
@@ -54,11 +60,11 @@ export function GuideFormClient() {
           <Check className="h-6 w-6 text-white" aria-hidden />
         </span>
         <h2 className="font-heading text-xl font-bold text-claimondo-navy sm:text-2xl">
-          Ihr Unfallguide steht bereit.
+          {t('erfolg_h2')}
         </h2>
         <p className="mt-2 max-w-prose text-base leading-relaxed text-slate-600">
           {ergebnis?.ok
-            ? 'Wir rufen Sie zwischen 8 und 20 Uhr zurück, in der Regel innerhalb von 15 Minuten. Bis dahin haben Sie schon alles Wichtige in der Hand.'
+            ? t('erfolg_text')
             : ergebnis?.error}
         </p>
 
@@ -69,11 +75,11 @@ export function GuideFormClient() {
           className="mt-6 inline-flex min-h-[52px] items-center gap-3 rounded-xl bg-claimondo-navy px-6 text-base font-semibold text-white transition-colors hover:bg-claimondo-navy/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-navy"
         >
           <Download className="h-5 w-5" aria-hidden />
-          Unfallguide öffnen (PDF, 6 Seiten)
+          {t('erfolg_knopf')}
         </a>
 
         <p className="mt-5 border-t border-claimondo-border pt-4 text-sm text-slate-500">
-          Lieber sofort sprechen?{' '}
+          {t('erfolg_sprechen')}{' '}
           <a
             href="tel:+4915153608515"
             onClick={() => track('guide_anruf_nach_abschluss')}
@@ -107,21 +113,25 @@ export function GuideFormClient() {
       className="rounded-2xl border border-claimondo-border bg-white p-6 shadow-sm sm:p-8"
     >
       <h2 className="font-heading text-xl font-bold text-claimondo-navy sm:text-2xl">
-        Guide anfordern
+        {t('h2')}
       </h2>
       <p className="mt-2 text-base leading-relaxed text-slate-600">
-        Sie bekommen ihn sofort auf dieser Seite. Kein Konto, keine Wartezeit.
+        {t('intro')}
       </p>
 
       {Object.entries(utm).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}
+      {/* Sprache der Seite. Verstecktes Feld, also kein zusaetzliches
+          sichtbares Feld und keine Frage mehr, die der Nutzer beantworten muss
+          — die Zahl der Felder entscheidet ueber die Abschlussquote. */}
+      <input type="hidden" name="sprache" value={locale} />
 
       <div className="mt-6 space-y-4">
         <Feld
           id="guide-name"
           name="name"
-          label="Ihr Name"
+          label={t('name_label')}
           autoComplete="name"
           fehler={fehlerFeld === 'name' ? fehlerText : null}
           required
@@ -129,23 +139,24 @@ export function GuideFormClient() {
         <Feld
           id="guide-telefon"
           name="telefon"
-          label="Telefonnummer"
+          label={t('telefon_label')}
           type="tel"
           inputMode="tel"
           autoComplete="tel"
-          hinweis="Für den Rückruf. Wir geben sie nicht weiter."
+          hinweis={t('telefon_hinweis')}
           fehler={fehlerFeld === 'telefon' ? fehlerText : null}
           required
         />
         <Feld
           id="guide-email"
           name="email"
-          label="E-Mail"
+          label={t('email_label')}
           type="email"
           inputMode="email"
           autoComplete="email"
           optional
-          hinweis="Damit Sie den Guide auch später wiederfinden."
+          optionalLabel={t('optional')}
+          hinweis={t('email_hinweis')}
           fehler={fehlerFeld === 'email' ? fehlerText : null}
         />
       </div>
@@ -158,10 +169,7 @@ export function GuideFormClient() {
           required
           className="mt-0.5 h-5 w-5 shrink-0 rounded border-claimondo-border text-claimondo-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-navy"
         />
-        <span>
-          Claimondo darf mich zu meinem Unfall telefonisch und per WhatsApp kontaktieren. Ich kann
-          das jederzeit widerrufen.
-        </span>
+        <span>{t('einwilligung')}</span>
       </label>
       {fehlerFeld === 'einwilligung' && fehlerText && (
         <p className="mt-2 text-sm font-medium text-red-700">{fehlerText}</p>
@@ -179,12 +187,12 @@ export function GuideFormClient() {
         className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center gap-3 rounded-xl bg-claimondo-navy px-6 text-base font-semibold text-white transition-colors hover:bg-claimondo-navy/90 disabled:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-navy"
       >
         <Download className="h-5 w-5" aria-hidden />
-        {laeuft ? 'Einen Moment …' : 'Guide jetzt lesen'}
+        {laeuft ? t('knopf_laeuft') : t('knopf')}
       </button>
 
       <p className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
         <Phone className="h-4 w-4" aria-hidden />
-        Oder direkt anrufen:{' '}
+        {t('anrufen')}{' '}
         <a
           href="tel:+4915153608515"
           onClick={() => track('guide_anruf_statt_formular')}
@@ -206,6 +214,9 @@ type FeldProps = {
   autoComplete?: string
   hinweis?: string
   optional?: boolean
+  /** Beschriftung fuer den optional-Zusatz. Kommt von aussen, damit `Feld`
+      rein darstellend bleibt und keine eigene Uebersetzung zieht. */
+  optionalLabel?: string
   required?: boolean
   fehler?: string | null
 }
@@ -222,6 +233,7 @@ function Feld({
   autoComplete,
   hinweis,
   optional,
+  optionalLabel,
   required,
   fehler,
 }: FeldProps) {
@@ -231,7 +243,9 @@ function Feld({
     <div>
       <label htmlFor={id} className="block text-sm font-semibold text-claimondo-navy">
         {label}
-        {optional && <span className="ml-2 font-normal text-slate-400">optional</span>}
+        {optional && optionalLabel && (
+          <span className="ml-2 font-normal text-slate-400">{optionalLabel}</span>
+        )}
       </label>
       <input
         id={id}
