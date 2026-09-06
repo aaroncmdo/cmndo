@@ -70,6 +70,20 @@ export type EmbedFinderSectionProps = {
    * KI-Buchungen, wissen aber nicht, WELCHE KI sie gebracht hat.
    */
   utmSource?: string
+  /**
+   * Clarity-Projekt-ID fuer die Aufzeichnung IM iframe.
+   *
+   * WARUM VON HIER UND NICHT AUS DEM EMBED: Clarity auf dieser Seite zeichnet den
+   * Inhalt des cross-origin-iframes NICHT auf — der Finder, in dem der Nutzer
+   * tatsaechlich arbeitet, bliebe unsichtbar. Der Embed traegt die ID aber
+   * bewusst nicht selbst: derselbe iframe laeuft auch auf Seiten OHNE Clarity
+   * (`/werkstatt-finden`, `/schaden-melden/selbstverschulden`), und dort soll
+   * nichts aufgezeichnet werden. Nur die einbettende Seite weiss, ob sie trackt.
+   *
+   * Der Embed prueft den Wert gegen eine Allowlist und startet erst, wenn der
+   * Consent per postMessage `analytics_storage: 'granted'` meldet.
+   */
+  clarityId?: string
   /** Standort des Fahrzeugs aus dem Deeplink — die KI hat ihn im Gespraech erfragt.
    *  Der Embed ueberspringt damit den Ort-Schritt (nur wirksam mit initialCenter). */
   adresse?: string
@@ -128,6 +142,7 @@ export function EmbedFinderSection({
   schadenart,
   schuldfrage,
   oppref,
+  clarityId,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -164,6 +179,9 @@ export function EmbedFinderSection({
   // ist eine undurchsichtige Kennung von OpenAI, deshalb grosszuegig begrenzt statt
   // auf ein Format geprueft: eine zu enge Pruefung wuerde ihn still verwerfen.
   if (oppref) params.set('oppref', oppref.slice(0, 300))
+  // Aufzeichnung im iframe — nur wenn DIESE Seite selbst Clarity fuehrt.
+  // Der Embed gleicht den Wert gegen seine Allowlist ab.
+  if (clarityId) params.set('clarity', clarityId)
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 
