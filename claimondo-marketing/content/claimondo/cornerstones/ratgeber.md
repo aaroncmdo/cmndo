@@ -40,8 +40,7 @@ meta_description: "Ratgeber nach dem Unfall: Wem vertrauen, was der Versicherung
 
 ---
 
-## <a name="frisch"></a>1. Wenn dir gerade jemand reingefahren ist
-
+## 1. Wenn dir gerade jemand reingefahren ist {#frisch}
 ### Die Situation
 
 Vor zwei, drei Tagen ist passiert, was du nie wolltest: Jemand fährt dir hinten rein, schert in dich, übersieht dich beim Linksabbiegen. Niemand ist ernsthaft verletzt, aber das Auto ist beschädigt, und dein Kopf ist voll Fragen. Du wirst angerufen von der gegnerischen Versicherung. Vielleicht von einer Werkstatt, die plötzlich Bescheid weiß. Möglicherweise von einem „Gutachter", der „direkt kommen" kann. Und du denkst dir: Was muss ich jetzt tun? Mache ich etwas falsch?
@@ -88,8 +87,7 @@ Bei einem unverschuldeten Unfall, der über die **gegnerische Haftpflicht** läu
 
 ---
 
-## <a name="verletzt"></a>2. Wenn dein Körper später erst meldet, dass etwas war
-
+## 2. Wenn dein Körper später erst meldet, dass etwas war {#verletzt}
 ### Die Situation
 
 Direkt nach dem Unfall hast du gedacht: ist nichts. Drei Tage später schmerzt der Nacken, dein Kopf brummt, du schläfst schlecht. Vielleicht zuckst du jetzt beim Bremsen zusammen oder fährst die Unfallstrecke nicht mehr. Du fragst dich: bilde ich mir das ein? Ist das normal? Und du fragst dich: hat das, was ich da durchmache, eigentlich einen rechtlichen „Wert"?
@@ -139,8 +137,7 @@ Wenn deine Erwerbsfähigkeit dauerhaft beeinträchtigt ist, kann auch das zum Sc
 
 ---
 
-## <a name="angehoerige"></a>3. Wenn dein liebster Mensch im Auto verletzt wurde
-
+## 3. Wenn dein liebster Mensch im Auto verletzt wurde {#angehoerige}
 ### Die Situation
 
 Es ist Wochen her, und du funktionierst – irgendwie. Dein Partner, dein Kind, dein Elternteil ist schwer verletzt worden. Du schläfst kaum. Du erkennst dich nicht wieder. Du sollst Schreiben lesen, Termine koordinieren, dich um Anträge kümmern. Und gleichzeitig fragst du dich, ob du überhaupt das Recht hast, an Geld oder Ansprüche zu denken.
@@ -182,8 +179,7 @@ Nichts – wenn du das so willst. Du musst heute nichts entscheiden. Wenn du so 
 
 ---
 
-## <a name="eltern"></a>4. Wenn dein Kind dabei war und du dich schuldig fühlst
-
+## 4. Wenn dein Kind dabei war und du dich schuldig fühlst {#eltern}
 ### Die Situation
 
 Vor wenigen Tagen – du hattest dein Kind im Auto. Jemand ist dir reingefahren. Dein Kind ist körperlich unverletzt, aber du kommst nicht über die Schuldgefühle hinweg. Hättest du langsamer fahren sollen? Es gar nicht mitnehmen? Du schläfst kaum, dein Kind klammert. Und du fragst dich: bin ich schuld?
@@ -230,8 +226,7 @@ Genau dafür sorgt man früh vor. Bei Kindern hält man die Möglichkeit offen, 
 
 ---
 
-## <a name="totalschaden"></a>5. Wenn dein Auto Schrott ist und dein Alltag bricht
-
+## 5. Wenn dein Auto Schrott ist und dein Alltag bricht {#totalschaden}
 ### Die Situation
 
 Vor zwei Tagen: Unfall. Dein Auto ist abgeschleppt, vielleicht ein Totalschaden. Du brauchst morgen einen Mietwagen – du pendelst zur Arbeit. Die gegnerische Versicherung schickt dir ein Restwert-Angebot, das verdächtig hoch klingt. Und im Hintergrund denkst du: was ist eigentlich mit der Finanzierung? Will ich überhaupt wieder ein Auto haben?
@@ -284,8 +279,7 @@ Nach so einem Erlebnis ist das nachvollziehbar. Wenn das Unbehagen bleibt oder s
 
 ---
 
-## <a name="alle"></a>6. Schlüssel-Antworten, die für alle gelten
-
+## 6. Schlüssel-Antworten, die für alle gelten {#alle}
 Egal in welcher der fünf Situationen du dich findest – diese acht Antworten gelten **immer**:
 
 ### 1. Du bist nicht allein, und du musst heute nicht alles lösen.
@@ -314,8 +308,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 
 ---
 
-## <a name="rollen"></a>7. Was wir machen – und was wir bewusst nicht machen
-
+## 7. Was wir machen – und was wir bewusst nicht machen {#rollen}
 ### Was Claimondo macht
 - **Unabhängige Schadensgutachten** für dein Fahrzeug, kalkuliert mit **Audatex III**
 - **Wertminderungs-Bezifferung** nach anerkannten Methoden
@@ -334,8 +327,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 
 ---
 
-## <a name="wann"></a>8. Wann zur Kanzlei, wann zur Ärztin, wann zum Krisendienst
-
+## 8. Wann zur Kanzlei, wann zur Ärztin, wann zum Krisendienst {#wann}
 ### Zur Partnerkanzlei (wir koordinieren das)
 - Bei **jedem Personenschaden** – auch leichten
 - Bei **Sachschaden ab 1.500 €**
@@ -365,8 +357,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 
 ---
 
-## <a name="faq"></a>9. Häufige Fragen
-
+## 9. Häufige Fragen {#faq}
 **1. Was muss ich nach einem Verkehrsunfall als erstes tun?**
 Sicherheit (Warnblinker, Warndreieck, Verletzte versorgen), Polizei bei Bedarf, Foto-Dokumentation, Personalien austauschen, Zeugen-Adressen sichern. Innerhalb von 24 h ärztlich vorstellen lassen.
 
