@@ -42,7 +42,14 @@ export async function speichereKaskoTarifPortal(
     const { data: t } = await svc.from('kasko_tarife').select('anzeigename, hat_werkstattbindung, bindungsumfang').eq('id', auswahl.tarifId).maybeSingle()
     if (t) { tarif = { hatWerkstattbindung: t.hat_werkstattbindung as boolean, bindungsumfang: t.bindungsumfang as Bindungsumfang }; tarifName = t.anzeigename as string }
   }
-  const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas: false })
+  // Glas-Achse (Aaron 05.09.): die Schadenart entscheidet, ob eine reine Glas-Bindung greift. Sie steht am
+  // LEAD (claims fuehrt kein schadentyp) — ohne Lead bleibt es bei Karosserie, das ist die sichere Annahme.
+  let schadenIstGlas = false
+  if (owner.leadId) {
+    const { data: artRow } = await svc.from('leads').select('schadentyp').eq('id', owner.leadId).maybeSingle()
+    schadenIstGlas = ((artRow?.schadentyp as string | null) ?? null) === 'glas'
+  }
+  const ergebnis = leiteWerkstattbindungAb({ wbStatus, tarif, markerAntwort: auswahl.markerAntwort, schadenIstGlas })
 
   // Alt-Stand des Leads VOR jedem Write (Review #5864, Befund 7): ein Read-Fehler ist ein Fehler — sonst bliebe ein
   // wegen Werkstattbindung disqualifizierter Lead still disqualifiziert. Im Portal existiert per Definition ein Claim.

@@ -5631,6 +5631,10 @@
         "eigenverantwortung": {
           "label": "Kendim",
           "hint": "Kazaya kendim sebep oldum."
+        },
+        "kein_gegner": {
+          "label": "Karşı taraf yok",
+          "hint": "Dolu, sansar, cam, yaban hayvanı, hırsızlık veya fırtına."
         }
       }
     },
