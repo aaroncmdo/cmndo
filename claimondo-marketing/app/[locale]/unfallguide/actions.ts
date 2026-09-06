@@ -48,7 +48,6 @@ import { GUIDE_PFAD, type GuideLeadFeld, type GuideLeadErgebnis } from './consta
 //    nach dem Absenden auf der Seite. FlowLink und Rueckruf kommen dazu, aber
 //    der Gegenwert ist geliefert, bevor irgendein Kanal beteiligt ist.
 
-const QUELLE = 'unfallguide'
 
 /**
  * Das Schema haengt an der Sprache, weil seine Meldungen beim NUTZER landen.
@@ -80,7 +79,26 @@ function bauLeadSchema(t: Uebersetzer) {
   // gepflegt aus und misst nichts. Optional, damit ein Absenden ohne das Feld
   // (alter Cache, JS-Eigenheit) den Lead nicht verliert.
   sprache: z.string().optional(),
+  quelle: z.string().optional(),
   })
+}
+
+/**
+ * Woher kam der Lead? Bis 06.09. war das eine Konstante, weil es genau einen
+ * Eingang gab. Mit dem Abschnitt auf der Startseite gibt es zwei — und zwei
+ * Eingaenge unter demselben Herkunftswert sind in der Auswertung nicht mehr
+ * trennbar. Lead-Attribution war hier schon einmal blind, das reicht.
+ *
+ * Whitelist statt Durchreichen: der Wert kommt aus einem Formularfeld, landet
+ * in der Datenbank und in Auswertungen. Ein unbekannter Wert faellt auf den
+ * Landeseiten-Wert zurueck, statt beliebigen Text einzuschleusen.
+ * (`anfragen.quelle` traegt keinen CHECK — gegen prod gelesen; die Disziplin
+ * muss deshalb hier im Code stehen.)
+ */
+const QUELLEN = ['unfallguide', 'unfallguide-startseite'] as const
+
+function gueltigeQuelle(wert: string | undefined): string {
+  return (QUELLEN as readonly string[]).includes(wert ?? '') ? (wert as string) : QUELLEN[0]
 }
 
 /** Erlaubt sind genau die Werte des CHECK auf `leads.sprache` (gegen prod gelesen). */
@@ -96,7 +114,8 @@ export async function fordereUnfallguideAn(formData: FormData): Promise<GuideLea
   // erlaubten Werte gefiltert — ein manipuliertes Feld faellt auf 'de' zurueck
   // und kann den CHECK nicht verletzen.
   const sprache = gueltigeSprache(String(formData.get('sprache') ?? '') || undefined)
-  const t = await getTranslations({ locale: sprache, namespace: 'unfallguide.formular' })
+  const QUELLE = gueltigeQuelle(String(formData.get('quelle') ?? '') || undefined)
+  const t = await getTranslations({ locale: sprache, namespace: 'unfallguide_formular' })
 
   const parsed = bauLeadSchema(t).safeParse(Object.fromEntries(formData))
   if (!parsed.success) {

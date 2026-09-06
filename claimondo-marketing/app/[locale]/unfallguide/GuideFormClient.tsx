@@ -17,8 +17,18 @@ function track(name: string, params?: Record<string, unknown>): void {
 
 const UTM_FELDER = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'] as const
 
-export function GuideFormClient() {
-  const t = useTranslations('unfallguide.formular')
+export function GuideFormClient({
+  quelle = 'unfallguide',
+}: {
+  /**
+   * Woher wird abgeschickt? Die Landeseite laesst die Vorgabe stehen, der
+   * Abschnitt auf der Startseite setzt seinen eigenen Wert — sonst waeren die
+   * beiden Eingaenge in der Auswertung nicht mehr zu trennen. Die Server-Action
+   * prueft den Wert gegen eine Whitelist, das Feld ist also kein Einfallstor.
+   */
+  quelle?: 'unfallguide' | 'unfallguide-startseite'
+} = {}) {
+  const t = useTranslations('unfallguide_formular')
   // Die Sprache faehrt als verstecktes Feld mit. Die Server-Action kann sie
   // NICHT selbst ermitteln: sie laeuft nicht unter der Seiten-URL, dort ist
   // `requestLocale` leer und next-intl faellt still auf 'de' zurueck.
@@ -30,7 +40,7 @@ export function GuideFormClient() {
   const [utm, setUtm] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    track('guide_form_eingeblendet')
+    track('guide_form_eingeblendet', { quelle })
     const p = new URLSearchParams(window.location.search)
     const gefunden: Record<string, string> = {}
     for (const f of UTM_FELDER) {
@@ -38,7 +48,10 @@ export function GuideFormClient() {
       if (v) gefunden[f] = v
     }
     setUtm(gefunden)
-  }, [])
+    // `quelle` steht in der Abhaengigkeitsliste, weil das Ereignis sie traegt.
+    // Sie aendert sich im Leben einer Instanz nie — der Effekt laeuft trotzdem
+    // genau einmal, und die Liste bleibt vollstaendig statt unterdrueckt.
+  }, [quelle])
 
   // Nach dem Absenden gehoert der Fokus dorthin, wo die Antwort steht.
   // Sonst steht ein Screenreader-Nutzer weiter im abgeschickten Formular.
@@ -98,7 +111,7 @@ export function GuideFormClient() {
   return (
     <form
       action={(fd) => {
-        track('guide_abgeschickt')
+        track('guide_abgeschickt', { quelle })
         starte(async () => {
           const r = await fordereUnfallguideAn(fd)
           if (!r.ok) track('guide_fehler', { grund: r.feld ?? 'server' })
@@ -126,6 +139,7 @@ export function GuideFormClient() {
           sichtbares Feld und keine Frage mehr, die der Nutzer beantworten muss
           — die Zahl der Felder entscheidet ueber die Abschlussquote. */}
       <input type="hidden" name="sprache" value={locale} />
+      <input type="hidden" name="quelle" value={quelle} />
 
       <div className="mt-6 space-y-4">
         <Feld

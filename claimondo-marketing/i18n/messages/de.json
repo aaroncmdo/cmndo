@@ -4821,31 +4821,6 @@
       "text": "Sagen Sie uns in fünf Minuten, was passiert ist. Kostenlos und unverbindlich, auch wenn Sie nur wissen wollen, ob sich etwas lohnt.",
       "erreichbar": "Mo–Fr 8–20 Uhr, Sa+So 9–18 Uhr"
     },
-    "formular": {
-      "h2": "Guide anfordern",
-      "intro": "Sie bekommen ihn sofort auf dieser Seite. Kein Konto, keine Wartezeit.",
-      "name_label": "Ihr Name",
-      "telefon_label": "Telefonnummer",
-      "telefon_hinweis": "Für den Rückruf. Wir geben sie nicht weiter.",
-      "email_label": "E-Mail",
-      "email_hinweis": "Damit Sie den Guide auch später wiederfinden.",
-      "optional": "optional",
-      "einwilligung": "Claimondo darf mich zu meinem Unfall telefonisch und per WhatsApp kontaktieren. Ich kann das jederzeit widerrufen.",
-      "knopf": "Guide jetzt lesen",
-      "knopf_laeuft": "Einen Moment …",
-      "anrufen": "Oder direkt anrufen:",
-      "erfolg_h2": "Ihr Unfallguide steht bereit.",
-      "erfolg_text": "Wir rufen Sie montags bis freitags von 8 bis 20 Uhr zurück, samstags und sonntags von 9 bis 18 Uhr, in der Regel innerhalb von 15 Minuten. Bis dahin haben Sie schon alles Wichtige in der Hand.",
-      "erfolg_knopf": "Unfallguide öffnen (PDF, 6 Seiten)",
-      "erfolg_sprechen": "Lieber sofort sprechen?",
-      "fehler_name": "Bitte Ihren Namen angeben",
-      "fehler_telefon": "Bitte eine erreichbare Telefonnummer angeben",
-      "fehler_email": "Diese E-Mail-Adresse sieht nicht gültig aus",
-      "fehler_einwilligung": "Bitte bestätigen Sie, dass wir Sie zurückrufen dürfen",
-      "fehler_allgemein": "Bitte prüfen Sie Ihre Eingaben",
-      "fehler_speichern": "Wir konnten Ihre Anfrage nicht speichern. Der Guide steht trotzdem bereit, und unter 0151 5360 8515 erreichen Sie uns direkt.",
-      "hinweis_verarbeitung": "Ihre Anfrage ist angekommen, die Verarbeitung läuft noch. Wir melden uns."
-    },
     "nachricht": {
       "anrede_mit_name": "Guten Tag {vorname},",
       "anrede_ohne_name": "Guten Tag,",
@@ -4858,6 +4833,35 @@
       "kostenlos": "Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.",
       "mail_betreff": "Ihr Unfallguide von Claimondo",
       "mail_einleitung": "im Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten)."
+    },
+    "startseite": {
+      "h2": "Nehmen Sie den Guide mit, bevor Sie entscheiden.",
+      "text": "Sechs Seiten mit dem, was Ihnen zusteht, welche Fehler teuer werden und was zu tun ist, wenn die Versicherung kürzt. Kostenlos, sofort lesbar, ohne Konto."
     }
+  },
+  "unfallguide_formular": {
+    "h2": "Guide anfordern",
+    "intro": "Sie bekommen ihn sofort auf dieser Seite. Kein Konto, keine Wartezeit.",
+    "name_label": "Ihr Name",
+    "telefon_label": "Telefonnummer",
+    "telefon_hinweis": "Für den Rückruf. Wir geben sie nicht weiter.",
+    "email_label": "E-Mail",
+    "email_hinweis": "Damit Sie den Guide auch später wiederfinden.",
+    "optional": "optional",
+    "einwilligung": "Claimondo darf mich zu meinem Unfall telefonisch und per WhatsApp kontaktieren. Ich kann das jederzeit widerrufen.",
+    "knopf": "Guide jetzt lesen",
+    "knopf_laeuft": "Einen Moment …",
+    "anrufen": "Oder direkt anrufen:",
+    "erfolg_h2": "Ihr Unfallguide steht bereit.",
+    "erfolg_text": "Wir rufen Sie montags bis freitags von 8 bis 20 Uhr zurück, samstags und sonntags von 9 bis 18 Uhr, in der Regel innerhalb von 15 Minuten. Bis dahin haben Sie schon alles Wichtige in der Hand.",
+    "erfolg_knopf": "Unfallguide öffnen (PDF, 6 Seiten)",
+    "erfolg_sprechen": "Lieber sofort sprechen?",
+    "fehler_name": "Bitte Ihren Namen angeben",
+    "fehler_telefon": "Bitte eine erreichbare Telefonnummer angeben",
+    "fehler_email": "Diese E-Mail-Adresse sieht nicht gültig aus",
+    "fehler_einwilligung": "Bitte bestätigen Sie, dass wir Sie zurückrufen dürfen",
+    "fehler_allgemein": "Bitte prüfen Sie Ihre Eingaben",
+    "fehler_speichern": "Wir konnten Ihre Anfrage nicht speichern. Der Guide steht trotzdem bereit, und unter 0151 5360 8515 erreichen Sie uns direkt.",
+    "hinweis_verarbeitung": "Ihre Anfrage ist angekommen, die Verarbeitung läuft noch. Wir melden uns."
   }
 }
