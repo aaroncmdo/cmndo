@@ -88,11 +88,30 @@ SCAN_FILES.push(...APP_FILES)
 // deinen Hinweis … gehaengt"). Eine pauschale Ausnahme haette genau die zwei Stellen
 // versteckt, die das Gate finden soll. Sie steht deshalb in der Baseline, nicht hier.
 const ANREDE_DATEI_AUSNAHMEN = [
+  // (a) Anweisungen an ein Sprachmodell — "du" ist die Anrede an das MODELL
   /src\/lib\/wissen\/generate\.ts$/,          // "Du recherchierst …" — Artikel-Prompt
   /src\/lib\/lokalinhalt\/generate\.ts$/,     // "Du recherchierst hyperlokale Fakten …"
   /src\/lib\/bkat\/inference\.ts$/,           // "Setze … NUR wenn du die Ziffern lesen kannst"
   /src\/lib\/werkstatt\/copilot-prompt\.ts$/, // Werkstatt-Copilot, reiner Prompt
   /src\/lib\/faq-bot\/off-topic-guard\.ts$/,  // Erkennungsmuster "bist du eine ki" — Umstellen macht den Guard BLIND
+  // Werkzeugbeschreibung fuer KI-Agenten, die die oeffentliche API aufrufen: "NACHDEM du dem
+  // Nutzer erklaert hast …", "Du vermittelst Gutachter + Termin". Adressat ist der Agent, nicht
+  // der Endkunde — der bekommt seinen Text aus dem FlowLink.
+  /src\/app\/api\/v1\/openapi\.json\/route\.ts$/,
+
+  // (b) INTERNE Portale — Aaron 06.09.2026 auf die Frage, ob sie mitziehen sollen: "ja die
+  // sollen beim du bleiben". Das ist eine ENTSCHEIDUNG, keine Restschuld: hier steht nichts
+  // zum Aufraeumen. Wer eine dieser Dateien "nachbessert", dreht Aarons Entscheidung um.
+  /src\/app\/admin\/einstellungen\/google\/GoogleSettingsClient\.tsx$/, // "Verbinde dein Google Konto"
+  /src\/app\/admin\/marketing\/content-studio\/ContentStudioClient\.tsx$/,
+  /src\/app\/admin\/meine-tasks\/MyTasksClient\.tsx$/,
+  // Support-Widget: Feature-Requests ans eigene Team. Gemessen 06.09. — genutzt von admin (22x)
+  // und sachverstaendiger (2x), von KEINEM Kunden, zuletzt Mai 2026.
+  // ⚠ Bedingung: `ALLOWED_ROLES` in dieser Datei enthaelt 'kunde', obwohl der Kommentar
+  // darueber "Kunden sind NICHT zugelassen" sagt. Solange das so bleibt, ist die Ausnahme an
+  // die MESSUNG gebunden, nicht an den Code. Wird der Support je fuer Kunden geoeffnet, gehoeren
+  // seine zwei Ausgaben ("Du hast heute bereits …", "deinen Hinweis") mit auf Sie.
+  /src\/app\/api\/support\/chat\/route\.ts$/,
 ]
 
 const findings = [] // {file, line, code, match}

@@ -18,11 +18,6 @@
     "kfz-gutachter-bonn/lib/lokalinhalt.ts",
     "kfz-gutachter-duesseldorf/lib/lokalinhalt.ts",
     "kfz-gutachter-koeln/lib/lokalinhalt.ts",
-    "kfz-gutachter-wuppertal/lib/lokalinhalt.ts",
-    "src/app/admin/einstellungen/google/GoogleSettingsClient.tsx",
-    "src/app/admin/marketing/content-studio/ContentStudioClient.tsx",
-    "src/app/admin/meine-tasks/MyTasksClient.tsx",
-    "src/app/api/support/chat/route.ts",
-    "src/app/api/v1/openapi.json/route.ts"
+    "kfz-gutachter-wuppertal/lib/lokalinhalt.ts"
   ]
 }
