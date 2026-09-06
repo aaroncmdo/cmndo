@@ -166,8 +166,8 @@ export default function TerminDetailActions({
             Begutachtung durchgeführt
           </Button>
           <p className="text-xs text-claimondo-ondo">
-            Markiere den Termin als durchgeführt, sobald du die Begutachtung vor Ort erledigt hast.
-            Damit ist der Auftrag für dich abgeschlossen — dein Gutachten erstellst du wie gewohnt außerhalb der Plattform.
+            Markieren Sie den Termin als durchgeführt, sobald Sie die Begutachtung vor Ort erledigt haben.
+            Damit ist der Auftrag für Sie abgeschlossen — Ihr Gutachten erstellen Sie wie gewohnt außerhalb der Plattform.
           </p>
           {/* AAR-939: Kunde war nicht da / hat abgesagt → Billing-Review (kein Auto-Charge) */}
           <details className="bg-claimondo-bg border border-claimondo-border rounded-2xl">
@@ -176,8 +176,8 @@ export default function TerminDetailActions({
             </summary>
             <div className="px-4 pb-4 pt-2 space-y-2">
               <p className="text-[11px] text-claimondo-ondo">
-                Melde das, wenn der Kunde nicht zum Termin erschienen ist oder vorher abgesagt hat.
-                Wir prüfen es — wenn der Kunde der Grund war, wird dir dieser Termin nicht berechnet.
+                Melden Sie das, wenn der Kunde nicht zum Termin erschienen ist oder vorher abgesagt hat.
+                Wir prüfen es — wenn der Kunde der Grund war, wird Ihnen dieser Termin nicht berechnet.
               </p>
               <button
                 type="button"

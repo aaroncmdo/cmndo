@@ -1,5 +1,5 @@
 // Phase 5 Teil D: Zugriff auf die /updates-Vollseite.
-// Operative Rollen bekommen die Worklist (echte "Braucht dich"-Listen);
+// Operative Rollen bekommen die Worklist (echte "Braucht Sie"-Listen);
 // Kunde/makler bleiben beim Popover -> die Vollseite redirected sie auf ihr Portal.
 
 const OPERATIVE_ROLES = new Set<string>([

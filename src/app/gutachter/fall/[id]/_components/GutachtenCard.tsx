@@ -238,7 +238,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
       ) : (
         <>
           <p className="text-xs text-claimondo-ondo">
-            Lade dein fertiges Gutachten hoch (PDF). Damit wechselt der Fall in
+            Laden Sie Ihr fertiges Gutachten hoch (PDF). Damit wechselt der Fall in
             die Kanzlei-Phase.
           </p>
           <DokumentSlot

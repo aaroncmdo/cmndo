@@ -272,10 +272,10 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
       flow_key: 'sv-onboarding',
       reihenfolge: 45,
       phase_key: 'widget',
-      titel: 'Dein Widget',
+      titel: 'Ihr Widget',
       eyebrow: 'Kostenlos starten',
       beschreibung:
-        'Binde das Claimondo-Formular auf deiner Website ein — Anfragen landen direkt in deinem Posteingang.',
+        'Binde das Claimondo-Formular auf Ihrer Website ein — Anfragen landen direkt in Ihrem Posteingang.',
       conditional_on: null,
       felder: [
         {
@@ -285,7 +285,7 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
           feld_key: 'embed_site_created',
           typ: 'embed-site-create',
           label: 'Widget anlegen',
-          hint: 'Deine Domain + ein Name — fertig. Variante A (kostenlos, mit Claimondo-Branding).',
+          hint: 'Ihre Domain + ein Name — fertig. Variante A (kostenlos, mit Claimondo-Branding).',
           placeholder: null,
           pflicht: true,
           optionen: null,

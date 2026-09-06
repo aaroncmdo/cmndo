@@ -113,7 +113,7 @@ export async function extractDokument(
       model: MODEL,
       max_tokens: 1024,
       system:
-        `Du bist ein praeziser OCR-Extraktor fuer einen ${label}. Extrahiere die angeforderten ` +
+        `Sie sind ein praeziser OCR-Extraktor fuer einen ${label}. Extrahiere die angeforderten ` +
         `Felder aus dem angehaengten Bild/PDF. Wert nicht sicher erkennbar -> null (nicht raten). ` +
         `Datumswerte als ISO YYYY-MM-DD. Strings ohne Label-Praefix, nur den eigentlichen Inhalt.`,
       messages: [

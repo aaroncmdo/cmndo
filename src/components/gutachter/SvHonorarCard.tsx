@@ -32,7 +32,7 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
       <div className="flex items-center gap-2">
         <EuroIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
         <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
-          Dein Honorar
+          Ihr Honorar
         </p>
         <span
           className={`ml-auto text-[10px] font-medium rounded-full px-2 py-0.5 ${
@@ -47,7 +47,7 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
 
       {hatBetrag && (
         <div>
-          <p className="text-xs text-claimondo-ondo">Dein Anteil</p>
+          <p className="text-xs text-claimondo-ondo">Ihr Anteil</p>
           <p className="text-2xl font-bold text-[var(--brand-primary)] tabular-nums">
             {formatEuro(n!)}
           </p>
@@ -56,14 +56,14 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
 
       {eingegangenAm && (
         <div className="text-xs pt-1 border-t border-claimondo-border">
-          <p className="text-claimondo-ondo">Eingang auf deinem Konto</p>
+          <p className="text-claimondo-ondo">Eingang auf Ihrem Konto</p>
           <p className="text-claimondo-navy font-medium">{formatDate(eingegangenAm)}</p>
         </div>
       )}
 
       <p className="text-[11px] text-claimondo-ondo pt-1 border-t border-claimondo-border">
-        Dies ist dein SV-Honorar-Anteil nach Abzug des Leadpreises. Die Regulierung
-        an den Kunden ist für dich nicht relevant.
+        Dies ist Ihr SV-Honorar-Anteil nach Abzug des Leadpreises. Die Regulierung
+        an den Kunden ist für Sie nicht relevant.
       </p>
     </SectionCard>
   )

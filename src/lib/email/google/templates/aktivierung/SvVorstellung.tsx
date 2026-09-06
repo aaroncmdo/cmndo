@@ -18,11 +18,11 @@ import type { CopyFor } from './copy-schemas'
 type Props = { copy: CopyFor<'sv_vorstellung'>; merge: WerkstattMergeVars }
 
 export function subject(copy: CopyFor<'sv_vorstellung'>, merge: WerkstattMergeVars): string {
-  return merge.sv ? `Dein Gutachter in ${merge.sv.region}: ${merge.sv.name}` : 'Dein Gutachter in deiner Region'
+  return merge.sv ? `Ihr Gutachter in ${merge.sv.region}: ${merge.sv.name}` : 'Ihr Gutachter in Ihrer Region'
 }
 
 export function SvVorstellungEmail({ copy, merge }: Props) {
-  const region = merge.sv?.region ?? 'deiner Region'
+  const region = merge.sv?.region ?? 'Ihrer Region'
   const svName = merge.sv?.name ?? ''
   // C1-Fix (Final-Review): BEIDE Platzhalter in JEDEM Text ersetzen — sonst bleibt in der
   // Headline [Gutachter-Name] und in Absatz 2 [Region] roh stehen (Betreff war schon korrekt).
@@ -37,7 +37,7 @@ export function SvVorstellungEmail({ copy, merge }: Props) {
             name={merge.sv.name}
             photoUrl={merge.sv.photoUrl ?? null}
             contact={merge.sv.contact ?? ''}
-            label={`Dein Gutachter in ${merge.sv.region}`}
+            label={`Ihr Gutachter in ${merge.sv.region}`}
           />
         )}
         {copy.absaetze.map((a, i) => (

@@ -3,8 +3,8 @@
 // dieser Phase wissen muss — Aaron-Spec: "jede Karte in jedem
 // Prozessschritt = eine Funktion".
 //
-//   gutachten-freigegeben → "Wir haben dein Gutachten freigegeben"
-//   bei-kanzlei           → "Dein Gutachten liegt bei der Kanzlei" + LexDrive-Link
+//   gutachten-freigegeben → "Wir haben Ihr Gutachten freigegeben"
+//   bei-kanzlei           → "Ihr Gutachten liegt bei der Kanzlei" + LexDrive-Link
 //   stellungnahme         → wird von der bestehenden StellungnahmeCard übernommen
 //   nachbesichtigung      → wird von der bestehenden NachbesichtigungCard übernommen
 //   auszahlung            → "Honorar X € am Y eingegangen"
@@ -71,11 +71,11 @@ export default function MeinFallStatusCard(props: Props) {
           </p>
           <p className="text-xs text-claimondo-ondo mt-0.5">
             {props.phase === 'gutachten-freigegeben' &&
-              `Wir haben dein Gutachten am ${fmtDatum(props.gutachtenFreigegebenAm)} freigegeben.`}
+              `Wir haben Ihr Gutachten am ${fmtDatum(props.gutachtenFreigegebenAm)} freigegeben.`}
             {props.phase === 'bei-kanzlei' &&
-              'Das Gutachten liegt jetzt bei der Partnerkanzlei. Du findest den Vorgang im LexDrive-Portal.'}
+              'Das Gutachten liegt jetzt bei der Partnerkanzlei. Sie finden den Vorgang im LexDrive-Portal.'}
             {props.phase === 'auszahlung' &&
-              `Dein Honorar wurde am ${fmtDatum(props.svHonorarEingegangenAm)} überwiesen.`}
+              `Ihr Honorar wurde am ${fmtDatum(props.svHonorarEingegangenAm)} überwiesen.`}
             {props.phase === 'abgeschlossen-fall' &&
               'Der Fall ist vollständig reguliert.'}
           </p>
@@ -129,7 +129,7 @@ export default function MeinFallStatusCard(props: Props) {
           <div className="space-y-2">
             <p className="text-xs text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg p-3">
               Aktenzeichen folgt sobald die Kanzlei das Mandat angenommen hat.
-              Du erhältst dann hier den Direkt-Link zum Vorgang.
+              Sie erhalten dann hier den Direkt-Link zum Vorgang.
             </p>
             <Link
               href={getLexdriveLoginUrl()}
@@ -155,7 +155,7 @@ export default function MeinFallStatusCard(props: Props) {
           <div className="rounded-ios-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-1.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-claimondo-ondo font-medium flex items-center gap-1.5">
-                <EuroIcon className="w-3.5 h-3.5" /> Dein Honorar
+                <EuroIcon className="w-3.5 h-3.5" /> Ihr Honorar
               </span>
               <span className="text-sm font-bold text-claimondo-navy">
                 {fmtEuro(props.svHonorarBetrag ?? props.svHonorarVerdient)}

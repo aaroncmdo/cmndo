@@ -91,7 +91,7 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
     )
   }
 
-  // "Passt zu deinem Schaden"-Badge nur zeigen, wenn die Liste unterscheidet
+  // "Passt zu Ihrem Schaden"-Badge nur zeigen, wenn die Liste unterscheidet
   // (einige passen, andere nicht) — sonst ist der Badge auf allen sinnlos
   // (passt=true ist Default bei fehlender Schadenskategorie / Vollservice).
   const zeigeBadge = werkstaetten.some((w) => w.passt) && werkstaetten.some((w) => !w.passt)
@@ -128,7 +128,7 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
               w.fit === 'passt' ? (
                 <div className="mt-1">
                   <StatusBadge tone="success" size="xs">
-                    Passt zu deinem Schaden
+                    Passt zu Ihrem Schaden
                   </StatusBadge>
                 </div>
               ) : w.fit === 'unbekannt' ? (
@@ -147,7 +147,7 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
             ) : zeigeBadge && w.passt ? (
               <div className="mt-1">
                 <StatusBadge tone="success" size="xs">
-                  Passt zu deinem Schaden
+                  Passt zu Ihrem Schaden
                 </StatusBadge>
               </div>
             ) : null

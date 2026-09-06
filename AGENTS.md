@@ -689,6 +689,38 @@ in `MANUELLE_LIVE_SMOKES` der `playwright.config.ts`).
 
 Befund/Kontext: `AUDIT-nightly-nur-fehler-react418-und-auth-lock` (Memory).
 
+## Zweite Achse (05.09.2026): Pruefskript ohne Aufrufer
+
+**Ein `scripts/check-*.mjs`, das kein Workflow aufruft, laeuft nie — und faellt nicht auf, weil ein
+nicht aufgerufenes Skript keinen roten Lauf erzeugt.** Dieselbe Klasse wie der stumme Waechter, nur
+ohne Schalter: der Detektor steht im Repo, hat Unit-Tests und eine Baseline, und wirkt trotzdem nicht.
+
+**Gemessen 05.09.2026** (43 Skripte gegen 19 Workflows): `check-copy-lint.mjs` war seit #5862 nie
+verdrahtet — kein npm-Key, kein Step, keine Baseline. Es haette die RDG-Rollentrennung in allen
+Marketing-Texten gegatet. Ebenso `check-server-actions.mjs`: npm-Key vorhanden, kein Workflow-Step,
+seit 13.05.2026 — sein R1 blockt Value-Exports aus `'use server'`-Files, die Falle hinter dem
+AAR-664-Urgent-Crash. Beide sind mit #5876 bzw. #5879 verdrahtet.
+
+⚠ **Beide Aufrufformen zaehlen.** Ein Workflow ruft ein Skript per **npm-Key**
+(`npm run check:knip -- --ratchet`) ODER per **Dateiname** (`node scripts/check-anon-exposure.mjs`) auf.
+Der erste Zaehlversuch suchte nur nach npm-Keys und meldete die per Dateiname aufgerufenen
+Sicherheits-Ratchets (anon-exposure, anon-reachability, claim-view-rls, …) faelschlich als
+unverdrahtet — ein Fehlbefund, der die echten zwei Faelle im Rauschen versteckt haette.
+
+**Weitere Fallen, als Unit-Test verankert:** Wortgrenze beim Dateinamen (`check-rls.mjs` darf nicht
+in `check-rls-policies.mjs` treffen) und beim npm-Key (`check:rls` nicht in `check:rls-policies`);
+**YAML-Kommentare zaehlen nicht** (`# Siehe scripts/check-x.mjs` ist Doku, kein Aufruf — 11 solcher
+Nennungen stehen in `ci.yml`); npm-Keys, die andere npm-Keys aufrufen, werden transitiv aufgeloest.
+
+**Allowlist statt Baseline** fuer bewusst manuelle Werkzeuge (`SKRIPT_ALLOWLIST` in
+`scripts/check-stumme-waechter.mjs`, mit Grund): `check-console-errors.mjs` (Debug-Werkzeug mit
+Routen-Argument) und `check-memory-pr-status.mjs` (prueft den `memory/`-Index ausserhalb des Repos).
+Ein echtes Gate gehoert **nicht** in die Allowlist, sondern in einen Workflow-Step.
+
+Baseline-Schluessel ist `<datei>::KEIN_AUFRUFER`, damit beide Achsen dieselbe Baseline und dasselbe
+`diffBaseline` nutzen. Nachweis, dass die Achse auf CI greift: Probe-Skript ohne Aufrufer gepusht →
+Job rot mit genau diesem Dateinamen, entfernt → gruen (siehe PR #5879).
+
 # Flag-Drift-Gate (Ratchet)
 
 CHECK-invalide enum-Literale in Supabase-Writes/Filtern sind verboten — seit 22.07. **volle Abdeckung**: ALLE public ANY-ARRAY-enum-CHECKs (Status, Kanäle, Typen, Rollen, Kategorien, …), nicht mehr nur status-*benannte* (der alte conname-Filter deckte nur ~1/3 ab und verbarg den `nachrichten.kanal='system'`-Silent-Fail). Ein `.update({ status: 'geplant' })` auf `gutachter_termine` (wo `'geplant'` nicht im `gutachter_termine_status_check` steht) wird von Postgres **verworfen** → **stiller Fehlschlag**, den kein Build/tsc/anderer Ratchet fängt (belegt 05.07.: `geplant` in `slots.ts`, `kunde_storniert` in `kb-booking.ts` — beide Silent-Fail-Bugs). Ebenso Filter mit toten Werten (`.eq('status','durchgefuehrt')` matcht 0 Rows).

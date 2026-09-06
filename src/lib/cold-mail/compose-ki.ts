@@ -23,7 +23,7 @@ const ROLLEN_KONTEXT: Record<ColdMailRolle, string> = {
 
 function buildSystem(rolle: ColdMailRolle): string {
   return [
-    'Du schreibst eine professionelle deutsche Erstkontakt-Email (Cold Outreach) für das Claimondo Partnernetzwerk.',
+    'Sie schreiben eine professionelle deutsche Erstkontakt-Email (Cold Outreach) für das Claimondo Partnernetzwerk.',
     'Claimondo ist Deutschlands Plattform für Kfz-Schadensregulierung.',
     ROLLEN_KONTEXT[rolle],
     'Ton: sachlich-kompetent, seriös, B2B — KEIN reißerischer Werbeslang. Kurz (Body max ~1200 Zeichen).',

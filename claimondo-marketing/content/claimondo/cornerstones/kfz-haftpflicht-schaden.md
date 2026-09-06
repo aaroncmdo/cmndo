@@ -67,8 +67,7 @@ Das deutsche Schadensersatzrecht gibt Verkehrsunfall-Geschädigten ein umfassend
 
 ---
 
-## <a name="akut"></a>1. Die ersten 72 Stunden – Sofort-Maßnahmen
-
+## 1. Die ersten 72 Stunden – Sofort-Maßnahmen {#akut}
 In den ersten Stunden und Tagen nach dem Unfall entscheidet sich, wie stark deine spätere Verhandlungsposition ist. Adrenalin maskiert Schmerz, Beweise verlieren schnell ihre Beweiskraft. Folgende Schritte sind Pflicht:
 
 ### Direkt am Unfallort
@@ -93,8 +92,7 @@ In den ersten Stunden und Tagen nach dem Unfall entscheidet sich, wie stark dein
 
 ---
 
-## <a name="haftung"></a>2. Wer haftet – das Haftungs-System
-
+## 2. Wer haftet – das Haftungs-System {#haftung}
 Das deutsche Kfz-Haftungs-System hat **drei parallele Säulen**, die zusammen praktisch jeden Schadensfall abdecken:
 
 ### Säule 1: § 7 StVG – Halterhaftung ohne Verschulden
@@ -127,8 +125,7 @@ Du kommunizierst **direkt** mit der Haftpflichtversicherung des Schädigers, nic
 
 ---
 
-## <a name="anspruchsberechtigte"></a>3. Wer hat Ansprüche
-
+## 3. Wer hat Ansprüche {#anspruchsberechtigte}
 Geschädigter ist **jede Person**, deren Körper, Gesundheit, Eigentum oder geschützte Rechtsposition durch den Unfall direkt betroffen wurde. Das umfasst weit mehr Personen als oft gedacht:
 
 ### Primär Geschädigte
@@ -154,8 +151,7 @@ Die Krankenkasse, Berufsgenossenschaft oder Rentenversicherung holen sich ihre L
 
 ---
 
-## <a name="schaeden"></a>4. Welche Schäden sind erstattbar
-
+## 4. Welche Schäden sind erstattbar {#schaeden}
 Das deutsche Schadensersatzrecht erstattet **alle** durch den Unfall verursachten Schäden – sowohl Sach- als auch Personenschäden, mit zahlreichen Folgepositionen. Hier die vollständige Übersicht:
 
 ### Sachschäden
@@ -189,8 +185,7 @@ Das deutsche Schadensersatzrecht erstattet **alle** durch den Unfall verursachte
 
 ---
 
-## <a name="fristen"></a>5. Fristen – Verzug, Verjährung, Anerkenntnis
-
+## 5. Fristen – Verzug, Verjährung, Anerkenntnis {#fristen}
 ### Die 4-Wochen-Regulierungsfrist
 Bei klarer Haftung und vollständigen Unterlagen muss der Versicherer **innerhalb von 4 Wochen** regulieren. Danach tritt automatisch [Verzug nach § 286 BGB](/haftpflicht/verzug-bgb286) ein – mit Verzugszinsen und voll erstattbaren Anwaltskosten.
 
@@ -213,8 +208,7 @@ Anerkenntnis (§ 212 BGB) startet die Verjährung neu – gut für dich. Verglei
 
 ---
 
-## <a name="szenarien"></a>6. Standard-Unfall-Szenarien und ihre Quoten
-
+## 6. Standard-Unfall-Szenarien und ihre Quoten {#szenarien}
 In den allermeisten Verkehrsunfall-Konstellationen ist die Quote durch Anscheinsbeweis bereits klar – du musst nicht jedes Mal neu beweisen.
 
 ### Klare Anscheinsbeweis-Konstellationen (100 : 0)
@@ -237,8 +231,7 @@ In den allermeisten Verkehrsunfall-Konstellationen ist die Quote durch Anscheins
 
 ---
 
-## <a name="komplex"></a>7. Komplexe Konstellationen
-
+## 7. Komplexe Konstellationen {#komplex}
 Manche Unfälle weichen vom Standard ab und brauchen Spezial-Wissen:
 
 - **[Fahrerflucht](/haftpflicht/fahrerflucht)** – Verkehrsopferhilfe tritt ein
@@ -253,8 +246,7 @@ Manche Unfälle weichen vom Standard ab und brauchen Spezial-Wissen:
 
 ---
 
-## <a name="decoder"></a>8. Wie die Versicherung typisch agiert – und wie du dagegen vorgehst
-
+## 8. Wie die Versicherung typisch agiert – und wie du dagegen vorgehst {#decoder}
 Versicherer arbeiten mit standardisierten Brief-Vorlagen und Strategien. Für jede haben wir einen Decoder mit konkreter Antwort-Vorlage:
 
 | Versicherer-Brief / Strategie | Antwort-Decoder |
@@ -274,8 +266,7 @@ Versicherer arbeiten mit standardisierten Brief-Vorlagen und Strategien. Für je
 
 ---
 
-## <a name="aktionsplan"></a>9. Was du jetzt machst – Schritt-für-Schritt
-
+## 9. Was du jetzt machst – Schritt-für-Schritt {#aktionsplan}
 ### Phase 1: Akut (0–72 Stunden)
 1. Polizei, Foto-Dokumentation, Zeugen-Adressen sichern
 2. Ärztliche Vorstellung (auch wenn „okay" gefühlt)
@@ -307,8 +298,7 @@ Versicherer arbeiten mit standardisierten Brief-Vorlagen und Strategien. Für je
 
 ---
 
-## <a name="anwalt"></a>10. Wann Anwalt zwingend
-
+## 10. Wann Anwalt zwingend {#anwalt}
 ### Anwalt ist klar empfohlen bei:
 - **Jedem Personenschaden** – egal wie leicht. Spätfolgen häufiger als gedacht.
 - **Sachschaden über 1.500 €** – Differenz zur Versicherer-Bewertung typisch 15–40 %.
@@ -327,8 +317,7 @@ Bei unverschuldetem Unfall: **0 €** für dich. Anwaltskosten zahlt der gegneri
 
 ---
 
-## <a name="faq"></a>11. Häufige Fragen
-
+## 11. Häufige Fragen {#faq}
 **1. Wer zahlt nach Verkehrsunfall?**
 Bei unverschuldetem Unfall die gegnerische Haftpflichtversicherung. Alle Sach- und Personenschäden plus Anwaltskosten.
 
@@ -376,8 +365,7 @@ Pauschale Entschädigung 5.000–15.000 € für nahe Angehörige bei tödlichem
 
 ---
 
-## <a name="quellen"></a>12. Quellen-Verzeichnis
-
+## 12. Quellen-Verzeichnis {#quellen}
 ### Gesetze
 - **BGB** §§ 195, 199, 203, 212, 247, 249, 251, 253, 254, 280, 286, 288, 421, 426, 779, 781, 823, 828, 832, 833, 842, 843, 844, 1922 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
 - **StVG** §§ 7, 8, 11, 17, 18, 19a – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)

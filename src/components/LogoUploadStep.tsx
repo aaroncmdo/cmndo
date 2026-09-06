@@ -196,8 +196,8 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         <div className="text-sm text-[var(--brand-text-primary)]">
           <p className="font-semibold">Herzlichen Dank für Ihre Anzahlung!</p>
           <p className="text-xs text-claimondo-shield mt-1">
-            Letzter Schritt: Lade jetzt dein Logo hoch für dein eigenes Branding.
-            Die Farben werden automatisch aus deinem Logo extrahiert und auf dein
+            Letzter Schritt: Lade jetzt Ihr Logo hoch für Ihr eigenes Branding.
+            Die Farben werden automatisch aus Ihrem Logo extrahiert und auf Ihr
             gesamtes Portal angewendet.
           </p>
         </div>
@@ -270,11 +270,11 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           <div className="flex items-center gap-2">
             <SparklesIcon className="w-4 h-4 text-[var(--brand-text-secondary)]" />
             <p className="text-sm font-semibold text-[var(--brand-text-primary)]">
-              Stile aus deinem Logo
+              Stile aus Ihrem Logo
             </p>
           </div>
           <p className="text-[11px] text-claimondo-shield">
-            Fünf Variationen mit deinen Logo-Farben in unterschiedlichen Rollen. Klick wendet sofort an.
+            Fünf Variationen mit Ihren Logo-Farben in unterschiedlichen Rollen. Klick wendet sofort an.
           </p>
           <BrandPresetPicker
             presets={generateLogoPresets(extractedColors)}
@@ -291,7 +291,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
             </p>
           </div>
           <p className="text-[11px] text-claimondo-shield">
-            Kuratierte KFZ-Themes mit passender Schriftart. Du kannst später jederzeit ein eigenes Logo hochladen.
+            Kuratierte KFZ-Themes mit passender Schriftart. Sie können später jederzeit ein eigenes Logo hochladen.
           </p>
           <BrandPresetPicker onApply={handlePreset} />
         </div>
@@ -325,7 +325,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
       </div>
 
       <p className="text-[11px] text-[var(--brand-text-muted)] text-center">
-        Du kannst dein Logo jederzeit unter Profil → Branding ändern
+        Sie können Ihr Logo jederzeit unter Profil → Branding ändern
       </p>
     </div>
   )

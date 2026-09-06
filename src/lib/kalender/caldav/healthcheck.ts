@@ -179,8 +179,8 @@ async function pingAndUpdate(v: VerbindungRow): Promise<{ status: 'ok' | 'failed
 
       // SV-Task — empfaenger_user_id = profile_id (direkt aus der Row).
       await createLinkedTask({
-        titel: 'Deine Kalender-Verbindung ist unterbrochen',
-        beschreibung: `Bitte verbinde deinen Kalender neu unter Profil → Einstellungen → Kalender. Grund: ${errorMsg}`,
+        titel: 'Ihre Kalender-Verbindung ist unterbrochen',
+        beschreibung: `Bitte verbinde Ihren Kalender neu unter Profil → Einstellungen → Kalender. Grund: ${errorMsg}`,
         prioritaet: 'normal',
         typ: 'sv_kalender_verbindung_fehlgeschlagen',
         entity_type: 'gutachter',

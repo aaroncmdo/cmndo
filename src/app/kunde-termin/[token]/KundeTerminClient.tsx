@@ -59,7 +59,7 @@ export default function KundeTerminClient({
     startTransition(async () => {
       const res = await counterByToken(token, neuesDatum, grund.trim())
       if (res.success) {
-        setDoneMsg('Dein Vorschlag wurde übermittelt. Der Sachverständige meldet sich.')
+        setDoneMsg('Ihr Vorschlag wurde übermittelt. Der Sachverständige meldet sich.')
         setView('done')
       } else {
         setError(res.error ?? 'Aktion fehlgeschlagen')
@@ -150,7 +150,7 @@ export default function KundeTerminClient({
           <div className="space-y-3">
             <div>
               <label className="text-xs font-medium text-claimondo-navy block mb-1">
-                Dein Wunschtermin
+                Ihr Wunschtermin
               </label>
               <input
                 type="datetime-local"

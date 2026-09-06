@@ -27,7 +27,7 @@ export default function KalenderEinstellungenClient({
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
       <PageHeader
         title="Kalender"
-        description="Verbinde einen Kalender, damit wir bei Terminvorschlägen deine private Nicht-Verfügbarkeit berücksichtigen können."
+        description="Verbinde einen Kalender, damit wir bei Terminvorschlägen Ihre private Nicht-Verfügbarkeit berücksichtigen können."
         size="lg"
         useBranding
         leadingSlot={

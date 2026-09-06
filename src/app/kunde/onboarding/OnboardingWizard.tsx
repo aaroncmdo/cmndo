@@ -45,7 +45,7 @@ type PflichtDoc = PflichtdokumentStand
 // tatsaechlich gerenderten Steps liefert getOnboardingSteps(ctx) je Kunde.
 const STEPS = [
   { id: 'welcome', label: 'Willkommen' },
-  { id: 'fall', label: 'Dein Fall' },
+  { id: 'fall', label: 'Ihr Fall' },
   { id: 'termin', label: 'Termin' },
   { id: 'dokumente', label: 'Dokumente' },
   { id: 'fertig', label: 'Fertig' },
@@ -92,76 +92,76 @@ const LEGACY_DOKTYP_LABELS: Record<string, string> = {
 const DOC_INFO: Record<string, { warum: string; wo: string }> = {
   fahrzeugschein: {
     warum: 'Wir benötigen die Zulassungsbescheinigung Teil I (ZB1), um Halter, Kennzeichen und Fahrzeugdaten für das Gutachten und die Versicherung zu verifizieren.',
-    wo: 'Den Fahrzeugschein findest du im Fahrzeug (oft im Handschuhfach) oder bei deinen persönlichen Unterlagen. Beide Seiten als Foto reichen.',
+    wo: 'Den Fahrzeugschein finden Sie im Fahrzeug (oft im Handschuhfach) oder bei Ihren persönlichen Unterlagen. Beide Seiten als Foto reichen.',
   },
   fuehrerschein: {
     warum: 'Wir benötigen den Führerschein zur Identifikation des Fahrers zum Unfallzeitpunkt.',
-    wo: 'Deinen Führerschein hast du in der Regel bei dir — Vorder- und Rückseite als Foto reichen.',
+    wo: 'Ihren Führerschein haben Sie in der Regel bei Ihnen — Vorder- und Rückseite als Foto reichen.',
   },
   polizeibericht: {
     warum: 'Der Polizeibericht belegt den Unfallhergang gegenüber der gegnerischen Versicherung und beschleunigt die Regulierung erheblich.',
-    wo: 'Die polizeiliche Unfallmitteilung erhältst du direkt am Unfallort von der Polizei oder nachträglich bei der zuständigen Dienststelle (oft online anforderbar).',
+    wo: 'Die polizeiliche Unfallmitteilung erhalten Sie direkt am Unfallort von der Polizei oder nachträglich bei der zuständigen Dienststelle (oft online anforderbar).',
   },
   schadensfotos: {
     warum: 'Fotos aller Schadenstellen dokumentieren Ausmaß und Position — Grundlage für Kalkulation und spätere Beweisführung.',
     wo: 'Mach Fotos aus mehreren Perspektiven direkt am Fahrzeug — Nah- und Übersichtsaufnahmen helfen besonders.',
   },
   zeugenbericht: {
-    warum: 'Zeugenaussagen stärken deine Position bei strittiger Haftung und können die Regulierung deutlich beschleunigen.',
+    warum: 'Zeugenaussagen stärken Ihre Position bei strittiger Haftung und können die Regulierung deutlich beschleunigen.',
     wo: 'Der Zeuge kann den Bericht formlos schreiben oder unser Formular nutzen — wichtig sind Name, Adresse und Schilderung des Ablaufs.',
   },
   aerztliches_attest: {
-    warum: 'Ein ärztliches Attest dokumentiert deine Verletzungen und ist Grundlage für Schmerzensgeld und Heilbehandlungskosten.',
-    wo: 'Lass dir von deinem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
+    warum: 'Ein ärztliches Attest dokumentiert Ihre Verletzungen und ist Grundlage für Schmerzensgeld und Heilbehandlungskosten.',
+    wo: 'Lassen Sie sich von Ihrem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
   },
   diagnosebericht: {
     warum: 'Die ärztliche Diagnose konkretisiert Verletzungsart und Heilungsdauer — wichtig für Schmerzensgeld-Bemessung.',
-    wo: 'Den Bericht erhältst du von dem Arzt, der dich nach dem Unfall untersucht hat.',
+    wo: 'Den Bericht erhalten Sie von dem Arzt, der Sie nach dem Unfall untersucht hat.',
   },
   krankenhausbericht: {
     warum: 'Bei stationärer Behandlung belegt der Krankenhausbericht Schwere und Dauer der Verletzung.',
-    wo: 'Den Entlassungsbericht erhältst du vom Krankenhaus — oft auch nachträglich anforderbar.',
+    wo: 'Den Entlassungsbericht erhalten Sie vom Krankenhaus — oft auch nachträglich anforderbar.',
   },
   au_bescheinigung: {
     warum: 'Die Arbeitsunfähigkeitsbescheinigung belegt Verdienstausfall durch den Unfall.',
-    wo: 'Die AU-Bescheinigung bekommst du von deinem behandelnden Arzt — bei längerer AU mehrere Nachweise.',
+    wo: 'Die AU-Bescheinigung bekommen Sie von Ihrem behandelnden Arzt — bei längerer AU mehrere Nachweise.',
   },
   reparaturrechnungen_vorschaeden: {
     warum: 'Vorschäden müssen dokumentiert sein, damit der Gutachter den neuen Schaden korrekt bewerten kann. Ohne Nachweis können Vorschäden vom aktuellen Schaden abgezogen werden.',
-    wo: 'Die Rechnungen bekommst du von der Werkstatt, die den früheren Schaden repariert hat — oft auch nachträglich als Duplikat per E-Mail.',
+    wo: 'Die Rechnungen bekommen Sie von der Werkstatt, die den früheren Schaden repariert hat — oft auch nachträglich als Duplikat per E-Mail.',
   },
   vorschaden_bericht: {
     warum: 'Der SV-Bericht zu früheren Schäden grenzt Alt- von Neuschaden ab — schützt vor Kürzungen durch die Versicherung.',
-    wo: 'Falls du damals ein Gutachten hattest, liegt der Bericht bei deinen Unterlagen — oder anfordern beim damaligen Sachverständigen.',
+    wo: 'Falls Sie damals ein Gutachten hattest, liegt der Bericht bei Ihren Unterlagen — oder anfordern beim damaligen Sachverständigen.',
   },
   altschaden_fotos: {
     warum: 'Fotos eines früheren Schadens helfen dem Gutachter, den aktuellen Schaden sauber abzugrenzen. Ohne Vergleichsfotos kann die Versicherung den Vorschaden vom aktuellen abziehen.',
-    wo: 'Auf deinem Phone (Galerie / Cloud-Backup vom alten Datum), in alten WhatsApp-Chats oder bei der Werkstatt die damals repariert hat.',
+    wo: 'Auf Ihrem Phone (Galerie / Cloud-Backup vom alten Datum), in alten WhatsApp-Chats oder bei der Werkstatt die damals repariert hat.',
   },
   altes_gutachten: {
-    warum: 'Ein früheres Gutachten zum Vorschaden ist die beste Abgrenzung zum aktuellen Schaden. Der neue Sachverständige spart Zeit und du stärkst deine rechtliche Position erheblich.',
-    wo: 'In deinen Unterlagen vom letzten Schadensfall — oft als PDF per E-Mail vom damaligen Gutachter erhalten oder beim damaligen Anwalt anfordern.',
+    warum: 'Ein früheres Gutachten zum Vorschaden ist die beste Abgrenzung zum aktuellen Schaden. Der neue Sachverständige spart Zeit und Sie stärken Ihre rechtliche Position erheblich.',
+    wo: 'In Ihren Unterlagen vom letzten Schadensfall — oft als PDF per E-Mail vom damaligen Gutachter erhalten oder beim damaligen Anwalt anfordern.',
   },
   mietwagenrechnung: {
     warum: 'Die Mietwagenkosten werden von der gegnerischen Versicherung erstattet, wenn der Zeitraum und die Klasse nachgewiesen sind.',
-    wo: 'Die Rechnung erhältst du von der Mietwagenfirma — meist am Ende der Mietdauer per E-Mail.',
+    wo: 'Die Rechnung erhalten Sie von der Mietwagenfirma — meist am Ende der Mietdauer per E-Mail.',
   },
   freigabe_bank: {
-    warum: 'Bei finanzierten oder geleasten Fahrzeugen muss die Bank der Abrechnung zustimmen — ohne Freigabe darf die Versicherung nicht direkt an dich zahlen.',
-    wo: 'Die Freigabe erhältst du von deiner finanzierenden Bank oder Leasinggesellschaft — oft per Online-Formular oder E-Mail anforderbar.',
+    warum: 'Bei finanzierten oder geleasten Fahrzeugen muss die Bank der Abrechnung zustimmen — ohne Freigabe darf die Versicherung nicht direkt an Sie zahlen.',
+    wo: 'Die Freigabe erhalten Sie von Ihrer finanzierenden Bank oder Leasinggesellschaft — oft per Online-Formular oder E-Mail anforderbar.',
   },
   sa_vollmacht: {
-    warum: 'Mit der Sicherungsabtretung trittst du deine Ansprüche an Claimondo ab, damit wir die Regulierung direkt für dich führen können.',
-    wo: 'Das Dokument bekommst du von uns per E-Mail oder im Portal — du musst nur unterschreiben und hochladen.',
+    warum: 'Mit der Sicherungsabtretung treten Sie Ihre Ansprüche an Claimondo ab, damit wir die Regulierung direkt für Sie führen können.',
+    wo: 'Das Dokument bekommen Sie von uns per E-Mail oder im Portal — Sie müssen nur unterschreiben und hochladen.',
   },
 }
 const DOC_INFO_DEFAULT = {
-  warum: 'Dieses Dokument hilft uns, deinen Schaden schneller und vollständiger zu regulieren.',
-  wo: 'Bei Fragen, wo du das Dokument herbekommst, wende dich an deinen Betreuer — wir helfen gerne.',
+  warum: 'Dieses Dokument hilft uns, Ihren Schaden schneller und vollständiger zu regulieren.',
+  wo: 'Bei Fragen, wo Sie das Dokument bekommen, wenden Sie sich an Ihren Betreuer — wir helfen gerne.',
 }
 
 const STATUS_PHASES = [
-  { key: 'ersterfassung', label: 'Aufgenommen', description: 'Dein Fall wird vorbereitet' },
+  { key: 'ersterfassung', label: 'Aufgenommen', description: 'Ihr Fall wird vorbereitet' },
   { key: 'sv-termin', label: 'Gutachter-Termin', description: 'Termin wurde reserviert' },
   { key: 'begutachtung', label: 'Begutachtung', description: 'Gutachter erstellt das Gutachten' },
   { key: 'kanzlei', label: 'Kanzlei', description: 'Anwalt übernimmt die Abwicklung' },

@@ -52,7 +52,7 @@ export async function buildWerkstattMergeVars(args: {
     ...base,
     sv: {
       name: bester.vorname,
-      region: werkstatt.adresse_ort ?? 'deiner Region',
+      region: werkstatt.adresse_ort ?? 'Ihrer Region',
       photoUrl: bester.profilbild ?? undefined,
       // planeTerminOeffentlich projiziert keinen Kontakt/Telefon (leak-sicher) —
       // die SvVorstellung-Mail zeigt keinen direkten SV-Kontakt vor Terminvereinbarung.

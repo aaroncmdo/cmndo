@@ -32,7 +32,7 @@ export default function ReparaturKostenCard({
         <div className="flex items-center gap-2">
           <WalletIcon className="h-5 w-5 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">
-            {istSelbstzahler ? 'Diese Reparatur zahlst du selbst' : 'Kasko-Reparatur'}
+            {istSelbstzahler ? 'Diese Reparatur zahlen Sie selbst' : 'Kasko-Reparatur'}
           </h2>
         </div>
 
@@ -41,7 +41,7 @@ export default function ReparaturKostenCard({
             Du beauftragst die Reparatur als Selbstzahler.{' '}
             {kva != null
               ? `Voraussichtliche Kosten: ${formatEuro(kva)} (${kvaLabel}, laut Kostenvoranschlag). `
-              : 'Die Werkstatt erstellt dir zunächst einen Kostenvoranschlag. '}
+              : 'Die Werkstatt erstellt Ihnen zunächst einen Kostenvoranschlag. '}
             Der endgültige Betrag steht mit der Schlussrechnung der Werkstatt fest.
           </p>
         ) : (

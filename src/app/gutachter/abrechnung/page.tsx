@@ -253,7 +253,7 @@ export default async function AbrechnungPage() {
                 <p className="text-3xl font-bold text-claimondo-navy tabular-nums">
                   {anzahlungBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
                 </p>
-                <p className="text-claimondo-ondo text-xs mt-1">Du hast einmalig diesen Betrag als Anzahlung geleistet.</p>
+                <p className="text-claimondo-ondo text-xs mt-1">Sie haben einmalig diesen Betrag als Anzahlung geleistet.</p>
               </>
             ) : (
               <>
@@ -263,7 +263,7 @@ export default async function AbrechnungPage() {
             )}
             <p className="text-claimondo-ondo/70 text-[10px] mt-3 flex items-start gap-1">
               <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
-              <span>Die Verrechnung deiner Lead-Preise findest du in der Monatsabrechnung.</span>
+              <span>Die Verrechnung Ihrer Lead-Preise finden Sie in der Monatsabrechnung.</span>
             </p>
           </SectionCard>
 

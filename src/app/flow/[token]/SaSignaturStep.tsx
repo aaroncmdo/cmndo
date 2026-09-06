@@ -102,7 +102,7 @@ export default function SaSignaturStep({
     // Fängt die useOnlineStatus-Debounce-Race (Gate zeigt evtl. noch das Formular) und
     // schützt den geteilten Werkstatt-Intake-Kontext (kein Render-Gate).
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      setError('Die Beauftragung benötigt eine Internetverbindung. Bitte verbinde dich und versuche es erneut.')
+      setError('Die Beauftragung benötigt eine Internetverbindung. Bitte stellen Sie eine Verbindung her und versuchen Sie es erneut.')
       return
     }
     setSubmittingSA(true)

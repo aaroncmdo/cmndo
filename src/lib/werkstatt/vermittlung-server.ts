@@ -365,7 +365,7 @@ async function notifyAfterAssign(
   // (a) In-App-Mitteilung an den Kunden — nur wenn ein Account existiert.
   if (kundeUserId) {
     const inhalt = [
-      `Deine Werkstatt: ${w.name}`,
+      `Ihre Werkstatt: ${w.name}`,
       adresse ? `Adresse: ${adresse}` : null,
       w.telefon ? `Telefon: ${w.telefon}` : null,
     ]
@@ -376,7 +376,7 @@ async function notifyAfterAssign(
       empfaenger_id: kundeUserId,
       empfaenger_rolle: 'kunde',
       kategorie: 'update',
-      titel: 'Deine Reparatur-Werkstatt steht fest',
+      titel: 'Ihre Reparatur-Werkstatt steht fest',
       inhalt,
       kontext_typ: input.target === 'lead' ? 'lead' : 'fall',
       kontext_id: input.id,
@@ -384,7 +384,7 @@ async function notifyAfterAssign(
   }
 
   // (b) WhatsApp + Email an den Kunden — einziger Kanal fuer accountlose Leads.
-  // Wording bei Fremd-Vermittlung (Gutachter) "fuer dich organisiert".
+  // Wording bei Fremd-Vermittlung (Gutachter) "fuer Sie organisiert".
   if (kundeKontakt.telefon || kundeKontakt.email) {
     const { notifyKundeWerkstattVermittlung } = await import('@/lib/werkstatt/notify-kunde-vermittlung')
     await notifyKundeWerkstattVermittlung({
@@ -407,7 +407,7 @@ async function notifyAfterAssign(
       kategorie: 'update',
       titel: 'Neuer Reparaturauftrag',
       inhalt:
-        'Dir wurde über Claimondo ein Reparaturauftrag zugewiesen. Der Kunde meldet sich zur Terminabstimmung bei Dir.',
+        'Ihnen wurde über Claimondo ein Reparaturauftrag zugewiesen. Der Kunde meldet sich zur Terminabstimmung bei Ihnen.',
       kontext_typ: input.target === 'claim' ? 'fall' : 'lead',
       kontext_id: input.id,
     })

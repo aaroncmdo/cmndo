@@ -232,7 +232,7 @@ export async function GET(request: Request) {
         const ok = await nudgeKunde(
           claim,
           'keine-werkstatt',
-          'Für deine Reparatur fehlt noch die Werkstatt. Wähle jetzt eine Werkstatt in deinem Vorgang, damit es weitergeht.',
+          'Für Ihre Reparatur fehlt noch die Werkstatt. Wählen Sie jetzt eine Werkstatt in Ihrem Vorgang, damit es weitergeht.',
         )
         if (ok) {
           cohorts.keineWerkstatt += 1
@@ -252,7 +252,7 @@ export async function GET(request: Request) {
           claim,
           wUser,
           'Ein Kunde wartet seit über 48 Stunden auf die Bestätigung seines Reparatur-Wunschtermins. Bitte bestätige oder schlage einen neuen Termin vor.',
-          'Deine Werkstatt hat den Wunschtermin noch nicht bestätigt. Wir haken bei der Werkstatt nach — bei Fragen kannst du uns hier schreiben.',
+          'Ihre Werkstatt hat den Wunschtermin noch nicht bestätigt. Wir haken bei der Werkstatt nach — bei Fragen können Sie uns hier schreiben.',
         )
         if (ok) {
           cohorts.terminUnbestaetigt += 1
@@ -273,7 +273,7 @@ export async function GET(request: Request) {
         const ok = await nudgeKunde(
           claim,
           'termin-ueberfaellig',
-          'War deine Reparatur erfolgreich? Bitte bestätige den Abschluss in deinem Vorgang, damit wir alles Weitere für dich erledigen können.',
+          'War Ihre Reparatur erfolgreich? Bitte bestätigen Sie den Abschluss in Ihrem Vorgang, damit wir alles Weitere für Sie erledigen können.',
         )
         if (ok) {
           cohorts.terminUeberfaellig += 1

@@ -96,7 +96,7 @@ export default async function EinstellungenPage({
       href: '/gutachter/einstellungen/kalender',
       label: 'Kalender',
       description:
-        'Google, Apple iCloud oder anderer CalDAV-Server — Claimondo prüft deine Verfügbarkeit vor Terminvorschlägen.',
+        'Google, Apple iCloud oder anderer CalDAV-Server — Claimondo prüft Ihre Verfügbarkeit vor Terminvorschlägen.',
       status: kalenderStatus.label,
       statusTone: kalenderStatus.tone,
       icon: CalendarIcon,
@@ -114,7 +114,7 @@ export default async function EinstellungenPage({
       href: '/gutachter/einstellungen/embed',
       label: 'Embed-Widget & Anfragen',
       description:
-        'Binde das Monika-Widget auf deiner Website ein und sieh eingehende Anfragen direkt hier.',
+        'Binden Sie das Monika-Widget auf Ihrer Website ein und sehen Sie eingehende Anfragen direkt hier.',
       status: 'Öffnen',
       statusTone: 'gray',
       icon: Code2Icon,

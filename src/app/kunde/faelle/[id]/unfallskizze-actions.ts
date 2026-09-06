@@ -23,7 +23,7 @@ export async function meldeSkizzeKorrektur(
 ): Promise<{ ok: boolean; error?: string; neuGeneriert?: boolean }> {
   const text = korrektur.trim()
   if (!text) return { ok: false, error: 'Bitte beschreibe kurz, was nicht stimmt.' }
-  if (text.length > 1000) return { ok: false, error: 'Bitte fasse dich etwas kuerzer (max. 1000 Zeichen).' }
+  if (text.length > 1000) return { ok: false, error: 'Bitte fasse Sie etwas kuerzer (max. 1000 Zeichen).' }
 
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null

@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   // Kein "| Claimondo"-Suffix — das Layout-Template haengt es an (sonst doppelt im Tab).
   title: 'Als Sachverständiger registrieren',
   description:
-    'Registriere dich kostenlos als Kfz-Sachverständiger bei Claimondo. ' +
-    'Finde deinen bestehenden Eintrag oder lege ein neues Profil an.',
+    'Registriere Sie kostenlos als Kfz-Sachverständiger bei Claimondo. ' +
+    'Finde Ihren bestehenden Eintrag oder lege ein neues Profil an.',
 }
 
 export default async function SvRegistrierenPage({
@@ -31,7 +31,7 @@ export default async function SvRegistrierenPage({
             Als Sachverständiger registrieren
           </h1>
           <p className="mt-3 text-sm text-claimondo-shield">
-            Kostenlos starten — nach der Registrierung führt dich unser Onboarding in wenigen Minuten zur Freischaltung.
+            Kostenlos starten — nach der Registrierung führt Sie unser Onboarding in wenigen Minuten zur Freischaltung.
           </p>
         </div>
         <SvRegistrierenClient einladung={einladung} />

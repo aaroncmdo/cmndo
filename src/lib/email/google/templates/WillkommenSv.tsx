@@ -55,19 +55,19 @@ export function WillkommenSvEmail(props: Props) {
         <Heading>{salutation}!</Heading>
         <Paragraph>
           {props.von_admin_name
-            ? `${props.von_admin_name} hat deinen Account bei Claimondo angelegt.`
-            : 'Dein Account bei Claimondo wurde angelegt.'}
+            ? `${props.von_admin_name} hat Ihren Account bei Claimondo angelegt.`
+            : 'Ihr Account bei Claimondo wurde angelegt.'}
           {' '}Schön dass du dabei bist!
         </Paragraph>
 
         {isSubSv && (
           <Paragraph>
-            Du wurdest dem Büro <strong>{props.organisation_name}</strong> als{' '}
+            Sie wurden dem Büro <strong>{props.organisation_name}</strong> als{' '}
             {props.rolle_in_organisation ?? 'Mitarbeiter'} hinzugefügt.
           </Paragraph>
         )}
 
-        <Heading>Deine Konditionen</Heading>
+        <Heading>Ihre Konditionen</Heading>
         <InfoRow label="Paket" value={props.paket_name} />
         <InfoRow label="Kontingent" value={`${props.kontingent} Fälle / Monat`} />
         <InfoRow label="Radius" value={`${props.radius_km} km`} />
@@ -75,7 +75,7 @@ export function WillkommenSvEmail(props: Props) {
 
         <Heading>Nächste Schritte</Heading>
         <Paragraph>
-          <strong>1.</strong> Setze über den Button unten dein persönliches Passwort und melde dich mit deiner Email-Adresse (an die diese Mail geschickt wurde) an:
+          <strong>1.</strong> Setze über den Button unten Ihr persönliches Passwort und melden Sie sich mit Ihrer Email-Adresse (an die diese Mail geschickt wurde) an:
         </Paragraph>
         <div style={{ backgroundColor: email.color.surface, borderRadius: email.radius.md, padding: `${email.space(3)} ${email.space(4)}`, margin: `${email.space(3)} 0` }}>
           <InfoRow label="Login-Adresse" value={loginUrl} />
@@ -83,29 +83,29 @@ export function WillkommenSvEmail(props: Props) {
         {props.magicLink ? (
           <Note>Der Link zum Passwort-Setzen ist aus Sicherheitsgründen zeitlich begrenzt gültig. Ist er abgelaufen, nutze „Passwort vergessen" auf der Login-Seite.</Note>
         ) : (
-          <Note>Klicke auf der Login-Seite auf „Passwort vergessen", um dein Passwort zu setzen.</Note>
+          <Note>Klicken Sie auf der Login-Seite auf „Passwort vergessen", um Ihr Passwort zu setzen.</Note>
         )}
 
         <Paragraph>
-          <strong>2.</strong> Du siehst deine vollständigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
+          <strong>2.</strong> Sie sehen Ihre vollständigen Konditionen, können den Vertrag unterzeichnen und die Anzahlung leisten.
         </Paragraph>
 
         {!isSubSv && (
           <Paragraph>
-            <strong>3.</strong> Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet und du kannst Aufträge erhalten.
+            <strong>3.</strong> Sobald die Anzahlung eingegangen ist, ist Ihr Portal-Zugang freigeschaltet und Sie können Aufträge erhalten.
           </Paragraph>
         )}
 
         {isSubSv && (
           <Paragraph>
-            <strong>3.</strong> Dein Büro-Inhaber unterzeichnet den Vertrag stellvertretend und leistet die zentrale Anzahlung. Sobald das passiert ist, ist auch dein Portal-Zugang freigeschaltet.
+            <strong>3.</strong> Ihr Büro-Inhaber unterzeichnet den Vertrag stellvertretend und leistet die zentrale Anzahlung. Sobald das passiert ist, ist auch Ihr Portal-Zugang freigeschaltet.
           </Paragraph>
         )}
 
         <Button href={props.magicLink ?? loginUrl}>{props.magicLink ? 'Passwort setzen & einloggen' : 'Jetzt einloggen'}</Button>
 
         <Paragraph>
-          Bei Fragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
+          Bei Fragen erreichen Sie uns unter <strong>aaron.sprafke@claimondo.de</strong>.
         </Paragraph>
         <Paragraph>
           Viele Grüße,<br/>

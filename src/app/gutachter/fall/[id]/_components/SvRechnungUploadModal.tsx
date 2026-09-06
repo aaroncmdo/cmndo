@@ -57,7 +57,7 @@ export function SvRechnungUploadModal({
         <div className="space-y-1">
           <h2 className="text-heading-sm text-claimondo-navy font-semibold">Rechnung hochladen</h2>
           <p className="text-body-sm text-claimondo-ondo">
-            Lade deine Honorar- oder Gutachten-Rechnung hoch (PDF oder Bild, max. 10 MB). Der
+            Laden Sie Ihre Honorar- oder Gutachten-Rechnung hoch (PDF oder Bild, max. 10 MB). Der
             Kunde kann sie anschließend in seiner Fallakte herunterladen.
           </p>
         </div>

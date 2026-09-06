@@ -53,13 +53,12 @@ export function SvBasicPendingReview({
               </h1>
               {freigeschaltet ? (
                 <p className="mt-3 text-claimondo-navy/70 text-[15px] leading-relaxed">
-                  Dein Profil ist freigeschaltet — dein Portal ist bereit und du
-                  kannst ab sofort Aufträge erhalten.
+                  Ihr Profil ist freigeschaltet — Ihr Portal ist bereit und Sie können ab sofort Aufträge erhalten.
                 </p>
               ) : (
                 <p className="mt-3 text-claimondo-navy/70 text-[15px] leading-relaxed">
-                  Wir prüfen dein Profil und schalten dich innerhalb von 48 Stunden
-                  frei. Du bekommst eine E-Mail, sobald es losgeht.
+                  Wir prüfen Ihr Profil und schalten Sie innerhalb von 48 Stunden
+                  frei. Sie bekommen eine E-Mail, sobald es losgeht.
                 </p>
               )}
             </div>

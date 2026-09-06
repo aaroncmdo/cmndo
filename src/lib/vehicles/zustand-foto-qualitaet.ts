@@ -36,7 +36,7 @@ export function parseQualitaet(text: string): FotoQualitaet | null {
 }
 
 const SYSTEM =
-  'Du bewertest, wie gut ein Fahrzeugfoto fuer die KFZ-Schadenerkennung nutzbar ist — NICHT ob ein Schaden vorliegt. Kriterien: Schaerfe, Belichtung, Winkel, Abstand, Vollstaendigkeit der geforderten Perspektive.'
+  'Sie bewerten, wie gut ein Fahrzeugfoto fuer die KFZ-Schadenerkennung nutzbar ist — NICHT ob ein Schaden vorliegt. Kriterien: Schaerfe, Belichtung, Winkel, Abstand, Vollstaendigkeit der geforderten Perspektive.'
 
 /**
  * Fail-safe Vision-Call: bewertet EIN Foto. Kein Client / Fehler -> null.

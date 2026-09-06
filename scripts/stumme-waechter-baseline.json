@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-04T18:30:57.422Z",
+  "generatedAt": "2026-09-05T18:35:46.684Z",
   "count": 16,
   "eintraege": [
     "tests/e2e/flows/2fa-hardening-smoke.spec.ts::RUN_2FA_SMOKE",

@@ -66,7 +66,7 @@ export default function PrivatStopCard({
       </div>
 
       <p className="text-[11px] text-claimondo-ondo">
-        Wegpunkt aus deinem Kalender — keine Besichtigung.
+        Wegpunkt aus Ihrem Kalender — keine Besichtigung.
       </p>
 
       <div className="flex flex-col gap-2 pt-1">

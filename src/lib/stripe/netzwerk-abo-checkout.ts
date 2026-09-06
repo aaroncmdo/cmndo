@@ -78,7 +78,7 @@ export async function createNetzwerkAboCheckoutSession(
       .maybeSingle()
     const status = (abo as { status?: string | null } | null)?.status ?? null
     if (status === 'aktiv' || status === 'comped' || status === 'ueberfaellig') {
-      return { ok: false, error: 'Du bist bereits Netzwerkpartner — dein Abo verwaltest du über „Abo verwalten".' }
+      return { ok: false, error: 'Sie sind bereits Netzwerkpartner — Ihr Abo verwalten Sie über „Abo verwalten".' }
     }
 
     const preise = await ladeNetzwerkPreise()

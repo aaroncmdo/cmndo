@@ -70,7 +70,7 @@ export function PhoneLoginCard({ aktuellePhone }: { aktuellePhone: string | null
           <h3 className="text-sm font-semibold text-claimondo-navy">Telefon-Login</h3>
         </div>
         <p className="text-xs text-claimondo-ondo">
-          Melde dich künftig direkt mit deiner Telefonnummer an — ohne Passwort. Unabhängig von der
+          Melden Sie sich künftig direkt mit Ihrer Telefonnummer an — ohne Passwort. Unabhängig von der
           Zwei-Faktor-Authentifizierung.
         </p>
         <p className="text-xs text-claimondo-ondo mt-1">
@@ -123,8 +123,7 @@ export function PhoneLoginCard({ aktuellePhone }: { aktuellePhone: string | null
             {step === 'input' && (
               <>
                 <p className="text-xs text-claimondo-ondo">
-                  Wir senden einen 6-stelligen Code per SMS an deine Nummer. Nach der Bestätigung kannst
-                  du dich damit einloggen.
+                  Wir senden einen 6-stelligen Code per SMS an Ihre Nummer. Nach der Bestätigung können Sie sich damit einloggen.
                 </p>
                 <div>
                   <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">

@@ -70,6 +70,6 @@ describe('Kunden-Labels (labelByRole.kunde)', () => {
     expect(FALL_STATUS_DEFS['filmcheck'].labelByRole?.kunde).not.toBe(
       FALL_STATUS_DEFS['filmcheck'].label,
     )
-    expect(FALL_STATUS_DEFS['filmcheck'].labelByRole?.kunde).toBe('Wir prüfen dein Gutachten')
+    expect(FALL_STATUS_DEFS['filmcheck'].labelByRole?.kunde).toBe('Wir prüfen Ihr Gutachten')
   })
 })

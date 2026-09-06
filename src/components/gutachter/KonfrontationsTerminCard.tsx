@@ -106,8 +106,8 @@ export function KonfrontationsTerminCard({
       ) : (
         <>
           <p className="text-sm text-claimondo-navy">
-            Der Kunde wünscht deine Anwesenheit bei der Nachbesichtigung (Konfrontations-Termin
-            mit dem VS-Gutachter). Dieser Termin wird dir gesondert vergütet.
+            Der Kunde wünscht Ihre Anwesenheit bei der Nachbesichtigung (Konfrontations-Termin
+            mit dem VS-Gutachter). Dieser Termin wird Ihnen gesondert vergütet.
           </p>
 
           {terminVorschlaege && terminVorschlaege.length > 0 && (

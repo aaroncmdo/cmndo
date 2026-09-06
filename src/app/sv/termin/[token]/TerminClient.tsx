@@ -37,12 +37,12 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
     if (termin.status === 'bestaetigt') {
       icon = '✅'
       title = 'Termin steht'
-      message = `Dein Termin am ${datum} um ${uhrzeit} Uhr ist bestätigt.`
+      message = `Ihr Termin am ${datum} um ${uhrzeit} Uhr ist bestätigt.`
     } else if (termin.status === 'abgelehnt') {
       icon = '❌'
       title = 'Termin abgelehnt'
       const abDatum = termin.abgelehnt_am ? new Date(termin.abgelehnt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }) : ''
-      message = `Du hast diesen Termin${abDatum ? ` am ${abDatum}` : ''} abgelehnt. Claimondo wird einen neuen Gutachter zuweisen.`
+      message = `Sie haben diesen Termin${abDatum ? ` am ${abDatum}` : ''} abgelehnt. Claimondo wird einen neuen Gutachter zuweisen.`
     } else if (termin.status === 'abgesagt' || termin.status === 'storniert') {
       icon = '🚫'
       title = 'Termin storniert'
@@ -112,7 +112,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
     setLoading(false)
     setDoneSuccess(result.success)
     setDoneMessage(result.success
-      ? 'Dein Gegenvorschlag wurde übermittelt. Der Kunde wird benachrichtigt.'
+      ? 'Ihr Gegenvorschlag wurde übermittelt. Der Kunde wird benachrichtigt.'
       : result.error ?? 'Fehler beim Gegenvorschlag.')
     setView('done')
   }
@@ -131,7 +131,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
     <PageWrapper>
       <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-claimondo-border">
         <h1 className="text-lg font-semibold text-claimondo-navy mb-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-          Dein nächster Termin
+          Ihr nächster Termin
         </h1>
 
         <TerminInfoCard termin={termin} datum={datum} uhrzeit={uhrzeit} mapsUrl={mapsUrl} />
@@ -150,7 +150,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
         {/* SV-eigener Gegenvorschlag Status */}
         {isSvGegenvorschlag && termin.vorgeschlagenes_datum && (
           <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-2xl p-4 mb-4">
-            <p className="text-sm font-medium text-claimondo-navy">Du hast einen Gegenvorschlag gemacht</p>
+            <p className="text-sm font-medium text-claimondo-navy">Sie haben einen Gegenvorschlag gemacht</p>
             <p className="text-sm text-claimondo-shield">
               Vorgeschlagenes Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
@@ -163,8 +163,8 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
           <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-2xl px-4 py-3 mb-4">
             <p className="text-xs text-claimondo-shield">
               {isKundenGegenvorschlag
-                ? 'Der Kunde hat einen alternativen Termin vorgeschlagen. Du kannst annehmen, erneut gegenvorschlagen oder ablehnen.'
-                : 'Der Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn du ablehnen oder verschieben möchtest.'}
+                ? 'Der Kunde hat einen alternativen Termin vorgeschlagen. Sie können annehmen, erneut gegenvorschlagen oder ablehnen.'
+                : 'Der Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn Sie ablehnen oder verschieben möchtest.'}
             </p>
           </div>
         )}
@@ -192,7 +192,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
         {/* Ablehnen-View */}
         {view === 'ablehnen' && (
           <div className="space-y-3 mb-4">
-            <p className="text-sm text-claimondo-ondo">Möchtest du den Termin wirklich ablehnen?</p>
+            <p className="text-sm text-claimondo-ondo">Möchten Sie den Termin wirklich ablehnen?</p>
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
               className="w-full rounded-2xl border border-claimondo-border bg-claimondo-bg px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" rows={3} />
             <button onClick={handleAblehnen} disabled={loading}

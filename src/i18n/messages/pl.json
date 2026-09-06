@@ -5631,6 +5631,10 @@
         "eigenverantwortung": {
           "label": "Ja sam",
           "hint": "Sam spowodowałem wypadek."
+        },
+        "kein_gegner": {
+          "label": "Bez drugiego uczestnika",
+          "hint": "Grad, kuna, szyba, zwierzyna, kradzież lub wichura."
         }
       }
     },

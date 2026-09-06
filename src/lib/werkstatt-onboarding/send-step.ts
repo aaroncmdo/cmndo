@@ -35,12 +35,12 @@ function abmeldeUrl(email: string): string {
 /**
  * Betreff-Merge: dieselben SV-Platzhalter wie im Body (Templates .replace()n sie im Text).
  * Der Betreff kommt verbatim aus steps.betreff (Spec §5.3) — die sv_vorstellung-Zeile
- * "Dein Gutachter in [Region]: [Gutachter-Name]" wuerde sonst un-substituiert rausgehen.
+ * "Ihr Gutachter in [Region]: [Gutachter-Name]" wuerde sonst un-substituiert rausgehen.
  * Harmlos fuer die 5 anderen Betreffe (keine Platzhalter -> keine Ersetzung).
  */
 function substituiereBetreff(betreff: string, merge: WerkstattMergeVars): string {
   return betreff
-    .replace('[Region]', merge.sv?.region ?? 'deiner Region')
+    .replace('[Region]', merge.sv?.region ?? 'Ihrer Region')
     .replace('[Gutachter-Name]', merge.sv?.name ?? '')
 }
 

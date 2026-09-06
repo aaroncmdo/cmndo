@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
     .select('id')
     .single()
 
-  // AAR-939 (embed-B WA-Inbound): "Kam dein Gutachter?" per WhatsApp.
+  // AAR-939 (embed-B WA-Inbound): "Kam Ihr Gutachter?" per WhatsApp.
   // Antwortet der Kunde JA/NEIN auf den Resolution-Ping (Cron §1.3), loesen wir den
   // UEBERFAELLIGEN nur_gutachter-Termin direkt auf — portal-frei. Muss VOR der
   // (zukunfts-bezogenen) Buchungs-Bestaetigung stehen + frueh-return-sauber, damit

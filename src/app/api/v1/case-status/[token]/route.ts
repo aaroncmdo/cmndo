@@ -66,7 +66,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
         ok: false,
         error: 'not_found',
         hinweis:
-          'Kein Fall zu dieser Referenz gefunden. Bitte prüfe die Referenz aus deinem persönlichen Claimondo-Link (per WhatsApp erhalten).',
+          'Kein Fall zu dieser Referenz gefunden. Bitte prüfen Sie die Referenz aus Ihrem persönlichen Claimondo-Link (per WhatsApp erhalten).',
       },
       404,
     )
@@ -99,7 +99,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ token: s
       ok: true,
       status: coarseKundeStatus(opStatus),
       hinweis:
-        'Grober Bearbeitungsstand. Details + nächste Schritte zeigt dein persönlicher Claimondo-Link (WhatsApp); bei Rückfragen melde dich direkt bei Claimondo.',
+        'Grober Bearbeitungsstand. Details + nächste Schritte zeigt Ihr persönlicher Claimondo-Link (WhatsApp); bei Rückfragen melden Sie sich direkt bei Claimondo.',
     },
     200,
   )

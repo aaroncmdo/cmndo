@@ -142,8 +142,8 @@ export function FlowQualiStep({
   if (phase === 'selbstzahler') {
     return (
       <div className="max-w-md text-center">
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">Wir richten deinen Vorgang ein…</h1>
-        <p className="text-claimondo-navy/70">Gleich findest du eine passende Werkstatt in deiner Nähe.</p>
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">Wir richten Ihren Vorgang ein…</h1>
+        <p className="text-claimondo-navy/70">Gleich finden Sie eine passende Werkstatt in Ihrer Nähe.</p>
       </div>
     )
   }
@@ -182,7 +182,7 @@ export function FlowQualiStep({
             className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
           >
             <span className="block font-semibold text-claimondo-navy">Nein, ich zahle die Reparatur selbst</span>
-            <span className="block text-sm text-claimondo-navy/60">Wir finden dir eine passende Werkstatt.</span>
+            <span className="block text-sm text-claimondo-navy/60">Wir finden Ihnen eine passende Werkstatt.</span>
           </button>
         </div>
       </div>

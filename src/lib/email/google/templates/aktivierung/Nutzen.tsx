@@ -12,7 +12,7 @@ import type { CopyFor } from './copy-schemas'
 type Props = { copy: CopyFor<'nutzen'>; merge: WerkstattMergeVars }
 
 export function subject(copy: CopyFor<'nutzen'>, merge: WerkstattMergeVars): string {
-  return `Das bringt dir Claimondo, ${merge.werkstattName}`
+  return `Das bringt Ihnen Claimondo, ${merge.werkstattName}`
 }
 
 export function NutzenEmail({ copy, merge }: Props) {

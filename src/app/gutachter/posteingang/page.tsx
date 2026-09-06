@@ -81,7 +81,7 @@ export default async function PosteingangPage({
       currentUserId={user.id}
       istStaff={true}
       initialClaimId={faelle.find(f => f.fall_id === params.fall)?.id ?? null}
-      emptyHint="Noch keine Kunden-Nachrichten. Sobald ein Fall zugewiesen ist, kannst du hier mit dem Kunden kommunizieren."
+      emptyHint="Noch keine Kunden-Nachrichten. Sobald ein Fall zugewiesen ist, können Sie hier mit dem Kunden kommunizieren."
     />
   )
 }

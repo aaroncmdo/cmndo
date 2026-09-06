@@ -1,5 +1,17 @@
 import { describe, it, expect } from 'vitest'
-import { findeSchalter, hatFallback, wirdGesetzt, scanne, diffBaseline } from './stumme-waechter-scan.mjs'
+import {
+  findeSchalter,
+  hatFallback,
+  wirdGesetzt,
+  scanne,
+  diffBaseline,
+  ohneKommentare,
+  nenntDatei,
+  ruftNpmKey,
+  erreichbareNpmKeys,
+  skripteOhneAufrufer,
+  KEIN_AUFRUFER,
+} from './stumme-waechter-scan.mjs'
 
 const spec = (inhalt) => [{ datei: 'tests/e2e/flows/x.spec.ts', inhalt }]
 
@@ -106,5 +118,102 @@ describe('diffBaseline', () => {
       { datei: 'b.spec.ts', schalter: 'RUN_G' },
     ]
     expect(diffBaseline(treffer, ['a.spec.ts::RUN_G'])).toEqual(['b.spec.ts::RUN_G'])
+  })
+})
+
+// ---------------------------------------------------------------------------------------------
+// Achse 2: Pruefskript ohne Aufrufer
+
+describe('ohneKommentare', () => {
+  it('entfernt YAML-Kommentarzeilen und Zeilenend-Kommentare', () => {
+    expect(ohneKommentare('  # Siehe scripts/check-x.mjs\n  run: npm run check:y # ratchet')).toBe(
+      '  \n  run: npm run check:y ',
+    )
+  })
+
+  it('laesst ein # ohne Leerraum davor stehen (kein Kommentar)', () => {
+    expect(ohneKommentare('run: echo PR#5862')).toBe('run: echo PR#5862')
+  })
+})
+
+describe('nenntDatei', () => {
+  it('trifft den Dateinamen mit Pfad und Flags', () => {
+    expect(nenntDatei('check-x.mjs', 'run: node --env-file=.env.local scripts/check-x.mjs --ratchet')).toBe(true)
+  })
+
+  it('⭐ trifft NICHT als Teilstring eines laengeren Namens', () => {
+    // check-rls.mjs darf nicht in check-rls-policies.mjs "gefunden" werden — das wuerde
+    // ein unverdrahtetes Skript VERSTECKEN.
+    expect(nenntDatei('check-rls.mjs', 'run: node scripts/check-rls-policies.mjs')).toBe(false)
+    expect(nenntDatei('check-x.mjs', 'run: node scripts/check-x-y.mjs')).toBe(false)
+  })
+})
+
+describe('ruftNpmKey', () => {
+  it('trifft `npm run key`, mit `--` Argumenten und mit --silent', () => {
+    expect(ruftNpmKey('check:x', 'run: npm run check:x -- --ratchet')).toBe(true)
+    expect(ruftNpmKey('check:x', 'run: npm run --silent check:x')).toBe(true)
+  })
+
+  it('⭐ trifft NICHT den Praefix eines laengeren Keys', () => {
+    expect(ruftNpmKey('check:rls', 'run: npm run check:rls-policies -- --ratchet')).toBe(false)
+  })
+
+  it('trifft nicht die blosse Nennung ohne `npm run`', () => {
+    expect(ruftNpmKey('check:x', 'siehe check:x in package.json')).toBe(false)
+  })
+})
+
+describe('erreichbareNpmKeys', () => {
+  it('loest npm-Keys transitiv ueber ihre Kommandos auf', () => {
+    const npm = { 'check:all': 'npm run check:a && npm run check:b', 'check:a': 'node scripts/check-a.mjs', 'check:b': 'node scripts/check-b.mjs', 'check:c': 'node scripts/check-c.mjs' }
+    const erreicht = erreichbareNpmKeys(npm, ['run: npm run check:all'])
+    expect([...erreicht].sort()).toEqual(['check:a', 'check:all', 'check:b'])
+  })
+})
+
+describe('skripteOhneAufrufer', () => {
+  const npm = {
+    'check:a': 'node scripts/check-a.mjs',
+    'check:b': 'node --env-file=.env.local scripts/check-b.mjs',
+    'check:rls': 'node scripts/check-rls.mjs',
+    'check:rls-policies': 'node scripts/check-rls-policies.mjs',
+  }
+  const skripte = ['scripts/check-a.mjs', 'scripts/check-b.mjs', 'scripts/check-c.mjs', 'scripts/check-rls.mjs', 'scripts/check-rls-policies.mjs']
+
+  it('meldet das Skript, das weder per npm-Key noch per Dateiname aufgerufen wird', () => {
+    const wf = ['run: npm run check:a -- --ratchet\nrun: node scripts/check-b.mjs\nrun: npm run check:rls-policies -- --ratchet']
+    expect(skripteOhneAufrufer(skripte, npm, wf)).toEqual([
+      { datei: 'scripts/check-c.mjs', schalter: KEIN_AUFRUFER },
+      { datei: 'scripts/check-rls.mjs', schalter: KEIN_AUFRUFER },
+    ])
+  })
+
+  it('zaehlt den Aufruf per Dateiname (auch mit --env-file) — die Sicherheits-Ratchets laufen so', () => {
+    // Genau hier lag der Messfehler der Abnahme-Session: nur nach npm-Keys gesucht → die
+    // per Dateiname aufgerufenen RLS-/Grant-Ratchets galten faelschlich als unverdrahtet.
+    expect(skripteOhneAufrufer(['scripts/check-b.mjs'], npm, ['run: node --env-file=.env.local scripts/check-b.mjs'])).toEqual([])
+  })
+
+  it('⭐ zaehlt eine Nennung im YAML-Kommentar NICHT als Aufruf', () => {
+    expect(skripteOhneAufrufer(['scripts/check-c.mjs'], npm, ['# Siehe scripts/check-c.mjs + AGENTS.md'])).toEqual([
+      { datei: 'scripts/check-c.mjs', schalter: KEIN_AUFRUFER },
+    ])
+  })
+
+  it('respektiert die Allowlist', () => {
+    expect(skripteOhneAufrufer(['scripts/check-c.mjs'], npm, [], { 'scripts/check-c.mjs': 'manuell' })).toEqual([])
+  })
+
+  it('erkennt den Aufruf ueber einen transitiven npm-Key', () => {
+    const npm2 = { 'check:all': 'npm run check:a', 'check:a': 'node scripts/check-a.mjs' }
+    expect(skripteOhneAufrufer(['scripts/check-a.mjs'], npm2, ['run: npm run check:all'])).toEqual([])
+  })
+
+  it('liefert stabil sortiert', () => {
+    expect(skripteOhneAufrufer(['scripts/check-z.mjs', 'scripts/check-a.mjs'], {}, []).map((t) => t.datei)).toEqual([
+      'scripts/check-a.mjs',
+      'scripts/check-z.mjs',
+    ])
   })
 })

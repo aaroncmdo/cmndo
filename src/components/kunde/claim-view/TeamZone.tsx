@@ -69,11 +69,11 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
 
   return (
     <Card p={4} className="space-y-3">
-      <h2 className="text-body-sm font-semibold text-claimondo-navy">Dein Team</h2>
+      <h2 className="text-body-sm font-semibold text-claimondo-navy">Ihr Team</h2>
       {kb && (
         <KontaktRow
           name={kb.anzeigename || kb.name}
-          rolle="Dein Betreuer"
+          rolle="Ihr Betreuer"
           telefon={kb.telefon}
           avatarUrl={kb.avatarUrl}
           beschreibung={kb.profilbeschreibung}
@@ -82,7 +82,7 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
       {sv && (
         <KontaktRow
           name={sv.anzeigename || sv.name}
-          rolle="Dein Gutachter"
+          rolle="Ihr Gutachter"
           telefon={sv.telefon}
           avatarUrl={sv.avatarUrl}
           verifiziert={sv.verifiziert}
@@ -93,7 +93,7 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
       {werkstatt && (
         <KontaktRow
           name={werkstatt.name}
-          rolle="Deine Werkstatt"
+          rolle="Ihre Werkstatt"
           telefon={werkstatt.telefon}
           avatarUrl={null}
           beschreibung={werkstattAdresse}
@@ -103,7 +103,7 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
       {kanzlei && (
         <KontaktRow
           name={kanzlei.row?.name || kanzlei.ansprechpartnerName || 'Kanzlei'}
-          rolle="Deine Kanzlei"
+          rolle="Ihre Kanzlei"
           telefon={kanzlei.ansprechpartnerTelefon}
           avatarUrl={null}
           beschreibung={

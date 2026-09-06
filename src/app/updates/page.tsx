@@ -32,7 +32,7 @@ export default async function UpdatesPage() {
     <div className="mx-auto max-w-2xl px-4 py-6">
       <h1 className="text-heading-md font-bold text-claimondo-navy mb-1">Updates</h1>
       <p className="text-sm text-claimondo-ondo mb-4">
-        Deine offene Worklist („Braucht dich") und der Verlauf — filterbar nach Typ.
+        Ihre offene Worklist („Braucht Sie") und der Verlauf — filterbar nach Typ.
       </p>
       <UpdatesWorklist actionItems={actionItems} infoItems={infoItems} />
     </div>

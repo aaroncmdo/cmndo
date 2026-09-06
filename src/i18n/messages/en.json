@@ -5631,6 +5631,10 @@
         "eigenverantwortung": {
           "label": "Myself",
           "hint": "I caused the accident myself."
+        },
+        "kein_gegner": {
+          "label": "No other party involved",
+          "hint": "Hail, marten damage, glass, wildlife, theft or storm."
         }
       }
     },

@@ -85,7 +85,7 @@ export default async function ProfilPage() {
           icon={<Code2Icon style={{ width: 18, height: 18 }} />}
         >
           <p className="text-sm text-claimondo-ondo">
-            Binde das Monika-Widget auf deiner Website ein und sieh deine Anfragen — direkt in deinen Einstellungen.
+            Binden Sie das Monika-Widget auf Ihrer Website ein und sehen Sie Ihre Anfragen — direkt in Ihren Einstellungen.
           </p>
         </SectionCard>
       </Link>

@@ -163,7 +163,7 @@ export default function TwoFaClient({
 
   const beschreibung =
     phase === 'phone'
-      ? 'Richte deine Anmeldung per SMS-Code ein. Wir senden dir einen 6-stelligen Code an deine Telefonnummer.'
+      ? 'Richte Ihre Anmeldung per SMS-Code ein. Wir senden Ihnen einen 6-stelligen Code an Ihre Telefonnummer.'
       : versandZiel
         ? `Wir haben einen SMS-Code an ${versandZiel} gesendet.`
         : 'SMS-Code wird gesendet …'

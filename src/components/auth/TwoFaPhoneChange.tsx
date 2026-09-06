@@ -91,7 +91,7 @@ export function TwoFaPhoneChange({
       const loginAus = sync.ok && !sync.phoneLoginAktiviert
       if (loginAus) {
         setLoginHinweis(
-          'Der zusätzliche Login per Telefonnummer wurde nicht aktiviert — diese Nummer ist möglicherweise bereits einem anderen Konto zugeordnet. Deine SMS-2FA funktioniert normal.',
+          'Der zusätzliche Login per Telefonnummer wurde nicht aktiviert — diese Nummer ist möglicherweise bereits einem anderen Konto zugeordnet. Ihre SMS-2FA funktioniert normal.',
         )
       }
       // Modal nach kurzer Zeit schließen + Page refreshen via reload
@@ -157,7 +157,7 @@ export function TwoFaPhoneChange({
                   <p className="text-xs text-claimondo-ondo">
                     Wir senden einen 6-stelligen Code per SMS an die neue Nummer.
                     Erst nach erfolgreicher Bestätigung wird die Nummer
-                    übernommen — deine aktuelle Nummer bleibt bis dahin gültig.
+                    übernommen — Ihre aktuelle Nummer bleibt bis dahin gültig.
                   </p>
                   <div>
                     <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">

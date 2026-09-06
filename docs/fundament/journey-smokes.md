@@ -17,7 +17,7 @@
 | **J2** Meldung alle Kanäle | `lead-to-fall` · `flowlink-kunde` · `smoke-mini-wizard-strecke` · `golden-path-finder-prod` | teil (Wizard/FlowLink/Finder; Embed/API/Karte offen) | gemischt | Name |
 | **J3** Unterschriften SA/Vollmacht | eingebettet in `golden-path-completion-prod` · `smoke-vollstrecke` · `smoke-final-vollstaendig` | teil (kein **dediziertes** SA/Vollmacht-Spec) | prod-optin | ✅ grep |
 | **J4** Reparatur-Weg | `reparatur-weg-e2e-smoke` · `reparatur-funnel-abschluss-smoke` · `reparatur-weg-kva-betrag-pflicht` · `reparatur-weg-kva-ablehnung-loop` · `kasko-reparatur-phase-smoke` (Seed: `reparatur-weg-e2e-seed.mjs`) | **voll** (KVA→Freigabe/Ablehnung→Schlussrechnung→Abschluss) | prod-optin | ✅ gelesen |
-| **J5** Kasko/Selbstzahler | `kasko-reparatur-phase-smoke` | teil (Abrechnungsweg-Weiche selbst nicht dediziert) | prod-optin | Name |
+| **J5** Kasko/Selbstzahler | `kasko-reparatur-phase-smoke` · `kasko-werkstattbindung-abnahme-prod` (Delta 04.09.: Tariffrage → gebunden/frei/unklar/Freitext über FlowLink, Embed, Kunde-Portal, Dispatch-Override, Admin; im Gate nur T1+T2 FlowLink, nightly alle 9) | teil (Abrechnungsweg-Weiche selbst nicht dediziert; Werkstattbindung voll) | prod-optin / Gate T1+T2 gegen staging | ✅ gelaufen 05.09. (prod) |
 | **J6** Kanzlei-Übergabe | eingebettet in `golden-path-completion-prod` · `smoke-staging-vollstaendig` | teil (kein dediziertes Kanzlei-Übergabe-Spec) | prod-optin/staging | ✅ grep |
 | **J7** Storno/DSGVO | **— keine —** | **LÜCKE** | — | ✅ grep (bestätigt leer) |
 | **J8** Onboarding je Rolle | `onboarding-pflichtdok` · `partner-onboarding-termin-smoke` · `2fa-enroll-smoke` | teil (SV/Werkstatt/Kanzlei-Onboarding nicht end-to-end) | gemischt | Name |

@@ -134,6 +134,11 @@ function systemPrompt(): string {
     '- Nenne KEINE Statistiken oder Zahlen, die du nicht belegen kannst.',
     '',
     'Inhaltliche Regeln:',
+    // Das "Du" weiter oben richtet sich an DICH, das Modell. Der erzeugte Text ist etwas anderes:
+    // ohne diese Zeile waehlt das Modell die Anrede frei und produziert laufend neue Du-Texte,
+    // waehrend Portal und Marketing durchgehend siezen.
+    '- ANREDE: Der erzeugte Text siezt den Leser durchgehend ("Sie", "Ihr Fahrzeug"). Niemals duzen —',
+    '  das gilt besonders fuer die FAQ-Antworten, die der Nutzer direkt liest.',
     '- Alles muss extern überprüfbar sein: amtliche Stadtbezirke, tatsächlich vorhandene Autobahnen/Bundesstraßen.',
     '- Bist du bei einer Angabe unsicher, lass sie weg. Unvollständig ist besser als falsch.',
     '- Die lokalen FAQ müssen ORTSSPEZIFISCH sein. Was auf jeder Stadtseite Deutschlands stehen könnte, gehört nicht hierher.',

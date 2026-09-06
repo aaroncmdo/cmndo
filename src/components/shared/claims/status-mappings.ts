@@ -119,7 +119,7 @@ export const CLAIM_STATUS: Record<ClaimStatus, ClaimStatusMapping> = {
   },
   an_externe_kanzlei_uebergeben: {
     label:        'An externe Kanzlei',
-    labelKunde:   'An deine Kanzlei übergeben',
+    labelKunde:   'An Ihre Kanzlei übergeben',
     tone:         'brand',
     icon:         ScaleIcon,
     isEndzustand: true,

@@ -134,7 +134,11 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           (fixed bottom-4); zwei feste Leisten am unteren Rand wuerden sich
           gegenseitig verdecken. Auf Mobil fuehren Anker-Block und Fusszeile
           zum Guide. */}
-      <GuidePopover mobilBand={false} cluster={a.cluster ?? null} />
+      {/* mobilBand: seit 06.09.2026 wieder an (Default `true`). Vorher stand hier `false`,
+          und zusammen mit dem Mobil-Riegel im Ausloeser kam auf dem Handy nie etwas — das
+          fertig gebaute Band war doppelt unerreichbar. Es ist eine Leiste am unteren Rand
+          (`md:hidden`), kein Overlay; der Dialog bleibt per `istDesktop` mobil ungemountet. */}
+      <GuidePopover cluster={a.cluster ?? null} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>
