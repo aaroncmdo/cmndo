@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "build:embed": "node scripts/build-monika.mjs",
+    "build:guide-teaser": "node scripts/build-guide-teaser.mjs",
     "build:embed:login": "node scripts/build-login-embed.mjs",
     "check:anon-reachability": "node --env-file=.env.local scripts/check-anon-reachability.mjs",
     "check:anon-sensitive-grants": "node --env-file=.env.local scripts/check-anon-sensitive-grants.mjs",

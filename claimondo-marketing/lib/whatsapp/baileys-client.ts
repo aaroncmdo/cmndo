@@ -189,3 +189,96 @@ export async function getBaileysHealth(): Promise<
     return { ok: false, error: err instanceof Error ? err.message : 'unknown' }
   }
 }
+
+/**
+ * Ein Dokument senden — der Unfallguide als DATEI im Chat, nicht als Link.
+ *
+ * Aaron am 06.09.2026: „der guide soll per whatsapp versendet werden."
+ * Bis dahin ging nur Text; der Kunde bekam einen Link, und die Datei selbst
+ * reiste ausschliesslich per E-Mail — die aber optional ist. Wer nur eine
+ * Telefonnummer hinterliess, bekam den Guide nie als Datei.
+ *
+ * ⚠ Die Datei geht als Base64 IM RUMPF an den Dienst, nicht als URL. Eine URL
+ * waere weniger Nutzlast, wuerde den Dienst aber zu einem Abrufer beliebiger
+ * Adressen machen (SSRF). Der Rumpf ist dort auf 1 MB begrenzt; der Guide misst
+ * rund 200 KB, als Base64 etwa 270 KB.
+ *
+ * Der Zeitrahmen ist grosszuegiger als beim Text (30 s statt 10): der Dienst
+ * laedt die Datei zu WhatsApp hoch, bevor er antwortet.
+ *
+ * ⚠ Diese Datei ist die MARKETING-Kopie des Clients. Das Portal hat unter
+ * `src/lib/whatsapp/` eine eigene, die schon vorher abwich — dort gibt es
+ * keinen Aufrufer fuer den Dokumentversand, deshalb steht er bewusst nur hier.
+ */
+export async function sendWhatsAppDocument(
+  phone: string,
+  datei: { inhalt: Buffer | Uint8Array; dateiname: string; mimetype: string },
+  beschriftung?: string,
+): Promise<SendResult> {
+  const base = getBaseUrl()
+  const token = getAuthToken()
+  if (!token) {
+    return { ok: false, error: 'BAILEYS_AUTH_TOKEN missing', code: 'config_missing' }
+  }
+  if (!phone || phone.trim().length < 6) {
+    return { ok: false, error: 'phone too short', code: 'invalid_phone' }
+  }
+  if (!datei?.inhalt || datei.inhalt.length === 0) {
+    return { ok: false, error: 'empty document', code: 'send_failed' }
+  }
+
+  const ctrl = new AbortController()
+  const timeout = setTimeout(() => ctrl.abort(), 30000)
+  try {
+    const res = await fetch(`${base}/send-document`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Baileys-Token': token,
+      },
+      body: JSON.stringify({
+        phone,
+        fileName: datei.dateiname,
+        mimetype: datei.mimetype,
+        dataBase64: Buffer.from(datei.inhalt).toString('base64'),
+        ...(beschriftung ? { caption: beschriftung } : {}),
+      }),
+      signal: ctrl.signal,
+      cache: 'no-store',
+    })
+    clearTimeout(timeout)
+
+    if (res.status === 503) {
+      return { ok: false, error: 'baileys not connected', code: 'baileys_not_connected' }
+    }
+    if (res.status === 404) {
+      return { ok: false, error: 'recipient not on whatsapp', code: 'recipient_not_on_whatsapp' }
+    }
+    if (res.status === 400 || res.status === 413) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string }
+      return { ok: false, error: body?.error ?? 'invalid request', code: 'send_failed' }
+    }
+    if (!res.ok) {
+      return { ok: false, error: `baileys returned ${res.status}`, code: 'send_failed' }
+    }
+
+    const data = (await res.json()) as {
+      message_id?: string | null
+      jid?: string
+      timestamp?: string
+    }
+    return {
+      ok: true,
+      messageId: data.message_id ?? null,
+      jid: data.jid ?? '',
+      timestamp: data.timestamp ?? new Date().toISOString(),
+    }
+  } catch (err) {
+    clearTimeout(timeout)
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'unknown',
+      code: 'send_failed',
+    }
+  }
+}

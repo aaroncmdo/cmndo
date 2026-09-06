@@ -4764,5 +4764,104 @@
     "cta_h": "Wypadek nie z Twojej winy?",
     "cta_p": "Sprawdź w dwie minuty, co Ci przysługuje – bezpłatnie i bez zobowiązań.",
     "cta_btn": "Zamów bezpłatne oddzwonienie"
+  },
+  "unfallguide": {
+    "meta": {
+      "titel": "Unfallguide: co przysługuje po wypadku nie z własnej winy",
+      "beschreibung": "Bezpłatny 6-stronicowy przewodnik: jakie roszczenia przysługują, sześć błędów, które drogo kosztują, co obowiązuje przy szkodzie całkowitej i jak odpowiedzieć, gdy ubezpieczyciel obniża wypłatę."
+    },
+    "kopf": {
+      "eyebrow": "Bezpłatny przewodnik",
+      "h1_plain": "Większość poszkodowanych żąda mniej,",
+      "h1_accent": "niż im przysługuje.",
+      "intro": "Na sześciu stronach znajdzie Pan/Pani to, czego można żądać po wypadku nie z własnej winy, jakie błędy drogo kosztują i co zrobić, gdy ubezpieczyciel obniża wypłatę.",
+      "bild_alt": "Strona tytułowa przewodnika Unfallguide od Claimondo",
+      "punkt_1": "6 stron, do przeczytania w dziesięć minut",
+      "punkt_2": "Z paragrafami i sygnaturami akt, nie z gołosłownymi twierdzeniami",
+      "punkt_3": "Do przeczytania od razu, bez czekania"
+    },
+    "inhalt": {
+      "h2": "Co jest w środku",
+      "s1_titel": "Jaka jest Pana/Pani sytuacja",
+      "s1_text": "Co oznacza wypadek nie z własnej winy i dlaczego nic za to Pan/Pani nie płaci.",
+      "s2_titel": "Przysługujące roszczenia, z kwotami",
+      "s2_text": "Naprawa, własny rzeczoznawca, adwokat, utrata możliwości użytkowania, utrata wartości, wynajem auta. Z typowymi widełkami.",
+      "s3_titel": "Sześć błędów, które drogo kosztują",
+      "s3_text": "Oraz pięć zdań, które padają przez telefon: co się za nimi kryje i co na nie odpowiedzieć.",
+      "s4_titel": "Lista kontrolna do odhaczenia",
+      "s4_text": "Od razu na miejscu wypadku, tego samego dnia, w pierwszym tygodniu. Z rozgałęzieniem na Haftpflicht (OC sprawcy) i Kasko (AC).",
+      "s5_titel": "Gdy naprawa kosztuje więcej niż samo auto",
+      "s5_text": "Trzy drogi przy szkodzie całkowitej, kwestia podatku VAT i dlaczego wcześniejsze szkody muszą trafić do ekspertyzy.",
+      "s6_titel": "Gdy ubezpieczyciel obniża wypłatę",
+      "s6_text": "Cztery najczęstsze formułki ubezpieczycieli i to, co odbiera im moc."
+    },
+    "kostenlos": {
+      "h2": "Dlaczego nic to nie kosztuje",
+      "p1": "Przy wypadku nie z własnej winy strona przeciwna ma obowiązek przywrócić stan, który istniałby, gdyby do wypadku nie doszło. W całości, nie w przybliżeniu. To jest <b>§ 249 BGB</b> i powód, dla którego koszty ekspertyzy, adwokata i naszej pracy nie obciążają Pana/Pani, lecz ubezpieczenie sprawcy.",
+      "p2": "Ubezpieczenie sprawcy nie jest przy tym neutralnym rozjemcą. Reprezentuje swojego klienta. Obstawanie przy swoim prawie nie jest więc sporem, lecz normalną koleją rzeczy."
+    },
+    "stimmen": {
+      "h2": "Co piszą klientki i klienci",
+      "quelle": "Opinia w Google",
+      "original_hinweis": "Opinie w oryginalnym brzmieniu"
+    },
+    "fragen": {
+      "h2": "Zanim poda Pan/Pani swój numer",
+      "f1_frage": "Czy przewodnik jest naprawdę bezpłatny?",
+      "f1_antwort": "Tak. Podobnie jak stojąca za nim usługa: przy wypadku nie z własnej winy ubezpieczenie sprawcy pokrywa ekspertyzę, adwokata i naszą pracę. Tak stanowi § 249 BGB. Claimondo nigdy nie zarabia na poszkodowanym.",
+      "f2_frage": "Co dzieje się z moim numerem telefonu?",
+      "f2_antwort": "Oddzwaniamy od poniedziałku do piątku w godzinach 8–20, w soboty i niedziele w godzinach 9–18, i omawiamy Pana/Pani sprawę. Nie przekazujemy numeru dalej, a sprzeciwić się kontaktowi można w każdej chwili. Przewodnik jest niezależnie od tego dostępny do czytania od razu."
+    },
+    "abschluss": {
+      "h2": "Może od razu porozmawiamy?",
+      "text": "W pięć minut proszę nam powiedzieć, co się wydarzyło. Bezpłatnie i niezobowiązująco, także wtedy, gdy chce Pan/Pani tylko wiedzieć, czy coś się opłaca.",
+      "erreichbar": "Pn–Pt 8–20, Sb+Nd 9–18"
+    },
+    "nachricht": {
+      "anrede_mit_name": "Dzień dobry, {vorname},",
+      "anrede_ohne_name": "Dzień dobry,",
+      "zusage_sofort": "Zwykle oddzwaniamy w ciągu 15 minut.",
+      "zusage_heute": "Oddzwonimy dzisiaj od godziny {stunde}.",
+      "zusage_morgen": "Oddzwonimy jutro od godziny {stunde}.",
+      "wa_einleitung": "oto Pana/Pani Unfallguide od Claimondo:",
+      "flow_lang": "Jeśli jest Pan/Pani już dalej i chce od razu zgłosić szkodę:",
+      "flow_kurz": "Jeśli jest Pan/Pani już dalej:",
+      "kostenlos": "Usługa jest dla Pana/Pani bezpłatna. Przy wypadku nie z własnej winy koszty ponosi strona przeciwna.",
+      "mail_betreff": "Pana/Pani Unfallguide od Claimondo",
+      "mail_einleitung": "w załączniku znajdzie Pan/Pani swój Unfallguide (PDF, 6 stron)."
+    },
+    "startseite": {
+      "h2": "Proszę zabrać przewodnik, zanim zapadnie decyzja.",
+      "text": "Sześć stron o tym, co przysługuje, jakie błędy drogo kosztują i co zrobić, gdy ubezpieczyciel obniża wypłatę. Bezpłatnie, do przeczytania od razu, bez zakładania konta."
+    }
+  },
+  "unfallguide_formular": {
+    "h2": "Zamówienie przewodnika",
+    "intro": "Otrzyma go Pan/Pani od razu na tej stronie. Bez konta, bez czekania.",
+    "name_label": "Imię i nazwisko",
+    "telefon_label": "Numer telefonu",
+    "telefon_hinweis": "Do oddzwonienia. Nie przekazujemy go dalej.",
+    "email_label": "E-mail",
+    "email_hinweis": "Aby przewodnik był dostępny również później.",
+    "optional": "opcjonalnie",
+    "einwilligung": "Claimondo może kontaktować się ze mną w sprawie mojego wypadku telefonicznie i przez WhatsApp. Mogę to w każdej chwili odwołać.",
+    "knopf": "Przeczytaj przewodnik",
+    "knopf_laeuft": "Chwileczkę …",
+    "anrufen": "Można też zadzwonić od razu:",
+    "erfolg_h2": "Pana/Pani Unfallguide jest gotowy.",
+    "erfolg_text": "Oddzwaniamy od poniedziałku do piątku w godzinach 8–20, w soboty i niedziele w godzinach 9–18, zwykle w ciągu 15 minut. Do tego czasu ma Pan/Pani już przy sobie wszystko, co najważniejsze.",
+    "erfolg_knopf": "Otwórz Unfallguide (PDF, 6 stron)",
+    "erfolg_sprechen": "Chce Pan/Pani porozmawiać od razu?",
+    "fehler_name": "Proszę podać imię i nazwisko",
+    "fehler_telefon": "Proszę podać czynny numer telefonu",
+    "fehler_email": "Ten adres e-mail wygląda na nieprawidłowy",
+    "fehler_einwilligung": "Proszę potwierdzić, że możemy oddzwonić",
+    "fehler_allgemein": "Proszę sprawdzić wprowadzone dane",
+    "fehler_speichern": "Nie udało się zapisać Pana/Pani zgłoszenia. Przewodnik mimo to jest gotowy, a pod numerem 0151 5360 8515 można się z nami skontaktować bezpośrednio.",
+    "hinweis_verarbeitung": "Zgłoszenie do nas dotarło, przetwarzanie jeszcze trwa. Odezwiemy się.",
+    "teaser_aria": "Odblokuj przewodnik po wypadku",
+    "teaser_hinweis": "Dwie pozycje, o które wnioskuje się najrzadziej, są w rozmytej części.",
+    "teaser_regler": "Przesuń, aby odblokować",
+    "wa_kein_konto": "Nie znajdujemy WhatsAppa dla tego numeru. Przewodnik i tak otworzy się od razu tutaj."
   }
 }

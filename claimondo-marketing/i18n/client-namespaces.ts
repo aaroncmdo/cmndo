@@ -42,6 +42,10 @@ export const CLIENT_NAMESPACES = [
   'nutzungsausfall_rechner',
   'onboarding_wizard',
   'shared',
+  // Nur die 23 Formular-Texte des Unfallguides, NICHT der ganze
+  // `unfallguide`-Namensraum (73). Der Rest wird server-seitig
+  // uebersetzt und gehoert nicht in die Nutzlast jeder Seite.
+  'unfallguide_formular',
   'wertminderung_rechner',
 ] as const
 

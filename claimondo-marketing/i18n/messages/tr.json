@@ -4764,5 +4764,104 @@
     "cta_h": "Kusursuz bir kaza mı geçirdiniz?",
     "cta_p": "Hakkınız olanı iki dakikada kontrol ettirin – ücretsiz ve yükümlülüksüz.",
     "cta_btn": "Hakkınızı ücretsiz kontrol edin"
+  },
+  "unfallguide": {
+    "meta": {
+      "titel": "Unfallguide: Kusurunuz olmayan bir kazadan sonra nelere hakkınız var",
+      "beschreibung": "Ücretsiz 6 sayfalık rehber: hangi taleplere hakkınız var, hangi altı hata pahalıya mal olur, ekonomik pert durumunda ne geçerlidir ve yapılan kesintilere nasıl yanıt verirsiniz."
+    },
+    "kopf": {
+      "eyebrow": "Ücretsiz rehber",
+      "h1_plain": "Mağdurların çoğu,",
+      "h1_accent": "hakları olandan azını talep ediyor.",
+      "intro": "Altı sayfada: kusurunuz olmayan bir kazadan sonra neleri talep edebilirsiniz, hangi hatalar pahalıya mal olur ve sigorta ödemeyi kısarsa ne yapmalısınız.",
+      "bild_alt": "Claimondo Unfallguide'ın kapak sayfası",
+      "punkt_1": "6 sayfa, on dakikada okunur",
+      "punkt_2": "İddialarla değil, § ve dosya numaralarıyla",
+      "punkt_3": "Beklemeden, hemen okunabilir"
+    },
+    "inhalt": {
+      "h2": "İçinde neler var",
+      "s1_titel": "Durumunuz nedir",
+      "s1_text": "Kusurunuz olmayan bir kazanın sizin için ne anlama geldiği ve bunun için neden hiçbir ödeme yapmadığınız.",
+      "s2_titel": "Talepleriniz, tutarlarıyla",
+      "s2_text": "Onarım, kendi seçtiğiniz bilirkişi, avukat, kullanım kaybı, değer kaybı, kiralık araç. Alışılmış tutar aralıklarıyla.",
+      "s3_titel": "Pahalıya mal olan altı hata",
+      "s3_text": "Ve telefonda duyacağınız beş cümle: arkasında ne var ve nasıl yanıt verirsiniz.",
+      "s4_titel": "Adım adım kontrol listesi",
+      "s4_text": "Kaza yerinde hemen, aynı gün ve ilk hafta içinde yapılacaklar. Haftpflicht mi kasko mu, o ayrımla birlikte.",
+      "s5_titel": "Onarım aracın kendisinden pahalıya gelirse",
+      "s5_text": "Ekonomik pert (wirtschaftlicher Totalschaden) durumundaki üç yol, KDV (Mehrwertsteuer) meselesi ve önceki hasarların neden bilirkişi raporunda yer alması gerektiği.",
+      "s6_titel": "Ödeme kısılırsa",
+      "s6_text": "Sigortaların en sık kullandığı dört standart gerekçe ve bu gerekçeleri etkisiz bırakan noktalar."
+    },
+    "kostenlos": {
+      "h2": "Bunun size neden hiçbir maliyeti yok",
+      "p1": "Kusurunuz olmayan bir kazada karşı taraf, kaza hiç olmasaydı var olacak durumu geri getirmekle yükümlüdür. Yaklaşık olarak değil, tam olarak. Bunun dayanağı <b>§ 249 BGB</b>; bilirkişi raporunun, avukatın ve bizim çalışmamızın masrafının size değil, hatalı tarafın sigortasına ait olmasının nedeni de budur.",
+      "p2": "Karşı tarafın sigortası bu süreçte tarafsız bir hakem değildir. Kendi müşterisini temsil eder. Bu yüzden hakkınızın arkasında durmak bir kavga değil, olağan olandır."
+    },
+    "stimmen": {
+      "h2": "Müşterilerimiz ne yazıyor",
+      "quelle": "Google değerlendirmesi",
+      "original_hinweis": "Değerlendirmeler orijinal haliyle"
+    },
+    "fragen": {
+      "h2": "Numaranızı girmeden önce",
+      "f1_frage": "Rehber gerçekten ücretsiz mi?",
+      "f1_antwort": "Evet. Arkasındaki hizmet de öyle: kusurunuz olmayan bir kazada bilirkişi raporunun, avukatın ve bizim çalışmamızın masrafını karşı tarafın sigortası üstlenir. § 249 BGB'de böyle yazar. Claimondo hiçbir zaman mağdurdan kazanmaz.",
+      "f2_frage": "Telefon numarama ne olacak?",
+      "f2_antwort": "Sizi pazartesiden cumaya 8–20, cumartesi ve pazar 9–18 saatleri arasında arar ve durumunuzu görüşürüz. Numaranızı üçüncü kişilerle paylaşmayız; iletişime her zaman itiraz edebilirsiniz. Rehber bundan bağımsız olarak hemen okumaya hazırdır."
+    },
+    "abschluss": {
+      "h2": "Hemen görüşmeyi mi tercih edersiniz?",
+      "text": "Beş dakikada bize ne olduğunu anlatın. Ücretsiz ve bağlayıcı değil; yalnızca bir şeye değip değmeyeceğini öğrenmek isteseniz bile.",
+      "erreichbar": "Pzt–Cum 8–20, Cmt+Paz 9–18"
+    },
+    "nachricht": {
+      "anrede_mit_name": "Merhaba {vorname},",
+      "anrede_ohne_name": "Merhaba,",
+      "zusage_sofort": "Sizi genellikle 15 dakika içinde ararız.",
+      "zusage_heute": "Sizi bugün saat {stunde} ve sonrasında arayacağız.",
+      "zusage_morgen": "Sizi yarın saat {stunde} ve sonrasında arayacağız.",
+      "wa_einleitung": "Claimondo Unfallguide'ınız burada:",
+      "flow_lang": "Bir adım öndeyseniz ve hasarı doğrudan bildirmek istiyorsanız:",
+      "flow_kurz": "Bir adım öndeyseniz:",
+      "kostenlos": "Hizmet sizin için ücretsizdir. Kusurunuz olmayan bir kazada masrafları karşı taraf üstlenir.",
+      "mail_betreff": "Claimondo Unfallguide'ınız",
+      "mail_einleitung": "Unfallguide'ınızı ekte bulabilirsiniz (PDF, 6 sayfa)."
+    },
+    "startseite": {
+      "h2": "Karar vermeden önce rehberi yanınıza alın.",
+      "text": "Altı sayfada: nelere hakkınız var, hangi hatalar pahalıya mal olur ve sigorta ödemeyi kısarsa ne yapmalısınız. Ücretsiz, hemen okunabilir, hesap açmadan."
+    }
+  },
+  "unfallguide_formular": {
+    "h2": "Rehberi isteyin",
+    "intro": "Rehbere hemen bu sayfada ulaşırsınız. Hesap yok, bekleme yok.",
+    "name_label": "Adınız",
+    "telefon_label": "Telefon numarası",
+    "telefon_hinweis": "Geri arama için. Üçüncü kişilerle paylaşmayız.",
+    "email_label": "E-posta",
+    "email_hinweis": "Rehbere daha sonra da ulaşabilmeniz için.",
+    "optional": "isteğe bağlı",
+    "einwilligung": "Claimondo kazamla ilgili benimle telefonla ve WhatsApp üzerinden iletişime geçebilir. Bunu istediğim zaman geri alabilirim.",
+    "knopf": "Rehberi şimdi okuyun",
+    "knopf_laeuft": "Bir saniye …",
+    "anrufen": "Ya da doğrudan arayın:",
+    "erfolg_h2": "Unfallguide'ınız hazır.",
+    "erfolg_text": "Sizi pazartesiden cumaya 8–20, cumartesi ve pazar 9–18 saatleri arasında, genellikle 15 dakika içinde ararız. O zamana kadar önemli olan her şey elinizde olacak.",
+    "erfolg_knopf": "Unfallguide'ı açın (PDF, 6 sayfa)",
+    "erfolg_sprechen": "Hemen görüşmek ister misiniz?",
+    "fehler_name": "Lütfen adınızı girin",
+    "fehler_telefon": "Lütfen ulaşılabilir bir telefon numarası girin",
+    "fehler_email": "Bu e-posta adresi geçerli görünmüyor",
+    "fehler_einwilligung": "Sizi arayabileceğimizi lütfen onaylayın",
+    "fehler_allgemein": "Lütfen girdiğiniz bilgileri kontrol edin",
+    "fehler_speichern": "Talebinizi kaydedemedik. Rehber yine de hazır; 0151 5360 8515 numarasından bize doğrudan ulaşabilirsiniz.",
+    "hinweis_verarbeitung": "Talebiniz bize ulaştı, işleme alınıyor. Sizinle iletişime geçeceğiz.",
+    "teaser_aria": "Kaza rehberini açın ve okuyun",
+    "teaser_hinweis": "En seyrek talep edilen iki kalem, bulanık bölümde duruyor.",
+    "teaser_regler": "Açmak için kaydırın",
+    "wa_kein_konto": "Bu numarada WhatsApp bulamadık. Rehber yine de hemen burada açılıyor."
   }
 }

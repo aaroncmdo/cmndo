@@ -4768,5 +4768,104 @@
     "cta_h": "Unverschuldet im Unfall?",
     "cta_p": "Lassen Sie in zwei Minuten prüfen, was Ihnen zusteht – kostenfrei und unverbindlich.",
     "cta_btn": "Kostenlosen Rückruf anfordern"
+  },
+  "unfallguide": {
+    "meta": {
+      "titel": "Unfallguide: Was Ihnen nach einem unverschuldeten Unfall zusteht",
+      "beschreibung": "Kostenloser 6-Seiten-Guide: welche Ansprüche Sie haben, welche sechs Fehler teuer werden, was bei wirtschaftlichem Totalschaden gilt und wie Sie auf Kürzungen antworten."
+    },
+    "kopf": {
+      "eyebrow": "Kostenloser Leitfaden",
+      "h1_plain": "Die meisten Geschädigten fordern weniger,",
+      "h1_accent": "als ihnen zusteht.",
+      "intro": "Auf sechs Seiten steht, was Sie nach einem unverschuldeten Unfall verlangen können, welche Fehler teuer werden und was zu tun ist, wenn die Versicherung kürzt.",
+      "bild_alt": "Titelseite des Claimondo Unfallguides",
+      "punkt_1": "6 Seiten, in zehn Minuten gelesen",
+      "punkt_2": "Mit § und Aktenzeichen, nicht mit Behauptungen",
+      "punkt_3": "Sofort lesbar, ohne Wartezeit"
+    },
+    "inhalt": {
+      "h2": "Was drinsteht",
+      "s1_titel": "Wo Sie stehen",
+      "s1_text": "Was ein unverschuldeter Unfall für Sie bedeutet, und warum Sie dafür nichts zahlen.",
+      "s2_titel": "Ihre Ansprüche, mit Beträgen",
+      "s2_text": "Reparatur, eigener Gutachter, Anwalt, Nutzungsausfall, Wertminderung, Mietwagen. Mit typischen Spannen.",
+      "s3_titel": "Sechs Fehler, die teuer werden",
+      "s3_text": "Und die fünf Sätze, die am Telefon fallen: was dahintersteckt und was Sie antworten.",
+      "s4_titel": "Checkliste zum Abhaken",
+      "s4_text": "Sofort am Unfallort, am selben Tag, in der ersten Woche. Mit der Weiche Haftpflicht oder Kasko.",
+      "s5_titel": "Wenn die Reparatur teurer wird als das Auto",
+      "s5_text": "Die drei Wege bei wirtschaftlichem Totalschaden, die Sache mit der Mehrwertsteuer und warum Vorschäden ins Gutachten gehören.",
+      "s6_titel": "Wenn gekürzt wird",
+      "s6_text": "Die vier häufigsten Textbausteine der Versicherer, und was ihnen die Wirkung nimmt."
+    },
+    "kostenlos": {
+      "h2": "Warum das nichts kostet",
+      "p1": "Bei einem unverschuldeten Unfall schuldet die Gegenseite die Wiederherstellung des Zustands, der ohne den Unfall bestünde. Vollständig, nicht ungefähr. Das ist <b>§ 249 BGB</b> und der Grund, warum Gutachten, Anwalt und unsere Arbeit nicht bei Ihnen landen, sondern bei der Versicherung des Verursachers.",
+      "p2": "Die gegnerische Versicherung ist dabei kein neutraler Schlichter. Sie vertritt ihren Kunden. Auf Ihr Recht zu bestehen ist deshalb kein Streit, sondern der Normalfall."
+    },
+    "stimmen": {
+      "h2": "Was Kundinnen und Kunden schreiben",
+      "quelle": "Google-Bewertung",
+      "original_hinweis": "Bewertungen im Originalwortlaut"
+    },
+    "fragen": {
+      "h2": "Bevor Sie Ihre Nummer eingeben",
+      "f1_frage": "Ist der Guide wirklich kostenlos?",
+      "f1_antwort": "Ja. Und der Service dahinter auch: Bei einem unverschuldeten Unfall trägt die gegnerische Versicherung Gutachten, Anwalt und unsere Arbeit. Das steht so in § 249 BGB. Claimondo verdient nie am Geschädigten.",
+      "f2_frage": "Was passiert mit meiner Telefonnummer?",
+      "f2_antwort": "Wir rufen Sie montags bis freitags von 8 bis 20 Uhr zurück, samstags und sonntags von 9 bis 18 Uhr, und besprechen Ihren Fall. Wir geben Ihre Nummer nicht weiter, und Sie können dem Kontakt jederzeit widersprechen. Der Guide steht unabhängig davon sofort zum Lesen bereit."
+    },
+    "abschluss": {
+      "h2": "Lieber gleich sprechen?",
+      "text": "Sagen Sie uns in fünf Minuten, was passiert ist. Kostenlos und unverbindlich, auch wenn Sie nur wissen wollen, ob sich etwas lohnt.",
+      "erreichbar": "Mo–Fr 8–20 Uhr, Sa+So 9–18 Uhr"
+    },
+    "nachricht": {
+      "anrede_mit_name": "Guten Tag {vorname},",
+      "anrede_ohne_name": "Guten Tag,",
+      "zusage_sofort": "Wir rufen Sie in der Regel innerhalb von 15 Minuten zurück.",
+      "zusage_heute": "Wir rufen Sie heute ab {stunde} Uhr zurück.",
+      "zusage_morgen": "Wir rufen Sie morgen ab {stunde} Uhr zurück.",
+      "wa_einleitung": "hier ist Ihr Unfallguide von Claimondo:",
+      "flow_lang": "Wenn Sie schon weiter sind und den Schaden direkt melden möchten:",
+      "flow_kurz": "Wenn Sie schon weiter sind:",
+      "kostenlos": "Der Service ist für Sie kostenlos. Bei unverschuldetem Unfall trägt die Gegenseite die Kosten.",
+      "mail_betreff": "Ihr Unfallguide von Claimondo",
+      "mail_einleitung": "im Anhang finden Sie Ihren Unfallguide (PDF, 6 Seiten)."
+    },
+    "startseite": {
+      "h2": "Nehmen Sie den Guide mit, bevor Sie entscheiden.",
+      "text": "Sechs Seiten mit dem, was Ihnen zusteht, welche Fehler teuer werden und was zu tun ist, wenn die Versicherung kürzt. Kostenlos, sofort lesbar, ohne Konto."
+    }
+  },
+  "unfallguide_formular": {
+    "h2": "Guide anfordern",
+    "intro": "Sie bekommen ihn sofort auf dieser Seite. Kein Konto, keine Wartezeit.",
+    "name_label": "Ihr Name",
+    "telefon_label": "Telefonnummer",
+    "telefon_hinweis": "Für den Rückruf. Wir geben sie nicht weiter.",
+    "email_label": "E-Mail",
+    "email_hinweis": "Damit Sie den Guide auch später wiederfinden.",
+    "optional": "optional",
+    "einwilligung": "Claimondo darf mich zu meinem Unfall telefonisch und per WhatsApp kontaktieren. Ich kann das jederzeit widerrufen.",
+    "knopf": "Guide jetzt lesen",
+    "knopf_laeuft": "Einen Moment …",
+    "anrufen": "Oder direkt anrufen:",
+    "erfolg_h2": "Ihr Unfallguide steht bereit.",
+    "erfolg_text": "Wir rufen Sie montags bis freitags von 8 bis 20 Uhr zurück, samstags und sonntags von 9 bis 18 Uhr, in der Regel innerhalb von 15 Minuten. Bis dahin haben Sie schon alles Wichtige in der Hand.",
+    "erfolg_knopf": "Unfallguide öffnen (PDF, 6 Seiten)",
+    "erfolg_sprechen": "Lieber sofort sprechen?",
+    "fehler_name": "Bitte Ihren Namen angeben",
+    "fehler_telefon": "Bitte eine erreichbare Telefonnummer angeben",
+    "fehler_email": "Diese E-Mail-Adresse sieht nicht gültig aus",
+    "fehler_einwilligung": "Bitte bestätigen Sie, dass wir Sie zurückrufen dürfen",
+    "fehler_allgemein": "Bitte prüfen Sie Ihre Eingaben",
+    "fehler_speichern": "Wir konnten Ihre Anfrage nicht speichern. Der Guide steht trotzdem bereit, und unter 0151 5360 8515 erreichen Sie uns direkt.",
+    "hinweis_verarbeitung": "Ihre Anfrage ist angekommen, die Verarbeitung läuft noch. Wir melden uns.",
+    "teaser_aria": "Unfallguide freischalten und ansehen",
+    "teaser_hinweis": "Die zwei Positionen, die am seltensten gefordert werden, liegen im unscharfen Teil.",
+    "teaser_regler": "Zum Freischalten ziehen",
+    "wa_kein_konto": "Zu dieser Nummer finden wir kein WhatsApp. Der Guide öffnet sich trotzdem sofort hier."
   }
 }
