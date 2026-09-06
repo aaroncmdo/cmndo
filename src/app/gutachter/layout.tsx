@@ -136,7 +136,7 @@ export default async function GutachterLayout({
       )}
       {sv?.verifizierung_status === 'frist_ueberschritten' && (
         <div className="bg-danger-soft border-b border-danger/30 px-4 py-2.5 text-center text-xs text-danger-strong font-medium">
-          Deine Fälle sind pausiert, weil Berufshaftpflicht/Gewerbeanmeldung fehlen —{' '}
+          Ihre Fälle sind pausiert, weil Berufshaftpflicht/Gewerbeanmeldung fehlen —{' '}
           <a href="/gutachter/verifizierung" className="underline font-semibold">Nachweise hochladen</a>.
         </div>
       )}

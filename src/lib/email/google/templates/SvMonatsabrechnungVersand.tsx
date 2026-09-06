@@ -31,7 +31,7 @@ export function SvMonatsabrechnungVersandEmail(props: Props) {
           Hallo {props.vorname ?? 'Partner'},
         </Paragraph>
         <Paragraph>
-          deine Monatsabrechnung für {props.monat} ist erstellt.
+          Ihre Monatsabrechnung für {props.monat} ist erstellt.
         </Paragraph>
 
         <InfoRow label="Rechnungsnummer" value={props.abrechnungsNr} />

@@ -58,7 +58,7 @@ export function SvTerminBestaetigungEmail(props: Props) {
 
         {props.ablehnenUrl && (
           <Paragraph>
-            Wenn du diesen Termin verschieben oder ablehnen möchtest:{' '}
+            Wenn Sie diesen Termin verschieben oder ablehnen möchtest:{' '}
             <a href={props.ablehnenUrl}>Hier öffnen — kein Login nötig</a>
           </Paragraph>
         )}

@@ -38,7 +38,7 @@ export default function ReparaturKostenCard({
 
         {istSelbstzahler ? (
           <p className="text-body-sm text-claimondo-ondo">
-            Du beauftragst die Reparatur als Selbstzahler.{' '}
+            Sie beauftragen die Reparatur als Selbstzahler.{' '}
             {kva != null
               ? `Voraussichtliche Kosten: ${formatEuro(kva)} (${kvaLabel}, laut Kostenvoranschlag). `
               : 'Die Werkstatt erstellt Ihnen zunächst einen Kostenvoranschlag. '}
@@ -46,8 +46,8 @@ export default function ReparaturKostenCard({
           </p>
         ) : (
           <p className="text-body-sm text-claimondo-ondo">
-            Deine Kasko-Versicherung übernimmt die Reparaturkosten. Dein Eigenanteil (Selbstbehalt)
-            richtet sich nach deiner Police
+            Ihre Kasko-Versicherung übernimmt die Reparaturkosten. Ihr Eigenanteil (Selbstbehalt)
+            richtet sich nach Ihrer Police
             {kva != null
               ? ` — die voraussichtlichen Reparaturkosten liegen bei ${formatEuro(kva)} (${kvaLabel}).`
               : '.'}

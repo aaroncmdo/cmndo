@@ -473,7 +473,7 @@ export default function WillkommenClient({
             </div>
 
             <div className="mt-5 text-xs text-claimondo-ondo text-center">
-              Du kannst dieses Fenster schließen. Bei Fragen erreichst du uns unter{' '}
+              Sie können dieses Fenster schließen. Bei Fragen erreichen Sie uns unter{' '}
               <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
                 aaron.sprafke@claimondo.de
               </a>
@@ -720,7 +720,7 @@ export default function WillkommenClient({
                   <Building2Icon className="w-5 h-5 text-[var(--brand-primary)] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-claimondo-navy">
                     <p>
-                      Sie gehoeren zu <strong>{organisation.name}</strong>. Dein{' '}
+                      Sie gehoeren zu <strong>{organisation.name}</strong>. Ihr{' '}
                       {organisation.typ === 'akademie' ? 'Verwalter' : 'Inhaber'} kuemmert sich
                       um Vertrag und Zahlung. Du musst hier nur einmal die Bedingungen bestaetigen.
                     </p>
@@ -910,7 +910,7 @@ export default function WillkommenClient({
                 die <Link href="/agb" target="_blank" className="text-[var(--brand-primary)] underline">AGB</Link>{' '}
                 und die <Link href="/datenschutz" target="_blank" className="text-[var(--brand-primary)] underline">Datenschutzerklärung</Link>.
                 <br /><br />
-                Den vollständigen Vertrag inkl. Anzahlung schließt dein
+                Den vollständigen Vertrag inkl. Anzahlung schließt Ihr
                 {organisation?.typ === 'akademie' ? ' Verwalter' : ' Inhaber'} für dich ab — du musst
                 hier nur einmal die Bedingungen akzeptieren.
               </div>
@@ -1292,7 +1292,7 @@ function KontaktHinweis() {
       <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
         aaron.sprafke@claimondo.de
       </a>
-      {' '}— wir korrigieren deine Stammdaten bevor du den Vertrag unterzeichnest.
+      {' '}— wir korrigieren Ihre Stammdaten, bevor Sie den Vertrag unterzeichnen.
     </div>
   )
 }
