@@ -77,8 +77,8 @@ export function KaskoBindungEndansicht({
             {info.schadenEmail ? <> · <a className="font-semibold text-claimondo-ondo" href={`mailto:${info.schadenEmail}`}>{info.schadenEmail}</a></> : null}
             .
           </li>
-          <li>{du ? 'Lass Ihnen die Partnerwerkstatt benennen' : 'Lassen Sie sich die Partnerwerkstatt benennen'}{info.partnernetz ? ` (${info.partnernetz})` : ''}.</li>
-          <li>{du ? 'Ausnahmen, bei denen Sie frei wählen darfst: ' : 'Ausnahmen, bei denen Sie frei wählen dürfen: '}{info.ausnahmenText}.</li>
+          <li>{du ? 'Lassen Sie sich die Partnerwerkstatt benennen' : 'Lassen Sie sich die Partnerwerkstatt benennen'}{info.partnernetz ? ` (${info.partnernetz})` : ''}.</li>
+          <li>{du ? 'Ausnahmen, bei denen Sie frei wählen dürfen: ' : 'Ausnahmen, bei denen Sie frei wählen dürfen: '}{info.ausnahmenText}.</li>
         </ol>
       </Card>
 

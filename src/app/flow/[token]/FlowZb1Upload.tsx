@@ -158,7 +158,7 @@ export function FlowZb1Upload({
           data-testid="flow-zb1-gespeichert"
         >
           <p className="font-medium">Foto gespeichert ✓</p>
-          <p className="text-xs mt-1">Es wird automatisch ausgelesen, sobald Sie wieder online bist.</p>
+          <p className="text-xs mt-1">Es wird automatisch ausgelesen, sobald Sie wieder online sind.</p>
         </div>
       ) : status === 'fertig' && extracted ? (
         <div

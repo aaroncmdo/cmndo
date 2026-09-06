@@ -112,7 +112,7 @@ const DOC_INFO: Record<string, { warum: string; wo: string }> = {
   },
   aerztliches_attest: {
     warum: 'Ein ärztliches Attest dokumentiert Ihre Verletzungen und ist Grundlage für Schmerzensgeld und Heilbehandlungskosten.',
-    wo: 'Lass Ihnen von Ihrem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
+    wo: 'Lassen Sie sich von Ihrem Hausarzt oder der behandelnden Klinik ein Attest über Art und Dauer der Verletzungen ausstellen.',
   },
   diagnosebericht: {
     warum: 'Die ärztliche Diagnose konkretisiert Verletzungsart und Heilungsdauer — wichtig für Schmerzensgeld-Bemessung.',

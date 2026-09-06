@@ -166,7 +166,7 @@ export default function TerminDetailActions({
             Begutachtung durchgeführt
           </Button>
           <p className="text-xs text-claimondo-ondo">
-            Markiere den Termin als durchgeführt, sobald Sie die Begutachtung vor Ort erledigt hast.
+            Markieren Sie den Termin als durchgeführt, sobald Sie die Begutachtung vor Ort erledigt haben.
             Damit ist der Auftrag für Sie abgeschlossen — Ihr Gutachten erstellen Sie wie gewohnt außerhalb der Plattform.
           </p>
           {/* AAR-939: Kunde war nicht da / hat abgesagt → Billing-Review (kein Auto-Charge) */}
