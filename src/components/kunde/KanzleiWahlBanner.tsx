@@ -24,7 +24,7 @@ import { KanzleiWunschModal } from '@/components/shared/claims'
 
 export function KanzleiWahlBanner({
   claimId,
-  /** Steuert Text + Audit-Trail: vor dem Gutachten neutral, danach „Dein Gutachten ist da". */
+  /** Steuert Text + Audit-Trail: vor dem Gutachten neutral, danach „Ihr Gutachten ist da". */
   phase = 'lead_konvertierung',
 }: {
   claimId: string
@@ -45,7 +45,7 @@ export function KanzleiWahlBanner({
             </p>
             <p className="text-caption text-claimondo-ondo mt-0.5">
               {nachGutachten ? 'Ihr Gutachten ist da. ' : ''}
-              Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung — für dich
+              Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung — für Sie
               kostenfrei, wenn der Gegner haftet.
             </p>
           </div>
