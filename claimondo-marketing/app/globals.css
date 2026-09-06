@@ -1023,45 +1023,43 @@ html { scroll-behavior: smooth; }
   z-index: 39 !important;
 }
 
-/* Design-Aufnahme 05.09.2026 (Playwright, document.elementFromPoint, 1.155 Seiten):
- * unterhalb von ~1400 px Breite liegt die ausgeklappte Karte (150 px breit, rechts)
- * GENAU ueber dem Lead-Formular im Hero. Gemessen bei 1280x720 auf Startseite,
- * Stadtseite Koeln und kfzgutachter-lp: das Feld "Stadt / PLZ" und der Knopf
- * "Jetzt kostenlosen Rückruf erhalten" trafen bei einem Klick am rechten Rand
- * die Karte statt des Formulars (bei 1440x900 auf der Stadtseite ebenfalls der
- * Knopf). 1280-1366 px ist die haeufigste Laptop-Klasse.
+/* Klickdurchlaessig statt ausgeblendet (Aaron 05.09.2026, nach Prod-Messung).
  *
- * Das Siegel selbst ist als Trust-Signal gewollt (Aaron 23.08.2026: ausgeklappt
- * starten). Ein fixes Element hat auf schmalen Laptops aber keinen freien Platz:
- * unten rechts sitzt die Kontaktleiste, links der Hero-Text mit den CTAs. Deshalb
- * bleibt es dort aus; die Bewertung steht auf Startseite und LP zusaetzlich als
- * Inline-Badge ("5,0 von 5 · 27 Bewertungen") im Fluss. Reversibel: diese Regel
- * entfernen. Nachgemessen mit C:/pwtool/overlay-precise.mjs (0 verdeckte Ziele).
+ * Vorgeschichte: die Design-Aufnahme vom 05.09. fand, dass die ausgeklappte Karte
+ * (300 px breit, rechts, fix) GENAU ueber dem Lead-Formular im Hero liegt. Erster
+ * Versuch war `display:none` unterhalb 1400 px — das loeste die Blockade auf Laptops,
+ * nahm das Siegel aber auch jedem Handy und Tablet weg (Aaron: „ich sehe das ProSeal
+ * nicht auf der mobilen Version"). Und es reichte nicht: der Prod-Smoke fand bei
+ * 1440 px auf der Stadtseite Koeln weiter Name und Telefon verdeckt.
+ *
+ * Jetzt: das Siegel bleibt ueberall SICHTBAR und faengt keine Klicks mehr ab. Ein
+ * Element mit `pointer-events: none` liegt fuer `document.elementFromPoint()` und
+ * fuer jeden Klick nicht mehr im Weg — der Treffer geht an das, was darunter liegt.
+ * Preis, bewusst entschieden: das Siegel selbst ist nicht mehr anklickbar und laesst
+ * sich nicht mehr zuklappen; es wirkt als reines Trust-Signal.
+ *
+ * Auf prod gemessen (Playwright, document.elementFromPoint auf drei Punkten je Ziel,
+ * Startseite + Stadtseite Koeln + kfzgutachter-lp, Scrollpositionen 0/300/600/900):
+ *
+ *              ohne pointer-events   mit pointer-events:none
+ *   mobil 390    bis zu 3 verdeckt          0 verdeckt   (Siegel 260x421 sichtbar)
+ *   tablet 768   3-4 verdeckt              0 verdeckt   (Siegel 300x407 sichtbar)
+ *   laptop 1280  3 verdeckt                0 verdeckt
+ *   desktop 1440 3 verdeckt (Koeln)        0 verdeckt
+ *
+ * Die Spalte links ist die Positivkontrolle: dasselbe Messwerkzeug zeigt die Blockade,
+ * wenn sie da ist — eine Null ist sonst kein Befund.
  */
-@media (max-width: 1399px) {
-  .pe-pro-seal {
-    display: none !important;
-  }
+.pe-pro-seal,
+.pe-pro-seal * {
+  pointer-events: none !important;
 }
 
-/* Trefferflaeche des Minimieren-Knopfs. Das Siegel startet ausgeklappt (so gewollt,
- * Aaron 23.08.2026) und laesst sich zuklappen — der Knopf dafuer ist aber nur
- * 20x20 px gross, die gemessene Trefferflaeche sogar nur 18x18. Apple nennt 44x44
- * als Minimum; mit 18 px trifft ein Daumen daneben, und das Siegel wirkt, als
- * liesse es sich nicht schliessen.
- *
- * Das Pseudo-Element vergroessert NUR die Trefferflaeche — Optik und Layout
- * bleiben unangetastet (gemessen: optisch weiter 20x20, Position unveraendert
- * bei x362,y197; Trefferflaeche 18x18 -> 38x44, also fuenffache Flaeche).
- *
- * ⚠ KEIN `position: relative` auf dem Knopf: er ist bereits `absolute`
- * (top:0/right:0) — ein relative-Override reisst ihn aus seiner Verankerung und
- * verschiebt ihn um 50 px nach links (einmal gemessen, wieder verworfen).
- * Die Eltern haben `overflow: visible`, die groessere Flaeche wird also nicht
- * beschnitten. In der Breite begrenzt der rechte Bildschirmrand auf ~38 px.
+/* Die vergroesserte Trefferflaeche des Minimieren-Knopfs (`.pe-minimizeButton::after`,
+ * 18x18 -> 38x44) ist mit der Entscheidung oben gegenstandslos: das ganze Siegel ist
+ * `pointer-events: none`, der Knopf nimmt also gar keine Klicks mehr an. Die Regel ist
+ * hier entfernt statt auskommentiert — sie stuende sonst als toter Code im Weg. Wird das
+ * Siegel je wieder klickbar, gehoert sie zurueck (Begruendung: Apple nennt 44x44 als
+ * Mindest-Trefferflaeche; ⚠ dabei KEIN `position: relative` auf dem Knopf, er ist bereits
+ * `absolute` und wandert sonst um 50 px nach links).
  */
-.pe-minimizeButton::after {
-  content: '';
-  position: absolute;
-  inset: -13px;
-}
