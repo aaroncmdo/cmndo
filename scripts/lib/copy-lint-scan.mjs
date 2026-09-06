@@ -106,8 +106,30 @@ const ANREDE_AUSNAHMEN = [
  * Deutsche Du-Anrede in einem nutzersichtbaren Text.
  * @returns {string[]} die gefundenen Formen (leer = siezt)
  */
+// ⚠ ZWEI STELLEN, an denen "du" KEINE Anrede an den Leser ist. Beide gemeldet von der
+// Abnahme-Session am 06.09., beide in src/** (dort scannt dieser Detektor heute nicht —
+// die Ausnahmen stehen trotzdem schon hier, damit sie nicht fehlen, sobald jemand die
+// Wurzeln erweitert):
+//
+//   1. PROMPTS AN DAS MODELL. "Du schreibst einen Wissens-Artikel" (lib/wissen/generate.ts)
+//      ist eine Anweisung, keine Kundenansprache. "Sie schreiben" waere sinnentstellend.
+//
+//   2. ERKENNUNGSMUSTER FUER NUTZEREINGABEN. In lib/faq-bot/off-topic-guard.ts steht
+//      "bist du eine ki" als Muster, das eine Frage ERKENNEN soll — nicht als Ausgabe.
+//      Wer das auf Sie umstellt, macht den Guard fuer genau die Frage blind, die er
+//      abfangen soll. Ein stiller Ausfall: die Antwort daneben siezt korrekt weiter,
+//      also faellt nichts auf.
+const ANREDE_KONTEXT_AUSNAHMEN = [
+  // Prompt-Rollen und -Anweisungen an ein Modell
+  /\b(prompt|system[_ ]?(prompt|message)|anweisung|instruction)\b/i,
+  /\bDu (bist|schreibst|antwortest|formulierst|erstellst|erhaeltst|erhältst) /,
+  // Erkennungsmuster: Listen von Nutzer-Eingaben, gegen die geprueft wird
+  /\b(muster|pattern|keywords?|erkennung|matche?[sn]?|includes|test\()\b/i,
+]
+
 export function scanAnrede(text) {
   if (!text) return []
   for (const aus of ANREDE_AUSNAHMEN) if (aus.test(text)) return []
+  for (const aus of ANREDE_KONTEXT_AUSNAHMEN) if (aus.test(text)) return []
   return [...new Set((text.match(ANREDE_DU) || []).map((w) => w.toLowerCase()))]
 }
