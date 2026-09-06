@@ -6,6 +6,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
 import { AssetHero } from '@/components/content/AssetHero'
 import { TableOfContents } from '@/components/content/TableOfContents'
+import { GuidePopover } from '@/components/content/GuidePopover'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
 import {
@@ -161,6 +162,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         />
         <SpokeCtaBand />
       </main>
+      {/* Guide-Angebot bei 15 % Lesetiefe. Das Band positioniert sich selbst
+          ueber der StickyCallBar (bandAbstand in GuidePopover) — der Prop
+          `mobilBand` muss dafuer NICHT abgeschaltet werden. */}
+      <GuidePopover cluster={a.cluster ?? null} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${slug}`} whatsappHref={WA} />
     </div>

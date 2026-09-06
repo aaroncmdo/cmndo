@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { SERVICE_REALITY_BULLETS } from '@/lib/brand/service-pitch'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { GuidePopover } from '@/components/content/GuidePopover'
 import { NaechsterTerminHinweis } from '@/components/gutachter-finden/NaechsterTerminHinweis'
 import { WerkstattAbdeckungHinweis } from '@/components/gutachter-finden/WerkstattAbdeckungHinweis'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -307,7 +308,11 @@ export default async function KfzGutachterStadtPage({
   ]
 
   return (
-    <div className="min-h-screen bg-claimondo-bg">
+    // `id` ist der Messanker fuer GuidePopover: die Stadtseite ist eine
+    // Landingpage aus <section>-Bloecken und hat weder <article> noch <main>,
+    // der Standard-Selektor 'article' faende hier also nichts — und das
+    // Popover erschiene nie (still, ohne Fehler).
+    <div id="stadtseite-inhalt" className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
@@ -1203,6 +1208,11 @@ export default async function KfzGutachterStadtPage({
         rolle="verantwortlich"
         datum={stadtLastModifiedISO(s.slug, freigegeben?.veroeffentlichtAm).slice(0, 10)}
       />
+      {/* Guide-Angebot bei 15 % Seitentiefe. Gemessen wird gegen den Wrapper
+          oben (#stadtseite-inhalt), nicht gegen 'article' — den gibt es hier
+          nicht. Ohne `cluster`: Stadtseiten tragen kein Thema, die Ansprache
+          faellt auf ALLGEMEIN zurueck. */}
+      <GuidePopover artikelSelector="#stadtseite-inhalt" />
       <LandingFooter finderHref={finderHrefFuerStadt(s)} />
       <TrackingHooks />
       <StickyCallBar quelle={`Kfz-Gutachter ${s.name}`} finderHref={finderHrefFuerStadt(s)} />
