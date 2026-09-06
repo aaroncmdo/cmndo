@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, nurZustellbareEmpfaenger, istOperativerEmpfaenger, letzte9Ziffern, istAbnahmeInbox } from '../interne-identitaet'
+import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, nurZustellbareEmpfaenger, istOperativerEmpfaenger, letzte9Ziffern, istAbnahmeInbox, istUnzustellbareDomain, ohneUnzustellbareEmpfaenger } from '../interne-identitaet'
 
 // Regression-Guard fuer den Test-SV-Guard (2026-07-03): interne/Test-Leads duerfen NIE
 // einen echten Sachverstaendigen buchen/benachrichtigen. Firmendomain @claimondo.de = intern
@@ -166,5 +166,53 @@ describe('istAbnahmeInbox — Abnahme-Postfach (Send-Pfad)', () => {
       'abnahme+e6@claimondo.de',
       'kunde@gmail.com',
     ])
+  })
+})
+
+describe('istUnzustellbareDomain — RFC-reservierte Endungen (RFC 2606 / 6761)', () => {
+  it('erkennt die reservierten Top-Level-Domains', () => {
+    expect(istUnzustellbareDomain('werkstatt@claimondo.test')).toBe(true)
+    expect(istUnzustellbareDomain('a@irgendwas.invalid')).toBe(true)
+    expect(istUnzustellbareDomain('a@host.localhost')).toBe(true)
+    expect(istUnzustellbareDomain('a@foo.example')).toBe(true)
+    expect(istUnzustellbareDomain('a@drucker.local')).toBe(true)
+  })
+  it('erkennt die reservierten Beispiel-Domains', () => {
+    expect(istUnzustellbareDomain('a@example.com')).toBe(true)
+    expect(istUnzustellbareDomain('a@example.net')).toBe(true)
+    expect(istUnzustellbareDomain('a@example.org')).toBe(true)
+  })
+  it('ist unabhaengig von Gross-/Kleinschreibung und Leerzeichen', () => {
+    expect(istUnzustellbareDomain('  Werkstatt@Claimondo.TEST  ')).toBe(true)
+  })
+  it('laesst ECHTE Domains in Ruhe — auch unsere eigene interne', () => {
+    expect(istUnzustellbareDomain('info@claimondo.de')).toBe(false)
+    expect(istUnzustellbareDomain('werkstatt@musterfirma.de')).toBe(false)
+    expect(istUnzustellbareDomain('a@web.de')).toBe(false)
+  })
+  it('faellt nicht auf aehnlich AUSSEHENDE, aber echte Domains herein', () => {
+    // Diese Domains sind registrierbar und koennen Post empfangen — nur die ENDUNG zaehlt.
+    expect(istUnzustellbareDomain('a@example.de')).toBe(false)
+    expect(istUnzustellbareDomain('a@testfirma.de')).toBe(false)
+    expect(istUnzustellbareDomain('a@mein-test.de')).toBe(false)
+    expect(istUnzustellbareDomain('a@localhost.de')).toBe(false)
+  })
+  it('behandelt Muell als NICHT unzustellbar (der Versand entscheidet, nicht dieser Filter)', () => {
+    expect(istUnzustellbareDomain('')).toBe(false)
+    expect(istUnzustellbareDomain(null)).toBe(false)
+    expect(istUnzustellbareDomain('ohne-at-zeichen')).toBe(false)
+  })
+})
+
+describe('ohneUnzustellbareEmpfaenger', () => {
+  it('entfernt nur die unzustellbaren Adressen', () => {
+    expect(ohneUnzustellbareEmpfaenger(['a@claimondo.test', 'b@web.de'])).toEqual(['b@web.de'])
+  })
+  it('leert die Liste, wenn alle unzustellbar sind', () => {
+    expect(ohneUnzustellbareEmpfaenger(['a@claimondo.test', 'b@example.com'])).toEqual([])
+  })
+  it('nimmt auch einen einzelnen String', () => {
+    expect(ohneUnzustellbareEmpfaenger('a@web.de')).toEqual(['a@web.de'])
+    expect(ohneUnzustellbareEmpfaenger('a@claimondo.test')).toEqual([])
   })
 })
