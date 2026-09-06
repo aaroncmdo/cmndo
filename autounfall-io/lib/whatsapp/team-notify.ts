@@ -49,7 +49,7 @@ export async function notifyTeamWhatsApp(text: string): Promise<void> {
           cache: 'no-store',
         })
         if (!res.ok) {
-          console.error(`[au.io team-notify] Baileys ${res.status} fuer ${phone}`)
+          console.error(`[au.io team-notify] Baileys ${res.status} für ${phone}`)
         }
       } catch (err) {
         console.error(`[au.io team-notify] Send an ${phone} fehlgeschlagen:`, (err as Error).message)
