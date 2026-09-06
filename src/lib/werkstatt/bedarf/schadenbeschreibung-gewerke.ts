@@ -9,7 +9,7 @@ import { AI_MODELS } from '@/lib/ai/models'
 
 const MODEL = AI_MODELS.vision_schadenbeschreibung
 const SYSTEM =
-  'Du bist ein KFZ-Schadengutachter-Assistent. Bestimme aus der Schadenbeschreibung, welche Reparatur-Gewerke noetig sind.'
+  'Sie sind ein KFZ-Schadengutachter-Assistent. Bestimmen Sie aus der Schadenbeschreibung, welche Reparatur-Gewerke noetig sind.'
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
 function parseJson(text: string): { kategorien?: unknown; confidence?: unknown } | null {

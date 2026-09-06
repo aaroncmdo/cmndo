@@ -32,9 +32,9 @@ export function NetzwerkpartnerCta({
           Werde Teil des Claimondo-Netzwerks
         </h3>
         <p className="text-sm text-claimondo-ondo mt-2">
-          Als Netzwerkpartner erscheinst du bevorzugt im Gutachter-Finder deiner gebundenen
-          Kunden, deine Partner-Werkstätten stehen oben im „Dein Netzwerk"-Bereich — und dein
-          eigenes Branding (Logo &amp; Farben) geht für deine Kunden live.
+          Als Netzwerkpartner erscheinen Sie bevorzugt im Gutachter-Finder Ihrer gebundenen
+          Kunden, Ihre Partner-Werkstätten stehen oben im „Ihr Netzwerk"-Bereich — und Ihr
+          eigenes Branding (Logo &amp; Farben) geht für Ihre Kunden live.
         </p>
       </div>
 

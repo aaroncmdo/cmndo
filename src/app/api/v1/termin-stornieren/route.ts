@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   const raw = await req.json().catch(() => null)
   const parsed = StornoSchema.safeParse(raw)
   if (!parsed.success) {
-    return json({ ok: false, error: 'token ist Pflicht (Referenz aus deinem Claimondo-Link).' }, 400)
+    return json({ ok: false, error: 'token ist Pflicht (Referenz aus Ihrem Claimondo-Link).' }, 400)
   }
   const { token, grund } = parsed.data
 
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
         ok: false,
         error: 'not_found',
         hinweis:
-          'Kein laufender Termin zu dieser Referenz gefunden. Bitte prüfe die Referenz aus deinem persönlichen Claimondo-Link (per WhatsApp erhalten).',
+          'Kein laufender Termin zu dieser Referenz gefunden. Bitte prüfen Sie die Referenz aus Ihrem persönlichen Claimondo-Link (per WhatsApp erhalten).',
       },
       404,
     )
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
   if (!res.ok) {
     if (res.code === 'db_fehler') {
       console.error('[v1/termin-stornieren] Storno fehlgeschlagen:', res.error)
-      return json({ ok: false, error: 'Storno fehlgeschlagen. Bitte melde dich direkt bei Claimondo.' }, 500)
+      return json({ ok: false, error: 'Storno fehlgeschlagen. Bitte melden Sie sich direkt bei Claimondo.' }, 500)
     }
     return notFound()
   }
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
       war_geplant: res.startZeit,
       hinweis: res.bereitsStorniert
         ? 'Dieser Termin war bereits abgesagt — es wurde nichts erneut geändert.'
-        : 'Termin abgesagt. Claimondo meldet sich für einen Ersatztermin; einen neuen Termin kannst du jederzeit über deinen persönlichen Claimondo-Link wählen.',
+        : 'Termin abgesagt. Claimondo meldet sich für einen Ersatztermin; einen neuen Termin können Sie jederzeit über Ihren persönlichen Claimondo-Link wählen.',
     },
     200,
   )

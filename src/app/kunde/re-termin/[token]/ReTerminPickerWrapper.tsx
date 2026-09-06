@@ -31,7 +31,7 @@ export default function ReTerminPickerWrapper({
       kontext={{ vorname, kennzeichen, schadensOrt }}
       onBooked={(slotStartIso) => onSubmit(token, slotStartIso)}
       successHeading="Vorschlag gesendet"
-      successText="Dein Vorschlag ist beim Sachverständigen eingegangen. Du bekommst eine Bestätigung sobald er den Termin annimmt."
+      successText="Ihr Vorschlag ist beim Sachverständigen eingegangen. Sie bekommen eine Bestätigung sobald er den Termin annimmt."
     />
   )
 }

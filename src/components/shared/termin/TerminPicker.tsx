@@ -70,8 +70,8 @@ export function TerminPicker({
       mode === 'verlegung' ? 'Vorschlag gesendet' : 'Termin gebucht'
     const defaultText =
       mode === 'verlegung'
-        ? 'Dein Vorschlag ist beim Sachverständigen eingegangen. Du bekommst eine Bestätigung sobald er den Termin annimmt.'
-        : 'Dein Termin ist verbindlich reserviert. Wir senden dir eine Bestätigung per Email und WhatsApp.'
+        ? 'Ihr Vorschlag ist beim Sachverständigen eingegangen. Sie bekommen eine Bestätigung sobald er den Termin annimmt.'
+        : 'Ihr Termin ist verbindlich reserviert. Wir senden Ihnen eine Bestätigung per Email und WhatsApp.'
     return (
       <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
         <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success-strong">
@@ -92,11 +92,11 @@ export function TerminPicker({
   const heading =
     mode === 'verlegung'
       ? `${kontext?.vorname ? `Hallo ${kontext.vorname}, ` : ''}wähle einen neuen Termin`
-      : `${kontext?.vorname ? `Hallo ${kontext.vorname}, ` : ''}wähle deinen SV-Termin`
+      : `${kontext?.vorname ? `Hallo ${kontext.vorname}, ` : ''}wähle Ihren SV-Termin`
   const subtext =
     mode === 'verlegung'
-      ? 'Wir senden deinen Vorschlag an den Sachverständigen — er bestätigt ihn meist innerhalb von Stunden.'
-      : 'Wähle eine Wunschzeit. Du kannst den Termin später jederzeit verlegen.'
+      ? 'Wir senden Ihren Vorschlag an den Sachverständigen — er bestätigt ihn meist innerhalb von Stunden.'
+      : 'Wählen Sie eine Wunschzeit. Sie können den Termin später jederzeit verlegen.'
 
   return (
     <div>

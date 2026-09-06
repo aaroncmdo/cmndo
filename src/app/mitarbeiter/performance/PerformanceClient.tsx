@@ -151,7 +151,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
               <div key={entry.id} className={`flex items-center justify-between px-4 py-2.5 ${entry.id === userId ? 'bg-claimondo-ondo/10' : ''}`}>
                 <div className="flex min-w-0 items-center gap-3">
                   <span className={`w-5 shrink-0 text-body-sm font-bold tabular-nums ${i < 3 ? MEDAL[i] : 'text-claimondo-ondo'}`}>{i + 1}</span>
-                  <span className={`truncate text-body-sm text-claimondo-navy ${entry.id === userId ? 'font-semibold' : ''}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
+                  <span className={`truncate text-body-sm text-claimondo-navy ${entry.id === userId ? 'font-semibold' : ''}`}>{entry.name}{entry.id === userId ? ' (Sie)' : ''}</span>
                 </div>
                 <span className="shrink-0 text-body-sm font-semibold tabular-nums text-claimondo-ondo">{entry.value}</span>
               </div>

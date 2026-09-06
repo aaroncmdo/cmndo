@@ -20,7 +20,7 @@ export type KaskoTarifFrageProps = {
   kompakt?: boolean
   schadenIstGlas?: boolean
   /** Kundensicht im Portal duzt (seit 31.08.), FlowLink und Embed siezen. Default 'sie'. */
-  anrede?: 'sie' | 'du'
+  anrede?: 'sie' | 'Sie'
   /** Der Bestaetigungstext verspricht die E6-Mail — nur, wo der Aufrufer sie auch schickt (FlowLink; Embed nach dem
    *  Kontaktschritt). Das Portal sendet keine -> false (Review #5864, Befund 5). Default true. */
   mitMailHinweis?: boolean
@@ -29,7 +29,7 @@ export type KaskoTarifFrageProps = {
 type Stufe = 'laden' | 'marke' | 'freitext' | 'tarif' | 'marker' | 'bestaetigen'
 
 const DISCLAIMER = 'Maßgeblich sind Ihr Versicherungsschein und Ihre Versicherungsbedingungen (AKB). Tarifstand: CHECK24-Liste vom 20.07.2026.'
-const DISCLAIMER_DU = 'Maßgeblich sind dein Versicherungsschein und deine Versicherungsbedingungen (AKB). Tarifstand: CHECK24-Liste vom 20.07.2026.'
+const DISCLAIMER_DU = 'Maßgeblich sind Ihr Versicherungsschein und Ihre Versicherungsbedingungen (AKB). Tarifstand: CHECK24-Liste vom 20.07.2026.'
 
 function TarifBadge({ tarif }: { tarif: KaskoTarif }) {
   if (!tarif.hatWerkstattbindung) return <Badge tone="success" size="sm">freie Werkstattwahl</Badge>
@@ -38,7 +38,7 @@ function TarifBadge({ tarif }: { tarif: KaskoTarif }) {
 }
 
 export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, schadenIstGlas = false, anrede = 'sie', mitMailHinweis = true }: KaskoTarifFrageProps) {
-  const du = anrede === 'du'
+  const du = anrede === 'Sie'
   const disclaimer = du ? DISCLAIMER_DU : DISCLAIMER
   const [stufe, setStufe] = useState<Stufe>('laden')
   const [marken, setMarken] = useState<KaskoMarke[]>([])
@@ -136,10 +136,10 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
     return (
       <div className="flex flex-col gap-3" data-testid="kasko-tarif-frage">
         <div>
-          <h2 className={h}>{du ? 'Bei welcher Versicherung ist dein Fahrzeug kaskoversichert?' : 'Bei welcher Versicherung ist Ihr Fahrzeug kaskoversichert?'}</h2>
+          <h2 className={h}>{du ? 'Bei welcher Versicherung ist Ihr Fahrzeug kaskoversichert?' : 'Bei welcher Versicherung ist Ihr Fahrzeug kaskoversichert?'}</h2>
           <p className={p}>
             {du
-              ? 'Ob wir dir eine Werkstatt vermitteln dürfen, hängt von deinem Kasko-Tarif ab. Manche Tarife schreiben eine Partnerwerkstatt des Versicherers vor.'
+              ? 'Ob wir Ihnen eine Werkstatt vermitteln dürfen, hängt von Ihrem Kasko-Tarif ab. Manche Tarife schreiben eine Partnerwerkstatt des Versicherers vor.'
               : 'Ob wir Ihnen eine Werkstatt vermitteln dürfen, hängt von Ihrem Kasko-Tarif ab. Manche Tarife schreiben eine Partnerwerkstatt des Versicherers vor.'}
           </p>
         </div>
@@ -164,10 +164,10 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
     return (
       <div className="flex flex-col gap-3" data-testid="kasko-tarif-frage">
         <div>
-          <h2 className={h}>{du ? 'Wie heißt deine Kaskoversicherung?' : 'Wie heißt Ihre Kaskoversicherung?'}</h2>
+          <h2 className={h}>{du ? 'Wie heißt Ihre Kaskoversicherung?' : 'Wie heißt Ihre Kaskoversicherung?'}</h2>
           <p className={p}>
             {ladeFehler ? 'Die Tarifliste ist gerade nicht erreichbar. ' : ''}
-            {du ? 'Wir prüfen die Werkstattbindung dann anhand deines Versicherungsscheins.' : 'Wir prüfen die Werkstattbindung dann anhand Ihres Versicherungsscheins.'}
+            {du ? 'Wir prüfen die Werkstattbindung dann anhand Ihres Versicherungsscheins.' : 'Wir prüfen die Werkstattbindung dann anhand Ihres Versicherungsscheins.'}
           </p>
         </div>
         <input
@@ -195,9 +195,9 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
     return (
       <div className="flex flex-col gap-3" data-testid="kasko-tarif-frage">
         <div>
-          <h2 className={h}>{du ? `Welchen Tarif hast du bei ${marke.marke}?` : `Welchen Tarif haben Sie bei ${marke.marke}?`}</h2>
+          <h2 className={h}>{du ? `Welchen Tarif haben Sie bei ${marke.marke}?` : `Welchen Tarif haben Sie bei ${marke.marke}?`}</h2>
           <p className={p}>
-            {du ? 'Der Tarifname steht auf deinem Versicherungsschein.' : 'Der Tarifname steht auf Ihrem Versicherungsschein.'}
+            {du ? 'Der Tarifname steht auf Ihrem Versicherungsschein.' : 'Der Tarifname steht auf Ihrem Versicherungsschein.'}
             {marke.variantenHinweis ? ` ${marke.variantenHinweis}` : ''}
           </p>
           {marke.hinweis && <p className="text-caption text-warning-strong">{marke.hinweis}</p>}
@@ -233,18 +233,18 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
         <div>
           <h2 className={h}>Bitte kurz bestätigen</h2>
           <p className={p}>
-            {du ? 'Du hast ' : 'Sie haben '}
-            {pnd.auswahl.markeName ?? (du ? 'deine Versicherung' : 'Ihre Versicherung')}
+            {du ? 'Sie haben ' : 'Sie haben '}
+            {pnd.auswahl.markeName ?? (du ? 'Ihre Versicherung' : 'Ihre Versicherung')}
             {pnd.auswahl.tarifName ? ` mit dem Tarif „${pnd.auswahl.tarifName}“` : ''}
             {du
-              ? ' angegeben. Wenn das stimmt, vermitteln wir dir keine Werkstatt, denn deine Versicherung benennt sie.'
+              ? ' angegeben. Wenn das stimmt, vermitteln wir Ihnen keine Werkstatt, denn Ihre Versicherung benennt sie.'
               : ' angegeben. Wenn das stimmt, vermitteln wir Ihnen keine Werkstatt, denn Ihre Versicherung benennt sie.'}
             {mitMailHinweis
               ? du
-                ? ' Du bekommst von uns eine E-Mail mit den nächsten Schritten.'
+                ? ' Sie bekommen von uns eine E-Mail mit den nächsten Schritten.'
                 : ' Sie bekommen von uns eine E-Mail mit den nächsten Schritten.'
               : ''}
-            {du ? ' Im Zweifel gilt, was auf deinem Versicherungsschein steht.' : ' Im Zweifel gilt, was auf Ihrem Versicherungsschein steht.'}
+            {du ? ' Im Zweifel gilt, was auf Ihrem Versicherungsschein steht.' : ' Im Zweifel gilt, was auf Ihrem Versicherungsschein steht.'}
           </p>
         </div>
         <Card p={4} radius="lg" accentColor="warning">
@@ -284,10 +284,10 @@ export function KaskoTarifFrage({ onErgebnis, busy = false, kompakt = false, sch
         <h2 className={h}>
           {markerListe.length > 0
             ? du
-              ? 'Steht auf deinem Versicherungsschein einer dieser Zusätze?'
+              ? 'Steht auf Ihrem Versicherungsschein einer dieser Zusätze?'
               : 'Steht auf Ihrem Versicherungsschein einer dieser Zusätze?'
             : du
-              ? 'Enthält dein Vertrag einen Werkstattbindungs-Baustein?'
+              ? 'Enthält Ihr Vertrag einen Werkstattbindungs-Baustein?'
               : 'Enthält Ihr Vertrag einen Werkstattbindungs-Baustein?'}
         </h2>
         <p className={p}>

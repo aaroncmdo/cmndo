@@ -55,7 +55,7 @@ export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] })
       <EmptyState
         icon={Code2Icon}
         title="Noch keine Embed-Sites"
-        description="Lege deine erste Widget-Site an und kopiere das Einbinde-Snippet."
+        description="Lege Ihre erste Widget-Site an und kopiere das Einbinde-Snippet."
         action={{ label: 'Neue Site anlegen', href: '/gutachter/einstellungen/embed/neu' }}
       />
     )

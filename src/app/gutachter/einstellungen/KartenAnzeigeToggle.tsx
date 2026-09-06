@@ -67,8 +67,8 @@ export default function KartenAnzeigeToggle() {
           </span>
         </div>
         <p className="text-xs text-claimondo-ondo mt-1">
-          Zeigt dein Anfahrts-Gebiet als leuchtende Grenz-Fläche im Heute-Hub. Hilft dir
-          Termine außerhalb deiner Reichweite auf einen Blick zu erkennen.
+          Zeigt Ihr Anfahrts-Gebiet als leuchtende Grenz-Fläche im Heute-Hub. Hilft Ihnen
+          Termine außerhalb Ihrer Reichweite auf einen Blick zu erkennen.
         </p>
       </div>
       <span

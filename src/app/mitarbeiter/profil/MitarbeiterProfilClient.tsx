@@ -61,7 +61,7 @@ export default function MitarbeiterProfilClient({
 
   return (
     <div className="max-w-3xl space-y-5">
-      <PageHeader title="Mein Profil" description="Deine Identität und wie du im Kunden-Portal erscheinst." size="lg" />
+      <PageHeader title="Mein Profil" description="Ihre Identität und wie Sie im Kunden-Portal erscheinst." size="lg" />
 
       {/* Sektion 1 — Identitaet (read-only) */}
       <section className="rounded-ios-md border border-claimondo-border bg-white p-5 sm:p-6">
@@ -84,7 +84,7 @@ export default function MitarbeiterProfilClient({
       {/* Sektion 2 — Oeffentliche Anzeige (editierbar) + Live-Vorschau */}
       <section className="rounded-ios-md border border-claimondo-border bg-white p-5 sm:p-6">
         <h2 className="text-heading-sm font-semibold text-claimondo-navy">Öffentliche Anzeige</h2>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Name und Text, die deine Kunden im Portal unter „Mein Betreuer" sehen.</p>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Name und Text, die Ihre Kunden im Portal unter „Mein Betreuer" sehen.</p>
 
         <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-2">
           {/* Formular */}
@@ -142,7 +142,7 @@ export default function MitarbeiterProfilClient({
                   <p className="line-clamp-2 text-body-xs text-claimondo-ondo">{previewText}</p>
                 </div>
               </div>
-              <p className="mt-2 text-caption text-claimondo-ondo/60">So erscheinst du im Kunden-Portal.</p>
+              <p className="mt-2 text-caption text-claimondo-ondo/60">So erscheinen Sie im Kunden-Portal.</p>
             </div>
           </div>
         </div>

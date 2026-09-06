@@ -291,7 +291,7 @@ export function buildPushPayload(event: NotificationEvent, role: Role): PushPayl
     case 'claim.kanzlei_re_frage_due':
       return {
         title: 'Kanzlei einbinden?',
-        body:  'Dein Gutachten ist da — möchtest du eine Kanzlei einbinden?',
+        body:  'Ihr Gutachten ist da — möchten Sie eine Kanzlei einbinden?',
         url, tag, priority: 'normal',
       }
     case 'sa.flow_sent':

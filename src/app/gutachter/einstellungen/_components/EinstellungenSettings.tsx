@@ -62,7 +62,7 @@ export function EinstellungenSettings({
       <SectionCard className="p-6 mt-5">
         <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Live-Standort</h2>
         <p className="text-xs text-claimondo-ondo/70 mb-4">
-          Wenn aktiv, wird dein Standort während Terminen live getrackt.
+          Wenn aktiv, wird Ihr Standort während Terminen live getrackt.
           Ermöglicht optimierte Routenführung und Admin-Übersicht.
         </p>
         <GpsTrackingToggle svId={svId} initial={gpsInitial} />

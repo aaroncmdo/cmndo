@@ -97,14 +97,14 @@ export function ProfilSpezialisierung({
     <SectionCard className="p-6 mt-5">
       <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Spezialisierungen</h2>
       <p className="text-xs text-claimondo-ondo/70 mb-4">
-        Wir nutzen diese Angaben um dir passende Fälle zuzuordnen. Änderungen werden sofort gespeichert.
+        Wir nutzen diese Angaben um Ihnen passende Fälle zuzuordnen. Änderungen werden sofort gespeichert.
       </p>
       <div className="space-y-5">
         <SpezSection
           svId={svId}
           column="qualifikationen_neu"
           title="Qualifikationen"
-          hint="Was bietest du fachlich an?"
+          hint="Was bieten Sie fachlich an?"
           options={QUALIFIKATIONEN}
           initial={qualifikationen}
         />
@@ -112,7 +112,7 @@ export function ProfilSpezialisierung({
           svId={svId}
           column="spezifikationen"
           title="Spezifikationen"
-          hint="Auf welche Fahrzeug-Arten bist du spezialisiert?"
+          hint="Auf welche Fahrzeug-Arten sind Sie spezialisiert?"
           options={SPEZIFIKATIONEN}
           initial={spezifikationen}
         />
@@ -120,7 +120,7 @@ export function ProfilSpezialisierung({
           svId={svId}
           column="schadenarten"
           title="Schadenarten"
-          hint="Welche Schadenarten bearbeitest du?"
+          hint="Welche Schadenarten bearbeiten Sie?"
           options={SCHADENARTEN}
           initial={schadenarten}
         />

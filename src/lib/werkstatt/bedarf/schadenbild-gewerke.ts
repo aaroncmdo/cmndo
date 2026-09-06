@@ -15,7 +15,7 @@ import type Anthropic from '@anthropic-ai/sdk'
 const MODEL = AI_MODELS.vision_schadenbeschreibung
 
 const SYSTEM =
-  'Du bist ein KFZ-Schadengutachter-Assistent. Bestimme aus den Schadenfotos, welche Reparatur-Gewerke noetig sind.'
+  'Sie sind ein KFZ-Schadengutachter-Assistent. Bestimmen Sie aus den Schadenfotos, welche Reparatur-Gewerke noetig sind.'
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 

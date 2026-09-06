@@ -178,7 +178,7 @@ export default function PasswortZuruecksetzenPage() {
               <p className="text-claimondo-navy font-semibold text-base mb-2">
                 Passwort erfolgreich geändert
               </p>
-              <p className="text-claimondo-ondo text-sm">Du wirst weitergeleitet …</p>
+              <p className="text-claimondo-ondo text-sm">Sie werden weitergeleitet …</p>
             </div>
           )}
 

@@ -90,7 +90,7 @@ function validiereBusinessDaten(input: {
   }
   if (p !== 'basic') {
     if (!firmenname) return { ok: false, error: 'Firmenname ist bei bezahlten Paketen ein Pflichtfeld.' }
-    if (!rechtsform) return { ok: false, error: 'Bitte wähle deine Rechtsform.' }
+    if (!rechtsform) return { ok: false, error: 'Bitte wählen Sie Ihre Rechtsform.' }
     if (!steuernummer) return { ok: false, error: 'Steuernummer ist bei bezahlten Paketen ein Pflichtfeld.' }
   }
   if (!firmenname && !rechtsform && !steuernummer && !ustId) {
@@ -246,7 +246,7 @@ export async function beanspracheSvLead(input: {
     return {
       ok: false,
       error:
-        'Zu dieser E-Mail existiert bereits ein Konto. Bitte melde dich an.',
+        'Zu dieser E-Mail existiert bereits ein Konto. Bitte melden Sie sich an.',
     }
   }
 
@@ -518,7 +518,7 @@ export async function registriereSvBasicNeu(input: {
   if (existingProfile) {
     return {
       ok: false,
-      error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melde dich an.',
+      error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melden Sie sich an.',
     }
   }
 

@@ -38,8 +38,8 @@ export default async function WerkstattQrStartPage({
           QR-Code noch nicht aktiviert
         </h1>
         <p className="text-body text-claimondo-ondo">
-          Dieser QR-Code ist noch keiner Werkstatt zugewiesen. Bitte wende dich an
-          deine Werkstatt — oder melde deinen Schaden direkt bei Claimondo.
+          Dieser QR-Code ist noch keiner Werkstatt zugewiesen. Bitte wenden Sie sich an
+          Ihre Werkstatt — oder melde Ihren Schaden direkt bei Claimondo.
         </p>
         <a
           href="/schaden-melden"

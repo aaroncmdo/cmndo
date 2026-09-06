@@ -1,5 +1,5 @@
 // WS E / Netzwerk-Bindung (P6 T10): der Karten-Issuer wird beim Scan zum netzwerk_owner
-// des Claims (claims.netzwerk_owner_id, P0) — die Attribution speist den "Dein Netzwerk"-
+// des Claims (claims.netzwerk_owner_id, P0) — die Attribution speist den "Ihr Netzwerk"-
 // Finder-Boost (P2) und die Provisions-Suppression (P3).
 // v1: Issuer = Flotte (schadenkarten.firma_id) -> firmen_flotten_konten.user_id (= profiles.id).
 // Hook (nicht gebaut): generischer Issuer (SV/Werkstatt) fuer den Privatkunden-Rollout — sobald

@@ -231,7 +231,7 @@ export default function EmbedSiteWizard({
                 <p className="text-xs text-claimondo-ondo mt-1">Eigenes Theme + Dispatch-Qualifizierung.</p>
                 {!svVerifiziert && (
                   <p className="text-xs font-medium text-warning-strong mt-1.5">
-                    Erst nach deiner Verifizierung durch Claimondo freigeschaltet.
+                    Erst nach Ihrer Verifizierung durch Claimondo freigeschaltet.
                   </p>
                 )}
               </Card>
@@ -239,7 +239,7 @@ export default function EmbedSiteWizard({
 
             {!isB && (
               <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border px-4 py-3 text-xs text-claimondo-ondo">
-                Mit <strong>Variante B</strong> brandest du dein Widget mit deinem eigenen Theme und Logo.
+                Mit <strong>Variante B</strong> branden Sie Ihr Widget mit Ihrem eigenen Theme und Logo.
               </div>
             )}
 
@@ -269,7 +269,7 @@ export default function EmbedSiteWizard({
                   label="Logo-URL (optional)"
                   value={form.brand_logo_url_override}
                   onChange={(e) => patch({ brand_logo_url_override: e.target.value })}
-                  hint="Direkte URL zu deinem Logo (SVG/PNG). Leer = Claimondo-Logo."
+                  hint="Direkte URL zu Ihrem Logo (SVG/PNG). Leer = Claimondo-Logo."
                   placeholder="https://…/logo.svg"
                 />
 
@@ -295,9 +295,9 @@ export default function EmbedSiteWizard({
       {step === 2 && (
         <SectionCard title="Tracking & Conversions (optional)" bodyClassName="space-y-4">
           <p className="text-sm text-claimondo-ondo">
-            Verbinde Monika mit deinem GA4 / Google Ads. <strong>Direkt</strong> (empfohlen): trag unten deine
+            Verbinde Monika mit Ihrem GA4 / Google Ads. <strong>Direkt</strong> (empfohlen): trag unten Ihre
             GA4-Measurement-ID bzw. Google-Ads Conversion-ID + Label ein — Monika feuert die Conversion bei
-            erfolgreicher Anfrage direkt in dein Konto, ohne weiteres Setup. <strong>Oder per Webhook</strong>{' '}
+            erfolgreicher Anfrage direkt in Ihr Konto, ohne weiteres Setup. <strong>Oder per Webhook</strong>{' '}
             für eigene Pipelines (Make/Zapier): HMAC-signiert bei Anfrage, vereinbartem und durchgeführtem Termin.
             Pro Kanal nur einen Weg nutzen, sonst zählt die Conversion doppelt.
           </p>
@@ -320,7 +320,7 @@ export default function EmbedSiteWizard({
             label="Google-Ads Conversion-ID (optional)"
             value={form.tracking_gads_conversion_id}
             onChange={(e) => patch({ tracking_gads_conversion_id: e.target.value })}
-            hint="Aus Google Ads → Conversions → dein Conversion-Snippet. Format AW-XXXXXXXXX."
+            hint="Aus Google Ads → Conversions → Ihr Conversion-Snippet. Format AW-XXXXXXXXX."
             placeholder="AW-XXXXXXXXX"
           />
           <TextField

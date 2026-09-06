@@ -59,6 +59,11 @@ export function buildSystemPrompt(): string {
     'Du schreibst einen Wissens-Artikel fuer claimondo.de (Kfz-Schadenregulierung, unverschuldeter Unfall).',
     'HAUS-STIL: H1-Titel; direkt danach ein Blockquote "> **Kurz erklaert:** ..." (40-60 Woerter);',
     '  danach ## Sektionen; eine ## Haeufige Fragen Sektion (je **Frage?** + Antwort); Deutsch mit korrekten Umlauten.',
+    // Ohne diese Zeile waehlt das Modell die Anrede frei und erzeugt laufend neue Du-Texte —
+    // egal wie sauber der Bestand einmal umgestellt wurde. Das "Du" oben richtet sich an DICH,
+    // das Modell; der erzeugte Text spricht den Leser mit Sie an.
+    'ANREDE: Der ERZEUGTE Text siezt den Leser durchgehend ("Sie", "Ihr Fahrzeug", "wenden Sie sich").',
+    '  Niemals duzen. Das gilt fuer Fliesstext, Zwischenueberschriften und die Haeufige-Fragen-Sektion.',
     'BELEGE: Nenne die einschlaegigen §§ (z.B. "§ 249 BGB", "§ 254 BGB", "§ 7 StVG") — die sind Pflicht.',
     '  BGH-Aktenzeichen NUR, wenn du dir des EXAKTEN Az. absolut sicher bist. Im Zweifel formuliere',
     '  "der BGH hat entschieden, dass ..." OHNE Aktenzeichen. Ein erfundenes oder falsches Aktenzeichen',
@@ -93,6 +98,9 @@ export function buildB2BSystemPrompt(): string {
     'Du schreibst einen Fach-Artikel fuer claimondo.de (Kfz-Schadenregulierung, Branchenthemen).',
     'ZIELGRUPPE: Fach-Leser: Kfz-Sachverständige, Rechtsanwälte/Kanzleien, Kfz-Werkstätten und Versicherungsmakler',
     '  — kollegialer Fachton, KEIN Geschädigten-Du. Keine Erklärungen für Laien.',
+    // "Kollegialer Fachton" allein liess die Anrede offen — kollegial kann auch geduzt sein.
+    // Hier wird sie ausdruecklich festgelegt, sonst driftet der Generator wieder auseinander.
+    'ANREDE: Wo der Text den Leser anspricht, wird gesiezt ("Sie", "Ihre Mandantschaft"). Niemals duzen.',
     'RELEVANZ-CHECK (ZUERST): Relevant ist NUR, was Kfz-Sachverständige, Kfz-Werkstätten, Kfz-Versicherung/',
     '  Kaskoschaden, Fahrzeugbewertung/Gutachten oder Verkehrs-/Schadenrecht FACHLICH betrifft. NICHT relevant',
     '  (dann antworte AUSSCHLIESSLICH mit dem einzelnen Wort NICHT_RELEVANT — kein JSON, kein Body, sonst',

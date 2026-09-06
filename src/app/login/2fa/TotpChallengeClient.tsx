@@ -87,7 +87,7 @@ export default function TotpChallengeClient({
         <div className="mb-8">
           <PageHeader
             title="Zwei-Faktor-Authentifizierung"
-            description="Gib den 6-stelligen Code aus deiner Authenticator-App ein."
+            description="Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein."
             size="lg"
             align="center"
             leadingSlot={
@@ -159,7 +159,7 @@ export default function TotpChallengeClient({
 
         <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
           <KeyRoundIcon className="w-3 h-3 inline mr-1" />
-          Der Code wechselt alle 30 Sekunden in deiner Authenticator-App.
+          Der Code wechselt alle 30 Sekunden in Ihrer Authenticator-App.
         </p>
       </div>
     </div>

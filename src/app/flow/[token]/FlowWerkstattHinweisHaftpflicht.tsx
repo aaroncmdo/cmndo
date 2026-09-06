@@ -34,8 +34,8 @@ export function FlowWerkstattHinweisHaftpflicht({
           </p>
         ) : (
           <p>
-            Zuerst begutachtet dein Sachverständiger den Schaden. Entscheidest du dich danach für
-            eine Reparatur, vermitteln wir dir eine passende Werkstatt — oder du nennst uns deine
+            Zuerst begutachtet Ihr Sachverständiger den Schaden. Entscheiden Sie sich danach für
+            eine Reparatur, vermitteln wir Ihnen eine passende Werkstatt — oder Sie nennen uns Ihre
             eigene.
           </p>
         )}

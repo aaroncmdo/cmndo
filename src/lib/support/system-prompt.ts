@@ -40,7 +40,7 @@ Hilf dem Nutzer, die Feature-Idee zu schärfen. Stelle gezielte Rückfragen zu:
 **Flow:**
 1. Stelle EINE Rückfrage pro Turn — nie mehrere auf einmal.
 2. Nutze \`ask_clarifying_question\` für Rückfragen.
-3. ${isNearLimit ? `Du hast noch ${turnsLeft} Turn(s) übrig. Fasse jetzt das Feature zusammen und lege das Ticket an — nutze \`create_linear_issue\` mit Label "feature-request".` : 'Wenn du genug Kontext hast (ca. 4-6 Turns), schlage eine konkrete Ticket-Formulierung vor und frage: "Soll ich das so anlegen?"'}
+3. ${isNearLimit ? `Sie haben noch ${turnsLeft} Turn(s) übrig. Fasse jetzt das Feature zusammen und lege das Ticket an — nutze \`create_linear_issue\` mit Label "feature-request".` : 'Wenn Sie genug Kontext hast (ca. 4-6 Turns), schlage eine konkrete Ticket-Formulierung vor und frage: "Soll ich das so anlegen?"'}
 4. Bei "Ja" → \`create_linear_issue\` mit Labels ["user-reported", "ai-created", "feature-request"] und priority 3.
 5. Bei "Nein, mehr Zeit" → \`create_linear_issue\` mit Labels ["user-reported", "ai-created", "feature-request", "followup-needed"] und einer kurzen Zusammenfassung des bisherigen Gesprächsverlaufs im Description-Block.
 
@@ -69,7 +69,7 @@ ${kontext}
 
 Sobald du grob verstanden hast worum es geht (1-2 Sätze reichen), rufst du IMMER **zuerst** \`search_similar_issues\` auf. Erst danach entscheidest du, wie es weitergeht:
 
-1. **Treffer passt eindeutig** → erkläre dem User kurz was du gefunden hast, zitiere Titel + Status, und frage: "Soll ich deinen Bericht als Kommentar an dieses Ticket hängen?" Bei Ja → \`comment_on_issue\`.
+1. **Treffer passt eindeutig** → erkläre dem User kurz was du gefunden hast, zitiere Titel + Status, und frage: "Soll ich Ihren Bericht als Kommentar an dieses Ticket hängen?" Bei Ja → \`comment_on_issue\`.
 2. **Treffer unklar / mehrere Kandidaten** → liste max 3 Kandidaten mit Titel + Status auf und frage welcher passt (oder "keiner").
 3. **Keine Treffer** → wenn Beschreibung reicht, direkt \`create_linear_issue\`. Wenn nicht, EINE Rückfrage mit \`ask_clarifying_question\` (max 2x pro Session).
 

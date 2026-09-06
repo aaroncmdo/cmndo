@@ -71,7 +71,7 @@ export async function GET(request: Request) {
             email,
             vorname,
             subject: 'Verifizierung überfällig — bitte Unterlagen sofort nachreichen',
-            html: `<p>Hallo ${vorname},</p><p>die 14-Tage-Frist für deine Verifizierungs-Dokumente (Berufshaftpflicht, Gewerbeanmeldung, ggf. Bestellungsurkunde) ist abgelaufen.</p><p>Bitte lade die fehlenden Unterlagen umgehend in deinem Portal unter <strong>Verifizierung</strong> hoch, um deine Verifizierung abzuschließen.</p>`,
+            html: `<p>Hallo ${vorname},</p><p>die 14-Tage-Frist für Ihre Verifizierungs-Dokumente (Berufshaftpflicht, Gewerbeanmeldung, ggf. Bestellungsurkunde) ist abgelaufen.</p><p>Bitte laden Sie die fehlenden Unterlagen umgehend in Ihrem Portal unter <strong>Verifizierung</strong> hoch, um Ihre Verifizierung abzuschließen.</p>`,
           })
         } catch (err) { console.error('[AAR-359 W4] SV-Email frist_ueberschritten:', err) }
       }
@@ -107,7 +107,7 @@ export async function GET(request: Request) {
             email,
             vorname,
             subject: `Erinnerung: Verifizierungs-Dokumente in ${tageNochOffen} Tagen fällig`,
-            html: `<p>Hallo ${vorname},</p><p>die Hälfte der 14-Tage-Frist für deine Verifizierungs-Dokumente ist um — dir bleiben noch <strong>${tageNochOffen} Tage</strong>, um die fehlenden Unterlagen nachzureichen.</p><p>Bitte lade Berufshaftpflicht, Gewerbeanmeldung und — falls zutreffend — die Bestellungsurkunde in deinem Portal unter <strong>Verifizierung</strong> hoch.</p>`,
+            html: `<p>Hallo ${vorname},</p><p>die Hälfte der 14-Tage-Frist für Ihre Verifizierungs-Dokumente ist um — Ihnen bleiben noch <strong>${tageNochOffen} Tage</strong>, um die fehlenden Unterlagen nachzureichen.</p><p>Bitte laden Sie Berufshaftpflicht, Gewerbeanmeldung und — falls zutreffend — die Bestellungsurkunde in Ihrem Portal unter <strong>Verifizierung</strong> hoch.</p>`,
           })
         } catch (err) { console.error('[AAR-359 W4] SV-Email reminder_7d:', err) }
       }

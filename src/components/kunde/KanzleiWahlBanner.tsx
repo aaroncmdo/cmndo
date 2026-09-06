@@ -41,10 +41,10 @@ export function KanzleiWahlBanner({
           <ScaleIcon className="w-5 h-5 text-claimondo-ondo shrink-0 mt-0.5" />
           <div className="min-w-0 flex-1">
             <p className="text-body-sm font-semibold text-claimondo-navy">
-              Möchtest du eine Kanzlei einbinden?
+              Möchten Sie eine Kanzlei einbinden?
             </p>
             <p className="text-caption text-claimondo-ondo mt-0.5">
-              {nachGutachten ? 'Dein Gutachten ist da. ' : ''}
+              {nachGutachten ? 'Ihr Gutachten ist da. ' : ''}
               Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung — für dich
               kostenfrei, wenn der Gegner haftet.
             </p>

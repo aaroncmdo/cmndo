@@ -40,7 +40,7 @@ type Props = {
    */
   subBueros?: SubBuero[]
   /**
-   * Optional: Sub-SV einer Org → 'Du gehoerst zu [Name]' Hinweis statt
+   * Optional: Sub-SV einer Org → 'Sie gehoeren zu [Name]' Hinweis statt
    * der vollen Tabelle.
    */
   organisationName?: string | null
@@ -90,7 +90,7 @@ export default function OrderSummaryCard({
     return (
       <div className={`bg-white border border-[var(--brand-secondary)]/20 rounded-2xl p-6 ${className}`}>
         <p className="text-xs text-[var(--brand-primary)] uppercase tracking-wide font-semibold mb-1">
-          Dein Auftrag
+          Ihr Auftrag
         </p>
         <p className="text-base font-semibold text-claimondo-navy">{paketLabel}</p>
         <p className="text-xs text-claimondo-ondo">
@@ -99,7 +99,7 @@ export default function OrderSummaryCard({
 
         {organisationName && !istBuero && (
           <div className="mt-3 px-3 py-2 rounded-ios-lg bg-claimondo-bg border border-claimondo-border text-[11px] text-claimondo-ondo">
-            Du gehoerst zu <strong>{organisationName}</strong>
+            Sie gehoeren zu <strong>{organisationName}</strong>
           </div>
         )}
 
@@ -114,7 +114,7 @@ export default function OrderSummaryCard({
           <p className="text-[11px] text-claimondo-ondo mt-1">netto · einmalig</p>
           <p className="text-[11px] text-claimondo-ondo mt-2 leading-relaxed">
             Wird mit den ersten Lead-Gebuehren verrechnet. Sobald die Zahlung
-            eingegangen ist, ist dein Portal-Zugang freigeschaltet.
+            eingegangen ist, ist Ihr Portal-Zugang freigeschaltet.
           </p>
         </div>
 
@@ -179,7 +179,7 @@ export default function OrderSummaryCard({
   return (
     <div className={`bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-ios-xl p-5 ${className}`}>
       <p className="text-xs text-[var(--brand-primary)] uppercase tracking-wide font-semibold mb-3">
-        Deine Bestellung
+        Ihre Bestellung
       </p>
       <div className="grid grid-cols-2 gap-y-3 gap-x-4">
         <Cell label="Paket" value={paketLabel} />
@@ -191,7 +191,7 @@ export default function OrderSummaryCard({
       </div>
       {organisationName && !istBuero && (
         <div className="mt-3 px-3 py-2 rounded-ios-lg bg-white border border-claimondo-border text-[11px] text-claimondo-navy">
-          Du gehoerst zu <strong>{organisationName}</strong>
+          Sie gehoeren zu <strong>{organisationName}</strong>
         </div>
       )}
       <div className="mt-4 pt-4 border-t border-[var(--brand-secondary)]/15 flex items-center justify-between text-xs">

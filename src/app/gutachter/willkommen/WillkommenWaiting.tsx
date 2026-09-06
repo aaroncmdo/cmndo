@@ -19,7 +19,7 @@ export default function WillkommenWaiting() {
       <div className="w-10 h-10 rounded-full border-4 border-claimondo-navy/20 border-t-claimondo-navy animate-spin" />
       <p className="text-sm font-semibold text-claimondo-navy">Konto wird eingerichtet …</p>
       <p className="text-xs text-claimondo-ondo max-w-xs leading-relaxed">
-        Dein Account wurde soeben angelegt. Diese Seite lädt sich automatisch neu.
+        Ihr Account wurde soeben angelegt. Diese Seite lädt sich automatisch neu.
       </p>
     </div>
   )

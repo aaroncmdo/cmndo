@@ -92,7 +92,7 @@ export default async function KanzleiTerminPage() {
     <div className="space-y-4">
       <PageHeader
         title="Termin mit Admin"
-        description="Buche einen Video- oder Vor-Ort-Termin mit einem Claimondo-Admin. Der Termin landet direkt im Kalender des Admins, du erhältst per Mail eine Google-Einladung inkl. Meet-Link."
+        description="Buchen Sie einen Video- oder Vor-Ort-Termin mit einem Claimondo-Admin. Der Termin landet direkt im Kalender des Admins, Sie erhalten per Mail eine Google-Einladung inkl. Meet-Link."
         size="lg"
       />
       <TerminBuchungClient

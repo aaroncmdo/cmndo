@@ -20,7 +20,7 @@ export function TrackingAnleitungContent({ slug, ga4 }: { slug: string; ga4: str
         <SectionCard title="Google Analytics 4" bodyClassName="space-y-3 text-sm text-claimondo-navy">
           <p className="font-medium">Direkt — empfohlen, kein GTM nötig</p>
           <ol className="list-decimal pl-5 space-y-1">
-            <li>Trag deine GA4-Measurement-ID <code>{ga4}</code> im Wizard-Schritt „Tracking" ein.</li>
+            <li>Trag Ihre GA4-Measurement-ID <code>{ga4}</code> im Wizard-Schritt „Tracking" ein.</li>
             <li>
               Monika feuert bei erfolgreicher Anfrage automatisch das Ereignis <code>generate_lead</code>{' '}
               direkt in dein GA4 — client-seitig, ohne weiteren Einbau.
@@ -30,9 +30,9 @@ export function TrackingAnleitungContent({ slug, ga4 }: { slug: string; ga4: str
               zählt als Conversion.
             </li>
           </ol>
-          <p className="pt-2 font-medium">Alternativ über GTM (wenn du ohnehin GTM nutzt)</p>
+          <p className="pt-2 font-medium">Alternativ über GTM (wenn Sie ohnehin GTM nutzt)</p>
           <p>
-            Monika pusht zusätzlich Events in den <code>window.dataLayer</code> deiner Seite — die fängst du
+            Monika pusht zusätzlich Events in den <code>window.dataLayer</code> Ihrer Seite — die fangen Sie
             über den Google Tag Manager ab.
           </p>
           <p className="font-medium">Events, die Monika sendet:</p>
@@ -52,7 +52,7 @@ monika_anfrage_submit // Anfrage abgeschickt`}
           </ol>
           <p className="text-claimondo-ondo">
             Datenschutz: Beim Direkt-Weg lädt Monika den Google-Tag erst nach dem Absenden der Anfrage
-            (nach Einwilligung). Führe GA4 / Google Ads in deiner eigenen Datenschutzerklärung auf.
+            (nach Einwilligung). Führe GA4 / Google Ads in Ihrer eigenen Datenschutzerklärung auf.
           </p>
           {/* SCREENSHOT-PLATZ: GTM-Trigger-Konfiguration */}
         </SectionCard>
@@ -111,8 +111,8 @@ const expected = 'sha256=' + createHmac('sha256', SECRET).update(rawBody).digest
 // zeitkonstant gegen req.headers['x-claimondo-signature'] vergleichen`}
           </pre>
           <p className="text-claimondo-ondo">
-            Dein Signatur-Secret steht nach dem Speichern im Wizard-Schritt „Tracking". Mit dem
-            „Test-Webhook senden"-Button prüfst du die Verbindung sofort.
+            Ihr Signatur-Secret steht nach dem Speichern im Wizard-Schritt „Tracking". Mit dem
+            „Test-Webhook senden"-Button prüfen Sie die Verbindung sofort.
           </p>
           {/* SCREENSHOT-PLATZ: Make.com-Szenario */}
         </SectionCard>

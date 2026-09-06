@@ -529,7 +529,7 @@ export default function GutachterShell({
               className="px-3 pt-3 text-[11px] leading-snug"
               style={{ color: 'var(--brand-sidebar-text)', opacity: 0.55 }}
             >
-              🔒 Die weiteren Bereiche werden nach deiner Freischaltung sichtbar. Schließe zuerst dein Onboarding ab.
+              🔒 Die weiteren Bereiche werden nach Ihrer Freischaltung sichtbar. Schließen Sie zuerst Ihr Onboarding ab.
             </p>
           )}
         </nav>

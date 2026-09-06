@@ -36,7 +36,7 @@ export function AufgabenZone({ vm }: { vm: KundeClaimViewModel }) {
 
   return (
     <Card p={4} className="space-y-2">
-      <h2 className="text-body-sm font-semibold text-claimondo-navy">Deine Aufgaben</h2>
+      <h2 className="text-body-sm font-semibold text-claimondo-navy">Ihre Aufgaben</h2>
       <ul className="space-y-1.5">
         {aufgaben.map((a) => (
           <li key={a.id}>

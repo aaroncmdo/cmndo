@@ -63,8 +63,8 @@ export function buildKundeVermittlungWhatsApp(args: {
   const anrede = args.vorname?.trim() ? `Hallo ${args.vorname.trim()},` : 'Hallo,'
   const intro =
     args.imAuftragVon === 'gutachter'
-      ? `${anrede} dein Gutachter hat für dich eine Reparatur-Werkstatt organisiert:`
-      : `${anrede} wir haben Dir eine Reparatur-Werkstatt vermittelt:`
+      ? `${anrede} Ihr Gutachter hat für Sie eine Reparatur-Werkstatt organisiert:`
+      : `${anrede} wir haben Ihnen eine Reparatur-Werkstatt vermittelt:`
   const zeilen: Array<string | null> = [
     intro,
     '',
@@ -72,9 +72,9 @@ export function buildKundeVermittlungWhatsApp(args: {
     args.adresse?.trim() ? args.adresse.trim() : null,
     args.telefon?.trim() ? `Tel.: ${args.telefon.trim()}` : null,
     '',
-    'Die Werkstatt kümmert sich um die Reparatur Deines Fahrzeugs. Bei Fragen kannst Du uns jederzeit hier antworten.',
+    'Die Werkstatt kümmert sich um die Reparatur Ihres Fahrzeugs. Bei Fragen können Sie uns jederzeit hier antworten.',
     '',
-    'Dein Claimondo-Team',
+    'Ihr Claimondo-Team',
   ]
   return zeilen.filter((z): z is string => z !== null).join('\n')
 }
@@ -110,10 +110,10 @@ export function buildKundeVermittlungEmailHtml(args: {
         <tr><td style="background:${NAVY};padding:20px 28px;color:#ffffff;font-size:18px;font-weight:700;">Claimondo</td></tr>
         <tr><td style="padding:28px;">
           <p style="margin:0 0 12px;font-size:15px;">${anrede}</p>
-          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">${args.imAuftragVon === 'gutachter' ? 'dein Gutachter hat für dich eine Reparatur-Werkstatt organisiert:' : 'wir haben Dir eine Reparatur-Werkstatt für Dein Fahrzeug vermittelt:'}</p>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">${args.imAuftragVon === 'gutachter' ? 'Ihr Gutachter hat für Sie eine Reparatur-Werkstatt organisiert:' : 'wir haben Ihnen eine Reparatur-Werkstatt für Ihr Fahrzeug vermittelt:'}</p>
           <div style="background:${BG};border-radius:12px;padding:18px 20px;margin-bottom:20px;">${werkstattZeilen}</div>
-          <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Die Werkstatt kümmert sich um die Reparatur Deines Fahrzeugs. Bei Fragen sind wir jederzeit für Dich da.</p>
-          <p style="margin:24px 0 0;font-size:15px;">Dein Claimondo-Team</p>
+          <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Die Werkstatt kümmert sich um die Reparatur Ihres Fahrzeugs. Bei Fragen sind wir jederzeit für Sie da.</p>
+          <p style="margin:24px 0 0;font-size:15px;">Ihr Claimondo-Team</p>
         </td></tr>
       </table>
     </td></tr>
@@ -168,7 +168,7 @@ export async function notifyKundeWerkstattVermittlung(
       })
       await deps.sendEmail({
         to: kunde.email.trim(),
-        subject: 'Deine Reparatur-Werkstatt steht fest',
+        subject: 'Ihre Reparatur-Werkstatt steht fest',
         html,
         template: 'werkstatt_vermittlung_kunde',
         empfaengerTyp: 'kunde',

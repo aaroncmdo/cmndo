@@ -82,7 +82,7 @@ export function FlotteRegistrierenClient({ einladung = null }: { einladung?: str
           Kostenlos registrieren
         </Button>
         <p className="text-body-xs text-claimondo-shield">
-          Mit dem Absenden stimmst du unseren Nutzungsbedingungen und der Datenschutzerklärung zu.
+          Mit dem Absenden stimmen Sie unseren Nutzungsbedingungen und der Datenschutzerklärung zu.
         </p>
       </div>
     </Card>

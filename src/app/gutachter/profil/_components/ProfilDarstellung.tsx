@@ -14,7 +14,7 @@ export function ProfilDarstellung({
 }) {
   return (
     <SectionCard className="p-5 mt-5">
-      <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Wie Kunden dich sehen</h2>
+      <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Wie Kunden Sie sehen</h2>
 
       {/* AAR-454: Branding-Editor-Verweis (1:1 aus BrandingSection) */}
       <a

@@ -47,7 +47,7 @@ export function UpdatesWorklist({
         })}
       </div>
 
-      <div className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-danger">Braucht dich</div>
+      <div className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-danger">Braucht Sie</div>
       {fAction.length === 0 ? (
         <div className="px-4 pb-4 text-sm text-claimondo-ondo/70">Nichts offen — alles erledigt. ✓</div>
       ) : (

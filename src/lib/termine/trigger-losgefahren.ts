@@ -33,7 +33,7 @@ export async function triggerSvLosgefahren(
     .select('id, profile_id')
     .eq('id', termin.assignee_id)
     .single()
-  if (!sv || sv.profile_id !== user.id) return { error: 'Nicht dein Termin' }
+  if (!sv || sv.profile_id !== user.id) return { error: 'Nicht Ihr Termin' }
 
   // SV-Name
   const { data: svProfile } = await db.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()

@@ -206,7 +206,7 @@ export default async function KundentermineView() {
         title="Kundentermine"
         description={
           termine.length === 0
-            ? 'SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Änderungen erfolgen im Fall.'
+            ? 'SV-Besichtigungen der Fälle, die Sie als Kundenbetreuer begleitest. Nur lesend — Änderungen erfolgen im Fall.'
             : summaryParts.join(' · ')
         }
         size="lg"

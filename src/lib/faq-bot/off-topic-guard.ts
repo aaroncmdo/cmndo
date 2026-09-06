@@ -60,6 +60,14 @@ const FREMD_FALL_KEYWORDS: readonly string[] = [
   'anderen fall',
 ]
 
+// ⚠ Das sind ERKENNUNGSMUSTER fuer Nutzereingaben, keine Ausgabetexte. Sie duerfen NICHT
+// mit der Anrede-Umstellung auf Sie mitwandern: wer 'bist du eine ki' auf 'sind Sie eine KI'
+// aendert, macht den Waechter fuer genau die Frage blind, die er abfangen soll — und merkt es
+// nicht, weil die Antwort daneben ja korrekt siezt und kein Test rot wird.
+//
+// Umgekehrt fehlte bisher die Sie-Form ganz: der Waechter kannte nur die geduzte Frage. Seit
+// die Oberflaeche durchgehend siezt, fragen Nutzer eher "Sind Sie eine KI?" — und rutschten
+// damit durch. Beide Formen stehen deshalb hier.
 const META_KI_KEYWORDS: readonly string[] = [
   'bist du eine ki',
   'bist du ein bot',
@@ -68,6 +76,14 @@ const META_KI_KEYWORDS: readonly string[] = [
   'welches llm',
   'welche ki',
   'bist du ein mensch',
+  // Sie-Form derselben Fragen
+  'sind sie eine ki',
+  'sind sie ein bot',
+  'sind sie claude',
+  'sind sie ein mensch',
+  'sind sie echt',
+  'reden wir mit einer ki',
+  'spreche ich mit einem menschen',
 ]
 
 const ANTWORT_INTERNA =

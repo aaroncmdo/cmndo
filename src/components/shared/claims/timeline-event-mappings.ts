@@ -120,7 +120,7 @@ export const TIMELINE_EVENT_DISPLAY: Record<string, EventDisplay> = {
   'claim.klage_rechtsstreit': {
     icon: ScaleIcon, tone: 'brand', kategorie: 'phase',
     labelInternal: (p) => `Klage/Rechtsstreit${p.endzustand_grund ? ` — ${s(p.endzustand_grund)}` : ''}`,
-    labelKunde:    () => 'Dein Fall ist im gerichtlichen Verfahren',
+    labelKunde:    () => 'Ihr Fall ist im gerichtlichen Verfahren',
   },
   'claim.verjaehrt': {
     icon: XCircleIcon, tone: 'danger', kategorie: 'phase',
@@ -140,7 +140,7 @@ export const TIMELINE_EVENT_DISPLAY: Record<string, EventDisplay> = {
   'claim.an_externe_kanzlei_uebergeben': {
     icon: ScaleIcon, tone: 'brand', kategorie: 'phase',
     labelInternal: () => 'An externe Kanzlei übergeben',
-    labelKunde:    () => 'An deine Kanzlei übergeben',
+    labelKunde:    () => 'An Ihre Kanzlei übergeben',
   },
   'claim.storniert': {
     icon: PauseCircleIcon, tone: 'neutral', kategorie: 'phase',
@@ -167,7 +167,7 @@ export const TIMELINE_EVENT_DISPLAY: Record<string, EventDisplay> = {
   'termin.durchgefuehrt': {
     icon: CarFrontIcon, tone: 'success', kategorie: 'gutachten',
     labelInternal: () => 'Besichtigung durchgeführt',
-    labelKunde:    () => 'Gutachter hat dein Fahrzeug besichtigt',
+    labelKunde:    () => 'Gutachter hat Ihr Fahrzeug besichtigt',
   },
 
   // ── Repair-Events ────────────────────────────────────────────────────────

@@ -16,7 +16,7 @@ type Props = {
 }
 
 export function subject(_p: Props): string {
-  return 'Dein Claimondo-Konto – Passwort festlegen'
+  return 'Ihr Claimondo-Konto – Passwort festlegen'
 }
 
 export function SvBasicClaimLinkEmail({ vorname, actionUrl }: Props) {
@@ -29,8 +29,8 @@ export function SvBasicClaimLinkEmail({ vorname, actionUrl }: Props) {
       />
       <Card>
         <Paragraph>
-          Dein Eintrag auf Claimondo wurde erfolgreich beansprucht. Lege jetzt
-          dein Passwort fest, um dich in dein Konto einzuloggen und den
+          Ihr Eintrag auf Claimondo wurde erfolgreich beansprucht. Lege jetzt
+          Ihr Passwort fest, um Sie in Ihr Konto einzuloggen und den
           Verifizierungsprozess abzuschließen.
         </Paragraph>
         <Paragraph>
@@ -44,8 +44,8 @@ export function SvBasicClaimLinkEmail({ vorname, actionUrl }: Props) {
           </a>
         </Paragraph>
         <Paragraph>
-          Nach der Passwort-Vergabe prüfen wir deine Angaben innerhalb von 48 Stunden.
-          Du erhältst eine Benachrichtigung, sobald dein Konto freigeschaltet ist.
+          Nach der Passwort-Vergabe prüfen wir Ihre Angaben innerhalb von 48 Stunden.
+          Sie erhalten eine Benachrichtigung, sobald Ihr Konto freigeschaltet ist.
         </Paragraph>
         <Paragraph>
           Bei Fragen erreichst du uns unter{' '}

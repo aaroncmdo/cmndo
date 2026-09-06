@@ -477,14 +477,14 @@ export async function erzeugeSelbstzahlerClaim(
         const { sendEmail } = await import('@/lib/email/google/client')
         await sendEmail({
           to: kundenEmail,
-          subject: 'Dein Fall bei Claimondo ist angelegt',
+          subject: 'Ihr Fall bei Claimondo ist angelegt',
           html: `<div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; line-height: 1.5;">
   <p>${anrede}</p>
-  <p>Dein Fall wurde erfolgreich angelegt. Über den folgenden Link kommst du jederzeit zurück zu deinem Vorgang — auch wenn du den Browser-Tab schließt:</p>
+  <p>Ihr Fall wurde erfolgreich angelegt. Über den folgenden Link kommen Sie jederzeit zurück zu Ihrem Vorgang — auch wenn Sie den Browser-Tab schließt:</p>
   <p style="margin: 20px 0;"><a href="${flowUrl}" style="background: #4573A2; color: #ffffff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: bold;">Zu meinem Vorgang</a></p>
   <p style="font-size: 13px; color: #555;">Oder direkt: <a href="${flowUrl}">${flowUrl}</a></p>
-  <p>Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei dir.</p>
-  <p>Mit freundlichen Grüßen<br>Dein Claimondo-Team</p>
+  <p>Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen.</p>
+  <p>Mit freundlichen Grüßen<br>Ihr Claimondo-Team</p>
 </div>`,
         })
       }
@@ -919,7 +919,7 @@ export async function waehleWerkstattFlow(
   if (!leadRow) return { ok: false, error: 'Dieser Link ist ungültig.' }
   const row = leadRow as BedarfRow
 
-  // Die Werkstattwahl IST die Antwort auf "Wie möchtest du den Schaden abrechnen?".
+  // Die Werkstattwahl IST die Antwort auf "Wie möchten Sie den Schaden abrechnen?".
   // Wer die Frage überspringt, bekam den Step trotzdem angeboten — und jede Auswahl endete
   // in "Für diesen Vorgang ist keine Werkstatt-Auswahl möglich." (prod-verifiziert 28.08.).
   // Den Step wegzukonfigurieren geht NICHT (Sequenz beim Mount fixiert, `reparaturwunsch`

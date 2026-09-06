@@ -39,11 +39,11 @@ export function SvMonatsabrechnungVersandEmail(props: Props) {
         <InfoRow label="Fällig am" value={props.faelligAm} />
 
         <Paragraph>
-          Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von deinem
+          Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von Ihrem
           hinterlegten Zahlungsmittel eingezogen.
         </Paragraph>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </Card>
       <Footer />
     </EmailShell>

@@ -477,14 +477,14 @@ async function finalizeKundeSetup(
     try {
       const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
       const credsText = [
-        '🔐 Deine Claimondo-Zugangsdaten',
+        '🔐 Ihre Claimondo-Zugangsdaten',
         '',
         `E-Mail: ${email}`,
         `Passwort: ${password}`,
         '',
         `Login: ${base}/login`,
         '',
-        'Bitte ändere dein Passwort beim ersten Login. Dein Claimondo-Team',
+        'Bitte ändere Ihr Passwort beim ersten Login. Ihr Claimondo-Team',
       ].join('\n')
       const r = await sendWhatsAppText(telefon, credsText)
       if (!r.ok) console.error('[D] Login-Daten-WA fehlgeschlagen:', r.code, r.error)
@@ -1613,7 +1613,7 @@ export async function signSAandCreateFall(
           | { vorname: string | null }
           | null
       }
-      const svName = (profile?.vorname ?? '').trim() || 'deinem Gutachter'
+      const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')

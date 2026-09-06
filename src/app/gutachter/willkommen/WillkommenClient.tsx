@@ -143,7 +143,7 @@ const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
 ]
 
 const STEPS_2_SUB: { key: string; label: string; icon: typeof PackageIcon }[] = [
-  { key: 'konditionen', label: 'Dein Paket', icon: PackageIcon },
+  { key: 'konditionen', label: 'Ihr Paket', icon: PackageIcon },
   { key: 'agb', label: 'Bedingungen', icon: FileSignatureIcon },
 ]
 
@@ -368,7 +368,7 @@ export default function WillkommenClient({
   async function handleSoloVertragSubmit() {
     setError(null)
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
-    if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
+    if (!unterschriftName.trim()) { setError('Bitte geben Sie Ihren Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
     // BUG-96: Scroll-Lock raus — der User entscheidet ueber die Modal-Links
     // ob er die Vertragstexte vor der Akzeptanz lesen will.
@@ -394,7 +394,7 @@ export default function WillkommenClient({
     setError(null)
     if (!organisation) { setError('Keine Organisation zugeordnet'); return }
     if (!agbAccepted) { setError('Bitte akzeptiere die AGB/NB/DS'); return }
-    if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
+    if (!unterschriftName.trim()) { setError('Bitte geben Sie Ihren Namen ein'); return }
     if (!signaturePng) { setError('Bitte unterschreibe im Feld unten'); return }
 
     setSaving(true)
@@ -423,7 +423,7 @@ export default function WillkommenClient({
   async function handleSubAgbSubmit() {
     setError(null)
     if (!agbAccepted) { setError('Bitte bestaetige die Bedingungen'); return }
-    if (!unterschriftName.trim()) { setError('Bitte gib deinen Namen ein'); return }
+    if (!unterschriftName.trim()) { setError('Bitte geben Sie Ihren Namen ein'); return }
 
     setSaving(true)
     const result = await akzeptiereAgbSubSv(sv.id, unterschriftName)
@@ -452,16 +452,16 @@ export default function WillkommenClient({
             <h1 className="text-2xl font-semibold text-claimondo-navy">
               Bedingungen akzeptiert{profile.vorname ? `, ${profile.vorname}` : ''}!
             </h1>
-            <p className="text-claimondo-ondo text-sm mt-1">Letzter Schritt liegt jetzt bei deinem Inhaber</p>
+            <p className="text-claimondo-ondo text-sm mt-1">Letzter Schritt liegt jetzt bei Ihrem Inhaber</p>
           </div>
 
           <div className="bg-white border border-claimondo-border rounded-2xl p-6">
             <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-5 flex items-start gap-3">
               <ClockIcon className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" />
               <div className="text-sm text-warning-strong">
-                <p className="font-semibold mb-1">Dein Inhaber muss noch die Anzahlung leisten.</p>
+                <p className="font-semibold mb-1">Ihr Inhaber muss noch die Anzahlung leisten.</p>
                 <p>
-                  Du wirst per Email benachrichtigt sobald dein Account freigeschaltet ist und du
+                  Sie werden per Email benachrichtigt sobald Ihr Account freigeschaltet ist und Sie
                   die ersten Fälle erhalten kannst.
                 </p>
                 {organisation && (
@@ -587,10 +587,10 @@ export default function WillkommenClient({
                 <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-warning-strong">
-                    <p className="font-medium">Du bist Mitglied der Community <strong>{organisation.name}</strong>.</p>
+                    <p className="font-medium">Sie sind Mitglied der Community <strong>{organisation.name}</strong>.</p>
                     <p className="text-xs text-warning-strong mt-1">
-                      Du zahlst deine Anzahlung selbst und unterzeichnest deinen eigenen Vertrag.
-                      Der Unterschied zur Solo-Mitgliedschaft: dein Lead-Pool ist mit anderen Community-Mitgliedern geteilt.
+                      Sie zahlen Ihre Anzahlung selbst und unterzeichnest Ihren eigenen Vertrag.
+                      Der Unterschied zur Solo-Mitgliedschaft: Ihr Lead-Pool ist mit anderen Community-Mitgliedern geteilt.
                     </p>
                   </div>
                 </div>
@@ -598,7 +598,7 @@ export default function WillkommenClient({
 
               {/* Konditionen-Card */}
               <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-5">
-                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Konditionen</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Ihre Konditionen</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
                   <Kondition label="Fälle / Monat" value={String(sv.paket_faelle_gesamt)} />
@@ -618,7 +618,7 @@ export default function WillkommenClient({
 
               {/* Stammdaten-Card (read-only) */}
               <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
-                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Ihre Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
                   <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
@@ -640,7 +640,7 @@ export default function WillkommenClient({
             <div className="space-y-5">
               {/* Buero-Header */}
               <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-5">
-                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-1">Du verwaltest</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-1">Sie verwalten</p>
                 <p className="text-base font-semibold text-claimondo-navy">
                   {organisation?.name ?? '—'} <span className="text-sm text-claimondo-ondo font-normal">mit {subSvs.length} {subSvs.length === 1 ? 'Standort' : 'Standorten'}</span>
                 </p>
@@ -696,7 +696,7 @@ export default function WillkommenClient({
 
               {/* Inhaber-Stammdaten */}
               <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
-                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Inhaber-Stammdaten</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Ihre Inhaber-Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
                   <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
@@ -720,7 +720,7 @@ export default function WillkommenClient({
                   <Building2Icon className="w-5 h-5 text-[var(--brand-primary)] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-claimondo-navy">
                     <p>
-                      Du gehoerst zu <strong>{organisation.name}</strong>. Dein{' '}
+                      Sie gehoeren zu <strong>{organisation.name}</strong>. Dein{' '}
                       {organisation.typ === 'akademie' ? 'Verwalter' : 'Inhaber'} kuemmert sich
                       um Vertrag und Zahlung. Du musst hier nur einmal die Bedingungen bestaetigen.
                     </p>
@@ -730,7 +730,7 @@ export default function WillkommenClient({
 
               {/* Eigenes Paket */}
               <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
-                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Dein Paket</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Ihr Paket</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
                   <Kondition label="Fälle / Monat" value={String(sv.paket_faelle_gesamt)} />
@@ -744,7 +744,7 @@ export default function WillkommenClient({
 
               {/* Stammdaten */}
               <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
-                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Ihre Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
                   <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
@@ -781,7 +781,7 @@ export default function WillkommenClient({
                 <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-claimondo-navy">
-                    Du unterzeichnest stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
+                    Sie unterzeichnen stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
                     {subSvs.length} {subSvs.length === 1 ? 'Sub-Standort' : 'Sub-Standorte'}.
                   </div>
                 </div>
@@ -832,7 +832,7 @@ export default function WillkommenClient({
               {/* Name */}
               <div>
                 <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                  Dein Name (juristisch verbindlich) <span className="text-danger">*</span>
+                  Ihr Name (juristisch verbindlich) <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -918,7 +918,7 @@ export default function WillkommenClient({
               {/* Name-Bestätigung */}
               <div>
                 <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                  Dein Name (zur Bestätigung) <span className="text-danger">*</span>
+                  Ihr Name (zur Bestätigung) <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -1036,7 +1036,7 @@ export default function WillkommenClient({
               <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-4 space-y-2">
                 <p className="text-sm font-semibold text-claimondo-navy">Gutscheincode</p>
                 <p className="text-xs text-claimondo-ondo">
-                  Du hast einen Gutscheincode? Dann kannst du die Anzahlung überspringen.
+                  Sie haben einen Gutscheincode? Dann können Sie die Anzahlung überspringen.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input

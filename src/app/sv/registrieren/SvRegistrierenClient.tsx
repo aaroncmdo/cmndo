@@ -83,14 +83,14 @@ function PaketPicker({ paket, onChange }: { paket: string; onChange: (p: string)
       </div>
       {paket !== 'basic' && (
         <p className="text-xs text-claimondo-shield">
-          Vertrag + Anzahlung schließt du nach der Registrierung im Portal ab.
+          Vertrag + Anzahlung schließen Sie nach der Registrierung im Portal ab.
         </p>
       )}
       {/* P5 T10 (WS F): Freemium-Framing — Registrierung bleibt frei/Basic-first,
           der Netzwerkpartner-Vorteil ist optional im Portal aktivierbar (T8/T9). */}
       <p className="text-xs text-claimondo-shield">
         Tipp: Den <span className="font-semibold">Netzwerkpartner</span>-Vorteil (bevorzugte
-        Platzierung im Finder deiner Kunden) kannst du jederzeit optional im Portal aktivieren.
+        Platzierung im Finder Ihrer Kunden) können Sie jederzeit optional im Portal aktivieren.
       </p>
     </div>
   )
@@ -106,7 +106,7 @@ const BUSINESS_LEER: BusinessDaten = { firmenname: '', rechtsform: '', steuernum
 
 function validiereBusinessClient(b: BusinessDaten): string | null {
   if (!b.firmenname.trim()) return 'Firmenname ist bei bezahlten Paketen ein Pflichtfeld.'
-  if (!b.rechtsform.trim()) return 'Bitte wähle deine Rechtsform.'
+  if (!b.rechtsform.trim()) return 'Bitte wählen Sie Ihre Rechtsform.'
   if (!b.steuernummer.trim()) return 'Steuernummer ist bei bezahlten Paketen ein Pflichtfeld.'
   return null
 }
@@ -189,10 +189,10 @@ function SucheSchritt({
   return (
     <Card p={6}>
       <h2 className="mb-1 text-lg font-bold text-claimondo-navy">
-        Finde deinen Eintrag
+        Finde Ihren Eintrag
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Suche nach deinem Namen, deiner Firma, PLZ oder DAT-Nummer.
+        Suche nach Ihrem Namen, Ihrer Firma, PLZ oder DAT-Nummer.
       </p>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -343,7 +343,7 @@ function BeanspruchenSchritt({
         Eintrag beanspruchen
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Bestätige deine Kontaktdaten, um diesen Eintrag zu übernehmen.
+        Bestätigen Sie Ihre Kontaktdaten, um diesen Eintrag zu übernehmen.
       </p>
 
       {/* Gewählter Kandidat – read-only */}
@@ -373,7 +373,7 @@ function BeanspruchenSchritt({
         <TextField
           label="E-Mail-Adresse"
           type="email"
-          placeholder="deine@email.de"
+          placeholder="Ihre@email.de"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
@@ -488,7 +488,7 @@ function NeuSchritt({
         Neu registrieren
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Lege ein neues Profil an. Nach unserer Prüfung schalten wir dich frei.
+        Lege ein neues Profil an. Nach unserer Prüfung schalten wir Sie frei.
       </p>
 
       <div className="flex flex-col gap-4">
@@ -513,7 +513,7 @@ function NeuSchritt({
         <TextField
           label="E-Mail-Adresse *"
           type="email"
-          placeholder="deine@email.de"
+          placeholder="Ihre@email.de"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
@@ -619,8 +619,8 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
             <>
               Wir haben dir einen Link an{' '}
               <strong className="text-claimondo-navy">{email}</strong> geschickt —
-              damit legst du dein Passwort fest. Danach führt dich unser Onboarding
-              in wenigen Minuten zur Freischaltung deines Profils.
+              damit legen Sie Ihr Passwort fest. Danach führt Sie unser Onboarding
+              in wenigen Minuten zur Freischaltung Ihres Profils.
             </>
           ) : (
             <>
@@ -628,13 +628,13 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
               nicht zugestellt werden — du kannst dein Passwort jederzeit über
               „Passwort vergessen" mit der Adresse{' '}
               <strong className="text-claimondo-navy">{email}</strong> setzen. Danach
-              führt dich unser Onboarding in wenigen Minuten zur Freischaltung deines
+              führt Sie unser Onboarding in wenigen Minuten zur Freischaltung Ihres
               Profils.
             </>
           )}
         </p>
         <p className="text-xs text-claimondo-shield/70">
-          Bitte prüfe auch deinen Spam-Ordner.
+          Bitte prüfen Sie auch Ihren Spam-Ordner.
         </p>
       </div>
     </Card>

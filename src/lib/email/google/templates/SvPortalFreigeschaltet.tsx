@@ -11,7 +11,7 @@ type Props = {
 }
 
 export function subject(_p: Props) {
-  return 'Willkommen bei Claimondo — deine Vertragsunterlagen'
+  return 'Willkommen bei Claimondo — Ihre Vertragsunterlagen'
 }
 
 export function SvPortalFreigeschaltetEmail(props: Props) {
@@ -30,25 +30,25 @@ export function SvPortalFreigeschaltetEmail(props: Props) {
           Hallo {props.vorname ?? 'Partner'},
         </Paragraph>
         <Paragraph>
-          vielen Dank für die Unterzeichnung der Nutzungsbedingungen. Im Anhang findest du
-          dein unterschriebenes Vertragsdokument zur Aufbewahrung.
+          vielen Dank für die Unterzeichnung der Nutzungsbedingungen. Im Anhang finden Sie
+          Ihr unterschriebenes Vertragsdokument zur Aufbewahrung.
         </Paragraph>
         <Paragraph>
-          Dein Portal-Zugang wird freigeschaltet sobald die Anzahlung eingegangen ist.
+          Ihr Portal-Zugang wird freigeschaltet sobald die Anzahlung eingegangen ist.
         </Paragraph>
 
         <Paragraph>
           <strong>Nächster Schritt:</strong> Bitte leiste die Anzahlung über den
-          Stripe-Checkout in deinem Onboarding-Bereich.
+          Stripe-Checkout in Ihrem Onboarding-Bereich.
         </Paragraph>
 
         <Button href={url}>Zum Onboarding-Bereich</Button>
 
         <Paragraph>
-          Bei Fragen stehen wir dir jederzeit zur Verfügung.
+          Bei Fragen stehen wir Ihnen jederzeit zur Verfügung.
         </Paragraph>
 
-        <Paragraph>Dein Claimondo-Team</Paragraph>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
       </Card>
       <Footer />
     </EmailShell>

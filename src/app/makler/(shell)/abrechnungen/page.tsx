@@ -2,7 +2,7 @@
 // Monats-Summary und CSV-Export. Consent-Gate läuft in den Fall-Links auf
 // der Akte-Detail-Seite — hier gibt es nur Read-Only-Auswertungen aus
 // partner_provisionen (partner_typ='makler', eigenes partner_id via RLS gefiltert).
-// Anordnung Aaron 07.07.: die "Deine Pipeline"-Karte lebt jetzt hier (unter den
+// Anordnung Aaron 07.07.: die "Ihre Pipeline"-Karte lebt jetzt hier (unter den
 // 4 Summary-Karten) statt auf dem Dashboard.
 
 import { redirect } from 'next/navigation'
