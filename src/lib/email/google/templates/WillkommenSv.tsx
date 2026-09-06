@@ -57,7 +57,7 @@ export function WillkommenSvEmail(props: Props) {
           {props.von_admin_name
             ? `${props.von_admin_name} hat Ihren Account bei Claimondo angelegt.`
             : 'Ihr Account bei Claimondo wurde angelegt.'}
-          {' '}Schön dass du dabei bist!
+          {' '}Schön dass Sie dabei sind!
         </Paragraph>
 
         {isSubSv && (

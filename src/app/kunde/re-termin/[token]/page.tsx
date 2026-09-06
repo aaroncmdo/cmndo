@@ -140,7 +140,7 @@ function Bestaetigung({ fallNummer }: { fallNummer: string | null }) {
         <h1 className="text-lg font-semibold text-claimondo-navy mb-1">Termin angefragt</h1>
         <p className="text-sm text-claimondo-ondo">
           {fallNummer ? `Fall ${fallNummer}: ` : ''}
-          Dein Vorschlag ist beim Sachverständigen eingegangen. Du bekommst eine Bestätigung sobald er den Termin annimmt.
+          Ihr Vorschlag ist beim Sachverständigen eingegangen. Sie bekommen eine Bestätigung sobald er den Termin annimmt.
         </p>
       </div>
     </main>

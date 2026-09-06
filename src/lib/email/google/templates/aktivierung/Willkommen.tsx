@@ -35,7 +35,7 @@ export function WillkommenEmail({ copy, merge }: Props) {
         <Button href={merge.portalLink}>{copy.cta_label}</Button>
 
         <Paragraph>
-          Bei Fragen anrufen: {merge.ansprechpartner} ist für dich da unter{' '}
+          Bei Fragen anrufen: {merge.ansprechpartner} ist für Sie da unter{' '}
           <a href={`tel:${merge.tel}`} style={{ color: email.color.ondo }}>{merge.tel}</a>.
         </Paragraph>
       </Card>

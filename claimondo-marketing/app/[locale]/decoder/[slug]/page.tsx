@@ -7,6 +7,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { AssetHero } from '@/components/content/AssetHero'
+import { GuidePopover } from '@/components/content/GuidePopover'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { NaechsteTermineKompakt } from '@/components/content/NaechsteTermineKompakt'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
@@ -120,6 +121,9 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           weil kein Feld eine fachliche Einzelpruefung belegt — Begruendung in
           ReviewerByline.tsx. */}
       <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Ohne `cluster`: die Decoder-Eintraege
+          tragen keinen Themencluster, die Ansprache faellt auf ALLGEMEIN zurueck. */}
+      <GuidePopover />
       <LandingFooter />
       <StickyCallBar quelle={`Decoder: ${a.slug}`} whatsappHref={WA} />
     </div>

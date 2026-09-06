@@ -722,7 +722,7 @@ export default function WillkommenClient({
                     <p>
                       Sie gehoeren zu <strong>{organisation.name}</strong>. Ihr{' '}
                       {organisation.typ === 'akademie' ? 'Verwalter' : 'Inhaber'} kuemmert sich
-                      um Vertrag und Zahlung. Du musst hier nur einmal die Bedingungen bestaetigen.
+                      um Vertrag und Zahlung. Sie müssen hier nur einmal die Bedingungen bestaetigen.
                     </p>
                   </div>
                 </div>
@@ -911,7 +911,7 @@ export default function WillkommenClient({
                 und die <Link href="/datenschutz" target="_blank" className="text-[var(--brand-primary)] underline">Datenschutzerklärung</Link>.
                 <br /><br />
                 Den vollständigen Vertrag inkl. Anzahlung schließt Ihr
-                {organisation?.typ === 'akademie' ? ' Verwalter' : ' Inhaber'} für dich ab — du musst
+                {organisation?.typ === 'akademie' ? ' Verwalter' : ' Inhaber'} für Sie ab — Sie müssen
                 hier nur einmal die Bedingungen akzeptieren.
               </div>
 

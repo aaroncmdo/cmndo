@@ -11,6 +11,7 @@ import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
+import { GuidePopover } from '@/components/content/GuidePopover'
 
 // Stream A (Doc 25): Index-Hub für die Versicherer-Brief-Decoder. Bisher waren
 // die 10 Decoder nur unter /decoder/[slug] erreichbar (kein Cluster-Index) —
@@ -123,6 +124,9 @@ export default function Page() {
         <SpokeCtaBand headline={t('cta_band.headline_decoder')} />
       </main>
       <LandingFooter />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Ohne eigenen Selektor: die Seite
+          hat kein <article>, GuidePopover faellt auf den Seiteninhalt zurueck. */}
+      <GuidePopover />
       <StickyCallBar quelle="Hub: Decoder" whatsappHref={WA} />
     </div>
   )
