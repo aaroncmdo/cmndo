@@ -189,7 +189,20 @@ test.describe('Regel-4: Anrede (#5909) + Teilkasko (#5888) auf prod', () => {
   })
 
   // ── A3 · Die Kernprobe der Glas-Logik (E7) ────────────────────────────────────────────
-  test('A3 Glasschaden + Glas-Only-Tarif bindet, derselbe Tarif bei Karosserie nicht', async ({ page }) => {
+  //
+  // ⚠ NOCH NICHT NACHGEWIESEN. Der Test laeuft bis zur Tarifwahl und scheitert danach, ohne
+  // die Messzeile zu erreichen — ein Aufbau-Problem, kein Produktbefund. Gegengeprueft mit
+  // einer isolierten Probe (scratchpad/glas-probe.mjs):  und  verhalten sich auf
+  // prod IDENTISCH, beide wechseln sauber in die Kasko-Strecke. Es liegt also nicht an der
+  // Schadenart, und die Vermutung 'die Glas-Ableitung haengt' ist damit widerlegt.
+  //
+  // Was gesichert ist: der Glas-Only-Tarif existiert auf prod (9 Stueck, bindungsumfang =
+  // nur_glas), und die vierte Quali-Antwort ist live (A2). Was fehlt, ist der Klick-Nachweis,
+  // dass ein GLASschaden an diesem Tarif bindet und ein Karosserieschaden nicht.
+  //
+  // „Verdrahtet' ist eine andere Aussage als „gelaufen' — deshalb steht das hier und nicht
+  // als gruener Haken in der Abnahme.
+  test('A3 Glasschaden + Glas-Only-Tarif bindet, derselbe Tarif bei Karosserie nicht', async ({ browser }) => {
     test.skip(!RUN, 'Opt-in: RUN_ANREDE_TEILKASKO=1')
     test.setTimeout(240_000)
     const db = svc()
@@ -222,13 +235,22 @@ test.describe('Regel-4: Anrede (#5909) + Teilkasko (#5888) auf prod', () => {
       aufraeumen.push(email)
       const { token } = await seedeLeadUndFlowLink(db, email, schadentyp)
 
+      // Frischer Kontext je Durchlauf: der erste Lauf hinterlaesst sonst seinen Zustand,
+      // und der zweite scheitert an einer Stelle, die mit der Ursache nichts zu tun hat.
+      const ctx = await browser.newContext()
+      const page = await ctx.newPage()
       await gotoFlow(page, token)
       const boxen = page.locator('input[type="checkbox"]')
       const anzahl = await boxen.count()
       for (let i = 0; i < anzahl; i++) await boxen.nth(i).check({ timeout: 5_000 }).catch(() => {})
       await page.getByRole('button', { name: /^weiter/i }).first().click({ timeout: 15_000 })
       await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {})
-      await page.getByRole('button', { name: /^Ich selbst/ }).click({ timeout: 15_000 })
+      // ⚠ Die Optionen sind kurz nach dem Schrittwechsel DISABLED. Ein Klick darauf verpufft
+      // folgenlos, der Test steht danach immer noch auf der Schuldfrage — und der Fehler
+      // erscheint erst viel spaeter als 'Endseite nicht sichtbar'. Erst auf enabled warten.
+      const ichSelbst = page.getByRole('button', { name: /^Ich selbst/ })
+      await expect(ichSelbst).toBeEnabled({ timeout: 25_000 })
+      await ichSelbst.click({ timeout: 15_000 })
       await page.getByRole('button', { name: /Ja, ich habe eine Kaskoversicherung/i }).click({ timeout: 15_000 })
 
       await page.getByRole('button', { name: /Kaskoversicherung wählen/i }).click({ timeout: 20_000 })
@@ -242,6 +264,7 @@ test.describe('Regel-4: Anrede (#5909) + Teilkasko (#5888) auf prod', () => {
         .isVisible({ timeout: 25_000 })
         .catch(() => false)
       console.log(`[A3] schadentyp=${schadentyp} -> gebunden=${gebunden} (erwartet ${erwartet})`)
+      await ctx.close()
       expect(gebunden, `E7: ${schadentyp} am Glas-Only-Tarif`).toBe(erwartet)
     }
   })
