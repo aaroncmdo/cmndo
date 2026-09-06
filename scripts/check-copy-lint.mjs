@@ -105,13 +105,13 @@ const ANREDE_DATEI_AUSNAHMEN = [
   /src\/app\/admin\/einstellungen\/google\/GoogleSettingsClient\.tsx$/, // "Verbinde dein Google Konto"
   /src\/app\/admin\/marketing\/content-studio\/ContentStudioClient\.tsx$/,
   /src\/app\/admin\/meine-tasks\/MyTasksClient\.tsx$/,
-  // Support-Widget: Feature-Requests ans eigene Team. Gemessen 06.09. — genutzt von admin (22x)
-  // und sachverstaendiger (2x), von KEINEM Kunden, zuletzt Mai 2026.
-  // ⚠ Bedingung: `ALLOWED_ROLES` in dieser Datei enthaelt 'kunde', obwohl der Kommentar
-  // darueber "Kunden sind NICHT zugelassen" sagt. Solange das so bleibt, ist die Ausnahme an
-  // die MESSUNG gebunden, nicht an den Code. Wird der Support je fuer Kunden geoeffnet, gehoeren
-  // seine zwei Ausgaben ("Du hast heute bereits …", "deinen Hinweis") mit auf Sie.
-  /src\/app\/api\/support\/chat\/route\.ts$/,
+  // ⚠ `src/app/api/support/chat/route.ts` stand hier und ist am 06.09. wieder RAUS.
+  // Die Begruendung war falsch: "genutzt von admin 22x, SV 2x, von keinem Kunden" misst, wer es
+  // BISHER benutzt hat — nicht, wer es KANN. Nachgesehen: `<SupportButton>` wird gerendert in
+  // KundeMobileDrawer, FlotteManagerShell, MaklerShell, WerkstattShell und PortalUserFooter.
+  // Kunden und Partner kommen also sehr wohl heran; der Kommentar im Routen-Kopf
+  // ("laeuft nur im internen Portal") ist veraltet. Die Datei steht in der Baseline, bis die
+  // Zugangsfrage entschieden ist — siehe [[audit-support-widget-kunden-sehen-den-bugtracker]].
 ]
 
 const findings = [] // {file, line, code, match}

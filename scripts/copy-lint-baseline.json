@@ -18,6 +18,7 @@
     "kfz-gutachter-bonn/lib/lokalinhalt.ts",
     "kfz-gutachter-duesseldorf/lib/lokalinhalt.ts",
     "kfz-gutachter-koeln/lib/lokalinhalt.ts",
-    "kfz-gutachter-wuppertal/lib/lokalinhalt.ts"
+    "kfz-gutachter-wuppertal/lib/lokalinhalt.ts",
+    "src/app/api/support/chat/route.ts"
   ]
 }
