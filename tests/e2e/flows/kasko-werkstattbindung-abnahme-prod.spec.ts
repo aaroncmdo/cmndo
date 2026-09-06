@@ -16,8 +16,12 @@
 //     node --env-file=.env.local --env-file=<smoke.env> node_modules/@playwright/test/cli.js test \
 //     kasko-werkstattbindung-abnahme-prod --project=chromium --reporter=line --retries=0 --workers=1
 //
-// Isolation: @claimondo.test = interne Identitaet (ist_interne_email=true) -> keine Kunden-WhatsApp;
-// die E6-Mail geht an eine nicht existierende Domain (Bounce), der email_log-Eintrag ist der Nachweis.
+// Isolation: @claimondo.test = interne Identitaet (ist_interne_email=true) -> keine Kunden-WhatsApp.
+// ⚠ Diese Zeile behauptete bis zum 06.09.2026 das GEGENTEIL des Codes darunter ("die E6-Mail geht an
+// eine nicht existierende Domain (Bounce), der email_log-Eintrag ist der Nachweis"). Richtig ist:
+// die Send-Isolation unterdrueckt VOR dem email_log-Insert, T1 erwartet deshalb 0 Zeilen (Zeile ~344).
+// Seit dem Unzustellbar-Filter gilt zusaetzlich: an .test wird ueberhaupt nicht mehr gesendet, auch
+// nicht mit allowInternalRecipient. An der Erwartung "0 Zeilen" aendert das nichts.
 
 import { test, expect, type Page } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'

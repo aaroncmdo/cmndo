@@ -4,7 +4,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 import { htmlToPlainText } from '@/lib/email/plain-text'
 import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
-import { nurZustellbareEmpfaenger } from '@/lib/testdaten/interne-identitaet'
+import { nurZustellbareEmpfaenger, ohneUnzustellbareEmpfaenger } from '@/lib/testdaten/interne-identitaet'
 
 // Google Workspace Limit: 2000 Mails/Tag pro User
 const transporter = nodemailer.createTransport({
@@ -86,6 +86,27 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
       }
       if (zustellbar.length !== empfaenger.length) {
         opts = { ...opts, to: zustellbar }
+      }
+    }
+
+    // Unzustellbare Domains (RFC 2606/6762) — BEWUSST ausserhalb des allowInternalRecipient-Zweigs
+    // und damit NICHT abschaltbar. Der Grund fuer jene Ausnahme ("der interne Empfaenger ist die
+    // gewollte Zielperson") setzt voraus, dass diese Person erreichbar IST; bei .test ist sie es nie.
+    // Gemessen 06.09.2026: 227 solcher Mails seit dem 14.07., alle zwangslaeufig zurueckgeprallt —
+    // und bis zum Zustellnachweis (#5900) standen sie alle auf 'sent' und sahen aus wie zugestellt.
+    // Vor dem email_log-Insert, wie die Isolation darueber: ein Versand, den es nie gab, gehoert
+    // nicht ins Versandprotokoll.
+    {
+      const empfaenger = Array.isArray(opts.to) ? opts.to : [opts.to]
+      const erreichbar = ohneUnzustellbareEmpfaenger(empfaenger)
+      if (erreichbar.length === 0) {
+        console.warn(
+          `[unzustellbare-domain] Email unterdrueckt, Empfaenger-Domain existiert per Norm nicht: "${empfaenger.join(', ')}" subject="${opts.subject}"`,
+        )
+        return { messageId: `unroutable-domain-suppressed-${Date.now()}` }
+      }
+      if (erreichbar.length !== empfaenger.length) {
+        opts = { ...opts, to: erreichbar }
       }
     }
   }
