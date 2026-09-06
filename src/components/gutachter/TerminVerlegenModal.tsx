@@ -142,7 +142,7 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
         Termin verlegen
       </h3>
       <p className="text-sm text-claimondo-ondo mb-4">
-        Wir schlagen die nahesten freien Slots vor — inklusive Routen-Check zu deinen
+        Wir schlagen die nahesten freien Slots vor — inklusive Routen-Check zu Ihren
         anderen Terminen. Slot-Dauer: {slotDauerMin} Minuten.
       </p>
 

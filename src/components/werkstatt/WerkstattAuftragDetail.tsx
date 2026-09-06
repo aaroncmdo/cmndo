@@ -677,7 +677,7 @@ export function WerkstattAuftragDetail({
                   )}
                 </dl>
                 <p className="text-body-sm text-claimondo-ondo">
-                  Du hast diesen Kunden an Claimondo vermittelt.
+                  Sie haben diesen Kunden an Claimondo vermittelt.
                   {auftrag.provision_betrag_netto != null
                     ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${getPartnerProvisionStatusLabel(auftrag.provision_status)}).`
                     : ''}

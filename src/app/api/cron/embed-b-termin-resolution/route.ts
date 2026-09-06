@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
-// AAR-939: einmaliger WA-Ping an den Kunden „Kam dein Gutachter? Im Portal bestätigen".
+// AAR-939: einmaliger WA-Ping an den Kunden „Kam Ihr Gutachter? Im Portal bestätigen".
 // Treibt zum bereits funktionierenden Portal-Banner. Baileys-freier-Text (dynamischer
 // Link; keine Meta-Template-Restriktion). Non-critical — bei Baileys-Down kein Ping,
 // Portal-Banner + Dispatcher-Task greifen unabhaengig.

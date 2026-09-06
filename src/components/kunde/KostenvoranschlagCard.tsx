@@ -148,7 +148,7 @@ export default function KostenvoranschlagCard({
               freigeben.
             </p>
             {abgelehntGrund && (
-              <p className="text-body-sm text-claimondo-ondo mt-1.5">Dein Hinweis: „{abgelehntGrund}“</p>
+              <p className="text-body-sm text-claimondo-ondo mt-1.5">Ihr Hinweis: „{abgelehntGrund}“</p>
             )}
           </div>
         )}

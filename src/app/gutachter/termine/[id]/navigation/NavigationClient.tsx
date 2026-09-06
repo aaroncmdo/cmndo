@@ -165,7 +165,7 @@ export default function NavigationClient({
       <div className="bg-[var(--brand-primary)] px-4 py-4 safe-area-bottom space-y-3">
         {distanceMeters !== null && distanceMeters < 200 && (
           <div className="bg-emerald-900/50 border border-emerald-700 rounded-ios-xl p-3 text-center">
-            <p className="text-emerald-300 text-sm font-medium">Du bist fast da! ({distanceMeters} m)</p>
+            <p className="text-emerald-300 text-sm font-medium">Sie sind fast da! ({distanceMeters} m)</p>
           </div>
         )}
         <button

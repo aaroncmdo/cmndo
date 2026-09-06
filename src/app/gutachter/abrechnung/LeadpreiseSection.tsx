@@ -58,7 +58,7 @@ export async function LeadpreiseSection({ userId }: { userId: string }) {
         <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
         <ul className="text-xs text-[var(--brand-primary)] space-y-1.5 list-disc pl-4">
           <li>
-            Solange du innerhalb deines monatlichen Kontingents ({paketLabel}) bist, gilt der{' '}
+            Solange Sie innerhalb Ihres monatlichen Kontingents ({paketLabel}) bist, gilt der{' '}
             <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der{' '}
             <strong>Einzel-Preis</strong>.
           </li>
