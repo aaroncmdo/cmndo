@@ -44,7 +44,7 @@ export function EmbedSiteCreateField({
         </p>
         {hostedSlug && (
           <p className="text-sm text-claimondo-navy">
-            Deine Claimondo-Seite:{' '}
+            Ihre Claimondo-Seite:{' '}
             <a
               href={`/g/${hostedSlug}`}
               target="_blank"
