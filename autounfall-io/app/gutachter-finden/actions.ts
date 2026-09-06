@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { headers } from 'next/headers'
 import { createServiceClient } from '@/lib/supabase/server'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 
 // Lead-Server-Action für autounfall.io /gutachter-finden. EINZIGE Supabase-
 // Schreibung im ganzen au.io-Port. Pfad: anfragen-Insert (Inbox/Audit, mit
@@ -135,8 +136,9 @@ export async function submitAutounfallLead(formData: FormData): Promise<SubmitLe
   }
 
   // 5. In-app Dispatcher-/Admin-Benachrichtigung (fire-and-forget, geteilte DB).
-  //    Kein Email/WA (au.io standalone — Aaron 2026-05-24). Ein Twilio/Insert-
-  //    Fail darf den Lead NICHT brechen.
+  //    Ein Insert-Fail darf den Lead NICHT brechen.
+  //    ⚠ Hier stand "Kein Email/WA (au.io standalone — Aaron 2026-05-24)". Das gilt für
+  //    den KUNDEN-Kanal weiter; für das Team ist es seit 06.09.2026 aufgehoben (Schritt 6).
   try {
     const { data: dispatchers } = await sb
       .from('profiles')
@@ -163,6 +165,25 @@ export async function submitAutounfallLead(formData: FormData): Promise<SubmitLe
   } catch (err) {
     console.error('[autounfall-io] Dispatcher-Notify fehlgeschlagen (nicht kritisch):', (err as Error).message)
   }
+
+  // 6. Team-WhatsApp (Aaron 06.09.2026: "bitte auch eine whatsapp an nicolas und mich
+  //    wenn bei autounfall io was reinkommt"). Hebt die "nur in-app"-Entscheidung vom
+  //    24.05. fuer den TEAM-Kanal auf; an Kunden schickt au.io weiterhin nichts.
+  //
+  //    Der Baileys-Dienst liegt auf demselben VPS (localhost:3055) — kein Umweg ueber
+  //    die Haupt-App noetig. Wirft nie: ohne Token oder bei Baileys-Ausfall bleibt der
+  //    Lead trotzdem angelegt, und der Fehlschlag steht im Log.
+  await notifyTeamWhatsApp(
+    [
+      `🚗 Neuer Lead auf autounfall.io`,
+      `${parsed.data.name} · ${parsed.data.plz_oder_stadt}`,
+      parsed.data.telefon,
+      schadenstyp ? `Schaden: ${schadenstyp}` : null,
+      `https://app.claimondo.de/dispatch/leads/${String(leadId)}`,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  )
 
   return { ok: true, leadId: String(leadId), anfrageId: anfrage.id }
 }
