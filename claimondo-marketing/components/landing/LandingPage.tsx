@@ -8,6 +8,7 @@ import { HomeTrustStripSection } from './sections/HomeTrustStripSection'
 import { AnsprueecheSection } from './sections/AnsprueecheSection'
 import { WieEsFunktioniertSection } from './sections/WieEsFunktioniertSection'
 import { KostenTransparenzSection } from './sections/KostenTransparenzSection'
+import { HomeUnfallguideSection } from './sections/HomeUnfallguideSection'
 import { BeweisSection } from './sections/BeweisSection'
 import { ProduktAppSection } from './sections/ProduktAppSection'
 import { MenschenSection } from './sections/MenschenSection'
@@ -59,6 +60,7 @@ export async function LandingPage({ authenticatedUser }: Props) {
         <AnsprueecheSection />
         <WieEsFunktioniertSection />
         <KostenTransparenzSection />
+        <HomeUnfallguideSection />
         <BeweisSection />
         <ProduktAppSection />
         <MenschenSection />
