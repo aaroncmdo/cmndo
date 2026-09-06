@@ -60,6 +60,60 @@ const SCAN_FILES = []
 for (const r of ROOTS) for (const sd of SUBDIRS) SCAN_FILES.push(...walk(join(ROOT, r, sd)))
 for (const e of EXTRA_FILES) { const p = join(ROOT, e); if (existsSync(p)) SCAN_FILES.push(p) }
 
+// ── Die App (src/**) — NUR die Anrede-Achse ────────────────────────────────────────────────
+// Am 06.09. wurden ~850 Du-Stellen im Portal auf Sie umgestellt (#5909/#5917/#5925/#5928).
+// Noch am selben Tag kamen aus Release R478 zwei neue Du-Stellen zurueck (#5930) — die
+// Umstellung war ein Einmalvorgang, die Drift laeuft weiter. Dieser Detektor existierte
+// bereits fuer Marketing (#5899); er brauchte nur die Wurzel.
+//
+// ⚠ NUR die Anrede-Achse. Die Umlaut-Achse gilt hier NICHT: in `src/**` sind ASCII-Ersaetze
+// in Log-Strings, Kommentaren und Bezeichnern ausdruecklich erlaubt (AGENTS.md, "Sprache &
+// Zeichensatz" — die Pflicht gilt nur fuer nutzersichtbare Frontend-Texte). Wer sie hier
+// mitlaufen liesse, faerbte den Ratchet mit tausenden gewollten Treffern rot.
+// RDG und der Titel-Check bleiben ebenfalls Marketing-Themen.
+const APP_SUBDIRS = ['app', 'components', 'lib', 'i18n']
+const APP_FILES = []
+for (const sd of APP_SUBDIRS) APP_FILES.push(...walk(join(ROOT, 'src', sd)))
+const NUR_ANREDE = new Set(APP_FILES)
+SCAN_FILES.push(...APP_FILES)
+
+// Dateien, deren Texte ALS GANZES Anweisungen an ein Sprachmodell sind. Dort ist jedes "du"
+// eine Anweisung ("Du recherchierst …", "wenn du die Ziffern lesen kannst") — ein "Sie" waere
+// sinnentstellend. Die Text-Ausnahmen in copy-lint-scan.mjs greifen pro ZEILE und verfehlen
+// die Fortsetzungszeilen eines mehrzeiligen Prompts; deshalb hier auf Dateiebene.
+//
+// ⚠ Bewusst KURZ und einzeln belegt, nicht "alles was nach Prompt aussieht". Beim Aufstellen
+// stand `api/support/chat/route.ts` auf der Kandidatenliste — die Datei enthaelt aber neben
+// dem Prompt auch ECHTE Nutzerausgaben ("Du hast heute bereits … eingereicht", "ich habe
+// deinen Hinweis … gehaengt"). Eine pauschale Ausnahme haette genau die zwei Stellen
+// versteckt, die das Gate finden soll. Sie steht deshalb in der Baseline, nicht hier.
+const ANREDE_DATEI_AUSNAHMEN = [
+  // (a) Anweisungen an ein Sprachmodell — "du" ist die Anrede an das MODELL
+  /src\/lib\/wissen\/generate\.ts$/,          // "Du recherchierst …" — Artikel-Prompt
+  /src\/lib\/lokalinhalt\/generate\.ts$/,     // "Du recherchierst hyperlokale Fakten …"
+  /src\/lib\/bkat\/inference\.ts$/,           // "Setze … NUR wenn du die Ziffern lesen kannst"
+  /src\/lib\/werkstatt\/copilot-prompt\.ts$/, // Werkstatt-Copilot, reiner Prompt
+  /src\/lib\/faq-bot\/off-topic-guard\.ts$/,  // Erkennungsmuster "bist du eine ki" — Umstellen macht den Guard BLIND
+  // Werkzeugbeschreibung fuer KI-Agenten, die die oeffentliche API aufrufen: "NACHDEM du dem
+  // Nutzer erklaert hast …", "Du vermittelst Gutachter + Termin". Adressat ist der Agent, nicht
+  // der Endkunde — der bekommt seinen Text aus dem FlowLink.
+  /src\/app\/api\/v1\/openapi\.json\/route\.ts$/,
+
+  // (b) INTERNE Portale — Aaron 06.09.2026 auf die Frage, ob sie mitziehen sollen: "ja die
+  // sollen beim du bleiben". Das ist eine ENTSCHEIDUNG, keine Restschuld: hier steht nichts
+  // zum Aufraeumen. Wer eine dieser Dateien "nachbessert", dreht Aarons Entscheidung um.
+  /src\/app\/admin\/einstellungen\/google\/GoogleSettingsClient\.tsx$/, // "Verbinde dein Google Konto"
+  /src\/app\/admin\/marketing\/content-studio\/ContentStudioClient\.tsx$/,
+  /src\/app\/admin\/meine-tasks\/MyTasksClient\.tsx$/,
+  // ⚠ `src/app/api/support/chat/route.ts` stand hier und ist am 06.09. wieder RAUS.
+  // Die Begruendung war falsch: "genutzt von admin 22x, SV 2x, von keinem Kunden" misst, wer es
+  // BISHER benutzt hat — nicht, wer es KANN. Nachgesehen: `<SupportButton>` wird gerendert in
+  // KundeMobileDrawer, FlotteManagerShell, MaklerShell, WerkstattShell und PortalUserFooter.
+  // Kunden und Partner kommen also sehr wohl heran; der Kommentar im Routen-Kopf
+  // ("laeuft nur im internen Portal") ist veraltet. Die Datei steht in der Baseline, bis die
+  // Zugangsfrage entschieden ist — siehe [[audit-support-widget-kunden-sehen-den-bugtracker]].
+]
+
 const findings = [] // {file, line, code, match}
 for (const f of SCAN_FILES) {
   const rel = relative(ROOT, f).replace(/\\/g, '/')
@@ -71,17 +125,19 @@ for (const f of SCAN_FILES) {
   // als deutsches Duzen melden. RDG und Umlaut gelten dort ebenfalls nicht.
   const isUebersetzung = /content\/claimondo\/_translations\//.test(rel)
   const isGerman = (!isI18n || /\/de\.json$/.test(rel)) && !isUebersetzung
+  // src/** laeuft nur auf der Anrede-Achse (Begruendung oben bei APP_SUBDIRS).
+  const nurAnrede = NUR_ANREDE.has(f)
   for (const [line, text] of userStrings(f, src)) {
-    if (isGerman) for (const h of scanRdg(text)) findings.push({ file: rel, line, code: 'rdg:' + h.code, match: h.match })
-    if (isGerman && !/\.md$/.test(rel)) for (const w of scanUmlaute(text)) findings.push({ file: rel, line, code: 'umlaut', match: w })
+    if (isGerman && !nurAnrede) for (const h of scanRdg(text)) findings.push({ file: rel, line, code: 'rdg:' + h.code, match: h.match })
+    if (isGerman && !nurAnrede && !/\.md$/.test(rel)) for (const w of scanUmlaute(text)) findings.push({ file: rel, line, code: 'umlaut', match: w })
     // Anrede: die Seite siezt ueberall (Aaron 06.09.). Nur Deutsch — die 5 uebrigen Locales
     // haben eigene Hoeflichkeitsformen, und "du" ist dort teils ein anderes Wort.
     // ⚠ `.json` ist ausgenommen: das sind DATEN, keine Ansprache. Konkret meldete
     // `stadt-verkehrsmengen.json` die Messstelle "DU Beeckerwerth" — Duisburg, kein Duzen.
     // Die Kennzeichen-Ausnahme in der Liste trifft den Satz nachweislich, greift an dieser
     // Aufrufstelle aber nicht; statt den Einzelfall zu flicken ist die ganze Dateiart raus.
-    if (isGerman && !/\.json$/.test(rel)) for (const w of scanAnrede(text)) findings.push({ file: rel, line, code: 'anrede-du', match: w })
-    if (/title/i.test(text) || /\|\s*Claimondo/.test(text)) if (scanTitleBrandTwice(text)) findings.push({ file: rel, line, code: 'title-brand-twice', match: text.slice(0, 80) })
+    if (isGerman && !/\.json$/.test(rel) && !ANREDE_DATEI_AUSNAHMEN.some((a) => a.test(rel))) for (const w of scanAnrede(text)) findings.push({ file: rel, line, code: 'anrede-du', match: w })
+    if (!nurAnrede && (/title/i.test(text) || /\|\s*Claimondo/.test(text))) if (scanTitleBrandTwice(text)) findings.push({ file: rel, line, code: 'title-brand-twice', match: text.slice(0, 80) })
   }
 }
 
