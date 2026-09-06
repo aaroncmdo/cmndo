@@ -4,6 +4,7 @@ import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import Link from 'next/link'
 import { isInternalHref } from '@/lib/content/claimondo-mdx'
+import { remarkHeadingAnker } from '@/lib/content/remark-heading-anker'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -35,7 +36,11 @@ export function MarkdownRenderer({
   return (
     <div className="max-w-[68ch] text-[1.0625rem] leading-[1.7] text-claimondo-shield">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        // remarkHeadingAnker VOR rehypeSlug: es liest `## Titel {#anker}` und setzt die id
+        // selbst; rehype-slug ueberschreibt vorhandene IDs nicht. Ohne das trugen die
+        // Cornerstones ihre Sprungmarken als rohes <a name=...> — und react-markdown zeigte
+        // den Tag als sichtbaren Text in der Ueberschrift.
+        remarkPlugins={[remarkGfm, remarkHeadingAnker]}
         rehypePlugins={[rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'wrap' }]]}
         components={{
           ...(pageHasOwnH1 ? { h1: () => null } : {}),
