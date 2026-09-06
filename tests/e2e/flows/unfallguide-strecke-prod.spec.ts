@@ -31,7 +31,10 @@
 //   Log oder Statuscode es zeigen. Es geht nichts an echte Kunden.
 //
 // Aufruf (nie in CI):
-//   RUN_UNFALLGUIDE_SMOKE=1 npx playwright test --config=playwright.manual.config.ts
+//   RUN_UNFALLGUIDE_SMOKE=1 MANUAL_SPEC=unfallguide-strecke-prod \
+//     npx playwright test --config=playwright.manual.config.ts
+//   (MANUAL_SPEC ist seit 06.09.2026 Pflicht: die Konfiguration war vorher auf genau diese
+//    eine Spec fest verdrahtet, jede weitere manuelle Spec war damit nicht startbar.)
 //   Fuer die DB-Gegenprobe zusaetzlich NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY.
 //
 // ⚠ NICHT ueber die normale playwright.config.ts aufrufen — auch nicht mit explizitem
