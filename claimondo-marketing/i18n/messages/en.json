@@ -4764,5 +4764,100 @@
     "cta_h": "Not at fault in an accident?",
     "cta_p": "Have your entitlement checked in two minutes — free and without obligation.",
     "cta_btn": "Check entitlement for free"
+  },
+  "unfallguide": {
+    "meta": {
+      "titel": "Unfallguide: what you are entitled to after an accident that was not your fault",
+      "beschreibung": "Free 6-page guide: which claims you have, which six mistakes get expensive, what applies when the car is an economic total loss, and how to respond when the insurer cuts the payout."
+    },
+    "kopf": {
+      "eyebrow": "Free guide",
+      "h1_plain": "Most injured parties ask for less",
+      "h1_accent": "than they are entitled to.",
+      "intro": "Six pages on what you can claim after an accident that was not your fault, which mistakes get expensive, and what to do when the insurer cuts the payout.",
+      "bild_alt": "Cover page of the Claimondo Unfallguide",
+      "punkt_1": "6 pages, read in ten minutes",
+      "punkt_2": "With § references and case numbers, not assertions",
+      "punkt_3": "Readable immediately, no waiting"
+    },
+    "inhalt": {
+      "h2": "What is inside",
+      "s1_titel": "Where you stand",
+      "s1_text": "What an accident that was not your fault means for you, and why it costs you nothing.",
+      "s2_titel": "Your claims, with amounts",
+      "s2_text": "Repair, your own expert, lawyer, loss of use, diminished value, rental car. With typical ranges.",
+      "s3_titel": "Six mistakes that get expensive",
+      "s3_text": "And the five sentences you will hear on the phone: what is behind them and how to answer.",
+      "s4_titel": "A checklist to tick off",
+      "s4_text": "Right at the scene, the same day, in the first week. Including the fork: third-party liability (Haftpflicht) or comprehensive cover (Kasko).",
+      "s5_titel": "When the repair costs more than the car",
+      "s5_text": "The three routes in an economic total loss (wirtschaftlicher Totalschaden), the question of VAT, and why prior damage belongs in the expert report.",
+      "s6_titel": "When the payout is cut",
+      "s6_text": "The four standard phrases insurers use most often, and what takes the force out of them."
+    },
+    "kostenlos": {
+      "h2": "Why this costs you nothing",
+      "p1": "After an accident that was not your fault, the other side owes the restoration of the condition that would exist without the accident. In full, not approximately. That is <b>§ 249 BGB</b>, and the reason why the expert report, the lawyer and our work are not billed to you but to the insurer of the at-fault party.",
+      "p2": "The opposing insurance is not a neutral arbiter in this. It represents its own customer. Insisting on your rights is therefore not a fight, it is the normal course of things."
+    },
+    "stimmen": {
+      "h2": "What customers write",
+      "quelle": "Google review",
+      "original_hinweis": "Reviews in their original wording"
+    },
+    "fragen": {
+      "h2": "Before you enter your number",
+      "f1_frage": "Is the guide really free?",
+      "f1_antwort": "Yes. And so is the service behind it: after an accident that was not your fault, the opposing insurance carries the expert report, the lawyer and our work. That is what § 249 BGB says. Claimondo never earns anything from the injured party.",
+      "f2_frage": "What happens to my phone number?",
+      "f2_antwort": "We call you back Monday to Friday from 8 to 20 h, Saturday and Sunday from 9 to 18 h, and go through your case with you. We do not pass your number on, and you can object to being contacted at any time. The guide is ready to read straight away, regardless."
+    },
+    "abschluss": {
+      "h2": "Rather talk right away?",
+      "text": "Tell us in five minutes what happened. Free and without obligation, even if you only want to know whether it is worth pursuing.",
+      "erreichbar": "Mon–Fri 8–20 h, Sat+Sun 9–18 h"
+    },
+    "nachricht": {
+      "anrede_mit_name": "Hello {vorname},",
+      "anrede_ohne_name": "Hello,",
+      "zusage_sofort": "We usually call you back within 15 minutes.",
+      "zusage_heute": "We will call you back today from {stunde} h.",
+      "zusage_morgen": "We will call you back tomorrow from {stunde} h.",
+      "wa_einleitung": "Here is your Unfallguide from Claimondo:",
+      "flow_lang": "If you are already a step further and want to report the damage directly:",
+      "flow_kurz": "If you are already a step further:",
+      "kostenlos": "The service is free for you. After an accident that was not your fault, the other side carries the costs.",
+      "mail_betreff": "Your Unfallguide from Claimondo",
+      "mail_einleitung": "Attached you will find your Unfallguide (PDF, 6 pages)."
+    },
+    "startseite": {
+      "h2": "Take the guide with you before you decide.",
+      "text": "Six pages on what you are entitled to, which mistakes get expensive, and what to do when the insurer cuts the payout. Free, readable straight away, no account."
+    }
+  },
+  "unfallguide_formular": {
+    "h2": "Request the guide",
+    "intro": "You get it right here on this page. No account, no waiting.",
+    "name_label": "Your name",
+    "telefon_label": "Phone number",
+    "telefon_hinweis": "For the call back. We do not pass it on.",
+    "email_label": "Email",
+    "email_hinweis": "So you can find the guide again later.",
+    "optional": "optional",
+    "einwilligung": "Claimondo may contact me about my accident by phone and via WhatsApp. I can withdraw this at any time.",
+    "knopf": "Read the guide now",
+    "knopf_laeuft": "One moment …",
+    "anrufen": "Or call us directly:",
+    "erfolg_h2": "Your Unfallguide is ready.",
+    "erfolg_text": "We call you back Monday to Friday from 8 to 20 h, Saturday and Sunday from 9 to 18 h, usually within 15 minutes. Until then you already have everything important in hand.",
+    "erfolg_knopf": "Open the Unfallguide (PDF, 6 pages)",
+    "erfolg_sprechen": "Rather talk right now?",
+    "fehler_name": "Please enter your name",
+    "fehler_telefon": "Please enter a phone number where we can reach you",
+    "fehler_email": "This email address does not look valid",
+    "fehler_einwilligung": "Please confirm that we may call you back",
+    "fehler_allgemein": "Please check your entries",
+    "fehler_speichern": "We could not save your request. The guide is ready anyway, and you can reach us directly on 0151 5360 8515.",
+    "hinweis_verarbeitung": "Your request has arrived, processing is still running. We will get in touch."
   }
 }
