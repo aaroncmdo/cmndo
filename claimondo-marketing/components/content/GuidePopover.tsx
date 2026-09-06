@@ -145,15 +145,14 @@ export function GuidePopover({
       const gelesen = -box.top / Math.max(artikel.offsetHeight, 1)
       if (!runter || gelesen < TRIGGER_ANTEIL) return
 
-      // ⚠ AUF MOBIL NICHT OEFFNEN. Frueher entschied allein das CSS (`hidden md:block`)
-      // darueber, ob man den Dialog SIEHT — montiert wurde er trotzdem. Der
-      // Portal-Container traegt diese Klassen nicht und legte sich als
-      // bildschirmfuellendes, unsichtbares `fixed`-Element ueber den Artikel: jeder
-      // Klick auf den Text landete dort. Gefunden im ersten echten Prod-Smoke
-      // (390x844, pointer-events: auto, ueber der H1). Live gelesen statt aus dem
-      // Store, damit eine Groessenaenderung waehrend des Lesens sofort zaehlt.
-      if (!window.matchMedia(DESKTOP).matches) return
-
+      // Hier stand bis 06.09.2026 ein zweiter Mobil-Riegel (`if (!matchMedia(DESKTOP)) return`).
+      // Er ist ENTFERNT, und zwar bewusst: gegen den unsichtbaren Vollbild-Layer schuetzt der
+      // Riegel im RENDER (`{istDesktop && <DialogPrimitive.Root …>}`, s. u.) — dort montiert der
+      // Portal auf Mobil gar nicht erst. Der Riegel hier verhinderte zusaetzlich das mobile BAND,
+      // und das ist kein Overlay, sondern eine Leiste am unteren Rand mit `md:hidden`; sie kann
+      // den Klickfresser gar nicht ausloesen. Folge des alten Zustands: auf dem Handy kam nie
+      // etwas — gemessen auf prod, bis 84 % Lese-Anteil gescrollt (Schwelle 15 %), nichts.
+      // Aaron 06.09.: mobiles Band aufmachen.
       window.removeEventListener('scroll', pruefe)
       try {
         sessionStorage.setItem(SITZUNG_KEY, '1')
@@ -161,7 +160,13 @@ export function GuidePopover({
         /* Speicher blockiert: dann eben nur fuer diesen Seitenaufruf gemerkt. */
       }
       setOffen(true)
-      track('guide_popover_eingeblendet', { gelesen_prozent: Math.round(gelesen * 100), cluster: cluster ?? 'allgemein' })
+      // `variante` trennt die beiden Oberflaechen in der Messung — Band und Dialog sind
+      // verschiedene Dinge und duerfen nicht in einer Zahl verschwimmen.
+      track('guide_popover_eingeblendet', {
+        gelesen_prozent: Math.round(gelesen * 100),
+        cluster: cluster ?? 'allgemein',
+        variante: window.matchMedia(DESKTOP).matches ? 'desktop-dialog' : 'mobil-band',
+      })
     }
 
     window.addEventListener('scroll', pruefe, { passive: true })
