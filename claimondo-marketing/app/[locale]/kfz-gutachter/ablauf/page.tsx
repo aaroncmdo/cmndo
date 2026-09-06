@@ -15,6 +15,7 @@ import {
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
+import { GuidePopover } from '@/components/content/GuidePopover'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -269,6 +270,9 @@ export default function AblaufPage() {
       <ReviewerByline datum="2026-08-25" rolle="verantwortlich" />
 
       <LandingFooter />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Ohne eigenen Selektor: die Seite
+          hat kein <article>, GuidePopover faellt auf den Seiteninhalt zurueck. */}
+      <GuidePopover />
       <StickyCallBar quelle="Kfz-Gutachter Ablauf" />
     </div>
   )
