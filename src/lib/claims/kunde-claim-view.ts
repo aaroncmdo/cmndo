@@ -91,7 +91,7 @@ export type KundeSvTermin = {
   durchgefuehrtAm: string | null
 }
 
-// P3 (StatusZone Edge-Banner): Verlegungs-Vorschlag (ClaimStepper-bottomSlot) + „kam dein Gutachter?".
+// P3 (StatusZone Edge-Banner): Verlegungs-Vorschlag (ClaimStepper-bottomSlot) + „kam Ihr Gutachter?".
 // Rohe ISO-Daten — StatusZone formatiert (Berlin) beim Rendern.
 export type KundeVerlegung = {
   pendingTerminId: string
@@ -605,7 +605,7 @@ export async function getKundeClaimView(
     }
   }
 
-  // Edge-Banner: „kam dein Gutachter?" — nur_gutachter (oben berechnet) + ueberfaelliger
+  // Edge-Banner: „kam Ihr Gutachter?" — nur_gutachter (oben berechnet) + ueberfaelliger
   // ungeklaerter Termin + kein offener Klaerungs-Task.
   // T3-slice-2c: Terminal-Gate auf operative_status (istClaimGeschlossen prueft CLOSED_OPERATIVE_STATUS).
   const claimTerminal = istClaimGeschlossen({ operativeStatus: (claimExtra?.operative_status as string | null) ?? null })

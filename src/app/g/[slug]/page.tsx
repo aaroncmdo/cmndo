@@ -37,7 +37,7 @@ export default async function HostedEmbedPage({ params }: { params: Promise<{ sl
           Unfall? Jetzt kostenloses Kfz-Gutachten anfragen.
         </h1>
         <p className="mt-4 text-base text-claimondo-navy/70">
-          {site.name} — unabhängiges Schadengutachten, schnell und unkompliziert. Stell deine Anfrage
+          {site.name} — unabhängiges Schadengutachten, schnell und unkompliziert. Stellen Sie Ihre Anfrage
           in unter einer Minute über das Formular.
         </p>
       </div>

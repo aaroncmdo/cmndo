@@ -23,7 +23,7 @@ export function TrackingAnleitungContent({ slug, ga4 }: { slug: string; ga4: str
             <li>Trag Ihre GA4-Measurement-ID <code>{ga4}</code> im Wizard-Schritt „Tracking" ein.</li>
             <li>
               Monika feuert bei erfolgreicher Anfrage automatisch das Ereignis <code>generate_lead</code>{' '}
-              direkt in dein GA4 — client-seitig, ohne weiteren Einbau.
+              direkt in Ihr GA4 — client-seitig, ohne weiteren Einbau.
             </li>
             <li>
               GA4 → Verwalten → Ereignisse → <code>generate_lead</code> als „Schlüsselereignis" markieren →
