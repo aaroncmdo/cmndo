@@ -39,7 +39,7 @@ meta_description: "Ratgeber nach dem Unfall: Wem vertrauen, was der Versicherung
 
 ---
 
-## <a name="frisch"></a>1. If someone has just driven into you
+## 1. If someone has just driven into you {#frisch}
 
 ### The situation
 
@@ -87,7 +87,7 @@ For an accident that wasn't your fault, processed through the **opposing party's
 
 ---
 
-## <a name="verletzt"></a>2. If your body only reports the damage later
+## 2. If your body only reports the damage later {#verletzt}
 
 ### The situation
 
@@ -138,7 +138,7 @@ If your earning capacity is permanently impaired, that too can form part of your
 
 ---
 
-## <a name="angehoerige"></a>3. If your closest person was injured in the car
+## 3. If your closest person was injured in the car {#angehoerige}
 
 ### The situation
 
@@ -181,7 +181,7 @@ Nothing – if that is what you want. You do not have to decide anything today. 
 
 ---
 
-## <a name="eltern"></a>4. If your child was in the car and you feel responsible
+## 4. If your child was in the car and you feel responsible {#eltern}
 
 ### The situation
 
@@ -229,7 +229,7 @@ That is precisely what early precautions are for. With children, the possibility
 
 ---
 
-## <a name="totalschaden"></a>5. If your car is a write-off and your daily life is falling apart
+## 5. If your car is a write-off and your daily life is falling apart {#totalschaden}
 
 ### The situation
 
@@ -245,7 +245,7 @@ Two days ago: the accident. Your car has been towed away, possibly a total loss.
 Yes, as the injured party you are entitled to a rental car in the **same category as your own vehicle** – not the cheapest one the insurer likes to suggest. One category below is an acceptable duty to mitigate, several categories is not. If the insurer suggests a partner rental provider: be cautious – see [Decoder "Mietwagen zu hoch"](/decoder/mietwagen-zu-hoch) and [Rental car reimbursement](/haftpflicht/mietwagen).
 
 **"Is my car now a total loss – when does that apply?"**
-We calculate this using **Audatex III**. Simplified: economic total loss when repair costs would exceed the Wiederbeschaffungswert (replacement value) minus the Restwert (residual value). **However:** you can also enforce a more expensive repair if you keep the car and have it properly repaired – the **130% rule** (BGH VI ZR 70/04). Details: [Decoder "Reparatur unwirtschaftlich"](/decoder/reparatur-unwirtschaftlich).
+We calculate this using **Audatex III**. Simplified: economic total loss when repair costs would exceed the [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) (replacement value) minus the Restwert (residual value). **However:** you can also enforce a more expensive repair if you keep the car and have it properly repaired – the **130% rule** (BGH VI ZR 70/04). Details: [Decoder "Reparatur unwirtschaftlich"](/decoder/reparatur-unwirtschaftlich).
 
 **"What is my car still worth?"**
 The **Wiederbeschaffungswert** – what you would have to pay for an equivalent vehicle on the regional market. We determine this based on condition, mileage, specification and comparable offers. For **private individuals: gross** (including VAT) per BGH authority.
@@ -257,7 +257,7 @@ The **Wiederbeschaffungswert** – what you would have to pay for an equivalent 
 For a **genuine total loss** (car is replaced): no. Wertminderung is relevant for **repaired** vehicles. If your case turns out to be a repair case (130% rule), Wertminderung is also assessed – typically €500–€5,000. Details: [Wertminderung](/haftpflicht/wertminderung).
 
 **"The insurer is cutting the rental car costs – what will they actually pay?"**
-The dispute centres on the daily rate (Schwacke vs. Fraunhofer – courts generally apply a **blended midpoint**) and on the duration. If you choose **not** to take a rental car, you are entitled to Nutzungsausfall (loss of use) under the Sanden-Danner table – €27–€175/day depending on vehicle category, without needing to prove specific journeys (presumption of personal use).
+The dispute centres on the daily rate (Schwacke vs. Fraunhofer – courts generally apply a **blended midpoint**) and on the duration. If you choose **not** to take a rental car, you are entitled to [Nutzungsausfall](/haftpflicht/nutzungsausfall) (loss of use) under the Sanden-Danner table – €27–€175/day depending on vehicle category, without needing to prove specific journeys (presumption of personal use).
 
 **"The insurer has made an offer – accept it or litigate?"**
 Check it against our calculation. If Wiederbeschaffungswert, Restwert and ancillary costs add up: accepting is fine. If there are material deductions: the law firm issues a response and recovers the difference – litigation is the **last step**, handled by the law firm, not by you. You decide on the basis of figures, not exhaustion.
@@ -283,7 +283,7 @@ After an experience like this, that is entirely understandable. If the discomfor
 
 ---
 
-## <a name="alle"></a>6. Key answers that apply to everyone
+## 6. Key answers that apply to everyone {#alle}
 
 Regardless of which of the five situations you find yourself in – these eight answers **always** apply:
 
@@ -313,7 +313,7 @@ As long as the opposing party's liability cover is settling the claim, your own 
 
 ---
 
-## <a name="rollen"></a>7. What we do – and what we deliberately do not do
+## 7. What we do – and what we deliberately do not do {#rollen}
 
 ### What Claimondo does
 - **Independent vehicle damage reports**, calculated with **Audatex III**
@@ -333,7 +333,7 @@ As long as the opposing party's liability cover is settling the claim, your own 
 
 ---
 
-## <a name="wann"></a>8. When to go to the law firm, when to the doctor, when to a crisis service
+## 8. When to go to the law firm, when to the doctor, when to a crisis service {#wann}
 
 ### To the partner law firm (we coordinate this)
 - In **every personal injury case** – even minor ones
@@ -364,7 +364,7 @@ As long as the opposing party's liability cover is settling the claim, your own 
 
 ---
 
-## <a name="faq"></a>9. Frequently asked questions
+## 9. Frequently asked questions {#faq}
 
 **1. What is the first thing to do after a road accident?**
 Safety (hazard lights, warning triangle, attend to injured), call the police if needed, photographic documentation, exchange details, secure witness addresses. See a doctor within 24 hours.

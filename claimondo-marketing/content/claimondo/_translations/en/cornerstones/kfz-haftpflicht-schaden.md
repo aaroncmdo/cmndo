@@ -66,7 +66,7 @@ German damages law gives road accident victims a comprehensive package of claims
 
 ---
 
-## <a name="akut"></a>1. The first 72 hours – immediate measures
+## 1. The first 72 hours – immediate measures {#akut}
 
 In the hours and days after the accident, the strength of your subsequent negotiating position is determined. Adrenaline masks pain; evidence loses its probative value quickly. The following steps are essential:
 
@@ -92,7 +92,7 @@ In the hours and days after the accident, the strength of your subsequent negoti
 
 ---
 
-## <a name="haftung"></a>2. Who is liable – the liability system
+## 2. Who is liable – the liability system {#haftung}
 
 The German motor vehicle liability system has **three parallel pillars** that together cover practically every damage scenario:
 
@@ -126,7 +126,7 @@ You communicate **directly** with the tortfeasor's liability insurer, not via th
 
 ---
 
-## <a name="anspruchsberechtigte"></a>3. Who has claims
+## 3. Who has claims {#anspruchsberechtigte}
 
 An injured party is **any person** whose body, health, property or legally protected position was directly affected by the accident. This covers far more people than is often assumed:
 
@@ -153,7 +153,7 @@ Health insurers, employers' liability insurance associations and pension insurer
 
 ---
 
-## <a name="schaeden"></a>4. Which losses are recoverable
+## 4. Which losses are recoverable {#schaeden}
 
 German damages law compensates **all** losses caused by the accident – both property damage and personal injury, with numerous consequential heads. Here is the complete overview:
 
@@ -188,7 +188,7 @@ German damages law compensates **all** losses caused by the accident – both pr
 
 ---
 
-## <a name="fristen"></a>5. Deadlines – default, limitation, acknowledgement
+## 5. Deadlines – default, limitation, acknowledgement {#fristen}
 
 ### The 4-week settlement deadline
 Where liability is clear and all documents have been submitted, the insurer must settle **within 4 weeks**. After that, [default under § 286 BGB (German Civil Code on default)](/haftpflicht/verzug-bgb286) arises automatically – with default interest and fully recoverable legal costs.
@@ -212,7 +212,7 @@ An acknowledgement of liability (§ 212 BGB) restarts the limitation period – 
 
 ---
 
-## <a name="szenarien"></a>6. Standard accident scenarios and their apportionment percentages
+## 6. Standard accident scenarios and their apportionment percentages {#szenarien}
 
 In the vast majority of road accident constellations, the apportionment is already clear by virtue of the Anscheinsbeweis – you do not need to prove the same point from scratch each time.
 
@@ -236,7 +236,7 @@ In the vast majority of road accident constellations, the apportionment is alrea
 
 ---
 
-## <a name="komplex"></a>7. Complex constellations
+## 7. Complex constellations {#komplex}
 
 Some accidents deviate from the standard and require specialist knowledge:
 
@@ -252,7 +252,7 @@ Some accidents deviate from the standard and require specialist knowledge:
 
 ---
 
-## <a name="decoder"></a>8. How insurers typically operate – and how to respond
+## 8. How insurers typically operate – and how to respond {#decoder}
 
 Insurers use standardised letter templates and tactics. For each one we have a decoder with a concrete template response:
 
@@ -273,7 +273,7 @@ Insurers use standardised letter templates and tactics. For each one we have a d
 
 ---
 
-## <a name="aktionsplan"></a>9. What to do now – step by step
+## 9. What to do now – step by step {#aktionsplan}
 
 ### Phase 1: Acute (0–72 hours)
 1. Police, photo documentation, secure witness addresses
@@ -306,7 +306,7 @@ Insurers use standardised letter templates and tactics. For each one we have a d
 
 ---
 
-## <a name="anwalt"></a>10. When a lawyer is essential
+## 10. When a lawyer is essential {#anwalt}
 
 ### A lawyer is clearly recommended for:
 - **Every personal injury case** – however minor. Late-onset consequences are more common than expected.
@@ -326,7 +326,7 @@ In a no-fault accident: **€0** for you. Legal costs are paid by the opposing i
 
 ---
 
-## <a name="faq"></a>11. Frequently asked questions
+## 11. Frequently asked questions {#faq}
 
 **1. Who pays after a road accident?**
 In a no-fault accident, the opposing liability insurer. All property damage and personal injury losses, plus legal costs.
@@ -375,7 +375,7 @@ A lump-sum payment of €5,000–€15,000 to close relatives in the event of a 
 
 ---
 
-## <a name="quellen"></a>12. Sources
+## 12. Sources {#quellen}
 
 ### Legislation
 - **BGB** §§ 195, 199, 203, 212, 247, 249, 251, 253, 254, 280, 286, 288, 421, 426, 779, 781, 823, 828, 832, 833, 842, 843, 844, 1922 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)

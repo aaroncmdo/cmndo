@@ -66,7 +66,7 @@ Niemieckie prawo odszkodowawcze przyznaje osobom poszkodowanym w wypadkach drogo
 
 ---
 
-## <a name="akut"></a>1. Pierwsze 72 godziny – działania natychmiastowe
+## 1. Pierwsze 72 godziny – działania natychmiastowe {#akut}
 
 W pierwszych godzinach i dniach po wypadku decyduje się, jak mocna będzie Twoja późniejsza pozycja negocjacyjna. Adrenalina maskuje ból, a dowody szybko tracą swoją wartość dowodową. Następujące kroki są obowiązkowe:
 
@@ -92,7 +92,7 @@ W pierwszych godzinach i dniach po wypadku decyduje się, jak mocna będzie Twoj
 
 ---
 
-## <a name="haftung"></a>2. Kto ponosi odpowiedzialność – system odpowiedzialności
+## 2. Kto ponosi odpowiedzialność – system odpowiedzialności {#haftung}
 
 Niemiecki system odpowiedzialności za szkody komunikacyjne opiera się na **trzech równoległych filarach**, które wspólnie obejmują praktycznie każdy przypadek szkody:
 
@@ -126,7 +126,7 @@ Kontaktujesz się **bezpośrednio** z ubezpieczycielem OC sprawcy, nie przez pos
 
 ---
 
-## <a name="anspruchsberechtigte"></a>3. Komu przysługują roszczenia
+## 3. Komu przysługują roszczenia {#anspruchsberechtigte}
 
 Poszkodowanym jest **każda osoba**, której ciało, zdrowie, własność lub chronione dobro prawne zostało bezpośrednio naruszone przez wypadek. Obejmuje to znacznie więcej osób, niż się często zakłada:
 
@@ -153,7 +153,7 @@ Kasa chorych, zakład ubezpieczeń wypadkowych (Berufsgenossenschaft) lub ubezpi
 
 ---
 
-## <a name="schaeden"></a>4. Jakie szkody podlegają zwrotowi
+## 4. Jakie szkody podlegają zwrotowi {#schaeden}
 
 Niemieckie prawo odszkodowawcze pokrywa **wszystkie** szkody spowodowane wypadkiem – zarówno szkody majątkowe, jak i szkody na osobie, z licznymi pozycjami następczymi. Poniżej pełny przegląd:
 
@@ -188,7 +188,7 @@ Niemieckie prawo odszkodowawcze pokrywa **wszystkie** szkody spowodowane wypadki
 
 ---
 
-## <a name="fristen"></a>5. Terminy – zwłoka, przedawnienie, uznanie roszczenia
+## 5. Terminy – zwłoka, przedawnienie, uznanie roszczenia {#fristen}
 
 ### 4-tygodniowy termin regulacji
 Przy bezspornej odpowiedzialności i kompletnej dokumentacji ubezpieczyciel musi zlikwidować szkodę **w ciągu 4 tygodni**. Następnie automatycznie następuje [zwłoka według § 286 BGB](/haftpflicht/verzug-bgb286) – z odsetkami za zwłokę i w pełni zwracanymi kosztami adwokata.
@@ -212,7 +212,7 @@ Uznanie roszczenia (§ 212 BGB) powoduje bieg przedawnienia na nowo – korzystn
 
 ---
 
-## <a name="szenarien"></a>6. Typowe scenariusze wypadków i ich kwoty
+## 6. Typowe scenariusze wypadków i ich kwoty {#szenarien}
 
 W zdecydowanej większości typowych konstelacji wypadkowych kwota odpowiedzialności jest już jasna dzięki Anscheinsbeweis – nie trzeba za każdym razem przeprowadzać nowego dowodu.
 
@@ -236,7 +236,7 @@ W zdecydowanej większości typowych konstelacji wypadkowych kwota odpowiedzialn
 
 ---
 
-## <a name="komplex"></a>7. Złożone konstelacje
+## 7. Złożone konstelacje {#komplex}
 
 Niektóre wypadki odbiegają od standardu i wymagają specjalistycznej wiedzy:
 
@@ -252,7 +252,7 @@ Niektóre wypadki odbiegają od standardu i wymagają specjalistycznej wiedzy:
 
 ---
 
-## <a name="decoder"></a>8. Jak typowo działa ubezpieczyciel – i jak temu przeciwdziałać
+## 8. Jak typowo działa ubezpieczyciel – i jak temu przeciwdziałać {#decoder}
 
 Ubezpieczyciele posługują się standardowymi szablonami pism i strategiami. Do każdej z nich przygotowaliśmy dekoder z konkretnym szablonem odpowiedzi:
 
@@ -273,7 +273,7 @@ Ubezpieczyciele posługują się standardowymi szablonami pism i strategiami. Do
 
 ---
 
-## <a name="aktionsplan"></a>9. Co zrobić teraz – krok po kroku
+## 9. Co zrobić teraz – krok po kroku {#aktionsplan}
 
 ### Faza 1: Nagłe działania (0–72 godziny)
 1. Policja, dokumentacja fotograficzna, zabezpieczenie adresów świadków
@@ -306,7 +306,7 @@ Ubezpieczyciele posługują się standardowymi szablonami pism i strategiami. Do
 
 ---
 
-## <a name="anwalt"></a>10. Kiedy adwokat jest niezbędny
+## 10. Kiedy adwokat jest niezbędny {#anwalt}
 
 ### Adwokat jest wyraźnie zalecany przy:
 - **Każdej szkodzie na osobie** – bez względu na nasilenie. Późniejsze skutki zdrowotne są częstsze, niż się wydaje.
@@ -326,7 +326,7 @@ Przy niezawinionym wypadku: **0 €** dla Ciebie. Koszty adwokata pokrywa ubezpi
 
 ---
 
-## <a name="faq"></a>11. Najczęstsze pytania
+## 11. Najczęstsze pytania {#faq}
 
 **1. Kto płaci po wypadku drogowym?**
 Przy niezawinionym wypadku – ubezpieczyciel OC sprawcy. Wszystkie szkody majątkowe i na osobie plus koszty adwokata.
@@ -375,7 +375,7 @@ Ryczałtowe odszkodowanie 5.000–15.000 € dla bliskich krewnych przy wypadku 
 
 ---
 
-## <a name="quellen"></a>12. Wykaz źródeł
+## 12. Wykaz źródeł {#quellen}
 
 ### Ustawy
 - **BGB** §§ 195, 199, 203, 212, 247, 249, 251, 253, 254, 280, 286, 288, 421, 426, 779, 781, 823, 828, 832, 833, 842, 843, 844, 1922 – [gesetze-im-internet.de/bgb](https://www.gesetze-im-internet.de/bgb/)
