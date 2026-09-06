@@ -54,7 +54,10 @@ export function buildWhatsAppText(opts: {
   vorname: string | null
   flowUrl: string
 }): string {
-  const greet = opts.vorname ? `Hi ${opts.vorname}` : 'Hi'
+  // ⚠ „Hallo", nicht „Hi". Seit der Umstellung auf die Sie-Anrede (Aaron 06.09.) stand hier
+  // „Hi Ernest, danke für Ihre Schadenmeldung" — vertrauliche Begrüßung, förmlicher Rest.
+  // Ein Stilbruch im ersten Satz der ersten Nachricht, die ein Geschädigter von uns bekommt.
+  const greet = opts.vorname ? `Hallo ${opts.vorname}` : 'Hallo'
   return [
     `${greet}, danke für Ihre Schadenmeldung bei Claimondo.`,
     '',
