@@ -3,8 +3,14 @@
 // Agentic-Loop: Claude → (tool_use → Linear → tool_result → Claude) bis Ticket
 // erstellt/kommentiert oder Rückfrage/Text zurückgegeben wird.
 //
-// Rollen: sachverstaendiger, admin, kundenbetreuer. Kunden sind NICHT
-// zugelassen — Support-Widget läuft nur im internen Portal.
+// Rollen (Aaron 06.09.2026): INTERN sachverstaendiger, admin, kundenbetreuer — PARTNER
+// makler, werkstatt, flottenmanager. Endkunden sind NICHT zugelassen: das Widget legt
+// Linear-Tickets im Entwicklungs-Backlog an, das ist kein Kundensupport.
+//
+// ⚠ Der Knopf (<SupportButton>) und diese Liste muessen zusammenpassen. Vorher taten sie es
+// nicht: der Knopf hing in Makler-, Werkstatt- und Flotten-Shell, waehrend die Liste sie
+// abwies — rund 100 Nutzer sahen einen Knopf, der in ein 403 lief. Wer hier eine Rolle
+// ergaenzt oder streicht, prueft die Shells mit.
 
 import { NextRequest, NextResponse } from 'next/server'
 import type Anthropic from '@anthropic-ai/sdk'
@@ -24,8 +30,15 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// AAR-708: Kunde mit aufgenommen — Aaron will Tickets als Kunde anlegen können.
-const ALLOWED_ROLES = new Set(['sachverstaendiger', 'admin', 'kundenbetreuer', 'kunde'])
+// AAR-708 hatte 'kunde' aufgenommen ("Aaron will Tickets als Kunde anlegen koennen").
+// Aaron 06.09.2026 zurueckgenommen: "kunde raus … makler werkstatt flotte rein".
+// Zum Testen aus einer Kundensicht bleibt der Weg ueber ein Admin-Konto.
+const ALLOWED_ROLES = new Set([
+  'sachverstaendiger', 'admin', 'kundenbetreuer', 'dispatch',   // intern
+  // 'dispatch' war nie in dieser Liste, steht aber in DURCHDENKEN_ROLES und bekommt den
+  // Knopf ueber PortalUserFooter (DispatchNav) — dieselbe Luecke wie bei den Partnern.
+  'makler', 'werkstatt', 'flottenmanager',          // Partner — arbeiten operativ im System
+])
 // AAR-625: Durchdenken-Modus nur für interne Rollen (nicht SV)
 const DURCHDENKEN_ROLES = new Set(['admin', 'kundenbetreuer', 'dispatch'])
 const MAX_AGENT_ITERATIONS = 5
@@ -61,7 +74,7 @@ export async function POST(req: NextRequest) {
   const rolle = profile?.rolle ?? ''
   if (!ALLOWED_ROLES.has(rolle)) {
     return NextResponse.json(
-      { error: 'Support-Widget nur für SV/Admin/Kundenbetreuer verfügbar' },
+      { error: 'Das Support-Widget steht Ihrer Rolle nicht zur Verfügung.' },
       { status: 403 },
     )
   }
@@ -94,7 +107,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'Feature-Request-Limit erreicht',
-          message: `Du hast heute bereits ${FEATURE_REQUEST_LIMIT_PER_DAY} Feature-Requests eingereicht. Weitere morgen, oder sprich direkt mit Aaron wenn es dringend ist.`,
+          message: `Sie haben heute bereits ${FEATURE_REQUEST_LIMIT_PER_DAY} Feature-Requests eingereicht. Weitere morgen, oder sprich direkt mit Aaron wenn es dringend ist.`,
         },
         { status: 429 },
       )
@@ -106,7 +119,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: 'Rate-Limit erreicht',
-        message: `Du hast ${limit.used} Anfragen in dieser Stunde gestellt. Nächster Reset: ${limit.resetAt}.`,
+        message: `Sie haben ${limit.used} Anfragen in dieser Stunde gestellt. Nächster Reset: ${limit.resetAt}.`,
         resetAt: limit.resetAt,
       },
       { status: 429 },
@@ -201,7 +214,7 @@ export async function POST(req: NextRequest) {
         })
         const reply: SupportResponse = {
           type: 'question',
-          message: question || 'Kannst du das bitte konkretisieren?',
+          message: question || 'Können Sie das bitte konkretisieren?',
           remaining: Math.max(0, limit.remaining - 1),
         }
         return NextResponse.json(reply)
@@ -266,7 +279,7 @@ export async function POST(req: NextRequest) {
             type: 'commented',
             message:
               assistantText ||
-              'Danke — ich habe deinen Hinweis als Kommentar an das bestehende Ticket gehängt.',
+              'Danke — ich habe Ihren Hinweis als Kommentar an das bestehende Ticket gehängt.',
             issueIdentifier: issueId,
             commentUrl: created?.url ?? null,
             remaining: Math.max(0, limit.remaining - 1),
@@ -382,7 +395,7 @@ export async function POST(req: NextRequest) {
   const reply: SupportResponse = {
     type: 'text',
     message:
-      'Mir fehlen gerade Infos, um das sauber aufzunehmen. Magst du in einem Satz zusammenfassen, was genau schiefläuft?',
+      'Mir fehlen gerade Infos, um das sauber aufzunehmen. Möchten Sie in einem Satz zusammenfassen, was genau schiefläuft?',
     remaining: Math.max(0, limit.remaining - 1),
   }
   return NextResponse.json(reply)
