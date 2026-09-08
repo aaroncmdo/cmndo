@@ -24,7 +24,6 @@ related:
   - /haftpflicht/unversicherte-voh
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/fahrerflucht
-meta_description: "Schwarzfahrt/Kfz-Diebstahl: Halterhaftung entfällt nach §7 Abs. 3 StVG, der Schwarzfahrer haftet persönlich (§18 StVG). Verkehrsopferhilfe als Auffangnetz."
 ---
 
 # Unauthorized Vehicle Use & Car Theft – Liability for Joyriding

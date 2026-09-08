@@ -29,7 +29,6 @@ related:
   - /haftpflicht/verdienstausfall
   - /haftpflicht/eigene-kosten
   - /haftpflicht/vermehrte-beduerfnisse
-meta_description: "Heilbehandlungskosten nach Unfall sind nach §249 BGB voll erstattbar – Arzt, Physio, Reha, Psychotherapie. Die Krankenkasse nimmt Regress (§116 SGB X)."
 ---
 
 # Trafik Kazası Sonrası Tedavi Masrafları

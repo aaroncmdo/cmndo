@@ -26,7 +26,6 @@ related:
   - /haftpflicht/unversicherte-voh
   - /haftpflicht/kasko-versicherung
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Fahrerflucht-Opfer: Bleibt der Verursacher unbekannt, zahlt die Verkehrsopferhilfe nach §12 PflVG – Personenschäden voll, Sachschäden 500 € Selbstbehalt."
 ---
 
 # Fahrerflucht / Unfallflucht (Kaza Sonrası Kaçma) – Zarar Görenler Ne Yapabilir

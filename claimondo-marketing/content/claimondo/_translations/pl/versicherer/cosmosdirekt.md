@@ -17,7 +17,6 @@ keyFacts:
   - "Werkstattbindung über den WerkstattservicePLUS-Tarif (mit Prämienrabatt)"
   - "Dokumentiert: lange Telefon-/Bearbeitungszeiten im Schadenfall"
   - "BaFin-Kfz-Quote 2024 nicht separat ausgewiesen"
-meta_description: "CosmosDirekt Schadensregulierung: Generali-Direkttochter, Drittschaden über den Generali-Apparat, Werkstattbindung, lange Bearbeitung. Ihre Rechte – mit Quellen."
 ---
 
 # CosmosDirekt: likwidacja szkody, aparat Generali i Pana/Pani prawa

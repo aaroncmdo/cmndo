@@ -30,7 +30,6 @@ related:
   - /haftpflicht/nutzungsausfall
   - /haftpflicht/reparaturkosten
   - /decoder/reparatur-unwirtschaftlich
-meta_description: "„Mietwagen-Tagessatz zu hoch“? Wie Versicherer mit Schwacke/Fraunhofer 30–50 % kürzen – und wie Sie den vollen Satz nach §249 BGB durchsetzen."
 ---
 
 # „Stawka dzienna wynajmu samochodu zastępczego wyraźnie przekracza cenę rynkową" – Dekoder

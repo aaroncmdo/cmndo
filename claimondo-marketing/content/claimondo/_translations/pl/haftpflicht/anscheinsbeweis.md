@@ -29,7 +29,6 @@ related:
   - /haftpflicht/mitverschulden-bgb254
   - /haftpflicht/mitverschulden-stvg17
   - /decoder/mitverschulden-30-prozent
-meta_description: "Anscheinsbeweis: Bei Auffahrunfall, Vorfahrt- oder Rotlichtverstoß schließt das Gericht auf das Verschulden des anderen. Wann er für Sie spielt."
 ---
 
 # Anscheinsbeweis w wypadku drogowym – kiedy ma to znaczenie dla Pana/Pani

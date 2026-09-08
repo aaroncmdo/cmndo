@@ -27,7 +27,6 @@ related:
   - /haftpflicht/vorfahrt-rechts-vor-links
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/schmerzensgeld-bgb253
-meta_description: "Rotlicht-Unfall: Wer bei Rot fährt, trägt nach §37 StVO und Anscheinsbeweis die volle Schuld (100:0). Qualifizierter Verstoß ab 1 Sekunde."
 ---
 
 # Kırmızı Işık İhlali Sonucu Kaza — Kusur Kimde

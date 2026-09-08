@@ -25,7 +25,6 @@ keyFacts:
 related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/kasko-versicherung
-meta_description: "Wildunfall: kein Haftpflichtfall – der Schaden läuft über Ihre Teil- oder Vollkasko abzüglich Selbstbeteiligung. Ohne Kasko tragen Sie ihn selbst."
 ---
 
 # Wildunfall (Yaban Hayvanı Kazası) – Kim Öder, Ne Yapılmalı

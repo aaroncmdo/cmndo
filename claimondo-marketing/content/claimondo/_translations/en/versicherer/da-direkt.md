@@ -17,7 +17,6 @@ keyFacts:
   - "Seit 2011 dokumentiert: SV-Honorar-Kürzung „nicht erforderlich i. S. v. § 249 BGB""
   - "AG München 343 C 7350/10: sechs verbundene Verfahren, SV-Kosten in voller Höhe geschuldet"
   - "BaFin-Kfz-Quote 2024 nicht separat ausgewiesen"
-meta_description: "DA Direkt Schadensregulierung: Zurich-Tochter (nicht Generali!), SV-Honorar-Kürzung seit 2011, gemeinsamer Zurich-Apparat. AG-Urteile und Ihre Rechte – mit Quellen."
 ---
 
 # DA Direkt: Claim Settlement, Corporate Structure and Your Rights

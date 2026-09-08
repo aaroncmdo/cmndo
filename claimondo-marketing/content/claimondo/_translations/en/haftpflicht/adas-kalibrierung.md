@@ -32,7 +32,6 @@ related:
   - /haftpflicht/sv-kosten
   - /decoder/werkstatt-netz
   - /sachverstaendige/zkf
-meta_description: "Assistenzsysteme nach Unfall kalibrieren: Wann Kamera und Radar neu justiert werden müssen, warum das sicherheitsrelevant ist und wer die Kosten trägt."
 ---
 
 # Calibrating Driver Assistance Systems After an Accident – Why This Is Not an Optional Extra

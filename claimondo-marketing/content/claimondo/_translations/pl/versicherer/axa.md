@@ -17,7 +17,6 @@ keyFacts:
   - "SV-Honorar-Kürzungen auf Basis von LOGICHECK-Prüfberichten"
   - "Streit-Muster: Reaktion oft erst nach Klagezustellung"
   - "Franke & Bornberg Kfz-Tarifrating 2024: 32 AXA-Tarife nur „ausreichend“"
-meta_description: "AXA Schadensregulierung: LOGICHECK-Kürzungen, Regresswelle gegen Gutachter seit 2022, BaFin-Quote 2,27. AG-Urteile und Ihre Rechte als Geschädigter – mit Quellen."
 ---
 
 # AXA: likwidacja szkody, fala regresów i Pana/Pani prawa

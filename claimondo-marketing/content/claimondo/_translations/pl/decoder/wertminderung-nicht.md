@@ -31,7 +31,6 @@ related:
   - /haftpflicht/wiederbeschaffungswert
   - /decoder/werkstatt-netz
   - /decoder/unser-sachverstaendiger
-meta_description: "„Keine Wertminderung angefallen“? Die 3 Standard-Ausreden entkräftet – so sichern Sie Ihre merkantile Wertminderung nach BGH."
 ---
 
 # „Nie doszło do Wertminderung" – Dekoder

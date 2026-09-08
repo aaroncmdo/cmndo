@@ -25,7 +25,6 @@ related:
   - /haftpflicht/geschaedigte-primaer
   - /haftpflicht/mitverschulden-bgb254
   - /haftpflicht/betriebsgefahr-stvg7
-meta_description: "Fußgänger, Radfahrer und Kinder haben nach Unfall volle Ansprüche: Kinder unter 10 ohne Mitverschulden (§828 BGB), Radfahrer ohne Helm geschützt (BGH)."
 ---
 
 # Üçüncü Taraflar – Yayalar, Bisikletliler, Kazada Çocuklar

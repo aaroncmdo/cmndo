@@ -29,7 +29,6 @@ related:
   - /haftpflicht/wiederbeschaffungswert
   - /haftpflicht/reparaturkosten
   - /decoder/mietwagen-zu-hoch
-meta_description: "Mietwagen nach unverschuldetem Unfall zahlt die gegnerische Haftpflicht (§249 BGB) zum Normaltarif (Schwacke/Fraunhofer). So vermeiden Sie Kürzungen."
 ---
 
 # Zwrot kosztów wynajmu auta zastępczego po wypadku drogowym

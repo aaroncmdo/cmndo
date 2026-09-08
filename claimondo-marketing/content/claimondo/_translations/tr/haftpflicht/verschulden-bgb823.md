@@ -28,7 +28,6 @@ related:
   - /haftpflicht/fahrerhaftung-stvg18
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/beweislast
-meta_description: "§823 BGB: die allgemeine Verschuldenshaftung beim Unfall – sie ergänzt §7 StVG, ist aber beweislastig (Sie tragen das Verschulden). Wann sie greift."
 ---
 
 # § 823 BGB – Trafik Kazasında Genel Kusur Sorumluluğu

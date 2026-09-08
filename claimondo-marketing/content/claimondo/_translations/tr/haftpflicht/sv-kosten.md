@@ -29,7 +29,6 @@ related:
   - /haftpflicht/wertminderung
   - /haftpflicht/wiederbeschaffungswert
   - /decoder/unser-sachverstaendiger
-meta_description: "Sachverständigen-Kosten nach unverschuldetem Unfall zahlt die gegnerische Haftpflicht voll (§249 BGB). Sie wählen Ihren SV frei – für Sie 0 €."
 ---
 
 # Sachverständigen-Kosten (Bilirkişi Masrafları) Trafik Kazasında – Kim Öder, Ne Kadardır

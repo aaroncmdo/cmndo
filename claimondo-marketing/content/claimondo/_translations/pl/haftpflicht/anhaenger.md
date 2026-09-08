@@ -24,7 +24,6 @@ keyFacts:
 related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/mitverschulden-stvg17
-meta_description: "Anhänger-Unfall: Zugfahrzeug- und Anhänger-Halter haften gemeinsam nach §19a StVG, eigene Versicherungspflicht (§1 PflVG). So ordnen Sie die Haftung zu."
 ---
 
 # Przyczepa / przyczepa kempingowa / naczepa – odpowiedzialność przy wypadku

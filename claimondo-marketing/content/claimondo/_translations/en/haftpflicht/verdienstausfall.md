@@ -29,7 +29,6 @@ related:
   - /haftpflicht/haushaltsfuehrungsschaden
   - /haftpflicht/schmerzensgeld-bgb253
   - /haftpflicht/erwerbsminderungsschaden
-meta_description: "Verdienstausfall nach §252 BGB: Ersatz des unfallbedingt entgangenen Nettoeinkommens, bei Selbständigen des Gewinns. So berechnen und beweisen Sie ihn."
 ---
 
 # Loss of Earnings After a Road Accident – Calculation, Evidence, Special Cases

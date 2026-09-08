@@ -17,7 +17,6 @@ keyFacts:
   - "Erstanschreiben empfiehlt häufig einen Kostenvoranschlag statt eines Gutachtens"
   - "Mietwagen wird teils nach eigener Tabelle statt nach Schwacke bemessen"
   - "Eskalationsmuster wie HUK-Coburg: Zahlung oft erst nach Klagezustellung"
-meta_description: "HUK24 Schadensregulierung: Direktmarke der HUK-Coburg, gleicher Schadenapparat. Kostenvoranschlag-Falle, AG-Urteile und Ihre Rechte als Geschädigter – mit Quellen."
 ---
 
 # HUK24: likwidacja szkody, marka bezpośrednia i Pana/Pani prawa

@@ -28,7 +28,6 @@ related:
   - /haftpflicht/beerdigungskosten
   - /haftpflicht/erben-rechtsnachfolger
   - /haftpflicht/erwerbsminderungsschaden
-meta_description: "Unterhaltsschaden nach §844 Abs. 2 BGB: Hinterbliebene erhalten den entgangenen Unterhalt als Rente – Witwen rund 40 % des Familien-Nettos. Was zusteht."
 ---
 
 # Unterhaltsschaden według § 844 ust. 2 BGB – renta dla osób bliskich zmarłego

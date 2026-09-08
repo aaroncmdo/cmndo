@@ -32,7 +32,6 @@ related:
   - /haftpflicht/sv-kosten
   - /haftpflicht/wiederbeschaffungswert
   - /decoder/reparatur-unwirtschaftlich
-meta_description: "Reparaturbestätigung nach Unfall: Wann der Nachweis nötig ist – bei Eigenreparatur, Nutzungsausfall trotz fiktiver Abrechnung und in 130-Prozent-Fällen."
 ---
 
 # Repair Confirmation – Proof of Repair When There Is No Invoice

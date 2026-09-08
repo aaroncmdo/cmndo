@@ -17,7 +17,6 @@ keyFacts:
   - "Dokumentiert: Restwert-„Hochsetzung" über Carexpert-Nachbesichtigung (Schleyer-Fall: 0 € → 34.620 €)"
   - "Wertminderung pauschal auf Carexpert-Standardsätze gekürzt"
   - "Eskalationsmuster: Anerkenntnis häufig erst nach Klagezustellung"
-meta_description: "ERGO Schadensregulierung: höchste BaFin-Quote 4,7 unter den Großen (2024), Carexpert-Prüfung, Restwert-Hochsetzung. BGH-/AG-Urteile und Ihre Rechte – mit Quellen."
 ---
 
 # ERGO: likwidacja szkody, Carexpert i Pana/Pani prawa

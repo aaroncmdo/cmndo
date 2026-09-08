@@ -26,7 +26,6 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/spurwechsel
   - /haftpflicht/linksabbieger
-meta_description: "Überhol-Unfall: §5 StVO verlangt klare Sicht und Seitenabstand – wer dabei kollidiert, haftet nach Anscheinsbeweis meist 100:0. Wann sie anders liegt."
 ---
 
 # Kolizja podczas wyprzedzania – kto odpowiada w trakcie manewru wyprzedzania

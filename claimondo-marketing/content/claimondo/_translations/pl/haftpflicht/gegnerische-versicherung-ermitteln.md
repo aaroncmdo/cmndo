@@ -28,7 +28,6 @@ related:
   - /haftpflicht/geschaedigte-primaer
   - /haftpflicht/4-wochen-frist
   - /gegnerische-versicherung-zahlt-nicht
-meta_description: "Gegnerische Versicherung herausfinden: Der Zentralruf der Autoversicherer ermittelt sie kostenfrei über das Kennzeichen – 0800 250 260 0, rund um die Uhr."
 ---
 
 # Jak ustalić ubezpieczyciela sprawcy – ustalenie na podstawie numeru rejestracyjnego

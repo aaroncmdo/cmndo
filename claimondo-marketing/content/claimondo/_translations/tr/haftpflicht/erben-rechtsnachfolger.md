@@ -28,7 +28,6 @@ related:
   - /haftpflicht/unterhaltsschaden
   - /haftpflicht/beerdigungskosten
   - /haftpflicht/schmerzensgeld-bgb253
-meta_description: "Erben nach tödlichem Unfall: Ansprüche gehen nach §1922 BGB über, Schmerzensgeld ist vererbbar (BGH 1985). Was Rechtsnachfolger fordern."
 ---
 
 # Ölümlü Trafik Kazasında Mirasçılar ve Halefiyet

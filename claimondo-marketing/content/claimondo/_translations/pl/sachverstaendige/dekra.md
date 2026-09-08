@@ -20,7 +20,6 @@ related:
   - /sachverstaendige/gtue-kues-tuev-ifl
   - /sachverstaendige/ifs-leitsaetze
   - /sachverstaendige/pruefdienstleister
-meta_description: "DEKRA als Kfz-Gutachter: Wert- und Schadengutachten. Warum DEKRA oft im Versicherer-Auftrag prüft – und Sie Ihren eigenen SV wählen dürfen."
 ---
 
 # DEKRA – wielka organizacja kontrolna i rzeczoznawcy motoryzacyjni

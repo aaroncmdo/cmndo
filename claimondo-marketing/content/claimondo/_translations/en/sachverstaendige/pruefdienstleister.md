@@ -21,7 +21,6 @@ related:
   - /sachverstaendige/zkf
   - /sachverstaendige/ihk-bestellung-oebv
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Prüfdienstleister wie controlExpert & carexpert: wie Versicherer damit Gutachten und Reparaturrechnungen kürzen – und wie Sie dagegen vorgehen."
 ---
 
 # Audit Service Providers (controlExpert, carexpert & Co.) – How Insurers Cut Your Bills

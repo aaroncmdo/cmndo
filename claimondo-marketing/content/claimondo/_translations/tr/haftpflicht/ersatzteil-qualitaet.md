@@ -32,7 +32,6 @@ related:
   - /haftpflicht/wertminderung
   - /decoder/werkstatt-netz
   - /haftpflicht/sv-kosten
-meta_description: "Original, Identteil oder Gebrauchtteil nach Unfall: Was der Unterschied ist, wann Anspruch auf Originalteile besteht (BGH VI ZR 302/08) und was Kürzungen bedeuten."
 ---
 
 # Orijinal, Identteil veya İkinci El Parça – Size Ait Olan Yedek Parçalar

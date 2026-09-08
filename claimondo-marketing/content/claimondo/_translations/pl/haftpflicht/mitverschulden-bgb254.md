@@ -30,7 +30,6 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/beweislast
   - /decoder/mitverschulden-30-prozent
-meta_description: "Mitverschulden nach §254 BGB kürzt den Schadensersatz nur bei bewiesenem Kausalbeitrag – Gurt-Quote 20–30 %. Wie viel es kürzt und wie Sie sich wehren."
 ---
 
 # Przyczynienie się poszkodowanego do szkody według § 254 BGB – na czym polega i o ile naprawdę obniża odszkodowanie

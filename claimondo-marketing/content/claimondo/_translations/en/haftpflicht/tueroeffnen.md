@@ -25,7 +25,6 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/parkplatz
   - /haftpflicht/mitverschulden-stvg17
-meta_description: "Türöffnen-Unfall: Wer die Tür in den fließenden Verkehr öffnet, haftet nach §14 StVO fast immer 100:0 – bei Dooring von Radfahrern oft mehr Schmerzensgeld."
 ---
 
 # Car Door Accident – Who Is Liable When a Door Opens Into Moving Traffic

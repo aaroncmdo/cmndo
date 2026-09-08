@@ -17,7 +17,6 @@ keyFacts:
   - "Dokumentiert: Mandanten-Fragebogen mit Suggestivfragen zur Anwaltswahl (DAV-Protest 2020)"
   - "Carexpert-Prüfberichte als Grundlage für SV-Honorar-Kürzungen"
   - "Einordnung: dokumentierte Einzelfälle bei unterdurchschnittlicher Beschwerdedichte"
-meta_description: "R+V Schadensregulierung: niedrige BaFin-Quote 0,77, aber dokumentierter Anwalts-Fragebogen (DAV-Protest) und Carexpert-Kürzungen. Ihre Rechte – mit Quellen."
 ---
 
 # R+V: Hasar Tazminatı, Avukat Anketi ve Haklarınız

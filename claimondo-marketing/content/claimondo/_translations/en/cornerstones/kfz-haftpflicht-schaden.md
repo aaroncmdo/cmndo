@@ -16,7 +16,6 @@ keyFacts:
   - 4-Wochen-Prüfungsfrist – danach Verzug mit Zinsen (§ 286 BGB)
 last_legal_review: pending
 schema_types: ["Article", "LegalService", "FAQPage", "HowTo"]
-meta_description: "Kfz-Haftpflichtschaden – das Handbuch: Ihre Ansprüche nach unverschuldetem Unfall (Reparatur, Wertminderung, Anwalt). Für Sie 0 € (§249 BGB)."
 ---
 
 # Motor Vehicle Third-Party Liability Claims – The Complete Guide for Injured Parties

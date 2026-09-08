@@ -26,7 +26,6 @@ related:
   - /haftpflicht/vorfahrt-rechts-vor-links
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17
-meta_description: "Vorfahrt-Schild missachtet: Stopp (Z 206) oder Vorfahrt achten (Z 205) = 100:0 nach Anscheinsbeweis. Auf der Vorfahrtsstraße sind Sie umfassend geschützt."
 ---
 
 # Trafik İşaretlerine (Vorfahrt-Schilder) Uyulmaması – Dur, „Yol Ver" ve Anayol Levhalarında Sorumluluk

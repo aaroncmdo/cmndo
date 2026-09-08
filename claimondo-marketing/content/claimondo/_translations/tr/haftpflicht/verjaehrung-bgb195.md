@@ -27,7 +27,6 @@ last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286
   - /haftpflicht/anerkenntnis-bgb212
-meta_description: "Verjährung von Unfall-Ansprüchen: 3 Jahre nach §195 BGB ab dem 31.12. des Kenntnisjahres, 30 Jahre bei Personenschäden. So vermeiden Sie den Verlust."
 ---
 
 # § 195 BGB Uyarınca Trafik Kazası Taleplerinde Zamanaşımı

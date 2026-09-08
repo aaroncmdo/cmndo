@@ -29,7 +29,6 @@ related:
   - /haftpflicht/verjaehrung-bgb195
   - /haftpflicht/verzug-bgb286
   - /decoder/pauschal-abgeltung
-meta_description: "Anerkenntnis (§212 BGB) vs. Vergleich (§779 BGB): eines startet die Verjährung neu, das andere beendet alle Ansprüche. Nicht vorschnell unterschreiben."
 ---
 
 # Uznanie roszczenia (§ 212 BGB) i ugoda (§ 779 BGB) – kluczowa różnica

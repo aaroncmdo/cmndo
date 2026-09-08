@@ -29,7 +29,6 @@ related:
   - /haftpflicht/vermehrte-beduerfnisse
   - /haftpflicht/pflege-mehrbedarf
   - /haftpflicht/schmerzensgeld-bgb253
-meta_description: "Erwerbsminderungs-Schaden nach §843 BGB: Rente oder Kapital bei dauerhafter unfallbedingter Erwerbsminderung, bemessen am MdE-Grad. Was Ihnen zusteht."
 ---
 
 # § 843 BGB Uyarınca Çalışma Gücü Kaybı Zararı – Kalıcı Sonuçlarda Rant

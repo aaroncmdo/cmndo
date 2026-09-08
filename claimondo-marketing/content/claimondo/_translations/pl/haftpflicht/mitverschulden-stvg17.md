@@ -29,7 +29,6 @@ related:
   - /haftpflicht/mitverschulden-bgb254
   - /haftpflicht/anscheinsbeweis
   - /decoder/mitverschulden-30-prozent
-meta_description: "§17 StVG: Quotelung nach Verschulden und Betriebsgefahr – oft bleiben 20–30 % Restquote trotz fremder Hauptschuld. Wie die Mithaftung berechnet wird."
 ---
 
 # § 17 StVG – współodpowiedzialność między pojazdami i podział winy

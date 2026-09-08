@@ -25,7 +25,6 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/vorfahrt-rechts-vor-links
-meta_description: "Linksabbieger-Unfall: §9 StVO verlangt doppelte Sorgfalt, der Anscheinsbeweis spricht gegen den Abbieger (100:0). Wann der Entgegenkommer mithaftet."
 ---
 
 # Kolizja skręcającego w lewo – odpowiedzialność przy zderzeniu z pojazdem nadjeżdżającym z naprzeciwka

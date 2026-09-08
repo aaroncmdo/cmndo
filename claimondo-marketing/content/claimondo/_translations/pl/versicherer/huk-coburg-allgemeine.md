@@ -17,7 +17,6 @@ keyFacts:
   - "Signature-Taktik: Kürzung des Sachverständigenhonorars unter Verweis auf eine eigene Honorartabelle"
   - "DAV-Forsa-Umfrage 2017 (n=1.072 Verkehrsanwälte): 68 % nennen die HUK-Coburg als Problemversicherer"
   - "Eskalationsmuster: vorgerichtlich selten Nachzahlung, nach Klagezustellung häufig schnelle Zahlung"
-meta_description: "HUK-Coburg Allgemeine 2024: höchste BaFin-Beschwerdequote der Top-12. Kürzungspraxis, BGH-/AG-Urteile und Eskalationswege für Geschädigte – mit Quellen."
 ---
 
 # HUK-Coburg Allgemeine: likwidacja szkód, praktyka obniżek i Pana/Pani prawa

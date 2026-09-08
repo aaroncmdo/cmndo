@@ -21,7 +21,6 @@ related:
   - /sachverstaendige/zak
   - /sachverstaendige/bvsk
   - /sachverstaendige/pruefdienstleister
-meta_description: "Öffentlich bestellter & vereidigter Sachverständiger (öbV): die IHK-Bestellung nach §36 GewO – die höchste Qualifikationsstufe für Gutachter."
 ---
 
 # Kamu Tarafından Atanmış ve Yeminli Bilirkişi (öbV) – IHK Ataması

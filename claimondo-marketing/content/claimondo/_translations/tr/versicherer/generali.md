@@ -17,7 +17,6 @@ keyFacts:
   - "Rechnungsprüfung über ClaimsControlling und Carexpert"
   - "Eskalationsmuster: Regulierung teils erst nach Klagezustellung"
   - "BaFin-Kfz-Quote 2024 nicht separat ausgewiesen (unter der Top-9-Schwelle)"
-meta_description: "Generali Schadensregulierung: Werkstattsteuerung über das Partnernetz, ClaimsControlling/Carexpert-Prüfung, Zahlung oft erst nach Klage. Ihre Rechte – mit Quellen."
 ---
 
 # Generali: Hasar Tazminatı, Atölye Yönlendirmesi ve Haklarınız

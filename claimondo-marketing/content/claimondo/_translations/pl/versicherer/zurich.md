@@ -17,7 +17,6 @@ keyFacts:
   - "Mietwagen-Kürzung über Fraunhofer statt Schwacke (LOGICHECK)"
   - "Positiv: eigenes Online-Formular für Geschädigte/Anspruchsteller"
   - "Mutterkonzern Zurich Insurance Group; DA Direkt ist eine Schwester-Marke (NICHT Generali)"
-meta_description: "Zurich Schadensregulierung: Mietwagen-Kürzung über Fraunhofer, eigenes Geschädigten-Formular, neue NL 2024. AG-Urteile und Ihre Rechte als Geschädigter – mit Quellen."
 ---
 
 # Zurich: likwidacja szkody, obniżenie kosztów wynajmu pojazdu i Pana/Pani prawa

@@ -29,7 +29,6 @@ related:
   - /haftpflicht/wiederbeschaffungswert
   - /haftpflicht/sv-kosten
   - /decoder/wertminderung-nicht
-meta_description: "Wertminderung: der merkantile Wertverlust trotz Reparatur – eigenständig erstattbar nach §249 BGB (BGH VI ZR 357/03). So wird sie korrekt berechnet."
 ---
 
 # Wertminderung przy wypadku samochodowym – definicja, metody, obliczanie

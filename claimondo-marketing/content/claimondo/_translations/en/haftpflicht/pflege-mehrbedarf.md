@@ -29,7 +29,6 @@ related:
   - /haftpflicht/heilbehandlungskosten
   - /haftpflicht/erwerbsminderungsschaden
   - /haftpflicht/haushaltsfuehrungsschaden
-meta_description: "Pflege-Mehrbedarf nach §843 BGB: Erstattung von Pflegediensten und fiktiver Vergütung Angehöriger (10–14 €/Std). Pflegekasse nimmt Regress (§116 SGB X)."
 ---
 
 # Additional Care Needs After a Road Accident

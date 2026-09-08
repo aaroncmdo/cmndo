@@ -26,7 +26,6 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/spurwechsel
   - /haftpflicht/mitverschulden-stvg17
-meta_description: "Wenden auf der Fahrbahn: §9 Abs. 5 StVO verlangt die höchste Sorgfalt – bei Kollision haftet der Wendende fast immer 100:0. Wann die Gegenseite mithaftet."
 ---
 
 # Zawracanie na jezdni – odpowiedzialność przy kolizji

@@ -17,7 +17,6 @@ keyFacts:
   - "Dokumentiert: Kürzungsschreiben mit unzutreffender Bezugnahme auf BGH-Urteile (Kanzlei Schleyer)"
   - "„Passiver Rechtsschutz" – Aufforderung, Schriftwechsel nur mit der LVM zu führen"
   - "Einordnung: dokumentierte Einzelfälle bei unterdurchschnittlicher Beschwerdedichte"
-meta_description: "LVM Schadensregulierung: branchenbeste BaFin-Quote 0,76, aber dokumentierte BGH-Falschzitate in Kürzungsschreiben und „passiver Rechtsschutz". Ihre Rechte – mit Quellen."
 ---
 
 # LVM: likwidacja szkody, cytaty BGH i Pana/Pani prawa

@@ -24,7 +24,6 @@ related:
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/anscheinsbeweis
-meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtschuldner (§421 BGB) – Sie fordern den vollen Schaden von jedem. Innenausgleich ist deren Sache."
 ---
 
 # Wielu sprawców / kolizja łańcuchowa – solidarna odpowiedzialność na podstawie § 421 BGB

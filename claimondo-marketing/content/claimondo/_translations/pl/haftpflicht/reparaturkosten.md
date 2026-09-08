@@ -31,7 +31,6 @@ related:
   - /haftpflicht/sv-kosten
   - /decoder/reparatur-unwirtschaftlich
   - /decoder/werkstatt-netz
-meta_description: "Reparaturkosten: nach §249 BGB voll erstattbar bis zur 130-%-Grenze (BGH). So sichern Sie fiktive/konkrete Abrechnung, UPE-Aufschläge und Markenwerkstatt."
 ---
 
 # Koszty naprawy po wypadku drogowym – co jest zwracane, a co nie

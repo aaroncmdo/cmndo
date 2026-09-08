@@ -32,7 +32,6 @@ related:
   - /haftpflicht/sv-kosten
   - /decoder/unser-sachverstaendiger
   - /decoder/werkstatt-netz
-meta_description: "Was kostet ein Kfz-Gutachter? Die BVSK-Kosten-Tabelle 2025 nach Schadenhöhe (550–2.600 €) – plus: so wehren Sie die Honorar-Kürzung „nicht ortsüblich" nach BGH ab."
 ---
 
 # Araç Ekspertiz Ücret Tablosu (BVSK 2025) – Decoder

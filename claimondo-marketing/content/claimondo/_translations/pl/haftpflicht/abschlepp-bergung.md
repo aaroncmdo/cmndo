@@ -28,7 +28,6 @@ related:
   - /haftpflicht/reparaturkosten
   - /haftpflicht/wiederbeschaffungswert
   - /haftpflicht/eigene-kosten
-meta_description: "Abschlepp- und Bergungskosten nach Unfall sind nach §249 BGB voll erstattbar – auch Standkosten in der Gutachtenphase. So rechnen Sie korrekt ab."
 ---
 
 # Koszty holowania i ratowania pojazdu przy wypadku drogowym
