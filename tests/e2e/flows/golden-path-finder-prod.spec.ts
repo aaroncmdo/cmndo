@@ -121,7 +121,8 @@ test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async (
   await expect(addr, 'Adress-Eingabe sichtbar').toBeVisible({ timeout: 20_000 })
   await addr.click()
   await addr.pressSequentially(PELLWORM.adresse, { delay: 60 }) // triggert Places-Predictions zuverlaessiger als fill()
-  const pac = page.locator('.pac-item').first()
+  // 08.09.2026: die Adresssuche laeuft serverseitig mit eigener Liste (<li role="option">) — .pac-item (Google-Widget) existiert nicht mehr
+  const pac = page.locator('li[role="option"]').first()
   await expect(pac, 'Google-Places-Suggestion erscheint').toBeVisible({ timeout: 15_000 })
   await pac.click()
 
