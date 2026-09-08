@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendEmail } from '@/lib/email/google/client'
 import { callSupportClaude, SUPPORT_CATEGORY_LABELS, SUPPORT_SEVERITY_LABELS } from '@/lib/support/anthropic-client'
 import { buildSystemPrompt } from '@/lib/support/system-prompt'
 import { checkRateLimit, incrementRateLimit, checkFeatureRateLimit, incrementFeatureRateLimit, FEATURE_REQUEST_LIMIT_PER_DAY } from '@/lib/support/rate-limit'
@@ -129,6 +130,16 @@ export async function POST(req: NextRequest) {
 
   const hasScreenshot = !!body.screenshot
   const hasVoice = !!body.voiceTranscript
+
+  // Wortlaut der Meldung fuer Aufbewahrung + Benachrichtigung. Bis 08.09.2026 wurde er NIRGENDS
+  // gespeichert: support_ticket_log hielt nur Metadaten, und der Linear-Pfad ist seit Mai tot.
+  const meldungText =
+    (body.messages ?? [])
+      .filter((m) => m.role === 'user')
+      .map((m) => (m.content ?? '').trim())
+      .filter(Boolean)
+        .join('\n\n---\n\n')
+      .slice(0, 20000) || null
   const userTurnCount = messages.filter(m => m.role === 'user').length
   const systemPrompt = buildSystemPrompt({
     userRolle: rolle,
@@ -185,6 +196,9 @@ export async function POST(req: NextRequest) {
         turnCount: iterations,
         hasScreenshot,
         hasVoice,
+        meldungText,
+        rolle,
+        email: profile?.email ?? null,
       })
       const reply: SupportResponse = {
         type: 'text',
@@ -211,6 +225,9 @@ export async function POST(req: NextRequest) {
           turnCount: iterations,
           hasScreenshot,
           hasVoice,
+          meldungText,
+          rolle,
+          email: profile?.email ?? null,
         })
         const reply: SupportResponse = {
           type: 'question',
@@ -274,6 +291,9 @@ export async function POST(req: NextRequest) {
             turnCount: iterations,
             hasScreenshot,
             hasVoice,
+            meldungText,
+            rolle,
+            email: profile?.email ?? null,
           })
           const reply: SupportResponse = {
             type: 'commented',
@@ -347,6 +367,9 @@ export async function POST(req: NextRequest) {
             turnCount: iterations,
             hasScreenshot,
             hasVoice,
+            meldungText,
+            rolle,
+            email: profile?.email ?? null,
           })
           const reply: SupportResponse = {
             type: 'created',
@@ -391,6 +414,9 @@ export async function POST(req: NextRequest) {
     turnCount: iterations,
     hasScreenshot,
     hasVoice,
+    meldungText,
+    rolle,
+    email: profile?.email ?? null,
   })
   const reply: SupportResponse = {
     type: 'text',
@@ -479,12 +505,20 @@ async function logTicketAction(params: {
   turnCount: number
   hasScreenshot: boolean
   hasVoice: boolean
+  /**
+   * Wortlaut der Meldung. Ab 08.09.2026 der massgebliche Aufbewahrungsort: der Linear-Pfad
+   * darf ausfallen (LINEAR_API_KEY fehlt seit Mai 2026), ohne dass die Meldung verloren geht.
+   */
+  meldungText: string | null
+  rolle: string
+  email: string | null
 }): Promise<void> {
   const db = createAdminClient()
   const { error } = await db.from('support_ticket_log').insert({
     user_id: params.userId,
     linear_issue_id: params.issueId,
     action_type: params.actionType,
+    meldung_text: params.meldungText,
     ticket_typ: params.ticketTyp ?? (params.actionType === 'comment' ? 'comment' : params.actionType === 'no_action' ? 'no_action' : 'bug'),
     page_url: params.pageUrl,
     turn_count: params.turnCount,
@@ -492,4 +526,73 @@ async function logTicketAction(params: {
     has_voice: params.hasVoice,
   })
   if (error) console.error('[AAR-518] support_ticket_log insert fehlgeschlagen:', error.message)
+
+  // Aufbewahren (oben) und Benachrichtigen (hier) sind bewusst GETRENNT. Bis 08.09.2026 hingen
+  // beide am selben externen Dienst: faellt Linear aus, ist die Meldung weg UND niemand erfaehrt
+  // davon. Genau das ist seit Mai 2026 der Fall gewesen.
+  // Non-critical (AGENTS.md, Server-Actions): ein Mailfehler darf das Protokoll nicht kippen.
+  if (params.meldungText) {
+    try {
+      await benachrichtigeTeam(params)
+    } catch (err) {
+      console.error('[AAR-518] Support-Benachrichtigung fehlgeschlagen:', err)
+    }
+  }
+}
+
+/**
+ * Empfaenger der Support-Benachrichtigung.
+ *
+ * Bewusst NICHT `info@claimondo.de`: tote Postfaecher haben hier bereits echte Warnungen
+ * verschluckt (memory/AUDIT-tote-postfaecher-verschluckten-echte-warnungen). Die Adresse
+ * gehoert in die Umgebung, damit sie ohne Code-Aenderung umgestellt werden kann.
+ */
+const SUPPORT_ALERT_EMPFAENGER = process.env.SUPPORT_ALERT_EMAIL || 'aaron.sprafke@claimondo.de'
+
+function htmlEscape(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+async function benachrichtigeTeam(params: {
+  meldungText: string | null
+  rolle: string
+  email: string | null
+  pageUrl: string | null
+  issueId: string | null
+}): Promise<void> {
+  const zeile = (label: string, wert: string) =>
+    `<tr><td style="padding:4px 12px 4px 0;color:#4573A2;white-space:nowrap">${label}</td><td style="padding:4px 0">${wert}</td></tr>`
+
+  const ablage = params.issueId
+    ? `Linear-Ticket ${htmlEscape(params.issueId)}`
+    : 'kein Ticket angelegt — die Meldung steht nur in support_ticket_log'
+
+  await sendEmail({
+    to: SUPPORT_ALERT_EMPFAENGER,
+    subject: `Support-Meldung (${params.rolle})`,
+    html: `<div style="font-family:system-ui,sans-serif;color:#0D1B3E;max-width:640px">
+  <h2 style="margin:0 0 16px;font-size:18px">Neue Support-Meldung</h2>
+  <table style="font-size:14px;border-collapse:collapse;margin-bottom:16px">
+    ${zeile('Rolle', htmlEscape(params.rolle))}
+    ${zeile('Melder', htmlEscape(params.email ?? 'unbekannt'))}
+    ${zeile('Seite', htmlEscape(params.pageUrl ?? '-'))}
+    ${zeile('Ablage', ablage)}
+  </table>
+  <div style="white-space:pre-wrap;background:#f8f9fb;border-left:3px solid #4573A2;padding:12px 16px;font-size:14px;line-height:1.5">${htmlEscape(params.meldungText ?? '')}</div>
+</div>`,
+    text: [
+      `Neue Support-Meldung (${params.rolle})`,
+      `Melder: ${params.email ?? 'unbekannt'}`,
+      `Seite: ${params.pageUrl ?? '-'}`,
+      `Ablage: ${params.issueId ? 'Linear ' + params.issueId : 'nur support_ticket_log'}`,
+      '',
+      params.meldungText ?? '',
+    ].join('\n'),
+    empfaengerTyp: 'admin',
+    template: 'support-meldung',
+    // Pflicht: ohne dieses Flag unterdrueckt die Send-Isolation jede @claimondo.de-Adresse —
+    // die Benachrichtigung waere still nie angekommen. Der Fall ist genau der dokumentierte:
+    // interne, transaktionale 1:1-Mail an das eigene Team.
+    allowInternalRecipient: true,
+  })
 }
