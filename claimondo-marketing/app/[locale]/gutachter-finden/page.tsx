@@ -182,8 +182,14 @@ export default async function GutachterFindenPage({
       {/* Eigenes Clarity-Projekt fuer die Anzeigen-Ziele. ClarityInit ueberspringt
           diese Route via SKIP_ROUTES — sonst liefen zwei Projekte gleichzeitig. */}
       <ClarityInitLP projectId={CLARITY_ID_ANZEIGEN_ZIELE} />
+      {/* Clarity AUCH im iframe: Das Projekt oben zeichnet nur diese Seite auf, nicht den
+          cross-origin-Finder darin. Der Embed startet dasselbe Projekt nach Consent — aber nur,
+          wenn die Elternseite es hier anfordert (Allowlist im Embed). Bewusst NICHT im Wrapper
+          GutachterFindenSection gesetzt: der laeuft auch in SvFinderSection auf der Startseite,
+          und dort ist Clarity nicht eingeschaltet (Aaron 04.09.: nur /check + /gutachter-finden). */}
       <GutachterFindenSection
         height="100dvh"
+        clarityId={CLARITY_ID_ANZEIGEN_ZIELE}
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
         oppref={oppref}
