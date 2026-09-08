@@ -29,7 +29,6 @@ related:
   - /haftpflicht/wiederbeschaffungswert
   - /haftpflicht/reparaturkosten
   - /decoder/nutzungsausfall-nicht
-meta_description: "Nutzungsausfall ohne Mietwagen: 27–175 €/Tag nach Sanden-Danner-Tabelle, Grundlage §249 BGB (BGH GSZ 1/86). So berechnen und beweisen Sie ihn."
 ---
 
 # Loss of Use Compensation (Nutzungsausfall): Amount, Entitlement and Rate Table After an Accident

@@ -28,7 +28,6 @@ related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/fahrerhaftung-stvg18
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Geschädigt ist, wessen Körper, Gesundheit oder Eigentum der Unfall verletzt – unabhängig vom Fahrzeug-Eigentum. Direktanspruch nach §115 VVG."
 ---
 
 # Who Is the Injured Party — Primary Entitlement to Claim After a Road Accident

@@ -28,7 +28,6 @@ related:
   - /haftpflicht/mietwagen
   - /haftpflicht/nutzungsausfall
   - /haftpflicht/reparaturkosten
-meta_description: "Eigene Kosten nach Unfall: Taxi, Fahrt-, Porto- und Telefonaufwand sind nach §249 BGB erstattbar – Auslagenpauschale 25–30 € ohne Belege."
 ---
 
 # Out-of-Pocket Expenses After a Road Accident – Taxi, Travel, Phone & Postage Costs

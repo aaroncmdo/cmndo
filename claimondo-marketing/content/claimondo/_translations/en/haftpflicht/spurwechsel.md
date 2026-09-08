@@ -25,7 +25,6 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/auffahrunfall
-meta_description: "Spurwechsel-Unfall: §7 Abs. 5 StVO verlangt, jede Gefährdung auszuschließen – der Spurwechsler haftet meist 100:0. Wann der Geradeausfahrer mithaftet."
 ---
 
 # Lane-Change Accident – Who Is Liable in a Lane-Change Collision

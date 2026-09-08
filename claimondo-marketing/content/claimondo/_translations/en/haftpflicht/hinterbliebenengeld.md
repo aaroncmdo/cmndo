@@ -28,7 +28,6 @@ related:
   - /haftpflicht/unterhaltsschaden
   - /haftpflicht/beerdigungskosten
   - /haftpflicht/erben-rechtsnachfolger
-meta_description: "Hinterbliebenengeld nach §844 Abs. 3 BGB: pauschale Entschädigung für nahe Angehörige bei tödlichem Unfall – typisch 5.000–15.000 €, ohne Diagnose."
 ---
 
 # Bereavement Compensation under § 844 Abs. 3 BGB

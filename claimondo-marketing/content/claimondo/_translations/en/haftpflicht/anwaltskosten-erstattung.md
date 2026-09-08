@@ -31,7 +31,6 @@ related:
   - /haftpflicht/4-wochen-frist
   - /haftpflicht/anerkenntnis-bgb212
   - /decoder/wir-pruefen-sachverhalt
-meta_description: "Anwaltskosten nach unverschuldetem Unfall zahlt die gegnerische Haftpflicht – eigener Schaden nach §249 BGB (BGH VI ZR 235/13). Für Sie 0 € Eigenanteil."
 ---
 
 # Legal Fees in Road Accident Claims – Who Pays and How They Are Calculated
