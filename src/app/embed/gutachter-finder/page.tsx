@@ -161,8 +161,8 @@ export default async function GutachterFinderEmbedPage({
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
-  // Mode v2: consent-default=denied läuft VOR gtm.js (im Script unten); <ConsentBridge> hebt nach
-  // Parent-Einwilligung via gtag('consent','update') an. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
+  // Mode v2: consent-default (CONSENT_DEFAULT ?? granted, s. u.) läuft VOR gtm.js; <ConsentBridge> setzt nach
+  // Parent-Nachricht via gtag('consent','update') den Cookie-Stand. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
   //
   // BEWUSST NICHT-öffentliches `GF_GTM_ID` (kein NEXT_PUBLIC_): diese Server-Component ist dynamisch
   // (await searchParams + Daten-Fetch → `ƒ`), liest die Var also pro Request zur LAUFZEIT und rendert
@@ -170,12 +170,19 @@ export default async function GutachterFinderEmbedPage({
   // + Restart, KEIN Rebuild) — NEXT_PUBLIC_* wäre build-time-inlined (Footgun: runtime-Set ohne
   // Rebuild lädt still nie). Der Wert ist ohnehin nicht geheim (steht im Client-HTML).
   const gtmId = process.env.GF_GTM_ID
+  // Consent-Default im iframe = derselbe wie auf der Elternseite (claimondo-marketing
+  // [locale]/layout.tsx: 'granted', Anwalts-Freigabe 26.06.2026; Aaron 09.09.2026: "GA4 soll
+  // auch immer messen"). Vorher startete der Container hier mit 'denied' und die Bridge
+  // sendete ohne Cookie ebenfalls 'denied' — auf /gutachter-finden erscheint kein Banner,
+  // also blieb GA4 im iframe dauerhaft im cookielosen Ping-Modus (gemessen 08.09.2026).
+  // Rueckfall-Schalter wie draussen: CONSENT_DEFAULT=denied im App-Prozess (Laufzeit, kein Rebuild).
+  const consentDefault = process.env.CONSENT_DEFAULT === 'denied' ? 'denied' : 'granted'
 
   return (
     <>
       {gtmId ? (
         <Script id="gf-gtm" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',functionality_storage:'denied',security_storage:'granted',wait_for_update:500});(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'${consentDefault}',ad_user_data:'${consentDefault}',ad_personalization:'${consentDefault}',analytics_storage:'${consentDefault}',functionality_storage:'${consentDefault}',security_storage:'granted',wait_for_update:500});(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
         </Script>
       ) : null}
       <ConsentBridge />
