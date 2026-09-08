@@ -22,6 +22,16 @@
 // (cross-origin). Er hoert deshalb auf dieselbe postMessage-Bruecke wie die
 // ConsentBridge nebenan (AAR-956) und startet Clarity erst bei
 // `analytics_storage: 'granted'`. Ohne Einwilligung wird nichts geladen.
+//
+// WARUM ERST GEPRUEFT WIRD, OB CLARITY SCHON LAEUFT: Der GTM-Container derselben
+// Seite (GTM-KD2L63T3) traegt ein eigenes Clarity-Tag. Gemessen 08.09.2026 auf
+// prod, Embed ohne Elternseite und ohne jede Consent-Nachricht: `clarity.ms/tag/
+// x5ey734m5b?ref=gtm` laedt 534 ms nach gtm.js und sendet Daten — das Tag ist
+// nicht consent-gegated und deshalb IMMER vor uns da. Clarity vertraegt nur ein
+// Projekt pro Seite (`window.clarity` ist global); ein zweites Tag daneben ist
+// undefiniertes Verhalten. Diese Komponente laedt darum NUR, wenn noch kein
+// Clarity-Tag existiert — und sagt in der Konsole, was im Weg steht. Sobald das
+// GTM-Tag entfernt ist, greift sie ohne weiteren Deploy.
 
 import { useEffect, useRef } from 'react'
 import Clarity from '@microsoft/clarity'
@@ -37,6 +47,24 @@ import { isTrustedParentOrigin } from '../_lib/trusted-origin'
  */
 const ERLAUBTE_PROJEKTE = new Set(['y7ve121jr0'])
 
+/**
+ * Liefert die Projekt-ID eines bereits geladenen Clarity-Tags — oder `null`,
+ * wenn keins da ist. Zwei Achsen, weil das Snippet `window.clarity` VOR dem
+ * `<script>`-Einbau setzt: erst das Script-Element (traegt die ID in der URL),
+ * dann die globale Funktion (ID unbekannt, aber eindeutig fremd).
+ */
+function laufendesClarityProjekt(): { id: string | null; quelle: string } | null {
+  const tag = document.querySelector<HTMLScriptElement>('script[src*="clarity.ms/tag/"]')
+  if (tag) {
+    const id = /\/tag\/([a-z0-9]+)/i.exec(tag.src)?.[1] ?? null
+    return { id, quelle: tag.src.includes('ref=gtm') ? 'GTM' : 'fremdes Tag' }
+  }
+  if (typeof (window as unknown as { clarity?: unknown }).clarity === 'function') {
+    return { id: null, quelle: 'window.clarity ohne Script-Tag' }
+  }
+  return null
+}
+
 export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
   const gestartet = useRef(false)
 
@@ -46,6 +74,20 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
     const starte = () => {
       if (gestartet.current) return
       gestartet.current = true
+
+      const fremd = laufendesClarityProjekt()
+      if (fremd) {
+        if (fremd.id !== projectId) {
+          console.warn(
+            `[ClarityEmbed] Clarity laeuft bereits mit Projekt "${fremd.id ?? '?'}" (${fremd.quelle}). ` +
+              `"${projectId}" wird NICHT zusaetzlich geladen — zwei Projekte auf einer Seite ` +
+              `zerstoeren beide Aufzeichnungen. Damit "${projectId}" greift: das bestehende Tag ` +
+              `im GTM-Container entfernen.`,
+          )
+        }
+        return
+      }
+
       try {
         Clarity.init(projectId)
       } catch {
