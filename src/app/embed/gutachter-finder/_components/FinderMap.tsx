@@ -42,8 +42,14 @@ import { empfehleSvFuerOrt } from '../actions'
 import { setzeDeadPinEbene } from './deadpin-layer'
 
 type Props = {
-  /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
-  svLeads: SvLeadPublic[]
+  /**
+   * Anzahl aktiver Tier-3 Leads (sv_leads) — nur fuer die Bundesweit-Pill.
+   * Die Dead-Pins selbst werden seit 09.09.2026 je Kartenausschnitt NACHGELADEN
+   * (GET /api/embed/finder-pins, beim Start und nach jeder Bewegung), nicht mehr
+   * als Prop mitgeliefert: 9.712 Pins waren 1,15 MB im HTML des Embeds, das
+   * Dokument kam auf Mobilfunk erst nach 26 s an (Aaron: "34 Sekunden … Katastrophe").
+   */
+  gesamtLeads: number
   /** Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron): JEDER verifizierte,
    * aktive SV ist klickbar mit anonymem Profil-Popup (RLS-gegated). */
   aktiveSVs?: AktiverSVPublic[]
@@ -236,7 +242,13 @@ function GutachterPill({
   )
 }
 
-export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
+export function FinderMap({ gesamtLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
+  // Nachgeladene Dead-Pins des aktuellen Ausschnitts — nur ab dem Zoom-Umschlag MIT id
+  // (klickbar, zaehlbar); in der Heatmap-Zone bleibt die Liste leer, die Karte bekommt die
+  // Punkte direkt. State fuer das Rendering (Naehe-Zaehlung), Ref fuer die Closures des
+  // mount-only-Effekts (Klick auf einen Pin liest sonst die leere Startliste).
+  const [svLeads, setSvLeads] = useState<SvLeadPublic[]>([])
+  const svLeadsRef = useRef<SvLeadPublic[]>([])
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -472,6 +484,45 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     map.dragRotate.disable()
     map.touchZoomRotate.disableRotation()
 
+    // ── Dead-Pins nachladen (seit 09.09.2026) ──────────────────────────────────────────
+    // Der sichtbare Ausschnitt plus 15 % Rand geht als bbox an /api/embed/finder-pins.
+    // Unter dem Zoom-Umschlag liefert die Route Koordinaten-Tupel ohne id (Heatmap),
+    // darueber Objekte mit id. Eine aeltere Antwort, die nach einer neueren eintrifft,
+    // wird verworfen (Laufzaehler) — sonst zeigt die Karte kurz den falschen Ausschnitt.
+    let pinsTimer: ReturnType<typeof setTimeout> | undefined
+    let pinsLauf = 0
+    const ladeDeadPinsFuerAusschnitt = async () => {
+      const lauf = ++pinsLauf
+      try {
+        const b = map.getBounds()
+        if (!b) return
+        const randLng = (b.getEast() - b.getWest()) * 0.15
+        const randLat = (b.getNorth() - b.getSouth()) * 0.15
+        const qs = new URLSearchParams({
+          bbox: [b.getWest() - randLng, b.getSouth() - randLat, b.getEast() + randLng, b.getNorth() + randLat].map((n) => n.toFixed(4)).join(','),
+          zoom: map.getZoom().toFixed(1),
+        })
+        const antwort = await fetch(`/api/embed/finder-pins?${qs.toString()}`)
+        if (!antwort.ok || lauf !== pinsLauf) return
+        const { pins } = (await antwort.json()) as { pins: Array<[number, number]> | SvLeadPublic[] }
+        if (lauf !== pinsLauf || !map.getStyle()) return
+        const mitId = pins.length > 0 && !Array.isArray(pins[0])
+        const punkte: SvLeadPublic[] = mitId
+          ? (pins as SvLeadPublic[])
+          : (pins as Array<[number, number]>).map(([lat, lng]) => ({ id: '', lat, lng }))
+        setzeDeadPinEbene(map, punkte, COL_NAVY)
+        const klickbar = mitId ? punkte : []
+        svLeadsRef.current = klickbar
+        setSvLeads(klickbar)
+      } catch {
+        /* ohne Dead-Pins ist die Karte voll bedienbar — Pins sind Kontext */
+      }
+    }
+    const ladeDeadPinsEntprellt = () => {
+      if (pinsTimer) clearTimeout(pinsTimer)
+      pinsTimer = setTimeout(() => void ladeDeadPinsFuerAusschnitt(), 350)
+    }
+
     map.on('load', () => {
       loaded = true
       window.clearTimeout(loadTimeout)
@@ -485,9 +536,9 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       // (`deadpin-layer.ts`). Vorher lagen dieselben Punkte zweimal im Speicher
       // — bei 62 belanglos, bei über 8.000 nicht mehr. Ausserdem waren die
       // Zoom-Schwellen sonst auf zwei Dateien verteilt und liefen auseinander.
-      if (svLeads.length > 0) {
-        setzeDeadPinEbene(map, svLeads, COL_NAVY)
-      }
+      // Dead-Pins je Ausschnitt: einmal beim Start, danach nach jeder Bewegung (entprellt).
+      void ladeDeadPinsFuerAusschnitt()
+      map.on('moveend', ladeDeadPinsEntprellt)
 
       // ── Partner-Einsatzgebiet (kräftig, OBEN) — NACHGELADEN, nicht mitgeliefert ──
       //
@@ -628,7 +679,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       svMarkerElsRef.current.forEach((el) => el.classList.remove('sv-marker-selected'))
       if (!deadPinId) return
 
-      const lead = svLeads.find((l) => l.id === deadPinId)
+      const lead = svLeadsRef.current.find((l) => l.id === deadPinId)
       if (!lead) return
       const marker = addDeadPin(map, [], lead.lng, lead.lat)
       marker.getElement().classList.add('deadpin-selected')
@@ -805,12 +856,14 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       popupRootRef.current?.unmount()
       popupRef.current?.remove()
       map.remove()
+      if (pinsTimer) clearTimeout(pinsTimer)
       mapRef.current = null
     }
     // AAR-956 Fix: Karte NUR einmal (mount) initialisieren. Mit [svLeads] lief der
     // Effekt nach jedem Server-Action-Refresh (Buchung → RSC-Refresh → neue svLeads-Ref)
-    // neu → Cleanup map.remove() → Route + Fahrzeug-Pin weg. svLeads/aktiveSVs sind im
-    // Embed statisch (server-once geladen), also ist [] korrekt (kein Marker-Verlust).
+    // neu → Cleanup map.remove() → Route + Fahrzeug-Pin weg. aktiveSVs sind im Embed
+    // statisch (server-once geladen); die Dead-Pins laedt der Effekt selbst nach (State +
+    // Ref, siehe ladeDeadPinsFuerAusschnitt) — also bleibt [] korrekt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -968,7 +1021,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         <div className="flex items-center justify-end sm:justify-between gap-2 pointer-events-auto">
           {/* AAR-956 (Aaron 14.06.): Pill nur Desktop im Header — Mobil unten-mittig (s.u.). */}
           <div className="hidden sm:block">
-            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
+            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + gesamtLeads} />
           </div>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
@@ -981,7 +1034,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           (nicht oben links) — ausgeblendet wenn das Sheet offen ist. Desktop = Header (s.o.). */}
       {!mobileSheetOpen && (
         <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-[72px] z-[8] flex justify-center">
-          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
+          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + gesamtLeads} />
         </div>
       )}
 

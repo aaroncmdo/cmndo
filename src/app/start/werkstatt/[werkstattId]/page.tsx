@@ -11,7 +11,7 @@
 
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { ladeAktiveSVs, zaehleSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { resolveVermittlerOwnerProfil } from '@/lib/netzwerk/owner-resolution'
 import { FinderMap } from '@/app/embed/gutachter-finder/_components/FinderMap'
 import { FinderWizard } from '@/app/embed/gutachter-finder/_components/FinderWizard'
@@ -44,9 +44,11 @@ export default async function WerkstattStartPage({
   // Die Werkstatt ist oben bereits als aktiv validiert; makler bliebe hier null (kein Graph-Knoten).
   const ownerProfilId = await resolveVermittlerOwnerProfil(supabase, 'werkstatt', werkstatt.id)
 
-  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs({ ownerProfilId }), ladeSvLeads()])
+  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs({ ownerProfilId }), zaehleSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
-  const leadPins = leadsRes.ok ? leadsRes.data : []
+  // Seit 09.09.2026 nur die ANZAHL fuer die Bundesweit-Pill — die Pins laedt die Karte je
+  // Ausschnitt nach (/api/embed/finder-pins): 9.712 Pins waren 1,15 MB im HTML.
+  const anzahlLeads = leadsRes.ok ? leadsRes.data : 0
 
   // Der FinderWizard wird in denselben FinderMap-Wrapper montiert wie im Embed,
   // damit die Karte + Wizard-Interaktion (Ort-Pin, SV-Highlight, Bottom-Sheet) funktioniert.
@@ -64,7 +66,7 @@ export default async function WerkstattStartPage({
 
   return (
     <FinderMap
-      svLeads={leadPins}
+      gesamtLeads={anzahlLeads}
       aktiveSVs={svs}
       height="100dvh"
       initialCenter={initialCenter}
