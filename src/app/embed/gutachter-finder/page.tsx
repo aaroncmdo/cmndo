@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
-import { unionIsochrones } from '@/lib/mapbox/union-isochrones'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
+import { ClarityEmbed } from './_components/ClarityEmbed'
 import { SCHADEN_OPTIONEN } from './_lib/schadenarten'
 import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
 
@@ -38,6 +38,12 @@ export default async function GutachterFinderEmbedPage({
     slot?: string
     /** `utm_source` der Einstiegs-URL (z.B. `chatgpt.com`) — reine Attribution. */
     utm_source?: string
+    /**
+     * Clarity-Projekt-ID, die die EINBETTENDE Seite anfordert. Ohne sie zeichnet
+     * der Embed nichts auf — derselbe iframe laeuft auch auf Seiten ohne Clarity.
+     * Wird gegen eine Allowlist geprueft (siehe ClarityEmbed).
+     */
+    clarity?: string
     /** OpenAI-Ads-Kennung, von der Parent-Seite durch die iframe-Grenze gereicht. */
     oppref?: string
     /** GEO-Deep-Link: Standort des Fahrzeugs, den die KI im Gespraech erfragt hat.
@@ -64,11 +70,15 @@ export default async function GutachterFinderEmbedPage({
   const svs = aktiveRes.ok ? aktiveRes.data : []
   const leadPins = leadsRes.ok ? leadsRes.data : []
 
-  // Perf: die Partner-Isochronen (~10k Vertices/SV) server-seitig zu EINER Coverage-
-  // Flaeche vereinen — sonst liefe @turf/union client-seitig (~1.6s Freeze bei 6 SVs,
-  // waechst mit dem Netz). isochrone_polygon danach aus dem Client-Payload strippen
-  // (nur die Union wird gerendert; der Nearest-SV-Check laeuft server via empfehleSvFuerOrt).
-  const coverageUnion = unionIsochrones(svs.map((s) => s.isochrone_polygon))
+  // isochrone_polygon aus dem Client-Payload strippen — der Nearest-SV-Check laeuft
+  // server-seitig via empfehleSvFuerOrt, der Client braucht die Polygone nie.
+  //
+  // ⚠ Die vereinte Abdeckungsflaeche wird hier NICHT mehr berechnet und mitgeliefert.
+  // Gemessen auf prod (06.09.2026): sie war mit 19.252 Koordinaten-Paaren der Hauptteil
+  // des RSC-Payloads (1.605 von 1.653 kB HTML). Auf gedrosseltem Mobilfunk (~400 kbit/s)
+  // braucht allein dieses Dokument ~33 Sekunden — nach 10 Sekunden war genau EIN Element
+  // sichtbar (der Sprung-Link), der Rest Ladespinner. Die Flaeche ist Kontext, kein
+  // Bedienelement: FinderMap holt sie jetzt nach ueber /api/embed/finder-abdeckung.
   const svsLight = svs.map(({ isochrone_polygon: _iso, ...rest }) => rest)
 
   // WS6: Optionales Start-Zentrum aus der iframe-URL (?lat&lng[&zoom]). Die
@@ -169,10 +179,12 @@ export default async function GutachterFinderEmbedPage({
         </Script>
       ) : null}
       <ConsentBridge />
+      {/* Clarity im iframe — nur wenn die einbettende Seite eine bekannte
+          Projekt-ID anfordert UND der Parent Analyse-Consent meldet. */}
+      <ClarityEmbed projectId={sp.clarity} />
       <FinderMap
         svLeads={leadPins}
         aktiveSVs={svsLight}
-        coverageUnion={coverageUnion}
         height="100dvh"
         initialCenter={initialCenter}
         initialZoom={initialZoom}
