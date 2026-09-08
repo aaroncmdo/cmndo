@@ -171,6 +171,25 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
   return { ok: true, data: gelesen.zeilen }
 }
 
+/**
+ * Nur die ANZAHL aktiver Tier-3 Leads — fuer die Bundesweit-Pill der Karte.
+ *
+ * Seit 09.09.2026 werden die Pins selbst je Kartenausschnitt nachgeladen
+ * (GET /api/embed/finder-pins) statt als Prop mitgeliefert: 9.712 Pins waren
+ * 1,15 MB im HTML des Embeds, das Dokument kam auf Mobilfunk erst nach 26 s an.
+ * Die Seite braucht dann nur noch diese eine Zahl — ein `count`-Head-Request
+ * statt 9.712 Zeilen.
+ */
+export async function zaehleSvLeads(): Promise<{ ok: true; data: number } | { ok: false; error: string }> {
+  const supabase = await createClient()
+  const { count, error } = await supabase
+    .from('sv_leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('ist_aktiv', true)
+  if (error) return { ok: false, error: error.message }
+  return { ok: true, data: count ?? 0 }
+}
+
 export async function ladeAktiveSVs(
   // P2-T7 (K11): Owner wird INJIZIERT (Attribution: Makler-/Werkstatt-Einstieg), nie
   // session-abgeleitet — der anon-Finder hat keinen auth-Owner. Ohne Owner kein

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { ladeAktiveSVs, zaehleSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
@@ -12,7 +12,7 @@ import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
 // Zieht den Finder aus der Marketing-App hierher → direkter Termin-Engine-Zugriff,
 // design-token-konform, per <iframe> auf claimondo.de + beliebigen Seiten einbettbar.
 //
-// WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/ladeSvLeads (leak-safe, Google-Reviews).
+// WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/zaehleSvLeads (leak-safe, Google-Reviews); die Pins selbst laedt FinderMap je Ausschnitt nach.
 // WS1b: Karten-UI <FinderMap> aus der Marketing-Karte portiert (next-intl → inline DE).
 // WS2: Profil-ueber-Pin + GoogleBewertungBadge. WS3: empfohlener SV + Route/Zoom.
 // WS4 + Reorder: 4-Step-Wizard (Ort → Termin → Schaden → Kontakt) füllt den wizardSlot;
@@ -66,9 +66,11 @@ export default async function GutachterFinderEmbedPage({
   // -> bewusst OHNE Owner (nur das globale istNetzwerkpartner-Badge). Sobald ein attribuierter
   // Einstieg existiert (Werkstatt-QR ?werkstatt= / Makler-Link), dessen Entity -> profiles.id
   // aufloesen und hier injizieren. Makler sind v1 kein Graph-Knoten (Owner haette 0 Freunde).
-  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
+  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), zaehleSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
-  const leadPins = leadsRes.ok ? leadsRes.data : []
+  // Seit 09.09.2026 nur die ANZAHL fuer die Bundesweit-Pill — die Pins laedt die Karte je
+  // Ausschnitt nach (/api/embed/finder-pins): 9.712 Pins waren 1,15 MB im HTML.
+  const anzahlLeads = leadsRes.ok ? leadsRes.data : 0
 
   // isochrone_polygon aus dem Client-Payload strippen — der Nearest-SV-Check laeuft
   // server-seitig via empfehleSvFuerOrt, der Client braucht die Polygone nie.
@@ -183,7 +185,7 @@ export default async function GutachterFinderEmbedPage({
           Projekt-ID anfordert UND der Parent Analyse-Consent meldet. */}
       <ClarityEmbed projectId={sp.clarity} />
       <FinderMap
-        svLeads={leadPins}
+        gesamtLeads={anzahlLeads}
         aktiveSVs={svsLight}
         height="100dvh"
         initialCenter={initialCenter}
