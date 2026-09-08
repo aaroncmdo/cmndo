@@ -1104,6 +1104,21 @@ html { scroll-behavior: smooth; }
   cursor: pointer;
 }
 
+/* Der Teaser ist eine Geste fuer den Finger und gilt nur auf dem Telefon.
+ * Ab lg steht das Formular direkt in der Heldenzeile — die zweispaltige
+ * Anordnung mit einem hochformatigen Cover daneben war noch nicht gut
+ * (Aaron 06.09.2026).
+ *
+ * Bewusst HIER und nicht als `lg:hidden` am Knopf: `.guide-teaser` steht
+ * ausserhalb jedes @layer, und ungeschichtetes CSS schlaegt in Tailwind v4
+ * IMMER die utilities-Schicht — ein `lg:hidden` waere wirkungslos gewesen,
+ * ohne dass es irgendwo aufgefallen waere. */
+@media (min-width: 1024px) {
+  .guide-teaser {
+    display: none;
+  }
+}
+
 .guide-teaser-stack {
   position: relative;
   display: block;
