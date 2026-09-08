@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { MenuIcon, XIcon, LogOutIcon } from 'lucide-react'
-import { SupportButton } from '@/components/support/SupportButton'
 
 export type KundeMobileDrawerProps = {
   initials: string
@@ -106,9 +105,6 @@ export default function KundeMobileDrawer({
                   <p className="text-[10px] text-claimondo-light-blue leading-tight">{t('drawer.profilAnsehen')}</p>
                 </div>
               </Link>
-              <div className="pt-2">
-                <SupportButton userName={displayName} />
-              </div>
               <form action="/api/auth/logout" method="POST">
                 <button
                   type="submit"
