@@ -346,6 +346,14 @@ export default async function FlowPage({
     .select('id, start_zeit, assignee_id, assignee_typ, status')
     // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+    // 09.09.2026: NUR Begutachtungstermine zaehlen als "der Kunde hat einen Gutachter". Ohne diesen
+    // Filter traf der Lookup den automatischen KB-Rueckruftermin (typ='kb_beratung', den die
+    // Marketing-Eingaenge 0,2 s VOR dem FlowLink anlegen) -> flow-kontext sv_id='gesetzt' -> der
+    // termin-Step fiel aus der Sequenz, der gutachter-Step hatte nichts anzuzeigen und sprang zu 'sa'
+    // (7 von 16 Flows in 30 Tagen; Abnahme memory/abnahmen/2026-09-09-flowlink-kb-termin-*.md).
+    // `typ` statt `assignee_typ`, damit Dead-Pin-Wunschtermine (assignee_typ='sv_lead') weiter als
+    // Gutachter-Termin gelten. Der KB-Termin hat seinen eigenen Lookup (findeBeratungsterminFuerLead).
+    .eq('typ', 'sv_begutachtung')
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: false })
     .limit(1)
