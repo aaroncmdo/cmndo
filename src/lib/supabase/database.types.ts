@@ -20001,6 +20001,7 @@ export type Database = {
           has_voice: boolean
           id: number
           linear_issue_id: string | null
+          meldung_text: string | null
           page_url: string | null
           ticket_typ: string | null
           turn_count: number
@@ -20013,6 +20014,7 @@ export type Database = {
           has_voice?: boolean
           id?: number
           linear_issue_id?: string | null
+          meldung_text?: string | null
           page_url?: string | null
           ticket_typ?: string | null
           turn_count?: number
@@ -20025,6 +20027,7 @@ export type Database = {
           has_voice?: boolean
           id?: number
           linear_issue_id?: string | null
+          meldung_text?: string | null
           page_url?: string | null
           ticket_typ?: string | null
           turn_count?: number
@@ -24925,14 +24928,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -25299,14 +25302,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -26418,13 +26421,6 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_lead_id_fkey"
             columns: ["konvertiert_von_lead"]
             isOneToOne: false
             referencedRelation: "leads"
@@ -26434,8 +26430,8 @@ export type Database = {
             foreignKeyName: "claims_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "v_lead_termin_gutachter"
-            referencedColumns: ["lead_id"]
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
@@ -26448,8 +26444,8 @@ export type Database = {
             foreignKeyName: "claims_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "v_lead_workstate"
-            referencedColumns: ["id"]
+            referencedRelation: "v_lead_termin_gutachter"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
@@ -26461,13 +26457,20 @@ export type Database = {
           {
             foreignKeyName: "claims_lead_id_fkey"
             columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_lead_workstate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_lead_id_fkey"
+            columns: ["konvertiert_von_lead"]
             isOneToOne: false
             referencedRelation: "v_werkstatt_lead"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
-            columns: ["konvertiert_von_lead"]
+            columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "v_werkstatt_lead"
             referencedColumns: ["id"]
