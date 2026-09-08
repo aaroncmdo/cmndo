@@ -73,13 +73,28 @@ sie schickt die nächste Session auf die Suche nach einer Migration, die es nich
 → Den Check in einem Worktree mit `node_modules` fahren, `--env-file` per **absolutem** Pfad auf die
 `.env.local` des Haupt-Checkouts zeigen lassen, und die Ausgabe lesen. Grundsatz: **ein Positiv
 verlangen, nicht die Abwesenheit eines Negativs.**
+⚠ **Der Worktree muss auch AKTUELL sein — sonst misst der Check den eigenen Rückstand.** Die
+Repo-Seite kommt aus `git ls-files`, also aus dem **Index des laufenden Checkouts** — nie aus
+`origin/main`. Zwei Commits Rückstand genügen für einen Fund, der echt aussieht: gültige Version,
+plausibler Name, Zeitstempel von heute. Am 08.09.2026 so passiert: `20260908170628` und
+`20260908170753` wurden als fehlend gemeldet und lagen längst auf `origin/main` **und**
+`origin/staging` (#5938, #5939, Release r487). Wer das nicht bemerkt, rekonstruiert sie ein zweites
+Mal — und erzeugt genau den add/add-Konflikt, vor dem Punkt 1 unten warnt. Ein Phantom-Befund ist
+teurer als ein übersehener: er schickt die nächste Session auf die Suche nach einer Migration, die
+es nicht gibt — dieselbe Schadensform wie bei der Fehldiagnose oben, nur aus der anderen Richtung.
+→ Vor dem Lauf `git fetch --all --prune`; den Prüf-Worktree per
+`git worktree add --detach <pfad> origin/main` frisch aufsetzen, und `git rev-list --count
+main..origin/main` muss `0` sein.
 ⚠ Dieses Gate steht **bewusst beim Drain und nicht in der CI**: die Drift entsteht außerhalb eines
 PRs, ein CI-Ratchet würde unbeteiligte Lanes rot färben (Begründung des Autors im ci.yml-Kommentar,
 unverändert gültig). Beim Drain ist der Radius genau eine Runde, und der Drain darf sie selbst
 schließen (Aaron 05.09.: „zieh du einfach die Migration noch nach").
 
-**Behebungs-Reihenfolge — erst suchen, dann erst rekonstruieren:**
+**Behebungs-Reihenfolge — erst prüfen, ob es ein Befund ist, dann suchen, dann erst rekonstruieren:**
 
+0. **Ist der eigene Checkout aktuell?** `git fetch --all --prune`, dann
+   `MSYS_NO_PATHCONV=1 git ls-tree --name-only origin/main supabase/migrations/ | grep "<version>_"`.
+   Trifft das, war der „Fund" ein Artefakt des eigenen Rückstands — nichts zu tun.
 1. **Urheber-PR suchen.** `gh pr list --state open --search "<version>"` **und**
    `git log --all --diff-filter=A -- 'supabase/migrations/<version>_*'`. Existiert die Datei in
    irgendeinem Ref, wird **nicht** rekonstruiert — eine zweite Fassung erzeugt einen add/add-Konflikt
