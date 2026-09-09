@@ -36,8 +36,8 @@ const MAX_BYTES = 10 * 1024 * 1024
 
 /** `leadId` (optional, aus `?lead=`) verknuepft die Schaetzung sofort mit dem /check-Lead —
  *  Voraussetzung dafuer, dass die Vorschaetzung beim SV ankommt. Validierung in erstelleSession. */
-export async function starteAnspruchSession(leadId?: string | null) {
-  return erstelleSession(leadId ?? null)
+export async function starteAnspruchSession(leadId?: string | null, checkRef?: string | null) {
+  return erstelleSession(leadId ?? null, checkRef ?? null)
 }
 
 export async function ladeSchadenfoto(

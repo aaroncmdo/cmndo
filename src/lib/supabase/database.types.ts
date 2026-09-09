@@ -1940,6 +1940,7 @@ export type Database = {
       }
       anspruch_schaetzungen: {
         Row: {
+          check_ref: string | null
           erkanntes_segment: string | null
           erstellt_am: string
           ez_jahr: number | null
@@ -1955,6 +1956,7 @@ export type Database = {
           vision_result: Json | null
         }
         Insert: {
+          check_ref?: string | null
           erkanntes_segment?: string | null
           erstellt_am?: string
           ez_jahr?: number | null
@@ -1970,6 +1972,7 @@ export type Database = {
           vision_result?: Json | null
         }
         Update: {
+          check_ref?: string | null
           erkanntes_segment?: string | null
           erstellt_am?: string
           ez_jahr?: number | null

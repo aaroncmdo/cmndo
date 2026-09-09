@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { Camera, ChevronRight } from 'lucide-react'
 import { buildFotoCheckUrl } from '@/lib/check/foto-check-url'
+import { getOrCreateCheckRef } from '@/lib/check/check-ref'
 import { type Schuld } from '@/lib/check/result-model'
 import { trackEvent } from '@/lib/analytics/track-event'
 
@@ -34,7 +35,10 @@ export function AnspruchFotoCheckCta({ schuld, leadId }: { schuld?: Schuld; lead
   if (leadId) extra.lead = leadId
   const href =
     typeof window !== 'undefined'
-      ? buildFotoCheckUrl(EMBED_ORIGIN, window.location.search, Object.keys(extra).length > 0 ? extra : undefined)
+      // `ref` = Browser-Kennung (Cookie claimondo_check_ref): das Tool schreibt sie an die Session, ein spaeterer
+      // Kontakt auf /check haengt die Session dann nachtraeglich an den Lead (2026-09-09). Nur im Browser-Zweig —
+      // die Komponente erscheint erst nach Klicks (Client-State), der SSR-Fallback darunter wird nie hydriert.
+      ? buildFotoCheckUrl(EMBED_ORIGIN, window.location.search, { ...extra, ref: getOrCreateCheckRef() })
       : `${EMBED_ORIGIN}/embed/anspruch-pruefen`
 
   return (

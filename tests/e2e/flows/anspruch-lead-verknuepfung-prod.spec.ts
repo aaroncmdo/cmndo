@@ -234,15 +234,39 @@ async function checkBisErgebnis(page: Page, schuld: Schuld) {
 
 const fotoCta = (page: Page) => page.locator('a[data-tracking="cta-check-foto-tool"]')
 
-async function loginSv(page: Page) {
+async function loginAls(page: Page, email: string, passwort: string) {
   await page.goto(`${APP}/login`, { waitUntil: 'domcontentloaded', timeout: 60_000 })
-  await page.fill('input[type="email"], input[name="email"]', TEST_SV_EMAIL)
-  await page.fill('input[type="password"], input[name="password"]', TEST_SV_PASSWORD)
+  await page.fill('input[type="email"], input[name="email"]', email)
+  await page.fill('input[type="password"], input[name="password"]', passwort)
   await page.click('button[type="submit"]')
   await page.waitForURL((url) => url.pathname !== '/login', { timeout: 30_000 })
-  expect(page.url(), 'test-sv@ hat 0 MFA-Faktoren (09.09.) — ein /login/2fa-Umweg heisst, jemand hat das geaendert').not.toContain('/login/2fa')
+  expect(page.url(), `${email} hat 0 MFA-Faktoren (09.09.) — ein /login/2fa-Umweg heisst, jemand hat das geaendert`).not.toContain('/login/2fa')
   await page.waitForLoadState('networkidle').catch(() => {})
 }
+const loginSv = (page: Page) => loginAls(page, TEST_SV_EMAIL, TEST_SV_PASSWORD)
+
+const TEST_DISPATCH_EMAIL = 'test-dispatch@claimondo.de'
+const TEST_DISPATCH_PASSWORD = process.env.TEST_DISPATCH_PASSWORD || ''
+
+// D2 · Dispatch sieht die drei Check-Antworten am Lead aus Zelle C (leads.auswertung_unverbindlich ->
+// DispatchAnspruchspruefungHinweis). Liest die Lead-ID aus zelle-c-lead.json des Laufs (kein top-level read).
+test('D2 · test-dispatch@ oeffnet den Check-Lead -> sieht „Anspruchsprüfung des Kunden" mit den drei Antworten', async ({ page }) => {
+  const datei = join(SHOTS, 'zelle-c-lead.json')
+  test.skip(!existsSync(datei) || !TEST_DISPATCH_PASSWORD, 'braucht zelle-c-lead.json aus Zelle C und TEST_DISPATCH_PASSWORD (smoke.env)')
+  test.setTimeout(180_000)
+  const { leadId } = JSON.parse(readFileSync(datei, 'utf8')) as { leadId: string }
+  await loginAls(page, TEST_DISPATCH_EMAIL, TEST_DISPATCH_PASSWORD)
+  await page.goto(`${APP}/dispatch/leads/${leadId}`, { waitUntil: 'domcontentloaded', timeout: 60_000 })
+  await expect(page.getByText(/Wird geladen/)).toHaveCount(0, { timeout: 45_000 })
+  const hinweis = page.getByText(/Anspruchsprüfung des Kunden/)
+  await expect(hinweis).toBeVisible({ timeout: 45_000 })
+  await hinweis.scrollIntoViewIfNeeded()
+  await expect(page.getByText(/Vollanspruch \(unverschuldet\)/)).toBeVisible()
+  await expect(page.getByText(/Der Gegner/)).toBeVisible()
+  await expect(page.getByText(/von der Versicherung/)).toBeVisible()
+  await expect(page.getByText(/vor bis zu einem Monat/)).toBeVisible()
+  await shot(page, 'D2-dispatch-lead-mit-antworten')
+})
 
 // ---------------------------------------------------------------------------------------------
 // Zelle A — Empfaengerseite (app.claimondo.de) am Fixture-Lead c1. Serial: A5 braucht A1.
@@ -463,9 +487,26 @@ test('C · /check -> Kontakt absenden -> Erfolgs-CTA MIT lead= -> Tool -> Schaet
   await checkBisErgebnis(page, 'gegner')
   await page.getByLabel('Ihr Name').fill('Smoke AnspruchLink')
   await page.getByLabel('Ihre Telefonnummer').fill(SMOKE_PHONE)
-  // Ort: Google-Places-Autocomplete (controlled, onChange setzt city) -> hidden input name="city"
-  await page.getByPlaceholder(/z\. B\. Köln oder 50670/).fill('Köln')
-  await page.getByRole('button', { name: /^Kostenlosen Rückruf anfordern/ }).click()
+  // Ort: Google-Places-Autocomplete (controlled). Lauf C1 (09.09.): das offene Vorschlags-Dropdown
+  // ueberdeckte den Submit-Button, 554 Klickversuche wurden abgefangen. Deshalb wie ein Nutzer den
+  // Vorschlag waehlen (setzt city + place_id) — schliesst das Dropdown; Fallback Escape.
+  // Lauf C2: die Vorschlaege sind <li role="option"> in einer listbox, und isVisible() wartet nicht —
+  // das Escape kam vor den Vorschlaegen, die Liste oeffnete sich danach erneut ueber dem Button.
+  // Deshalb: auf die Option WARTEN, waehlen (setzt city + place_id), dann pruefen, dass die Liste zu ist.
+  const ort = page.getByPlaceholder(/z\. B\. Köln oder 50670/)
+  await ort.fill('Köln')
+  const option = page.getByRole('option', { name: /^Köln, Nordrhein-Westfalen/ }).first()
+  await option.waitFor({ state: 'visible', timeout: 15_000 })
+  await option.click()
+  const listbox = page.getByRole('listbox')
+  if (await listbox.count()) {
+    await ort.press('Escape')
+    await expect(listbox).toBeHidden({ timeout: 5_000 })
+  }
+  const absenden = page.getByRole('button', { name: /^Kostenlosen Rückruf anfordern/ })
+  await absenden.scrollIntoViewIfNeeded()
+  // 20 s statt des Test-Timeouts: ein wieder geoeffnetes Dropdown soll sofort als Fehler erscheinen, nicht nach 5 Minuten.
+  await absenden.click({ timeout: 20_000 })
   await expect(page.getByRole('heading', { name: /Danke.*wir melden uns gleich/ })).toBeVisible({ timeout: 60_000 })
   await shot(page, 'C-erfolg')
 
@@ -495,6 +536,89 @@ test('C · /check -> Kontakt absenden -> Erfolgs-CTA MIT lead= -> Tool -> Schaet
   writeFileSync(join(SHOTS, 'zelle-c-lead.json'), JSON.stringify({ leadId, href, session_token: row!.session_token }, null, 2))
   // Cleanup des Leads (flow_links, tasks, benachrichtigungen, anfragen, schaetzungen) laeuft bewusst getrennt,
   // nachdem Aaron die Zeile gesehen hat — sonst ist der Beleg weg, bevor er ihn prueft.
+})
+
+// ---------------------------------------------------------------------------------------------
+// Nachtraegliche Verknuepfung (Aaron 09.09., Soll-Blatt 2026-09-09-foto-check-nachtraegliche-verknuepfung).
+// Erst nach dem Deploy BEIDER Builds gruen (Marketing setzt Cookie + ?ref=, App schreibt check_ref).
+// Deploy-Beweis vorher: git cat-file blob origin/main:claimondo-marketing/lib/check/check-ref.ts | grep -c claimondo_check_ref -> 1.
+// ---------------------------------------------------------------------------------------------
+const CHECK_REF_COOKIE = 'claimondo_check_ref'
+
+test('A6 · Tool direkt mit ?ref=<gueltig> -> Session traegt check_ref, lead_id NULL', async ({ page }) => {
+  test.setTimeout(120_000)
+  const db = admin()
+  const ref = crypto.randomUUID()
+  const token = await sessionMitFoto(page, db, `?ref=${ref}`, null)
+  const { data } = await db.from('anspruch_schaetzungen').select('check_ref, lead_id').eq('session_token', token).maybeSingle()
+  expect(data?.check_ref).toBe(ref)
+  expect(data?.lead_id).toBeNull()
+})
+
+test('A7 · Tool direkt mit ?ref=kaputt -> Session entsteht, check_ref NULL, kein Fehler', async ({ page }) => {
+  test.setTimeout(120_000)
+  const db = admin()
+  const token = await sessionMitFoto(page, db, '?ref=../../etc', null)
+  const { data } = await db.from('anspruch_schaetzungen').select('check_ref, lead_id').eq('session_token', token).maybeSingle()
+  expect(data?.check_ref).toBeNull()
+})
+
+test('K2b · Foto-Check VOR dem Kontakt -> spaeter Kontakt auf /check -> Session haengt nachtraeglich am Lead', async ({ page, context }) => {
+  test.skip(!ZELLE_C_GO || !SMOKE_PHONE, 'erzeugt einen echten Lead + Kunden-WhatsApp — nur mit RUN_ANSPRUCH_LEAD_ZELLE_C=1 + SMOKE_CHECK_PHONE (Aaron-Go 09.09.)')
+  test.setTimeout(300_000)
+  const db = admin()
+
+  // 1) Ergebnis-CTA VOR dem Kontakt: traegt ref=<uuid>, das Cookie liegt im Browser
+  await checkBisErgebnis(page, 'gegner')
+  const cta = fotoCta(page)
+  await expect(cta).toBeVisible({ timeout: 30_000 })
+  const href = (await cta.getAttribute('href')) ?? ''
+  const ref = new URL(href).searchParams.get('ref')
+  test.info().annotations.push({ type: 'cta_href_vor_kontakt', description: href })
+  expect(ref, 'Ergebnis-CTA traegt kein ref= — Marketing-Build noch nicht deployed?').toMatch(/^[0-9a-f-]{36}$/)
+  const cookie = (await context.cookies('https://claimondo.de')).find((c) => c.name === CHECK_REF_COOKIE)
+  expect(cookie?.value).toBe(ref)
+
+  // 2) Ins Tool, Foto hoch -> Session mit check_ref, noch OHNE Lead
+  await cta.click()
+  await expect(page).toHaveURL(/embed\/anspruch-pruefen/, { timeout: 30_000 })
+  await expect(page.getByText(/Wird geladen/)).toHaveCount(0, { timeout: 45_000 })
+  await ladeFoto(page)
+  let session: { session_token: string; lead_id: string | null } | null = null
+  await expect.poll(async () => {
+    const { data } = await db.from('anspruch_schaetzungen').select('session_token, lead_id').eq('check_ref', ref!).order('erstellt_am', { ascending: false }).limit(1).maybeSingle()
+    session = (data as typeof session) ?? null
+    return session?.session_token ?? null
+  }, { timeout: 30_000 }).toBeTruthy()
+  merkeToken(session!.session_token)
+  expect(session!.lead_id).toBeNull()
+
+  // 3) Zurueck auf /check (neuer Aufruf, gleicher Browser = gleiches Cookie), Fragen erneut, Kontakt absenden
+  await checkBisErgebnis(page, 'gegner')
+  await page.getByLabel('Ihr Name').fill('Smoke Nachtraeglich')
+  await page.getByLabel('Ihre Telefonnummer').fill(SMOKE_PHONE)
+  const ort = page.getByPlaceholder(/z\. B\. Köln oder 50670/)
+  await ort.fill('Köln')
+  const option = page.getByRole('option', { name: /^Köln, Nordrhein-Westfalen/ }).first()
+  await option.waitFor({ state: 'visible', timeout: 15_000 })
+  await option.click()
+  const listbox = page.getByRole('listbox')
+  if (await listbox.count()) { await ort.press('Escape'); await expect(listbox).toBeHidden({ timeout: 5_000 }) }
+  const absenden = page.getByRole('button', { name: /^Kostenlosen Rückruf anfordern/ })
+  await absenden.scrollIntoViewIfNeeded()
+  await absenden.click({ timeout: 20_000 })
+  await expect(page.getByRole('heading', { name: /Danke.*wir melden uns gleich/ })).toBeVisible({ timeout: 60_000 })
+  const erfolgHref = (await fotoCta(page).getAttribute('href')) ?? ''
+  const leadId = new URL(erfolgHref).searchParams.get('lead')
+  expect(leadId).toBeTruthy()
+  await shot(page, 'K2b-erfolg')
+
+  // 4) Kern: die VOR dem Kontakt entstandene Session haengt jetzt am neuen Lead
+  await expect.poll(async () => {
+    const { data } = await db.from('anspruch_schaetzungen').select('lead_id').eq('session_token', session!.session_token).maybeSingle()
+    return data?.lead_id ?? null
+  }, { timeout: 30_000 }).toBe(leadId)
+  writeFileSync(join(SHOTS, 'zelle-k2b-lead.json'), JSON.stringify({ leadId, ref, session_token: session!.session_token }, null, 2))
 })
 
 // ---------------------------------------------------------------------------------------------
