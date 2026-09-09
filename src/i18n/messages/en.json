@@ -801,6 +801,8 @@
       "vollmachttext": "POWER OF ATTORNEY & LEGAL MANDATE (Vollmacht & Anwaltsmandat)\n\nI, the undersigned, hereby grant Claimondo GmbH and the lawyers instructed by them full power of attorney to represent me in all matters relating to the reported claim.\n\nThe power of attorney covers in particular:\n• Out-of-court enforcement of all claims against at-fault parties and insurers\n• Judicial enforcement in one's own name and on behalf of others\n• Conclusion of settlements and receipt of payments\n• Engagement of expert appraisers and other specialists\n• Initiation and conduct of enforcement proceedings\n\nThis power of attorney remains in effect until expressly revoked in writing."
     },
     "zb1": {
+      "finForm": "A vehicle identification number has 17 characters (no I, O, Q) — currently {anzahl}.",
+      "finNichtUebernommen": "Your other details are saved. We could not accept the vehicle identification number — it has 17 characters without I, O and Q.",
       "errorExpiredTitle": "Link Expired",
       "errorExpiredBody": "This upload link is no longer valid. Please contact your designated contact person for a new link.",
       "errorAlreadyTitle": "Photo Already Received",

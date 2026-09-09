@@ -27,6 +27,7 @@ import { useTranslations } from 'next-intl'
 import { CameraIcon, CheckIcon, FileCheck2Icon, RefreshCwIcon } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { compressImage } from '@/lib/dokumente/compress-image'
+import { VIN_REGEX, istPlausibleFin } from '@/lib/vehicles/ensure-vehicle'
 import { uploadPflichtdokument } from './actions'
 import { confirmZb1Korrekturen } from '@/app/kunde/onboarding-details/zb1-actions'
 import {
@@ -63,6 +64,13 @@ export function Zb1Karte({
   const [fehler, setFehler] = useState<string | null>(null)
   const [speichert, setSpeichert] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Die Fahrgestellnummer ist das einzige Feld mit harter Form: siebzehn Zeichen, ohne
+  // I, O und Q, mit Ziffern. Passt sie nicht, geht sie NICHT ans Fahrzeug — und damit
+  // nicht ins Gutachten. Das sagen wir beim Tippen, nicht erst nach dem Bestaetigen.
+  const finEingabe = (werte.fin ?? '').trim().toUpperCase()
+  const finUnvollstaendig =
+    finEingabe.length > 0 && (!VIN_REGEX.test(finEingabe) || !istPlausibleFin(finEingabe))
 
   async function handleFile(file: File) {
     setZustand('laedt')
@@ -134,6 +142,13 @@ export function Zb1Karte({
       if (!res.ok) {
         setSpeichert(false)
         setFehler(res.error)
+        return
+      }
+      // Der Server sagt, wenn die Nummer die Form verfehlt hat: alles andere ist
+      // gespeichert, nur sie erreicht das Fahrzeug nicht.
+      if (res.finHinweis === 'format') {
+        setSpeichert(false)
+        setFehler(t('zb1.finNichtUebernommen'))
         return
       }
     }
@@ -241,8 +256,20 @@ export function Zb1Karte({
                       value={werte[feld]}
                       data-testid={`zb1-feld-${feld}`}
                       onChange={(e) => setWerte({ ...werte, [feld]: e.target.value })}
-                      className="w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy"
+                      aria-describedby={feld === 'fin' && finUnvollstaendig ? 'zb1-fin-hinweis' : undefined}
+                      className={`w-full rounded-ios-sm border bg-white px-3 py-2 text-sm text-claimondo-navy ${
+                        feld === 'fin' && finUnvollstaendig ? 'border-warning' : 'border-claimondo-border'
+                      }`}
                     />
+                    {feld === 'fin' && finUnvollstaendig && (
+                      <span
+                        id="zb1-fin-hinweis"
+                        data-testid="zb1-fin-hinweis"
+                        className="text-[11px] text-warning-strong"
+                      >
+                        {t('zb1.finForm', { anzahl: finEingabe.length })}
+                      </span>
+                    )}
                   </label>
                 ))}
               </div>
