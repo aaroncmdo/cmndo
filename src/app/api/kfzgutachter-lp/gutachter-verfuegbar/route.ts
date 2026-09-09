@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 import { meldeGoogleFehler } from '@/lib/google-maps/melde-fehler'
 import {
   pointInRing,
@@ -11,6 +12,9 @@ import {
   isValidPlaceId,
   type GutachterProfilPublic,
 } from './_lib'
+
+// Zeilenform des Tier-3-Lesepfads (nur die Isochrone wird ausgewertet).
+type SvLeadIsochrone = { id: string; isochrone_polygon: unknown }
 
 // API für den Scroll-Popover (Step 2): nimmt eine Google-Place-ID,
 // löst sie über die Places-Details-API in lat/lng auf, zählt
@@ -171,7 +175,7 @@ export async function POST(req: Request) {
   //    (>30 in Köln), Privacy bleibt gewahrt weil weder Profile noch
   //    Avatar/Reviews aus sv_leads zurück gehen.
   const sb = createServiceClient()
-  const [tier1Res, tier3Res] = await Promise.all([
+  const [tier1Res, tier3Gelesen] = await Promise.all([
     sb
       .from('sachverstaendige')
       .select(
@@ -188,11 +192,23 @@ export async function POST(req: Request) {
       .is('gesperrt_seit', null)
       .is('geloescht_am', null)
       .not('isochrone_polygon', 'is', null),
-    sb
-      .from('sv_leads')
-      .select('id, isochrone_polygon')
-      .eq('ist_aktiv', true)
-      .not('isochrone_polygon', 'is', null),
+    // ⚠ Ohne `range` liefert PostgREST still hoechstens 1.000 Zeilen. Heute
+    // tragen 222 sv_leads eine Isochrone (prod, 09.09.2026) — die Zahl stimmt
+    // also noch. Der Isochronen-Backfill laeuft aber weiter (140 am 03.09.,
+    // 222 am 09.09., rund 14 pro Tag): ab 1.000 wuerde diese Route stumm
+    // beliebige Treffer zaehlen und die Verfuegbarkeit auf der Landingpage
+    // untertreiben. Der Deckel wird hier abgeraeumt, BEVOR er greift.
+    alleSeiten<SvLeadIsochrone>((von, bis) =>
+      sb
+        .from('sv_leads')
+        .select('id, isochrone_polygon')
+        .eq('ist_aktiv', true)
+        .not('isochrone_polygon', 'is', null)
+        // Ein Zweitschluessel ist Pflicht: ohne stabile Reihenfolge kann
+        // dieselbe Zeile auf zwei Seiten erscheinen — oder auf keiner.
+        .order('id', { ascending: true })
+        .range(von, bis),
+    ),
   ])
 
   if (tier1Res.error || !tier1Res.data) {
@@ -206,12 +222,12 @@ export async function POST(req: Request) {
     )
   }
   const svs = tier1Res.data
-  const svLeads = tier3Res.data ?? []
-  if (tier3Res.error) {
+  const svLeads = tier3Gelesen.ok ? tier3Gelesen.zeilen : []
+  if (!tier3Gelesen.ok) {
     // Tier-3 ist nicht-kritisch — Count fällt nur auf Tier-1 zurück, kein Fail.
     console.warn(
       '[gutachter-verfuegbar] sv_leads-Query Fehler (fallback Tier-1-only):',
-      tier3Res.error.message,
+      tier3Gelesen.error,
     )
   }
 

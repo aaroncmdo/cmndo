@@ -2,6 +2,14 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from '@/lib/dispatch/isochrone-parse'
+import { alleSeiten } from '@/lib/db/alle-seiten'
+import { umkreisBox } from '@/lib/geo/umkreis-box'
+
+/**
+ * Suchradius fuer Tier-3-Leads. Die DB-Box wird DARAUS abgeleitet, damit
+ * Filter und Vorfilter nie auseinanderlaufen koennen.
+ */
+const LEAD_RADIUS_KM = 30
 
 type SvKandidat = {
   id: string
@@ -87,18 +95,50 @@ export async function matcheSvFuerWizard(lat: number, lng: number): Promise<SvMa
   }
 
   // ── Priorität 2: sv_leads — 30-km-Radius, Kalender immer frei ──
-  const { data: leadsData } = await supabase
-    .from('sv_leads')
-    .select('id, name, vorname, lat, lng')
-    .eq('ist_aktiv', true)
-    .not('lat', 'is', null)
-    .not('lng', 'is', null)
+  // ⚠ Ohne `range` liefert PostgREST still hoechstens 1.000 Zeilen. Bei 9.712
+  // aktiven Leads mit Koordinaten (prod, 09.09.2026) sah dieser Pfad 10 % des
+  // Bestands — und ohne ORDER BY bei jedem Aufruf potenziell ANDERE 10 %. Der
+  // naechste Sachverstaendige konnte damit schlicht unsichtbar sein.
+  //
+  // Zwei Massnahmen, die zusammengehoeren:
+  //  1. Die Umkreis-Box zieht den Radius-Filter in die DB (nutzt den
+  //     vorhandenen Index `sv_leads_lat_lng_idx`) — statt 9.712 Zeilen kommen
+  //     im dichtesten gemessenen Fenster 636 zurueck.
+  //  2. `alleSeiten` garantiert Vollstaendigkeit trotzdem: waechst der Bestand,
+  //     holt es eine zweite Seite, statt still zu schneiden. Die Box senkt die
+  //     Kosten, sie ist NICHT die Garantie.
+  const box = umkreisBox(lat, lng, LEAD_RADIUS_KM)
+  const leadsGelesen = await alleSeiten<SvLeadKandidat>((von, bis) =>
+    supabase
+      .from('sv_leads')
+      .select('id, name, vorname, lat, lng')
+      .eq('ist_aktiv', true)
+      .not('lat', 'is', null)
+      .not('lng', 'is', null)
+      .gte('lat', box.latVon)
+      .lte('lat', box.latBis)
+      .gte('lng', box.lngVon)
+      .lte('lng', box.lngBis)
+      // Ein Zweitschluessel ist Pflicht: ohne stabile Reihenfolge kann dieselbe
+      // Zeile auf zwei Seiten erscheinen — oder auf keiner.
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  if (!leadsGelesen.ok) {
+    // Vorher wurde der Lesefehler verworfen: der Kunde bekam „Kein
+    // Sachverstaendiger in Ihrer Naehe" — eine falsche Aussage ueber die
+    // Datenlage. Ein Fehlschlag ist etwas anderes als ein leeres Ergebnis.
+    console.error('[matcheSvFuerWizard] sv_leads:', leadsGelesen.error)
+    return { ok: false, error: 'Die Suche ist gerade nicht möglich. Bitte versuchen Sie es erneut.' }
+  }
 
   const leadKandidaten: (SvLeadKandidat & { distanzKm: number })[] = []
 
-  for (const lead of (leadsData ?? []) as SvLeadKandidat[]) {
+  // Die Box ist ein Superset des Kreises — ihre Ecken liegen weiter als der
+  // Radius. Der Haversine-Filter bleibt deshalb unveraendert stehen.
+  for (const lead of leadsGelesen.zeilen) {
     const distanzKm = haversineKm(lat, lng, lead.lat, lead.lng)
-    if (distanzKm > 30) continue
+    if (distanzKm > LEAD_RADIUS_KM) continue
     leadKandidaten.push({ ...lead, distanzKm })
   }
 
