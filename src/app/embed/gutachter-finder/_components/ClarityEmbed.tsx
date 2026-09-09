@@ -30,11 +30,32 @@
 // Seite (GTM-KD2L63T3) traegt ein eigenes Clarity-Tag. Gemessen 08.09.2026 auf
 // prod, Embed ohne Elternseite und ohne jede Consent-Nachricht: `clarity.ms/tag/
 // x5ey734m5b?ref=gtm` laedt 534 ms nach gtm.js und sendet Daten — das Tag ist
-// nicht consent-gegated und deshalb IMMER vor uns da. Clarity vertraegt nur ein
-// Projekt pro Seite (`window.clarity` ist global); ein zweites Tag daneben ist
-// undefiniertes Verhalten. Diese Komponente laedt darum NUR, wenn noch kein
-// Clarity-Tag existiert — und sagt in der Konsole, was im Weg steht. Sobald das
-// GTM-Tag entfernt ist, greift sie ohne weiteren Deploy.
+// nicht consent-gegated. Clarity vertraegt nur ein Projekt pro Seite
+// (`window.clarity` ist global); ein zweites Tag daneben ist undefiniertes
+// Verhalten. Diese Komponente laedt darum NUR, wenn kein fremdes Clarity-Tag
+// existiert — und sagt in der Konsole, was im Weg steht. Sobald das GTM-Tag
+// entfernt ist, greift sie ohne weiteren Deploy.
+//
+// ⚠ WARUM SIE NACH DEM CONSENT WARTET (Hotfix 09.09.2026): Mit dem Opt-out-
+// Default (#5951) kommt die Consent-Nachricht sofort beim Ready-Handshake —
+// also VOR dem GTM-Tag, das erst ~3 s nach Seitenstart injiziert wird. Die
+// Pruefung fand nichts, initialisierte y7ve121jr0, und Sekunden spaeter kam
+// x5ey734m5b dazu: zwei Tags auf prod (gemessen 09.09., 12:1x). Die alte
+// Annahme "GTM ist immer zuerst da" galt nur, solange die Nachricht `denied`
+// war.
+//
+// Gemessen dazu (09.09., prod): `window.clarity` traegt genau EINE Instanz —
+// Clarity initialisiert nur das ZUERST geladene Tag, das zweite ist ein No-op.
+// Zwei Tags sind also kein Doppel-Tracking, sondern ein RENNEN um das Projekt.
+// Daraus folgen zwei Wege:
+//   * OPT-OUT (`sofortStarten`, Default seit #5951): sofort beim Mount starten
+//     — die Komponente laeuft in der Hydration, GTMs Tag kommt erst nach
+//     gtm.js + Container (~1 s spaeter). y7ve121jr0 gewinnt deterministisch,
+//     das GTM-Tag ist wirkungslos, kein Klick im GTM noetig. Ein spaeteres
+//     `denied` vom Parent entzieht die Einwilligung (consentV2).
+//   * OPT-IN (Rueckfall-Schalter): auf `granted` warten, danach bis zu
+//     WARTEZEIT_MS auf ein fremdes Tag warten und erst dann entscheiden —
+//     nie doppelt, dafuer 4 s spaeter.
 
 import { useEffect, useRef } from 'react'
 import Clarity from '@microsoft/clarity'
@@ -49,6 +70,10 @@ import { isTrustedParentOrigin } from '../_lib/trusted-origin'
  * Mal. Eine neue ID gehoert in BEIDE Listen.
  */
 const ERLAUBTE_PROJEKTE = new Set(['y7ve121jr0'])
+
+/** So lange geben wir GTM nach dem Consent Zeit, sein eigenes Clarity-Tag zu setzen. */
+const WARTEZEIT_MS = 4000
+const PRUEFTAKT_MS = 200
 
 /**
  * Liefert die Projekt-ID eines bereits geladenen Clarity-Tags — oder `null`,
@@ -68,17 +93,21 @@ function laufendesClarityProjekt(): { id: string | null; quelle: string } | null
   return null
 }
 
-export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
+export function ClarityEmbed({ projectId, sofortStarten = false }: { projectId?: string | null; sofortStarten?: boolean }) {
   const gestartet = useRef(false)
+  const warteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!projectId || !ERLAUBTE_PROJEKTE.has(projectId)) return
 
-    const starte = () => {
-      if (gestartet.current) return
-      gestartet.current = true
-
+    // Entscheidet erst, wenn ein fremdes Tag da ist ODER die Wartezeit um ist.
+    const entscheide = (seit: number) => {
       const fremd = laufendesClarityProjekt()
+      if (!fremd && Date.now() - seit < WARTEZEIT_MS) {
+        warteTimer.current = setTimeout(() => entscheide(seit), PRUEFTAKT_MS)
+        return
+      }
+      warteTimer.current = null
       if (fremd) {
         if (fremd.id !== projectId) {
           console.warn(
@@ -99,6 +128,12 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
       }
     }
 
+    const starte = () => {
+      if (gestartet.current) return
+      gestartet.current = true
+      entscheide(Date.now())
+    }
+
     function onMessage(e: MessageEvent) {
       if (!isTrustedParentOrigin(e.origin)) return
       const data = e.data as { type?: string; gcm?: Record<string, unknown> } | null
@@ -106,6 +141,11 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
       // Genau ein Signal zaehlt: Clarity ist Analyse, nicht Werbung.
       if (data.gcm.analytics_storage === 'granted') starte()
       // Widerspruch nach dem Start (CMP-Auswahl auf der Elternseite): Einwilligung entziehen.
+      // Kommt er waehrend der Wartezeit, darf Clarity danach nicht mehr starten.
+      if (data.gcm.analytics_storage === 'denied' && warteTimer.current) {
+        clearTimeout(warteTimer.current)
+        warteTimer.current = null
+      }
       if (data.gcm.analytics_storage === 'denied' && gestartet.current) {
         try {
           Clarity.consentV2({ ad_Storage: 'denied', analytics_Storage: 'denied' })
@@ -116,6 +156,14 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
     }
 
     window.addEventListener('message', onMessage)
+
+    // Opt-out: nicht auf den Handshake warten — sofort starten und das Rennen um
+    // das Projekt gewinnen (siehe Kopfkommentar). Laeuft bereits ein fremdes Tag
+    // (z. B. Re-Mount), greift die Pruefung in `entscheide` wie sonst.
+    if (sofortStarten) {
+      gestartet.current = true
+      entscheide(Date.now() - WARTEZEIT_MS)
+    }
 
     // Ready-Handshake wie in der ConsentBridge: Der Parent sendet den Consent
     // erneut, sobald sich ein Listener meldet. Ohne das ginge die erste
@@ -128,8 +176,11 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
       /* kein Parent / sandboxed → no-op */
     }
 
-    return () => window.removeEventListener('message', onMessage)
-  }, [projectId])
+    return () => {
+      window.removeEventListener('message', onMessage)
+      if (warteTimer.current) clearTimeout(warteTimer.current)
+    }
+  }, [projectId, sofortStarten])
 
   return null
 }
