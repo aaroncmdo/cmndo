@@ -16,6 +16,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { ziehVehicleNach } from '@/lib/vehicles/snapshot-update'
 import { schreibeFinAufFahrzeug } from '@/lib/vehicles/fin-schreiben'
+import { VIN_REGEX, istPlausibleFin } from '@/lib/vehicles/ensure-vehicle'
 
 /**
  * Ops-Test 11.08. (RC-3): Der ZB1-Parser extrahiert 15 Felder, korrigierbar waren
@@ -83,7 +84,19 @@ export async function confirmZb1Korrekturen(
   const update: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   }
+  // Eine Fahrgestellnummer, die keine sein kann, wird NIRGENDS gespeichert — auch nicht
+  // im Lead. Dort gibt es zwar keinen Constraint, aber der Lead ist die Quelle der
+  // Konversion: ein abgelegtes Wort haelt spaeter jemand fuer eine echte Nummer.
+  // Dieselbe Abwaegung wie beim Parser: eine falsche Nummer ist schaedlicher als keine.
+  const finFormatOk =
+    corrections.fin === undefined ||
+    corrections.fin === null ||
+    (() => {
+      const k = String(corrections.fin).trim().toUpperCase()
+      return k === '' || (VIN_REGEX.test(k) && istPlausibleFin(k))
+    })()
   for (const feld of DIREKTE_FELDER) {
+    if (feld === 'fin' && !finFormatOk) continue
     if (corrections[feld] !== undefined) update[feld] = corrections[feld]
   }
   if (corrections.halter_name !== undefined) {
@@ -93,8 +106,9 @@ export async function confirmZb1Korrekturen(
   }
 
   if (Object.keys(update).length === 1) {
-    // Nur updated_at — keine Korrekturen vorhanden, früher Exit
-    return { ok: true }
+    // Nur updated_at — keine brauchbare Korrektur. Kam ausschliesslich eine unbrauchbare
+    // Nummer, sagen wir das, statt stillschweigend Erfolg zu melden.
+    return finFormatOk ? { ok: true } : { ok: true, finHinweis: 'format' }
   }
 
   const { error } = await admin.from('leads').update(update).eq('id', leadId)

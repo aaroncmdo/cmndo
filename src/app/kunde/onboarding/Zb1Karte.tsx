@@ -255,7 +255,15 @@ export function Zb1Karte({
                       type="text"
                       value={werte[feld]}
                       data-testid={`zb1-feld-${feld}`}
-                      onChange={(e) => setWerte({ ...werte, [feld]: e.target.value })}
+                      // Funktional aktualisieren: `werte` aus der Closure ist der Stand des
+                      // letzten Renders. Zwei Änderungen in verschiedenen Feldern kurz
+                      // hintereinander — Ausfüllhilfe, Einfügen, schnelles Tippen — machten
+                      // sonst die erste rückgängig, weil die zweite auf einem veralteten
+                      // Objekt aufbaut.
+                      onChange={(e) => {
+                        const wert = e.target.value
+                        setWerte((vorher) => ({ ...vorher, [feld]: wert }))
+                      }}
                       aria-describedby={feld === 'fin' && finUnvollstaendig ? 'zb1-fin-hinweis' : undefined}
                       className={`w-full rounded-ios-sm border bg-white px-3 py-2 text-sm text-claimondo-navy ${
                         feld === 'fin' && finUnvollstaendig ? 'border-warning' : 'border-claimondo-border'
