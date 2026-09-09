@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getOnboardingSteps, buildOnboardingContext } from './get-onboarding-steps'
+import { getOnboardingSteps, buildOnboardingContext, naechsterSichtbarerStep } from './get-onboarding-steps'
 
 describe('AAR-903 getOnboardingSteps', () => {
   it('liefert alle 5 Steps wenn Kunde noch nichts hat', () => {
@@ -120,5 +120,41 @@ describe('Audit-Bug D — abrechnungsweg-aware Termin-Step', () => {
       const ctx = buildOnboardingContext({ termin: null, pflichtDocs: [], abrechnungsweg: weg })
       expect(ctx.brauchtGutachter).toBe(true)
     }
+  })
+})
+
+// 09.09.2026 — der tote „Weiter"-Button. Ein Sprung auf eine feste Step-ID
+// laeuft ins Leere, sobald dieser Schritt fuer den Kunden gefiltert ist.
+describe('naechsterSichtbarerStep', () => {
+  const steps = (ctx: Parameters<typeof getOnboardingSteps>[0]) => getOnboardingSteps(ctx)
+  const VOLL = { hatTerminGebucht: false, offenePflichtdokumente: 3, brauchtGutachter: true }
+  const MIT_TERMIN = { hatTerminGebucht: true, offenePflichtdokumente: 3, brauchtGutachter: true }
+  const WERKSTATT = { hatTerminGebucht: false, offenePflichtdokumente: 0, brauchtGutachter: false }
+
+  it('voller Wizard: von "fall" geht es zum Termin', () => {
+    expect(naechsterSichtbarerStep(steps(VOLL), 'fall')).toBe('termin')
+  })
+
+  it('REGRESSION: Termin schon gebucht -> von "fall" geht es zu den Dokumenten', () => {
+    // Der Fall aus Aarons Meldung: der Termin-Step ist gefiltert, der Button
+    // sprang auf 'termin' und tat nichts.
+    expect(naechsterSichtbarerStep(steps(MIT_TERMIN), 'fall')).toBe('dokumente')
+  })
+
+  it('REGRESSION: Werkstatt-Weg ohne offene Dokumente -> von "fall" direkt zu "fertig"', () => {
+    expect(naechsterSichtbarerStep(steps(WERKSTATT), 'fall')).toBe('fertig')
+  })
+
+  it('REGRESSION: kein Dokumente-Step -> von "termin" geht es zu "fertig"', () => {
+    const ohneDocs = { hatTerminGebucht: false, offenePflichtdokumente: 0, brauchtGutachter: true }
+    expect(naechsterSichtbarerStep(steps(ohneDocs), 'termin')).toBe('fertig')
+  })
+
+  it('letzter Schritt hat kein Weiter', () => {
+    expect(naechsterSichtbarerStep(steps(VOLL), 'fertig')).toBeNull()
+  })
+
+  it('ein Schritt, den dieser Kunde gar nicht hat, liefert kein Ziel', () => {
+    expect(naechsterSichtbarerStep(steps(MIT_TERMIN), 'termin')).toBeNull()
   })
 })

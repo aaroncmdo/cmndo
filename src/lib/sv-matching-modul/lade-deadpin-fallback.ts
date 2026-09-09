@@ -10,6 +10,7 @@
 // und KEINE Server-Imports in ./fallback (das bleibt reine Typ-Ebene fuer Client-Import).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 import { parseIsochrone } from '@/lib/dispatch/isochrone-parse'
 import { haversineKm, pointInPolygon } from '@/lib/termine/engine'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
@@ -72,20 +73,37 @@ type SvLeadGeoRow = {
 export const ladeDeadPinFallback: LadeDeadPinFallback = async ({ lat, lng }) => {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return []
   const db = createAdminClient()
-  const { data, error } = await db
-    .from('sv_leads')
-    .select('id, ort, lat, lng, isochrone_polygon, paket_umkreis_km')
-    .eq('ist_aktiv', true)
-    .not('lat', 'is', null)
-    .not('lng', 'is', null)
-  if (error) {
-    console.error('[ladeDeadPinFallback] sv_leads:', error.message)
+  // ⚠ Ohne `range` liefert PostgREST still hoechstens 1.000 Zeilen — bei 9.712
+  // aktiven Leads mit Koordinaten (prod, 09.09.2026) deckte dieser Fallback
+  // 10 % des Bestands ab, ohne dass irgendetwas darauf hingedeutet haette.
+  //
+  // Bewusst OHNE DB-seitige Umkreis-Box (anders als in `svMatching.ts`): der
+  // Vorfilter unten haengt an `paket_umkreis_km` — einem Wert je ZEILE (heute
+  // 15–25 km, gemessen). Eine Box aus einer Code-Konstante waere eine stille
+  // Annahme ueber DB-Inhalte: erhoeht jemand den Umkreis, schnitte sie
+  // Kandidaten weg — genau die Fehlerklasse, die hier behoben wird. Der Pfad
+  // laeuft ohnehin nur bei 0 Partnern (`onKeinMatch`), die Seiten sind
+  // verschmerzbar.
+  const gelesen = await alleSeiten<SvLeadGeoRow>((von, bis) =>
+    db
+      .from('sv_leads')
+      .select('id, ort, lat, lng, isochrone_polygon, paket_umkreis_km')
+      .eq('ist_aktiv', true)
+      .not('lat', 'is', null)
+      .not('lng', 'is', null)
+      // Ein Zweitschluessel ist Pflicht: ohne stabile Reihenfolge kann dieselbe
+      // Zeile auf zwei Seiten erscheinen — oder auf keiner.
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  if (!gelesen.ok) {
+    console.error('[ladeDeadPinFallback] sv_leads:', gelesen.error)
     return []
   }
 
   const slots = generischeDeadPinSlots()
   const treffer: Array<DeadPinOeffentlich & { _km: number }> = []
-  for (const row of (data ?? []) as SvLeadGeoRow[]) {
+  for (const row of gelesen.zeilen) {
     const distanzKm = haversineKm(lat, lng, row.lat, row.lng)
     // AAR-956 (Aaron 14.06.): Haversine-Vorfilter VOR dem teuren parseIsochrone/pointInPolygon.
     // Die Isochrone ist aus paket_umkreis_km generiert (Fahrweg >= Luftlinie) → sie kann den Ort

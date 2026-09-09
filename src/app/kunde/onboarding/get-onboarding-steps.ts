@@ -76,3 +76,24 @@ export function buildOnboardingContext(input: {
     brauchtGutachter: !istWerkstattReparaturWeg(input.abrechnungsweg ?? null),
   }
 }
+
+/** Nächster sichtbarer Schritt nach `aktuelleId` — der Kern jedes „Weiter"-Buttons.
+ *
+ *  09.09.2026: Die Weiter-Buttons sprangen auf eine feste Step-ID (`'termin'`,
+ *  `'dokumente'`). Sobald dieser Schritt für den Kunden herausgefiltert ist —
+ *  und genau das tut das adaptive Onboarding —, findet der Sprung sein Ziel
+ *  nicht und der Button tut gar nichts. Auf prod reproduziert: ein Kunde mit
+ *  gebuchtem Gutachter-Termin kam über „Daten bestätigen und weiter" nicht
+ *  hinaus (Claim CLM-2026-07672).
+ *
+ *  „Weiter" heißt deshalb immer: der nächste Schritt, den DIESER Kunde sieht.
+ *  Rückgabe `null` = es gibt keinen weiteren (letzter Schritt oder unbekannte ID).
+ */
+export function naechsterSichtbarerStep(
+  visibleSteps: readonly OnboardingStep[],
+  aktuelleId: OnboardingStepId,
+): OnboardingStepId | null {
+  const idx = visibleSteps.findIndex((s) => s.id === aktuelleId)
+  if (idx < 0) return null
+  return visibleSteps[idx + 1]?.id ?? null
+}

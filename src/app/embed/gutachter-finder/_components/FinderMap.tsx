@@ -24,12 +24,25 @@ import { useEffect, useRef, useState } from 'react'
 // die sonst in den Public-Map-Bundle wandern. THREE.Color hat im minified
 // Turbopack-Build den Constructor verloren → "i.Color is not a constructor"-
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
-import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
+// LAZY (09.09.2026): NICHT aus '@/lib/mapbox/client' — dessen statischer
+// `import mapboxgl from 'mapbox-gl'` haengt den 1.698-kB-Chunk in den STATISCHEN
+// Graph dieser Seite, und React hydriert erst, wenn er geladen und geparst ist.
+// Gemessen auf prod (4 Mbit/s, 100 ms RTT, CPU 4x): Adressfeld nach 6,1 s sichtbar,
+// aber erst nach 25,7 s tippbar. Der Nutzer sieht ein Feld, das 19 s nichts annimmt.
+// `ladeMapbox()` macht daraus einen nachgeladenen Chunk; das `glBereit`-Gate unten
+// haelt den Karten-Effekt an, bis die Instanz steht.
+import { ladeMapbox } from '@/lib/mapbox/lazy-client'
 import { fetchDrivingRoute } from '@/lib/mapbox/directions'
 // Route-Feature (Aaron 17.07., werkstatt-embed-Lane): gerichteter Puls auf der bestehenden
 // embed-route — hier REVERSE = fließt SV → Kunde (Geometrie ist Kunde→SV geordnet).
 import { addPulsingFlow, type PulsingFlowHandle } from '@/lib/mapbox/pulsing-route'
 import type { Map as MapboxMap, Marker, Popup, GeoJSONSource } from 'mapbox-gl'
+
+// Traeger der nachgeladenen mapbox-gl-Instanz. Wird von `ladeMapbox()` gesetzt,
+// BEVOR der Karten-Effekt laeuft (er wartet auf `glBereit`). Dadurch bleiben alle
+// bestehenden `new mapboxgl.Marker(...)`/`.Map(...)`/`.Popup(...)`-Aufrufe in dieser
+// Datei unveraendert — der Umbau kostet drei Stellen statt fuenfzig.
+let mapboxgl = null as unknown as typeof import('mapbox-gl').default
 import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
@@ -337,15 +350,31 @@ export function FinderMap({ gesamtLeads, aktiveSVs = [], wizardSlot, initialCent
   // (Aktuell reicht der Scroll, weil der Wizard sich Server-side rendert.)
   const sidebarScrollRef = useRef<HTMLDivElement | null>(null)
 
+  // mapbox-gl nachladen (eigener Chunk, nicht im Hydrations-Pfad — siehe Import oben).
+  // Erst wenn die Instanz steht, darf der Karten-Effekt laufen; bis dahin ist die Seite
+  // schon bedienbar (Adressfeld, Wizard sind server-gerendert).
+  const [glBereit, setGlBereit] = useState(false)
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return
-    const ok = ensureMapboxInitialized()
-    if (!ok) {
-      // Token-Init failed — fail loud im Smoke statt silent
-      console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt')
-      setMapStatus('no-token')
-      return
+    let abgebrochen = false
+    void ladeMapbox().then((gl) => {
+      if (abgebrochen) return
+      if (!gl) {
+        // Token-Init failed — fail loud im Smoke statt silent
+        console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt')
+        setMapStatus('no-token')
+        return
+      }
+      mapboxgl = gl
+      setGlBereit(true)
+    })
+    return () => {
+      abgebrochen = true
     }
+  }, [])
+
+  useEffect(() => {
+    if (!glBereit) return
+    if (!containerRef.current || mapRef.current) return
 
     // Doc 34 0a.3: URL-Param-Zentrum (?stadt/?plz/?lat&lng) gewinnt über den
     // NRW-Default. Ohne initialCenter bleibt es bei NRW-Mittelpunkt + Geolocation.
@@ -883,8 +912,10 @@ export function FinderMap({ gesamtLeads, aktiveSVs = [], wizardSlot, initialCent
     // neu → Cleanup map.remove() → Route + Fahrzeug-Pin weg. aktiveSVs sind im Embed
     // statisch (server-once geladen); die Dead-Pins laedt der Effekt selbst nach (State +
     // Ref, siehe ladeDeadPinsFuerAusschnitt) — also bleibt [] korrekt.
+    // `glBereit` ist die EINZIGE Dependency: es kippt genau einmal von false auf true
+    // (mapbox-gl nachgeladen) und startet damit diesen Effekt — vorher gab es keine.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [glBereit])
 
   return (
     <div className="relative w-full" style={{ height }}>
