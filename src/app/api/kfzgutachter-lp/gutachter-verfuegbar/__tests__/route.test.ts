@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // Service-Client: liefert ein konfiguriertes Set an SV-Zeilen via Promise-then.
-// Der Supabase-Chain (.from().select().eq().is().not()) ist thenable — beim
-// await wird then() aufgerufen. Wir routen das je nach Tabellen-Argument
-// (sachverstaendige = Tier-1, sv_leads = Tier-3).
+// Der Supabase-Chain (.from().select().eq().is().not().order().range()) ist
+// thenable — beim await wird then() aufgerufen. Wir routen das je nach
+// Tabellen-Argument (sachverstaendige = Tier-1, sv_leads = Tier-3).
+//
+// ⚠ .order()/.range() gehoeren seit dem PostgREST-1000-Deckel-Fix dazu: der
+// Tier-3-Read laeuft ueber alleSeiten(). Fehlt eines der beiden im Stub,
+// stirbt die Route mit "…​.order is not a function" — der Test misst dann den
+// Mock, nicht die Route. Da der Stub bei jedem then() dieselbe (kurze) Menge
+// liefert, endet alleSeiten nach einer Seite: Seite < Seitengroesse.
 const mockSvSelect = vi.fn()
 const mockSvLeadsSelect = vi.fn().mockReturnValue({ data: [], error: null })
 // Erfasst die .eq()-Aufrufe auf der sachverstaendige-Query -> Test kann pruefen,
@@ -20,6 +26,8 @@ const mockServiceClient = {
       is: vi.fn(() => chain),
       not: vi.fn(() => chain),
       in: vi.fn(() => chain),
+      order: vi.fn(() => chain),
+      range: vi.fn(() => chain),
       then: (resolve: (v: unknown) => void) => {
         if (table === 'sachverstaendige') resolve(mockSvSelect())
         else if (table === 'sv_leads') resolve(mockSvLeadsSelect())
