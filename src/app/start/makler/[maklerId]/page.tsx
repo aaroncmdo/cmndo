@@ -4,7 +4,7 @@
 // an den FinderWizard -> reserviereEmbedTermin -> lead.promotion_code_id durchgereicht.
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { ladeAktiveSVs, zaehleSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from '@/app/embed/gutachter-finder/_components/FinderMap'
 import { FinderWizard } from '@/app/embed/gutachter-finder/_components/FinderWizard'
 
@@ -33,13 +33,15 @@ export default async function MaklerStartPage({ params }: { params: Promise<{ ma
     .limit(1)
     .maybeSingle()
 
-  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
+  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), zaehleSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
-  const leadPins = leadsRes.ok ? leadsRes.data : []
+  // Seit 09.09.2026 nur die ANZAHL fuer die Bundesweit-Pill — die Pins laedt die Karte je
+  // Ausschnitt nach (/api/embed/finder-pins): 9.712 Pins waren 1,15 MB im HTML.
+  const anzahlLeads = leadsRes.ok ? leadsRes.data : 0
 
   return (
     <FinderMap
-      svLeads={leadPins}
+      gesamtLeads={anzahlLeads}
       aktiveSVs={svs}
       height="100dvh"
       initialCenter={null}

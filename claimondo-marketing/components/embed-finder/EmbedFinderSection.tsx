@@ -18,12 +18,7 @@
 // im Embed tot (Permissions-Policy blockt Geolocation in cross-origin-iframes).
 
 import { useEffect, useRef } from 'react'
-import {
-  CONSENT_COOKIE_NAME,
-  CONSENT_CHANGED_EVENT,
-  parseConsent,
-  categoriesToGcm,
-} from '@/lib/analytics/consent'
+import { CONSENT_CHANGED_EVENT, gcmMitDefault } from '@/lib/analytics/consent'
 
 const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
 
@@ -120,11 +115,15 @@ export type EmbedFinderSectionProps = {
   oppref?: string
 }
 
-/** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
+/**
+ * Aktueller Consent-State als GCM-v2-Update-Payload für den iframe — MIT Opt-out-Default.
+ * Ohne Cookie bekommt der iframe denselben Default wie die Elternseite (consentDefault(),
+ * heute 'granted' — Aaron 09.09.2026: „GA4 soll auch immer messen"). Vorher sendete diese
+ * Stelle ohne Cookie „alles denied"; weil auf /gutachter-finden kein Banner erscheint, blieb
+ * der iframe dauerhaft blind (gemessen 08.09.: zwei Nachrichten, alles denied).
+ */
 function currentGcm(): Record<string, 'granted' | 'denied'> {
-  if (typeof document === 'undefined') return categoriesToGcm({ statistics: false, marketing: false })
-  const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'))
-  return categoriesToGcm(parseConsent(m?.[1]))
+  return gcmMitDefault()
 }
 
 export function EmbedFinderSection({

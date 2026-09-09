@@ -393,7 +393,7 @@
       "wunschtermin_pending": "We'll confirm the exact appointment shortly.",
       "besichtigungsort_label": "Inspection location",
       "treffpunkt_label": "Meeting point: {treffpunkt}",
-      "kein_gutachter": "We'll assign your personal expert in the next step. Just continue.",
+      "kein_gutachter": "We'll assign your personal expert after you sign the order. Just continue.",
       "aendern_cta": "Choose a different appointment or expert",
       "aendern_confirm": "Your current appointment will be released and you'll choose again. Continue?",
       "aendern_ja": "Yes, choose again",

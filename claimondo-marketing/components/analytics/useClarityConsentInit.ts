@@ -1,13 +1,15 @@
 import { useEffect, useRef } from 'react'
 import Clarity from '@microsoft/clarity'
-import { hasTrackingConsent, CONSENT_CHANGED_EVENT } from '@/lib/analytics/consent'
+import { trackingErlaubtOptOut, trackingAbgelehnt, CONSENT_CHANGED_EVENT } from '@/lib/analytics/consent'
 
 // Consent-gated Microsoft-Clarity-Init (DSGVO). Geteilte Logik fuer ClarityInit
 // (app-weit, mit SKIP_ROUTES) und ClarityInitLP (LP-eigene Project-ID + native
 // GCM-consent/update als zusaetzlicher Gate-Trigger).
 //
-// - Initial: pruefe hasTrackingConsent() — bei Granted starte Clarity sofort
-//   (Wiederkehrer mit gespeichertem Consent).
+// - OPT-OUT (Aaron 09.09.2026, wie GA4 seit 26.06.): Clarity startet, solange der Besucher
+//   Statistik nicht ausdruecklich abgelehnt hat — auch ohne Cookie. Lehnt er spaeter ab,
+//   meldet die Instanz consentV2 'denied' und zeichnet nicht weiter auf.
+//   NEXT_PUBLIC_CONSENT_DEFAULT=denied schaltet auf das alte Opt-in zurueck (consent.ts).
 // - Lausche auf CONSENT_CHANGED_EVENT (CMP-Auswahl) — feuert beliebig oft, der
 //   startedRef-Guard sorgt fuer Single-Init.
 // - listenNativeGcm (LP-only): faengt zusaetzlich native gtag('consent','update')
@@ -29,15 +31,23 @@ export function useClarityConsentInit(
 
     const start = () => {
       if (startedRef.current) return
-      if (!hasTrackingConsent() && !(listenNativeGcm && analyticsGrantedViaDataLayer()))
+      if (!trackingErlaubtOptOut() && !(listenNativeGcm && analyticsGrantedViaDataLayer()))
         return
       startedRef.current = true
       Clarity.init(projectId)
+      Clarity.consentV2({ ad_Storage: 'granted', analytics_Storage: 'granted' })
+    }
+    // Widerspruch NACH dem Start: Clarity die Einwilligung entziehen (kein Reload noetig).
+    const widerspruch = () => {
+      if (startedRef.current && trackingAbgelehnt()) {
+        try { Clarity.consentV2({ ad_Storage: 'denied', analytics_Storage: 'denied' }) } catch { /* noch nicht geladen */ }
+      }
     }
 
     // Sofort versuchen (Wiederkehrer) + auf die CMP-Consent-Auswahl hoeren.
     start()
     window.addEventListener(CONSENT_CHANGED_EVENT, start)
+    window.addEventListener(CONSENT_CHANGED_EVENT, widerspruch)
 
     // LP-only: GCM-native Consent-Grants per dataLayer-Polling abfangen
     // (robust gegen GTMs push-Ersetzung). Stoppt bei Init oder nach ~20s.
@@ -55,6 +65,7 @@ export function useClarityConsentInit(
 
     return () => {
       window.removeEventListener(CONSENT_CHANGED_EVENT, start)
+      window.removeEventListener(CONSENT_CHANGED_EVENT, widerspruch)
       if (pollId) clearInterval(pollId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -134,10 +134,66 @@ console.log(
   `[migration-files] ${data.length} getrackt, ${repoVersionen.size} Files, ${fehlend.length} ohne File (Baseline ${baseline.length}), ${neu.length} neu.`,
 )
 
+// Diagnose-Helfer: liegt eine vermeintlich fehlende Migration schon auf einem Remote-Ref?
+//
+// `git ls-files` oben liest den Index des LAUFENDEN Checkouts — nie origin/main. Ein Rueckstand
+// von wenigen Commits erzeugt damit Funde, die echt aussehen (gueltige Version, plausibler Name,
+// Zeitstempel von heute), aber laengst gemergt sind. Am 08.09.2026 real passiert: 20260908170628
+// und 20260908170753 wurden gemeldet und lagen auf origin/main UND origin/staging (#5938, #5939,
+// Release r487).
+//
+// ⚠ Das URTEIL bleibt unveraendert (fail-closed, exit 1). Korrigiert wird nur die DIAGNOSE — denn
+// die falsche Diagnose ist der Schaden: sie verleitet dazu, die Datei ein ZWEITES Mal anzulegen,
+// und das erzeugt einen add/add-Konflikt am selben Pfad (belegt 19.08., #5412 gegen #5415).
+function liegtAufRemote(versionen) {
+  const treffer = new Map()
+  if (versionen.length === 0) return treffer
+  // Laeuft nur im Fundfall, also selten — kein regelmaessiger Netzzugriff.
+  try {
+    execSync('git fetch --no-tags --quiet origin main staging', { stdio: 'ignore' })
+  } catch {
+    // offline / kein Remote: die bereits vorhandenen Refs werden trotzdem geprueft
+  }
+  for (const ref of ['origin/main', 'origin/staging']) {
+    let liste = ''
+    try {
+      liste = execSync(`git ls-tree --name-only ${ref} supabase/migrations/`, { encoding: 'utf8' })
+    } catch {
+      continue // Ref unbekannt (z. B. shallow CI-Clone) — dann entfaellt nur die Diagnose
+    }
+    for (const v of versionen) {
+      if (!treffer.has(v) && liste.includes(`/${v}_`)) treffer.set(v, ref)
+    }
+  }
+  return treffer
+}
+
 if (mode === 'ratchet' && neu.length > 0) {
+  const aufRemote = liegtAufRemote(neu.map((f) => f.split('_')[0]))
+
+  if (aufRemote.size > 0) {
+    console.error(
+      `\n[migration-files] ⚠ DEIN CHECKOUT IST NICHT AKTUELL — ${aufRemote.size} von ${neu.length} ` +
+        'Meldung(en) liegen bereits auf einem Remote-Ref:\n' +
+        [...aufRemote].map(([v, ref]) => `   - ${v}  ->  ${ref}`).join('\n') +
+        '\n\nDas ist KEIN Fund, sondern dein Rueckstand. NICHT rekonstruieren — eine zweite Fassung\n' +
+        'erzeugt einen add/add-Konflikt am selben Pfad. Erst aktualisieren, dann neu messen:\n' +
+        '   git fetch --all --prune\n' +
+        '   git rev-list --count HEAD..origin/main      # muss 0 sein\n',
+    )
+  }
+
+  // Alle Meldungen erklaert? Dann waere die Rekonstruktions-Anleitung unten aktiv schaedlich.
+  if (aufRemote.size === neu.length) {
+    process.exit(1) // fail-closed: die Messung ist erst nach dem Aktualisieren gueltig
+  }
+
   console.error(
-    `\n[migration-files] ✖ ${neu.length} getrackte Migration(en) ohne File im Repo:\n` +
-      neu.map((f) => `   - ${f}`).join('\n') +
+    `\n[migration-files] ✖ ${neu.length - aufRemote.size} getrackte Migration(en) ohne File im Repo:\n` +
+      neu
+        .filter((f) => !aufRemote.has(f.split('_')[0]))
+        .map((f) => `   - ${f}`)
+        .join('\n') +
       '\n\nSo behebst du das (Regel 2, Schritt 4 nachholen):\n' +
       "   1. Statement holen:  select statements[1] from supabase_migrations.schema_migrations where version='<V>';\n" +
       '   2. Datei anlegen:    supabase/migrations/<V>_<name>.sql  (Inhalt 1:1)\n' +

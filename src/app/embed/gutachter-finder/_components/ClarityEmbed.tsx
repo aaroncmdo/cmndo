@@ -21,7 +21,10 @@
 // CONSENT: Der iframe kann das Consent-Cookie der Elternseite nicht lesen
 // (cross-origin). Er hoert deshalb auf dieselbe postMessage-Bruecke wie die
 // ConsentBridge nebenan (AAR-956) und startet Clarity erst bei
-// `analytics_storage: 'granted'`. Ohne Einwilligung wird nichts geladen.
+// `analytics_storage: 'granted'`. Seit 09.09.2026 (Aaron: Clarity wie GA4 auf
+// Opt-out) sendet die Elternseite ohne Cookie 'granted' als Default — die
+// Komponente selbst bleibt unveraendert consent-gesteuert. Kommt spaeter ein
+// 'denied' (Widerspruch im CMP), entzieht sie Clarity die Einwilligung.
 //
 // WARUM ERST GEPRUEFT WIRD, OB CLARITY SCHON LAEUFT: Der GTM-Container derselben
 // Seite (GTM-KD2L63T3) traegt ein eigenes Clarity-Tag. Gemessen 08.09.2026 auf
@@ -90,6 +93,7 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
 
       try {
         Clarity.init(projectId)
+        Clarity.consentV2({ ad_Storage: 'granted', analytics_Storage: 'granted' })
       } catch {
         /* Blocker/Netzfehler: Aufzeichnung ist ein Zusatz, nie ein Blocker fuer den Finder. */
       }
@@ -101,6 +105,14 @@ export function ClarityEmbed({ projectId }: { projectId?: string | null }) {
       if (!data || data.type !== 'claimondo-consent' || !data.gcm) return
       // Genau ein Signal zaehlt: Clarity ist Analyse, nicht Werbung.
       if (data.gcm.analytics_storage === 'granted') starte()
+      // Widerspruch nach dem Start (CMP-Auswahl auf der Elternseite): Einwilligung entziehen.
+      if (data.gcm.analytics_storage === 'denied' && gestartet.current) {
+        try {
+          Clarity.consentV2({ ad_Storage: 'denied', analytics_Storage: 'denied' })
+        } catch {
+          /* Clarity nicht geladen (fremdes Tag hatte Vorrang) → nichts zu entziehen */
+        }
+      }
     }
 
     window.addEventListener('message', onMessage)

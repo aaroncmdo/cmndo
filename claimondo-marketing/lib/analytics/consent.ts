@@ -50,6 +50,61 @@ export function parseConsent(cookieValue: string | null | undefined): ConsentSta
   } catch { return { statistics: false, marketing: false } }
 }
 
+/**
+ * Opt-out-Default (Aaron 09.09.2026: "Du kannst auch Clarity opt outen … GA4 soll auch immer messen").
+ * Dieselbe Quelle wie der GA4-Consent-Default im [locale]/layout.tsx (Anwalts-Freigabe 26.06.2026):
+ * ohne Entscheidung gilt 'granted'; NEXT_PUBLIC_CONSENT_DEFAULT=denied schaltet ALLES wieder auf
+ * Opt-in — ein Schalter, kein Code. NEXT_PUBLIC_* wird beim Build inliniert; ein Umschalten braucht
+ * einen neuen Build (bewusst, siehe Runbook A2/B6).
+ */
+export function consentDefault(): 'granted' | 'denied' {
+  return process.env.NEXT_PUBLIC_CONSENT_DEFAULT === 'denied' ? 'denied' : 'granted'
+}
+
+/** Client: der rohe cc_cookie-Wert — null, wenn der Besucher noch nie entschieden hat. */
+function readConsentCookieRaw(): string | null {
+  if (typeof document === 'undefined') return null
+  const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'))
+  return m?.[1] ?? null
+}
+
+/**
+ * Opt-out-Semantik fuer Statistik-Tracking (Clarity): erlaubt, solange nicht ausdruecklich
+ * abgelehnt. "Keine Entscheidung" (kein Cookie) zaehlt als erlaubt — genau wie bei GA4.
+ * Mit consentDefault()==='denied' faellt es auf hasTrackingConsent() zurueck (Opt-in).
+ *
+ * Bewusst NICHT fuer hasMarketingConsent (OpenAI-Ads-Pixel): Aaron hat Clarity und GA4
+ * genannt, nicht den Werbe-Pixel.
+ */
+export function trackingErlaubtOptOut(): boolean {
+  if (consentDefault() === 'denied') return hasTrackingConsent()
+  const roh = readConsentCookieRaw()
+  if (roh === null) return true
+  return parseConsent(roh).statistics
+}
+
+/** Client: hat der Besucher Statistik ausdruecklich ABGELEHNT (Cookie da, statistics=false)? */
+export function trackingAbgelehnt(): boolean {
+  const roh = readConsentCookieRaw()
+  return roh !== null && !parseConsent(roh).statistics
+}
+
+/**
+ * GCM-v2-Payload mit Opt-out-Default — fuer die Consent-Bridge zum Embed-iframe. Ohne Cookie
+ * bekommt der iframe denselben Default wie die Elternseite (alle Signale = consentDefault()),
+ * mit Cookie die getroffene Auswahl. Vorher sendete die Bridge ohne Cookie "alles denied" —
+ * strenger als die Seite selbst, und weil auf /gutachter-finden kein Banner erscheint, blieb
+ * der iframe dauerhaft blind (gemessen 08.09.2026: zwei Nachrichten, alles denied).
+ */
+export function gcmMitDefault(): Record<string, 'granted' | 'denied'> {
+  const roh = readConsentCookieRaw()
+  if (roh === null) {
+    const d = consentDefault()
+    return { analytics_storage: d, functionality_storage: d, ad_storage: d, ad_user_data: d, ad_personalization: d }
+  }
+  return categoriesToGcm(parseConsent(roh))
+}
+
 /** Client: das cc_cookie lesen und in beide Kategorien aufloesen. */
 function readConsentCookie(): ConsentState {
   if (typeof document === 'undefined') return { statistics: false, marketing: false }
