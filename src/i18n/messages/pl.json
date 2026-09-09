@@ -4443,6 +4443,20 @@
       "takePhoto": "Zrób zdjęcie",
       "cta": "Zaczynamy"
     },
+    "zb1": {
+      "liegtVorTitel": "Mamy Państwa dowód rejestracyjny",
+      "liegtVorText": "Przejęliśmy dane pojazdu. Prosimy o krótkie sprawdzenie, czy wszystko się zgadza.",
+      "pruefenCta": "Sprawdź dane",
+      "pruefenTitel": "Prosimy sprawdzić dane",
+      "manuellTitel": "Prosimy wprowadzić dane",
+      "manuellText": "Tym razem nie udało się odczytać dowodu rejestracyjnego automatycznie. Zdjęcie zostało zapisane — prosimy wprowadzić dane samodzielnie.",
+      "bestaetigenCta": "Potwierdź dane",
+      "gespeichertTitel": "Dane pojazdu zapisane",
+      "nochmalAendern": "Zmień dane ponownie",
+      "neuesFoto": "Zrób nowe zdjęcie",
+      "fehlerFoto": "Nie udało się przetworzyć zdjęcia. Prosimy spróbować ponownie.",
+      "fehlerUpload": "Przesyłanie nie powiodło się. Prosimy spróbować ponownie."
+    },
     "fall": {
       "title": "Państwa szkoda",
       "intro": "Dane z rozmowy telefonicznej zostały już przez nas przyjęte. Prosimy o krótkie sprawdzenie i potwierdzenie poniżej.",

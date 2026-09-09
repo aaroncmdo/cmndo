@@ -4609,6 +4609,20 @@
       "takePhoto": "Foto machen",
       "cta": "Los geht's"
     },
+    "zb1": {
+      "liegtVorTitel": "Ihr Fahrzeugschein liegt uns vor",
+      "liegtVorText": "Wir haben Ihre Fahrzeugdaten übernommen. Bitte prüfen Sie kurz, ob alles stimmt.",
+      "pruefenCta": "Daten prüfen",
+      "pruefenTitel": "Bitte prüfen Sie die Daten",
+      "manuellTitel": "Bitte tragen Sie die Daten ein",
+      "manuellText": "Wir konnten den Fahrzeugschein diesmal nicht automatisch lesen. Ihr Foto ist gespeichert — bitte tragen Sie die Daten kurz selbst ein.",
+      "bestaetigenCta": "Daten bestätigen",
+      "gespeichertTitel": "Fahrzeugdaten gespeichert",
+      "nochmalAendern": "Daten noch einmal ändern",
+      "neuesFoto": "Neues Foto aufnehmen",
+      "fehlerFoto": "Das Foto konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.",
+      "fehlerUpload": "Der Upload hat nicht geklappt. Bitte versuchen Sie es erneut."
+    },
     "fall": {
       "title": "Ihr Schadenfall",
       "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie sie kurz und bestätigen Sie unten.",
