@@ -1,3 +1,9 @@
+// stumme-waechter-skip: bewusst nur manuell. Der Lauf bucht einen echten Termin auf prod,
+// legt Lead, Fall, Auftrag und ein Kunden-Konto an und raeumt sie danach wieder ab. In einem
+// CI-Job hiesse das: bei jedem Push echte Zeilen in der prod-DB, und bei einem Abbruch mitten
+// im Lauf ein AKTIVER Wegwerf-Gutachter im Matching-Pool (am 09.09. zweimal passiert, beide
+// von Hand nachgeraeumt). Derselbe Grund wie bei der Schwester-Spec golden-path-finder-prod,
+// die als grandfatherter Baseline-Eintrag steht.
 import { test, expect, type Page } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { CTA_SA_UNTERSCHREIBEN } from '../lib/ui-texte'
