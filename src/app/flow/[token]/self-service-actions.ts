@@ -717,6 +717,13 @@ export async function bucheTerminFlow(
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+    // 09.09.2026: NUR Begutachtungstermine — "alte Lead-Reservierung" meint die Gutachter-Buchung.
+    // Ohne diesen Filter stornierte jede Slot-Buchung auch den automatischen KB-Rueckruftermin
+    // (typ='kb_beratung', status='reserviert', lead_id gesetzt): 3 von 3 konvertierten Leads in
+    // 30 Tagen, jeweils 0,1-0,2 s VOR dem neuen SV-Termin. Aaron 09.09.: "der KB-Rueckruf ist
+    // gewollt und soll bleiben — fuer jeden Claim eine Beratung". Spiegelbild von #5949 (Lookup in
+    // page.tsx:344) — dieselbe Klasse, nur beim Schreiben statt beim Lesen.
+    .eq('typ', 'sv_begutachtung')
     .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
   // Genau hier haengt die zugesagte Idempotenz ("eine aktive Reservierung pro Lead").
   // Still fehlgeschlagen bleiben ZWEI aktive Reservierungen stehen — Doppelbelegung
@@ -789,6 +796,11 @@ export async function aendereTerminFlow(
     .from('gutachter_termine')
     .select('id, status')
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+    // 09.09.2026: nur der Begutachtungstermin entscheidet den Pfad. Ohne Filter gewinnt per
+    // `order start_zeit desc` ein spaeter liegender KB-Rueckruftermin (typ='kb_beratung') — und ein
+    // bestaetigter Rueckruf schickte den Kunden in die Dispatch-Anfrage, obwohl sein SV-Termin nur
+    // reserviert ist (Neu-Wahl waere richtig). Dieselbe Klasse wie #5949 / bucheTerminFlow oben.
+    .eq('typ', 'sv_begutachtung')
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: false })
     .limit(1)
