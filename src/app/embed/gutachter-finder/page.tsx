@@ -190,7 +190,9 @@ export default async function GutachterFinderEmbedPage({
       <ConsentBridge />
       {/* Clarity im iframe — nur wenn die einbettende Seite eine bekannte
           Projekt-ID anfordert UND der Parent Analyse-Consent meldet. */}
-      <ClarityEmbed projectId={sp.clarity} />
+      {/* Opt-out (CONSENT_DEFAULT ?? granted): sofort starten und das Rennen gegen das
+          GTM-Clarity-Tag gewinnen; Opt-in: auf den Consent des Parents warten. */}
+      <ClarityEmbed projectId={sp.clarity} sofortStarten={consentDefault === 'granted'} />
       <FinderMap
         gesamtLeads={anzahlLeads}
         aktiveSVs={svsLight}
