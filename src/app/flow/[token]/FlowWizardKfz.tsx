@@ -538,8 +538,12 @@ export default function FlowWizardKfz({
   // Gutachter da → sequenziell weiter (stepIndex+1), damit die Config-Steps zwischen gutachter
   // und sa (ort_fahrzeug/werkstatt) NICHT uebersprungen werden. Der frueher hardcodierte Sprung
   // auf 'sa' driftete gegen die DB-Step-Sequenz (Config-Code-Drift) → "springt ans Ende".
-  // Kein Gutachter → aktiv weiterleiten: zum Buchungs-Step, sonst 'sa' (Dispatcher-/Embed-Pfad
-  // ohne Slot-Picker, AAR-908 ordnet bei SA den Top-SV zu).
+  // Kein Gutachter → zum Buchungs-Step, wenn es ihn gibt; sonst SEQUENZIELL weiter (null).
+  // 09.09.2026 (Aaron: "der soll nicht einfach zu SA springen"): der fruehere Sprung auf 'sa'
+  // uebersprang ort_fahrzeug/werkstatt/werkstatt_anzeige — jeder Kunde ohne Gutachter-Anzeige
+  // (Dispatcher-Pfad ohne Slot-Picker, oder weil ein KB-Rueckruftermin als SV-Termin galt) verlor
+  // damit die Werkstattsuche. AAR-908 ordnet bei SA weiterhin den Top-SV zu; die Werkstatt-Steps
+  // bleiben ueberspringbar, aber sie werden nicht mehr stumm uebergangen.
   // Re-Smoke #4943 (03.08.): hat der Kunde EXPLIZIT "Termin lieber spaeter vereinbaren"
   // gewaehlt (ohneTermin), darf das Rueck-Routing NICHT greifen — sonst Endlos-Loop
   // termin -> gutachter -> termin, der ort_fahrzeug/werkstatt/sa unerreichbar macht.
@@ -548,7 +552,7 @@ export default function FlowWizardKfz({
     ? null
     : stepIndexById('termin') >= 0
       ? 'termin'
-      : 'sa'
+      : null
 
   // ─── SA unterzeichnen + Fall erstellen → <SaSignaturStep> (extrahiert, Approach C).
   //     onSigned setzt fallId + geht zum Account-Step (der Account-Step-Effect unten

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { ladeAktiveSVs, zaehleSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
@@ -12,7 +12,7 @@ import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
 // Zieht den Finder aus der Marketing-App hierher → direkter Termin-Engine-Zugriff,
 // design-token-konform, per <iframe> auf claimondo.de + beliebigen Seiten einbettbar.
 //
-// WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/ladeSvLeads (leak-safe, Google-Reviews).
+// WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/zaehleSvLeads (leak-safe, Google-Reviews); die Pins selbst laedt FinderMap je Ausschnitt nach.
 // WS1b: Karten-UI <FinderMap> aus der Marketing-Karte portiert (next-intl → inline DE).
 // WS2: Profil-ueber-Pin + GoogleBewertungBadge. WS3: empfohlener SV + Route/Zoom.
 // WS4 + Reorder: 4-Step-Wizard (Ort → Termin → Schaden → Kontakt) füllt den wizardSlot;
@@ -66,9 +66,11 @@ export default async function GutachterFinderEmbedPage({
   // -> bewusst OHNE Owner (nur das globale istNetzwerkpartner-Badge). Sobald ein attribuierter
   // Einstieg existiert (Werkstatt-QR ?werkstatt= / Makler-Link), dessen Entity -> profiles.id
   // aufloesen und hier injizieren. Makler sind v1 kein Graph-Knoten (Owner haette 0 Freunde).
-  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
+  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), zaehleSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
-  const leadPins = leadsRes.ok ? leadsRes.data : []
+  // Seit 09.09.2026 nur die ANZAHL fuer die Bundesweit-Pill — die Pins laedt die Karte je
+  // Ausschnitt nach (/api/embed/finder-pins): 9.712 Pins waren 1,15 MB im HTML.
+  const anzahlLeads = leadsRes.ok ? leadsRes.data : 0
 
   // isochrone_polygon aus dem Client-Payload strippen — der Nearest-SV-Check laeuft
   // server-seitig via empfehleSvFuerOrt, der Client braucht die Polygone nie.
@@ -161,8 +163,8 @@ export default async function GutachterFinderEmbedPage({
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
-  // Mode v2: consent-default=denied läuft VOR gtm.js (im Script unten); <ConsentBridge> hebt nach
-  // Parent-Einwilligung via gtag('consent','update') an. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
+  // Mode v2: consent-default (CONSENT_DEFAULT ?? granted, s. u.) läuft VOR gtm.js; <ConsentBridge> setzt nach
+  // Parent-Nachricht via gtag('consent','update') den Cookie-Stand. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
   //
   // BEWUSST NICHT-öffentliches `GF_GTM_ID` (kein NEXT_PUBLIC_): diese Server-Component ist dynamisch
   // (await searchParams + Daten-Fetch → `ƒ`), liest die Var also pro Request zur LAUFZEIT und rendert
@@ -170,12 +172,19 @@ export default async function GutachterFinderEmbedPage({
   // + Restart, KEIN Rebuild) — NEXT_PUBLIC_* wäre build-time-inlined (Footgun: runtime-Set ohne
   // Rebuild lädt still nie). Der Wert ist ohnehin nicht geheim (steht im Client-HTML).
   const gtmId = process.env.GF_GTM_ID
+  // Consent-Default im iframe = derselbe wie auf der Elternseite (claimondo-marketing
+  // [locale]/layout.tsx: 'granted', Anwalts-Freigabe 26.06.2026; Aaron 09.09.2026: "GA4 soll
+  // auch immer messen"). Vorher startete der Container hier mit 'denied' und die Bridge
+  // sendete ohne Cookie ebenfalls 'denied' — auf /gutachter-finden erscheint kein Banner,
+  // also blieb GA4 im iframe dauerhaft im cookielosen Ping-Modus (gemessen 08.09.2026).
+  // Rueckfall-Schalter wie draussen: CONSENT_DEFAULT=denied im App-Prozess (Laufzeit, kein Rebuild).
+  const consentDefault = process.env.CONSENT_DEFAULT === 'denied' ? 'denied' : 'granted'
 
   return (
     <>
       {gtmId ? (
         <Script id="gf-gtm" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',functionality_storage:'denied',security_storage:'granted',wait_for_update:500});(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'${consentDefault}',ad_user_data:'${consentDefault}',ad_personalization:'${consentDefault}',analytics_storage:'${consentDefault}',functionality_storage:'${consentDefault}',security_storage:'granted',wait_for_update:500});(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
         </Script>
       ) : null}
       <ConsentBridge />
@@ -183,7 +192,7 @@ export default async function GutachterFinderEmbedPage({
           Projekt-ID anfordert UND der Parent Analyse-Consent meldet. */}
       <ClarityEmbed projectId={sp.clarity} />
       <FinderMap
-        svLeads={leadPins}
+        gesamtLeads={anzahlLeads}
         aktiveSVs={svsLight}
         height="100dvh"
         initialCenter={initialCenter}
