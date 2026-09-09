@@ -359,9 +359,22 @@ export function FinderMap({ gesamtLeads, aktiveSVs = [], wizardSlot, initialCent
     void ladeMapbox().then((gl) => {
       if (abgebrochen) return
       if (!gl) {
-        // Token-Init failed — fail loud im Smoke statt silent
-        console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt')
-        setMapStatus('no-token')
+        // Zwei verschiedene Ursachen, zwei verschiedene Meldungen: das Token fehlte
+        // schon im Build, ODER der nachgeladene Chunk kam nicht an (Funkloch, Tunnel,
+        // Cache-Miss nach einem Deploy). Ein „Token fehlt" auf einen Netz-Abbruch zu
+        // schreiben, schickt die naechste Suche in die falsche Richtung.
+        const ohneToken = !process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+        console.error(
+          ohneToken
+            ? '[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt'
+            : '[gutachter-finden] Mapbox-Init fehlgeschlagen — die Kartenbibliothek konnte nicht nachgeladen werden',
+        )
+        if (ohneToken) {
+          setMapStatus('no-token')
+        } else {
+          setMapErrorMsg('Kartenbibliothek konnte nicht geladen werden')
+          setMapStatus('error')
+        }
         return
       }
       mapboxgl = gl
