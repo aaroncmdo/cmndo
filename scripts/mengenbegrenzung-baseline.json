@@ -1,0 +1,9 @@
+{
+  "files": [
+    "src/app/admin/health/page.tsx",
+    "src/app/api/cron/gast-conversion-reminder/route.ts",
+    "src/app/dispatch/dashboard/page.tsx",
+    "src/lib/health/checks/email-failure-rate.ts",
+    "src/lib/werkstatt/ausstehende-freigaben.ts"
+  ]
+}

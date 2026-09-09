@@ -50,13 +50,25 @@ export async function ladeMapbox(): Promise<MapboxNamespace | null> {
       console.warn('[mapbox] NEXT_PUBLIC_MAPBOX_TOKEN fehlt — Karte wird nicht initialisiert')
       return null
     }
-    const modul = await import('mapbox-gl')
-    // Interop: je nach Bundler liegt der Namespace unter `default` oder direkt am Modul.
-    const gl = ((modul as unknown as { default?: MapboxNamespace }).default ??
-      (modul as unknown as MapboxNamespace))
-    gl.accessToken = token
-    geladen = gl
-    return gl
+    try {
+      const modul = await import('mapbox-gl')
+      // Interop: je nach Bundler liegt der Namespace unter `default` oder direkt am Modul.
+      const gl = ((modul as unknown as { default?: MapboxNamespace }).default ??
+        (modul as unknown as MapboxNamespace))
+      gl.accessToken = token
+      geladen = gl
+      return gl
+    } catch (err) {
+      // Der Chunk kommt ueber das Netz — ein Abbruch (Funkloch, Tunnel, geleerter
+      // Cache nach einem Deploy) ist hier der Normalfall, kein Ausnahmefall.
+      // OHNE dieses catch wirft `ladeMapbox()`, der Aufrufer haengt in einem
+      // .then() ohne .catch(), `setMapStatus` wird nie erreicht — und der Nutzer
+      // sieht dauerhaft eine leere Flaeche ohne jeden Hinweis. Zusaetzlich bliebe
+      // `laufend` als abgelehnte Zusage stehen und jeder weitere Versuch bekaeme
+      // denselben Fehlschlag zurueck: er braennte sich ein.
+      console.error('[mapbox] Nachladen fehlgeschlagen:', err)
+      return null
+    }
   })()
 
   const ergebnis = await laufend

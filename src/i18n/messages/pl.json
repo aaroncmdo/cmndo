@@ -4444,6 +4444,8 @@
       "cta": "Zaczynamy"
     },
     "zb1": {
+      "finForm": "Numer identyfikacyjny pojazdu ma 17 znaków (bez I, O, Q) — obecnie {anzahl}.",
+      "finNichtUebernommen": "Pozostałe dane zostały zapisane. Numeru identyfikacyjnego nie udało się przyjąć — ma 17 znaków bez I, O i Q.",
       "liegtVorTitel": "Mamy Państwa dowód rejestracyjny",
       "liegtVorText": "Przejęliśmy dane pojazdu. Prosimy o krótkie sprawdzenie, czy wszystko się zgadza.",
       "pruefenCta": "Sprawdź dane",

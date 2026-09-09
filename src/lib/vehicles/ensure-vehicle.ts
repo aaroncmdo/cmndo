@@ -36,6 +36,19 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/
 
+/**
+ * Eine Fahrzeug-Identifizierungsnummer OHNE jede Ziffer ist keine Nummer, sondern ein Wort.
+ *
+ * Gemessen am prod-Scan vom 25.08.2026: die Texterkennung machte aus "Mehrzweckfahrzeug"
+ * (Feld 5 des Fahrzeugscheins) den Wert "MAHZAWACKFAHRZEUG" — siebzehn Zeichen, kein I, O
+ * oder Q, also formgueltig. Er wanderte in die Fahrzeug-Identitaet und damit ins Gutachten.
+ * Jede echte Nummer traegt Ziffern (Modelljahr an Stelle 10, laufende Nummer am Ende);
+ * diese Pruefung kostet keinen gueltigen Wert und gilt fuer JEDEN Schreibweg.
+ */
+export function istPlausibleFin(kandidat: string): boolean {
+  return /[0-9]/.test(kandidat)
+}
+
 /** Jahr (int) -> 'YYYY-01-01' fuer vehicles.baujahr_monat (date). Null wenn unplausibel. */
 export function yearToDateStr(y?: number | null): string | null {
   if (y == null || !Number.isInteger(y) || y < 1900 || y > 2100) return null
@@ -113,8 +126,8 @@ export async function ensureVehicleFromFin(params: {
   const fin = params.fin?.trim().toUpperCase() ?? ''
   // Defensiv vorvalidieren — sonst wirft die RPC eine RAISE-Exception (ERRCODE 22023),
   // die als roher Fehler durchschlaegt. Format == das der RPC/saveFinVin/enrich.
-  if (!VIN_REGEX.test(fin)) {
-    return { ok: false, error: 'FIN-Format ungueltig (17 Zeichen, ohne I/O/Q)' }
+  if (!VIN_REGEX.test(fin) || !istPlausibleFin(fin)) {
+    return { ok: false, error: 'FIN-Format ungueltig (17 Zeichen, ohne I/O/Q, mit Ziffern)' }
   }
 
   const s = params.snapshot ?? {}

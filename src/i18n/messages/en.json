@@ -4444,6 +4444,8 @@
       "cta": "Let's go"
     },
     "zb1": {
+      "finForm": "A vehicle identification number has 17 characters (no I, O, Q) — currently {anzahl}.",
+      "finNichtUebernommen": "Your other details are saved. We could not accept the vehicle identification number — it has 17 characters without I, O and Q.",
       "liegtVorTitel": "We have your vehicle registration",
       "liegtVorText": "We have taken over your vehicle data. Please check briefly that everything is correct.",
       "pruefenCta": "Check data",

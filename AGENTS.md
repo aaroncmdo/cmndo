@@ -796,6 +796,63 @@ CI fährt `npm run check:termin-bezug -- --ratchet`. Es blockt **NEUE** Verletze
 
 **Abgrenzung zu `check:termin-engine-contract`:** Der Contract-Ratchet gatet `.eq('lead_id')`/`.eq('sv_id')` = **Engine-API-Disziplin** (nutze `findeTerminFuerLead`/`assignee_id`), hard-0. Dieses Gate gatet die **Bezug-Filter-Korrektheit** (`fall_id`/`claim_id` voll + `lead_id` jenseits `.eq`). Komplementär, keine funktionale Überlappung (die einzigen `.eq('lead_id')` liegen im ausgenommenen `finde-termin-fuer-lead.ts`). Ausnahmen identisch: `engine/*` + `finde-termin-fuer-lead.ts` dürfen die Achsen direkt anfassen. Marker: `coordination-p33-gutachter-termine-legacy-retire`.
 
+# Mengenbegrenzungs-Gate (Ratchet)
+
+**Ein Lesepfad auf eine grosse Tabelle ohne Mengenbegrenzung ist verboten.** PostgREST liefert
+ohne `range` **hoechstens 1.000 Zeilen** — kein Fehler, keine Warnung, die Antwort ist einfach
+kuerzer als die Wahrheit. Ohne `order` ist zusaetzlich **nicht bestimmt, welche** 1.000 kommen:
+zwei Aufrufe koennen verschiedene Teilmengen sehen.
+
+```ts
+.from('tasks').select('…').not('faellig_am','is',null)     // ❌ still bei 1.000 gekappt
+alleSeiten((von,bis) => q.order('id').range(von,bis))      // ✅ vollstaendig
+.from('tasks').select('…').limit(50)                       // ✅ Grenze gewollt
+```
+
+**Belegter Vorfall (09.09.2026, PR #5964):** Der Admin-Kalender zeigte am 3. September **NULL**
+Aufgaben, obwohl sieben faellig waren — insgesamt fehlten **930 von 1.930**, und die Luecke wuchs
+mit jeder neuen Aufgabe (03.09.: 719). Das SV-Matching sah **1.000 von 9.712** aktiven Leads und
+konnte den naechstgelegenen Sachverstaendigen schlicht nicht sehen. Beides lief monatelang ohne
+eine einzige Fehlermeldung. Der Fix liegt seit jeher im Repo (`alleSeiten()`,
+`src/lib/db/alle-seiten.ts`) und hatte genau **einen** Consumer.
+
+CI faehrt `npm run check:mengenbegrenzung -- --ratchet`. Lokal (ohne Flag) `--warn` (exit 0,
+listet alle mit prod-Zeilenzahl). Pure Logik: `scripts/lib/mengenbegrenzung-scan.mjs`
+(unit-getestet, 17 Faelle).
+
+**Nur die 15 Tabellen, die den Deckel real erreichen** (`GROSSE_TABELLEN`, mit prod-Zeilenzahl
+als Begruendung; Stand 09.09.: `cron_jobs_audit` 61.701 … `notification_events` 1.057). Auf einer
+Tabelle mit 40 Zeilen ist eine fehlende Grenze folgenlos. ⚠ **Die Liste priorisiert, sie
+entscheidet nicht:** ein Scan ohne diese Einschraenkung meldete **135** Stellen — nachgemessen
+hatten davon genau **vier** echten Schaden, und das waren die vier aus #5964. Neue grosse Tabelle
+→ hier eintragen, die Baseline steigt dann einmalig.
+
+**Baseline = 5 grandfathered** (Stand 09.09., alle einzeln gegen prod gemessen und **heute
+harmlos**): `admin/health/page.tsx` (15 Checks, alle in den neuesten 1.000 sichtbar),
+`dispatch/dashboard` (3 Zeilen), `werkstatt/ausstehende-freigaben` (0), `health/email-failure-rate`
+(28), `cron/gast-conversion-reminder` (0). ⚠ Das ist eine **Pruefliste, keine Schuldenliste** —
+`health_check_runs` waechst um ~360 Zeilen/Tag, und die Seite dedupliziert im JS auf „neuester
+Lauf je Check": sinkt die Lauffrequenz eines Checks unter das Fenster der neuesten 1.000, faellt
+er still aus der Ansicht.
+
+**0 False-Positives by design** — drei Regeln, alle beim Bau real eingefahren:
+
+* **Kommentare werden entfernt, nicht als Kettenende gelesen.** Der erste Entwurf brach die Kette
+  am ersten `//` ab — genau dort steht in den reparierten Stellen die Erklaerung, direkt VOR
+  `.order().range()`. Ergebnis: vier gefixte Stellen wurden als kaputt gemeldet. Die
+  Positivkontrolle im Test faengt das bei jedem Lauf.
+* **Ueber eine Variable aufgebaute Ketten werden NIE geflaggt.** `let q = db.from(…); q = q.or(…);
+  await q.limit(20)` — die Grenze steht in einer anderen Anweisung. Real belegt:
+  `sv-basic/claim-actions.ts` baut so auf und hat `.limit(20)`.
+* **Ein Gleichheits-/IN-Filter auf eine ID-Spalte** (`fall_id`, `claim_id`, `zugewiesen_an`, …)
+  haelt die Menge an den uebergebenen Kennungen fest, nicht an der Tabellengroesse.
+
+Writes sind eine andere Klasse und bleiben beim `check:silent-writes`. Bewusster Vollabzug →
+`// mengenbegrenzung-skip: <grund>` am File-Anfang.
+
+**Nachweis, dass das Gate greift:** Probe-Datei mit ungebremstem `mitteilungen`-Read eingefuegt →
+exit 1 mit Dateiname und Zeile, entfernt → exit 0.
+
 # Stille-Write-Gate (Ratchet)
 
 **Ein Supabase-Write auf eine schadensträchtige Tabelle, dessen Ergebnis niemand liest, ist verboten.** `supabase-js` **wirft nicht** — ein fehlgeschlagener Write gibt `{ error }` zurück. Wer den Rückgabewert verwirft, kann Erfolg und Fehlschlag nicht unterscheiden:
