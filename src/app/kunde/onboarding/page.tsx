@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import OnboardingWizard from './OnboardingWizard'
-import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './actions'
+import { getPflichtdokumenteStand } from './actions'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import type { ClaimFull } from '@/lib/claims/types'
 // CMM-33: Zentrale PflichtdokumenteSection liest dieselben Slots wie
@@ -94,12 +94,24 @@ export default async function OnboardingPage({
     lead_id: string | null
     besichtigungsort_adresse: string | null
     onboarding_complete: boolean | null
+    // 09.09.2026: Grundlage des Fahrzeugschein-Schritts — der Kunde sieht, was schon
+    // bekannt ist, und stellt richtig, statt alles neu zu tippen.
+    fin_vin: string | null
+    hsn: string | null
+    tsn: string | null
+    erstzulassung: string | null
+    fahrzeug_farbe: string | null
+    halter_vorname: string | null
+    halter_nachname: string | null
+    halter_strasse: string | null
+    halter_plz: string | null
+    halter_stadt: string | null
   } | null
   let fall: FallRow = null
   try {
     const { data, error } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, claim_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete')
+      .select('id, claim_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete, fin_vin, hsn, tsn, erstzulassung, fahrzeug_farbe, halter_vorname, halter_nachname, halter_strasse, halter_plz, halter_stadt')
       .eq('kunde_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -186,14 +198,9 @@ export default async function OnboardingPage({
     }
   }
 
-  let freieSlots: Awaited<ReturnType<typeof getFreieSlotsFuerKunde>> = []
-  if (fall?.id) {
-    try {
-      freieSlots = await getFreieSlotsFuerKunde(fall.id)
-    } catch (err) {
-      return <DiagPage stage="freie-slots" error={err} />
-    }
-  }
+  // 09.09.2026: der Load der freien (optionalen) Slots ist entfallen — der Wizard
+  // zeigte sie seit CMM-21 nicht mehr, der Aufruf lief bei JEDEM Onboarding ins Leere.
+  // Die Funktion bleibt fuer kuenftige Nutzung in actions.ts.
 
   // Pflichtdok-Kanonisierung: dokAnforderungen server-seitig berechnen und als
   // Prop weitergeben — der Client (OnboardingWizard) kann getAlleSlots nicht awaiten.
@@ -247,8 +254,26 @@ export default async function OnboardingPage({
         pflichtDocs={pflichtDocs}
         abrechnungsweg={abrechnungsweg}
         pflichtSlots={pflichtSlots}
-        freieSlots={freieSlots}
         dokAnforderungen={dokAnforderungen}
+        fahrzeugdaten={
+          fall
+            ? {
+                kennzeichen: fall.kennzeichen,
+                fahrzeug_hersteller: fall.fahrzeug_hersteller,
+                fahrzeug_modell: fall.fahrzeug_modell,
+                erstzulassung: fall.erstzulassung,
+                fahrzeug_farbe: fall.fahrzeug_farbe,
+                halter_vorname: fall.halter_vorname,
+                halter_nachname: fall.halter_nachname,
+                halter_strasse: fall.halter_strasse,
+                halter_plz: fall.halter_plz,
+                halter_stadt: fall.halter_stadt,
+                fin_vin: fall.fin_vin,
+                hsn: fall.hsn,
+                tsn: fall.tsn,
+              }
+            : null
+        }
       />
     )
   } catch (err) {

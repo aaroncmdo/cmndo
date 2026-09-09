@@ -4443,6 +4443,20 @@
       "takePhoto": "Fotoğraf çek",
       "cta": "Başlayalım"
     },
+    "zb1": {
+      "liegtVorTitel": "Ruhsatınız elimizde",
+      "liegtVorText": "Araç bilgilerinizi aldık. Lütfen her şeyin doğru olduğunu kısaca kontrol edin.",
+      "pruefenCta": "Bilgileri kontrol et",
+      "pruefenTitel": "Lütfen bilgileri kontrol edin",
+      "manuellTitel": "Lütfen bilgileri girin",
+      "manuellText": "Ruhsatı bu kez otomatik okuyamadık. Fotoğrafınız kaydedildi — lütfen bilgileri kendiniz girin.",
+      "bestaetigenCta": "Bilgileri onayla",
+      "gespeichertTitel": "Araç bilgileri kaydedildi",
+      "nochmalAendern": "Bilgileri tekrar değiştir",
+      "neuesFoto": "Yeni fotoğraf çek",
+      "fehlerFoto": "Fotoğraf işlenemedi. Lütfen tekrar deneyin.",
+      "fehlerUpload": "Yükleme başarısız oldu. Lütfen tekrar deneyin."
+    },
     "fall": {
       "title": "Hasar davanız",
       "intro": "Telefon görüşmesinde verdiğiniz bilgileri kaydettik. Lütfen kısaca kontrol edip aşağıda onaylayın.",
