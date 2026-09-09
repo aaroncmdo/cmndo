@@ -6,7 +6,7 @@
 import {
   LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon, CalendarIcon,
   MessageCircleIcon, BarChart3Icon, AlertCircleIcon, UserIcon,
-  MapIcon, MapPinnedIcon, LogOutIcon,
+  MapIcon, MapPinnedIcon, LogOutIcon, LifeBuoyIcon,
 } from 'lucide-react'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 import TasksPill from '@/components/shared/TasksPill'
@@ -22,6 +22,10 @@ const ITEMS: PortalNavItem[] = [
   { href: '/mitarbeiter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/mitarbeiter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
   { href: '/mitarbeiter/performance', label: 'Performance', icon: BarChart3Icon },
+  // 09.09.2026: Die RLS-Policy auf support_ticket_log erlaubt dem Kundenbetreuer seit
+  // jeher, ALLE Meldungen zu lesen — er hatte nur keinen Weg dorthin (die Ansicht lag
+  // allein unter /admin/support, und das Admin-Layout laesst nur `admin` durch).
+  { href: '/mitarbeiter/support', label: 'Support-Meldungen', icon: LifeBuoyIcon },
   { href: '/mitarbeiter/profil', label: 'Mein Profil', icon: UserIcon },
 ]
 

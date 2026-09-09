@@ -17,12 +17,15 @@ import { createClient } from '@supabase/supabase-js'
 
 const RUN = process.env.RUN_SUPPORT_ANSICHT === '1'
 const RUN_LANGTEXT = process.env.RUN_SUPPORT_LANGTEXT === '1'
+const RUN_KB = process.env.RUN_SUPPORT_KB === '1'
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 const ZIEL = `${BASE}/admin/support`
+const ZIEL_KB = `${BASE}/mitarbeiter/support`
 
 const KONTEN = {
   admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'gaFLpfnd19FssAKUPHOQrimVab0gpYUu' },
   makler: { email: 'test-makler@claimondo.de', pass: process.env.TEST_MAKLER_PASSWORD ?? 'IfJyyoXTh2VAJUXgNgR7WPOn5zUn5tYb' },
+  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'oKFPCPDIbaiDFjTnjsR9vriskal6GJsk' },
 }
 
 async function login(page: Page, email: string, pass: string) {
@@ -171,5 +174,78 @@ test.describe('Support-Meldungen: Ansicht im Admin-Portal (#5958)', () => {
         console.log(`[D] Residue entfernt: ${error ? 'FEHLER ' + error.message : 'ok'}`)
       }
     }
+  })
+
+  // ── E–G · Kundenbetreuer-Route (#Folge-PR) ───────────────────────────────────────────────
+  // SOLL (memory/abnahmen/2026-09-09-support-meldungen-kundenbetreuer.md, Abschnitt 1c;
+  // Aaron 09.09. "ja geh die Route an"):
+  // Die RLS-Policy erlaubt dem Kundenbetreuer seit jeher ALLE Meldungen — er hatte nur keinen
+  // Weg dorthin. Die neue Route liest per RLS-Client, folgt also der Policy statt dem Guard.
+  test('E · Kundenbetreuer sieht die Meldungen in seinem Portal', async ({ page }) => {
+    test.skip(!RUN_KB, 'RUN_SUPPORT_KB=1 setzen')
+    await login(page, KONTEN.kb.email, KONTEN.kb.pass)
+    await page.goto(ZIEL_KB, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle', { timeout: 45_000 }).catch(() => {})
+
+    const endUrl = page.url()
+    const text = await page.locator('body').innerText()
+    console.log(`[E] KB landet auf: ${endUrl}`)
+    expect(endUrl, 'der KB muss auf der Seite bleiben').toContain('/mitarbeiter/support')
+    expect(text, 'Überschrift muss stehen').toContain('Support-Meldungen')
+    expect(text, 'Erklärung zu Wortlaut/Ticket muss stehen').toContain('8. September 2026')
+
+    // Der Navigationspunkt muss da sein — eine Seite ohne Einstieg ist keine Seite
+    // (7-Punkte-Audit #2: UI-Erreichbarkeit).
+    const navLink = page.getByRole('link', { name: /Support-Meldungen/i })
+    const navSichtbar = (await navLink.count()) > 0
+    console.log(`[E] Navigationspunkt vorhanden: ${navSichtbar}`)
+    expect(navSichtbar, 'der KB braucht einen Einstieg in der Navigation').toBe(true)
+  })
+
+  test('F · KB und Admin sehen DIESELBE Anzahl (RLS-Client == service_role)', async ({ page }) => {
+    test.skip(!RUN_KB, 'RUN_SUPPORT_KB=1 setzen')
+    // Die eigentliche Probe dieser Aenderung: /admin/support liest per service_role (RLS aus),
+    // /mitarbeiter/support per RLS-Client. Liefern beide dasselbe, folgt die Policy dem Guard —
+    // laufen sie auseinander, sieht eine Rolle zu viel oder zu wenig.
+    const zaehle = (t: string) => {
+      const m = t.match(/(\d+)\s+Meldungen aus dem Hilfe-Widget/)
+      return m ? Number(m[1]) : -1
+    }
+
+    await login(page, KONTEN.kb.email, KONTEN.kb.pass)
+    await page.goto(ZIEL_KB, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle', { timeout: 45_000 }).catch(() => {})
+    const kbAnzahl = zaehle(await page.locator('body').innerText())
+
+    await page.context().clearCookies()
+    await login(page, KONTEN.admin.email, KONTEN.admin.pass)
+    await page.goto(ZIEL, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle', { timeout: 45_000 }).catch(() => {})
+    const adminAnzahl = zaehle(await page.locator('body').innerText())
+
+    console.log(`[F] KB sieht ${kbAnzahl}, Admin sieht ${adminAnzahl}`)
+    expect(kbAnzahl, 'die Anzahl muss auf der KB-Seite ablesbar sein').toBeGreaterThan(-1)
+    expect(kbAnzahl, 'KB und Admin müssen dasselbe sehen').toBe(adminAnzahl)
+  })
+
+  test('G · Makler kommt nicht auf die KB-Route', async ({ page }) => {
+    test.skip(!RUN_KB, 'RUN_SUPPORT_KB=1 setzen')
+    await login(page, KONTEN.makler.email, KONTEN.makler.pass)
+    await page.goto(ZIEL_KB, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle', { timeout: 45_000 }).catch(() => {})
+    const endUrl = page.url()
+    const text = await page.locator('body').innerText()
+    console.log(`[G] Makler landet auf: ${endUrl}`)
+    expect(endUrl, 'ein Makler darf nicht auf /mitarbeiter/support bleiben').not.toContain('/mitarbeiter/support')
+    expect(text).not.toContain('Support-Meldungen')
+  })
+
+  test('H · Anonym landet auch bei der KB-Route auf /login', async ({ page }) => {
+    test.skip(!RUN_KB, 'RUN_SUPPORT_KB=1 setzen')
+    await page.context().clearCookies()
+    await page.goto(ZIEL_KB, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
+    console.log(`[H] Anonym landet auf: ${page.url()}`)
+    expect(page.url()).toContain('/login')
   })
 })
