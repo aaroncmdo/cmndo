@@ -44,10 +44,12 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
   { href: '/admin/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
   { href: '/admin/health', label: 'Pipeline-Health', icon: ActivityIcon },
-  // Route-Reachability-Audit 06.07.: /admin/support (Ansicht der von Usern gemeldeten
-  // technischen Probleme, Tabelle technische_probleme) war gebaut, aber nirgends verlinkt —
-  // es gab nur den SupportButton (Composer zum Melden), keinen Einstieg zur Ticket-Liste.
-  { href: '/admin/support', label: 'Support-Tickets', icon: LifeBuoyIcon },
+  // Route-Reachability-Audit 06.07.: /admin/support war gebaut, aber nirgends verlinkt —
+  // es gab nur den SupportButton (Composer zum Melden), keinen Einstieg zur Liste.
+  // 09.09.2026: Die Seite zeigt jetzt die Meldungen aus dem Hilfe-Widget
+  // (`support_ticket_log`). Ihre alte Quelle `technische_probleme` hat 0 Zeilen und keinen
+  // Schreiber mehr — der Composer wurde umgestellt, die Ansicht blieb leer zurueck.
+  { href: '/admin/support', label: 'Support-Meldungen', icon: LifeBuoyIcon },
 ]
 
 const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/kalender', '/admin/vertrieb']
