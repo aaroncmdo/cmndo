@@ -17,14 +17,32 @@ import { createClient } from '@supabase/supabase-js'
 
 const RUN = process.env.RUN_SUPPORT_ROLLEN === '1'
 const RUN_SAMMELSTELLE = process.env.RUN_SUPPORT_SAMMELSTELLE === '1'
+const RUN_ALLE_ROLLEN = process.env.RUN_SUPPORT_ALLE_ROLLEN === '1'
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 
 const KONTEN = {
   makler: { email: 'test-makler@claimondo.de', pass: process.env.TEST_MAKLER_PASSWORD ?? 'IfJyyoXTh2VAJUXgNgR7WPOn5zUn5tYb' },
   kunde: { email: 'smoke-kunde@claimondo.de', pass: process.env.SMOKE_KUNDE_PASS ?? 'PibnEZfmwnSOiG5AMM61mwpmFNjnvC6u' },
+  // Die uebrigen freigeschalteten Rollen. Fuer `werkstatt` (89 Nutzer, die groesste Gruppe)
+  // gibt es KEIN Testkonto — siehe Kommentar bei Test D2.
+  flotte: { email: 'flotte.test@claimondo.de', pass: process.env.TEST_FLOTTE_PASSWORD ?? 'RkNcl7FsjwTLplnk5Ifk19yVal9XaUm0' },
+  dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'L5Y7XiReJk3PP3cl0wg9xeoUXF0pb2vC' },
+  sv: { email: 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'GK0I3sKIiIuauyDcbLHhAFsLNuA8EUTP' },
 }
 
 const SUPPORT_KNOPF = 'Hilfe und Support öffnen'
+
+/**
+ * Das Eingabefeld des Support-Widgets — ein <textarea> im Drawer.
+ *
+ * ⚠ NICHT `getByRole('textbox').last()`: Das traf im SV-Portal ein anderes Feld und brach mit
+ * "locator.fill: Malformed value" (gemessen 09.09. bei der Rollen-Vollprobe). Ein Selektor, der
+ * "das letzte Textfeld der Seite" meint, haengt am Layout des jeweiligen Portals — der Nachweis
+ * soll aber am WIDGET haengen.
+ */
+function supportEingabe(page: Page) {
+  return page.locator('textarea').filter({ visible: true }).last()
+}
 
 async function login(page: Page, email: string, pass: string) {
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
@@ -54,7 +72,7 @@ test.describe('Support-Widget: Rollen nach #5936', () => {
     )
 
     await knopf.click()
-    const eingabe = page.getByRole('textbox').last()
+    const eingabe = supportEingabe(page)
     await expect(eingabe).toBeVisible({ timeout: 20_000 })
     await eingabe.fill('Regel-4-Smoke #5936 — bitte ignorieren. Prueft nur, ob die Partner-Rolle zugelassen ist.')
     await eingabe.press('Enter')
@@ -115,7 +133,7 @@ test.describe('Support-Widget: Rollen nach #5936', () => {
       { timeout: 60_000 },
     )
     await knopf.click()
-    const eingabe = page.getByRole('textbox').last()
+    const eingabe = supportEingabe(page)
     await expect(eingabe).toBeVisible({ timeout: 20_000 })
     await eingabe.fill(text)
     await eingabe.press('Enter')
@@ -161,4 +179,45 @@ test.describe('Support-Widget: Rollen nach #5936', () => {
     const { count } = await db.from('support_ticket_log').select('id', { count: 'exact', head: true }).ilike('meldung_text', `%${marker}%`)
     console.log(`[C] Residue nach Cleanup: ${count ?? '?'}`)
   })
+
+  // ── D2 · Die uebrigen freigeschalteten Rollen ────────────────────────────────────────────
+  // BEFUND AN DER EIGENEN ARBEIT (09.09.): Der erste Nachweis zu #5936 behauptete, "~105 Nutzer
+  // laufen nicht mehr ins 403" — gemessen war aber NUR `makler` (8 Nutzer). Freigeschaltet sind
+  // sachverstaendiger (30), dispatch (5), makler (8), werkstatt (89), flottenmanager (3).
+  // Eine Stichprobe von 8 traegt die Aussage ueber 105 nicht.
+  //
+  // ⚠ Fuer `werkstatt` — die GROESSTE Gruppe — existiert kein Testkonto. Die Rolle bleibt
+  // deshalb ausdruecklich UNGEMESSEN; sie steht in derselben ALLOWED_ROLES-Menge und ihr Knopf
+  // ist im Code belegt (WerkstattShell), aber "im Code belegt" ist nicht "gelaufen".
+  for (const [rolle, konto] of [
+    ['flottenmanager', KONTEN.flotte],
+    ['dispatch', KONTEN.dispatch],
+    ['sachverstaendiger', KONTEN.sv],
+  ] as const) {
+    test(`D2 · ${rolle} kommt durch (vorher 403)`, async ({ page }) => {
+      test.skip(!RUN_ALLE_ROLLEN, 'RUN_SUPPORT_ALLE_ROLLEN=1 setzen')
+      await login(page, konto.email, konto.pass)
+
+      const knopf = page.getByRole('button', { name: SUPPORT_KNOPF })
+      const sichtbar = await knopf.isVisible().catch(() => false)
+      console.log(`[D2/${rolle}] Support-Knopf sichtbar: ${sichtbar}`)
+      // Sichtbarkeit ist Portal-abhaengig; die Route ist es NICHT. Deshalb wird der Zugang
+      // unten unabhaengig vom Knopf geprueft — sonst haenge der Nachweis am Layout.
+      expect(sichtbar, `${rolle} sollte den Support-Knopf sehen`).toBe(true)
+
+      const antwort = page.waitForResponse(
+        (r) => r.url().includes('/api/support/chat') && r.request().method() === 'POST',
+        { timeout: 60_000 },
+      )
+      await knopf.click()
+      const eingabe = supportEingabe(page)
+      await expect(eingabe).toBeVisible({ timeout: 20_000 })
+      await eingabe.fill(`Rollenprobe ${rolle} — bitte ignorieren, prueft nur den Zugang.`)
+      await eingabe.press('Enter')
+
+      const status = (await antwort).status()
+      console.log(`[D2/${rolle}] POST /api/support/chat → HTTP ${status}`)
+      expect(status, `${rolle} darf nicht in ein 403 laufen`).not.toBe(403)
+    })
+  }
 })
