@@ -305,6 +305,12 @@ export function FinderMap({ gesamtLeads, aktiveSVs = [], wizardSlot, initialCent
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
   // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  // Fuer die Closures des mount-only-Effekts (Pins-Nachladen): der Standort entscheidet,
+  // welchen Umkreis die Anfrage zusaetzlich zum Ausschnitt abdecken muss.
+  const userLocationRef = useRef<{ lat: number; lng: number } | null>(null)
+  useEffect(() => {
+    userLocationRef.current = userLocation
+  }, [userLocation])
   // AAR-956 (Aaron 14.06.): standortabhängiger „Gutachter in Ihrer Nähe"-Count (geräteübergreifend):
   // aktive Gutachter, deren Umkreis den bekannten Ort deckt + Dead-Pins im 15-km-Radius.
   const loc = userLocation
@@ -498,8 +504,21 @@ export function FinderMap({ gesamtLeads, aktiveSVs = [], wizardSlot, initialCent
         if (!b) return
         const randLng = (b.getEast() - b.getWest()) * 0.15
         const randLat = (b.getNorth() - b.getSouth()) * 0.15
+        let w = b.getWest() - randLng, s = b.getSouth() - randLat, e = b.getEast() + randLng, n = b.getNorth() + randLat
+        // Die Naehe-Zaehlung ("N Gutachter in Ihrer Naehe") zaehlt Dead-Pins im 15-km-Umkreis um
+        // den Standort. Nach der Adresseingabe steht die Karte auf Zoom ~13, der Ausschnitt ist
+        // dann KLEINER als der Umkreis — die Anfrage muss den Umkreis mit abdecken, sonst zaehlt
+        // die Pill nur, was gerade im Bild ist (Regel-4-Befund 09.09.: 157 stimmten nur, weil
+        // die NRW-Pins vom Start noch im Speicher lagen).
+        const loc = userLocationRef.current
+        if (loc) {
+          const dLat = 16 / 111 // 15 km + Rand, in Grad
+          const dLng = 16 / (111 * Math.max(0.2, Math.cos((loc.lat * Math.PI) / 180)))
+          w = Math.min(w, loc.lng - dLng); e = Math.max(e, loc.lng + dLng)
+          s = Math.min(s, loc.lat - dLat); n = Math.max(n, loc.lat + dLat)
+        }
         const qs = new URLSearchParams({
-          bbox: [b.getWest() - randLng, b.getSouth() - randLat, b.getEast() + randLng, b.getNorth() + randLat].map((n) => n.toFixed(4)).join(','),
+          bbox: [w, s, e, n].map((x) => x.toFixed(4)).join(','),
           zoom: map.getZoom().toFixed(1),
         })
         const antwort = await fetch(`/api/embed/finder-pins?${qs.toString()}`)

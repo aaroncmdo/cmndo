@@ -24,9 +24,11 @@ import { ZOOM_UMSCHLAG } from '@/app/embed/gutachter-finder/_components/deadpin-
 export const dynamic = 'force-dynamic'
 
 const CACHE_MS = 60 * 60 * 1000
-// Ab hier liefern wir ids: eine halbe Zoomstufe VOR dem Umschlag, damit beim Hineinzoomen
-// keine Luecke entsteht (die Symbol-Ebene wird ab ZOOM_UMSCHLAG sichtbar).
-const ZOOM_MIT_ID = ZOOM_UMSCHLAG - 0.5
+// Ab hier liefern wir ids — genau ab dem Umschlag, ab dem die Symbol-Ebene sichtbar und
+// klickbar wird. Gemessen 09.09. auf prod: der Start-Zoom des Embeds ist 8.5; mit der
+// frueheren Grenze ZOOM_UMSCHLAG-0.5 kamen dort 2.515 Objekte mit id (193 kB), obwohl die
+// Heatmap keine ids braucht. Tupel sind ein Viertel davon.
+const ZOOM_MIT_ID = ZOOM_UMSCHLAG
 
 let cache: { pins: SvLeadPublic[]; expiresAt: number } | null = null
 
