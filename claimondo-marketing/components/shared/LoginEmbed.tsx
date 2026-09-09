@@ -12,7 +12,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ChevronDown, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { createClient } from '@/lib/supabase/client'
+// LAZY (09.09.2026): der Supabase-Browser-Client wird erst beim ABSENDEN gebraucht.
+// Statisch importiert haengt er im Pflichtprogramm jeder Marketing-Seite, weil die
+// Topbar diese Komponente auf jeder Seite rendert — gemessen 261 kB in einem Chunk,
+// der die Hydration verzoegert. Der Import steht deshalb unten in `handleSubmit`.
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 const APP_BASE = 'https://app.claimondo.de'
@@ -48,6 +51,7 @@ export function LoginEmbed({ triggerClassName }: { triggerClassName?: string }) 
     setError(null)
     setPending(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data, error: signErr } = await supabase.auth.signInWithPassword({
         email: email.trim(),

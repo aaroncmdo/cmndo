@@ -23,8 +23,18 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 const KONTEN = {
   makler: { email: 'test-makler@claimondo.de', pass: process.env.TEST_MAKLER_PASSWORD ?? 'IfJyyoXTh2VAJUXgNgR7WPOn5zUn5tYb' },
   kunde: { email: 'smoke-kunde@claimondo.de', pass: process.env.SMOKE_KUNDE_PASS ?? 'PibnEZfmwnSOiG5AMM61mwpmFNjnvC6u' },
-  // Die uebrigen freigeschalteten Rollen. Fuer `werkstatt` (89 Nutzer, die groesste Gruppe)
-  // gibt es KEIN Testkonto — siehe Kommentar bei Test D2.
+  // Die uebrigen freigeschalteten Rollen.
+  //
+  // `werkstatt` (89 Nutzer, die groesste Gruppe) hat KEIN dauerhaftes Testkonto. Statt eines
+  // anzulegen — das waere ein Eingriff in prod-Stammdaten — fuehrt der Lauf ein WEGWERF-Konto
+  // mit (scripts/smoke/throwaway-account.mjs create werkstatt), das den `werkstaetten`-Satelliten
+  // mit status='aktiv' mitbringt und danach wieder geloescht wird. Deshalb kommen die Zugaenge
+  // hier aus der Umgebung und haben KEINEN Fallback: das Repo ist oeffentlich, und ein
+  // Wegwerf-Passwort im Klartext waere nicht nur unnoetig, sondern nach dem Cleanup auch falsch.
+  werkstatt: {
+    email: process.env.SMOKE_WERKSTATT_EMAIL ?? '',
+    pass: process.env.SMOKE_WERKSTATT_PASSWORD ?? '',
+  },
   flotte: { email: 'flotte.test@claimondo.de', pass: process.env.TEST_FLOTTE_PASSWORD ?? 'RkNcl7FsjwTLplnk5Ifk19yVal9XaUm0' },
   dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'L5Y7XiReJk3PP3cl0wg9xeoUXF0pb2vC' },
   sv: { email: 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'GK0I3sKIiIuauyDcbLHhAFsLNuA8EUTP' },
@@ -186,16 +196,27 @@ test.describe('Support-Widget: Rollen nach #5936', () => {
   // sachverstaendiger (30), dispatch (5), makler (8), werkstatt (89), flottenmanager (3).
   // Eine Stichprobe von 8 traegt die Aussage ueber 105 nicht.
   //
-  // ⚠ Fuer `werkstatt` — die GROESSTE Gruppe — existiert kein Testkonto. Die Rolle bleibt
-  // deshalb ausdruecklich UNGEMESSEN; sie steht in derselben ALLOWED_ROLES-Menge und ihr Knopf
-  // ist im Code belegt (WerkstattShell), aber "im Code belegt" ist nicht "gelaufen".
+  // `werkstatt` fehlte hier zunaechst — mangels Konto, und damit blieb ausgerechnet die
+  // GROESSTE Gruppe unbelegt. Seit 09.09.2026 laeuft sie ueber ein Wegwerf-Konto (s. KONTEN
+  // oben); damit sind alle fuenf freigeschalteten Rollen GEMESSEN statt nur im Code belegt.
+  // Ein erneuter Lauf braucht ein neues Wegwerf-Konto — das alte ist nach dem Lauf geloescht:
+  //   node scripts/smoke/throwaway-account.mjs create werkstatt --json
+  //   SMOKE_WERKSTATT_EMAIL=… SMOKE_WERKSTATT_PASSWORD=… npx playwright test …
+  //   node scripts/smoke/throwaway-account.mjs cleanup <uid>
   for (const [rolle, konto] of [
     ['flottenmanager', KONTEN.flotte],
     ['dispatch', KONTEN.dispatch],
     ['sachverstaendiger', KONTEN.sv],
+    ['werkstatt', KONTEN.werkstatt],
   ] as const) {
     test(`D2 · ${rolle} kommt durch (vorher 403)`, async ({ page }) => {
       test.skip(!RUN_ALLE_ROLLEN, 'RUN_SUPPORT_ALLE_ROLLEN=1 setzen')
+      // Ohne Zugang wird NICHT stillschweigend gruen gemeldet: der Lauf skippt sichtbar mit
+      // Grund. Ein Test, der ohne Konto "passed" faerbt, waere ein Nachweis ueber nichts.
+      test.skip(
+        !konto.email || !konto.pass,
+        `${rolle}: kein Zugang gesetzt (Wegwerf-Konto anlegen, SMOKE_WERKSTATT_EMAIL/_PASSWORD setzen)`,
+      )
       await login(page, konto.email, konto.pass)
 
       const knopf = page.getByRole('button', { name: SUPPORT_KNOPF })
