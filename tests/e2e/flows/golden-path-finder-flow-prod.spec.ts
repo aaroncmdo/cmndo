@@ -135,11 +135,37 @@ test.afterAll(async () => {
       await db.from('admin_termine').delete().eq('lead_id', leadId)
       await db.from('leads').delete().eq('id', leadId)
     }
+    // Der Gutachter selbst haengt nach einer echten Konversion an drei FKs, die die
+    // Fixture nicht kennt — sie stammt aus der Spec, die VOR dem FlowLink endet und
+    // deshalb nie einen Fall erzeugt. Ohne diese drei Zeilen scheitert der Purge still
+    // und ein AKTIVER Wegwerf-Gutachter bleibt auf prod im Matching-Pool stehen
+    // (am 09.09. zweimal passiert, beide von Hand nachgeraeumt):
+    //   claims.sv_id          — der Fall zeigt auf ihn
+    //   auftraege.claim_id    — sein Auftrag haengt am Fall
+    //   tasks.empfaenger_user_id — die Aufgabe "sv-zum-termin", die die Buchung ausloest
+    if (svHandle?.svId) {
+      await db.from('auftraege').delete().eq('sv_id', svHandle.svId)
+      await db.from('claims').update({ sv_id: null }).eq('sv_id', svHandle.svId)
+    }
+    if (svHandle?.uid) {
+      await db.from('tasks').delete().eq('empfaenger_user_id', svHandle.uid)
+      await db.from('mitteilungen').delete().eq('empfaenger_id', svHandle.uid)
+      await db.from('notification_deliveries').delete().eq('recipient_user_id', svHandle.uid)
+    }
   } catch {
     /* best effort — der Purge unten faengt den Rest */
   }
   await purgeThrowawayFinderSv(db, { svId: svHandle?.svId ?? null, uid: svHandle?.uid ?? null, bucherEmail })
   await purgeStaleThrowawayFinderSvs(db)
+
+  // Positivkontrolle statt Vertrauen: hat das Aufraeumen wirklich gegriffen?
+  const { count: svRest } = await db
+    .from('sachverstaendige')
+    .select('id', { count: 'exact', head: true })
+    .eq('standort_adresse', 'Pellworm (E2E-Wegwerf-Finder-SV)')
+  if ((svRest ?? 0) > 0) {
+    console.warn(`[kette] ⚠ ${svRest} Wegwerf-Gutachter blieben auf prod stehen — von Hand nachraeumen`)
+  }
 })
 
 test('Kette: Finder-Buchung → derselbe FlowLink → Claim, Auftrag, Kundenportal', async ({ page }) => {
