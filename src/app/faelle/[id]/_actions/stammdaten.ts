@@ -537,6 +537,25 @@ export async function updateFallField(
   // ensureVehicleForClaim resolved/erzeugt das claim-Fahrzeug; FALL_VEHICLE_COL + fallVehicleWriteValue
   // (reine, getestete lib-Funktion) liefern Zielspalte + Transform. Admin-Client: canEditField()
   // hat oben bereits autorisiert.
+  // Die Fahrgestellnummer ist die Identitaet der Fahrzeugzeile, kein gewoehnliches Feld:
+  // sie traegt UNIQUE + CHECK(17) und entscheidet, WELCHES Fahrzeug gemeint ist. Ein
+  // direktes Update wuerde eine bestehende Zeile umwidmen, statt die passende zu finden.
+  if (field === 'fin_vin') {
+    const admin = createAdminClient()
+    const res = await schreibeFinAufFahrzeug({
+      claimId: gateClaimId,
+      fin: normalized == null ? null : String(normalized),
+      quelle: 'manuell',
+      db: admin,
+    })
+    if (!res.ok) return { success: false, error: res.error }
+    if (!res.geaendert && res.grund === 'format') {
+      return { success: false, error: 'Ungültige FIN. 17 Zeichen, ohne I, O und Q, mit Ziffern.' }
+    }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   const vehicleCol = FALL_VEHICLE_COL[field]
   if (vehicleCol) {
     const admin = createAdminClient()

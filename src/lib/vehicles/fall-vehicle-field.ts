@@ -37,7 +37,15 @@ export const FALL_VEHICLE_COL: Record<string, string> = {
   fahrzeug_farbe: 'farbe_klartext',
   lackfarbe_code: 'farbcode',
   kennzeichen: 'kennzeichen_aktuell',
-  fin_vin: 'fin',
+  // 09.09.2026: fin_vin gehoert NICHT in diese Abbildung. Der generische Inline-Editor
+  // schreibt `.from('vehicles').update({ [spalte]: wert })` — bei der Fahrgestellnummer
+  // heisst das: die IDENTITAET einer bestehenden Fahrzeugzeile wird still ueberschrieben,
+  // an der Dedup-Logik vorbei. Auf prod gemessen: eine Zeile, die an ZWEI Vorgaengen hing,
+  // bekam eine neue Nummer, ohne dass ein zweites Fahrzeug entstand oder ein vorhandenes
+  // gefunden wurde. Zusaetzlich umgangen: die Plausibilitaetspruefung und der
+  // Herkunftsvermerk (fin_quelle blieb auf dem Wert des vorigen Schreibers stehen).
+  // Die Nummer laeuft jetzt ueber schreibeFinAufFahrzeug (upsert + Zusammenfuehrung).
+  // fin_vin: bewusst NICHT hier — siehe updateFallField.
   kilometerstand: 'aktueller_kilometerstand',
   erstzulassung: 'erstzulassung',
   fahrzeug_baujahr: 'baujahr_monat',
