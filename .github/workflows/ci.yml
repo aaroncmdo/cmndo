@@ -154,6 +154,17 @@ jobs:
       # Skizzen-Korrektur (16.08.). Siehe AGENTS.md Paragraph Stille-Write-Gate.
       - name: Stille-Write-Ratchet
         run: npm run check:silent-writes -- --ratchet
+      # Mengenbegrenzungs-Gate: PostgREST liefert ohne `range` HOECHSTENS 1.000 Zeilen —
+      # ohne Fehler, ohne Warnung, die Antwort ist einfach kuerzer als die Wahrheit. Belegt
+      # am 09.09.2026 (PR #5964): der Admin-Kalender zeigte am 3. September NULL Aufgaben,
+      # obwohl sieben faellig waren (930 von 1.930 fehlten insgesamt); das SV-Matching sah
+      # 1.000 von 9.712 aktiven Leads und konnte den naechsten Sachverstaendigen nicht
+      # sehen. Monatelang stumm. Der Ratchet blockt NEUE ungebremste Lesepfade auf den 15
+      # Tabellen, die den Deckel real erreichen (Baseline 5, alle gemessen harmlos).
+      # Siehe AGENTS.md Paragraph Mengenbegrenzungs-Gate.
+      - name: Mengenbegrenzungs-Ratchet
+        run: npm run check:mengenbegrenzung -- --ratchet
+
 
       # Client-Timezone-Gate: eine 'use client'-Component wird server-seitig vorgerendert
       # UND im Browser hydriert. `toLocaleString()` ohne `timeZone` nimmt auf jeder Seite

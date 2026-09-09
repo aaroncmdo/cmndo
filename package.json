@@ -28,6 +28,7 @@
     "check:intake-funnel": "node scripts/check-intake-funnel.mjs",
     "check:journey-bezug": "node scripts/check-journey-bezug.mjs",
     "check:knip": "node scripts/check-knip.mjs",
+    "check:mengenbegrenzung": "node scripts/check-mengenbegrenzung.mjs",
     "check:metadata-merge": "node scripts/check-metadata-merge.mjs",
     "check:migration-files": "node --env-file=.env.local scripts/check-migration-files.mjs",
     "check:migration-utf8": "node scripts/check-migration-utf8.mjs",
