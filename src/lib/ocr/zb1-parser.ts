@@ -1,8 +1,16 @@
+import { istPlausibleFin } from '@/lib/vehicles/ensure-vehicle'
+
 // AAR-182: Shared ZB1-Parser — extrahiert aus /api/ocr-fahrzeugschein damit
 // sowohl der Fall-Endpoint als auch der Lead-Inbound-Webhook dieselbe Logik
 // nutzt. Neue Felder (Baujahr aus Erstzulassung, AAR-181) leben jetzt hier.
 
 const FIN_REGEX = /\b([A-HJ-NPR-Z0-9]{17})\b/gi
+
+// Die Plausibilitaetspruefung liegt bei den Fahrzeug-Helfern: sie gilt fuer den LESE-Pfad
+// (dieser Parser) und fuer jeden SCHREIB-Pfad auf vehicles.fin gleichermassen. Zwei
+// Definitionen derselben Regel waeren genau die Drift, die den Fund erst ermoeglicht hat.
+// Warum es sie braucht: am prod-Scan vom 25.08. wurde "Mehrzweckfahrzeug" zu
+// "MAHZAWACKFAHRZEUG" — 17 Zeichen, kein I/O/Q, formgueltig und trotzdem Unsinn.
 const DATE_REGEX = /\b(\d{2}\.\d{2}\.\d{4})\b/
 const PLZ_ORT_REGEX = /\b(\d{5})\s+(.+)/
 // Spec B (Aaron 14.07.): ZB1-Feld J = EU-/KBA-Fahrzeugklasse. Der HARTE Filter fuers Werkstatt-Matching
@@ -41,7 +49,7 @@ const KENNZEICHEN_ANKER = /^([A-ZÄÖÜ]{1,3})[\s-]?([A-Z]{1,2})[\s-]?(\d{1,4})[
 // echten prod-Scan greift deshalb KEIN Label, und alle Halterfelder kamen aus
 // Zufalls-Fallbacks (Straße = "C1.3 Anschnitt", Nachname = der Vorname).
 const ZB1_FELDCODES = [
-  'A', 'B', 'J', 'R',
+  'A', 'B', 'E', 'J', 'R',
   'C1', 'C1.1', 'C1.2', 'C1.3', 'C3', 'C4',
   'D1', 'D2', 'D3',
   '2.1', '2.2',
@@ -164,20 +172,38 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
 
   const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean)
 
+  // Feld E gewinnt immer gegen den Textfund — auch wenn der Fund frueher im Dokument steht.
+  let finAusFeld: string | null = null
+  let finKandidat: string | null = null
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
     const nextLine = lines[i + 1] ?? ''
     const trimmed = line.replace(/[()[\]]/g, '').trim()
 
-    if (!result.fin_vin) {
+    // Fallback-Kandidat: irgendeine 17er-Folge im Text. Wird NUR genommen, wenn Feld E
+    // nichts hergibt — vorher gewann der erste Zufallstreffer im ganzen Dokument.
+    if (!finKandidat) {
       const finMatch = line.match(FIN_REGEX)
-      if (finMatch) result.fin_vin = finMatch[0].toUpperCase()
+      if (finMatch && istPlausibleFin(finMatch[0])) finKandidat = finMatch[0].toUpperCase()
     }
     // B5: Feldcode ermitteln — traegt die Zeile die amtliche Beschriftung hinter
     // dem Code ("A Amtliches Kennzeichen"), steht sie in `feld.rest`.
     const feld = zerlegeFeldZeile(trimmed)
     const code = feld?.code ?? null
 
+    // ZB1-Feld E = Fahrzeug-Identifizierungsnummer. Bis 09.09.2026 fehlte E in der
+    // Feldcode-Liste: die Nummer war das EINZIGE Feld ohne Anker und wurde blind aus dem
+    // Fliesstext gefischt. Alle uebrigen Felder haben ihren Anker seit #5243.
+    if (code === 'E' && !finAusFeld) {
+      for (const kandidat of [feld!.rest, nextLine]) {
+        const m = kandidat.trim().match(FIN_REGEX)
+        if (m && istPlausibleFin(m[0])) {
+          finAusFeld = m[0].toUpperCase()
+          break
+        }
+      }
+    }
     if (code === 'A') {
       // Der Wert steht je nach Scan im Rest derselben Zeile oder in der naechsten.
       // Beide werden gegen das Kennzeichen-Muster GEPRUEFT statt blind uebernommen —
@@ -406,6 +432,10 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
       if (y >= 1990 && y <= maxYear) result.fahrzeug_baujahr = y
     }
   }
+
+  // Feld E schlaegt den Textfund. Ohne beides bleibt die Nummer leer — eine falsche
+  // Identifizierungsnummer in Gutachten und Sicherungsabtretung waere schaedlicher als keine.
+  result.fin_vin = finAusFeld ?? finKandidat
 
   return result
 }

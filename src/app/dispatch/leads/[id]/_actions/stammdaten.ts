@@ -136,10 +136,14 @@ export async function saveStammdaten(
   // schon VOR der SA existieren (auto-claim/createCase) — dann lief der Lead-Edit
   // weiter und die vehicles-Row driftete auseinander. Nur die Fahrzeugfelder, nur
   // wenn sie im Save vorkamen; non-critical.
+  // 09.09.2026: 'fin' fehlte in dieser Liste. Wer NUR die Fahrgestellnummer korrigierte,
+  // loeste damit gar keinen Nachzug aus — der Save war fertig konfiguriert und durch die
+  // eigene Bedingung ausgesperrt.
   const fahrzeugImSave =
     'kennzeichen' in allowed || 'fahrzeug_hersteller' in allowed || 'fahrzeug_modell' in allowed ||
     'hsn' in allowed || 'tsn' in allowed || 'fahrzeug_farbe' in allowed ||
-    'erstzulassung' in allowed || 'fahrzeug_baujahr' in allowed || 'kennzeichen_buchstaben' in allowed
+    'erstzulassung' in allowed || 'fahrzeug_baujahr' in allowed || 'kennzeichen_buchstaben' in allowed ||
+    'fin' in allowed
   if (fahrzeugImSave) {
     const { ziehVehicleNach } = await import('@/lib/vehicles/snapshot-update')
     const { createAdminClient } = await import('@/lib/supabase/admin')
@@ -161,6 +165,29 @@ export async function saveStammdaten(
     })
     if (!nachzug.ok) {
       console.error('[stammdaten] vehicles-Nachzug fehlgeschlagen (nicht kritisch):', nachzug.error)
+    }
+
+    // 09.09.2026: dieselbe Luecke wie bei der Korrektur des Kunden — ziehVehicleNach
+    // uebertraegt bewusst alles AUSSER der Fahrgestellnummer (sie ist die Dedup-Identitaet
+    // der Fahrzeugzeile). Korrigierte ein Dispatcher sie hier, blieb sie im Lead stehen und
+    // erreichte weder Gutachten noch Fahrzeugakte.
+    if ('fin' in allowed && allowed.fin) {
+      const { schreibeFinAufFahrzeug } = await import('@/lib/vehicles/fin-schreiben')
+      const { data: claimRow } = await createAdminClient()
+        .from('claims').select('id').eq('lead_id', leadId)
+        .order('created_at', { ascending: false }).limit(1).maybeSingle()
+      const claimId = (claimRow?.id as string | null) ?? null
+      if (claimId) {
+        const finRes = await schreibeFinAufFahrzeug({
+          claimId,
+          fin: allowed.fin as string,
+          quelle: 'dispatch_manuell',
+          db: createAdminClient(),
+        })
+        if (!finRes.ok) {
+          console.error('[stammdaten] FIN erreichte das Fahrzeug nicht:', finRes.error)
+        }
+      }
     }
   }
 

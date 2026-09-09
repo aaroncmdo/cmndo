@@ -53,7 +53,9 @@ export function SupportChat({ userName }: { userName?: string | null }) {
   }
 
   const placeholder = messages.length === 0
-    ? `Hi${userName ? ' ' + userName.split(' ')[0] : ''}! Beschreibe das Problem oder den Wunsch…`
+    // Gesiezt: seit #5936 nutzen auch Partner (Makler/Werkstatt/Flotte) das Widget, nicht
+    // nur das eigene Team. Die Folgezeile siezte schon immer — hier lief es auseinander.
+    ? `Hallo${userName ? ' ' + userName.split(' ')[0] : ''}! Beschreiben Sie das Problem oder den Wunsch…`
     : 'Ihre Antwort…'
 
   return (

@@ -15,6 +15,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { ziehVehicleNach } from '@/lib/vehicles/snapshot-update'
+import { schreibeFinAufFahrzeug } from '@/lib/vehicles/fin-schreiben'
+import { VIN_REGEX, istPlausibleFin } from '@/lib/vehicles/ensure-vehicle'
 
 /**
  * Ops-Test 11.08. (RC-3): Der ZB1-Parser extrahiert 15 Felder, korrigierbar waren
@@ -55,7 +57,15 @@ const DIREKTE_FELDER = [
   'fahrzeug_farbe',
 ] as const satisfies ReadonlyArray<keyof Zb1Korrekturen>
 
-export type Zb1ActionResult = { ok: true } | { ok: false; error: string }
+export type Zb1ActionResult =
+  | {
+      ok: true
+      /** Gesetzt, wenn die eingegebene Fahrgestellnummer NICHT ans Fahrzeug ging.
+       *  'format' = keine 17 Zeichen / verbotene Buchstaben / keine Ziffer. Die uebrigen
+       *  Korrekturen sind trotzdem gespeichert — die Oberflaeche sagt es dem Kunden. */
+      finHinweis?: 'format'
+    }
+  | { ok: false; error: string }
 
 export async function confirmZb1Korrekturen(
   fallId: string,
@@ -74,7 +84,19 @@ export async function confirmZb1Korrekturen(
   const update: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   }
+  // Eine Fahrgestellnummer, die keine sein kann, wird NIRGENDS gespeichert — auch nicht
+  // im Lead. Dort gibt es zwar keinen Constraint, aber der Lead ist die Quelle der
+  // Konversion: ein abgelegtes Wort haelt spaeter jemand fuer eine echte Nummer.
+  // Dieselbe Abwaegung wie beim Parser: eine falsche Nummer ist schaedlicher als keine.
+  const finFormatOk =
+    corrections.fin === undefined ||
+    corrections.fin === null ||
+    (() => {
+      const k = String(corrections.fin).trim().toUpperCase()
+      return k === '' || (VIN_REGEX.test(k) && istPlausibleFin(k))
+    })()
   for (const feld of DIREKTE_FELDER) {
+    if (feld === 'fin' && !finFormatOk) continue
     if (corrections[feld] !== undefined) update[feld] = corrections[feld]
   }
   if (corrections.halter_name !== undefined) {
@@ -84,8 +106,9 @@ export async function confirmZb1Korrekturen(
   }
 
   if (Object.keys(update).length === 1) {
-    // Nur updated_at — keine Korrekturen vorhanden, früher Exit
-    return { ok: true }
+    // Nur updated_at — keine brauchbare Korrektur. Kam ausschliesslich eine unbrauchbare
+    // Nummer, sagen wir das, statt stillschweigend Erfolg zu melden.
+    return finFormatOk ? { ok: true } : { ok: true, finHinweis: 'format' }
   }
 
   const { error } = await admin.from('leads').update(update).eq('id', leadId)
@@ -116,10 +139,35 @@ export async function confirmZb1Korrekturen(
     console.error('[zb1-korrektur] vehicles-Nachzug fehlgeschlagen (nicht kritisch):', nachzug.error)
   }
 
+  // Aaron 09.09.2026 („Gutachten und Fahrzeug"): Die Nummer stand bisher NUR im Lead.
+  // Gutachten-Briefing, Sachverstaendigen-Auftrag und die Fahrzeugansicht des Kunden lesen
+  // sie aber ueber v_claim_full aus vehicles — fehlt sie dort, fordert die SV-Fallseite den
+  // Gutachter auf, sie nachzutragen, obwohl der Kunde sie eingegeben hat.
+  // ziehVehicleNach oben kann das nicht: die Nummer ist die Dedup-Identitaet der
+  // Fahrzeugzeile (UNIQUE + CHECK(17)) und wird nur ueber den Upsert-Weg gesetzt.
+  let finHinweis: 'format' | undefined
+  if (corrections.fin !== undefined) {
+    const claimId = await resolveClaimId(supabase, fallId)
+    if (claimId) {
+      const finRes = await schreibeFinAufFahrzeug({
+        claimId,
+        fin: corrections.fin,
+        quelle: 'kunde_korrektur',
+        db: admin,
+      })
+      if (!finRes.ok) {
+        // Non-critical: die Nummer steht im Lead, die uebrigen Korrekturen sind gespeichert.
+        console.error('[zb1-korrektur] FIN erreichte das Fahrzeug nicht:', finRes.error)
+      } else if (!finRes.geaendert && finRes.grund === 'format') {
+        finHinweis = 'format'
+      }
+    }
+  }
+
   revalidatePath(`/kunde/onboarding-details`)
   revalidatePath(`/kunde/faelle/${fallId}`)
   revalidatePath(`/dispatch/leads/${leadId}`)
-  return { ok: true }
+  return finHinweis ? { ok: true, finHinweis } : { ok: true }
 }
 
 export async function clearZb1Felder(fallId: string): Promise<Zb1ActionResult> {

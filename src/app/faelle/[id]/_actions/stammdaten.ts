@@ -8,8 +8,9 @@
 // machine) nicht über diese Action.
 
 import { createClient } from '@/lib/supabase/server'
+import { schreibeFinAufFahrzeug } from '@/lib/vehicles/fin-schreiben'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ensureVehicleFromFin, ensureVehicleForClaim } from '@/lib/vehicles/ensure-vehicle'
+import { ensureVehicleForClaim } from '@/lib/vehicles/ensure-vehicle'
 import { FALL_VEHICLE_COL, fallVehicleWriteValue } from '@/lib/vehicles/fall-vehicle-field'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
@@ -718,56 +719,25 @@ export async function saveFinVin(
     return { success: false, error: 'Ungültige FIN. Muss 17 alphanumerische Zeichen lang sein.' }
   }
 
-  // CMM-50 Phase-B (Write-Retire): Die FIN gehoert auf vehicles (SSoT) — KEIN faelle.fin_vin-Write
-  // mehr. Alle Reader lesen via v_claim_full aus vehicles (Reader-Migration #2836/#2842 live). Die
-  // vehicles-Anlage ist damit der PRIMAERE, kritische Persistenz-Write (vorher non-critical neben
-  // dem faelle.update) — schlaegt er fehl, ist die FIN nirgends gespeichert => Form-Fehler statt
-  // stillem Verlust. Snapshot aus dem existierenden Fahrzeug (vcf, vehicles-sourced); finQuelle/-Am
-  // literal 'manuell'/now (manuelle Eingabe). v_claim_full.id == claim_id, .fall_id == faelle.id.
-  try {
+  // CMM-50 Phase-B: Die Nummer gehoert auf vehicles (SSoT) — kein faelle-Write mehr; alle
+  // Leser holen sie ueber v_claim_full. Der Weg dorthin liegt seit 09.09.2026 in
+  // lib/vehicles/fin-schreiben: er stand hier, im SV-Portal und in der OCR-Route fast
+  // wortgleich und fehlte an zwei weiteren Stellen ganz. Verhalten unveraendert.
+  const claimIdFuerFin = await (async () => {
     const admin = createAdminClient()
-    const { data: snap } = await admin
-      .from('v_claim_full')
-      .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben')
-      .eq('fall_id', fallId)
-      .single()
-    const fr = snap as Record<string, unknown> | null
-    const claimId = (fr?.id as string | null) ?? null
-    // Vehicle-Unifikation: aktuelles Claim-Fahrzeug (evtl. FIN-loser Stub) vor dem FIN-Upsert lesen
-    // und als supersedesVehicleId durchreichen -> die FIN-Row absorbiert den Stub.
-    let altesFahrzeug: string | null = null
-    if (claimId) {
-      const { data: cr } = await admin.from('claims').select('vehicle_id').eq('id', claimId).maybeSingle()
-      altesFahrzeug = (cr?.vehicle_id as string | null) ?? null
-    }
-    const veh = await ensureVehicleFromFin({
-      fin: cleaned,
-      snapshot: {
-        kennzeichen: (fr?.kennzeichen as string | null) ?? null,
-        hersteller: (fr?.fahrzeug_hersteller as string | null) ?? null,
-        modell: (fr?.fahrzeug_modell as string | null) ?? null,
-        hsn: (fr?.hsn as string | null) ?? null,
-        tsn: (fr?.tsn as string | null) ?? null,
-        kilometerstand: (fr?.kilometerstand as number | null) ?? null,
-        // CMM-50.1: Snapshot-Restfelder — jetzt aus vehicles (vcf)
-        kennzeichenBuchstaben: (fr?.kennzeichen_buchstaben as string | null) ?? null,
-        farbe: (fr?.fahrzeug_farbe as string | null) ?? null,
-        farbcode: (fr?.lackfarbe_code as string | null) ?? null,
-        bauart: (fr?.fahrzeug_typ as string | null) ?? null,
-        baujahr: (fr?.fahrzeug_baujahr as number | null) ?? null,
-        erstzulassung: (fr?.erstzulassung as string | null) ?? null,
-        ausstattung: fr?.fahrzeug_ausstattung ?? null,
-        finQuelle: 'manuell',
-        finExtrahiertAm: new Date().toISOString(),
-      },
-      db: admin,
-      supersedesVehicleId: altesFahrzeug ?? undefined,
-    })
-    if (!veh.ok) return { success: false, error: veh.error ?? 'Fahrzeug konnte nicht gespeichert werden' }
-    if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
-  } catch (e) {
-    return { success: false, error: e instanceof Error ? e.message : 'Fahrzeug-Speicherung fehlgeschlagen' }
-  }
+    const { data } = await admin.from('v_claim_full').select('id').eq('fall_id', fallId).maybeSingle()
+    return ((data as Record<string, unknown> | null)?.id as string | null) ?? null
+  })()
+  if (!claimIdFuerFin) return { success: false, error: 'Fall nicht gefunden' }
+  const finRes = await schreibeFinAufFahrzeug({
+    claimId: claimIdFuerFin,
+    fin: cleaned,
+    quelle: 'manuell',
+    db: createAdminClient(),
+  })
+  // Die vehicles-Anlage ist der PRIMAERE Write: schlaegt sie fehl, ist die Nummer nirgends
+  // gespeichert => Form-Fehler statt stillem Verlust.
+  if (!finRes.ok) return { success: false, error: finRes.error }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,

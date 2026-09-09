@@ -4610,6 +4610,8 @@
       "cta": "Los geht's"
     },
     "zb1": {
+      "finForm": "Eine Fahrgestellnummer hat 17 Zeichen (ohne I, O, Q) — aktuell {anzahl}.",
+      "finNichtUebernommen": "Ihre übrigen Angaben sind gespeichert. Die Fahrgestellnummer konnten wir nicht übernehmen — sie hat 17 Zeichen ohne I, O und Q.",
       "liegtVorTitel": "Ihr Fahrzeugschein liegt uns vor",
       "liegtVorText": "Wir haben Ihre Fahrzeugdaten übernommen. Bitte prüfen Sie kurz, ob alles stimmt.",
       "pruefenCta": "Daten prüfen",
