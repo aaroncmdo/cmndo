@@ -16,6 +16,7 @@ import { test, expect, type Page } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 
 const RUN = process.env.RUN_SUPPORT_ANSICHT === '1'
+const RUN_LANGTEXT = process.env.RUN_SUPPORT_LANGTEXT === '1'
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 const ZIEL = `${BASE}/admin/support`
 
@@ -95,5 +96,80 @@ test.describe('Support-Meldungen: Ansicht im Admin-Portal (#5958)', () => {
     const endUrl = page.url()
     console.log(`[C] Anonym landet auf: ${endUrl}`)
     expect(endUrl).toContain('/login')
+  })
+
+  // ── D · Langer Meldungstext bricht die Seite nicht ───────────────────────────────────────
+  // Im ersten Abnahmebericht stand dieser Punkt als "verdrahtet, nicht gelaufen": whitespace-
+  // pre-wrap + Breitenbegrenzung sind im Code, aber es gab keinen langen Text in den Daten.
+  // Dieser Test ERZEUGT einen (ueber die echte Route, nicht per DB-Seed — der Weg gehoert zum
+  // Soll) und misst dann das Verhalten der Seite.
+  //
+  // Gemessen wird am LAYOUT, nicht am Markup: scrollWidth des Bodys gegen die Fensterbreite.
+  // "max-w-2xl steht im HTML" beweist nicht, dass der Text auch umbricht.
+  test('D · Ein langer Meldungstext sprengt die Seite nicht', async ({ page }) => {
+    test.skip(!RUN_LANGTEXT, 'RUN_SUPPORT_LANGTEXT=1 — erzeugt eine echte Meldung auf prod')
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) throw new Error('Service-Role-Zugang fehlt')
+    const db = createClient(url, key, { auth: { persistSession: false } })
+
+    const marker = `LANGTEXT-${Date.now()}`
+    // Ein Wort ohne Leerzeichen ist der haertere Fall: normaler Fliesstext bricht von allein,
+    // eine lange ungebrochene Kette nur mit break-words.
+    const langerText =
+      `${marker} — Regel-4-Abnahme, bitte ignorieren. ` +
+      'Diese Meldung prueft absichtlich den Umbruch bei sehr langem Inhalt. '.repeat(12) +
+      'UNUNTERBROCHENEKETTE' + 'X'.repeat(180)
+
+    await login(page, KONTEN.makler.email, KONTEN.makler.pass)
+    const knopf = page.getByRole('button', { name: 'Hilfe und Support öffnen' })
+    await expect(knopf).toBeVisible({ timeout: 30_000 })
+    const antwort = page.waitForResponse(
+      (r) => r.url().includes('/api/support/chat') && r.request().method() === 'POST',
+      { timeout: 60_000 },
+    )
+    await knopf.click()
+    const eingabe = page.getByRole('textbox').last()
+    await expect(eingabe).toBeVisible({ timeout: 20_000 })
+    await eingabe.fill(langerText)
+    await eingabe.press('Enter')
+    expect((await antwort).status()).toBe(200)
+
+    let zeileId: string | null = null
+    await expect.poll(async () => {
+      const { data } = await db
+        .from('support_ticket_log')
+        .select('id, meldung_text')
+        .ilike('meldung_text', `%${marker}%`)
+        .limit(1)
+      zeileId = data?.[0]?.id ?? null
+      return zeileId
+    }, { timeout: 30_000, message: 'die lange Meldung muss in der DB stehen' }).toBeTruthy()
+    console.log(`[D] lange Meldung gespeichert (${langerText.length} Zeichen)`)
+
+    try {
+      await login(page, KONTEN.admin.email, KONTEN.admin.pass)
+      await page.goto(ZIEL, { waitUntil: 'domcontentloaded' })
+      await page.waitForLoadState('networkidle', { timeout: 45_000 }).catch(() => {})
+
+      const text = await page.locator('body').innerText()
+      expect(text, 'der lange Text muss auf der Seite stehen').toContain(marker)
+
+      // DIE eigentliche Messung: laeuft der Body seitlich aus dem Fenster?
+      const mass = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }))
+      const ueberstand = mass.scrollWidth - mass.clientWidth
+      console.log(`[D] Body scrollWidth ${mass.scrollWidth} vs. clientWidth ${mass.clientWidth} → Überstand ${ueberstand}px`)
+      expect(ueberstand, 'die Seite darf nicht horizontal scrollen').toBeLessThanOrEqual(2)
+    } finally {
+      // Residue IMMER weg — auch wenn die Assertion oben scheitert (regel4-smoke: Cleanup
+      // gehoert nicht hinter eine Assertion, die den Test abbrechen kann).
+      if (zeileId) {
+        const { error } = await db.from('support_ticket_log').delete().eq('id', zeileId)
+        console.log(`[D] Residue entfernt: ${error ? 'FEHLER ' + error.message : 'ok'}`)
+      }
+    }
   })
 })
