@@ -11,7 +11,11 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { LoginEmbed } from '@/components/shared/LoginEmbed'
-import { createClient } from '@/lib/supabase/client'
+// LAZY (09.09.2026): `createClient` wird erst NACH dem Mount gebraucht, und auch dann
+// nur, wenn der Server keinen Nutzer aufgeloest hat. Statisch importiert haengt der
+// Supabase-Browser-Client im Pflichtprogramm JEDER Marketing-Seite — diese Komponente
+// steht in der Topbar. Gemessen: 261 kB in einem Chunk, der die Hydration verzoegert.
+// Der Import steht deshalb im Effekt unten.
 import { roleToPath } from '@/lib/auth/role-redirect'
 import type { AuthenticatedUser } from './LandingTopbar'
 
@@ -37,11 +41,15 @@ export function TopbarAuthCta({
     // Startseite hat den User schon server-aufgeloest → kein Client-Fetch, kein Flash.
     if (initialUser) return
     let cancelled = false
-    const supabase = createClient()
-    // getSession() liest lokal (Cookie/Storage, kein GoTrue-Roundtrip) — reicht als CTA-Hint.
-    supabase.auth
-      .getSession()
-      .then(async ({ data: { session } }) => {
+    void (async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        if (cancelled) return
+        const supabase = createClient()
+        // getSession() liest lokal (Cookie/Storage, kein GoTrue-Roundtrip) — reicht als CTA-Hint.
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
         if (cancelled || !session?.user) return
         const { data: profile } = await supabase
           .from('profiles')
@@ -56,10 +64,12 @@ export function TopbarAuthCta({
             session.user.email ||
             'Mein Portal',
         })
-      })
-      .catch(() => {
-        // Kein valider Session-Zustand → anonymer CTA bleibt (kein Bruch).
-      })
+      } catch {
+        // Kein valider Session-Zustand ODER der Chunk kam nicht an → anonymer CTA
+        // bleibt stehen. Das ist der richtige Rueckfall: „Anmelden" fuehrt zum Ziel,
+        // nur der Abkuerzungs-Link ins Portal fehlt dann.
+      }
+    })()
     return () => {
       cancelled = true
     }

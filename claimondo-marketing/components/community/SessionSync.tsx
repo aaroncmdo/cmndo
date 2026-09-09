@@ -13,7 +13,6 @@
 
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 export function SessionSync({ loggedIn }: { loggedIn: boolean }) {
   const router = useRouter()
@@ -22,9 +21,10 @@ export function SessionSync({ loggedIn }: { loggedIn: boolean }) {
   useEffect(() => {
     if (loggedIn || done.current) return // Server sah bereits eingeloggt -> nichts zu tun
     done.current = true // nur EIN Versuch -> kein Refresh-Loop bei echt-ausgeloggt
-    const supabase = createClient()
-    supabase.auth
-      .getSession()
+    // LAZY (09.09.2026): der Supabase-Browser-Client wird erst hier gebraucht. Statisch
+    // importiert haengt er im Pflichtprogramm der Seite und verzoegert die Hydration.
+    void import('@/lib/supabase/client')
+      .then(({ createClient }) => createClient().auth.getSession())
       .then(({ data: { session } }) => {
         if (session?.user) router.refresh()
       })
