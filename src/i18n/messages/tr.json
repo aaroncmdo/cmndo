@@ -801,6 +801,8 @@
       "vollmachttext": "VEKÂLETNAME & AVUKATLIK YETKİSİ\n\nBen, aşağıda imzası bulunan taraf, Claimondo GmbH'ye ve onun görevlendireceği avukatlara, bildirilen hasar olayına ilişkin tüm konularda beni tam kapsamlı olarak temsil etmeleri için vekâlet veriyorum.\n\nVekâlet özellikle şunları kapsamaktadır:\n• Zarar verenlere ve sigorta şirketlerine karşı tüm taleplerin mahkeme dışında ileri sürülmesi\n• Kendi ve başkası adına yargısal yolla takip edilmesi\n• Uzlaşma sağlanması ve ödemelerin kabul edilmesi\n• Bilirkişi ve diğer uzmanların görevlendirilmesi\n• İcra takibi başlatılması ve yürütülmesi\n\nBu vekâlet, açık yazılı bir geri çekme bildiriminde bulunulana kadar geçerliliğini korur."
     },
     "zb1": {
+      "finForm": "Şasi numarası 17 karakterdir (I, O, Q hariç) — şu anda {anzahl}.",
+      "finNichtUebernommen": "Diğer bilgileriniz kaydedildi. Şasi numarasını alamadık — 17 karakterden oluşur, I, O ve Q içermez.",
       "errorExpiredTitle": "Bağlantı Süresi Doldu",
       "errorExpiredBody": "Bu yükleme bağlantısı artık geçerli değil. Yeni bir bağlantı için lütfen ilgili kişinizle iletişime geçin.",
       "errorAlreadyTitle": "Fotoğraf Zaten Alındı",

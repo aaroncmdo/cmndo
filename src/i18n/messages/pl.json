@@ -801,6 +801,8 @@
       "vollmachttext": "PEŁNOMOCNICTWO & MANDAT ADWOKACKI (VOLLMACHT & ANWALTSMANDAT)\n\nJa, niżej podpisany/podpisana, niniejszym udzielam Claimondo GmbH oraz zleconym przez nią adwokatom i radcom prawnym pełnomocnictwa do pełnego reprezentowania mnie we wszelkich sprawach dotyczących zgłoszonej szkody.\n\nPełnomocnictwo obejmuje w szczególności:\n• Pozasądowe dochodzenie wszelkich roszczeń wobec sprawców i ubezpieczycieli\n• Sądowe egzekwowanie roszczeń we własnym i cudzym imieniu\n• Zawieranie ugód i przyjmowanie płatności\n• Zlecanie rzeczoznawców i innych specjalistów\n• Wszczęcie i przeprowadzenie postępowania egzekucyjnego\n\nNiniejsze pełnomocnictwo obowiązuje do jego wyraźnego pisemnego odwołania."
     },
     "zb1": {
+      "finForm": "Numer identyfikacyjny pojazdu ma 17 znaków (bez I, O, Q) — obecnie {anzahl}.",
+      "finNichtUebernommen": "Pozostałe dane zostały zapisane. Numeru identyfikacyjnego nie udało się przyjąć — ma 17 znaków bez I, O i Q.",
       "errorExpiredTitle": "Link wygasł",
       "errorExpiredBody": "Ten link do przesyłania nie jest już ważny. Skontaktuj się ze swoim opiekunem, aby otrzymać nowy link.",
       "errorAlreadyTitle": "Zdjęcie już otrzymane",

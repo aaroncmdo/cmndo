@@ -1,24 +1,16 @@
+import { istPlausibleFin } from '@/lib/vehicles/ensure-vehicle'
+
 // AAR-182: Shared ZB1-Parser — extrahiert aus /api/ocr-fahrzeugschein damit
 // sowohl der Fall-Endpoint als auch der Lead-Inbound-Webhook dieselbe Logik
 // nutzt. Neue Felder (Baujahr aus Erstzulassung, AAR-181) leben jetzt hier.
 
 const FIN_REGEX = /\b([A-HJ-NPR-Z0-9]{17})\b/gi
 
-/**
- * Eine Fahrzeug-Identifizierungsnummer OHNE jede Ziffer ist keine Nummer, sondern ein Wort.
- *
- * 09.09.2026, am prod-Scan vom 25.08. gemessen: der Parser trug
- * `fin_vin = "MAHZAWACKFAHRZEUG"` ein — die Texterkennung hatte "Mehrzweckfahrzeug"
- * (Feld 5, Fahrzeugart) verlesen. Siebzehn Zeichen, kein I/O/Q: formal gueltig, fachlich
- * Unsinn. Der Wert wandert ueber ensureVehicleFromFin in die Fahrzeug-Identitaet und
- * damit ins Gutachten. Die echte Nummer stand zwei Zeilen darueber und wurde verworfen,
- * weil die Erkennung ein `O` statt einer `0` gelesen hatte — der Fallback nahm daraufhin
- * den naechsten Treffer im Dokument. Jede echte Nummer traegt Ziffern (Modelljahr,
- * laufende Nummer); diese Pruefung kostet keinen gueltigen Wert.
- */
-function istPlausibleFin(kandidat: string): boolean {
-  return /\d/.test(kandidat)
-}
+// Die Plausibilitaetspruefung liegt bei den Fahrzeug-Helfern: sie gilt fuer den LESE-Pfad
+// (dieser Parser) und fuer jeden SCHREIB-Pfad auf vehicles.fin gleichermassen. Zwei
+// Definitionen derselben Regel waeren genau die Drift, die den Fund erst ermoeglicht hat.
+// Warum es sie braucht: am prod-Scan vom 25.08. wurde "Mehrzweckfahrzeug" zu
+// "MAHZAWACKFAHRZEUG" — 17 Zeichen, kein I/O/Q, formgueltig und trotzdem Unsinn.
 const DATE_REGEX = /\b(\d{2}\.\d{2}\.\d{4})\b/
 const PLZ_ORT_REGEX = /\b(\d{5})\s+(.+)/
 // Spec B (Aaron 14.07.): ZB1-Feld J = EU-/KBA-Fahrzeugklasse. Der HARTE Filter fuers Werkstatt-Matching

@@ -1093,6 +1093,8 @@
       "vollmachttext": "VOLLMACHT & ANWALTSMANDAT\n\nIch, der/die Unterzeichnende, erteile hiermit der Claimondo GmbH sowie den von ihr beauftragten Rechtsanwältinnen und Rechtsanwälten Vollmacht, mich in allen Belangen des gemeldeten Schadensfalles umfassend zu vertreten.\n\nDie Vollmacht umfasst insbesondere:\n• Außergerichtliche Geltendmachung aller Ansprüche gegenüber Schädigern und Versicherern\n• Gerichtliche Durchsetzung im eigenen und fremden Namen\n• Abschluss von Vergleichen und Entgegennahme von Zahlungen\n• Beauftragung von Sachverständigen und weiteren Fachleuten\n• Einleitung und Durchführung von Zwangsvollstreckungsmaßnahmen\n\nDiese Vollmacht gilt bis zu ihrem ausdrücklichen schriftlichen Widerruf."
     },
     "zb1": {
+      "finForm": "Eine Fahrgestellnummer hat 17 Zeichen (ohne I, O, Q) — aktuell {anzahl}.",
+      "finNichtUebernommen": "Ihre übrigen Angaben sind gespeichert. Die Fahrgestellnummer konnten wir nicht übernehmen — sie hat 17 Zeichen ohne I, O und Q.",
       "errorExpiredTitle": "Link abgelaufen",
       "errorExpiredBody": "Dieser Upload-Link ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Ansprechpartner für einen neuen Link.",
       "errorAlreadyTitle": "Foto bereits empfangen",
