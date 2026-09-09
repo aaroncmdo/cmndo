@@ -4443,6 +4443,20 @@
       "takePhoto": "Take photo",
       "cta": "Let's go"
     },
+    "zb1": {
+      "liegtVorTitel": "We have your vehicle registration",
+      "liegtVorText": "We have taken over your vehicle data. Please check briefly that everything is correct.",
+      "pruefenCta": "Check data",
+      "pruefenTitel": "Please check the data",
+      "manuellTitel": "Please enter the data",
+      "manuellText": "We could not read the vehicle registration automatically this time. Your photo is saved — please enter the data yourself.",
+      "bestaetigenCta": "Confirm data",
+      "gespeichertTitel": "Vehicle data saved",
+      "nochmalAendern": "Change data again",
+      "neuesFoto": "Take a new photo",
+      "fehlerFoto": "The photo could not be processed. Please try again.",
+      "fehlerUpload": "The upload did not work. Please try again."
+    },
     "fall": {
       "title": "Your claim",
       "intro": "We have already recorded your details from the phone call. Please review briefly and confirm below.",

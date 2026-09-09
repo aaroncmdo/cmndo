@@ -19,62 +19,23 @@ import type { OnboardingFeld } from '../types'
 import { uploadDokumentViaAnfrageToken } from '@/app/upload/dokumente/[token]/actions'
 import { compressImage } from '@/lib/dokumente/compress-image'
 import { confirmZb1Korrekturen, clearZb1Felder } from '@/app/kunde/onboarding-details/zb1-actions'
+import {
+  ZB1_KORREKTUR_FELDER,
+  ZB1_GRUPPEN,
+  type Zb1KorrekturFeld,
+  type Zb1Werte,
+} from '@/lib/onboarding/zb1-felder'
 
 type Status = 'idle' | 'uploading' | 'preview' | 'error' | 'skipped'
 
-// Ops-Test 11.08. (RC-3): Die Feldmenge stand vorher VIERMAL untereinander
-// (Upload-Result, Extracted-Typ, leereExtracted, Diff-Bildung) — jedes Mal mit
-// denselben 4 Feldern, obwohl der Parser 15 liefert. Halteradresse, FIN, HSN/TSN
-// und Erstzulassung konnte der Kunde damit weder sehen noch korrigieren. Eine
-// Liste als Quelle verhindert, dass die Stellen wieder auseinanderlaufen.
-const ZB1_FELDER = [
-  'kennzeichen',
-  'fahrzeug_hersteller',
-  'fahrzeug_modell',
-  'erstzulassung',
-  'fahrzeug_farbe',
-  'halter_name',
-  'halter_strasse',
-  'halter_plz',
-  'halter_stadt',
-  'fin',
-  'hsn',
-  'tsn',
-] as const
-
-type Zb1Feld = (typeof ZB1_FELDER)[number]
-type Extracted = Record<Zb1Feld, string>
-
-/** Anzeige-Reihenfolge in der Preview, gruppiert. i18n-Key je Feld. */
-const GRUPPEN: ReadonlyArray<{ titelKey: string; felder: ReadonlyArray<{ feld: Zb1Feld; labelKey: string }> }> = [
-  {
-    titelKey: 'zb1_gruppe_fahrzeug',
-    felder: [
-      { feld: 'kennzeichen', labelKey: 'zb1_label_kennzeichen' },
-      { feld: 'fahrzeug_hersteller', labelKey: 'zb1_label_hersteller' },
-      { feld: 'fahrzeug_modell', labelKey: 'zb1_label_modell' },
-      { feld: 'erstzulassung', labelKey: 'zb1_label_erstzulassung' },
-      { feld: 'fahrzeug_farbe', labelKey: 'zb1_label_farbe' },
-    ],
-  },
-  {
-    titelKey: 'zb1_gruppe_halter',
-    felder: [
-      { feld: 'halter_name', labelKey: 'zb1_label_halter' },
-      { feld: 'halter_strasse', labelKey: 'zb1_label_halter_strasse' },
-      { feld: 'halter_plz', labelKey: 'zb1_label_halter_plz' },
-      { feld: 'halter_stadt', labelKey: 'zb1_label_halter_stadt' },
-    ],
-  },
-  {
-    titelKey: 'zb1_gruppe_technisch',
-    felder: [
-      { feld: 'fin', labelKey: 'zb1_label_fin' },
-      { feld: 'hsn', labelKey: 'zb1_label_hsn' },
-      { feld: 'tsn', labelKey: 'zb1_label_tsn' },
-    ],
-  },
-]
+// Ops-Test 11.08. (RC-3): Die Feldmenge stand vorher VIERMAL untereinander im Code,
+// jedes Mal mit vier statt zwoelf Feldern. Seit 09.09.2026 liegt sie EINMAL in
+// @/lib/onboarding/zb1-felder — der Fahrzeugschein-Schritt im Kunden-Onboarding nutzt
+// dieselbe Liste, damit die beiden Oberflaechen nicht wieder auseinanderlaufen.
+type Zb1Feld = Zb1KorrekturFeld
+type Extracted = Zb1Werte
+const ZB1_FELDER = ZB1_KORREKTUR_FELDER
+const GRUPPEN = ZB1_GRUPPEN
 
 const MAX_VERSUCHE = 2
 
