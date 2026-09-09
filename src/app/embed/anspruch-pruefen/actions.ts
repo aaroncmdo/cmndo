@@ -15,7 +15,7 @@ import {
 import { SEGMENTE, type AnspruchSpanne, type Ersatzfahrzeug, type Schuldform, type Segment, type VisionResult } from '@/lib/anspruch/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const VISION_SYSTEM = `Du bist ein KFZ-Schadensexperte fuer den deutschen Markt. Antworte IMMER als valides JSON mit exakt diesem Schema, ohne weiteren Text:
+const VISION_SYSTEM = `Du bist ein KFZ-Schadensexperte für den deutschen Markt. Antworte IMMER als valides JSON mit exakt diesem Schema, ohne weiteren Text:
 {
   "beschaedigte_teile": ["string"],
   "schweregrad": "leicht" | "mittel" | "schwer",
@@ -28,7 +28,8 @@ const VISION_SYSTEM = `Du bist ein KFZ-Schadensexperte fuer den deutschen Markt.
   "restwert_max": number,
   "beschreibung": "string"
 }
-Schaetze Reparaturkosten als realistische BRUTTO-Spanne (deutsche Werkstattpreise). "segment" = Fahrzeugklasse aus dem sichtbaren Fahrzeug. "wiederbeschaffungswert" = geschaetzter aktueller Marktwert des Fahrzeugs (Wiederbeschaffung) in EUR; "restwert" = geschaetzter Wert des beschaedigten Fahrzeugs. Beide als BRUTTO-Spanne. Sei konservativ; bei Unsicherheit breitere Spanne.`
+Schätze Reparaturkosten als realistische BRUTTO-Spanne (deutsche Werkstattpreise). "segment" = Fahrzeugklasse aus dem sichtbaren Fahrzeug. "wiederbeschaffungswert" = geschätzter aktueller Marktwert des Fahrzeugs (Wiederbeschaffung) in EUR; "restwert" = geschätzter Wert des beschädigten Fahrzeugs. Beide als BRUTTO-Spanne. Sei konservativ; bei Unsicherheit breitere Spanne.
+Alle Textwerte ("beschreibung" und die Einträge in "beschaedigte_teile") in korrektem Deutsch mit echten Umlauten (ä, ö, ü, ß) schreiben — niemals ae/oe/ue/ss als Ersatz. Die JSON-Schlüsselnamen bleiben exakt wie im Schema.`
 
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_BYTES = 10 * 1024 * 1024
