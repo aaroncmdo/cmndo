@@ -7,6 +7,7 @@ import { useTranslations, useFormatter } from 'next-intl'
 import {
   getOnboardingSteps,
   buildOnboardingContext,
+  naechsterSichtbarerStep,
 } from './get-onboarding-steps'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -212,13 +213,13 @@ export default function OnboardingWizard({
     return idx >= 0 ? idx : 0
   })()
   const [stepIndex, setStepIndex] = useState(initialStepIndex)
-  // AAR-903: hardcoded Step-Indizes (setStepIndex(1), setStepIndex(4)) wurden
-  // durch gotoStepById ersetzt — funktioniert auch wenn 'termin' oder
-  // 'dokumente' aus visibleSteps gefiltert sind.
+  // Sprung auf einen BESTIMMTEN Schritt (z. B. ans Ende nach „alle spaeter
+  // nachreichen"). Fehlt der Schritt in visibleSteps, passiert bewusst nichts.
   const gotoStepById = (id: 'welcome' | 'fall' | 'termin' | 'dokumente' | 'fertig') => {
     const idx = visibleSteps.findIndex((s) => s.id === id)
     if (idx >= 0) setStepIndex(idx)
   }
+
   const [pending, startTransition] = useTransition()
   const [uploadingId, setUploadingId] = useState<string | null>(null)
   // AAR-323: Per-Doc-Status als lokaler State, initialisiert aus Server-Daten.
@@ -245,6 +246,16 @@ export default function OnboardingWizard({
 
   // AAR-903: currentStep referenziert visibleSteps (gefiltert), nicht STEPS.
   const currentStep = visibleSteps[stepIndex] ?? visibleSteps[0]
+  // 09.09.2026 (Aaron: „der Knopf hat aktuell fuer mich keine Funktion"):
+  // Die Weiter-Buttons riefen gotoStepById mit einer FESTEN Ziel-ID. Ist dieser
+  // Schritt fuer den Kunden gefiltert — Termin schon gebucht, keine offenen
+  // Pflichtdokumente, Werkstatt-Weg —, findet der Sprung sein Ziel nicht und der
+  // Button tut nichts. Der Kommentar darueber behauptete das Gegenteil.
+  // „Weiter" heisst jetzt: der naechste Schritt, den DIESER Kunde sieht.
+  const gotoWeiter = () => {
+    const ziel = naechsterSichtbarerStep(visibleSteps, currentStep.id)
+    if (ziel) gotoStepById(ziel)
+  }
 
   // CMM-21 / Pflichtdok-Kanonisierung: Anforderungen kommen jetzt vorberechnet
   // vom Server-Parent (page.tsx via getAlleSlots + buildDokumentKontext) als
@@ -551,7 +562,7 @@ export default function OnboardingWizard({
                 )}
 
                 <button
-                  onClick={() => gotoStepById('fall')}
+                  onClick={() => gotoWeiter()}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >{t('welcome.cta')}</button>
               </div>
@@ -641,7 +652,7 @@ export default function OnboardingWizard({
                 </div>
 
                 <button
-                  onClick={() => gotoStepById('termin')}
+                  onClick={() => gotoWeiter()}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >
                   {t('fall.cta')}
@@ -690,7 +701,7 @@ export default function OnboardingWizard({
                   <p className="mt-4 text-sm text-claimondo-ondo">{t('termin.pending')}</p>
                 )}
                 <button
-                  onClick={() => gotoStepById('dokumente')}
+                  onClick={() => gotoWeiter()}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >{t('termin.cta')}</button>
               </div>
@@ -742,7 +753,7 @@ export default function OnboardingWizard({
                     48h) UND springt nach fertig. Wenn nichts offen ist, reicht
                     "Weiter". */}
                 <button
-                  onClick={() => gotoStepById('fertig')}
+                  onClick={() => gotoWeiter()}
                   className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >{t('dokumente.cta')}</button>
                 {pflichtBlocked.length > 0 && (
