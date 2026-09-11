@@ -74,6 +74,22 @@ const ERLAUBTE_PROJEKTE = new Set(['y7ve121jr0'])
 /** So lange geben wir GTM nach dem Consent Zeit, sein eigenes Clarity-Tag zu setzen. */
 const WARTEZEIT_MS = 4000
 const PRUEFTAKT_MS = 200
+// Frist zwischen dem Ready-Handshake und dem Sofortstart unter Opt-out. Sie existiert
+// aus genau einem Grund: ein Widerspruch der Elternseite muss den Start VERHINDERN
+// koennen, nicht erst danach die Einwilligung entziehen.
+//
+// Gemessen 09.09.2026 auf prod (Abnahme-Session, echter Widerspruch im Banner): der
+// Sofortstart lief VOR jeder Consent-Nachricht, Clarity sendete DREI collect-Anfragen,
+// und erst danach kam das `denied` an. Es floss also nicht nur ein Script — es flossen
+// Daten. Ein postMessage-Roundtrip im selben Browser braucht Millisekunden; 250 ms sind
+// grosszuegig, auch auf gedrosselter CPU.
+//
+// Preis: Unter Opt-out startet die Komponente 250 ms spaeter und kann damit das Rennen
+// gegen das GTM-Clarity-Tag verlieren (gemessener Vorsprung war 86 ms). Das ist eine
+// Frage der Messqualitaet — WELCHES Projekt aufzeichnet — und wiegt leichter als Daten,
+// die trotz Widerspruch abfliessen. Sobald das GTM-Tag geloescht ist, gibt es kein
+// Rennen mehr und die Frist kostet nichts.
+const WIDERSPRUCHS_FRIST_MS = 250
 
 /**
  * Liefert die Projekt-ID eines bereits geladenen Clarity-Tags — oder `null`,
@@ -96,6 +112,10 @@ function laufendesClarityProjekt(): { id: string | null; quelle: string } | null
 export function ClarityEmbed({ projectId, sofortStarten = false }: { projectId?: string | null; sofortStarten?: boolean }) {
   const gestartet = useRef(false)
   const warteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Merkt einen Widerspruch, der zwischen Ready-Handshake und Sofortstart eintrifft.
+  // Ohne dieses Flag genuegt das Loeschen des Timers nicht: eine Nachricht, die exakt
+  // nach dem Timer-Ablauf ankommt, faende den Start bereits vollzogen.
+  const widersprochen = useRef(false)
 
   useEffect(() => {
     if (!projectId || !ERLAUBTE_PROJEKTE.has(projectId)) return
@@ -131,7 +151,16 @@ export function ClarityEmbed({ projectId, sofortStarten = false }: { projectId?:
     const starte = () => {
       if (gestartet.current) return
       gestartet.current = true
-      entscheide(Date.now())
+      // Die Frist hat ihren Zweck erfuellt, sobald der Parent geantwortet hat.
+      if (warteTimer.current) {
+        clearTimeout(warteTimer.current)
+        warteTimer.current = null
+      }
+      // Unter Opt-out die Wartezeit auf ein fremdes Tag ueberspringen — das ist der
+      // Kern von #5959 (Rennen gegen das GTM-Tag). Weil die Bruecke typischerweise in
+      // Millisekunden antwortet, startet Clarity bei Einwilligung damit praktisch
+      // sofort; die 250-ms-Frist unten greift nur, wenn gar keine Antwort kommt.
+      entscheide(sofortStarten ? Date.now() - WARTEZEIT_MS : Date.now())
     }
 
     function onMessage(e: MessageEvent) {
@@ -142,6 +171,9 @@ export function ClarityEmbed({ projectId, sofortStarten = false }: { projectId?:
       if (data.gcm.analytics_storage === 'granted') starte()
       // Widerspruch nach dem Start (CMP-Auswahl auf der Elternseite): Einwilligung entziehen.
       // Kommt er waehrend der Wartezeit, darf Clarity danach nicht mehr starten.
+      if (data.gcm.analytics_storage === 'denied') {
+        widersprochen.current = true
+      }
       if (data.gcm.analytics_storage === 'denied' && warteTimer.current) {
         clearTimeout(warteTimer.current)
         warteTimer.current = null
@@ -157,23 +189,35 @@ export function ClarityEmbed({ projectId, sofortStarten = false }: { projectId?:
 
     window.addEventListener('message', onMessage)
 
-    // Opt-out: nicht auf den Handshake warten — sofort starten und das Rennen um
-    // das Projekt gewinnen (siehe Kopfkommentar). Laeuft bereits ein fremdes Tag
-    // (z. B. Re-Mount), greift die Pruefung in `entscheide` wie sonst.
-    if (sofortStarten) {
-      gestartet.current = true
-      entscheide(Date.now() - WARTEZEIT_MS)
-    }
-
     // Ready-Handshake wie in der ConsentBridge: Der Parent sendet den Consent
     // erneut, sobald sich ein Listener meldet. Ohne das ginge die erste
     // Nachricht verloren, wenn der Parent schneller ist als dieser Effekt.
     // Zwei Ready-Pings (Bridge + hier) sind unkritisch — der Parent sendet dann
     // zweimal denselben Zustand, und `gestartet` verhindert eine Doppel-Init.
+    //
+    // ⚠ Der Ping steht VOR dem Sofortstart, nicht danach: sonst kann die Antwort
+    // den Start gar nicht mehr verhindern — genau das war der Befund vom 09.09.
     try {
       window.parent?.postMessage({ type: 'claimondo-consent-ready' }, '*')
     } catch {
       /* kein Parent / sandboxed → no-op */
+    }
+
+    // Opt-out: nicht auf den Handshake warten — aber ihm eine kurze Frist geben.
+    // Ohne die Frist lief der Start VOR jeder Consent-Nachricht, und Clarity sendete
+    // trotz Widerspruch Daten (drei collect-Anfragen, gemessen 09.09. auf prod).
+    // Meldet die Elternseite in dieser Frist `denied`, startet die Komponente gar nicht.
+    // Laeuft bereits ein fremdes Tag (z. B. Re-Mount), greift die Pruefung in
+    // `entscheide` wie sonst.
+    if (sofortStarten) {
+      warteTimer.current = setTimeout(() => {
+        warteTimer.current = null
+        // `gestartet` faengt den Fall ab, dass der Parent in der Frist `granted`
+        // gemeldet hat — dann lief der Start schon ueber `starte()`.
+        if (gestartet.current || widersprochen.current) return
+        gestartet.current = true
+        entscheide(Date.now() - WARTEZEIT_MS)
+      }, WIDERSPRUCHS_FRIST_MS)
     }
 
     return () => {
