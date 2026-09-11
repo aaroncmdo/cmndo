@@ -32,8 +32,12 @@ export function AnspruchWizard() {
     // (getAnspruchVorschauFuerFall: claims.lead_id -> schaetzung.lead_id) bleibt leer —
     // genau der Grund, warum auf prod 62 Schaetzungen existierten und 0 verknuepft waren.
     // Serverseitig geprueft (UUID + Lead existiert), gleiches Muster wie `?schuld=`.
-    const lead = new URLSearchParams(window.location.search).get('lead')
-    starteAnspruchSession(lead).then((r) => { if (aktiv && r.ok) setSessionToken(r.sessionToken) })
+    const params = new URLSearchParams(window.location.search)
+    const lead = params.get('lead')
+    // `?ref=` = Browser-Kennung aus dem /check-Cookie (nachtraegliche Verknuepfung, 2026-09-09): die Session
+    // traegt sie, damit ein SPAETERER Kontakt auf /check sie noch an den dann entstehenden Lead haengen kann.
+    const ref = params.get('ref')
+    starteAnspruchSession(lead, ref).then((r) => { if (aktiv && r.ok) setSessionToken(r.sessionToken) })
     return () => { aktiv = false }
   }, [])
 
@@ -41,6 +45,9 @@ export function AnspruchWizard() {
     // Schuldfrage aus dem /check-Funnel (via ?schuld=) vorbefuellen -> kein Doppelt-Fragen
     // (zusammenhaengender Aufnahme-Flow). Nur valide Werte uebernehmen.
     const s = new URLSearchParams(window.location.search).get('schuld')
+    // Bewusst im Effekt: die URL-Params kennt erst der Client. Ein Lazy-Initializer liefe beim SSR ohne
+    // window und beim Client mit — der Kontinuitaets-Hinweis wuerde dann anders hydrieren (React #418).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (s === 'unverschuldet' || s === 'teilschuld' || s === 'selbst') setInitialSchuld(s)
   }, [])
 

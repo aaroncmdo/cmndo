@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Database } from '@/lib/supabase/database.types'
 import type { AnspruchPosition, Schuldform, Schweregrad, Segment, TotalschadenInfo, VisionResult } from './types'
+import { normalisiereCheckRef } from './check-ref'
 
 // schuld-Spalte existiert in der DB (Migration 20260706085339); die generierten Supabase-Typen
 // hinken noch hinterher (Regen aufgeschoben — database.types.ts wird parallel von anderen Sessions
@@ -28,6 +29,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  */
 export async function erstelleSession(
   leadId?: string | null,
+  checkRef?: string | null,
 ): Promise<{ ok: true; sessionToken: string } | { ok: false; error: string }> {
   const db = createAdminClient()
   const sessionToken = randomUUID()
@@ -39,9 +41,13 @@ export async function erstelleSession(
     else console.warn('[anspruch/session] lead-Param zeigt auf keinen Lead:', leadId)
   }
 
+  // Nachtraegliche Verknuepfung (2026-09-09): `?ref=` ist die Browser-Kennung aus dem /check-Cookie.
+  // Sie kommt aus der URL — nur UUID-Form landet in check_ref, sonst NULL. Ein SPAETERER Kontakt auf
+  // /check haengt alle Sessions mit dieser ref an den dann entstehenden Lead (verknuepfe-sessions.ts).
+  const check_ref = normalisiereCheckRef(checkRef)
   const { error } = await db
     .from('anspruch_schaetzungen')
-    .insert({ session_token: sessionToken, lead_id: verknuepft })
+    .insert({ session_token: sessionToken, lead_id: verknuepft, check_ref })
   if (error) return { ok: false, error: error.message }
   return { ok: true, sessionToken }
 }
