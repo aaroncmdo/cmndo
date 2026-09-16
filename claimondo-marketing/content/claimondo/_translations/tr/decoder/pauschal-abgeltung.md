@@ -110,7 +110,7 @@ Asla – hiçbir koşulda – açık bir sonraki sonuç çekincesi (Spätfolge-V
 ### 🛠 Her imzadan önce beş adım
 
 **1. Şartı ayrıştırın**
-Uyarı sinyallerini arayın: „bütün talepler", „nihai", „gelecektekiler de", „kapatma". Biri ortaya çıktığı anda – Dur.
+Uyarı sinyallerini arayın: „bütün talepler", „nihai", „gelecektekiler de", „kapatma". Biri ortaya çıktığı anda – Durun.
 
 **2. Avukat tutun**
 Her imzadan önce, istisnasız. Avukatlık masraflarını sigortacı öder (bkz. [Avukatlık masraflarının iadesi](/haftpflicht/anwaltskosten-erstattung)).

@@ -29,7 +29,6 @@ related:
   - /haftpflicht/verjaehrung-bgb195
   - /haftpflicht/verzug-bgb286
   - /decoder/pauschal-abgeltung
-meta_description: "Anerkenntnis (§212 BGB) vs. Vergleich (§779 BGB): eines startet die Verjährung neu, das andere beendet alle Ansprüche. Nicht vorschnell unterschreiben."
 ---
 
 # İbra (§ 212 BGB) ve Sulh (§ 779 BGB) – Belirleyici Fark

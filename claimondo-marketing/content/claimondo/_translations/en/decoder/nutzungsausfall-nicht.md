@@ -30,7 +30,6 @@ related:
   - /haftpflicht/mietwagen
   - /decoder/mietwagen-zu-hoch
   - /haftpflicht/beweislast
-meta_description: "„Nutzungsausfall nicht erstattbar“? Die 3 Standard-Argumente der Versicherer entkräftet – so bekommen Sie Ihre Entschädigung pro Ausfalltag."
 ---
 
 # "We Cannot Reimburse the Loss of Use" – Decoder

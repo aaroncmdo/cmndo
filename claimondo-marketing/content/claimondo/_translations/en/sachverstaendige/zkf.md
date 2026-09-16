@@ -21,7 +21,6 @@ related:
   - /sachverstaendige/zak
   - /sachverstaendige/pruefdienstleister
   - /sachverstaendige/gtue-kues-tuev-ifl
-meta_description: "ZKF – Zentralverband Karosserie- und Fahrzeugtechnik (3.000+ Betriebe): Werkstattverband, nicht Sachverständigen-Organisation. Die Unterschiede."
 ---
 
 # ZKF – Zentralverband Karosserie- und Fahrzeugtechnik

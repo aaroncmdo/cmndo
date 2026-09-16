@@ -17,7 +17,6 @@ keyFacts:
   - "Mietwagen-Kürzung über LOGICHECK (Fraunhofer statt Schwacke)"
   - "Seit 2024 zusätzlich SV-Honorar-Kürzung mit Verweis auf fehlende BVSK-Mitgliedschaft"
   - "DAV-Forsa-Umfrage 2017: 44 % der Verkehrsanwälte nennen die Allianz (Platz 3)"
-meta_description: "Allianz Schadensregulierung: ControlExpert-Mehrheit seit 2020, LOGICHECK-Mietwagenkürzung, Prüfberichte. BGH-/AG-Urteile und Ihre Rechte – mit Quellen."
 ---
 
 # Allianz: Claim Settlement, ControlExpert, and Your Rights

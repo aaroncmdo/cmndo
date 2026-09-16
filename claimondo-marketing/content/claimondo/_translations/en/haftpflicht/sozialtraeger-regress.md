@@ -28,7 +28,6 @@ related:
   - /haftpflicht/verdienstausfall
   - /haftpflicht/erben-rechtsnachfolger
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Sozialträger-Regress (§116 SGB X): Krankenkasse & Co. übernehmen Ihren Anspruch, soweit sie leisten – Ihr Quotenvorrecht geht vor. Was bei Ihnen bleibt."
 ---
 
 # Social Welfare Subrogation under § 116 SGB X – When Your Health Insurance Joins the Recovery

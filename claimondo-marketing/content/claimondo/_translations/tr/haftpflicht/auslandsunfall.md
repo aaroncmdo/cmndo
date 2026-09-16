@@ -24,7 +24,6 @@ keyFacts:
 related:
   - /haftpflicht/fahrerflucht
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Auslandsunfall (EU/EWR/Schweiz): Regulierung über die Grüne Karte und den deutschen Regulierungsbeauftragten – ohne Klage im Ausland. So gehen Sie vor."
 ---
 
 # Yurt Dışı Kazası – Yeşil Kart Sistemi Üzerinden Hasar Tazminatı

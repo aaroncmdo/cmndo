@@ -23,7 +23,6 @@ related:
   - /haftpflicht/anwaltskosten-erstattung
   - /haftpflicht/anerkenntnis-bgb212
   - /decoder/wir-pruefen-sachverhalt
-meta_description: "4-Wochen-Regulierungsfrist: So lange darf die Kfz-Haftpflicht prüfen (BGH-Linie), dann tritt Verzug nach §286 BGB ein. Was Sie nach Fristablauf fordern."
 ---
 
 # The 4-Week Claims Settlement Period After a Road Accident

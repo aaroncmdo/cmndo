@@ -32,7 +32,6 @@ related:
   - /haftpflicht/sv-kosten
   - /decoder/reparatur-unwirtschaftlich
   - /sachverstaendige/zkf
-meta_description: "Beilackierung nach Unfall: bei modernen Lacken technisch nötig und laut BGH VI ZR 174/24 erstattungsfähig. Was tun, wenn die Versicherung die Position streicht."
 ---
 
 # Kaza Sonrası Beilackierung (Komşu Panel Boyama) – Sigortanın Ödemek Zorunda Olduğu Durumlar

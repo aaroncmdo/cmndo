@@ -29,7 +29,6 @@ related:
   - /haftpflicht/verjaehrung-bgb195
   - /haftpflicht/verzug-bgb286
   - /decoder/pauschal-abgeltung
-meta_description: "Anerkenntnis (§212 BGB) vs. Vergleich (§779 BGB): eines startet die Verjährung neu, das andere beendet alle Ansprüche. Nicht vorschnell unterschreiben."
 ---
 
 # Acknowledgement of Liability (§ 212 BGB) vs. Settlement (§ 779 BGB) – the decisive difference

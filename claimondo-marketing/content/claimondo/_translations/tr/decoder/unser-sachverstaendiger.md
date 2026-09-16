@@ -30,7 +30,6 @@ related:
   - /decoder/wertminderung-nicht
   - /decoder/reparatur-unwirtschaftlich
   - /decoder/werkstatt-netz
-meta_description: "„Wir schicken unseren Vertrauens-Gutachter“? Warum Versicherer-Sachverständige nicht neutral sind – Sie wählen Ihren eigenen SV (§249 BGB)."
 ---
 
 # "Size Güvenilir Uzmanımızı Göndereceğiz" – Decoder

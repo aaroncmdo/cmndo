@@ -17,7 +17,6 @@ keyFacts:
   - "Prüfdienstleister laut Kanzlei Voigt „weisungsgebunden, ohne eigenen Prüfungsspielraum""
   - "DAV-Forsa-Umfrage 2017: 46 % der Verkehrsanwälte nennen die VHV (Platz 2)"
   - "Eskalationsmuster: prozessbereite Klageerwiderung, Sofortzahlung nach Klage gegen den VN"
-meta_description: "VHV Schadensregulierung: offene „Grundsatzentscheidung" zum SV-Honorar, eigener Gebührenrechner statt BVSK, Carexpert. AG-Urteile und Ihre Rechte – mit Quellen."
 ---
 
 # VHV: Claim Settlement, a Policy Decision, and Your Rights
