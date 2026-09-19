@@ -70,7 +70,7 @@ export default async function MitarbeiterTasks({ searchParams }: { searchParams:
                   className="flex flex-1 items-start justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-claimondo-bg"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 items-start gap-2">
                       <span
                         className={cn(
                           'shrink-0 rounded px-1.5 py-0.5 text-caption font-bold',
@@ -83,7 +83,7 @@ export default async function MitarbeiterTasks({ searchParams }: { searchParams:
                       >
                         {t.prioritaet}
                       </span>
-                      <p className="truncate text-body-sm font-medium text-claimondo-navy">{t.titel}</p>
+                      <p className="break-words text-body-sm font-medium text-claimondo-navy">{t.titel}</p>
                     </div>
                     {t.beschreibung ? <p className="mt-1 line-clamp-2 text-body-xs text-claimondo-ondo">{t.beschreibung}</p> : null}
                   </div>

@@ -512,7 +512,7 @@ export default function GutachterShell({
                       )}
                       {badge > 0 && (
                         <span
-                          className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-red-500 text-white"
+                          className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold bg-danger text-white"
                           aria-label={`${badge} neue ${label}`}
                         >
                           {badge > 99 ? '99+' : badge}

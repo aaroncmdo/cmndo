@@ -251,7 +251,7 @@ export default function HeuteClient({
       >
         {/* Tagesvorbereitung-Header */}
         <GlassPanel className="px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy">
-          <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
+          <span className="hidden font-medium whitespace-nowrap sm:inline">Tagesvorbereitung:</span>
           <TagesvorbereitungButton />
         </GlassPanel>
 
