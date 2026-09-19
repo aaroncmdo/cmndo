@@ -21,6 +21,7 @@ import { storagePfadAusUrl } from '@/lib/dokumente/sync-lead-zu-pflicht'
 import { trackServerConversion, buildSaSignedEvent, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 import { sendOaiqEvent } from '@/lib/analytics/oaiq-capi'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { buildKundeZugangWhatsAppText } from '@/lib/whatsapp/kunde-zugang-text'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 
@@ -470,26 +471,22 @@ async function finalizeKundeSetup(
     auth_provider: 'email',
   }, { onConflict: 'id' })
 
-  // D (Aaron 27.07.): Login-Daten EINMAL per WhatsApp (zusaetzlich zur Willkommens-Email). Nach dem
-  // /flow-Auto-Login hat der Kunde zwar schon eine Session, braucht Email+Passwort aber fuer spaetere
-  // Logins. Non-fatal: ein Baileys-Fail darf die Account-Anlage nie brechen.
+  // EIN Magic-Link fuer WhatsApp UND Welcome-Mail (unten durchgereicht) — ein zweiter
+  // generateLink-Aufruf wuerde den ersten Token invalidieren.
+  const kundeMagicLink = await generateKundeMagicLink(admin, email)
+
+  // D (Aaron 27.07., ueberarbeitet 19.09.): Login-EINSTIEG einmal per WhatsApp — aber als
+  // Magic-Link statt Klartext-Passwort. WhatsApp laeuft ueber Baileys + wird in `nachrichten`
+  // gespeichert; ein Klartext-Passwort waere dort ein DSGVO-/Security-Leak. Das Passwort geht
+  // weiterhin ueber die Welcome-Mail. Non-fatal: ein Baileys-Fail darf die Account-Anlage nie brechen.
   if (telefon && telefon.trim().length >= 5) {
     try {
       const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-      const credsText = [
-        '🔐 Ihre Claimondo-Zugangsdaten',
-        '',
-        `E-Mail: ${email}`,
-        `Passwort: ${password}`,
-        '',
-        `Login: ${base}/login`,
-        '',
-        'Bitte ändere Ihr Passwort beim ersten Login. Ihr Claimondo-Team',
-      ].join('\n')
+      const credsText = buildKundeZugangWhatsAppText({ magicLink: kundeMagicLink, loginUrl: `${base}/login` })
       const r = await sendWhatsAppText(telefon, credsText)
-      if (!r.ok) console.error('[D] Login-Daten-WA fehlgeschlagen:', r.code, r.error)
+      if (!r.ok) console.error('[D] Login-Einstieg-WA fehlgeschlagen:', r.code, r.error)
     } catch (err) {
-      console.error('[D] Login-Daten-WA Fehler:', err)
+      console.error('[D] Login-Einstieg-WA Fehler:', err)
     }
   }
 
@@ -659,43 +656,48 @@ async function finalizeKundeSetup(
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
   // CMM-14: Magic-Link weiterreichen damit der Wizard direkt einen
   // "Zu meinem Portal"-Button anbieten kann.
-  return await sendWelcomeWithLogin(admin, fallId, email, password, phoneLoginAktiviert)
+  return await sendWelcomeWithLogin(admin, fallId, email, password, phoneLoginAktiviert, kundeMagicLink)
 }
 
-// AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
-// und schickt die Welcome-Mail mit Magic-Link + Zugangsdaten als Fallback.
-// Magic-Link-Generierung ist non-fatal: bei Fehler geht die Mail trotzdem
-// raus, nur ohne Button (Template rendert dann nur den Zugangsdaten-Block).
+// AAR-127: generiert den Kunde-Magic-Link via Supabase Auth Admin API.
+// TOKEN-HASH-FIX: admin.generateLink liefert einen IMPLICIT-#access_token-Hash im action_link,
+// den /api/auth/callback (erwartet ?code) NICHT einloesen kann. Wir nutzen data.properties.hashed_token
+// + die /api/auth/confirm-Route (verifyOtp server-seitig → Cookie → Redirect auf next).
+// Siehe src/app/api/auth/confirm/route.ts. Non-fatal: bei Fehler null.
+async function generateKundeMagicLink(
+  adminDb: ReturnType<typeof createAdminClient>,
+  email: string,
+): Promise<string | null> {
+  try {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+    const { data, error } = await adminDb.auth.admin.generateLink({ type: 'magiclink', email })
+    if (error) {
+      console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen:', error)
+      return null
+    }
+    const tokenHash = data?.properties?.hashed_token
+    return tokenHash
+      ? `${base}/api/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink&next=${encodeURIComponent('/kunde/onboarding')}`
+      : null
+  } catch (err) {
+    console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen (Exception):', err)
+    return null
+  }
+}
+
+// AAR-127: schickt die Welcome-Mail mit Magic-Link + Zugangsdaten als Fallback.
+// `vorabMagicLink`: hat der Aufrufer (finalizeKundeSetup fuer die WhatsApp) den Link schon
+// erzeugt, wird DERSELBE genutzt — ein zweiter generateLink wuerde den ersten Token invalidieren.
+// Magic-Link-Generierung ist non-fatal: bei Fehler geht die Mail trotzdem raus, nur ohne Button.
 async function sendWelcomeWithLogin(
   adminDb: ReturnType<typeof createAdminClient>,
   fallId: string,
   email: string,
   password: string,
   phoneLoginAktiviert: boolean = false,
+  vorabMagicLink?: string | null,
 ): Promise<{ magicLink: string | null }> {
-  let magicLink: string | null = null
-  try {
-    // TOKEN-HASH-FIX: admin.generateLink liefert inzwischen einen IMPLICIT-#access_token-Hash
-    // im action_link, den /api/auth/callback (erwartet ?code) NICHT einloesen kann ("OAuth
-    // fehlgeschlagen" → /login). Wir nutzen daher data.properties.hashed_token + die
-    // /api/auth/confirm-Route (verifyOtp server-seitig → Cookie → Redirect auf next).
-    // Siehe src/app/api/auth/confirm/route.ts.
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-    const { data, error } = await adminDb.auth.admin.generateLink({
-      type: 'magiclink',
-      email,
-    })
-    if (error) {
-      console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen:', error)
-    } else {
-      const tokenHash = data?.properties?.hashed_token
-      magicLink = tokenHash
-        ? `${base}/api/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink&next=${encodeURIComponent('/kunde/onboarding')}`
-        : null
-    }
-  } catch (err) {
-    console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen (Exception):', err)
-  }
+  const magicLink = vorabMagicLink ?? (await generateKundeMagicLink(adminDb, email))
 
   try {
     const { sendKundeWelcome } = await import('@/lib/email/google/flows')
