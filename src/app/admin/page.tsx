@@ -48,16 +48,19 @@ async function loadKpis() {
   // CMM-49 P1: "Neue Faelle heute" direkt aus claims (SSoT).
   const [aktiveSvs, offeneAnzahlungen, offeneRechnungen, neueFaelleHeute, umsatzMonat, pendingQc, saeumigeSvs] =
     await Promise.all([
-      // gelöschte + gesperrte SVs raus aus KPI-Counts.
+      // gelöschte + gesperrte SVs raus aus KPI-Counts. Testkonten ebenso (19.09.2026, Dashboard-
+      // Inventur): „Aktive SVs 29" zaehlte vier Testkonten mit, Aaron sah keine echte Zahl.
       supabase
         .from('sachverstaendige')
         .select('id', { count: 'exact', head: true })
         .eq('portal_zugang_freigeschaltet', true)
+        .eq('ist_testaccount', false)
         .is('gesperrt_seit', null)
         .is('geloescht_am', null),
       supabase
         .from('sachverstaendige')
         .select('onboarding_anzahlung_betrag')
+        .eq('ist_testaccount', false)
         .eq('vertrag_unterschrieben', true)
         .eq('portal_zugang_freigeschaltet', false)
         .is('geloescht_am', null)
