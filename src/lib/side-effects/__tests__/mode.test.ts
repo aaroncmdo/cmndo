@@ -72,16 +72,19 @@ describe('sendWhatsApp honoriert SIDE_EFFECT_MODE (wiring)', () => {
     expect(r.sid).toBe('side-effect-suppressed')
     expect(sendTextMock).not.toHaveBeenCalled()
   })
+  // sendWhatsApp macht seinen eigenen se.mode-Guard und uebergibt dem Leaf deshalb
+  // `skipInternalGuard: true` (kein doppelter DB-Lookup, siehe whatsapp.ts). Gegenstand
+  // dieses Tests bleibt, WOHIN und WAS gesendet wird — das dritte Argument ist der Vertrag.
   it('test-recipient: leitet an Test-Nummer um', async () => {
     process.env.SIDE_EFFECT_MODE = 'test-recipient'
     process.env.SIDE_EFFECT_TEST_PHONE = '+49999999999'
     const { sendWhatsApp } = await import('@/lib/whatsapp')
     await sendWhatsApp('+491701234567', 'hallo')
-    expect(sendTextMock).toHaveBeenCalledWith('+49999999999', 'hallo')
+    expect(sendTextMock).toHaveBeenCalledWith('+49999999999', 'hallo', { skipInternalGuard: true })
   })
   it('live (default): sendet an echte Nummer', async () => {
     const { sendWhatsApp } = await import('@/lib/whatsapp')
     await sendWhatsApp('+491701234567', 'hallo')
-    expect(sendTextMock).toHaveBeenCalledWith('+491701234567', 'hallo')
+    expect(sendTextMock).toHaveBeenCalledWith('+491701234567', 'hallo', { skipInternalGuard: true })
   })
 })
