@@ -398,7 +398,7 @@ export function LoginLinkEmail({ vorname, actionUrl }: Props) {
   )
 }
 ```
-*(Sollte `email.color.ondo` im Tokens-Modul anders heißen, den Namen aus `PasswortReset.tsx` übernehmen — dort steht die real genutzte Token-Referenz.)*
+*(Token-Name gemessen 19.09.: `PasswortReset.tsx:41` nutzt `email.color.ondo`.)*
 
 - [ ] **Step 4: `sendLoginLink` in `flows.ts`** — direkt unter `sendPasswortReset`, gleiches Muster:
 
