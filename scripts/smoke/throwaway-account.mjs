@@ -258,9 +258,33 @@ async function cleanup(idOrEmail, quiet) {
       /* egal */
     }
   }
-  await api(`/rest/v1/profiles?id=eq.${uid}`, { method: 'DELETE' }) // defensiv (falls kein CASCADE)
+  // Zeilen, die auf das Konto zeigen und ein DELETE BLOCKIEREN (FK ohne CASCADE, aus pg_constraint
+  // gelesen, 19.09.2026). Gemessen an einem Wegwerf-ADMIN: der naechste Cron-Tick schickt allen
+  // Admins eine Mitteilung ("1 Lead nach 10 Tagen auto-disqualifiziert", mark_expired_leads) ->
+  // profiles-DELETE scheitert mit 409, auth-DELETE mit 500, das Konto bleibt liegen. Vorher wurde
+  // die Antwort des profiles-DELETE nicht einmal gelesen — genau das versteckte den Grund.
+  // Am 19.09. lagen 123 verwaiste Wegwerf-Konten auf prod; dieser Pfad ist ein Teil davon.
+  const wegwerf = (pfad) => api(pfad, { method: 'DELETE' })
+  const loesen = (pfad, body) => api(pfad, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(body) })
+  await wegwerf(`/rest/v1/mitteilungen?or=(empfaenger_id.eq.${uid},absender_id.eq.${uid})`)
+  await wegwerf(`/rest/v1/nachrichten?or=(sender_id.eq.${uid},empfaenger_id.eq.${uid},kb_empfaenger_id.eq.${uid})`)
+  await wegwerf(`/rest/v1/ki_gespraeche?user_id=eq.${uid}`)
+  await wegwerf(`/rest/v1/webhook_events?user_id=eq.${uid}`)
+  // Urheber-/Zuordnungsspalten auf Faellen werden NICHT geloescht — die Zeile gehoert dem Fall,
+  // nur die Verknuepfung zum Konto wird geloest.
+  await loesen(`/rest/v1/tasks?erstellt_von_id=eq.${uid}`, { erstellt_von_id: null })
+  await loesen(`/rest/v1/tasks?zugewiesen_an=eq.${uid}`, { zugewiesen_an: null })
+  await loesen(`/rest/v1/tasks?empfaenger_user_id=eq.${uid}`, { empfaenger_user_id: null })
+  await loesen(`/rest/v1/timeline?erstellt_von=eq.${uid}`, { erstellt_von: null })
+
+  const p = await api(`/rest/v1/profiles?id=eq.${uid}`, { method: 'DELETE' })
+  if (!p.ok) console.error(`  profiles-DELETE ${p.status}: ${errBody(p)}`)
   const d = await api(`/auth/v1/admin/users/${uid}`, { method: 'DELETE' })
   if (!quiet) console.log(`Cleanup ${uid}: auth=${d.status === 200 ? 'ok' : d.status}`)
+  if (d.status !== 200) {
+    console.error(`  auth-DELETE ${d.status}: ${errBody(d)} — Konto liegt noch auf prod!`)
+    process.exitCode = 1 // ein afterEach, das das ignoriert, sieht es wenigstens im Lauf-Exit
+  }
 }
 
 async function cleanupAll() {
