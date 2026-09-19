@@ -51,7 +51,7 @@ const VERBOTEN: { titel: string; text: string }[] = [
   },
   {
     titel: 'Keine Identitätstäuschung',
-    text: 'Wähle keinen Nutzernamen, der vorgibt, Claimondo, ein Anwalt oder eine Behörde zu sein.',
+    text: 'Wählen Sie keinen Nutzernamen, der vorgibt, Claimondo, ein Anwalt oder eine Behörde zu sein.',
   },
 ]
 

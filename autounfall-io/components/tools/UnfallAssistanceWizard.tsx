@@ -141,7 +141,7 @@ function planFor(state: Answers): Plan {
       title: 'Ihr klügster nächster Schritt als Verursacher',
       lead: 'Hier geht es nicht um Schadensersatz für Sie, sondern um Schadensbegrenzung — und darum, dem Geschädigten eine saubere Regulierung zu ermöglichen (das senkt Ihr Regress-Risiko).',
       steps: [
-        'Prüfe, ob sich Selbstzahlung lohnt — der SF-Rechner unten zeigt die Größenordnung.',
+        'Prüfen Sie, ob sich Selbstzahlung lohnt — der SF-Rechner unten zeigt die Größenordnung.',
         'Bei Fahrerflucht zählt das 24h-Fenster: hol Ihnen früh eine anwaltliche Einschätzung.',
         'Informiere den Geschädigten — per WhatsApp-Brücke weiß er sofort, was ihm zusteht.',
       ],
@@ -159,7 +159,7 @@ function planFor(state: Answers): Plan {
       title: 'Die Kürzung müssen Sie nicht hinnehmen',
       lead: 'Versicherer kürzen oft Positionen, die Ihnen nach BGH zustehen. Mit dem richtigen Argument — oder einem Anwalt — holen Sie das Geld zurück.',
       steps: [
-        'Prüfe, welche Position gekürzt wurde (Verbringungskosten, UPE-Aufschläge, Stundensatz, Nutzungsausfall).',
+        'Prüfen Sie, welche Position gekürzt wurde (Verbringungskosten, UPE-Aufschläge, Stundensatz, Nutzungsausfall).',
         'Hol Ihnen das passende BGH-Argument als Beleg.',
         'Bei hartnäckiger Kürzung: unsere Verkehrsrechts-Partnerkanzlei schreibt das für Sie — bei Fremdverschulden ohne Kostenrisiko.',
       ],
@@ -234,7 +234,7 @@ function planFor(state: Answers): Plan {
   if (s === 'ich') {
     return {
       title: 'Selbst verursacht: so läuft es über die Kasko',
-      lead: 'Bei eigenem Verschulden greift in der Regel Ihre Kaskoversicherung. Prüfe vorher, ob sich Selbstzahlung lohnt (SF-Rückstufung).',
+      lead: 'Bei eigenem Verschulden greift in der Regel Ihre Kaskoversicherung. Prüfen Sie vorher, ob sich Selbstzahlung lohnt (SF-Rückstufung).',
       steps: [
         'Schaden zeitnah der Kasko melden.',
         'SF-Rückstufung gegen Schadenshöhe abwägen (Rechner unten).',
@@ -284,7 +284,7 @@ function planFor(state: Answers): Plan {
     steps: [
       'Beauftrage einen eigenen Gutachter — nicht den der Gegnerversicherung.',
       'Lass den Schaden vor Reparatur vollständig dokumentieren' + artHint + '.',
-      'Gib der Versicherung nichts Schriftliches, das wie ein Schuldeingeständnis wirkt.',
+      'Geben Sie der Versicherung nichts Schriftliches, das wie ein Schuldeingeständnis wirkt.',
       'Wir vermitteln einen Sachverständigen in Ihrer Nähe und übernehmen den Schriftverkehr.',
     ],
     ctas: [['Gutachter anfragen', '/gutachter-finden#anfrage', 'prim']],
