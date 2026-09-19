@@ -99,6 +99,7 @@ export type SendResult =
 export async function sendWhatsAppText(
   phone: string,
   text: string,
+  opts?: { skipInternalGuard?: boolean },
 ): Promise<SendResult> {
   const base = getBaseUrl()
   const token = getAuthToken()
@@ -110,6 +111,26 @@ export async function sendWhatsAppText(
   }
   if (!text || text.trim().length === 0) {
     return { ok: false, error: 'empty text', code: 'invalid_phone' }
+  }
+
+  // Send-Isolation am zentralen Chokepoint (2026-09-19): dies ist die EINE Stelle, durch die
+  // jeder WhatsApp-Send laeuft — auch die ~21 Aufrufer, die den Guard in sendWhatsApp umgehen
+  // (sendNachricht, direkter sendWhatsAppText). Kunden-WhatsApp an eine interne/Test-Nummer
+  // wird hier unterdrueckt, damit Smoke-Laeufe keine echten WhatsApps mehr senden. Team-Alarme
+  // (notifyTeamWhatsApp) senden ABSICHTLICH an interne Nummern und setzen skipInternalGuard.
+  // Dynamischer Import haelt den duennen HTTP-Leaf statisch von der DB-Schicht entkoppelt;
+  // istInternesTelefon ist fail-open (Lookup-Fehler -> false -> senden).
+  if (!opts?.skipInternalGuard) {
+    const { istInternesTelefon } = await import('@/lib/testdaten/test-sv-guard')
+    if (await istInternesTelefon(phone)) {
+      console.warn(`[send-isolation:leaf] WhatsApp an internes/Test-Telefon ${phone} unterdrueckt`)
+      return {
+        ok: true,
+        messageId: 'internal-recipient-suppressed',
+        jid: '',
+        timestamp: new Date().toISOString(),
+      }
+    }
   }
 
   const ctrl = new AbortController()
