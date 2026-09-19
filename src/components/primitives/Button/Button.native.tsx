@@ -33,12 +33,13 @@ const toneMap: Record<ButtonTone, ToneStyle> = {
     border: tokens.colors.border,
   },
   bare: { bg: 'transparent', text: tokens.colors.navy },
+  hell: { bg: 'transparent', text: tokens.colors.white },
   danger: { bg: tokens.colors.danger, text: tokens.colors.white },
   success: { bg: tokens.colors.success, text: tokens.colors.white },
 }
 
 export function Button(props: ButtonProps) {
-  const { children, size = 'md', iconLeft, iconRight, fullWidth, ariaLabel } = props
+  const { children, size = 'md', iconLeft, iconRight, fullWidth, ariaLabel, ariaExpanded } = props
   const { tone, handler, isDisabled, loading } = resolveButtonProps(props)
   const t = toneMap[tone]
   const isIcon = size === 'icon'
@@ -70,7 +71,7 @@ export function Button(props: ButtonProps) {
       onPress={isDisabled ? undefined : handler}
       disabled={isDisabled}
       accessibilityLabel={ariaLabel}
-      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      accessibilityState={{ disabled: isDisabled, busy: loading, expanded: ariaExpanded }}
       style={({ pressed }: { pressed: boolean }) => [
         containerStyle,
         { opacity: pressed && !isDisabled ? 0.7 : containerStyle.opacity },

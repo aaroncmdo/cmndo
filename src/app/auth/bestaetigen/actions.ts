@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { schreibeLoginTimeline } from '@/lib/kunde/login-timeline'
 import type { EmailOtpType } from '@supabase/supabase-js'
 
 // Prefetch-Haertung: verifyOtp laeuft NUR hier (POST aus der /auth/bestaetigen-Seite,
@@ -30,6 +31,14 @@ export async function bestaetigeMagicLink(formData: FormData): Promise<void> {
     const supabase = await createClient()
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
     if (!error) {
+      // Login ohne Link (19.09.): nur beim Anmelde-Link (magiclink) — recovery ist der
+      // Passwort-Reset, kein Login-Ereignis. Best-effort, bricht den Redirect nie.
+      if (type === 'magiclink') {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (user) await schreibeLoginTimeline(user, 'email')
+      }
       // Session sitzt jetzt als Cookie (Server-Action darf Cookies setzen) -> weiter zum Ziel.
       redirect(next)
     }

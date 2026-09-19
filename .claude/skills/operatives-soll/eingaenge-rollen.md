@@ -22,7 +22,7 @@ Jede Ja-Antwort ist eine Zeile in Abschnitt 6 der Abnahme-Datei.
 | A-3 | Gegner-Flow / Schadenkarte NFC `/schaden/[token]` | Direkt-Claim, Kern direkt | Gegner ist **nicht** der Kunde — kein FlowLink für ihn |
 | B-1 | Embed Gutachter-Finder `/embed/gutachter-finder` | lead-first, im **iframe** | Messung im äußeren Dokument sieht 0 Felder |
 | B-2 | Embed Werkstatt-Finder `/embed/werkstatt-finder` | lead-first, im **iframe** | einziger Eingang ohne Erstnotification |
-| B-3 | Public-API `POST /api/v1/melde-schaden` (MCP-Tool) | lead-first | Team bekommt nichts (bewusst) |
+| B-3 | Public-API `POST /api/v1/melde-schaden` (MCP-Tool) | lead-first | Team-WhatsApp über `notify-new-lead.ts` (gemessen 19.09.); FlowLink ohne E-Mail nie zustellbar → #5986 |
 | B-4 | Öffentlicher Rückruf (Marketing-Formulare) | Lead + `admin_termine` | kein Dedup → Doppel-Rückrufe |
 | C-1 | FlowLink `/flow/[token]` | **Konvergenzpunkt**, Claim entsteht am Ende | Zustand kommt oft **vorbelegt** an (Quali schon im Lead) |
 | C-x | 14 FlowLink-Eingänge (Issuance/Delivery) | siehe `entry-points-flowlink.md` | ein neuer Token-Pfad braucht `publicPaths` |
