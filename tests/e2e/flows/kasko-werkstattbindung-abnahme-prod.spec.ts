@@ -280,8 +280,14 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await waehleMarke(page, 'HUK-COBURG')
     await expect(page.getByRole('heading', { name: /Welchen Tarif haben Sie bei HUK-COBURG/i })).toBeVisible({ timeout: 20_000 })
     await shot(page, 't1-02-tarifliste')
-    // Mess-Punkt UX: Ein Klick auf die Karte entscheidet sofort (keine Bestaetigung) — Stand ohne #-Bestaetigungs-PR.
     await page.getByText('Classic SELECT', { exact: true }).click()
+    // Seit #5864 (05.09.) entscheidet der Klick auf die Karte NICHT mehr sofort: „Bitte kurz
+    // bestaetigen" mit „Ja, das ist mein Tarif" / „Nein, zurueck zur Auswahl" steht dazwischen.
+    // Diese Spec lief am 19.09. genau daran rot (Endseite nie erreicht) — Test-Drift, kein
+    // Produktbefund; der Screenshot zeigte den Bestaetigungsschritt.
+    await expect(page.getByRole('heading', { name: /Bitte kurz bestätigen/i })).toBeVisible({ timeout: 20_000 })
+    await shot(page, 't1-02b-bestaetigung')
+    await page.getByRole('button', { name: /Ja, das ist mein Tarif/i }).click()
 
     const endseite = page.getByRole('heading', { name: /Ihr Kasko-Tarif enthält eine Werkstattbindung/i })
     await expect(endseite).toBeVisible({ timeout: 30_000 })
