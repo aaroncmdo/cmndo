@@ -29,6 +29,7 @@ import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from 
 import { GegnerBestaetigungEmail, subject as gegnerBestaetigungSubject } from './templates/GegnerBestaetigung'
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
 import { PasswortResetEmail, subject as passwortResetSubject } from './templates/PasswortReset'
+import { LoginLinkEmail, subject as loginLinkSubject } from './templates/LoginLink'
 import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates/MaklerWelcome'
 import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from './templates/WillkommenWerkstatt'
 import { MaklerWochenReportEmail, subject as maklerWochenReportSubject } from './templates/MaklerWochenReport'
@@ -1447,5 +1448,24 @@ export async function sendPasswortReset({
       success: false,
       error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
     }
+  }
+}
+
+/** Anmelde-Link (Login ohne FlowLink, Weg 2 per E-Mail). Muster sendPasswortReset. */
+export async function sendLoginLink({ to, vorname, actionUrl }: { to: string; vorname: string | null; actionUrl: string }): Promise<{ success: boolean; error?: string }> {
+  try {
+    const props = { vorname, actionUrl }
+    const html = await render(LoginLinkEmail(props))
+    await sendEmail({
+      to,
+      subject: loginLinkSubject(props),
+      html,
+      fallId: null,
+      template: 'login_link',
+      allowInternalRecipient: true,
+    })
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
   }
 }

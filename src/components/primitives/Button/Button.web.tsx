@@ -56,6 +56,11 @@ const toneMap: Record<ButtonTone, ToneStyle> = {
     bgHover: GHOST_HOVER_BG,
     text: tokens.cssColors.navy,
   },
+  hell: {
+    bg: 'transparent',
+    bgHover: 'rgba(255, 255, 255, 0.15)',
+    text: tokens.colors.white,
+  },
   danger: {
     bg: tokens.colors.danger,
     bgHover: DANGER_HOVER,
@@ -69,7 +74,7 @@ const toneMap: Record<ButtonTone, ToneStyle> = {
 }
 
 export function Button(props: ButtonProps) {
-  const { children, size = 'md', iconLeft, iconRight, fullWidth, type = 'button', className, ariaLabel } = props
+  const { children, size = 'md', iconLeft, iconRight, fullWidth, type = 'button', className, ariaLabel, ariaExpanded } = props
   const [hover, setHover] = useState(false)
   const { tone, handler, isDisabled, loading } = resolveButtonProps(props)
   const t = toneMap[tone]
@@ -118,6 +123,7 @@ export function Button(props: ButtonProps) {
       style={style}
       className={['cmdo-btn', className].filter(Boolean).join(' ')}
       aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
       aria-busy={loading || undefined}
       onClick={isDisabled ? undefined : handler}
       disabled={isDisabled}
