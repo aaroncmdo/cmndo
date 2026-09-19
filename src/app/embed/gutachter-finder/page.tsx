@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import { ladeAktiveSVs, zaehleSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
+import { GtmNachConsent } from './_components/GtmNachConsent'
 import { ClarityEmbed } from './_components/ClarityEmbed'
 import { SCHADEN_OPTIONEN } from './_lib/schadenarten'
 import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
@@ -178,15 +178,22 @@ export default async function GutachterFinderEmbedPage({
   // sendete ohne Cookie ebenfalls 'denied' — auf /gutachter-finden erscheint kein Banner,
   // also blieb GA4 im iframe dauerhaft im cookielosen Ping-Modus (gemessen 08.09.2026).
   // Rueckfall-Schalter wie draussen: CONSENT_DEFAULT=denied im App-Prozess (Laufzeit, kein Rebuild).
+  //
+  // ⚠ Seit 19.09.2026 ist dieser Wert nur noch der FALLBACK fuer den Fall, dass die
+  // Elternseite gar nicht antwortet (Direktaufruf des Embeds). Antwortet sie, gilt ihr
+  // Consent — siehe GtmNachConsent. Die urspruengliche Begruendung ("auf /gutachter-finden
+  // erscheint kein Banner") traegt nicht mehr: dort steht sehr wohl eins, und ein
+  // Widerspruch darin muss wirken.
   const consentDefault = process.env.CONSENT_DEFAULT === 'denied' ? 'denied' : 'granted'
 
   return (
     <>
-      {gtmId ? (
-        <Script id="gf-gtm" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'${consentDefault}',ad_user_data:'${consentDefault}',ad_personalization:'${consentDefault}',analytics_storage:'${consentDefault}',functionality_storage:'${consentDefault}',security_storage:'granted',wait_for_update:500});(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
-        </Script>
-      ) : null}
+      {/* GTM laedt ERST, wenn der Consent der Elternseite bekannt ist — bei Widerspruch
+          gar nicht. Begruendung samt Messwerten im Kopf von GtmNachConsent.
+          Vorher stand hier ein server-seitiges Snippet, das `granted` als consent-default
+          behauptete und GTM sofort startete; dessen ungegatetes Clarity-Tag sendete
+          dadurch auch nach einem Widerspruch Daten (gemessen 19.09. auf prod). */}
+      {gtmId ? <GtmNachConsent gtmId={gtmId} fallback={consentDefault} /> : null}
       <ConsentBridge />
       {/* Clarity im iframe — nur wenn die einbettende Seite eine bekannte
           Projekt-ID anfordert UND der Parent Analyse-Consent meldet. */}
