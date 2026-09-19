@@ -85,15 +85,9 @@ export async function GET(request: Request) {
     if (!plz) maengel.push('keine standort_plz')
     if (sv.standort_lat == null || sv.standort_lng == null) maengel.push('keine Koordinaten')
     if (!sv.isochrone_polygon) maengel.push('keine Isochrone (Radius-Fallback)')
-    // Nur DIESER Status sperrt (src/lib/sv/dispatch-gate.ts, Entscheidung FG3);
-    // 'ausstehend' und NULL sind ausdruecklich erlaubt.
-    if (sv.verifizierung_status === 'frist_ueberschritten') {
-      maengel.push(
-        sv.verifiziert
-          ? 'GESPERRT (frist_ueberschritten) OBWOHL verifiziert=true — Status nach Nachverifizierung nicht zurueckgesetzt?'
-          : 'gesperrt: Verifizierungsfrist ueberschritten',
-      )
-    }
+    // Bis 19.09.2026 galt `verifizierung_status = 'frist_ueberschritten'` hier als Mangel
+    // („gesperrt"). Aaron hat die Frist-Mechanik abgeschafft — der Status entscheidet
+    // nichts mehr (src/lib/sv/dispatch-gate.ts), also ist er auch kein Mangel mehr.
     const heute = new Date().toISOString().slice(0, 10)
     if (sv.urlaub_von && sv.urlaub_bis && sv.urlaub_von <= heute && heute <= sv.urlaub_bis) {
       maengel.push(`Urlaub bis ${sv.urlaub_bis}`)

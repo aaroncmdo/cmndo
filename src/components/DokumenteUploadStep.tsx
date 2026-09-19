@@ -123,7 +123,11 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
     isFilled(slots['sv_sicherungsabtretung']) || isFilled(slots['sv_honorarvereinbarung'])
   const hatDatenschutz = isFilled(slots['sv_datenschutzerklaerung'])
   const hatWiderruf = isFilled(slots['sv_widerrufsbelehrung'])
-  const kannWeiter = hatAbtretung && hatDatenschutz && hatWiderruf
+  // Aaron 19.09.2026: „wenn Dokumente fehlen, soll der Sachverständige trotzdem angezeigt
+  // werden und sogar auch buchbar sein. Allerdings muss er die Dokumente hochladen können."
+  // Der Schritt bleibt, das Gate ist weg: Weiter geht immer, fehlende Dokumente lassen sich
+  // jederzeit unter „Nachweise" nachreichen.
+  const allesDa = hatAbtretung && hatDatenschutz && hatWiderruf
 
   return (
     <div className="space-y-6">
@@ -131,10 +135,11 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
       <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-xl p-4 flex items-start gap-3">
         <FileTextIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
         <div className="text-sm text-claimondo-navy">
-          <p className="font-semibold">Dokumente hochladen</p>
+          <p className="font-semibold">Dokumente hochladen — optional</p>
           <p className="text-xs text-claimondo-shield mt-1">
-            Wir benötigen ihre Sicherungsabtretung oder Honorarvereinbarung, ihre
-            Datenschutzerklärung und ihre Widerrufsbelehrung.
+            Ihre Sicherungsabtretung oder Honorarvereinbarung, Ihre Datenschutzerklärung und Ihre
+            Widerrufsbelehrung legen wir Ihren Kunden bei der Unterschrift vor. Sie können diesen
+            Schritt überspringen und die Dokumente jederzeit unter „Nachweise“ nachreichen.
           </p>
         </div>
       </div>
@@ -196,15 +201,14 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
           isLoading={uploading !== null}
           loadingText="Upload läuft ..."
           onClick={onDone}
-          disabled={!kannWeiter}
           className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {kannWeiter ? 'Weiter zum Kalender' : 'Bitte alle Pflichtdokumente hochladen'}
+          {allesDa ? 'Weiter zum Kalender' : 'Später hochladen — weiter zum Kalender'}
         </LoadingButton>
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">
-        Die Dokumente werden von Claimondo geprüft. Sie können sie später unter Profil → Verifizierung ersetzen.
+        Hochgeladene Dokumente sind sofort aktiv. Sie können sie jederzeit unter „Nachweise“ ersetzen.
       </p>
     </div>
   )

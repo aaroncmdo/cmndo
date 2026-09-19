@@ -5,6 +5,10 @@ export type FieldTyp =
   | 'zb1-upload' | 'termin'
   | 'phone-verify' | 'avatar-upload' | 'calendar-connect'
   | 'embed-site-create'
+  // 19.09.2026 (Aaron): optionaler Dokumenten-Schritt im Basic-SV-Onboarding. Self-persisting
+  // wie calendar-connect — die Uploads laufen ueber uploadSvPflichtdokument, der Wert ist nur
+  // ein Marker. CODE-injizierte Phase (src/lib/onboarding/sv-dokumente-phase.ts), kein DB-Seed.
+  | 'sv-dokumente'
   // Ops-Test 11.08. (RC-8): Adressfeld mit Google-Places-Autocomplete. Wert bleibt ein
   // String (formatierte Adresse) -> kompatibel zum generischen Speicherpfad; Koordinaten
   // ergaenzt der Server per Geocoding. Freitext bleibt erlaubt.

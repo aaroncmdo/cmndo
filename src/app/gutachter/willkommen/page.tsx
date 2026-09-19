@@ -48,7 +48,7 @@ export default async function GutachterWillkommenPage({
   // AAR-714: sa_vorlage_status/_admin_notiz entfernt — Wizard nutzt jetzt
   // pflichtdokumente (3 Slots) als Dispatch-Gate.
   const svSelect =
-    'id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected'
+    'id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_status, onboarding_anzahlung_betrag, vertrag_unterschrieben, portal_zugang_freigeschaltet, standort_adresse, standort_plz, standort_lat, standort_lng, organisation_id, rolle_in_organisation, logo_url, brand_primary, brand_secondary, use_custom_branding, firmenname, steuernummer, gcal_connected'
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -137,9 +137,16 @@ export default async function GutachterWillkommenPage({
       } catch (err) {
         console.error('[willkommen] abo-status:', err)
       }
+      // Nicht freigeschaltet nach Abschluss = der Geo-Guard hat geblockt (Adresse nicht
+      // verortbar). Der SV soll WISSEN, woran es liegt (Nachbar-Lane 19.09.: „Heute merken
+      // sie nicht, woran es liegt") — statt eines pauschalen „wir prüfen".
+      const standortFehlt =
+        (sv as { standort_lat?: number | null }).standort_lat == null ||
+        (sv as { standort_lng?: number | null }).standort_lng == null
       return (
         <SvBasicPendingReview
           freigeschaltet={!!sv.portal_zugang_freigeschaltet}
+          grund={!sv.portal_zugang_freigeschaltet && standortFehlt ? 'standort' : null}
           netzwerkAsk={
             !hatAbo && netzwerkMonatEuro ? (
               <NetzwerkAskInline
@@ -213,10 +220,17 @@ export default async function GutachterWillkommenPage({
   const hatAbtretung = isSlotFilled('sv_sicherungsabtretung') || isSlotFilled('sv_honorarvereinbarung')
   const hatDatenschutz = isSlotFilled('sv_datenschutzerklaerung')
   const hatWiderruf = isSlotFilled('sv_widerrufsbelehrung')
-  const needsDokumenteStep =
-    rolle !== 'sub_mitarbeiter' && !(hatAbtretung && hatDatenschutz && hatWiderruf)
 
-  if (sv.portal_zugang_freigeschaltet && !needsLogoStep && !needsDokumenteStep) {
+  // Aaron 19.09.2026: Dokumente sind kein Tor mehr — „wenn Dokumente fehlen, soll der
+  // Sachverständige trotzdem angezeigt werden und sogar auch buchbar sein." Bis dahin hielt
+  // `needsDokumenteStep` einen bezahlten SV im Wizard fest, bis drei Dokumente hochgeladen
+  // waren (Portal unerreichbar). Jetzt: freigeschaltet + Logo da → Portal, AUSSER der SV ist
+  // gerade bewusst im Wizard (Rückkehr von Stripe/Kalender, expliziter Step) — dann sieht er
+  // den Dokumente-Schritt noch einmal, kann ihn aber überspringen.
+  const fruehParams = await searchParams
+  const explizitImWizard = !!(fruehParams?.stripe_success || fruehParams?.step || fruehParams?.kalender_connected)
+
+  if (sv.portal_zugang_freigeschaltet && !needsLogoStep && !explizitImWizard) {
     redirect('/gutachter')
   }
 

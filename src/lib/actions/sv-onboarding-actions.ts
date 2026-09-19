@@ -6,6 +6,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { signAndStoreContract } from '@/lib/contracts/sign-and-store'
+import { freischaltungsPatch } from '@/lib/sv/freischaltung'
 
 /**
  * KFZ-148: Vertrag unterzeichnen (Schritt 2).
@@ -182,12 +183,14 @@ export async function einloeseGutscheincode(
   }
 
   const db = createAdminClient()
+  // Freischaltungs-Patch (portal_zugang, ist_aktiv, verifiziert) — derselbe wie im
+  // Stripe-Webhook und in der Basic-Freigabe (Aaron 19.09.2026: ein Begriff von
+  // „freigeschaltet" fuer alle Eingaenge, Siegel inklusive, keine Frist).
   const { error } = await db
     .from('sachverstaendige')
     .update({
+      ...freischaltungsPatch(new Date().toISOString()),
       onboarding_status: 'bezahlt',
-      portal_zugang_freigeschaltet: true,
-      ist_aktiv: true,
       anzahlung_status: 'bezahlt',
     })
     .eq('id', sv.id)

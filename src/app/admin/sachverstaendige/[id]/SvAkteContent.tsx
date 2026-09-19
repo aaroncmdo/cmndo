@@ -442,9 +442,9 @@ export default async function SvDetailPage({
               svId={sv.id}
               paket={(sv.paket as string | null) ?? null}
               onboardingQuelle={(sv.onboarding_quelle as string | null) ?? null}
+              portalFreigeschaltet={!!sv.portal_zugang_freigeschaltet}
               verifizierungStatus={(sv.verifizierung_status as 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | 'abgelehnt' | null) ?? null}
               verifizierungAdminNotiz={(sv.verifizierung_admin_notiz as string | null) ?? null}
-              verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
               verifiziertAm={sv.verifiziert_am ?? null}
               tier2Slots={verifizierungsData.tier2Slots}
               pflichtdokumente={verifizierungsData.pflichtdokumente}

@@ -118,8 +118,10 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   // (anon-Leak-Fix granted nur 9 Map-Spalten). Ein Filter darauf wirft als anon
   // "permission denied for table sachverstaendige" und killt den GESAMTEN Read
   // → 0 SVs auf der Marketing-Karte (nur sv_lead-Dead-Pins). Die anon-RLS-Policy
-  // `sachverstaendige_anon_select_map_ready` erzwingt ist_aktiv=true +
-  // verifiziert=true + geloescht_am IS NULL ohnehin server-seitig — der App-Filter
+  // `sachverstaendige__b1sel_an` (seit 19.09.2026 OHNE verifiziert — Aaron: „Die
+  // Verifizierung ist ja keine notwendige Sache fuer den Finder") erzwingt ist_aktiv +
+  // portal_zugang_freigeschaltet + nicht gesperrt/geloescht/Testkonto + Standort +
+  // Isochrone ohnehin server-seitig (Migration 20260919132007) — der App-Filter
   // war redundant. isochrone_polygon + standort_lat SIND granted → Filter ok.
   const supabase = await createClient()
   const { data: allRows, error } = await supabase

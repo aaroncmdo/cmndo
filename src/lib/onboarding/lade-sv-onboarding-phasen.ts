@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { localizePhase, localizeFeld } from './localize'
 import { filterFelderByAudience } from './filter-felder-by-audience'
+import { baueSvDokumentePhase, SV_DOKUMENTE_SLOTS } from './sv-dokumente-phase'
 import type {
   OnboardingPhase,
   OnboardingFeld,
@@ -297,6 +298,30 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
         },
       ],
     })
+    phasen.sort((a, b) => a.reihenfolge - b.reihenfolge)
+  }
+
+  // 19.09.2026 (Aaron): Dokumenten-Schritt — „er muss die Dokumente hochladen koennen im
+  // Onboarding, weil das ist ja wichtig fuer die Sicherungsabtretungsunterzeichnung,
+  // Datenschutzerklaerung etc." Optional (kein Pflichtfeld → nie blockierend), CODE-injiziert
+  // aus demselben Grund wie die Widget-Phase. Der aktuelle Stand je Slot faehrt als
+  // `optionen` mit, damit der Renderer keinen eigenen Read braucht. Wird IMMER gezeigt,
+  // solange der Wizard laeuft — auch bei bereits hochgeladenen Dokumenten (dann mit Haken).
+  {
+    const svIdFuerDocs = (sv as unknown as Record<string, unknown>).id as string
+    const { data: docRows, error: docErr } = await admin
+      .from('pflichtdokumente')
+      .select('dokument_typ, status')
+      .eq('sv_id', svIdFuerDocs)
+      .in('dokument_typ', SV_DOKUMENTE_SLOTS.map((s) => s.slotId))
+    if (docErr) {
+      // Nicht fatal: ohne Stand zeigt der Schritt alle Slots als leer — schlimmstenfalls
+      // laedt der SV ein Dokument erneut hoch (Upsert je Slot, kein Duplikat).
+      console.error('[ladeSvOnboardingPhasen] pflichtdokumente-Read fehlgeschlagen:', docErr.message)
+    }
+    const status: Record<string, string> = {}
+    for (const r of docRows ?? []) status[r.dokument_typ as string] = (r.status as string) ?? 'leer'
+    phasen.push(baueSvDokumentePhase(status))
     phasen.sort((a, b) => a.reihenfolge - b.reihenfolge)
   }
 

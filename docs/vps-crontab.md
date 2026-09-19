@@ -61,7 +61,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 0    16 * * *  /usr/local/bin/cron-call.sh /api/cron/reklamation-frist-check
 30   16 * * *  /usr/local/bin/cron-call.sh /api/cron/sv-payment-reminders
 40   15 * * *  /usr/local/bin/cron-call.sh /api/cron/haftpflicht-ablauf
-20   11 * * *  /usr/local/bin/cron-call.sh /api/cron/verifizierung-reminder
+20   11 * * *  /usr/local/bin/cron-call.sh /api/cron/verifizierung-reminder   # ⚠ seit 19.09.2026 No-op (Aaron: keine Dokumenten-Frist mehr) — Zeile kann gestrichen werden
 0    9  * * *  /usr/local/bin/cron-call.sh /api/cron/mietwagen-tracking
 0    9  * * 1  /usr/local/bin/cron-call.sh /api/cron/vs-korrespondenz-review
 0    3  * * *  /usr/local/bin/cron-call.sh /api/cron/db-backup

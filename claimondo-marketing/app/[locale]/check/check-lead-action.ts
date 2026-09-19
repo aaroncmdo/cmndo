@@ -8,6 +8,8 @@ import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { erzeugeUndSendeFlowLink } from '@/lib/leads/flowlink-fuer-lead'
 import { resolveMaklerByPromoCode } from '@/lib/makler/resolve-promo'
 import { erfasseLeadAttribution } from '@/lib/analytics/oaiq-capi'
+import { leseCheckRef } from '@/lib/check/check-ref-server'
+import { verknuepfeSessionsMitLead } from '@/lib/check/verknuepfe-sessions'
 
 // Lead-Server-Action für die interaktive Anspruchs-Prüfung (/check).
 // Spiegelt submitHomeLead (components/landing/home-lead-action.ts): anfragen-Zeile
@@ -134,6 +136,19 @@ export async function submitCheckLead(
   // im iframe und die SA oft Tage spaeter — spaeter ist der Wert nicht mehr
   // erreichbar. Ohne Anzeigenklick/Marketing-Consent ein No-op.
   await erfasseLeadAttribution(String(leadId))
+
+  // Nachtraegliche Verknuepfung (2026-09-09): Foto-Check-Sessions, die VOR dem Kontakt entstanden sind
+  // (Browser-Kennung im Cookie claimondo_check_ref, vom Foto-CTA als ?ref= ins Tool getragen), haengen
+  // jetzt an diesem Lead — sonst sieht der SV sie nie und der Cron loescht sie nach 30 Tagen.
+  // NON-FATAL wie der FlowLink darunter: der Lead steht, ein Fehler hier darf ihn nicht kippen.
+  try {
+    const ref = await leseCheckRef()
+    const v = await verknuepfeSessionsMitLead(sb, ref, String(leadId))
+    if (!v.ok) console.error('[check] Foto-Check-Verknuepfung:', v.error)
+    else if (v.anzahl > 0) console.info('[check] Foto-Check nachtraeglich verknuepft:', v.anzahl, 'Session(s) an Lead', leadId)
+  } catch (err) {
+    console.error('[check] Foto-Check-Verknuepfung fehlgeschlagen:', (err as Error).message)
+  }
 
   // FlowLink erzeugen + dem MELDER schicken — sein Kanal zurück in den eigenen Vorgang.
   // Bis 30.08.2026 fehlte das: der Lead entstand, das Team bekam eine WhatsApp, der Kunde

@@ -15,7 +15,7 @@ export type SvKontakt = {
   telefon: string | null
   avatarUrl: string | null
   verifizierungStatus: string | null
-  /** verifizierung_status === 'geprueft' */
+  /** sachverstaendige.verifiziert — das Siegel, seit 19.09.2026 = freigeschalteter Partner */
   verifiziert: boolean
   googlePlaceId: string | null
   profilbeschreibung: string | null
@@ -42,9 +42,14 @@ export type KbKontakt = {
  */
 export async function getSvKontakt(db: DbClient, svId: string | null): Promise<SvKontakt | null> {
   if (!svId) return null
+  // `verifiziert` ist das EINE kundensichtbare Siegel (Fallakte TeamZone, Termin-Detail,
+  // Whitelabel-Gate). Bis 19.09.2026 leitete dieser Loader es aus `verifizierung_status ===
+  // 'geprueft'` ab — eine zweite, abweichende Definition: die Fallakte zeigte das Siegel,
+  // das Termin-Detail nicht. Seit Aarons Entscheidung („damit soll er wirklich verifiziert
+  // sein") wird das Flag mit der Freischaltung gesetzt und hier direkt gelesen.
   const { data: sv } = await db
     .from('sachverstaendige')
-    .select('profile_id, verifizierung_status')
+    .select('profile_id, verifizierung_status, verifiziert')
     .eq('id', svId)
     .maybeSingle()
   if (!sv?.profile_id) return null
@@ -65,7 +70,7 @@ export async function getSvKontakt(db: DbClient, svId: string | null): Promise<S
     telefon: (p?.telefon as string | null) ?? null,
     avatarUrl: (p?.avatar_url as string | null) ?? null,
     verifizierungStatus: (sv.verifizierung_status as string | null) ?? null,
-    verifiziert: sv.verifizierung_status === 'geprueft',
+    verifiziert: sv.verifiziert === true,
     googlePlaceId: (p?.google_place_id as string | null) ?? null,
     profilbeschreibung: (p?.profilbeschreibung as string | null) ?? null,
   }
