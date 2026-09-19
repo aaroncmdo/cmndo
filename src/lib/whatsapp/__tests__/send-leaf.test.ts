@@ -24,7 +24,9 @@ describe('sendWhatsApp (Baileys leaf)', () => {
 
     await sendWhatsApp('0151 23456789', 'hi')
 
-    expect(mockedSendWhatsAppText).toHaveBeenCalledWith('+4915123456789', 'hi')
+    // sendWhatsApp macht den internen-Guard selbst (se.mode-bewusst) und ueberspringt daher
+    // den Leaf-Guard via skipInternalGuard (2026-09-19).
+    expect(mockedSendWhatsAppText).toHaveBeenCalledWith('+4915123456789', 'hi', { skipInternalGuard: true })
   })
 
   it('returns {success:true, sid} when Baileys responds ok', async () => {

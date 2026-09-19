@@ -3,6 +3,7 @@ import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendLeadReminderEmail } from '@/lib/email/lead-reminders'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { hatKuerzlichMenschlicheKonversation } from '@/lib/whatsapp/konversations-guard'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { createNotification } from '@/lib/notifications'
 
@@ -166,6 +167,16 @@ export async function GET(request: Request) {
     // ist. Wer Stufe 1 einfach ueberspringt, erreicht Stufe 2 nie.
     if (!WHATSAPP_STUFEN.has(step)) return null
     if (!lead.telefon) return false
+
+    // Konversations-Guard (2026-09-19): nicht dazwischenfunken, waehrend ein Betreuer den Lead
+    // gerade manuell per WhatsApp betreut (Aaron, Fall Anna Winter / CLM-2026-07961 — der Reminder
+    // "Schadenmeldung noch offen" platzte mitten in eine laufende Betreuer-Konversation). null =
+    // bewusst uebersprungen, der Stufen-Marker wird trotzdem gesetzt (die Kaskade laeuft weiter,
+    // aber ohne Spam-WhatsApp). Fail-open im Helper.
+    if (await hatKuerzlichMenschlicheKonversation(supabase, { leadId: lead.id, telefon: lead.telefon })) {
+      console.warn(`[AAR-477] WhatsApp-Reminder Stufe ${step} an Lead ${lead.id} uebersprungen — aktive Konversation <24h`)
+      return null
+    }
 
     // ⚠ NICHT den Token roh aus flow_links lesen. Die Links haben eine TTL, und
     // `/flow/[token]` weist einen abgelaufenen ab (page.tsx:91) — ein Reminder mit
