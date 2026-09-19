@@ -280,6 +280,15 @@ export default function DatenschutzPage() {
               Daneben werden technische Daten erhoben (siehe Ziff. 3) sowie der Zeitstempel der
               Übermittlung und die IP-Adresse zur Missbrauchsprävention (gespeichert für 30 Tage).
             </p>
+            <p className="mt-3">
+              Nutzen Sie vor Ihrer Anfrage unseren Foto-Check (Anspruchsprüfung mit Schadenfotos),
+              speichern wir in einem technisch notwendigen First-Party-Cookie
+              (<code>claimondo_check_ref</code>, Laufzeit 30 Tage) eine zufällig erzeugte Kennung.
+              Sie enthält keine personenbezogenen Daten und dient allein dazu, Ihre Foto-Schätzung
+              Ihrer späteren Anfrage zuzuordnen, damit Sie die Fotos nicht erneut hochladen müssen
+              (§ 25 Abs. 2 Nr. 2 TDDDG i. V. m. Art. 6 Abs. 1 lit. b DSGVO). Ohne spätere Anfrage
+              wird die Foto-Schätzung nach 30 Tagen gelöscht.
+            </p>
             <H3>5.2 Zweck der Verarbeitung</H3>
             <p>
               Die Daten werden zum Zweck der Bearbeitung Ihrer Anfrage verarbeitet. Konkret nehmen
