@@ -163,7 +163,13 @@ export async function ladeEinsatzStaedte(): Promise<string[]> {
       .from('sachverstaendige')
       .select('standort_lat, standort_lng, paket_umkreis_km')
       .eq('ist_aktiv', true)
-      .eq('verifiziert', true)
+      // `.eq('verifiziert', true)` stand hier bis zum 19.09.2026 — entfernt auf Aarons
+      // Entscheidung („ich moechte nicht mehr verifizieren"). Die Einsatzstaedte-Liste
+      // (Sitemap, llms.txt, Finder-Seite, Verfuegbarkeitsstreifen) spiegelt jetzt die
+      // Finder-Menge der App: freigeschaltet + aktiv + nicht gesperrt + nicht geloescht.
+      .eq('portal_zugang_freigeschaltet', true)
+      .is('gesperrt_seit', null)
+      .is('geloescht_am', null)
       .eq('ist_testaccount', false)
       // Admin-Toggle: ein SV kann intern arbeiten, ohne oeffentlich als buchbar genannt
       // zu werden. Default true — bestehende SVs bleiben sichtbar.

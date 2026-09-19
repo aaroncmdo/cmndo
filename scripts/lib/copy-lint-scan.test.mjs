@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { scanRdg, scanUmlaute, scanHeadingCode, scanTitleBrandTwice } from './copy-lint-scan.mjs'
+import { scanRdg, scanUmlaute, scanHeadingCode, scanTitleBrandTwice, scanAnredeImperativ } from './copy-lint-scan.mjs'
 
 describe('scanRdg — RDG-Rollentrennung', () => {
   it('flaggt Erstperson-Rechtsverben (alle am 04.09. live gefundenen Formen)', () => {
@@ -74,5 +74,48 @@ describe('scanTitleBrandTwice', () => {
     expect(scanTitleBrandTwice('Täglich 3 × 50 € Gutschein gewinnen | Claimondo | Claimondo')).toBe(true)
     expect(scanTitleBrandTwice('Täglich 3 × 50 € Gutschein gewinnen | Claimondo')).toBe(false)
     expect(scanTitleBrandTwice(undefined)).toBe(false)
+  })
+})
+
+describe('scanAnredeImperativ — duzende Befehlsform ohne Pronomen', () => {
+  // Die Achse, die scanAnrede per Konstruktion fehlt: "Beschreibe das Problem" duzt,
+  // enthält aber weder du noch dein. Alle Positivfälle sind am 19.09.2026 real auf
+  // prod gefunden worden, in siezender Umgebung.
+  it('flaggt die zehn real gefundenen Stellen', () => {
+    expect(scanAnredeImperativ('Beschreibe das Problem oder den Wunsch')).toHaveLength(1)
+    expect(scanAnredeImperativ('Mach Fotos aus mehreren Perspektiven direkt am Fahrzeug')).toHaveLength(1)
+    expect(scanAnredeImperativ('Kein Code erhalten? Prüfe, ob die Telefonnummer korrekt ist')).toHaveLength(1)
+    expect(scanAnredeImperativ('Wähle keinen Nutzernamen, der vorgibt, ein Anwalt zu sein.')).toHaveLength(1)
+    expect(scanAnredeImperativ('Vergiss nicht: Bei Erfolg trägt der Versicherer alle Kosten.')).toHaveLength(1)
+    expect(scanAnredeImperativ('→ Beachte die wichtigste Falle: Die Frist startet nicht …')).toHaveLength(1)
+    expect(scanAnredeImperativ('Gib der Versicherung nichts Schriftliches.')).toHaveLength(1)
+  })
+
+  it('flaggt auch, wenn im SELBEN Satz gesiezt wird — dort liest der Pronomen-Detektor das Sie und meldet grün', () => {
+    expect(scanAnredeImperativ('Prüfe alle Posten, bevor Sie zustimmen.')).toHaveLength(1)
+    expect(scanAnredeImperativ('Hier greift Ihre Kaskoversicherung. Prüfe vorher, ob sich das lohnt.')).toHaveLength(1)
+  })
+
+  it('kennt Umlaute am Wortanfang — \\b wäre dort blind', () => {
+    // ASCII-Wortgrenze vor Ö/Ä greift nicht; ohne die eigene Zeichenklasse wären
+    // "Öffne" und "Ändere" zwei stumme Verben in der Liste gewesen.
+    expect(scanAnredeImperativ('Öffne die App')).toHaveLength(1)
+    expect(scanAnredeImperativ('Ändere die Angaben')).toHaveLength(1)
+  })
+
+  it('lässt die vier Fehltreffer-Klassen durch, die eine breite Liste erzeugt hätte', () => {
+    expect(scanAnredeImperativ('Beschreiben Sie das Problem')).toHaveLength(0)   // Höflichkeitsform
+    expect(scanAnredeImperativ('Sende…')).toHaveLength(0)                        // Ladezustand
+    expect(scanAnredeImperativ('Online-Melde-Pfad')).toHaveLength(0)             // Kompositum
+    expect(scanAnredeImperativ('Erschütterungs-Versuche zurückweisen')).toHaveLength(0) // Substantiv
+    expect(scanAnredeImperativ('Wir überprüfen das')).toHaveLength(0)            // Verb im Wortinneren
+    expect(scanAnredeImperativ('Vergissmeinnicht')).toHaveLength(0)              // längeres Wort
+  })
+
+  it('erkennt die bekannte Grenze NICHT — kleingeschriebene Imperative nach Komma', () => {
+    // Dokumentiert, nicht versteckt: von "ich fordere" nicht sauber trennbar.
+    // Der 2FA-Satz wurde über die GROSSE Form im selben Satz gefunden.
+    expect(scanAnredeImperativ('und fordere ihn erneut an')).toHaveLength(0)
+    expect(scanAnredeImperativ('beschreibe ich kurz')).toHaveLength(0)
   })
 })

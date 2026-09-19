@@ -954,7 +954,7 @@ export const decoders: Decoder[] = [
     "faq": [
       {
         "q": "Ist ein Vergleich immer schlecht?",
-        "a": "Nein, aber das erste Angebot ist selten der volle Anspruch. Prüfe alle Posten, bevor Sie zustimmen."
+        "a": "Nein, aber das erste Angebot ist selten der volle Anspruch. Prüfen Sie alle Posten, bevor Sie zustimmen."
       },
       {
         "q": "Was passiert mit Spätschäden nach einer Abfindung?",
@@ -1061,7 +1061,7 @@ export const decoders: Decoder[] = [
       },
       {
         "h2": "Was Sie prüfen sollten",
-        "html": "<p>Vergleiche den angesetzten <strong>Wiederbeschaffungswert</strong> mit realen Angeboten für ein gleichwertiges Fahrzeug auf dem regionalen Markt. Prüfe, ob der <strong>Restwert</strong> auf einem realistischen regionalen Gebot beruht. Ihr Gutachten ist die Referenz — Abweichungen der Versicherung sind angreifbar. Mehrwertsteuer wird nur erstattet, wenn sie tatsächlich anfällt.</p>"
+        "html": "<p>Vergleiche den angesetzten <strong>Wiederbeschaffungswert</strong> mit realen Angeboten für ein gleichwertiges Fahrzeug auf dem regionalen Markt. Prüfen Sie, ob der <strong>Restwert</strong> auf einem realistischen regionalen Gebot beruht. Ihr Gutachten ist die Referenz — Abweichungen der Versicherung sind angreifbar. Mehrwertsteuer wird nur erstattet, wenn sie tatsächlich anfällt.</p>"
       }
     ],
     "next": {

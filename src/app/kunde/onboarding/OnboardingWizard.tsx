@@ -101,7 +101,7 @@ const DOC_INFO: Record<string, { warum: string; wo: string }> = {
   },
   schadensfotos: {
     warum: 'Fotos aller Schadenstellen dokumentieren Ausmaß und Position — Grundlage für Kalkulation und spätere Beweisführung.',
-    wo: 'Mach Fotos aus mehreren Perspektiven direkt am Fahrzeug — Nah- und Übersichtsaufnahmen helfen besonders.',
+    wo: 'Machen Sie Fotos aus mehreren Perspektiven direkt am Fahrzeug — Nah- und Übersichtsaufnahmen helfen besonders.',
   },
   zeugenbericht: {
     warum: 'Zeugenaussagen stärken Ihre Position bei strittiger Haftung und können die Regulierung deutlich beschleunigen.',

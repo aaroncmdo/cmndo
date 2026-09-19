@@ -30,19 +30,22 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  *   - geloescht_am IS NULL (nicht gelöscht)
  *   - ist_testaccount = false (kein interner Test-/Demo-Account)
  *
- * NICHT mehr Teil des Filters (Aaron 2026-09-19, beide am selben Tag):
- *   - `verifiziert=true` (Vormittag: „Die Verifizierung ist ja keine notwendige Sache für den
- *     Finder") — Begründung und Messung im Kopf von ./dispatch-gate.ts.
- *   - `verifizierung_status != 'frist_ueberschritten'` (Nachmittag: „nicht mehr nachhalten,
- *     ob die Dokumente fehlen … trotzdem angezeigt und sogar auch buchbar") — hob FG3
- *     decision A (11.07.) und Option B (08.08.) auf; 3 Gutachter waren allein dadurch
- *     aus der Engine ausgeschlossen.
+ * Gutachter-Onboarding-Audit (Befund #1) fuehrte die Invariante ein:
+ * "auf der Karte gelistet" == "durch die Engine buchbar". Sie gilt unveraendert.
  *
- * Gutachter-Onboarding-Audit (Befund #1): Vorher gated die öffentliche Karte (anon-RLS)
- * auf `verifiziert`, Dispatch/MCP aber nur auf portal_zugang -> ein bezahlter-aber-
- * unverifizierter SV war buchbar, aber unsichtbar auf der Karte. Seitdem gilt:
- * "auf der Karte gelistet" == "durch die Engine buchbar" — und seit dem 19.09. ohne
- * jede Ausnahme, weil auch die Frist-Klausel weg ist, die die Karte nie hatte.
+ * ⚠ Die gemeinsame Bedingung war bis zum 19.09.2026 `verifiziert=true` und ist es
+ * NICHT mehr (Aaron, Vormittag: "Die Verifizierung ist ja keine notwendige Sache fuer
+ * den Finder"). Gemessen an dem Tag auf prod: von 27 freigeschalteten Gutachtern waren
+ * nur 13 im Finder sichtbar und buchbar. Karte, Engine und die anon-Policy
+ * `sachverstaendige__b1sel_an` haben das Flag gemeinsam verloren; die Invariante
+ * traegt jetzt portal_zugang_freigeschaltet. Begruendung: ./dispatch-gate.ts,
+ * Policy-Seite: Migration 20260919132007.
+ *
+ * Ebenfalls NICHT mehr Teil des Filters (Aaron, Nachmittag desselben Tages: „nicht mehr
+ * nachhalten, ob die Dokumente fehlen … trotzdem angezeigt und sogar auch buchbar"):
+ * `verifizierung_status != 'frist_ueberschritten'` — hob FG3 decision A (11.07.) und
+ * Option B (08.08.) auf; 3 Gutachter waren allein dadurch aus der Engine ausgeschlossen,
+ * obwohl die Karte sie zeigte. Seitdem gilt die Invariante ohne jede Ausnahme.
  *
  * Befund #6: `ist_testaccount=false` ist neu. Test-Accounts wurden bisher NUR
  * per crude firmenname-ILIKE (isTestAccount) aus Karte + LP-Count gefiltert,
