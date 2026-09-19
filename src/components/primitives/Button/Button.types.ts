@@ -6,7 +6,8 @@
 import type { ReactNode } from 'react'
 
 // 'bare' = wie 'ghost' aber ohne Rahmen (borderlose Sekundär-Aktion).
-export type ButtonTone = 'navy' | 'ondo' | 'ghost' | 'bare' | 'danger' | 'success'
+// 'hell' = wie 'bare', aber weißer Text für dunkle Flächen (navy Glass-Card im Self-Service).
+export type ButtonTone = 'navy' | 'ondo' | 'ghost' | 'bare' | 'hell' | 'danger' | 'success'
 /** Kanonischer Name fuer die Farbvariante (identische Werte wie ButtonTone). */
 export type ButtonVariant = ButtonTone
 /** sm=36 · md=44 (touchMin) · lg=52 · icon=44×44 quadratisch (Icon-only) */
@@ -36,6 +37,8 @@ export type ButtonProps = {
   ariaLabel?: string
   /** Zeigt einen Spinner und deaktiviert den Button (verhindert Doppel-Submit). */
   loading?: boolean
+  /** Auf-/Zugeklappt-Zustand für Toggle-Buttons (Web: aria-expanded, Native: accessibilityState.expanded). */
+  ariaExpanded?: boolean
   /**
    * Web-only Escape-Hatch: zusätzliche Tailwind-Klassen (Layout/extra). Native
    * (`.native.tsx`) ignoriert das. Token-abgeleitete inline-styles gewinnen bei

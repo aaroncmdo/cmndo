@@ -15,6 +15,7 @@ import { ShieldCheck, MapPin, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { PartnerRangBadge } from '@/components/shared/PartnerRangBadge'
+import { ProfiltextAusklappbar } from '@/components/shared/ProfiltextAusklappbar'
 import type { AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 import { GlassSurface } from './GlassSurface'
 
@@ -170,12 +171,15 @@ export function SvProfileInhalt({ sv, gross = false }: { sv: AktiverSVPublic; gr
         </Section>
       )}
 
-      {/* AAR-369: Selbstgeschriebener Profiltext (Bio) — SV-eigenes Trust-Signal. */}
-      {sv.profilbeschreibung && (
-        <p className="text-body-sm italic leading-relaxed text-claimondo-navy/70">
-          „{sv.profilbeschreibung}"
-        </p>
-      )}
+      {/* AAR-369: Selbstgeschriebener Profiltext (Bio) — SV-eigenes Trust-Signal.
+          19.09. (Aaron): lange Texte gekürzt (180 Zeichen) + „Mehr anzeigen", damit das
+          Profil die Karte nicht überdeckt. */}
+      <ProfiltextAusklappbar
+        text={sv.profilbeschreibung}
+        anfuehrungszeichen
+        textClassName="text-body-sm italic leading-relaxed text-claimondo-navy/70"
+      />
+
 
       <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/60">
         Den passenden Gutachter wählt das System anhand Ihres Schadenorts.

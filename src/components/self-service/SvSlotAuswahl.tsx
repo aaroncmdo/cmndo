@@ -10,6 +10,7 @@ import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { PartnerRangBadge } from '@/components/shared/PartnerRangBadge'
+import { ProfiltextAusklappbar } from '@/components/shared/ProfiltextAusklappbar'
 import { Card } from '@/components/primitives/Card'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
@@ -152,7 +153,14 @@ export function SvSlotAuswahl({
                 </div>
               )}
               {sv.profilbeschreibung && (
-                <p className={cn('text-sm mb-3 line-clamp-2', dunkel ? 'text-white/70' : 'text-claimondo-navy/60')}>{sv.profilbeschreibung}</p>
+                <ProfiltextAusklappbar
+                  text={sv.profilbeschreibung}
+                  hell={dunkel}
+                  mehrLabel={t('slot.mehr_anzeigen')}
+                  wenigerLabel={t('slot.weniger_anzeigen')}
+                  className="mb-3"
+                  textClassName={cn('text-sm', dunkel ? 'text-white/70' : 'text-claimondo-navy/60')}
+                />
               )}
               {sv.slots.length === 0 ? (
                 <p className={cn('text-sm', dunkel ? 'text-white/60' : 'text-claimondo-navy/50')}>{t('slot.keine_termine')}</p>

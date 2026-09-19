@@ -5,6 +5,7 @@
 import { Card } from '@/components/primitives'
 import { PhoneIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { ProfiltextAusklappbar } from '@/components/shared/ProfiltextAusklappbar'
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 
 type KontaktProps = {
@@ -34,7 +35,9 @@ function KontaktRow({ name, rolle, telefon, avatarUrl, verifiziert, beschreibung
           <p className="text-body-sm font-medium text-claimondo-navy truncate">{name ?? '—'}</p>
           {verifiziert && <StatusBadge tone="success" size="sm">Verifiziert</StatusBadge>}
         </div>
-        {beschreibung && <p className="text-body-xs text-claimondo-ondo/80 mt-0.5 line-clamp-2">{beschreibung}</p>}
+        {beschreibung && (
+          <ProfiltextAusklappbar text={beschreibung} className="mt-0.5" textClassName="text-body-sm text-claimondo-ondo/80" />
+        )}
       </div>
       {telefon && (
         <a

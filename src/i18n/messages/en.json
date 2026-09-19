@@ -5663,6 +5663,8 @@
       "wunschzeit": "Preferred time",
       "wunschzeit_anfrage": "on request",
       "keine_termine": "No available appointments at the moment.",
+      "mehr_anzeigen": "Show more",
+      "weniger_anzeigen": "Show less",
       "uhr_suffix": "h"
     },
     "kasko": {
