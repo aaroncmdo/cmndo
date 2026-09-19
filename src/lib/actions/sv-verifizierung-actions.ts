@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
-import { createLinkedTask } from '@/lib/tasks/create-task'
 import { revalidatePath } from 'next/cache'
 
 async function requireGutachter() {
@@ -52,7 +51,7 @@ export async function uploadSvPflichtdokument(
   try {
     const ctx = await requireGutachter()
     svId = ctx.svId
-    const { userId, svFirmenname, supabase } = ctx
+    const { supabase } = ctx
 
     slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
     const file = formData.get('datei') as File | null
@@ -80,16 +79,6 @@ export async function uploadSvPflichtdokument(
 
     const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
     const db = createAdminClient()
-
-    const { data: profile } = await db
-      .from('profiles')
-      .select('vorname, nachname')
-      .eq('id', userId)
-      .maybeSingle()
-    const svName =
-      [profile?.vorname, profile?.nachname].filter(Boolean).join(' ').trim()
-      || svFirmenname
-      || 'Unbekannter SV'
 
     const path = `sv-pflicht/${svId}/${slotId}/${Date.now()}.${ext}`
     const { error: uploadErr } = await db.storage
@@ -138,47 +127,17 @@ export async function uploadSvPflichtdokument(
       }
     }
 
-    // Admin-Task: Review-Pflicht nach Upload
-    await createLinkedTask({
-      titel: `${slot.label} von ${svName} zu prüfen`,
-      beschreibung: `${svName} hat „${slot.label}" hochgeladen. Bitte im Verifizierungs-Tab prüfen und freigeben.`,
-      prioritaet: 'normal',
-      typ: 'sv_dokument_review',
-      entity_type: 'gutachter',
-      entity_id: svId,
-      empfaenger_rolle: 'admin',
-      task_code: `sv_${slotId}_review`,
-      trigger_event: 'sv_pflichtdokument_hochgeladen',
-      auto_erstellt: true,
-    })
-
-    // Mitteilung an alle Admins (non-blocking)
-    try {
-      const { data: admins } = await db
-        .from('profiles')
-        .select('id')
-        .eq('rolle', 'admin')
-      if (admins && admins.length > 0) {
-        const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
-        await createMitteilungMulti(
-          admins.map((a) => ({ id: a.id, rolle: 'admin' as const })),
-          {
-            kategorie: 'update',
-            titel: `${slot.label} von ${svName}`,
-            inhalt: 'Bitte im SV-Verifizierungs-Tab prüfen und freigeben.',
-            route_url: `/admin/vertrieb/sachverstaendige/${svId}?tab=verifizierung`,
-            icon: 'bell',
-            prioritaet: 'normal',
-          },
-        )
-      }
-    } catch (err) {
-      console.error('[AAR-647] Admin-Mitteilung nach SV-Upload fehlgeschlagen:', err)
-    }
+    // Bis 19.09.2026 entstand hier je Upload ein Admin-Pruef-Task + eine Mitteilung an alle
+    // Admins („bitte pruefen und freigeben"). Aaron: „ich moechte nicht mehr verifizieren und
+    // ich moechte auch nicht mehr nachhalten muessen, ob die Dokumente fehlen oder nicht."
+    // Das Dokument wirkt ab `status='hochgeladen'` sofort im Kundenflow (SA-Tool merged den
+    // Slot, der FlowLink verlinkt Datenschutz/Widerruf). Der Admin sieht den Stand in der
+    // SV-Akte und kann dort weiterhin zurueckweisen oder sperren — er muss nicht.
 
     revalidatePath('/gutachter/verifizierung')
-    revalidatePath('/admin/aufgaben/alle')
+    revalidatePath('/gutachter/willkommen')
     revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
+    revalidatePath(`/admin/sachverstaendige/${svId}`)
 
     return { ok: true, slot_id: slotId, storage_path: path }
   } catch (err) {

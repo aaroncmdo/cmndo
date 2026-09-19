@@ -16,10 +16,16 @@ import { Card } from '@/components/primitives'
 
 export function SvBasicPendingReview({
   freigeschaltet = false,
+  grund = null,
   netzwerkAsk = null,
 }: {
   /** portal_zugang_freigeschaltet — Auto-Freigabe durch (true) vs. Geo-Guard-Fallback (false). */
   freigeschaltet?: boolean
+  /**
+   * Warum NICHT freigeschaltet: 'standort' = Adresse nicht auf der Karte verortbar (der
+   * einzige verbleibende Grund seit 19.09.2026 — Dokumente und Prüfung sind kein Tor mehr).
+   */
+  grund?: 'standort' | null
   /** Optionaler Netzwerkpartner-Ask (null = zahlend/Preis-Config fehlt). */
   netzwerkAsk?: ReactNode
 }) {
@@ -53,12 +59,18 @@ export function SvBasicPendingReview({
               </h1>
               {freigeschaltet ? (
                 <p className="mt-3 text-claimondo-navy/70 text-[15px] leading-relaxed">
-                  Ihr Profil ist freigeschaltet — Ihr Portal ist bereit und Sie können ab sofort Aufträge erhalten.
+                  Ihr Profil ist freigeschaltet — Sie sind auf der Karte sichtbar, buchbar und können ab
+                  sofort Aufträge erhalten. Nachweise und Dokumente können Sie jederzeit im Portal ergänzen.
+                </p>
+              ) : grund === 'standort' ? (
+                <p className="mt-3 text-claimondo-navy/70 text-[15px] leading-relaxed">
+                  Fast geschafft: Wir konnten Ihre Adresse nicht auf der Karte verorten, deshalb sind Sie noch
+                  nicht sichtbar. Unser Team trägt den Standort nach und schaltet Sie frei — Sie bekommen eine
+                  E-Mail, sobald es losgeht.
                 </p>
               ) : (
                 <p className="mt-3 text-claimondo-navy/70 text-[15px] leading-relaxed">
-                  Wir prüfen Ihr Profil und schalten Sie innerhalb von 48 Stunden
-                  frei. Sie bekommen eine E-Mail, sobald es losgeht.
+                  Wir schalten Ihr Profil in Kürze frei. Sie bekommen eine E-Mail, sobald es losgeht.
                 </p>
               )}
             </div>

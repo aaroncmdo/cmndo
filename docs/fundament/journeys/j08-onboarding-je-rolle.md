@@ -24,7 +24,7 @@ Prod-Smoke mit externer Wegwerf-Identität.
 
 ### A · Sachverständiger (SV) — Freemium
 1. **Registrieren** — **kostenlos für alle** (kein DAT-Gating mehr). Büro-Daten, SV-Typ, Einzugsgebiet/Geo, optional Whitelabel-Branding.
-2. **Verifikation** — Admin prüft (48h) → `verifiziert=true`. Danach im Dispatch-Pool + Gutachter-Finder sichtbar (Gate: `verifiziert`, Geo).
+2. **Automatische Freischaltung** (Soll-Delta 19.09.2026, Aaron: „ich möchte nicht mehr verifizieren und ich möchte auch nicht mehr nachhalten müssen, ob die Dokumente fehlen oder nicht … Damit soll er wirklich verifiziert und buchbar sein"): Mit dem Wizard-Abschluss (Basic: Unterschrift Partnervertrag; bezahlt: Zahlungseingang/Gutschein/Büro) setzt **ein** Freischaltungs-Patch an **jedem** Eingang `portal_zugang_freigeschaltet`, `ist_aktiv` **und `verifiziert`** — ohne Admin-Klick. Danach sofort im Dispatch-Pool, im Gutachter-Finder, im MCP und mit Siegel in der Kunden-Fallakte (Gate: Portal + aktiv + nicht gesperrt + Geo). Einzige Ausnahme: **Geo-Guard** — ohne verortbare Adresse kein Kartenpunkt → der SV erfährt den Grund, der Admin bekommt genau eine Nachhol-Aufgabe („Profil freischalten" = Nachhol-Weg, nicht Regelweg). **Dokumente sind Zubehör, kein Tor:** Berufshaftpflicht, Gewerbeanmeldung, Sicherungsabtretung/Honorarvereinbarung, Datenschutzerklärung und Widerrufsbelehrung lädt der SV im Wizard (eigener optionaler Schritt, Basic **und** bezahlt) oder jederzeit unter „Nachweise" hoch; ein Upload wirkt sofort im Kundenflow (J3: Mit-Signatur + FlowLink-Links), ohne Prüf-Task, ohne Frist. *(Ersetzt: „Verifikation — Admin prüft (48h) → `verifiziert=true`"; die Tier-2-Frist vom 08.08. — siehe Variante unten — ist zurückgenommen.)*
 3. **Netzwerkpartner werden** (Haupt-Preismodell, optional) — **Monats-Flatrate + einmalige Einrichtungsgebühr, beide via Stripe** (Single Subscription-Checkout mit Setup-Fee-Item). Entitlement **derive-at-read** aus `sv_netzwerk_abonnements`. Ergebnis: **Netzwerkpartner-Badge + Ranking-Boost** (J10).
 4. **Rechtsform** — Nudge bei NULL (#4798) bleibt.
 
@@ -51,7 +51,11 @@ Prod-Smoke mit externer Wegwerf-Identität.
   Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.
   Marketing-Einstieg: flotte.claimondo.de (Subdomain-LP, CTA -> Self-Signup) —
   analog werkstatt.claimondo.de fuer Werkstaetten.)
-- **Tier-2-Dokumente-Frist nach Freischaltung** (Soll-Delta 08.08., Aaron „Option B"): Jeder
+- ~~**Tier-2-Dokumente-Frist nach Freischaltung**~~ — **ZURÜCKGENOMMEN 19.09.2026** (Aaron: „nicht mehr
+  nachhalten, ob die Dokumente fehlen … trotzdem angezeigt und sogar auch buchbar"). Keine Frist, kein
+  `frist_ueberschritten`-Dispatch-Stopp, kein Reminder-Cron, kein Prüf-Task je Upload; Bestand per Migration
+  bereinigt (3 gesperrte SVs wieder buchbar, 19 Fristen gelöscht, 14 Siegel nachgezogen). Der Absatz bleibt als
+  Geschichte stehen: (Soll-Delta 08.08., Aaron „Option B"): Jeder
   freigeschaltete SV ohne geprüfte **Berufshaftpflicht + Gewerbeanmeldung** erhält 14 Tage Frist
   ab Freischaltung (`verifizierung_status='ausstehend'` + `verifizierung_frist_bis`). Nach Ablauf →
   `frist_ueberschritten` → **Fall-Empfang pausiert** (bestehendes FG3-Gate `svDarfFaelleEmpfangen`),

@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
-import { sindTier2DocsGeprueft, berechneTier2Patch, berechneVerifiziertPatch } from '@/lib/sv/tier2-docs'
+import { freischaltungsPatch } from '@/lib/sv/freischaltung'
 import { haversineKm } from '@/lib/gps/geofence'
 
 type AdminClient = ReturnType<typeof createAdminClient>
@@ -23,9 +23,18 @@ export const STANDORT_PLAUSIBILITAET_MAX_KM = 25
  *  1. Go-Live-Geo-Guard: ohne standort_lat/lng blocken (der SV waere sonst zwar
  *     "frei", aber map-unsichtbar + nicht dispatchbar). Fehlende Isochrone aus den
  *     Koordinaten nachberechnen; schlaegt das fehl -> blocken.
- *  2. Die 5 Freigabe-Flags atomar setzen (verifizierung_status, verifiziert,
- *     verifiziert_am, ist_aktiv, portal_zugang_freigeschaltet) + ggf. Isochrone.
+ *  2. Den Freischaltungs-Patch schreiben (portal_zugang_freigeschaltet, ist_aktiv,
+ *     verifiziert, verifiziert_am — src/lib/sv/freischaltung.ts, derselbe Patch wie
+ *     Stripe/Gutschein/Sub-SV) + onboarding_status + ggf. Isochrone.
  *  3. Offenen sv_basic_claim_review-Task schliessen (non-fatal).
+ *
+ * Aaron 19.09.2026: „ich moechte nicht mehr verifizieren und ich moechte auch nicht mehr
+ * nachhalten muessen, ob die Dokumente fehlen oder nicht … Damit soll er wirklich
+ * verifiziert und buchbar sein." — Deshalb setzt die Freigabe `verifiziert` wieder
+ * bedingungslos und startet KEINE 14-Tage-Frist mehr (Option B vom 08.08. und der
+ * Siegel-Fix vom 31.08. sind zurueckgenommen; beide standen hier bis zum 19.09.).
+ * Dokumente laedt der SV im Wizard oder jederzeit unter „Nachweise" hoch — sie sind
+ * Zubehoer fuer den Kundenflow, kein Tor.
  *
  * KEIN Auth-Guard hier — der Caller macht die Auth (Admin bzw. eingeloggter SV).
  * Der Caller uebergibt seinen Admin-Client (Service-Role) und revalidiert selbst.
@@ -36,7 +45,7 @@ export async function freigebeBasicSvCore(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { data: sv, error: readErr } = await db
     .from('sachverstaendige')
-    .select('standort_lat, standort_lng, standort_plz, paket_umkreis_km, isochrone_polygon, verifizierung_status, verifizierung_frist_bis')
+    .select('standort_lat, standort_lng, standort_plz, paket_umkreis_km, isochrone_polygon, verifiziert_am')
     .eq('id', svId)
     .maybeSingle()
   if (readErr) return { ok: false, error: `SV konnte nicht geladen werden: ${readErr.message}` }
@@ -102,54 +111,29 @@ export async function freigebeBasicSvCore(
     }
   }
 
-  // Tier-2-Enforcement (Spec 2026-08-08): Freischaltung setzt verifizierung_status
-  // NICHT mehr blind auf 'geprueft'. Nur wenn Berufshaftpflicht + Gewerbeanmeldung
-  // wirklich geprueft sind → 'geprueft'; sonst 'ausstehend' + 14-Tage-Frist, damit
-  // der Reminder-Cron + der FG3-Dispatch-Gate (frist_ueberschritten) greifen. Der
-  // fruehere Blind-'geprueft'-Setter war der Bypass, der 9 SVs ohne Docs dispatchbar
-  // machte (prod 08.08.). 'geprueft' setzt kuenftig NUR tier2Freigeben nach Doc-Pruefung.
-  // EINMAL bestimmt und fuer BEIDE Verifizierungs-Achsen genutzt (siehe update unten).
-  const tier2Geprueft = await sindTier2DocsGeprueft(db, svId)
-  const tier2Patch = berechneTier2Patch(
-    tier2Geprueft,
-    (sv as { verifizierung_status?: string | null }).verifizierung_status ?? null,
-    (sv as { verifizierung_frist_bis?: string | null }).verifizierung_frist_bis ?? null,
-    Date.now(),
-  )
-
-  // Die Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone + Tier-2-Patch).
+  // Die Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
   // onboarding_status='abgeschlossen': ohne den Flip blieben freigegebene Basic-SVs
   // ewig auf dem Anlage-Default 'pending' (Aaron-Fund 05.08.). Der Paid-Statusautomat
   // laeuft NICHT ueber diesen Core und bleibt unberuehrt.
+  //
+  // `verifiziert` speist das gruene "Verifiziert"-Badge in der Kundensicht
+  // (components/kunde/claim-view/TeamZone.tsx) und das Whitelabel-Gate (branding/gate.ts).
+  // Seit dem 19.09. bedeutet es „freigeschalteter Claimondo-Partner" und wird mit der
+  // Freischaltung gesetzt — bei einem erneuten Lauf bleibt das erste Datum stehen.
+  const nowIso = new Date().toISOString()
   const { error: svErr } = await db
     .from('sachverstaendige')
     .update({
-      // `verifiziert` ist die ZWEITE Verifizierungs-Achse neben `verifizierung_status`
-      // -- und die nutzersichtbare: sie speist das gruene "Verifiziert"-Badge in der
-      // Kundensicht (components/kunde/claim-view/TeamZone.tsx) und das Whitelabel-Gate
-      // (branding/token-theme.ts: `verifiziert && use_custom_branding`).
-      //
-      // Der Tier-2-Fix vom 08.08. (Kommentar oben) hat `verifizierung_status` an die
-      // echte Doc-Pruefung gebunden, `verifiziert` aber blind auf true gelassen. Folge
-      // auf prod (31.08. gemessen): 4 SVs mit `verifiziert=true`, `status='ausstehend'`
-      // und `verifiziert_von=NULL` -- ein Vertrauens-Siegel gegenueber Endkunden, das
-      // niemand geprueft hat; bei 2 davon war zusaetzlich `use_custom_branding=true`,
-      // sie erfuellten das Whitelabel-Gate also vollstaendig.
-      //
-      // Nur SETZEN, nie zuruecksetzen: ein erneuter Lauf dieser Freigabe darf einem
-      // echt verifizierten SV das Flag nicht entziehen.
-      ...berechneVerifiziertPatch(tier2Geprueft, new Date().toISOString()),
-      ist_aktiv: true,
-      portal_zugang_freigeschaltet: true,
+      ...freischaltungsPatch(nowIso, {
+        verifiziertAmBestehend: (sv as { verifiziert_am?: string | null }).verifiziert_am ?? null,
+      }),
       onboarding_status: 'abgeschlossen',
-      ...tier2Patch,
       ...geoPatch,
     } as never)
     .eq('id', svId)
   if (svErr) return { ok: false, error: `Freigabe fehlgeschlagen: ${svErr.message}` }
 
   // Offenen sv_basic_claim_review-Task schliessen (best-effort, non-fatal).
-  const nowIso = new Date().toISOString()
   const { error: taskErr } = await db
     .from('tasks')
     .update({

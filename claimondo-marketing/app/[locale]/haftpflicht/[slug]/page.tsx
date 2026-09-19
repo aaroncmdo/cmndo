@@ -135,12 +135,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <ReviewerByline rolle="verantwortlich" datum={a.lastModified.toISOString().slice(0, 10)} />
         <SpokeCtaBand />
       </main>
-      {/* Guide-Angebot bei 15 % Artikeltext — nur das Desktop-Modal. Das
-          Mobil-Band ist hier AUS: die Seite traegt schon die StickyCallBar
-          (fixed bottom-4); zwei feste Leisten am unteren Rand wuerden sich
-          gegenseitig verdecken. Auf Mobil fuehren Anker-Block und Fusszeile
-          zum Guide. */}
-      <GuidePopover mobilBand={false} cluster={a.cluster ?? null} />
+      {/* Guide-Angebot bei 15 % Lesetiefe. Das Band positioniert sich selbst
+          ueber der StickyCallBar (bandAbstand in GuidePopover, #5926) — der Prop
+          `mobilBand` muss dafuer NICHT abgeschaltet werden (wie wissen/[slug]).
+          Bis 19.09.2026 stand hier `mobilBand={false}` aus der Zeit VOR bandAbstand
+          (#5913: "zwei feste Leisten wuerden sich verdecken"). Der Fix aus #5926 war
+          damit deployt und auf genau den 62 Ratgeber-Seiten, fuer die er gebaut
+          wurde, nicht eingeschaltet. Gemessen auf prod (390x844, bis 80 %
+          gescrollt): Band nie da — und sessionStorage "gezeigt" trotzdem gesetzt,
+          der Leser bekam es in dieser Sitzung nie mehr. */}
+      <GuidePopover cluster={a.cluster ?? null} />
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${a.slug}`} whatsappHref={WA} />
     </div>
