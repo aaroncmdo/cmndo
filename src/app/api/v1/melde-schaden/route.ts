@@ -91,6 +91,17 @@ const MeldeSchadenSchema = z.object({
   schuldfrage: z.string().trim().max(40).optional(),
   name: z.string().trim().min(2).max(80),
   telefon: z.string().trim().regex(PHONE_RE),
+  /**
+   * Rueckfallebene der Versand-Kaskade (WhatsApp -> SMS -> Email, issue-canonical-flowlink.ts).
+   * Eine Nummer, die kein WhatsApp/SMS empfaengt (Festnetz, Zahlendreher), hinterlaesst ohne
+   * dieses Feld kanal='none': kein Link, keine Zustellspur, kein Rueckweg fuer den Kunden.
+   * Gemessen 19.09.2026: 0 von 21 MCP-Leads hatten je eine Zustellung.
+   *
+   * BEWUSST locker validiert — gleiche Begruendung wie bei `schuldfrage` oben: eine vom
+   * Modell vertippte Adresse darf die Schadenmeldung nicht mit 400 abweisen. Was nicht wie
+   * eine Adresse aussieht, faellt unten still auf undefined und der Kanal bleibt wie bisher.
+   */
+  email: z.string().trim().max(120).optional(),
   /** Stage-1-Einwilligung — Pflicht. zugestimmt MUSS true sein, sonst kein Write. */
   einwilligung: z.object({
     zugestimmt: z.literal(true),
@@ -184,9 +195,16 @@ export async function POST(req: Request) {
   // Stage-1-Consent-Zeitpunkt (Server-Zeit der bestaetigten in-chat-Einwilligung).
   const consentTs = new Date().toISOString()
 
+  // Nur was wie eine Adresse aussieht, wandert weiter — sonst undefined (s. Schema-Kommentar).
+  // Dieselbe Minimalpruefung, die auch die Versand-Kaskade fahrt (`email.includes('@')`),
+  // hier einmal zentral, damit im Datensatz kein Fragment landet, das nie zustellbar waere.
+  const kundenEmail =
+    input.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.email) ? input.email : undefined
+
   const payload: EmbedAnfrageInput = {
     name: input.name,
     telefon: input.telefon,
+    email: kundenEmail,
     schadentyp: input.schadenart,
     schadens_kurzbeschreibung: input.hergang,
     source: 'mcp',
