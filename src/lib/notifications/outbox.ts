@@ -4,8 +4,20 @@
 // (schliesst die P1a-Dedup-Luecke strukturell). Der Versand laeuft ueber den
 // Worker (outbox-worker.ts), angedockt an /api/notifications/process.
 import { createAdminClient } from '@/lib/supabase/admin'
+import { hatKuerzlichMenschlicheKonversation } from '@/lib/whatsapp/konversations-guard'
 
 export type OutboxChannel = 'whatsapp' | 'email' | 'sms' | 'in_app'
+
+// Reminder-/Eskalations-Templates, die NICHT dazwischenfunken sollen, waehrend ein Betreuer
+// den Kunden gerade manuell per WhatsApp betreut (Aaron 19.09.2026, Fall Anna Winter /
+// CLM-2026-07961). Bewusst NICHT hier: kritische Einmal-Sends wie fall_eroeffnet (Willkommen)
+// oder sv_auftrag_verbindlich — die muessen immer raus.
+const KONVERSATIONS_SENSIBLE_TEMPLATES = new Set<string>([
+  'dokumente_nachreichen',
+  'eskalation_tag14',
+  'eskalation_tag21',
+  'eskalation_tag28',
+])
 
 export type OutboxEnqueueInput = {
   dedupKey: string
@@ -37,6 +49,23 @@ export function buildDedupKey(parts: {
 
 export async function enqueue(input: OutboxEnqueueInput): Promise<OutboxEnqueueResult> {
   const supabase = createAdminClient()
+
+  // Konversations-Guard (2026-09-19): einen Reminder NICHT senden, wenn mit dem Kunden in den
+  // letzten 24h eine menschliche WhatsApp lief (Betreuer betreut ihn gerade manuell). Nur fuer
+  // die konversations-sensiblen Reminder-Templates; kritische Sends laufen unberuehrt. Fail-open
+  // (der Helper faengt Query-Fehler ab -> false -> Reminder laeuft).
+  if (
+    input.kanal === 'whatsapp' &&
+    input.claimId &&
+    KONVERSATIONS_SENSIBLE_TEMPLATES.has(input.template) &&
+    (await hatKuerzlichMenschlicheKonversation(supabase, { claimId: input.claimId }))
+  ) {
+    console.warn(
+      `[outbox] Reminder ${input.template} an Claim ${input.claimId} unterdrueckt — aktive Konversation <24h`,
+    )
+    return { ok: true, enqueued: false }
+  }
+
   const { data, error } = await supabase
     .from('notifications_outbox')
     .upsert(

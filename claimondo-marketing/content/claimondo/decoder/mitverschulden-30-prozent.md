@@ -188,7 +188,7 @@ Verhandlungspflicht im engeren Sinn gibt es nicht. Sie können direkt klagen –
 Polizei-Vermerke sind Indizien, aber keine bindende Schuldzuweisung. Im Zivilrecht zählt das Ergebnis einer eigenen Beweisaufnahme – Polizeibefunde können angegriffen werden.
 
 **Lohnt sich Klage gegen Mitverschulden bei kleinen Summen?**
-Bei Forderungen unter 750 € ist das Mahnverfahren oft günstiger als Klage. Ab 750 € lohnt eine anwaltliche Prüfung. Vergiss nicht: Bei Erfolg trägt der Versicherer alle Kosten.
+Bei Forderungen unter 750 € ist das Mahnverfahren oft günstiger als Klage. Ab 750 € lohnt eine anwaltliche Prüfung. Denken Sie daran: Bei Erfolg trägt der Versicherer alle Kosten.
 
 **Ich war wirklich teilweise schuldig – was dann?**
 Wenn ein Mitverschulden tatsächlich vorliegt (z. B. nicht angeschnallt, anerkanntermaßen zu schnell), wird eine Quote anerkannt. Aber: Auch hier muss der Versicherer **konkret begründen**, in welcher Höhe – pauschale Zahlen sind auch dann angreifbar.

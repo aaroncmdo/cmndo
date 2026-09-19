@@ -49,6 +49,8 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
   const { data: svRows } = await supabase
     .from('sachverstaendige')
     .select('id, profile_id, onboarding_anzahlung_betrag, onboarding_anzahlung_faellig_am, vertrag_unterschrieben_am, vertrag_unterschrieben, portal_zugang_freigeschaltet')
+    // Testkonten (ist_testaccount) mahnen wir nicht an — sie stuenden sonst als offene Zahlung im Admin.
+    .eq('ist_testaccount', false)
     .eq('vertrag_unterschrieben', true)
     .eq('portal_zugang_freigeschaltet', false)
     .is('geloescht_am', null)

@@ -54,7 +54,7 @@ export function istTestSvAngebotBlockiert(
 async function ladeIdentitaet(
   db: SupabaseClient,
   bezug: BezugRef,
-): Promise<{ email: string | null; name: string | null }> {
+): Promise<{ email: string | null; name: string | null; telefon: string | null }> {
   let leadId: string | null = null
   if (bezug.typ === 'lead') {
     leadId = bezug.id
@@ -64,10 +64,10 @@ async function ladeIdentitaet(
     leadId = (data?.lead_id as string | null) ?? null
   }
   if (leadId) {
-    const { data: lead } = await db.from('leads').select('email, vorname, nachname').eq('id', leadId).maybeSingle()
+    const { data: lead } = await db.from('leads').select('email, vorname, nachname, telefon').eq('id', leadId).maybeSingle()
     if (lead) {
       const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
-      return { email: (lead.email as string | null) ?? null, name }
+      return { email: (lead.email as string | null) ?? null, name, telefon: (lead.telefon as string | null) ?? null }
     }
   }
   // Fallback ueber claim_parties (11.08.): die lead_id-only-Aufloesung war bei 30/79 Claims (38 %)
@@ -75,7 +75,7 @@ async function ladeIdentitaet(
   // ueber den Geschaedigten der claim_parties aufloesbar (user_id -> profiles ODER person_id ->
   // personen, je nach Gast/Account). Belegt an CLM-2026-01011: Smoke-Claim (lead_id NULL) klebte
   // 13 Tage im Portal eines ECHTEN Partner-SV, ohne dass der Guard etwas sehen konnte.
-  if (bezug.typ === 'lead') return { email: null, name: null }
+  if (bezug.typ === 'lead') return { email: null, name: null, telefon: null }
   const { data: party } = await db
     .from('claim_parties')
     .select('user_id, person_id')
@@ -85,20 +85,26 @@ async function ladeIdentitaet(
     .order('reihenfolge')
     .limit(1)
     .maybeSingle()
-  if (!party) return { email: null, name: null }
-  const alsIdentitaet = (r: { email?: unknown; vorname?: unknown; nachname?: unknown } | null) =>
-    r ? { email: (r.email as string | null) ?? null, name: [r.vorname, r.nachname].filter(Boolean).join(' ') || null } : null
+  if (!party) return { email: null, name: null, telefon: null }
+  const alsIdentitaet = (r: { email?: unknown; vorname?: unknown; nachname?: unknown; telefon?: unknown } | null) =>
+    r
+      ? {
+          email: (r.email as string | null) ?? null,
+          name: [r.vorname, r.nachname].filter(Boolean).join(' ') || null,
+          telefon: (r.telefon as string | null) ?? null,
+        }
+      : null
   if (party.user_id) {
-    const { data: prof } = await db.from('profiles').select('email, vorname, nachname').eq('id', party.user_id).maybeSingle()
+    const { data: prof } = await db.from('profiles').select('email, vorname, nachname, telefon').eq('id', party.user_id).maybeSingle()
     const ident = alsIdentitaet(prof)
     if (ident && (ident.email || ident.name)) return ident
   }
   if (party.person_id) {
-    const { data: pers } = await db.from('personen').select('email, vorname, nachname').eq('id', party.person_id).maybeSingle()
+    const { data: pers } = await db.from('personen').select('email, vorname, nachname, telefon').eq('id', party.person_id).maybeSingle()
     const ident = alsIdentitaet(pers)
     if (ident && (ident.email || ident.name)) return ident
   }
-  return { email: null, name: null }
+  return { email: null, name: null, telefon: null }
 }
 
 /**
@@ -125,7 +131,14 @@ export async function pruefeTestSvKonsistenz(
     ])
     const svIstTest =
       (svRes.data?.ist_testaccount as boolean | null) === true || fixtureRes.data != null
-    const leadIstIntern = istInterneIdentitaet(identitaet.email, identitaet.name)
+    let leadIstIntern = istInterneIdentitaet(identitaet.email, identitaet.name)
+    // 19.09.2026 (Befund B1, Dashboard-Inventur): Leads OHNE E-Mail (MCP-Probelaeufe legen nur Name +
+    // Telefon an) galten als echt und reservierten fuenfmal beim echten Partner UnfallSafe. Das
+    // Telefon ist die zweite Identitaetsachse: Platzhalter-Nummer ODER die Nummer eines internen
+    // Kontos/Leads = intern. Bleibt fail-open — der Reverse-Lookup liefert bei Fehlern false.
+    if (!leadIstIntern && identitaet.telefon) {
+      leadIstIntern = istDummyTelefon(identitaet.telefon) || (await istInternesTelefon(identitaet.telefon, db))
+    }
     return entscheideTestSvGuard(leadIstIntern, svIstTest)
   } catch (err) {
     console.warn('[test-sv-guard] Identitaets-Lookup fehlgeschlagen, lasse Buchung durch:', err)
@@ -157,4 +170,22 @@ export async function istInternesTelefon(telefonE164: string, db?: SupabaseClien
     console.warn('[send-isolation] istInternesTelefon Lookup-Fehler, lasse Send durch:', err)
     return false
   }
+}
+
+/**
+ * Platzhalter-Telefon (reine Logik): aufsteigende/absteigende Ziffernfolge (1234567), sechs gleiche
+ * Ziffern in Folge (000000) oder die in Deutschland nicht vergebene Vorwahl 0123 / +49 123.
+ * Bewusst eng: eine echte Nummer darf hier nie haengen bleiben (fail-open Richtung Kunde).
+ */
+export function istDummyTelefon(telefon: string | null | undefined): boolean {
+  const digits = (telefon ?? '').replace(/[^0-9]/g, '')
+  if (!digits) return false
+  let national = digits
+  if (national.startsWith('0049')) national = national.slice(4)
+  else if (national.startsWith('49') && national.length >= 11) national = national.slice(2)
+  else if (national.startsWith('0')) national = national.slice(1)
+  if (national.startsWith('123')) return true
+  if (/(\d)\1{5,}/.test(national)) return true
+  if (national.includes('1234567') || national.includes('7654321')) return true
+  return false
 }

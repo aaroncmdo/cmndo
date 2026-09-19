@@ -90,6 +90,56 @@ export function scanTitleBrandTwice(title) {
 
 const ANREDE_DU = /\b(du|dir|dich|dein|deine|deinem|deinen|deiner|deines)\b/gi
 
+// ── Zweite Anrede-Achse: der Imperativ OHNE Pronomen ──────────────────────────────────────
+// ANREDE_DU sucht PRONOMEN. Eine Befehlsform braucht keines: "Beschreibe das Problem" duzt,
+// enthaelt aber weder du noch dein. Der Detektor kann sie per Konstruktion nicht sehen.
+//
+// Gemessen 19.09.2026, nachdem die Luecke ZWEIMAL real zugeschlagen hatte: 10 Stellen, alle
+// in siezender Umgebung, zwei davon im selben Satz gemischt —
+//   "Pruefe alle Posten, bevor Sie zustimmen."   (autounfall-io, Decoder-Antwort)
+//   "…greift in der Regel Ihre Kaskoversicherung. Pruefe vorher, …"
+// Der Pronomen-Detektor liest dort das "Sie" und meldet gruen.
+//
+// ⚠ DIE VERBLISTE IST KURATIERT, NICHT VOLLSTAENDIG. Eine breite Liste erzeugte in der
+// Vorab-Messung 6 Fehltreffer auf 8 Stichproben — drei Quellen, alle real:
+//   1. LADEZUSTAND:  "Sende…" / "Melde…" auf einem Knopf ist 1. Person, kein Befehl.
+//   2. SUBSTANTIV:   "Erschuetterungs-Versuche", "die Suche", "die Fuelle", "die Trage".
+//   3. KOMPOSITUM:   "Online-Melde-Pfad" — der Bindestrich IST eine Wortgrenze.
+// Deshalb fehlen Sende/Melde/Warte/Starte (1) und Versuche/Suche/Fuelle/Trage/Schau/Buche/
+// Lade (2) bewusst; der Lookahead deckt (1) und (3) zusaetzlich ab. Lieber ein paar echte
+// Stellen nicht sehen als die Flotte mit Fehltreffern rot faerben.
+//
+// ⚠ BEKANNTE GRENZE, dokumentiert statt versteckt: nur GROSSgeschriebene Formen, also der
+// Satzanfang. "…, und fordere ihn erneut an" (klein, nach Komma) wird nicht erkannt — das
+// liesse sich von "ich fordere" nicht sauber trennen. Genau so ein Halbsatz stand im
+// 2FA-Bildschirm; gefunden wurde er ueber die GROSSE Form im selben Satz ("Pruefe, …").
+const ANREDE_IMPERATIV_VERBEN = [
+  'Beschreibe', 'Wähle', 'Klicke', 'Vergiss', 'Beachte', 'Prüfe', 'Öffne',
+  'Gib', 'Nimm', 'Mach', 'Lies', 'Bestätige', 'Nutze', 'Verwende',
+  'Kontaktiere', 'Erstelle', 'Ändere', 'Speichere',
+]
+// ⚠ KEIN \b an den Raendern. `\b` ist eine ASCII-Wortgrenze, und Ö/Ä/Ü zaehlen dort nicht als
+// Wortzeichen — "Öffne" und "Ändere" waeren damit STUMM geblieben. Beim Selbsttest aufgefallen
+// (10/12 statt 12/12): ein Gate, das zwei seiner achtzehn Verben nie sieht, meldet gruen und
+// bewacht sie trotzdem nicht. Die Zeichenklassen unten schliessen Umlaute ausdruecklich ein.
+const ANREDE_IMPERATIV = new RegExp(
+  '(?<![A-Za-zÄÖÜäöüß])(' + ANREDE_IMPERATIV_VERBEN.join('|') +
+    ')(?![A-Za-zÄÖÜäöüß])(?!\\s*[-–—…]|\\s*\\.\\.\\.|\\s+Sie\\b)',
+  'g',
+)
+
+/**
+ * Duzende Befehlsform ohne Pronomen in einem nutzersichtbaren Text.
+ * Ergaenzt scanAnrede um die Achse, die dort per Konstruktion fehlt.
+ * @returns {string[]} die gefundenen Formen (leer = keine)
+ */
+export function scanAnredeImperativ(text) {
+  if (!text) return []
+  for (const aus of ANREDE_AUSNAHMEN) if (aus.test(text)) return []
+  for (const aus of ANREDE_KONTEXT_AUSNAHMEN) if (aus.test(text)) return []
+  return [...new Set(text.match(ANREDE_IMPERATIV) || [])]
+}
+
 // Stellen, an denen dieselbe Buchstabenfolge kein deutsches Duzen ist.
 const ANREDE_AUSNAHMEN = [
   /\bchef\s+du\b/i,          // franzoesisch

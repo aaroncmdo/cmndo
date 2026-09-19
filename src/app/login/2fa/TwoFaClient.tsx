@@ -280,7 +280,7 @@ export default function TwoFaClient({
 
         <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
           <SmartphoneIcon className="w-3 h-3 inline mr-1" />
-          Kein Code erhalten? Prüfe, ob die Telefonnummer korrekt ist, und fordere ihn erneut an.
+          Kein Code erhalten? Prüfen Sie, ob die Telefonnummer korrekt ist, und fordern Sie ihn erneut an.
         </p>
       </div>
     </div>

@@ -107,15 +107,17 @@ export async function GET(request: Request) {
       // Termin-Fenster [+20h,+28h] eng ist: schlug der Send fehl, war der Termin beim
       // naechsten Lauf aus dem Fenster und der Reminder ging NIE raus. Jetzt Retry-
       // Backoff (innerhalb des Fensters) + Dead-Letter-Task.
-      // dedupKey mit termin.id als Fenster — der Reminder ist PRO TERMIN (das
-      // Idempotenz-Flag liegt auf gutachter_termine), ein Fall mit Nachbesichtigung
-      // oder Re-Termin bekommt legitim mehrere; ein template:claimId-Key wuerde den
-      // zweiten Termin-Reminder faelschlich unterdruecken.
+      // dedupKey mit dem TAG als Fenster (nicht termin.id): der Reminder-TEXT ist claim-weit
+      // ("diese Dokumente fehlen fuer Ihren Fall"), nicht termin-spezifisch. Hat ein Kunde zwei
+      // Termine im Fenster [+20h,+28h], erzeugte der fruehere termin.id-Key zwei Outbox-Rows mit
+      // verschiedenen dedup_keys -> zwei identische WhatsApps im selben 07:00-Lauf (prod 13.09.
+      // 07:00:03, 0,22 s Abstand). Pro Tag genau EIN Dokumente-Reminder je Kunde; ein Reminder an
+      // einem ANDEREN Tag bleibt moeglich (anderes Fenster). Aaron 19.09.2026: "keine Scheisse".
       const enqRes = await enqueue({
         dedupKey: buildDedupKey({
           template: 'dokumente_nachreichen',
           claimId: fall.id as string,
-          fenster: termin.id as string,
+          fenster: now.toISOString().slice(0, 10),
         }),
         kanal: 'whatsapp',
         template: 'dokumente_nachreichen',
