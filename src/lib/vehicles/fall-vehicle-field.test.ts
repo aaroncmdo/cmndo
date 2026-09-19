@@ -9,7 +9,15 @@ describe('FALL_VEHICLE_COL', () => {
     expect(FALL_VEHICLE_COL.fahrzeug_typ).toBe('bauart')
     expect(FALL_VEHICLE_COL.fahrzeug_farbe).toBe('farbe_klartext')
     expect(FALL_VEHICLE_COL.lackfarbe_code).toBe('farbcode')
-    expect(FALL_VEHICLE_COL.fin_vin).toBe('fin')
+  })
+
+  it('die Fahrgestellnummer gehoert BEWUSST nicht in diese Abbildung', () => {
+    // 09.09.2026: Der generische Inline-Editor schreibt die abgebildete Spalte direkt
+    // (`update({ [spalte]: wert })`). Bei der Nummer hiesse das: die Identitaet einer
+    // bestehenden Fahrzeugzeile still ueberschreiben, an der Dedup-Logik vorbei — auf prod
+    // gemessen an einer Zeile, die an zwei Vorgaengen hing. Sie laeuft jetzt ueber
+    // schreibeFinAufFahrzeug (Upsert + Zusammenfuehrung + Plausibilitaet + Herkunft).
+    expect(FALL_VEHICLE_COL.fin_vin).toBeUndefined()
     expect(FALL_VEHICLE_COL.kilometerstand).toBe('aktueller_kilometerstand')
     expect(FALL_VEHICLE_COL.erstzulassung).toBe('erstzulassung')
     expect(FALL_VEHICLE_COL.fahrzeug_baujahr).toBe('baujahr_monat')
