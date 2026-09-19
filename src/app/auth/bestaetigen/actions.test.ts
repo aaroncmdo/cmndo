@@ -16,7 +16,14 @@ const { redirectMock, verifyOtpMock } = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({ redirect: redirectMock }))
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: async () => ({ auth: { verifyOtp: verifyOtpMock } }),
+  createClient: async () => ({
+    auth: {
+      verifyOtp: verifyOtpMock,
+      // Login ohne Link (19.09.): bestaetigeMagicLink liest nach magiclink den User fuer den
+      // Timeline-Eintrag. user: null -> kein Write, Redirect-Vertrag unveraendert.
+      getUser: async () => ({ data: { user: null }, error: null }),
+    },
+  }),
 }))
 
 import { bestaetigeMagicLink } from './actions'

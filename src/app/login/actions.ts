@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue, LOGIN_CONTINUE_COOKIE } from '@/lib/auth/safe-continue'
 import { entscheideLoginRouting } from '@/lib/auth/mfa-gate'
+import { schreibeLoginTimeline } from '@/lib/kunde/login-timeline'
 
 // BUG-83 Befund 7: gleiche Konstante wie in supabase/server.ts.
 const REMEMBER_COOKIE_NAME = 'cm_remember'
@@ -172,6 +173,9 @@ export async function finalisierePhoneLogin(): Promise<
     console.error('[finalisierePhoneLogin] profiles update fehlgeschlagen:', updateError.message)
     return { ok: false, error: 'Profil konnte nicht aktualisiert werden. Bitte erneut versuchen.' }
   }
+
+  // Login ohne Link (19.09.): Dispatcher/KB sehen am Lead, dass der Kunde selbst reinkam. Best-effort.
+  await schreibeLoginTimeline(user, 'telefon')
 
   const { data: profile } = await supabase
     .from('profiles')
