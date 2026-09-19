@@ -53,7 +53,11 @@ import { FRIST_UEBERSCHRITTEN } from './dispatch-gate'
 // für ein brauchbares Generic-Constraint — der Consumer castet selbst.
 export function applyDispatchableFilter(q: any): any {
   return q
-    .eq('verifiziert', true)
+    // `.eq('verifiziert', true)` stand hier bis zum 19.09. — entfernt auf Aarons
+    // Entscheidung, Begruendung und Messung im Kopf von ./dispatch-gate.ts.
+    // ⚠ Diese Klausel und die anon-RLS-Policy `sachverstaendige__b1sel_an` muessen
+    // dieselbe Menge beschreiben (Invariante: „auf der Karte gelistet" == „durch die
+    // Engine buchbar"). Wer hier etwas aendert, aendert die Policy mit.
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
     .eq('ist_testaccount', false)
