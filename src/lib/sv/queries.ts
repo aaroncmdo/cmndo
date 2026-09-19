@@ -24,8 +24,7 @@ import { FRIST_UEBERSCHRITTEN } from './dispatch-gate'
 
 /**
  * Filter für SVs die Fälle bekommen dürfen.
- *   - verifiziert=true (Dokumente geprüft — Angleich ans Karten-Gate, s.u.)
- *   - portal_zugang_freigeschaltet=true (Anzahlung durch, Portal offen)
+ *   - portal_zugang_freigeschaltet=true (Anzahlung durch ODER vom Admin freigegeben)
  *   - ist_aktiv=true (technisch aktiv — wird vom Stripe-Webhook zusammen mit
  *     portal_zugang_freigeschaltet gesetzt, siehe /api/stripe/webhook/route.ts)
  *   - gesperrt_seit IS NULL (kein Admin-Block)
@@ -34,11 +33,16 @@ import { FRIST_UEBERSCHRITTEN } from './dispatch-gate'
  *   - verifizierung_status != 'frist_ueberschritten' (NULL-safe: NULL/ausstehend/geprueft
  *     bekommen weiter Faelle) — FG3 decision A (Aaron 2026-07-11). TS-Mirror: svDarfFaelleEmpfangen.
  *
- * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
- * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
- * nur auf portal_zugang -> ein bezahlter-aber-unverifizierter SV war buchbar,
- * aber unsichtbar auf der Karte (und die Engine wies unvetteten SVs Fälle zu).
- * Jetzt gilt: "auf der Karte gelistet" == "durch die Engine buchbar".
+ * Gutachter-Onboarding-Audit (Befund #1) fuehrte die Invariante ein:
+ * "auf der Karte gelistet" == "durch die Engine buchbar". Sie gilt unveraendert.
+ *
+ * ⚠ Die gemeinsame Bedingung war bis zum 19.09.2026 `verifiziert=true` und ist es
+ * NICHT mehr (Aaron: "Die Verifizierung ist ja keine notwendige Sache fuer den
+ * Finder"). Gemessen an dem Tag auf prod: von 27 freigeschalteten Gutachtern waren
+ * nur 13 im Finder sichtbar und buchbar. Karte, Engine und die anon-Policy
+ * `sachverstaendige__b1sel_an` haben das Flag gemeinsam verloren; die Invariante
+ * traegt jetzt portal_zugang_freigeschaltet. Begruendung: ./dispatch-gate.ts,
+ * Policy-Seite: Migration 20260919132007.
  *
  * Befund #6: `ist_testaccount=false` ist neu. Test-Accounts wurden bisher NUR
  * per crude firmenname-ILIKE (isTestAccount) aus Karte + LP-Count gefiltert,

@@ -8,9 +8,21 @@
 //   4) create_linear_issue    — nur wenn keine Duplikate passen.
 //
 // Sprache: immer Deutsch, kurz (2-4 Sätze), freundlich, ohne Emojis.
+//
+// ANREDE: der Nutzer wird durchgehend GESIEZT — auch intern (Aaron 19.09.2026:
+// "macht die Anrede auf sie"). Vorher galt "Partner siezt du, intern nicht"; seit der
+// Rollen-Öffnung am 09.09. (#5936) sind 100 der 135 zugelassenen Nutzer Partner, und eine
+// Anrede, die von der Rolle abhängt, produziert im selben Fenster beide Formen.
+//
+// ⚠ Das "du" in den Prompt-Texten unten ist die Anrede an das MODELL ("Du sprichst …",
+// "Bevor du aufrufst …") und bleibt. Nur die Anweisung, wie das Modell den NUTZER
+// anspricht, ist Sie. Wer das verwechselt, macht den Prompt unlesbar für das Modell.
 
 export type SupportContext = {
-  userRolle: 'sachverstaendiger' | 'admin' | 'kundenbetreuer' | string
+  userRolle:
+    | 'sachverstaendiger' | 'admin' | 'kundenbetreuer' | 'dispatch'
+    | 'makler' | 'werkstatt' | 'flottenmanager'
+    | string
   userName?: string | null
   userEmail?: string | null
   pageUrl?: string | null
@@ -44,7 +56,7 @@ Hilf dem Nutzer, die Feature-Idee zu schärfen. Stelle gezielte Rückfragen zu:
 4. Bei "Ja" → \`create_linear_issue\` mit Labels ["user-reported", "ai-created", "feature-request"] und priority 3.
 5. Bei "Nein, mehr Zeit" → \`create_linear_issue\` mit Labels ["user-reported", "ai-created", "feature-request", "followup-needed"] und einer kurzen Zusammenfassung des bisherigen Gesprächsverlaufs im Description-Block.
 
-**Stil:** Konstruktiv, kurz, auf Deutsch. Keine Emojis. Du sprichst mit einem internen Mitarbeiter.`
+**Stil:** Konstruktiv, kurz, auf Deutsch. Keine Emojis. Du sprichst mit einem Mitarbeiter oder einem Geschäftspartner (Makler/Werkstatt/Flottenmanager) — **sieze ihn durchgehend**.`
 }
 
 export function buildSystemPrompt(ctx: SupportContext): string {
@@ -117,7 +129,7 @@ Schreibe deine Einschätzung (1-2 Sätze) in den "## Schweregrad-Einschätzung"-
 # Stil
 
 - Antworte knapp auf Deutsch, 2-4 Sätze pro Turn. Keine Emojis.
-- Du sprichst mit internen Nutzern (SV/Admin/Kundenbetreuer) ODER mit Partnern (Makler/Werkstatt/Flottenmanager). Intern darfst du technisch werden; Partner siezt du und bleibst allgemeinverständlich. Endkunden erreichen dieses Widget nicht.
+- Du sprichst mit internen Nutzern (SV/Admin/Kundenbetreuer/Dispatch) ODER mit Partnern (Makler/Werkstatt/Flottenmanager). **Sieze den Nutzer durchgehend — auch intern.** Intern darfst du technisch werden, gegenüber Partnern bleibst du allgemeinverständlich. Endkunden erreichen dieses Widget nicht.
 - Wenn der User nur "Hallo" o.ä. schreibt: frage kurz worum es geht, KEIN Tool-Call.
 - Wenn der User zufrieden ist / bedankt sich / "passt so" sagt: antworte freundlich ohne weiteren Tool-Call.`
 }
@@ -128,6 +140,9 @@ function rolleToLabel(rolle: string): string {
     case 'admin': return 'Admin'
     case 'kundenbetreuer': return 'Kundenbetreuer'
     case 'dispatch': return 'Dispatch'
+    case 'makler': return 'Makler'
+    case 'werkstatt': return 'Werkstatt'
+    case 'flottenmanager': return 'Flottenmanager'
     default: return rolle
   }
 }
