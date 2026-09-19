@@ -24,19 +24,25 @@
 // Der Schutz des Pools haengt damit an den Feldern, die ihn wirklich tragen:
 // portal_zugang_freigeschaltet (bezahlt ODER vom Admin freigegeben), ist_aktiv,
 // gesperrt_seit (der Admin-Riegel) und geloescht_am.
-
-/**
- * The verifizierung_status value that blocks case-reception. Single source shared by
- * the SQL filter (applyDispatchableFilter's .or(...)) and this predicate + its tests.
- */
-export const FRIST_UEBERSCHRITTEN = 'frist_ueberschritten'
+//
+// ⚠ ZWEITE ENTSCHEIDUNG 2026-09-19 (Aaron, Nachmittag), sie ueberschreibt FG3-Task-3.0
+// (11.07., „decision A: ENFORCE") und Option B (08.08., 14-Tage-Frist):
+//   „ich moechte nicht mehr verifizieren und ich moechte auch nicht mehr nachhalten
+//    muessen, ob die Dokumente fehlen oder nicht … wenn Dokumente fehlen, soll der
+//    Sachverstaendige trotzdem angezeigt werden und sogar auch buchbar sein."
+// `verifizierung_status = 'frist_ueberschritten'` blockt den Fall-Empfang NICHT mehr.
+// Gemessen am selben Tag auf prod: 3 Gutachter waren allein deshalb aus der Engine
+// ausgeschlossen, 2 davon trugen sogar `verifiziert=true`. Der Status bleibt als
+// Information in der Spalte (Admin-Akte), wird aber nicht mehr geschrieben und
+// entscheidet nichts mehr. Damit beschreiben die anon-Policy der Karte (sie hatte nie
+// eine Frist-Klausel) und dieses Praedikat EXAKT dieselbe Menge.
 
 /**
  * Fields the case-reception predicate reads — mirrors applyDispatchableFilter's columns.
  *
- * `verifiziert` bleibt im Typ, obwohl das Praedikat es seit dem 19.09. nicht mehr liest:
- * die Aufrufer selektieren es weiterhin, und ein Entfernen wuerde nur ihre Selects
- * umschreiben, ohne etwas zu gewinnen. Optional, damit neue Aufrufer es weglassen duerfen.
+ * `verifiziert` und `verifizierung_status` bleiben optional im Typ, obwohl das Praedikat
+ * beide seit dem 19.09. nicht mehr liest: die Aufrufer selektieren sie weiterhin, und ein
+ * Entfernen wuerde nur ihre Selects umschreiben, ohne etwas zu gewinnen.
  */
 export type SvDispatchGateFields = {
   verifiziert?: boolean | null
@@ -45,16 +51,15 @@ export type SvDispatchGateFields = {
   ist_testaccount: boolean | null
   gesperrt_seit: string | null
   geloescht_am: string | null
-  verifizierung_status: string | null
+  verifizierung_status?: string | null
 }
 
 /**
  * Case-reception gate: a SV may RECEIVE new cases when technically active, portal-unlocked
- * (deposit paid or admin-released), not a test account, not admin-blocked, not soft-deleted
- * — and (per decision FG3-Task-3.0) not 'frist_ueberschritten'. Pure mirror of
- * applyDispatchableFilter's SQL predicate so TS callers and the DB query agree.
+ * (deposit paid or admin-released), not a test account, not admin-blocked, not soft-deleted.
+ * Pure mirror of applyDispatchableFilter's SQL predicate so TS callers and the DB query agree.
  *
- * `verifiziert` wird seit dem 19.09. NICHT mehr geprueft (Aaron-Entscheidung, siehe Kopf).
+ * Weder `verifiziert` noch `verifizierung_status` werden geprueft (Aaron 19.09., siehe Kopf).
  */
 export function svDarfFaelleEmpfangen(sv: SvDispatchGateFields | null | undefined): boolean {
   if (!sv) return false
@@ -63,6 +68,5 @@ export function svDarfFaelleEmpfangen(sv: SvDispatchGateFields | null | undefine
   if (sv.ist_testaccount !== false) return false
   if (sv.gesperrt_seit != null) return false
   if (sv.geloescht_am != null) return false
-  if (sv.verifizierung_status === FRIST_UEBERSCHRITTEN) return false
   return true
 }

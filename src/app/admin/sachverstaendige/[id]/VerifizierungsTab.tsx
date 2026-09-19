@@ -6,7 +6,6 @@ import {
   XCircleIcon,
   ClockIcon,
   FileTextIcon,
-  AlertTriangleIcon,
   LockIcon,
   UnlockIcon,
   PlusIcon,
@@ -18,7 +17,6 @@ import {
 import {
   tier2Freigeben,
   tier2DokumentNachfordern,
-  tier2FristVerlaengern,
   svSperren,
   svEntsperren,
   pflichtdokumentFreigeben,
@@ -84,12 +82,19 @@ type Props = {
   // Paket + Onboarding-Kontext (fuer Basic-Freigabe-Gate)
   paket: string | null
   onboardingQuelle: string | null
+  /**
+   * Seit 19.09.2026 die einzige Bedingung fuer die Nachhol-Karte „Profil freischalten":
+   * portal_zugang_freigeschaltet=false (Geo-Guard hat die Auto-Freigabe geblockt). Vorher hing
+   * die Karte an verifizierung_status='ausstehend' — den tragen jetzt dauerhaft fast alle
+   * Basic-SVs (Nachweise werden nicht mehr geprueft), die Karte haette also bei jedem
+   * laengst freigeschalteten Gutachter „Wartet auf Pruefung" gezeigt.
+   */
+  portalFreigeschaltet: boolean
   // Tier 1 (AAR-714 Pflichtdokumente)
   pflichtdokumente: PflichtdokumentSlot[]
   svVerifiziert: boolean
-  // Tier 2
+  // Tier 2 — seit 19.09.2026 rein informativ (Aaron: keine Frist, keine Pflichtpruefung mehr)
   verifizierungStatus: 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | 'abgelehnt' | null
-  verifizierungFristBis: string | null
   verifiziertAm: string | null
   // Ablehnungsgrund (verifizierung_admin_notiz) — nur relevant bei Status 'abgelehnt'.
   verifizierungAdminNotiz: string | null
@@ -116,8 +121,7 @@ function StatusBadge({ tone, children }: { tone: StatusBadgeTone; children: Reac
 }
 
 export default function VerifizierungsTab(props: Props) {
-  const isBasicPending =
-    props.paket === 'basic' && props.verifizierungStatus === 'ausstehend'
+  const isBasicPending = props.paket === 'basic' && !props.portalFreigeschaltet
 
   return (
     <div className="space-y-5">
@@ -138,9 +142,11 @@ export default function VerifizierungsTab(props: Props) {
   )
 }
 
-// ─── P3: Basic-SV-Freigabe ────────────────────────────────────────────
+// ─── P3: Basic-SV-Freigabe (seit 19.09.2026 nur noch der Nachhol-Weg) ────────────────
 //
-// Zeigt sich ausschliesslich wenn paket='basic' + verifizierung_status='ausstehend'.
+// Zeigt sich ausschliesslich wenn paket='basic' + portal_zugang_freigeschaltet=false — also
+// wenn der Geo-Guard die Auto-Freigabe beim Wizard-Abschluss geblockt hat (Adresse nicht
+// verortbar) oder der SV den Wizard noch nicht abgeschlossen hat.
 // Zwei Aktionen: "Profil freischalten" (gibBasicSvFrei) und "Ablehnen" (lehneBasicSvAb).
 
 const ONBOARDING_QUELLE_LABEL: Record<string, string> = {
@@ -212,7 +218,7 @@ function BasicFreigabeCard({
         </div>
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-warning-soft text-warning-strong border border-warning/30">
           <ClockIcon className="w-3 h-3" />
-          Wartet auf Prüfung
+          Noch nicht freigeschaltet
         </span>
       </div>
 
@@ -536,7 +542,6 @@ function PflichtdokumenteCard({
 function Tier2Card({
   svId,
   verifizierungStatus,
-  verifizierungFristBis,
   verifiziertAm,
   verifizierungAdminNotiz,
   tier2Slots,
@@ -548,26 +553,26 @@ function Tier2Card({
   const offeneSlots = tier2Slots.filter(s => !s.pflichtdokId)
   const angefordert = tier2Slots.filter(s => s.pflichtdokId)
 
-  let badge: React.ReactNode = <StatusBadge tone="gray">Noch nicht geprüft</StatusBadge>
+  // Seit 19.09.2026 (Aaron) rein informativ: Der Status oeffnet und schliesst nichts mehr —
+  // weder Karte noch Engine noch Siegel. 'frist_ueberschritten' wird nicht mehr geschrieben
+  // (Bestand per Migration bereinigt), 'ausstehend' heisst nur „Nachweise nicht geprueft".
+  let badge: React.ReactNode = <StatusBadge tone="gray">Nachweise nicht geprüft</StatusBadge>
   if (verifizierungStatus === 'ausstehend') {
-    badge = <StatusBadge tone="amber"><ClockIcon className="w-2.5 h-2.5" />14-Tage-Frist läuft</StatusBadge>
+    badge = <StatusBadge tone="gray"><ClockIcon className="w-2.5 h-2.5" />Nachweise nicht geprüft</StatusBadge>
   } else if (verifizierungStatus === 'geprueft') {
-    badge = <StatusBadge tone="green"><CheckCircle2Icon className="w-2.5 h-2.5" />Verifiziert</StatusBadge>
+    badge = <StatusBadge tone="green"><CheckCircle2Icon className="w-2.5 h-2.5" />Nachweise geprüft</StatusBadge>
   } else if (verifizierungStatus === 'frist_ueberschritten') {
-    badge = <StatusBadge tone="red"><AlertTriangleIcon className="w-2.5 h-2.5" />Frist überschritten</StatusBadge>
+    badge = <StatusBadge tone="gray"><ClockIcon className="w-2.5 h-2.5" />Nachweise nicht geprüft (Alt-Status)</StatusBadge>
   } else if (verifizierungStatus === 'abgelehnt') {
     badge = <StatusBadge tone="red"><XCircleIcon className="w-2.5 h-2.5" />Abgelehnt</StatusBadge>
   }
 
-  const fristDatum = verifizierungFristBis
-    ? new Date(verifizierungFristBis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
-    : null
   const verifiziertDatum = verifiziertAm
     ? new Date(verifiziertAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
     : null
 
   function handleFreigeben() {
-    if (!confirm('Tier-2-Verifizierung freigeben? SV gilt damit als vollständig verifiziert.')) return
+    if (!confirm('Berufshaftpflicht und Gewerbeanmeldung als geprüft markieren? (Rein informativ — Sichtbarkeit und Buchbarkeit hängen seit 19.09.2026 nicht mehr daran.)')) return
     setFehler(null)
     startTransition(async () => {
       const res = await tier2Freigeben(svId)
@@ -594,15 +599,6 @@ function Tier2Card({
     })
   }
 
-  function handleFristVerlaengern() {
-    if (!confirm('Tier-2-Frist um 14 Tage verlängern? Ein pausierter SV wird damit wieder für Fälle freigegeben.')) return
-    setFehler(null)
-    startTransition(async () => {
-      const res = await tier2FristVerlaengern(svId, 14)
-      if (!res.success) setFehler(res.error ?? 'Unbekannter Fehler')
-    })
-  }
-
   const defaultFrist = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   return (
@@ -610,18 +606,18 @@ function Tier2Card({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
-          <h3 className="text-sm font-semibold text-claimondo-navy">Tier 2 — Verifizierungs-Dokumente</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Nachweise — Berufshaftpflicht &amp; Gewerbeanmeldung</h3>
         </div>
         {badge}
       </div>
 
+      <p className="mb-3 text-[11px] text-claimondo-ondo">
+        Informativ. Seit 19.09.2026 entscheiden Nachweise nicht mehr über Sichtbarkeit, Buchbarkeit oder das
+        Siegel — der Gutachter ist mit dem Onboarding-Abschluss freigeschaltet. Fehlt etwas Wesentliches, ist
+        „Sperren“ der Weg, nicht dieses Tab.
+      </p>
+
       <div className="grid grid-cols-2 gap-3 mb-4 text-[11px]">
-        {fristDatum && (
-          <div className="px-3 py-2 rounded-ios-lg bg-claimondo-bg border border-claimondo-border">
-            <p className="text-claimondo-ondo">Frist bis</p>
-            <p className="font-medium text-claimondo-navy">{fristDatum}</p>
-          </div>
-        )}
         {verifiziertDatum && (
           <div className="px-3 py-2 rounded-ios-lg bg-success-soft border border-success/30">
             <p className="text-success-strong">Verifiziert am</p>
@@ -730,19 +726,6 @@ function Tier2Card({
         </div>
       )}
 
-      {verifizierungStatus === 'frist_ueberschritten' && (
-        <div className="mb-3 px-3 py-2.5 rounded-ios-lg bg-danger-soft border border-danger/30 text-[11px]">
-          <p className="font-semibold text-danger-strong flex items-center gap-1">
-            <AlertTriangleIcon className="w-3 h-3" />
-            Fall-Empfang pausiert
-          </p>
-          <p className="text-danger-strong mt-1">
-            Dieser SV erhält keine neuen Fälle, bis Berufshaftpflicht + Gewerbeanmeldung geprüft sind.
-            „Frist +14 Tage" reaktiviert ihn übergangsweise.
-          </p>
-        </div>
-      )}
-
       <div className="flex items-center gap-2 flex-wrap">
         {verifizierungStatus !== 'geprueft' && (
           <button
@@ -752,18 +735,7 @@ function Tier2Card({
             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50"
           >
             <CheckCircle2Icon className="w-3.5 h-3.5" />
-            Tier-2 komplett freigeben
-          </button>
-        )}
-        {(verifizierungStatus === 'ausstehend' || verifizierungStatus === 'frist_ueberschritten') && (
-          <button
-            type="button"
-            onClick={handleFristVerlaengern}
-            disabled={pending}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold text-claimondo-ondo border border-claimondo-ondo/30 hover:bg-claimondo-ondo/5 disabled:opacity-50"
-          >
-            <ClockIcon className="w-3.5 h-3.5" />
-            Frist +14 Tage
+            Nachweise als geprüft markieren
           </button>
         )}
       </div>

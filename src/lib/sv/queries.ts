@@ -18,27 +18,31 @@
 //   - Soft-Delete: `geloescht_am IS NOT NULL`.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { FRIST_UEBERSCHRITTEN } from './dispatch-gate'
 
 // ─── Filter-Klauseln (deklarativ) ────────────────────────────────────────
 
 /**
  * Filter für SVs die Fälle bekommen dürfen.
- *   - verifiziert=true (Dokumente geprüft — Angleich ans Karten-Gate, s.u.)
- *   - portal_zugang_freigeschaltet=true (Anzahlung durch, Portal offen)
- *   - ist_aktiv=true (technisch aktiv — wird vom Stripe-Webhook zusammen mit
- *     portal_zugang_freigeschaltet gesetzt, siehe /api/stripe/webhook/route.ts)
+ *   - portal_zugang_freigeschaltet=true (Anzahlung durch ODER Admin-/Auto-Freigabe, Portal offen)
+ *   - ist_aktiv=true (technisch aktiv — wird zusammen mit portal_zugang_freigeschaltet
+ *     gesetzt, EIN Patch für alle Pfade: src/lib/sv/freischaltung.ts)
  *   - gesperrt_seit IS NULL (kein Admin-Block)
  *   - geloescht_am IS NULL (nicht gelöscht)
  *   - ist_testaccount = false (kein interner Test-/Demo-Account)
- *   - verifizierung_status != 'frist_ueberschritten' (NULL-safe: NULL/ausstehend/geprueft
- *     bekommen weiter Faelle) — FG3 decision A (Aaron 2026-07-11). TS-Mirror: svDarfFaelleEmpfangen.
  *
- * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
- * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
- * nur auf portal_zugang -> ein bezahlter-aber-unverifizierter SV war buchbar,
- * aber unsichtbar auf der Karte (und die Engine wies unvetteten SVs Fälle zu).
- * Jetzt gilt: "auf der Karte gelistet" == "durch die Engine buchbar".
+ * NICHT mehr Teil des Filters (Aaron 2026-09-19, beide am selben Tag):
+ *   - `verifiziert=true` (Vormittag: „Die Verifizierung ist ja keine notwendige Sache für den
+ *     Finder") — Begründung und Messung im Kopf von ./dispatch-gate.ts.
+ *   - `verifizierung_status != 'frist_ueberschritten'` (Nachmittag: „nicht mehr nachhalten,
+ *     ob die Dokumente fehlen … trotzdem angezeigt und sogar auch buchbar") — hob FG3
+ *     decision A (11.07.) und Option B (08.08.) auf; 3 Gutachter waren allein dadurch
+ *     aus der Engine ausgeschlossen.
+ *
+ * Gutachter-Onboarding-Audit (Befund #1): Vorher gated die öffentliche Karte (anon-RLS)
+ * auf `verifiziert`, Dispatch/MCP aber nur auf portal_zugang -> ein bezahlter-aber-
+ * unverifizierter SV war buchbar, aber unsichtbar auf der Karte. Seitdem gilt:
+ * "auf der Karte gelistet" == "durch die Engine buchbar" — und seit dem 19.09. ohne
+ * jede Ausnahme, weil auch die Frist-Klausel weg ist, die die Karte nie hatte.
  *
  * Befund #6: `ist_testaccount=false` ist neu. Test-Accounts wurden bisher NUR
  * per crude firmenname-ILIKE (isTestAccount) aus Karte + LP-Count gefiltert,
@@ -53,9 +57,10 @@ import { FRIST_UEBERSCHRITTEN } from './dispatch-gate'
 // für ein brauchbares Generic-Constraint — der Consumer castet selbst.
 export function applyDispatchableFilter(q: any): any {
   return q
-    // `.eq('verifiziert', true)` stand hier bis zum 19.09. — entfernt auf Aarons
-    // Entscheidung, Begruendung und Messung im Kopf von ./dispatch-gate.ts.
-    // ⚠ Diese Klausel und die anon-RLS-Policy `sachverstaendige__b1sel_an` muessen
+    // `.eq('verifiziert', true)` und `.or(verifizierung_status … neq.frist_ueberschritten)`
+    // standen hier bis zum 19.09. — beide entfernt auf Aarons Entscheidung, Begruendung
+    // und Messung im Kopf von ./dispatch-gate.ts.
+    // ⚠ Diese Klauseln und die anon-RLS-Policy `sachverstaendige__b1sel_an` muessen
     // dieselbe Menge beschreiben (Invariante: „auf der Karte gelistet" == „durch die
     // Engine buchbar"). Wer hier etwas aendert, aendert die Policy mit.
     .eq('ist_aktiv', true)
@@ -63,7 +68,6 @@ export function applyDispatchableFilter(q: any): any {
     .eq('ist_testaccount', false)
     .is('gesperrt_seit', null)
     .is('geloescht_am', null)
-    .or(`verifizierung_status.is.null,verifizierung_status.neq.${FRIST_UEBERSCHRITTEN}`)
 }
 
 /**

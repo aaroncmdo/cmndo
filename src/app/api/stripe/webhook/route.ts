@@ -3,6 +3,11 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { recordFailedOperation, markOperationResolved } from '@/lib/reliability/dead-letter'
 import { meldePartnerZahlungsproblem, resolvePartnerFromStripe } from '@/lib/stripe/zahlungsproblem-alert'
+// Freischaltungs-Patch (portal_zugang, ist_aktiv, verifiziert) — EIN Begriff von
+// „freigeschaltet" fuer alle Eingaenge (Aaron 19.09.2026). Ersetzt hier die drei
+// handgeschriebenen Feldlisten, die zusaetzlich eine 14-Tage-Tier-2-Frist starteten
+// (Option B vom 08.08., zurueckgenommen: „nicht mehr nachhalten, ob Dokumente fehlen").
+import { freischaltungsPatch } from '@/lib/sv/freischaltung'
 
 export const dynamic = 'force-dynamic'
 
@@ -118,25 +123,18 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           }).eq('id', orgId)
 
-          // AAR-359 W2: Tier-2-Frist für alle Sub-SVs starten. 14 Tage ab
-          // Anzahlung-Eingang — danach löst der Verifizierungs-Cron den
-          // Banner-Countdown bzw. den frist_ueberschritten-Hard-Blocker aus.
-          const verifizierungFristBis = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-
           // Alle Sub-SVs (mitarbeiter) + Inhaber freischalten
           // BUG-92: vertrag_unterschrieben=true defensiv mitziehen — falls der
           // Sub-SV/Inhaber den AGB-Step nicht durchlaufen hat, ist der State
           // sonst inkonsistent (portal=true aber vertrag_unterschrieben=false).
+          // (Die 14-Tage-Tier-2-Frist, die hier bis 19.09.2026 startete, gibt es nicht mehr.)
           await db.from('sachverstaendige').update({
+            ...freischaltungsPatch(new Date().toISOString()),
             onboarding_status: 'bezahlt',
             stripe_anzahlung_bezahlt_am: new Date().toISOString(),
-            portal_zugang_freigeschaltet: true,
             anzahlung_status: 'bezahlt',
-            ist_aktiv: true,
             vertrag_unterschrieben: true,
             vertrag_unterschrieben_am: new Date().toISOString(),
-            verifizierung_status: 'ausstehend',
-            verifizierung_frist_bis: verifizierungFristBis,
           }).eq('organisation_id', orgId)
 
           // ARCH-1 FR-5: Werbebudget pro Sub-SV mit dem jeweiligen
@@ -259,20 +257,15 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           }).eq('id', orgId)
 
-          // AAR-359 W2: Tier-2-Frist auch im Akademie-Branch.
-          const verifizierungFristBisAkademie = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-
-          // Alle Akademie-Mitglieder + Verwalter freischalten
+          // Alle Akademie-Mitglieder + Verwalter freischalten (Patch wie im Buero-Zweig;
+          // keine Tier-2-Frist mehr, Aaron 19.09.2026)
           await db.from('sachverstaendige').update({
+            ...freischaltungsPatch(new Date().toISOString()),
             onboarding_status: 'bezahlt',
             stripe_anzahlung_bezahlt_am: new Date().toISOString(),
-            portal_zugang_freigeschaltet: true,
             anzahlung_status: 'bezahlt',
-            ist_aktiv: true,
             vertrag_unterschrieben: true,
             vertrag_unterschrieben_am: new Date().toISOString(),
-            verifizierung_status: 'ausstehend',
-            verifizierung_frist_bis: verifizierungFristBisAkademie,
           }).eq('organisation_id', orgId)
 
           // Werbebudget-Init pro Sub-SV (analog FR-5 Buero-Branch).
@@ -456,28 +449,21 @@ export async function POST(request: Request) {
           const initGuthaben = Number(svBefore?.onboarding_anzahlung_betrag ?? 0)
 
           // AAR-359 W2: Tier-2-Frist für Solo-SV starten (14 Tage ab Anzahlung).
-          const verifizierungFristBisSolo = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-
-          // Portal freischalten
+          // Portal freischalten — Freischaltungs-Patch (portal_zugang, ist_aktiv, verifiziert),
+          // derselbe wie Buero/Akademie/Gutschein/Sub-SV/Basic. Keine Tier-2-Frist mehr
+          // (Aaron 19.09.2026).
           // BUG-92: vertrag_unterschrieben=true defensiv mitziehen — falls der
           // Solo-SV den Vertrag-Step uebersprungen hat (sollte nicht vorkommen,
           // aber verhindert inkonsistenten State im Admin-Listing).
           await db.from('sachverstaendige').update({
+            ...freischaltungsPatch(new Date().toISOString()),
             onboarding_status: 'bezahlt',
             stripe_anzahlung_payment_intent_id: session.payment_intent as string ?? null,
             stripe_anzahlung_bezahlt_am: new Date().toISOString(),
-            portal_zugang_freigeschaltet: true,
-            // AAR SV-Audit-Konsolidierung: ist_aktiv zusammen mit
-            // portal_zugang_freigeschaltet aktivieren — Solo-Wizard setzt
-            // jetzt ist_aktiv=false beim Anlegen, also muss der Webhook
-            // beide auf true setzen (wie die anderen 2 Branches bereits).
-            ist_aktiv: true,
             anzahlung_status: 'bezahlt',
             werbebudget_guthaben_netto: initGuthaben,
             vertrag_unterschrieben: true,
             vertrag_unterschrieben_am: new Date().toISOString(),
-            verifizierung_status: 'ausstehend',
-            verifizierung_frist_bis: verifizierungFristBisSolo,
           }).eq('id', svId)
 
           // KFZ-151: Auto-Resolve aller offenen Tasks zu diesem Onboarding
