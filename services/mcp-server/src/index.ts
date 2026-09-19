@@ -288,6 +288,56 @@ Du vermittelst Gutachter + Termin und gibst allgemeine Infos zur Schadensregulie
 function buildServer(): McpServer {
   const server = new McpServer({ name: 'claimondo-mcp-server', version: '1.2.0' }, { instructions: SERVER_INSTRUCTIONS })
 
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TOOL-ANNOTATIONEN — Begruendung je Hint (OpenAI-App-Review, 19.09.2026)
+  //
+  // Die Einreichung von v1.2.0 wurde abgelehnt: "Annotationen scheinen nicht zum
+  // Verhalten zu passen ... bestaetige, dass sie explizit auf true oder false
+  // gesetzt sind (nicht null), und gib eine klare Begruendung."
+  //
+  // Zwei Befunde, beide hier behoben:
+  //  (1) LUECKE: `claimondo_rueckruf` trug KEIN idempotentHint -> fuer den Review
+  //      ist ein fehlender Hint = null. Jetzt explizit `false` (siehe unten).
+  //  (2) openWorldHint stand bei ALLEN neun Tools auf `true`. Das widerspricht der
+  //      Spec-Definition: "If false, the tool's domain of interaction is closed
+  //      (e.g. memory tool)" — Gegenbeispiel fuer `true` ist eine Websuche. Jedes
+  //      dieser Tools operiert ausschliesslich auf Claimondo-eigenen Daten
+  //      (unsere Gutachter-, Termin- und Fall-Tabellen). Die Domaene ist damit
+  //      geschlossen, auch wenn intern eine PLZ geocodet wird: das ist ein
+  //      Implementierungsdetail, keine offene Ergebnismenge. -> durchgaengig false.
+  //
+  // Verbindliche Lesart der vier Hints (MCP-Spec):
+  //   readOnlyHint    true  = veraendert die Umgebung nicht
+  //   destructiveHint true  = kann bestehende Daten zerstoerend aendern;
+  //                           false = nur additiv. Nur sinnvoll bei readOnly=false.
+  //   idempotentHint  true  = wiederholter Aufruf mit denselben Argumenten hat
+  //                           KEINE zusaetzliche Wirkung. Nur sinnvoll bei readOnly=false.
+  //   openWorldHint   true  = interagiert mit einer offenen Welt externer Entitaeten.
+  //
+  // | Tool                             | readOnly | destructive | idempotent | Begruendung
+  // |----------------------------------|----------|-------------|------------|------------
+  // | finde_sachverstaendige           | true     | false       | true       | reiner Read auf unsere SV-Liste; schreibt nichts
+  // | finde_werkstatt                  | true     | false       | true       | dito, Werkstatt-Liste
+  // | finde_gutachter_termine          | true     | false       | true       | liest freie Slots; reserviert NICHTS
+  // | melde_schaden                    | false    | false       | FALSE      | legt Lead + Terminreservierung an = additiv,
+  // |                                  |          |             |            | zerstoert nichts. NICHT idempotent: jeder
+  // |                                  |          |             |            | Aufruf erzeugt einen WEITEREN Lead.
+  // | pruefe_anspruch                  | true     | false       | true       | reine Berechnung aus den Argumenten
+  // | decode_brief                     | true     | false       | true       | analysiert uebergebenen Text; kein Write
+  // | rueckruf                         | false    | false       | FALSE      | legt Lead + Rueckruf-Task an = additiv.
+  // |                                  |          |             |            | NICHT idempotent: dedupliziert nur 10 Min
+  // |                                  |          |             |            | (Retry-Erkennung); ein spaeterer gleicher
+  // |                                  |          |             |            | Aufruf erzeugt einen ZWEITEN Rueckruf.
+  // | fall_status                      | true     | false       | true       | liest einen Fall ueber die Kundenreferenz
+  // | termin_absagen                   | false    | TRUE        | true       | sagt einen bestehenden Termin ab = ein
+  // |                                  |          |             |            | zerstoerender Zustandswechsel. Idempotent:
+  // |                                  |          |             |            | eine zweite Absage aendert nichts mehr
+  // |                                  |          |             |            | (Status bereits 'abgesagt').
+  //
+  // Bei readOnly=true sind destructive/idempotent laut Spec bedeutungslos; sie sind
+  // trotzdem explizit gesetzt, weil der Review ausdrueckliche Werte statt null verlangt.
+  // ─────────────────────────────────────────────────────────────────────────────
+
   server.registerTool(
     'claimondo_finde_sachverstaendige',
     {
@@ -313,7 +363,7 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     async ({ plz, ort, radius, response_format }) => {
@@ -389,7 +439,7 @@ Args:
 ⚠ WICHTIG zur Ausgabe: Die Liste enthält BEWUSST keine Firmennamen, Telefonnummern oder Adressen. Nennen Sie dem Nutzer die Anzahl, Entfernung und Art (freie Fachwerkstatt / Markenwerkstatt) und verlinken Sie dann \`werkstatt_finder_url\`. Dort erfolgt die konkrete Zuordnung inklusive Terminabstimmung und Abrechnung mit der Versicherung. Erfinden Sie keine Werkstattnamen und raten Sie keine Kontaktdaten.`,
       inputSchema: werkstattInput,
       outputSchema: werkstattOutput,
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ plz, ort, radius, response_format }) => {
       try {
@@ -433,7 +483,7 @@ Hinweis: gutachter[].id + ein termin.start sind zusätzlich das Buchungs-Handle 
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     async ({ plz, ort, wunschtermin, response_format }) => {
@@ -473,7 +523,7 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
         readOnlyHint: false,
         destructiveHint: false,
         idempotentHint: false,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     async ({ schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, email, einwilligung_erteilt }) => {
@@ -505,7 +555,7 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
 Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu"). Erfrage zuerst die Schuldfrage (unverschuldet/teilschuld/selbst). Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
       inputSchema: pruefeAnspruchInput,
       outputSchema: pruefeAnspruchOutput,
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ schuldfrage, schadenart, vollkasko }) => {
       try {
@@ -530,7 +580,7 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
 Übergib den Brief-Text (oder den relevanten Auszug) als "text". Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
       inputSchema: decodeBriefInput,
       outputSchema: decodeBriefOutput,
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ text }) => {
       try {
@@ -555,7 +605,7 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
 Erfrage Name + Telefonnummer + (optional) Schadenart/Anliegen/PLZ. Rufe dies NUR mit einwilligung_erteilt=true auf, NACHDEM der Nutzer der Datenverarbeitung + dem telefonischen Kontakt (Verarbeitung teils über einen KI-Dienst in den USA) ausdrücklich zugestimmt hat.`,
       inputSchema: rueckrufInput,
       outputSchema: rueckrufOutput,
-      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     },
     async ({ name, telefon, schadenart, anliegen, plz, ort, wunschzeit, einwilligung_erteilt }) => {
       try {
@@ -585,7 +635,7 @@ Args:
 Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keinen Status. Unbekannte/ungültige Referenz -> „kein Fall gefunden".`,
       inputSchema: caseStatusInput,
       outputSchema: caseStatusOutput,
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ token }) => {
       try {
@@ -618,7 +668,7 @@ Args:
 Antwortet PII-frei (kein Name/Gutachter/Adresse). Mehrfach-Aufruf ist unschädlich: ein bereits abgesagter Termin wird nicht erneut geändert. Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keine Absage.`,
       inputSchema: stornoInput,
       outputSchema: stornoOutput,
-      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     },
     async ({ token, grund }) => {
       try {

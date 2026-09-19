@@ -310,6 +310,35 @@ export async function POST(req: Request) {
     : input.slot_start
       ? 'Wunschtermin vorgemerkt (finale Bestätigung im Link). '
       : ''
+
+  // Kein Kanal getragen -> der Kunde hat KEINEN Weg zurueck in seinen Vorgang.
+  // Bis hierher war das ein stiller Verlust: der Lead stand auf 'neu', niemand
+  // erfuhr davon, und die Antwort unten versprach trotzdem "Dispatch kontaktiert
+  // manuell" — ein Versprechen ohne Mechanik. Diese Aufgabe ist die Mechanik.
+  // Gemessen 19.09.2026: 0 von 21 MCP-Leads hatten je eine Zustellung.
+  if (issued.kanal === 'none') {
+    const { error: kontaktTaskFehler } = await admin.from('tasks').insert({
+      lead_id: issued.leadId,
+      typ: 'lead-kontakt-herstellen',
+      titel: `Kein Kontakt-Kanal erreichbar: ${input.name}`,
+      beschreibung:
+        `Über den KI-Assistenten gemeldet (${input.schadenart}, PLZ ${input.plz}). ` +
+        `Weder WhatsApp noch SMS noch E-Mail konnten zugestellt werden — der Kunde hat ` +
+        `keinen Link und kommt von allein nicht in seinen Vorgang. ` +
+        `Telefon: ${input.telefon}${kundenEmail ? ` · E-Mail: ${kundenEmail}` : ' · keine E-Mail hinterlegt'}. ` +
+        `Bitte telefonisch Kontakt aufnehmen und eine erreichbare Adresse nachtragen.`,
+      status: 'offen',
+      prioritaet: 'dringend',
+      empfaenger_rolle: 'dispatch',
+      auto_erstellt: true,
+      entity_type: 'lead',
+      entity_id: issued.leadId,
+      task_code: 'mcp-lead-ohne-kanal',
+    })
+    if (kontaktTaskFehler) {
+      console.error('[melde-schaden] Kontakt-Task NICHT erstellt — Lead bleibt still:', kontaktTaskFehler.message)
+    }
+  }
   return json(
     {
       ok: true,
