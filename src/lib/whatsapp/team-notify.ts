@@ -37,7 +37,10 @@ export function istTeamNummer(phone: string | null | undefined): boolean {
 export async function notifyTeamWhatsApp(text: string): Promise<void> {
   await Promise.all(
     WA_TEAM_EMPFAENGER.map(async (phone) => {
-      const r = await sendWhatsAppText(phone, text)
+      // Team-Alarme gehen ABSICHTLICH an die internen Team-Nummern — sie sind die eine
+      // legitime Ausnahme vom Send-Isolation-Guard am Chokepoint (sonst wuerde der Guard
+      // sie als intern erkennen und unterdruecken). "Das Echte soll bleiben" (Aaron 19.09.).
+      const r = await sendWhatsAppText(phone, text, { skipInternalGuard: true })
       if (!r.ok) {
         console.error(`[team-notify] Baileys-WA an ${phone} fehlgeschlagen:`, r.code, r.error)
       }

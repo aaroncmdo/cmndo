@@ -76,7 +76,7 @@ Drei Schritte:
 | 15.03.2026 | erst Juni 2027 (Spätfolge) | 31.12.2027 | **31.12.2030** |
 | 15.03.2026 | erst März 2030 (chronisches Schmerz-Syndrom) | 31.12.2030 | **31.12.2033** |
 
-→ Beachte die wichtigste Falle: Die Frist startet **nicht** mit dem Unfall, sondern mit dem **Jahresende** des Unfall- oder Kenntnisjahres. Ein Unfall am 15.12. und am 15.03. haben dieselbe Frist-Endposition (31.12.).
+→ Beachten Sie die wichtigste Falle: Die Frist startet **nicht** mit dem Unfall, sondern mit dem **Jahresende** des Unfall- oder Kenntnisjahres. Ein Unfall am 15.12. und am 15.03. haben dieselbe Frist-Endposition (31.12.).
 
 ---
 

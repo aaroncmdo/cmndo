@@ -1940,6 +1940,7 @@ export type Database = {
       }
       anspruch_schaetzungen: {
         Row: {
+          check_ref: string | null
           erkanntes_segment: string | null
           erstellt_am: string
           ez_jahr: number | null
@@ -1955,6 +1956,7 @@ export type Database = {
           vision_result: Json | null
         }
         Insert: {
+          check_ref?: string | null
           erkanntes_segment?: string | null
           erstellt_am?: string
           ez_jahr?: number | null
@@ -1970,6 +1972,7 @@ export type Database = {
           vision_result?: Json | null
         }
         Update: {
+          check_ref?: string | null
           erkanntes_segment?: string | null
           erstellt_am?: string
           ez_jahr?: number | null
@@ -21850,6 +21853,27 @@ export type Database = {
           },
         ]
       }
+      testdaten_fixtures: {
+        Row: {
+          angelegt_am: string
+          grund: string
+          id: string
+          tabelle: string
+        }
+        Insert: {
+          angelegt_am?: string
+          grund: string
+          id: string
+          tabelle: string
+        }
+        Update: {
+          angelegt_am?: string
+          grund?: string
+          id?: string
+          tabelle?: string
+        }
+        Relationships: []
+      }
       timeline: {
         Row: {
           beschreibung: string | null
@@ -27817,6 +27841,7 @@ export type Database = {
       cron_pflicht_foto_validation: { Args: never; Returns: undefined }
       cron_rate_limit_reset: { Args: never; Returns: undefined }
       cron_reparatur_freigabe_eskalation: { Args: never; Returns: undefined }
+      cron_testdaten_aufraeumen: { Args: never; Returns: undefined }
       cron_trigger_exif_worker: { Args: never; Returns: undefined }
       cron_trigger_netzwerk_abo_dunning: { Args: never; Returns: undefined }
       cron_trigger_notification_worker: { Args: never; Returns: undefined }
@@ -27938,6 +27963,7 @@ export type Database = {
       is_werkstatt_for_claim: { Args: { p_claim_id: string }; Returns: boolean }
       ist_chat_teilnehmer: { Args: { p_thread_id: string }; Returns: boolean }
       ist_interne_email: { Args: { p_email: string }; Returns: boolean }
+      ist_wegwerf_email: { Args: { p_email: string }; Returns: boolean }
       link_lead_data_to_fall: {
         Args: { p_fall_id: string; p_lead_id: string }
         Returns: Json

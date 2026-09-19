@@ -3,6 +3,7 @@ import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { hatKuerzlichMenschlicheKonversation } from '@/lib/whatsapp/konversations-guard'
 
 /**
  * KFZ-193: KB-Beratungstermin 1h-Erinnerung (alle 15 Minuten)
@@ -66,7 +67,16 @@ export async function GET(request: Request) {
       if (profile?.vorname) vorname = profile.vorname
     }
 
-    if (telefon) {
+    // Konversations-Guard (2026-09-19): keine automatische 1h-Terminerinnerung, wenn ein Betreuer
+    // den Kunden gerade manuell per WhatsApp betreut (Aaron, Fall Anna Winter / CLM-2026-07961).
+    // reminder_1h_sent_at wird unten trotzdem gesetzt -> kein Nachfeuern, sobald die Konversation ruht.
+    const konversationAktiv = telefon
+      ? await hatKuerzlichMenschlicheKonversation(db, { claimId, leadId: effektiveLeadId, telefon })
+      : false
+    if (konversationAktiv) {
+      console.warn(`[kb-termin-reminder-1h] 1h-Erinnerung an Termin ${termin.id} uebersprungen — aktive Konversation <24h`)
+    }
+    if (telefon && !konversationAktiv) {
       await sendCommunication('kb_termin_reminder_1h', {
         telefon,
         vorname,

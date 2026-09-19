@@ -10,7 +10,7 @@
 // (docs/2026-09-04-copy-audit-marketingseiten.md).
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join, relative, extname } from 'node:path'
-import { scanRdg, scanUmlaute, scanTitleBrandTwice, scanAnrede } from './lib/copy-lint-scan.mjs'
+import { scanRdg, scanUmlaute, scanTitleBrandTwice, scanAnrede, scanAnredeImperativ } from './lib/copy-lint-scan.mjs'
 
 const ROOT = process.cwd()
 const ROOTS = ['claimondo-marketing', 'autounfall-io', 'kfz-gutachter-koeln', 'kfz-gutachter-duesseldorf', 'kfz-gutachter-bonn', 'kfz-gutachter-aachen', 'kfz-gutachter-wuppertal']
@@ -55,7 +55,12 @@ function userStrings(file, src) {
 // Einzeldateien mit nutzersichtbaren Texten ausserhalb der Marketing-Builds: die Blatt-Texte der
 // Bildserie "Aus der Patsche" leben als String-Literale im Generator (Abnahme 05.09.: sonst sind die
 // Blaetter fuer den Ratchet unsichtbar). Python-Literale werden wie TS/JS-Literale extrahiert.
-const EXTRA_FILES = ['docs/marketing/aus-der-patsche/generator.py']
+// ⚠ `decoder-data.generated.ts` heisst generiert und ist es NICHT: ihr eigener Kopf sagt
+// "Der Generator existiert nicht mehr … Dieses File IST die Quelle". Die SKIP-Regel oben wirft
+// `*.generated.ts` aber raus — damit war ausgerechnet nutzersichtbarer Decoder-Text unbewacht.
+// Gemessen 19.09.: zwei duzende Stellen darin, eine davon "Prüfe alle Posten, bevor Sie
+// zustimmen." — Duzen und Siezen im selben Satz.
+const EXTRA_FILES = ['docs/marketing/aus-der-patsche/generator.py', 'autounfall-io/content/decoder-data.generated.ts']
 const SCAN_FILES = []
 for (const r of ROOTS) for (const sd of SUBDIRS) SCAN_FILES.push(...walk(join(ROOT, r, sd)))
 for (const e of EXTRA_FILES) { const p = join(ROOT, e); if (existsSync(p)) SCAN_FILES.push(p) }
@@ -87,6 +92,32 @@ SCAN_FILES.push(...APP_FILES)
 // dem Prompt auch ECHTE Nutzerausgaben ("Du hast heute bereits … eingereicht", "ich habe
 // deinen Hinweis … gehaengt"). Eine pauschale Ausnahme haette genau die zwei Stellen
 // versteckt, die das Gate finden soll. Sie steht deshalb in der Baseline, nicht hier.
+
+// ── Wo die Imperativ-Achse laeuft ──────────────────────────────────────────────────────────
+// Marketing komplett (dort ist Siezen unstrittig: autounfall-io steht 79:0, claimondo-marketing
+// 1.395:13 fuer Sie). In `src/**` dagegen NUR dort, wo ein Kunde oder Geschaeftspartner hinsieht.
+//
+// ⚠ Die Einschraenkung ist eine ENTSCHEIDUNG, kein Messfehler: Aaron am 06.09.2026 — „ja die
+// sollen beim du bleiben" fuer die internen Oberflaechen. Die Chat-Inbox sagt „Waehle einen Chat
+// aus der Liste", das CalDav-Fenster „Waehle den Hauptkalender" — beides richtig so. Liefe die
+// Achse flaechig ueber src/**, faerbte sie genau diese Stellen rot und drehte Aarons Entscheidung
+// um, in bester Absicht. (Dieselbe Falle wie bei der Baseline, die am 06.09. deshalb durch eine
+// Ausnahmeliste ersetzt wurde.)
+//
+// Das Support-Widget steht hier bewusst DRIN, obwohl Aaron es am 06.09. zu den internen zaehlte:
+// seit dem 09.09. duerfen Makler, Werkstatt und Flotte es benutzen (#5936) — 100 der 135
+// zugelassenen Nutzer sind seither Partner, keine Kollegen, und die Route siezt ihre fuenf
+// Ausgaben seitdem ebenfalls. Sollte Aaron das Widget zurueck aufs Du stellen, gehoert dieser
+// Pfad raus und die Route mit ihm — dann aber ALS GANZES, nicht halb.
+const IMPERATIV_SRC_APP =
+  /^src\/app\/(kunde|kunde-nps|kunde-termin|flow|upload|schaden|schaden-melden|unfallmeldung|start|g|gewinn|beratung|login|auth|passwort-[a-z]+|abmelden|partner-abmelden|wochenreport-abmelden|makler|werkstatt|flotte)\//
+const IMPERATIV_SRC_KOMPONENTEN = /^src\/components\/(support|flow|kunde)\//
+
+/** Laeuft die Imperativ-Achse fuer diese Datei? Marketing immer, src nur kundensichtbar. */
+function imperativGeprueft(rel, nurAnrede) {
+  if (!nurAnrede) return true
+  return IMPERATIV_SRC_APP.test(rel) || IMPERATIV_SRC_KOMPONENTEN.test(rel)
+}
 const ANREDE_DATEI_AUSNAHMEN = [
   // (a) Anweisungen an ein Sprachmodell — "du" ist die Anrede an das MODELL
   /src\/lib\/wissen\/generate\.ts$/,          // "Du recherchierst …" — Artikel-Prompt
@@ -94,6 +125,12 @@ const ANREDE_DATEI_AUSNAHMEN = [
   /src\/lib\/bkat\/inference\.ts$/,           // "Setze … NUR wenn du die Ziffern lesen kannst"
   /src\/lib\/werkstatt\/copilot-prompt\.ts$/, // Werkstatt-Copilot, reiner Prompt
   /src\/lib\/faq-bot\/off-topic-guard\.ts$/,  // Erkennungsmuster "bist du eine ki" — Umstellen macht den Guard BLIND
+  // Der Support-Prompt. Sein "du" ist durchgehend die Anrede an das MODELL ("Du sprichst …",
+  // "Bevor du aufrufst …") — die Anweisung, wie es den NUTZER anspricht, lautet seit dem
+  // 19.09.2026 "sieze durchgehend" (Aaron). Heute sieht das Gate die Datei ohnehin nicht,
+  // weil `userStrings` mehrzeilige Template-Literale nicht erfasst; der Eintrag macht die
+  // Absicht fest, bevor jemand den Extraktor erweitert und 11 Fehltreffer erntet.
+  /src\/lib\/support\/system-prompt\.ts$/,
   // Werkzeugbeschreibung fuer KI-Agenten, die die oeffentliche API aufrufen: "NACHDEM du dem
   // Nutzer erklaert hast …", "Du vermittelst Gutachter + Termin". Adressat ist der Agent, nicht
   // der Endkunde — der bekommt seinen Text aus dem FlowLink.
@@ -137,6 +174,9 @@ for (const f of SCAN_FILES) {
     // Die Kennzeichen-Ausnahme in der Liste trifft den Satz nachweislich, greift an dieser
     // Aufrufstelle aber nicht; statt den Einzelfall zu flicken ist die ganze Dateiart raus.
     if (isGerman && !/\.json$/.test(rel) && !ANREDE_DATEI_AUSNAHMEN.some((a) => a.test(rel))) for (const w of scanAnrede(text)) findings.push({ file: rel, line, code: 'anrede-du', match: w })
+    // Zweite Achse: Befehlsform ohne Pronomen ("Beschreibe das Problem"). Sie laeuft nur auf
+    // kundensichtbaren Flaechen — intern bleibt das Du (Aaron 06.09.), s. imperativGeprueft.
+    if (isGerman && !/\.json$/.test(rel) && imperativGeprueft(rel, nurAnrede) && !ANREDE_DATEI_AUSNAHMEN.some((a) => a.test(rel))) for (const w of scanAnredeImperativ(text)) findings.push({ file: rel, line, code: 'anrede-imperativ', match: w })
     if (!nurAnrede && (/title/i.test(text) || /\|\s*Claimondo/.test(text))) if (scanTitleBrandTwice(text)) findings.push({ file: rel, line, code: 'title-brand-twice', match: text.slice(0, 80) })
   }
 }
@@ -145,7 +185,7 @@ const byFile = {}
 for (const f of findings) (byFile[f.file] ??= []).push(f)
 const files = Object.keys(byFile).sort()
 for (const file of files) { console.log(file); for (const f of byFile[file].slice(0, 12)) console.log(`  L${f.line} [${f.code}] ${f.match}`); if (byFile[file].length > 12) console.log(`  … +${byFile[file].length - 12}`) }
-console.log(`\ncopy-lint: ${findings.length} Treffer in ${files.length} Files (RDG: ${findings.filter(f => f.code.startsWith('rdg')).length}, Umlaut: ${findings.filter(f => f.code === 'umlaut').length}, Titel: ${findings.filter(f => f.code === 'title-brand-twice').length}, Anrede-Du: ${findings.filter(f => f.code === 'anrede-du').length})`)
+console.log(`\ncopy-lint: ${findings.length} Treffer in ${files.length} Files (RDG: ${findings.filter(f => f.code.startsWith('rdg')).length}, Umlaut: ${findings.filter(f => f.code === 'umlaut').length}, Titel: ${findings.filter(f => f.code === 'title-brand-twice').length}, Anrede-Du: ${findings.filter(f => f.code === 'anrede-du').length}, Anrede-Imperativ: ${findings.filter(f => f.code === 'anrede-imperativ').length})`)
 
 if (mode === 'update') { writeFileSync(BASELINE, JSON.stringify({ files }, null, 2) + '\n'); console.log(`Baseline geschrieben: ${files.length} Files`); process.exit(0) }
 if (mode === 'ratchet') {

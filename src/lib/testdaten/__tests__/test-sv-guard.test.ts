@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { entscheideTestSvGuard, pruefeTestSvKonsistenz, istInternesTelefon } from '../test-sv-guard'
+import { entscheideTestSvGuard, pruefeTestSvKonsistenz, istInternesTelefon, istDummyTelefon } from '../test-sv-guard'
 
 // Der Guard sitzt in reserviere() (der einen Buchungs-Chokepoint) und verhindert, dass
 // eine interne/Test-Buchung einen echten SV erreicht (und umgekehrt ein echter Kunde einen
@@ -191,5 +191,87 @@ describe('istInternesTelefon — Telefon-Reverse-Lookup (Send-Guard)', () => {
   it('fail-open bei Lookup-Fehler', async () => {
     const db = { from() { throw new Error('db down') } } as unknown as SupabaseClient
     expect(await istInternesTelefon('+491735633541', db)).toBe(false)
+  })
+})
+
+// 19.09.2026 — Befund B1 (Dashboard-Inventur): MCP-Probelaeufe legen Leads OHNE E-Mail an
+// (nur Name + Telefon). Der Guard leitete "intern" bislang allein aus E-Mail/Platzhalter-Name
+// ab — ein solcher Lead galt als ECHTER Kunde und reservierte fuenfmal beim echten Partner
+// UnfallSafe (25./26.07., 19.09.). Die Telefonnummer ist die zweite Identitaetsachse.
+describe('istDummyTelefon — Platzhalter-Nummern (reine Logik)', () => {
+  it('erkennt aufsteigende Ziffernfolgen (+4915512345678)', () => {
+    expect(istDummyTelefon('+4915512345678')).toBe(true)
+  })
+  it('erkennt Wiederholungen (000000 / 111111)', () => {
+    expect(istDummyTelefon('+49 170 0000000')).toBe(true)
+    expect(istDummyTelefon('+491711111111')).toBe(true)
+  })
+  it('erkennt die nicht vergebene Vorwahl 0123 / +49123', () => {
+    expect(istDummyTelefon('+49123456789')).toBe(true)
+    expect(istDummyTelefon('0123 987654')).toBe(true)
+  })
+  it('laesst echte Nummern durch', () => {
+    expect(istDummyTelefon('+491735633541')).toBe(false)
+    expect(istDummyTelefon('0176 22334455')).toBe(false)
+    expect(istDummyTelefon('+380505954949')).toBe(false)
+  })
+  it('null/leer -> false', () => {
+    expect(istDummyTelefon(null)).toBe(false)
+    expect(istDummyTelefon('')).toBe(false)
+  })
+})
+
+// Fake, der BEIDE Zugriffsformen kann: .maybeSingle() (Identitaets-Aufloesung) und
+// .ilike() als Liste (Telefon-Reverse-Lookup).
+function fakeDbBeides(
+  single: Record<string, () => Row>,
+  listen: Record<string, Array<Record<string, unknown>>>,
+): SupabaseClient {
+  const builder = (table: string): unknown => ({
+    select: () => builder(table),
+    eq: () => builder(table),
+    order: () => builder(table),
+    limit: () => builder(table),
+    maybeSingle: async () => (single[table] ? single[table]() : { data: null, error: null }),
+    ilike: async () => ({ data: listen[table] ?? [], error: null }),
+  })
+  return { from: (table: string) => builder(table) } as unknown as SupabaseClient
+}
+
+describe('pruefeTestSvKonsistenz — Telefon als zweite Identitaetsachse (B1, 19.09.)', () => {
+  it('blockt Lead OHNE E-Mail mit Platzhalter-Telefon auf echtem SV (der MCP-Probelauf)', async () => {
+    const db = fakeDbBeides(
+      {
+        sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+        leads: () => ({ data: { email: null, vorname: 'Petra', nachname: 'Winters', telefon: '+4915512345678' }, error: null }),
+      },
+      { profiles: [], leads: [] },
+    )
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
+    expect(res.blockieren).toBe(true)
+  })
+
+  it('blockt Lead OHNE E-Mail, dessen Telefon zu einem internen Konto gehoert', async () => {
+    const db = fakeDbBeides(
+      {
+        sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+        leads: () => ({ data: { email: null, vorname: 'Jonas', nachname: 'Berger', telefon: '+491735633541' }, error: null }),
+      },
+      { profiles: [{ email: 'aaron.sprafke@claimondo.de', telefon: '+491735633541' }], leads: [] },
+    )
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
+    expect(res.blockieren).toBe(true)
+  })
+
+  it('laesst Lead OHNE E-Mail mit echter, unbekannter Nummer auf echtem SV durch (kein neuer False-Positive)', async () => {
+    const db = fakeDbBeides(
+      {
+        sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+        leads: () => ({ data: { email: null, vorname: 'Anna', nachname: 'Winter', telefon: '+491573001122' }, error: null }),
+      },
+      { profiles: [], leads: [] },
+    )
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
+    expect(res.blockieren).toBe(false)
   })
 })

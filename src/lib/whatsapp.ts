@@ -38,7 +38,9 @@ export async function sendWhatsApp(to: string, message: string): Promise<{ succe
     return { success: true, sid: 'internal-recipient-suppressed' }
   }
 
-  const result = await sendWhatsAppText(cleanTo, message)
+  // Guard hier oben (Zeile ~36, se.mode-bewusst) bereits durchlaufen -> Leaf-Guard ueberspringen
+  // (sonst doppelter DB-Lookup, und der Leaf kennt den se.mode-Kontext nicht).
+  const result = await sendWhatsAppText(cleanTo, message, { skipInternalGuard: true })
   if (result.ok) return { success: true, sid: result.messageId ?? undefined }
   console.error(`[whatsapp] Baileys send failed (${result.code}): ${result.error}`)
   return { success: false, error: result.error }
