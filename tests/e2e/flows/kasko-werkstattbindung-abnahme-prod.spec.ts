@@ -184,6 +184,21 @@ async function cleanupLead(db: SupabaseClient, email: string): Promise<void> {
         if (del && 'error' in del && del.error) console.warn('[cleanup] deleteUser fehlgeschlagen:', uid, del.error)
       }
     }
+    // 19.09.: T2 (Werkstatt-Strecke) hinterliess Lead + Claim auf prod. Der Claim haengt per
+    // claims.lead_id am Lead, steht aber NICHT in leads.konvertiert_zu_claim_id — der Block oben
+    // sah ihn nicht, und der Lead-DELETE scheiterte am FK. Alle Claims des Leads loesen, wie oben.
+    if (leadId) {
+      const { data: weitereClaims } = await db.from('claims').select('id').eq('lead_id', leadId).neq('id', claimId ?? '00000000-0000-0000-0000-000000000000')
+      for (const c of weitereClaims ?? []) {
+        const { error: eT } = await db.from('tasks').delete().eq('claim_id', c.id)
+        if (eT) console.warn('[cleanup] tasks des Claims bleiben liegen:', c.id, eT.message)
+        const { error: eC } = await db
+          .from('claims')
+          .update({ lead_id: null, ist_aktiv: false, deaktiviert_am: new Date().toISOString(), deaktiviert_grund: 'testfall' })
+          .eq('id', c.id)
+        if (eC) console.warn('[cleanup] Claim bleibt am Lead:', c.id, eC.message)
+      }
+    }
     if (leadId) {
       await db.from('tasks').delete().eq('entity_id', leadId)
       await db.from('tasks').delete().eq('lead_id', leadId)
@@ -280,8 +295,14 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await waehleMarke(page, 'HUK-COBURG')
     await expect(page.getByRole('heading', { name: /Welchen Tarif haben Sie bei HUK-COBURG/i })).toBeVisible({ timeout: 20_000 })
     await shot(page, 't1-02-tarifliste')
-    // Mess-Punkt UX: Ein Klick auf die Karte entscheidet sofort (keine Bestaetigung) — Stand ohne #-Bestaetigungs-PR.
     await page.getByText('Classic SELECT', { exact: true }).click()
+    // Seit #5864 (05.09.) entscheidet der Klick auf die Karte NICHT mehr sofort: „Bitte kurz
+    // bestaetigen" mit „Ja, das ist mein Tarif" / „Nein, zurueck zur Auswahl" steht dazwischen.
+    // Diese Spec lief am 19.09. genau daran rot (Endseite nie erreicht) — Test-Drift, kein
+    // Produktbefund; der Screenshot zeigte den Bestaetigungsschritt.
+    await expect(page.getByRole('heading', { name: /Bitte kurz bestätigen/i })).toBeVisible({ timeout: 20_000 })
+    await shot(page, 't1-02b-bestaetigung')
+    await page.getByRole('button', { name: /Ja, das ist mein Tarif/i }).click()
 
     const endseite = page.getByRole('heading', { name: /Ihr Kasko-Tarif enthält eine Werkstattbindung/i })
     await expect(endseite).toBeVisible({ timeout: 30_000 })
