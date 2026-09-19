@@ -10,6 +10,7 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { safeContinue } from '@/lib/auth/safe-continue'
 import { finalisierePhoneLogin } from './actions'
 import { toE164 } from '@/lib/format/telefon'
+import { bereiteTelefonLoginVor, sendeAnmeldeLinkPerEmail } from './bekannter-kontakt-actions'
 
 // Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
 // Server-Action-Ausfuehrung sichtbar ist (BUG-88).
@@ -44,6 +45,9 @@ export default function LoginClient({
   const [phoneError, setPhoneError] = useState<string | null>(null)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [googleError, setGoogleError] = useState<string | null>(null)
+  // Login ohne Link (19.09.): Anmelde-Link per E-Mail fuer bekannte Kontakte.
+  const [linkGesendet, setLinkGesendet] = useState(false)
+  const [linkLoading, setLinkLoading] = useState(false)
 
   async function handlePhoneSend() {
     setPhoneError(null)
@@ -56,11 +60,25 @@ export default function LoginClient({
       // B2: Eingabe auf E.164 normalisieren, damit sie gegen auth.users.phone
       // (kanonisch E.164) aufloest — sonst findet signInWithOtp das Konto nicht.
       const phoneE164 = toE164(phone) ?? phone
+      // Login ohne Link (19.09.): fuer einen BEKANNTEN Kontakt (Lead/Claim mit dieser
+      // Nummer) entsteht das Konto jetzt serverseitig, BEVOR signInWithOtp
+      // (shouldCreateUser:false) danach sucht. Die Action antwortet immer neutral —
+      // der Satz im Verify-Schritt gilt fuer bekannt UND unbekannt.
+      await bereiteTelefonLoginVor(phoneE164)
       const { error } = await supabase.auth.signInWithOtp({
         phone: phoneE164,
         options: { shouldCreateUser: false },
       })
-      if (error) throw error
+      if (error) {
+        // Enumeration-Schutz: unbekannte Nummer -> Supabase antwortet mit
+        // code 'otp_disabled' ("Signups not allowed for otp", 422; gemessen 19.09.).
+        // Das sieht fuer den Nutzer aus wie Erfolg — derselbe Satz wie nach Versand.
+        if ((error as { code?: string }).code === 'otp_disabled') {
+          setPhoneStep('verify')
+          return
+        }
+        throw error
+      }
       setPhoneStep('verify')
     } catch (err) {
       setPhoneError(err instanceof Error ? err.message : 'SMS konnte nicht gesendet werden')
@@ -216,6 +234,43 @@ export default function LoginClient({
         </form>
       )}
 
+      {/* Login ohne Link (19.09.): Anmelde-Link an die E-Mail, mit der der Schaden gemeldet wurde.
+          Antwort ist fuer bekannte UND unbekannte Adressen derselbe Satz (Enumeration-Schutz). */}
+      {tab === 'email' && (
+        <div className="mt-4 border-t border-claimondo-border pt-4">
+          <p className="text-sm text-claimondo-ondo mb-2">
+            Kein Passwort? Wir schicken Ihnen einen Anmelde-Link an die E-Mail-Adresse, mit der Sie Ihren Schaden
+            gemeldet haben.
+          </p>
+          {linkGesendet ? (
+            <p className="text-sm text-claimondo-navy">
+              Falls zu dieser Adresse ein Vorgang bei uns existiert, ist der Anmelde-Link unterwegs. Bitte auch den
+              Spam-Ordner prüfen.
+            </p>
+          ) : (
+            <button
+              type="button"
+              disabled={linkLoading}
+              onClick={async () => {
+                const el = document.querySelector<HTMLInputElement>('input[name="email"]')
+                const value = el?.value ?? ''
+                if (!value.includes('@')) return
+                setLinkLoading(true)
+                try {
+                  await sendeAnmeldeLinkPerEmail(value)
+                  setLinkGesendet(true)
+                } finally {
+                  setLinkLoading(false)
+                }
+              }}
+              className="text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy underline underline-offset-2 disabled:opacity-60"
+            >
+              {linkLoading ? 'Wird gesendet …' : 'Anmelde-Link per E-Mail senden'}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Phone tab */}
       {tab === 'telefon' && (
         <div className="flex flex-col gap-4">
@@ -246,7 +301,10 @@ export default function LoginClient({
             </>
           ) : (
             <>
-              <p className="text-claimondo-ondo text-sm">Code gesendet an <span className="text-claimondo-navy">{phone}</span></p>
+              <p className="text-claimondo-ondo text-sm">
+                Falls zu <span className="text-claimondo-navy">{phone}</span> ein Vorgang bei uns existiert, haben wir
+                gerade einen Code per SMS geschickt.
+              </p>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-claimondo-navy">6-stelliger Code</label>
                 <input

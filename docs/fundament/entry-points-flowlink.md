@@ -111,6 +111,7 @@ UNBEKANNTER Verfügbarkeit (`verfuegbar !== false`, z. B. Baileys-Timeout) versu
 | 11 | **KB / Konsultation** (Abbrecher-Leads, service-role) | `mitarbeiter/konsultation/[terminId]/actions.ts:42` | — | ✗ | ✓ (reuse) | ✓ expliziter Kanal | ✓ idempotent | weich |
 | 12 | **Werkstatt-Anfragen** | `werkstatt/(shell)/anfragen/actions.ts:119` (ensure) + `:150/:153` (send) | — | ✗ | ✓ | ✓ WA→SMS-Fallback | ✓ idempotent | weich |
 | 13 | **Makler-Vermittlung** | `lib/makler/erstelle-anfrage.ts:233–235` | ✓/— (je Anfrage) | ✗ | ✓ | ✓ WA→SMS→Email (+ introText) | ✓ idempotent | weich |
+| L-2 | **`/login` (bekannter Kontakt)** — Telefon/E-Mail ohne Link, Konto entsteht beim ersten Login | `app/login/bekannter-kontakt-actions.ts` (Konto) + `app/kunde/offene-leads-actions.ts` (frischer FlowLink per Karte) | ✗ (liest Lead/Claim) | ✗ | ✓ neu über `ensureCanonicalFlowLinkForLead` | ✗ (Timeline `kunde_selbst_angemeldet` statt Notif) | ✓ (Konto idempotent, neutrale Antwort) | ✗ |
 
 ### Gruppe 4 — Verwaist (Dead-Code)
 
