@@ -173,8 +173,16 @@ export async function POST(req: Request) {
       .select(
         'id, isochrone_polygon, paket, profile_id, firmenname, standort_adresse',
       )
-      .eq('verifiziert', true)
+      // `.eq('verifiziert', true)` stand hier bis zum 19.09.2026 — entfernt auf Aarons
+      // Entscheidung („Die Verifizierung ist ja keine notwendige Sache fuer den Finder";
+      // nachmittags: „ich moechte nicht mehr verifizieren"). Spiegelt jetzt das Praedikat
+      // der App-Route src/app/api/kfzgutachter-lp/gutachter-verfuegbar/route.ts: die
+      // Region-Zahl zaehlt dieselben Gutachter, die der Finder anzeigt. Test-Accounts und
+      // gesperrte SVs raus; portal_zugang bewusst NICHT (Aaron hat die Zahl grosszuegig
+      // getunt, s. o. + Tier-3 sv_leads).
       .eq('ist_aktiv', true)
+      .eq('ist_testaccount', false)
+      .is('gesperrt_seit', null)
       .is('geloescht_am', null)
       .not('isochrone_polygon', 'is', null),
     sb

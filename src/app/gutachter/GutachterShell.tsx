@@ -144,7 +144,6 @@ export default function GutachterShell({
   standortLng,
   showCommunity,
   showVerifizierung,
-  verifizierungOffen,
   svId,
   onboardingModus,
 }: {
@@ -164,8 +163,6 @@ export default function GutachterShell({
   // AAR-359 W5: Verifizierungs-Link in der Sidebar. Ops-Test 11.08.: bleibt jetzt
   // dauerhaft sichtbar, damit der SV seine Nachweise nachreichen/erneuern kann.
   showVerifizierung?: boolean
-  /** Steuert nur das LABEL: offen -> "Verifizierung", geprueft -> "Nachweise". */
-  verifizierungOffen?: boolean
   // CMM-36: SV-ID für Geo-Tracking
   svId?: string | null
   // Onboarding-Modus (Option B, 17.07.): SV noch nicht freigeschaltet -> operative Nav gesperrt.
@@ -208,9 +205,9 @@ export default function GutachterShell({
     if (showVerifizierung) {
       before.push({
         href: '/gutachter/verifizierung',
-        // Nach abgeschlossener Pruefung ist "Verifizierung" irrefuehrend — der SV
-        // verwaltet dort seine hinterlegten Nachweise (SA, Haftpflicht, Gewerbe).
-        label: verifizierungOffen ? 'Verifizierung' : 'Nachweise',
+        // Immer „Nachweise": seit 19.09.2026 gibt es keine Verifizierung mehr, die der
+        // SV bestehen muesste (Aaron) — er verwaltet dort seine Dokumente, wann er will.
+        label: 'Nachweise',
         icon: ShieldCheckIcon,
       })
     }

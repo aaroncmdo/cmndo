@@ -18,10 +18,16 @@ import { logPartnerEvent } from '@/lib/partner/log-partner-event'
 
 // AAR-359 W6: Admin-Actions für Verifizierungs-Tab.
 //
+// ⚠ Seit 19.09.2026 (Aaron: „ich moechte nicht mehr verifizieren und … nicht mehr
+// nachhalten muessen, ob die Dokumente fehlen") sind alle Actions hier OPTIONAL: keine
+// oeffnet oder schliesst mehr die Karte, die Engine oder das Siegel. Freischaltung +
+// `verifiziert` setzt der Freischaltungs-Patch (src/lib/sv/freischaltung.ts) an jedem
+// Eingang; die 14-Tage-Frist (Option B, 08.08.) und ihr Dispatch-Block sind abgeschafft.
+//
 // Die Actions bilden den Admin-seitigen Gegenpart zum SV-Upload-Flow:
-// - tier2Freigeben / tier2DokumentNachfordern — Tier 2 (14-Tage-Frist)
-// - svSperren / svEntsperren — separate Sperre (nie automatisch)
-// - pflichtdokumentFreigeben / -Zurueckweisen — Tier-1-Pflichtdokumente (AAR-714)
+// - tier2Freigeben / tier2DokumentNachfordern — Nachweise als geprueft markieren / nachfordern (informativ)
+// - svSperren / svEntsperren — separate Sperre (nie automatisch) — DER Weg, einen SV aus dem Betrieb zu nehmen
+// - pflichtdokumentFreigeben / -Zurueckweisen — Kunden-Unterlagen (AAR-714), informativ
 //
 // AAR-360: Die Legacy-SA-Vorlage-Actions (saVorlageFreigeben/-Zurueckweisen)
 // wurden entfernt — das Tier-1-Dispatch-Gate läuft über pflichtdokumente.
@@ -110,37 +116,9 @@ export async function tier2Freigeben(svId: string): Promise<{ success: boolean; 
   return { success: true }
 }
 
-/**
- * Verlaengert die Tier-2-Frist eines SV (Admin-Kulanz). Setzt den Status zurueck
- * auf 'ausstehend' + neue Frist + hebt einen etwaigen frist_ueberschritten-Marker
- * auf → ein bereits dispatch-geblockter SV wird damit reaktiviert (Fall-Empfang
- * wieder moeglich, solange die neue Frist laeuft).
- */
-export async function tier2FristVerlaengern(
-  svId: string,
-  tage: number,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await requireAdmin()
-  if (!auth.success) return { success: false, error: auth.error }
-  if (!Number.isFinite(tage) || tage < 1 || tage > 90) {
-    return { success: false, error: 'Ungültige Verlängerung (1–90 Tage).' }
-  }
-
-  const db = createAdminClient()
-  const { error } = await db
-    .from('sachverstaendige')
-    .update({
-      verifizierung_status: 'ausstehend',
-      verifizierung_frist_bis: new Date(Date.now() + tage * 864e5).toISOString(),
-      verifizierung_frist_ueberschritten_am: null,
-      verifizierung_reminder_7d_gesendet_am: null,
-    })
-    .eq('id', svId)
-  if (error) return { success: false, error: `Frist-Verlängerung fehlgeschlagen: ${error.message}` }
-
-  revalidateBoth(svId)
-  return { success: true }
-}
+// `tier2FristVerlaengern` (Admin-Kulanz: Frist +14 Tage, hob den Dispatch-Block auf) stand
+// hier bis 19.09.2026. Mit Aarons Entscheidung („nicht mehr nachhalten, ob die Dokumente
+// fehlen") gibt es weder Frist noch Block — die Action waere ein Knopf ohne Wirkung.
 
 export async function tier2DokumentNachfordern(
   svId: string,
@@ -370,12 +348,10 @@ export async function pflichtdokumentZurueckweisen(
     .eq('id', row.id)
   if (error) return { success: false, error: `Ablehnung fehlgeschlagen: ${error.message}` }
 
-  // Verifiziert zurücksetzen — eine Ablehnung kippt den gesamten Verifiziert-
-  // Status, bis der SV neu hochlädt und der Admin erneut freigibt.
-  await db
-    .from('sachverstaendige')
-    .update({ verifiziert: false, verifiziert_am: null, verifiziert_von: null })
-    .eq('id', svId)
+  // Bis 19.09.2026 kippte eine Ablehnung hier `verifiziert` auf false. Seit Aarons
+  // Entscheidung bedeutet das Siegel „freigeschalteter Partner" und haengt nicht mehr an
+  // einzelnen Dokumenten — ein abgelehntes Dokument nimmt dem Gutachter weder Karte noch
+  // Siegel. Wer ihn wirklich aus dem Betrieb nehmen will, nutzt svSperren.
 
   // SV-Task: Re-Upload nachreichen (analog tier2DokumentNachfordern, aber
   // ohne harte Frist — der SV braucht's für Freischaltung, das ist Druck genug).

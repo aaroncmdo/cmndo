@@ -119,9 +119,11 @@ describe('gibBasicSvFrei — Go-Live-Geo-Guard', () => {
     const upd = updateCapture.sachverstaendige!
     expect(upd.ist_aktiv).toBe(true)
     expect(upd.portal_zugang_freigeschaltet).toBe(true)
-    // Freischalten heisst NICHT verifizieren: ohne geprüfte Tier-2-Dokumente bleibt das
-    // kundensichtbare Siegel aus (31.08. — es wurde vorher blind mitgesetzt).
-    expect('verifiziert' in upd).toBe(false)
+    // Aaron 19.09.2026: Freischalten heisst jetzt AUCH verifizieren — „ich möchte nicht mehr
+    // verifizieren … damit soll er wirklich verifiziert und buchbar sein". Die Dokumenten-
+    // prüfung (31.08./08.08.) entscheidet nicht mehr über das Siegel.
+    expect(upd.verifiziert).toBe(true)
+    expect('verifizierung_frist_bis' in upd).toBe(false) // keine 14-Tage-Frist mehr
     expect(upd.isochrone_polygon).toBeTruthy() // nachberechnet mitgeschrieben
   })
 
@@ -140,7 +142,7 @@ describe('gibBasicSvFrei — Go-Live-Geo-Guard', () => {
     const upd = updateCapture.sachverstaendige!
     expect(upd.ist_aktiv).toBe(true)
     expect(upd.portal_zugang_freigeschaltet).toBe(true)
-    expect('verifiziert' in upd).toBe(false) // siehe oben: Freischalten ≠ Verifizieren
+    expect(upd.verifiziert).toBe(true) // siehe oben: Freischalten = verifiziert (19.09.)
     expect('isochrone_polygon' in upd).toBe(false) // nicht angefasst
   })
 })

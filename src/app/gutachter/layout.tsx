@@ -40,10 +40,7 @@ export default async function GutachterLayout({
   // (Team/Verwalter-Nav retired 2026-07-28 — SV-Org-Modell dormant, s. docs/fundament/DECISIONS.md)
   const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
-  // AAR-359 W5 / AAR-714 / AAR-360: Verifizierungs-Link in Sidebar, solange
-  // ein Verifizierungs-Zustand aktiv bleibt. Die Legacy-SA-Vorlage (Tier 1)
-  // wurde mit AAR-360 entfernt — der Tier-2-Status ist der einzige Trigger.
-  const tier2Offen = sv?.verifizierung_status && sv.verifizierung_status !== 'geprueft'
+  // AAR-359 W5 / AAR-714 / AAR-360: Nachweise-Link in der Sidebar.
   // Ops-Test 11.08.: Nach 'geprueft' verschwand der Eintrag — der SV kam an seine
   // eigenen Nachweise nicht mehr heran (Aaron: "Der Gutachter muss seine
   // Sicherungsabtretung nachtraeglich in den Einstellungen hochladen koennen").
@@ -52,11 +49,9 @@ export default async function GutachterLayout({
   // und fehlende Tier-2-Dokumente machen den SV nicht-dispatchbar — er MUSS
   // jederzeit nachreichen koennen. Label unten wechselt auf "Nachweise".
   const showVerifizierung = !!sv
-  // Tier-2-Frist-Banner (Berufshaftpflicht/Gewerbeanmeldung — Spec 2026-08-08):
-  const tier2TageOffen = sv?.verifizierung_frist_bis
-    ? Math.max(0, Math.ceil((new Date(sv.verifizierung_frist_bis).getTime() - Date.now()) / 864e5))
-    : null
-  const tier2TageText = tier2TageOffen != null ? ` — noch ${tier2TageOffen} Tag${tier2TageOffen === 1 ? '' : 'e'}` : ''
+  // (Bis 19.09.2026 stand hier der Tier-2-Frist-Countdown fuer zwei Banner. Aaron hat die
+  // Frist abgeschafft — „nicht mehr nachhalten, ob die Dokumente fehlen" —, die Banner sind
+  // unten entfernt. Nachweise laedt der SV unter „Nachweise" hoch, wann er will.)
 
   // Check if this gutachter has been soft-deleted → sign out + redirect
   if (sv?.geloescht_am) {
@@ -116,7 +111,6 @@ export default async function GutachterLayout({
       standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
       showCommunity={showCommunity}
       showVerifizierung={showVerifizierung}
-      verifizierungOffen={!!tier2Offen}
       svId={sv?.id ? String(sv.id) : null}
       onboardingModus={sv?.portal_zugang_freigeschaltet === false}
     >
@@ -127,19 +121,11 @@ export default async function GutachterLayout({
         </div>
       )}
 
-      {/* Tier-2-Frist-Banner: Berufshaftpflicht + Gewerbeanmeldung (Spec 2026-08-08). */}
-      {sv?.verifizierung_status === 'ausstehend' && (
-        <div className="bg-warning-soft border-b border-warning/30 px-4 py-2.5 text-center text-xs text-warning-strong font-medium">
-          Berufshaftpflicht &amp; Gewerbeanmeldung fehlen{tier2TageText} —{' '}
-          <a href="/gutachter/verifizierung" className="underline font-semibold">jetzt hochladen</a>, sonst pausieren wir Ihre Fälle.
-        </div>
-      )}
-      {sv?.verifizierung_status === 'frist_ueberschritten' && (
-        <div className="bg-danger-soft border-b border-danger/30 px-4 py-2.5 text-center text-xs text-danger-strong font-medium">
-          Ihre Fälle sind pausiert, weil Berufshaftpflicht/Gewerbeanmeldung fehlen —{' '}
-          <a href="/gutachter/verifizierung" className="underline font-semibold">Nachweise hochladen</a>.
-        </div>
-      )}
+      {/* Die beiden Tier-2-Frist-Banner („… sonst pausieren wir Ihre Fälle" / „Ihre Fälle
+          sind pausiert") standen hier bis 19.09.2026. Aaron: „ich möchte auch nicht mehr
+          nachhalten müssen, ob die Dokumente fehlen oder nicht … trotzdem angezeigt und
+          sogar auch buchbar." Es gibt keine Frist und keine Pause mehr — der Hinweis auf
+          fehlende Nachweise lebt informativ auf /gutachter/verifizierung. */}
       {/* AAR-359 W5: Account-Sperre (rot, höchste Priorität) — getrennt von
           verifizierung_status, wird nur manuell vom Admin gesetzt. */}
       {sv?.gesperrt_seit && (

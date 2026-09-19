@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { freischaltungsPatch } from '@/lib/sv/freischaltung'
 
 /**
  * ARCH-1 FR-3: Sub-Mitarbeiter akzeptiert nur Nutzungsbedingungen + AGB + DS
@@ -113,13 +114,18 @@ export async function akzeptiereAgbSubSv(
   if (inhaberHatBezahlt) {
     // Inhaber hat bereits bezahlt → Sub-SV sofort freischalten
     // BUG-FOLLOW-4 analog: Werbebudget initialisieren falls nicht schon gesetzt
-    await db.from('sachverstaendige').update({
-      portal_zugang_freigeschaltet: true,
+    // Freischaltungs-Patch (portal_zugang, ist_aktiv, verifiziert) — derselbe wie im
+    // Stripe-Webhook, Gutschein-Pfad und in der Basic-Freigabe (Aaron 19.09.2026).
+    const { error: freiErr } = await db.from('sachverstaendige').update({
+      ...freischaltungsPatch(new Date().toISOString()),
       onboarding_status: 'bezahlt',
       anzahlung_status: 'bezahlt',
-      ist_aktiv: true,
       werbebudget_guthaben_netto: Number(sv.onboarding_anzahlung_betrag ?? 0),
     }).eq('id', sv.id)
+    if (freiErr) {
+      console.error('[akzeptiereAgbSubSv] Freischaltung fehlgeschlagen:', freiErr.message)
+      return { success: false, error: `Freischaltung fehlgeschlagen: ${freiErr.message}` }
+    }
 
     revalidatePath('/gutachter/willkommen', 'page')
     return { success: true, freigeschaltet: true }

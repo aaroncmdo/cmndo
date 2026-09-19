@@ -402,24 +402,12 @@ export async function beanspracheSvLead(input: {
     console.error('[sv-basic/beanspracheSvLead] Magic-Link-Sub-Op fehlgeschlagen:', err)
   }
 
-  // 8c. Admin-Task "Neue Basic-Claim wartet auf Freigabe"
-  try {
-    const { createLinkedTask } = await import('@/lib/tasks/create-task')
-    await createLinkedTask({
-      titel: 'Neue Basic-Claim wartet auf Freigabe',
-      beschreibung: `SV-Lead ${input.svLeadId} wurde von ${input.email} beansprucht. Bitte Identität prüfen und Konto freigeben.`,
-      prioritaet: 'normal',
-      typ: 'sv_basic_claim_review',
-      entity_type: 'gutachter',
-      entity_id: svId,
-      empfaenger_rolle: 'admin',
-      task_code: 'sv_basic_claim_review',
-      trigger_event: 'sv_basic_claim_created',
-      auto_erstellt: true,
-    })
-  } catch (err) {
-    console.error('[sv-basic/beanspracheSvLead] Admin-Task fehlgeschlagen:', err)
-  }
+  // 8c. (entfallen 19.09.2026) Bis dahin entstand hier ein Admin-Task „Neue Basic-Claim
+  //     wartet auf Freigabe — Identität prüfen und Konto freigeben". Aaron: „ich möchte nicht
+  //     mehr verifizieren". Die Freischaltung passiert beim Wizard-Abschluss automatisch
+  //     (finalize.ts → freigebeBasicSvCore); nur der Geo-Guard-Fall erzeugt dort noch eine
+  //     Nachhol-Aufgabe. Auf prod lagen 12 dieser Aufgaben verwaist offen (SV längst weg).
+  //     Vertrieb sieht den Neuzugang weiterhin im Partner-CRM (8e) und per Team-WhatsApp (8d).
 
   // 8d. Team-WhatsApp (Helper wirft nie; interne/Test-Identitaeten unterdrueckt er) —
   //     neue Marketing-Funnel-Partner sofort aufs Team-Handy (Aaron-Direktive 05.08.).
@@ -683,24 +671,11 @@ export async function registriereSvBasicNeu(input: {
     console.error('[sv-basic/registriereSvBasicNeu] Magic-Link-Sub-Op fehlgeschlagen:', err)
   }
 
-  // 9c. Admin-Task "Neue Basic-Registrierung wartet auf Freigabe"
-  try {
-    const { createLinkedTask } = await import('@/lib/tasks/create-task')
-    await createLinkedTask({
-      titel: 'Neue Basic-Registrierung wartet auf Freigabe',
-      beschreibung: `Frische SV-Selbstregistrierung von ${input.email} (DAT-Nr: ${input.datNr?.trim() || 'keine angegeben'}). Bitte Identität prüfen und Konto freigeben.`,
-      prioritaet: 'normal',
-      typ: 'sv_basic_claim_review',
-      entity_type: 'gutachter',
-      entity_id: svId,
-      empfaenger_rolle: 'admin',
-      task_code: 'sv_basic_claim_review',
-      trigger_event: 'sv_basic_claim_created',
-      auto_erstellt: true,
-    })
-  } catch (err) {
-    console.error('[sv-basic/registriereSvBasicNeu] Admin-Task fehlgeschlagen:', err)
-  }
+  // 9c. (entfallen 19.09.2026) Bis dahin entstand hier ein Admin-Task „Neue Basic-
+  //     Registrierung wartet auf Freigabe — Identität prüfen und Konto freigeben".
+  //     Aaron: „ich möchte nicht mehr verifizieren". Die Freischaltung passiert beim
+  //     Wizard-Abschluss automatisch (finalize.ts → freigebeBasicSvCore); nur der
+  //     Geo-Guard-Fall erzeugt dort noch eine Nachhol-Aufgabe. Siehe 8c in beanspracheSvLead.
 
   // 9d. Partner-CRM-Spiegel (best-effort, non-critical): der selbst-registrierte SV
   // erscheint als partner_leads-Prospect fuer Vertriebs-Sichtbarkeit + Tracking

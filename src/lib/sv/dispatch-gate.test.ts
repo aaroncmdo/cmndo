@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { svDarfFaelleEmpfangen, FRIST_UEBERSCHRITTEN, type SvDispatchGateFields } from './dispatch-gate'
+import { svDarfFaelleEmpfangen, type SvDispatchGateFields } from './dispatch-gate'
 
 const good: SvDispatchGateFields = {
   verifiziert: true,
@@ -46,12 +46,17 @@ describe('svDarfFaelleEmpfangen', () => {
     expect(svDarfFaelleEmpfangen(null)).toBe(false)
     expect(svDarfFaelleEmpfangen(undefined)).toBe(false)
   })
-  // DECISION FG3-Task-3.0 (Aaron 2026-07-11): ENFORCE. Do NOT flip without re-recording the decision.
-  it('false when verifizierung_status = frist_ueberschritten [decision A: ENFORCE]', () => {
-    expect(svDarfFaelleEmpfangen({ ...good, verifizierung_status: FRIST_UEBERSCHRITTEN })).toBe(false)
-  })
-  it('true for ausstehend / null status (only frist_ueberschritten blocks; NULL-safe)', () => {
+  // DECISION 2026-09-19 (Aaron) — überschreibt FG3-Task-3.0 (11.07., „decision A: ENFORCE")
+  // und Option B (08.08., 14-Tage-Frist): „ich möchte auch nicht mehr nachhalten müssen, ob
+  // die Dokumente fehlen oder nicht … wenn Dokumente fehlen, soll der Sachverständige trotzdem
+  // angezeigt werden und sogar auch buchbar sein." Gemessen am selben Tag auf prod: 3 Gutachter
+  // waren allein wegen `frist_ueberschritten` aus der Engine ausgeschlossen, 2 davon trugen
+  // sogar `verifiziert=true`. Der Status bleibt als Information in der Spalte, entscheidet aber
+  // nicht mehr, wer Fälle bekommt. Do NOT flip back without re-recording the decision.
+  it('true for EVERY verifizierung_status — auch frist_ueberschritten [decision 2026-09-19: Frist zurückgenommen]', () => {
+    expect(svDarfFaelleEmpfangen({ ...good, verifizierung_status: 'frist_ueberschritten' })).toBe(true)
     expect(svDarfFaelleEmpfangen({ ...good, verifizierung_status: 'ausstehend' })).toBe(true)
+    expect(svDarfFaelleEmpfangen({ ...good, verifizierung_status: 'abgelehnt' })).toBe(true)
     expect(svDarfFaelleEmpfangen({ ...good, verifizierung_status: null })).toBe(true)
   })
 })

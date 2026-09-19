@@ -1,5 +1,12 @@
 # Tier-2-Dokumente-Enforcement — Freischaltung vom Verifizierungs-Status entkoppeln
 
+> ⚠ **ZURÜCKGENOMMEN am 19.09.2026** (Aaron: „ich möchte nicht mehr verifizieren und ich möchte auch nicht
+> mehr nachhalten müssen, ob die Dokumente fehlen oder nicht … wenn Dokumente fehlen, soll der Sachverständige
+> trotzdem angezeigt werden und sogar auch buchbar sein"). Keine 14-Tage-Frist, kein `frist_ueberschritten`-
+> Dispatch-Stopp, kein Reminder-Cron, kein Prüf-Task je Upload. Freischaltung = EIN Patch an allen Eingängen
+> (`src/lib/sv/freischaltung.ts`) inkl. `verifiziert`. Soll-Blatt: `memory/abnahmen/2026-09-19-sv-onboarding-
+> auto-freischaltung-ueberall.md`. Dieses Dokument bleibt als Geschichte stehen.
+
 **Datum:** 2026-08-08
 **Entscheid:** Aaron „Option B" (hartes Enforcement mit Grace-Frist) + „denk an die Admin-Seite"
 **Berührt Journeys:** J8 (Onboarding je Rolle), J10 (Dispatch/Ranking)

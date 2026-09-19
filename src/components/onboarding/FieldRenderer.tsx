@@ -21,6 +21,7 @@ import { PhoneVerifyField } from './fields/PhoneVerifyField'
 import { AvatarUploadField } from './fields/AvatarUploadField'
 import { CalendarConnectField } from './fields/CalendarConnectField'
 import { EmbedSiteCreateField } from './fields/EmbedSiteCreateField'
+import { SvDokumenteField } from './fields/SvDokumenteField'
 import VersicherungAutocomplete from '@/components/VersicherungAutocomplete'
 
 export function FieldRenderer({
@@ -201,6 +202,15 @@ export function FieldRenderer({
     case 'calendar-connect':
       return (
         <CalendarConnectField
+          feld={feld}
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+        />
+      )
+    case 'sv-dokumente':
+      return (
+        <SvDokumenteField
           feld={feld}
           value={(value as string) ?? ''}
           onChange={onChange as (v: string) => void}

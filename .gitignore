@@ -165,3 +165,4 @@ scripts/.backfill-*-backup-*.json
 # Testprotokolle als Doku unmoeglich machen — genau die Belege, auf die sich Regel 4 stuetzt.
 *.log
 !docs/**/*.log
+scripts/smoke/.sv-onboarding-auto-freischaltung-seed.json

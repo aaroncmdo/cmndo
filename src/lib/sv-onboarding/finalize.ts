@@ -16,13 +16,14 @@ import { freigebeBasicSvCore } from '@/lib/sv-basic/freigabe'
  *
  * Voraussetzung: sachverstaendige.paket = 'basic'.
  * Danach AUTO-FREIGABE (Aaron 29.07.: "alle SVs sollen sich selbst freigeben"):
- * freigebeBasicSvCore setzt ist_aktiv/portal_zugang, sofern der Go-Live-Geo-Guard
- * passt (Standort + Isochrone) — sonst Fallback auf die manuelle Freigabe-Queue
- * (Admin-Task). Spiegelt damit die bezahlten Pfade (Stripe/Gutschein/Sub-SV), die
- * schon immer bei Abschluss selbst freischalten.
- * ⚠ `verifiziert` gehoert NICHT dazu: Freischalten (Portal nutzen duerfen) und
- * Verifizieren (geprueftes Vertrauens-Siegel gegenueber Kunden) sind getrennt.
- * Das Flag setzt nur die Doc-Pruefung — siehe freigabe.ts.
+ * freigebeBasicSvCore setzt den Freischaltungs-Patch (portal_zugang, ist_aktiv,
+ * verifiziert — src/lib/sv/freischaltung.ts), sofern der Go-Live-Geo-Guard passt
+ * (Standort + Isochrone) — sonst Fallback auf die manuelle Freigabe-Queue (Admin-Task).
+ * Spiegelt damit die bezahlten Pfade (Stripe/Gutschein/Sub-SV), die denselben Patch
+ * schreiben.
+ * Aaron 19.09.2026: `verifiziert` GEHOERT dazu — „Damit soll er wirklich verifiziert
+ * und buchbar sein." Die Dokumente (eigener Wizard-Schritt, optional) sind Zubehoer
+ * fuer den Kundenflow, kein Tor; die 14-Tage-Frist vom 08.08. gibt es nicht mehr.
  *
  * unterschriftName wird server-seitig aus profiles.vorname/nachname abgeleitet —
  * der Wizard nimmt keinen expliziten Namen entgegen.

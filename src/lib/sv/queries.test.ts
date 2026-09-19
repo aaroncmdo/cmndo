@@ -63,14 +63,15 @@ describe('applyDispatchableFilter', () => {
     expect(b.calls).toContainEqual(['is', 'geloescht_am', null])
   })
 
-  it('schliesst frist_ueberschritten NULL-safe aus (FG3 decision A)', () => {
+  // DECISION 2026-09-19 (Aaron): die 14-Tage-Frist (Option B, 08.08.) und ihr Dispatch-Stopp
+  // (FG3 decision A, 11.07.) sind zurückgenommen — „nicht mehr nachhalten, ob die Dokumente
+  // fehlen". Damit beschreiben Karte (anon-Policy `sachverstaendige__b1sel_an`, die nie eine
+  // Frist-Klausel hatte) und Engine jetzt EXAKT dieselbe Menge.
+  it('filtert NICHT mehr nach verifizierung_status [Entscheidung 19.09.2026: Frist zurückgenommen]', () => {
     const b = makeBuilder()
     applyDispatchableFilter(b)
-    // NULL-safe: NULL/ausstehend/geprueft passen; nur frist_ueberschritten faellt raus.
-    expect(b.calls).toContainEqual([
-      'or',
-      'verifizierung_status.is.null,verifizierung_status.neq.frist_ueberschritten',
-      undefined,
-    ])
+    const orCalls = b.calls.filter(([op]) => op === 'or')
+    expect(orCalls).toEqual([])
+    expect(b.calls.some(([, col]) => String(col).includes('verifizierung_status'))).toBe(false)
   })
 })
