@@ -4,8 +4,14 @@ import { applyDispatchableFilter } from './queries'
 // Gutachter-Onboarding-Audit (Befund #1): Die Karte gated auf `verifiziert`,
 // Dispatch/MCP-Buchung gateten NUR auf portal_zugang -> ein bezahlter-aber-
 // unverifizierter SV war dispatchbar/buchbar, aber NICHT als Karten-Pin sichtbar.
-// Vereinheitlicht: Dispatch verlangt jetzt ZUSÄTZLICH verifiziert=true, sodass
-// "gelistet auf der Karte" == "buchbar durch die Engine" gilt.
+// Vereinheitlicht: "gelistet auf der Karte" == "buchbar durch die Engine".
+//
+// ⚠ ENTSCHEIDUNG 2026-09-19 (Aaron): Die Invariante gilt weiter, die GEMEINSAME
+// Bedingung ist aber nicht mehr `verifiziert`. Beide Seiten — Karte und Engine —
+// haben das Flag am selben Tag verloren ("Die Verifizierung ist ja keine notwendige
+// Sache fuer den Finder"). Gemessen auf prod: 13 freigegebene Gutachter waren
+// unsichtbar und unbuchbar, alle allein wegen dieses Flags. Begruendung im Kopf
+// von ./dispatch-gate.ts, Policy-Seite in Migration 20260919132007.
 //
 // Befund #6: Test-Accounts wurden nur per crude firmenname-ILIKE (isTestAccount)
 // aus Karte + LP-Count gefiltert, NICHT aus Dispatch/MCP -> ein aktiver Test-SV
@@ -36,10 +42,10 @@ function makeBuilder() {
 }
 
 describe('applyDispatchableFilter', () => {
-  it('verlangt verifiziert=true (Angleich ans Karten-Gate)', () => {
+  it('verlangt KEIN verifiziert mehr [Entscheidung 19.09.2026]', () => {
     const b = makeBuilder()
     applyDispatchableFilter(b)
-    expect(b.calls).toContainEqual(['eq', 'verifiziert', true])
+    expect(b.calls).not.toContainEqual(['eq', 'verifiziert', true])
   })
 
   it('schließt Test-Accounts aus (ist_testaccount=false)', () => {

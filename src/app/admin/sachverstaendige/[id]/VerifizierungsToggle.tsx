@@ -1,6 +1,8 @@
 ﻿'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { BadgeCheckIcon, ShieldOffIcon } from 'lucide-react'
 import { setzeSvVerifiziert } from './actions'
 
@@ -14,6 +16,7 @@ type Props = {
 }
 
 export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm }: Props) {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [fehler, setFehler] = useState<string | null>(null)
 
@@ -27,7 +30,17 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
     setFehler(null)
     startTransition(async () => {
       const res = await setzeSvVerifiziert(svId, neu)
-      if (!res.success) setFehler(res.error ?? 'Unbekannter Fehler')
+      if (!res.success) {
+        setFehler(res.error ?? 'Unbekannter Fehler')
+        toast.error('Verifizierung fehlgeschlagen', { description: res.error })
+        return
+      }
+      // Bis zum 19.09.2026 endete der Erfolgsfall hier ohne jede Rueckmeldung: kein
+      // Toast, kein Refresh. Die Server-Action revalidierte zudem die offene Route
+      // nicht (siehe dort) — der Klick schrieb in die DB, und auf dem Schirm blieb
+      // alles wie es war. Aaron: "Die Verifizierung kann ich auch nicht automatisch machen."
+      toast.success(neu ? 'Als verifiziert markiert' : 'Verifizierung zurückgezogen')
+      router.refresh()
     })
   }
 

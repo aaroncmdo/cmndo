@@ -181,7 +181,10 @@ export async function POST(req: Request) {
       .select(
         'id, isochrone_polygon, paket, profile_id, firmenname, standort_adresse',
       )
-      .eq('verifiziert', true)
+      // `.eq('verifiziert', true)` stand hier bis zum 19.09. — entfernt auf Aarons
+      // Entscheidung (Kopf von @/lib/sv/dispatch-gate). Die Region-Zahl zaehlt damit
+      // dieselben Gutachter, die der Finder auch wirklich anzeigt; vorher war sie
+      // strenger als die Karte und damit zu niedrig.
       .eq('ist_aktiv', true)
       // Gutachter-Onboarding-Audit (Befund #6): Test-Accounts per DB-Flag raus
       // (ersetzt die firmenname-ILIKE isTestAccount, die vorher im Loop lief).

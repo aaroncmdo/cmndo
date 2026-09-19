@@ -46,6 +46,12 @@ async function requireAdmin() {
 
 function revalidateBoth(svId: string) {
   revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
+  // Die SV-Akte gibt es unter ZWEI Routen. Bis zum 19.09.2026 stand hier nur die
+  // /admin/vertrieb/-Variante plus die LISTE /admin/sachverstaendige — die Detailseite
+  // /admin/sachverstaendige/<id> wurde nie revalidiert. Wer sie offen hatte, sah nach
+  // einer Freigabe weiterhin den alten Stand: geklickt, geschrieben, nichts veraendert
+  // sich auf dem Schirm. Genau Aarons Befund "da kommt nichts".
+  revalidatePath(`/admin/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/aufgaben/alle')
   revalidatePath('/gutachter/verifizierung')

@@ -10,9 +10,11 @@ import {
 } from '@/lib/finder/visibility'
 
 const REASON_LABEL: Record<FinderVisibilityReason, string> = {
-  'nicht-verifiziert': 'nicht verifiziert',
+  'kein-portal-zugang': 'noch nicht freigeschaltet',
   'nicht-aktiv': 'nicht aktiv',
-  'keine-isochrone': 'keine Isochrone berechnet',
+  gesperrt: 'gesperrt',
+  geloescht: 'gelöscht',
+  'keine-isochrone': 'kein Einzugsgebiet berechnet',
   'kein-standort': 'kein Standort',
   'test-account': 'als Test-/Demo-Account markiert',
 }

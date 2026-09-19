@@ -15,9 +15,16 @@ describe('svDarfFaelleEmpfangen', () => {
   it('true when all dispatch clauses pass', () => {
     expect(svDarfFaelleEmpfangen(good)).toBe(true)
   })
-  it('false when not verified', () => {
-    expect(svDarfFaelleEmpfangen({ ...good, verifiziert: false })).toBe(false)
-    expect(svDarfFaelleEmpfangen({ ...good, verifiziert: null })).toBe(false)
+  // DECISION 2026-09-19 (Aaron): `verifiziert` gatet die Sichtbarkeit NICHT mehr.
+  // "Die Verifizierung ist ja keine notwendige Sache für den Finder … wenn die Admins
+  // etwas freigeben möchten, ohne Berufshaftpflicht etc., dann sollen die
+  // Sachverständigen auch auf der Karte angezeigt werden."
+  // Gemessen am selben Tag auf prod: 13 freigegebene Gutachter waren unsichtbar.
+  // Das Flag bleibt das nutzersichtbare Vertrauens-Siegel (Fallakte, Whitelabel) —
+  // es entscheidet nur nicht mehr, WER Fälle bekommt.
+  it('true even when not verified [decision 2026-09-19: Sichtbarkeit entkoppelt]', () => {
+    expect(svDarfFaelleEmpfangen({ ...good, verifiziert: false, verifizierung_status: 'ausstehend' })).toBe(true)
+    expect(svDarfFaelleEmpfangen({ ...good, verifiziert: null, verifizierung_status: null })).toBe(true)
   })
   it('false when not active', () => {
     expect(svDarfFaelleEmpfangen({ ...good, ist_aktiv: false })).toBe(false)
