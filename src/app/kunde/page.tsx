@@ -26,10 +26,11 @@ export default async function KundeStartseite() {
   // kunde_id IS NULL auf user.id claimen, damit RLS sie freigibt. Behebt das
   // „neuer Kunde sieht Fall + Termine nicht"-Symptom (RLS lässt nur
   // kunde_id=auth.uid() durch, kein Email-Fallback in der Policy).
-  if (user.email) {
+  // Login ohne Link (19.09.): beide Kontaktachsen (E-Mail ODER Telefon aus auth.users.phone).
+  if (user.email || user.phone) {
     const { createAdminClient } = await import('@/lib/supabase/admin')
-    const { claimFaelleByEmail } = await import('@/lib/kunde/auto-claim')
-    await claimFaelleByEmail(createAdminClient(), user.id, user.email)
+    const { claimFaelleByKontakt } = await import('@/lib/kunde/auto-claim')
+    await claimFaelleByKontakt(createAdminClient(), user.id, { email: user.email ?? null, telefon: user.phone ?? null })
   }
 
   const { data: profile } = await supabase
