@@ -125,6 +125,12 @@ const ANREDE_DATEI_AUSNAHMEN = [
   /src\/lib\/bkat\/inference\.ts$/,           // "Setze … NUR wenn du die Ziffern lesen kannst"
   /src\/lib\/werkstatt\/copilot-prompt\.ts$/, // Werkstatt-Copilot, reiner Prompt
   /src\/lib\/faq-bot\/off-topic-guard\.ts$/,  // Erkennungsmuster "bist du eine ki" — Umstellen macht den Guard BLIND
+  // Der Support-Prompt. Sein "du" ist durchgehend die Anrede an das MODELL ("Du sprichst …",
+  // "Bevor du aufrufst …") — die Anweisung, wie es den NUTZER anspricht, lautet seit dem
+  // 19.09.2026 "sieze durchgehend" (Aaron). Heute sieht das Gate die Datei ohnehin nicht,
+  // weil `userStrings` mehrzeilige Template-Literale nicht erfasst; der Eintrag macht die
+  // Absicht fest, bevor jemand den Extraktor erweitert und 11 Fehltreffer erntet.
+  /src\/lib\/support\/system-prompt\.ts$/,
   // Werkzeugbeschreibung fuer KI-Agenten, die die oeffentliche API aufrufen: "NACHDEM du dem
   // Nutzer erklaert hast …", "Du vermittelst Gutachter + Termin". Adressat ist der Agent, nicht
   // der Endkunde — der bekommt seinen Text aus dem FlowLink.
