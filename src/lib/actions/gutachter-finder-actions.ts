@@ -214,7 +214,10 @@ export async function ladeAktiveSVs(
   const { data: allRows, error } = await admin
     .from('sachverstaendige')
     .select('id,paket,profile_id,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
-    .eq('verifiziert', true)
+    // `.eq('verifiziert', true)` stand hier bis zum 19.09. — entfernt auf Aarons
+    // Entscheidung (Messung und Begruendung im Kopf von @/lib/sv/dispatch-gate).
+    // Das Praedikat spiegelt weiterhin die anon-Policy `sachverstaendige__b1sel_an`
+    // 1:1; beide wurden zusammen geaendert, sonst saehe anon eine andere Menge.
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
     .eq('ist_testaccount', false)

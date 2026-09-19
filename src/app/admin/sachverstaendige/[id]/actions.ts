@@ -169,6 +169,9 @@ export async function setzeSvVerifiziert(svId: string, verifiziert: boolean) {
   if (error) return { success: false, error: `Update fehlgeschlagen: ${error.message}` }
 
   revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
+  // Zweite Detail-Route, bis 19.09.2026 vergessen (siehe revalidateBoth in
+  // ./verifizierung-actions.ts): ohne sie zeigt die offene Akte weiter den alten Stand.
+  revalidatePath(`/admin/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   if (verifiziert) {
     await logPartnerEvent({ partnerTyp: 'sv', partnerId: svId, typ: 'verifiziert', text: 'SV verifiziert' })
