@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import KundeWillkommensHero from '@/components/kunde/KundeWillkommensHero'
+// Login ohne Link (19.09.): offene Schadenmeldung (Lead ohne Claim) sichtbar + fortsetzbar.
+import OffeneSchadenmeldungKarte from '@/components/kunde/OffeneSchadenmeldungKarte'
+import { ladeOffeneLeadsFuerKunde } from '@/lib/kunde/offene-leads'
 import KundeSchadenUebersicht from '@/components/kunde/KundeSchadenUebersicht'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
@@ -46,6 +49,8 @@ export default async function KundeStartseite() {
   // FallKarte + ladeFallKartenMeta brauchen.
   const adminClient = createAdminClient()
   const faelleTyped = await getKundeFaelle(adminClient, user.id, user.email ?? null)
+  // Leads ohne Claim (Flow nicht abgeschlossen) — alle Ownership-Wege oben enden bei Claims.
+  const offeneLeads = await ladeOffeneLeadsFuerKunde(adminClient, { email: user.email ?? null, telefon: user.phone ?? null })
   const faelle: Record<string, unknown>[] = faelleTyped as unknown as Record<string, unknown>[]
 
   // KFZ-207: Auto-Reaktivierung kalt-Lead wenn Kunde Portal öffnet
@@ -213,8 +218,17 @@ export default async function KundeStartseite() {
           fuer kuenftige Multi-Fall-Top-Strip-Iteration vorhanden, derzeit
           nicht aktiv. */}
 
+      {/* Login ohne Link (19.09.): eine offene Schadenmeldung (Lead ohne Claim) ist der
+          haeufigste Grund, warum ein Kunde ohne Faelle hier landet — sie steht vor dem Hero. */}
+      {offeneLeads.length > 0 && (
+        <div className="space-y-4 mb-6">
+          {offeneLeads.map((l) => (
+            <OffeneSchadenmeldungKarte key={l.id} lead={l} />
+          ))}
+        </div>
+      )}
       {faelle.length === 0 ? (
-        <KundeWillkommensHero vorname={vorname} />
+        offeneLeads.length === 0 ? <KundeWillkommensHero vorname={vorname} /> : null
       ) : (
         <div className="space-y-5">
           {/* Sub-Projekt 5: Schaden-Übersicht (v.a. Firmen mit mehreren Schäden) */}
