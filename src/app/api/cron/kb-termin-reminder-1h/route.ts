@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     .lte('start_zeit', in75min)
     .is('reminder_1h_sent_at', null)
     .is('cancelled_at', null)
+    .order('start_zeit', { ascending: true })
 
   if (error) {
     console.error('[kb-termin-reminder-1h] Query-Fehler:', error.message)
@@ -36,6 +37,8 @@ export async function GET(request: Request) {
   }
 
   let sent = 0
+  // Doppelsend-Guard (20.09.2026): siehe Kommentar am Send unten.
+  const bereitsErinnert = new Set<string>()
 
   for (const termin of termine ?? []) {
     const startDate = new Date(termin.start_zeit)
@@ -76,7 +79,19 @@ export async function GET(request: Request) {
     if (konversationAktiv) {
       console.warn(`[kb-termin-reminder-1h] 1h-Erinnerung an Termin ${termin.id} uebersprungen — aktive Konversation <24h`)
     }
-    if (telefon && !konversationAktiv) {
+    // Doppelsend-Guard (20.09.2026): der Marker 'reminder_1h_sent_at' haengt an der TERMIN-Zeile,
+    // also erzeugen zwei Termine desselben Kunden im selben Fenster ZWEI WhatsApps. Auf prod
+    // gemessen (20.09. 07:30:03.9 + 07:30:04.3, dieselbe lead_id, 10:00- und 10:30-Termin,
+    // 0,4 s Abstand) — genau die Klasse, die Aaron gemeldet hat. Pro Lauf bekommt ein
+    // Empfaenger jetzt genau EINE Erinnerung (die zum fruehesten Termin, s. .order oben);
+    // der Marker wird unten trotzdem fuer JEDEN Termin gesetzt, es feuert also nichts nach.
+    const empfaengerKey = telefon ? telefon.replace(/[^0-9]/g, '').slice(-9) : ''
+    const schonErinnert = empfaengerKey !== '' && bereitsErinnert.has(empfaengerKey)
+    if (schonErinnert) {
+      console.warn(`[kb-termin-reminder-1h] Termin ${termin.id}: Empfaenger hat in diesem Lauf schon eine Erinnerung — Doppelsend unterdrueckt`)
+    }
+    if (telefon && !konversationAktiv && !schonErinnert) {
+      bereitsErinnert.add(empfaengerKey)
       await sendCommunication('kb_termin_reminder_1h', {
         telefon,
         vorname,
