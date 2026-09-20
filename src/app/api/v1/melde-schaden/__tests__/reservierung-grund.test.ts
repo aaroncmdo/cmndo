@@ -30,6 +30,19 @@ describe('klassifiziereReservierungsGrund', () => {
     ).toBe('nicht_reserviert')
   })
 
+  it('Engine-Code hat Vorrang vor dem Text: test_guard -> test_sv_guard, belegt -> slot_belegt', () => {
+    // Seit 12.08. gibt die Engine beim Guard einen kundentauglichen Text ohne "Test-Guard" zurueck;
+    // die Regel-4-Probe vom 20.09. (#5990) sah deshalb 'nicht_reserviert'. Der Engine-Code reist mit.
+    const kundentext =
+      'Diese Buchung konnte leider nicht abgeschlossen werden. Bitte melden Sie sich kurz bei uns — wir vereinbaren Ihren Termin persönlich.'
+    expect(klassifiziereReservierungsGrund(kundentext)).toBe('nicht_reserviert')
+    expect(klassifiziereReservierungsGrund(kundentext, 'test_guard')).toBe('test_sv_guard')
+    expect(klassifiziereReservierungsGrund('irgendein Text', 'belegt')).toBe('slot_belegt')
+    // 'db' sagt nichts Genaueres — dann entscheidet weiterhin der Text.
+    expect(klassifiziereReservierungsGrund('Slot belegt', 'db')).toBe('slot_belegt')
+    expect(klassifiziereReservierungsGrund('duplicate key value violates unique constraint', 'db')).toBe('nicht_reserviert')
+  })
+
   it('null/leer -> null', () => {
     expect(klassifiziereReservierungsGrund(null)).toBeNull()
     expect(klassifiziereReservierungsGrund('')).toBeNull()

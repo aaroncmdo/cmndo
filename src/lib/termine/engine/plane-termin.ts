@@ -32,7 +32,11 @@ export type SlotVorschlag = {
 export type PlaneTerminResult =
   | { ok: true; kind: 'slots'; vorschlaege: SlotVorschlag[] }
   | { ok: true; kind: 'gebucht'; terminId: string; assignee: Assignee; von: string; bis: string; reserviertBis: string }
-  | { ok: false; code: 'kein_kandidat' | 'kein_slot' | 'belegt' | 'db' | 'nicht_unterstuetzt'; error: string }
+  | { ok: false; code: 'kein_kandidat' | 'kein_slot' | 'belegt' | 'db' | 'test_guard' | 'nicht_unterstuetzt'; error: string }
+
+/** Fehlercode eines gescheiterten planeTermin — Vertrag fuer Consumer (Flow, API), die den Grund
+ *  weiterreichen. Der `error`-Text ist kundentauglich und deshalb KEIN Klassifikationsmerkmal. */
+export type PlaneTerminFehlerCode = Extract<PlaneTerminResult, { ok: false }>['code']
 
 export interface PlaneTerminInput {
   bezug: { typ: BezugTyp; id: string }
@@ -150,8 +154,10 @@ export async function planeTermin(input: PlaneTerminInput): Promise<PlaneTerminR
       const bis = new Date(new Date(von).getTime() + dauerMin * 60_000).toISOString()
       const res = await reserviere({ assignee: input.assignee, von, bis, quelle: input.quelle, typ: terminTyp(input), bezug: input.bezug, db })
       if (res.ok) return { ok: true, kind: 'gebucht', terminId: res.terminId, assignee: input.assignee, von, bis, reserviertBis: res.reserviertBis }
-      // test_guard -> 'db' mappen (analog matching.ts); der beschreibende Grund reist in res.error.
-      return { ok: false, code: res.code === 'test_guard' ? 'db' : res.code, error: res.error }
+      // test_guard reist als eigener Code weiter (20.09.): auf 'db' gemappt verlor die API-Schicht den
+      // Grund ('nicht_reserviert' statt 'test_sv_guard'), weil der kundentaugliche Text seit 12.08.
+      // bewusst kein "Test-Guard" mehr enthaelt. Der Code ist der Vertrag, nicht der Text.
+      return { ok: false, code: res.code, error: res.error }
     }
     const slots = await slotsFuerAssignee(input.assignee, schadenort, wunschzeit, vonIso, bisIso, db)
     return {

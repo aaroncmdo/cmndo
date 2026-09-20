@@ -17,6 +17,7 @@ import { planeTermin } from '@/lib/termine/engine'
 import { cancelOffeneTermineFuerBezug } from '@/lib/termine/cancel-offene-termine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import type { PlaneTerminFehlerCode } from '@/lib/termine/engine/plane-termin'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
 import { sendOaiqEvent, ladeOpprefFuerLead } from '@/lib/analytics/oaiq-capi'
 import { resolveWunschterminIso } from './wunschtermin'
@@ -705,7 +706,7 @@ export async function bucheTerminFlow(
   svId: string,
   startIso: string,
   endIso: string,
-): Promise<{ ok: boolean; terminId?: string; error?: string }> {
+): Promise<{ ok: boolean; terminId?: string; error?: string; code?: PlaneTerminFehlerCode }> {
   if (!svId || !startIso || !endIso) return { ok: false, error: 'Termin-Daten fehlen.' }
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
@@ -767,9 +768,15 @@ export async function bucheTerminFlow(
     return { ok: true, terminId: res.terminId }
   }
   if (!res.ok && res.code === 'belegt') {
-    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wähle einen anderen.' }
+    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wähle einen anderen.', code: 'belegt' }
   }
-  return { ok: false, error: (!res.ok && res.error) || 'Termin konnte nicht reserviert werden.' }
+  // `code` reist mit (20.09.): der Text ist kundentauglich, die API-Diagnose (reservierung_grund)
+  // braucht den Engine-Code — sonst wird der Test-SV-Guard zu 'nicht_reserviert'.
+  return {
+    ok: false,
+    error: (!res.ok && res.error) || 'Termin konnte nicht reserviert werden.',
+    code: !res.ok ? res.code : undefined,
+  }
 }
 
 /**
