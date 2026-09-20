@@ -35,7 +35,6 @@ type S = {
   zugangsdatenHint: string
   labelPortal: string
   labelEmail: string
-  labelPasswort: string
   passwortHint: string
   telefonLoginHint: string
   // ── accountExists branch ──
@@ -83,8 +82,7 @@ const de: S = {
   zugangsdatenHint: 'Falls Sie den Login-Button nicht nutzen, können Sie sich auch klassisch anmelden:',
   labelPortal: 'Portal:',
   labelEmail: 'E-Mail:',
-  labelPasswort: 'Passwort:',
-  passwortHint: 'Wir empfehlen Ihnen, das Passwort nach dem ersten Login in den Einstellungen zu ändern.',
+  passwortHint: 'Ihr Passwort legen Sie beim ersten Login selbst fest. Ist der Link abgelaufen, fordern Sie unter app.claimondo.de/passwort-zuruecksetzen ein neues an.',
   telefonLoginHint: 'Tipp: Sie können sich künftig auch direkt mit Ihrer Telefonnummer anmelden — ganz ohne Passwort.',
   accountExistsIntro: 'In Ihrem Kunden-Portal können Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.',
   accountExistsButton: 'Zum Kunden-Portal',
@@ -127,8 +125,7 @@ const en: S = {
   zugangsdatenHint: 'If you do not use the login button, you can also sign in the classic way:',
   labelPortal: 'Portal:',
   labelEmail: 'E-mail:',
-  labelPasswort: 'Password:',
-  passwortHint: 'We recommend that you change the password in the settings after your first login.',
+  passwortHint: 'You set your own password when you first log in. If the link has expired, request a new one at app.claimondo.de/passwort-zuruecksetzen.',
   telefonLoginHint: 'Tip: In future you can also log in directly with your phone number — no password needed.',
   accountExistsIntro: 'In your customer portal you can track the progress of your case, view documents and communicate directly with us.',
   accountExistsButton: 'To the customer portal',
@@ -171,8 +168,7 @@ const tr: S = {
   zugangsdatenHint: 'Giriş düğmesini kullanmazsanız, klasik yolla da oturum açabilirsiniz:',
   labelPortal: 'Portal:',
   labelEmail: 'E-posta:',
-  labelPasswort: 'Şifre:',
-  passwortHint: 'İlk girişinizden sonra şifreyi ayarlardan değiştirmenizi öneririz.',
+  passwortHint: 'Şifrenizi ilk girişte kendiniz belirlersiniz. Bağlantının süresi dolduysa app.claimondo.de/passwort-zuruecksetzen adresinden yeni bir tane isteyebilirsiniz.',
   telefonLoginHint: 'İpucu: Bundan böyle doğrudan telefon numaranızla da giriş yapabilirsiniz — şifre gerekmez.',
   accountExistsIntro: 'Müşteri portalınızda dosyanızın ilerlemesini takip edebilir, belgeleri görüntüleyebilir ve bizimle doğrudan iletişim kurabilirsiniz.',
   accountExistsButton: 'Müşteri portalına git',
@@ -215,8 +211,7 @@ const ar: S = {
   zugangsdatenHint: 'إذا لم تستخدم زر تسجيل الدخول، يمكنك أيضًا تسجيل الدخول بالطريقة التقليدية:',
   labelPortal: 'البوابة:',
   labelEmail: 'البريد الإلكتروني:',
-  labelPasswort: 'كلمة المرور:',
-  passwortHint: 'نوصيك بتغيير كلمة المرور من الإعدادات بعد أول تسجيل دخول.',
+  passwortHint: 'تقوم بتعيين كلمة المرور بنفسك عند تسجيل الدخول لأول مرة. إذا انتهت صلاحية الرابط، يمكنك طلب رابط جديد عبر app.claimondo.de/passwort-zuruecksetzen.',
   telefonLoginHint: 'نصيحة: يمكنك مستقبلاً تسجيل الدخول مباشرةً برقم هاتفك أيضًا — دون الحاجة إلى كلمة مرور.',
   accountExistsIntro: 'في بوابة العملاء يمكنك متابعة تقدّم ملفك والاطلاع على المستندات والتواصل معنا مباشرة.',
   accountExistsButton: 'إلى بوابة العملاء',
@@ -259,7 +254,6 @@ const ru: S = {
   zugangsdatenHint: 'Если вы не используете кнопку входа, вы также можете войти обычным способом:',
   labelPortal: 'Портал:',
   labelEmail: 'Эл. почта:',
-  labelPasswort: 'Пароль:',
   passwortHint: 'Рекомендуем изменить пароль в настройках после первого входа.',
   telefonLoginHint: 'Совет: в дальнейшем вы также можете входить напрямую по номеру телефона — без пароля.',
   accountExistsIntro: 'В клиентском портале вы можете отслеживать ход вашего дела, просматривать документы и общаться с нами напрямую.',
@@ -303,7 +297,6 @@ const pl: S = {
   zugangsdatenHint: 'Jeśli nie korzystasz z przycisku logowania, możesz też zalogować się w klasyczny sposób:',
   labelPortal: 'Portal:',
   labelEmail: 'E-mail:',
-  labelPasswort: 'Hasło:',
   passwortHint: 'Zalecamy zmianę hasła w ustawieniach po pierwszym logowaniu.',
   telefonLoginHint: 'Wskazówka: w przyszłości możesz też logować się bezpośrednio numerem telefonu — bez hasła.',
   accountExistsIntro: 'W portalu klienta możesz śledzić postęp swojej sprawy, przeglądać dokumenty i komunikować się z nami bezpośrednio.',
