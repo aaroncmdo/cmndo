@@ -13,11 +13,11 @@ import { useEffect, useId, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon, CalendarCheckIcon, UserCheckIcon } from 'lucide-react'
+import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon, CalendarCheckIcon, UserCheckIcon, ChevronRightIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
-import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer, DataTableMobileCard } from '@/components/shared/DataTable'
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
 import { createClient } from '@/lib/supabase/client'
@@ -375,6 +375,56 @@ export default function LeadsViewToggle({
   )
 }
 
+// Mobil (Aaron 19.09.: „Status nicht sauber lesbar"): unter md Karten statt der 9-spaltigen
+// Tabelle — dort lag die Status-Spalte ausserhalb des 390-px-Viewports und war nur per Wischen
+// im overflow-Container erreichbar. Karte = Name, Nummer + Datum, Phase/Status/FlowLink als Badges.
+function LeadsMobileCards({ leads, highlightIds }: { leads: Lead[]; highlightIds: Set<string> }) {
+  if (leads.length === 0) {
+    return <p className="px-4 py-10 text-center text-body-sm text-claimondo-ondo/70">Keine Leads gefunden</p>
+  }
+  // Rahmen + Trennlinien liefert DataTableContainer (variant="card"), kein eigener Card-Div.
+  return (
+    <>
+      {leads.map((lead) => {
+        const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
+        return (
+          <DataTableMobileCard
+            key={lead.id}
+            href={`/dispatch/leads/${lead.id}`}
+            className={highlightIds.has(lead.id) ? 'bg-success-soft/70' : undefined}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="break-words text-body font-medium text-claimondo-navy">
+                  {leadAnzeigeName(lead)}
+                  {istFlottenLead(lead) && (
+                    <span className="ml-1.5 text-body-xs font-medium text-claimondo-ondo">Flotte</span>
+                  )}
+                </p>
+                <p className="mt-0.5 text-body-sm text-claimondo-ondo" suppressHydrationWarning>
+                  {lead.telefon ?? 'Keine Nummer'} ·{' '}
+                  {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
+                </p>
+              </div>
+              <ChevronRightIcon className="mt-0.5 h-5 w-5 shrink-0 text-claimondo-ondo/60" />
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
+              </span>
+              {lead.status && STATUS_BADGES[lead.status] && lead.status !== 'neu' && (
+                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_BADGES[lead.status]}`}>{lead.status}</span>
+              )}
+              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${fl.cls}`}>{fl.label}</span>
+              {lead.konvertiert_zu_claim_id && <span className="text-xs font-medium text-claimondo-ondo">→ Fall</span>}
+            </div>
+          </DataTableMobileCard>
+        )
+      })}
+    </>
+  )
+}
+
 function ListView({
   leads,
   density,
@@ -390,7 +440,11 @@ function ListView({
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
-    <DataTableContainer variant="plain" className="bg-white rounded-3xl shadow-claimondo-md overflow-hidden border border-claimondo-navy/[0.06]">
+    <DataTableContainer
+      variant="card"
+      className="bg-white rounded-3xl shadow-claimondo-md overflow-hidden border border-claimondo-navy/[0.06]"
+      mobileCards={<LeadsMobileCards leads={leads} highlightIds={highlightIds} />}
+    >
         <Table>
           <Thead className="!bg-transparent">
             <Tr className="border-b border-claimondo-navy/[0.08] bg-claimondo-navy/[0.03]">
@@ -446,18 +500,18 @@ function ListView({
                   </Td>
                   <Td>
                     <div className="flex flex-wrap items-center gap-1">
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                         {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                       </span>
                       {lead.status && STATUS_BADGES[lead.status] && lead.status !== 'neu' && (
-                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${STATUS_BADGES[lead.status]}`}>
+                        <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${STATUS_BADGES[lead.status]}`}>
                           {lead.status}
                         </span>
                       )}
                     </div>
                   </Td>
                   <Td className={cellPadCls}>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
                   </Td>
                   <Td className={cellPadCls}>
                     <TerminGutachterCell info={terminGutachter[lead.id]} />

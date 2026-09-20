@@ -98,7 +98,10 @@ export default function ClaimStepper({
           erwartet wird, dann wo er steht. */}
       {topSlot}
       <div className="px-4 sm:px-6 py-4 space-y-3">
-      <div className="flex items-center w-full">
+      {/* Mobil (19.09.): 2×2-Raster statt einer Zeile — in der Zeile lagen „Regulierung" und
+          „Abschluss" bei 390 px hinter dem overflow-hidden-Rahmen (x 362–573), der Kunde sah nur
+          zwei Phasen. Ab sm die gewohnte Zeile mit Verbindungslinien. */}
+      <div className="grid grid-cols-2 gap-x-3 gap-y-2 sm:flex sm:w-full sm:items-center">
         {phasen.map((key, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
@@ -108,7 +111,7 @@ export default function ClaimStepper({
           const Icon = istVerlegungWarn ? AlertTriangleIcon : PHASE_ICON[key]
           return (
             <React.Fragment key={key}>
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3 sm:shrink-0">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                     istVerlegungWarn
@@ -137,7 +140,7 @@ export default function ClaimStepper({
                     {tp(`main.${key}`)}
                   </p>
                   {isCurrent && (
-                    <p className="text-[11px] text-claimondo-ondo whitespace-nowrap mt-0.5">
+                    <p className="text-body-xs text-claimondo-ondo sm:whitespace-nowrap mt-0.5">
                       {tp(`subKunde.${lifecycle.subPhase}`)}
                     </p>
                   )}
@@ -145,7 +148,7 @@ export default function ClaimStepper({
               </div>
               {i < phasen.length - 1 && (
                 <div
-                  className={`flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-success/30' : 'bg-claimondo-border'}`}
+                  className={`hidden sm:block flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-success/30' : 'bg-claimondo-border'}`}
                 />
               )}
             </React.Fragment>

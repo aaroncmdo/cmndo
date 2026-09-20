@@ -32,7 +32,8 @@ type Props = {
 
 const PRIO_TONE: Record<MitteilungPrioritaet, { color: string; bg: string; icon: typeof BellIcon; label: string }> = {
   dringend: { color: '#dc2626', bg: '#fef2f2', icon: AlertTriangleIcon, label: 'Dringend' },
-  hoch: { color: '#d97706', bg: '#fffbeb', icon: BellIcon, label: 'Wichtig' },
+  // 19.09.: amber-600 gab weisser Schrift nur 3,2:1 (Mobil-Audit) — amber-700 4,5:1.
+  hoch: { color: '#b45309', bg: '#fffbeb', icon: BellIcon, label: 'Wichtig' },
   normal: { color: '#4573A2', bg: '#f8f9fb', icon: BellIcon, label: 'Mitteilung' },
 }
 
@@ -124,14 +125,25 @@ export function FallMitteilungenBanner({ fallId }: Props) {
               padding: tokens.spacing[3],
             }}
           >
-            <Row gap={3} align="start" justify="between">
-              <div style={{ display: 'flex', gap: tokens.spacing[2], minWidth: 0, flex: 1 }}>
+            {/* Mobil (19.09.): umbrechende Zeile — bei 390 px quetschten Aktions-Button + X den Text
+                auf ~150 px (Zeitstempel zweizeilig, Titel dreizeilig). minWidth 220 laesst die
+                Aktionen unter den Text rutschen; ab Tablet bleibt es eine Zeile. */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: tokens.spacing[3],
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', gap: tokens.spacing[2], minWidth: 220, flex: 1 }}>
                 <ToneIcon size={18} style={{ color: tone.color, flexShrink: 0, marginTop: 2 }} />
                 <Stack gap={1} >
                   <Row gap={2} align="center">
                     <span
                       style={{
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: 600,
                         textTransform: 'uppercase',
                         letterSpacing: 0.5,
@@ -209,7 +221,7 @@ export function FallMitteilungenBanner({ fallId }: Props) {
                   <XIcon size={16} />
                 </button>
               </Row>
-            </Row>
+            </div>
           </div>
         )
       })}
