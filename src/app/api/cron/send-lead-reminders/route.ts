@@ -135,6 +135,9 @@ export async function GET(request: Request) {
   let failed = 0
   let sentWhatsApp = 0
   let stillMarkiert = 0
+  let doppelsendUnterdrueckt = 0
+  // Doppelsend-Guard (20.09.2026): siehe Kommentar in processStep.
+  const bereitsErinnert = new Set<string>()
 
   // WhatsApp-Nurture nur auf Stufe 2 (24h) und 3 (72h).
   //
@@ -209,9 +212,35 @@ export async function GET(request: Request) {
     // Kanal folgt dem, was der Lead hergibt: E-Mail bleibt der Normalfall, WhatsApp
     // greift fuer die Formulare, die keine Adresse erheben (/check, Rueckruf, mcp).
     const perWhatsApp = !lead.email
-    const ok = perWhatsApp
-      ? await sendeWhatsAppReminder(lead, step)
-      : await sendLeadReminderEmail({ ...lead, email: lead.email as string }, step)
+
+    // Doppelsend-Guard (20.09.2026): die Stufen-Marker haengen an der LEAD-Zeile, nicht am
+    // Empfaenger. Zwei Lead-Zeilen derselben Person (z.B. zwei MCP-Eingaenge 15 Minuten
+    // auseinander) erzeugen deshalb ZWEI Erinnerungen. Auf prod gemessen (20.09., 18:45:03.976
+    // + 18:45:04.424 an dieselbe Nummer, 0,45 s Abstand; dahinter zwei Lead-Zeilen "Julia",
+    // beide source_channel='mcp') — genau die Klasse, die Aaron gemeldet hat. Pro Lauf bekommt
+    // ein Empfaenger jetzt genau EINE Erinnerung; der Stufen-Marker wird unten trotzdem fuer
+    // JEDE Lead-Zeile gesetzt, es feuert also nichts nach und die Kaskade laeuft weiter.
+    const rohKey = perWhatsApp
+      ? (lead.telefon ?? '').replace(/[^0-9]/g, '').slice(-9)
+      : (lead.email ?? '').trim().toLowerCase()
+    const empfaengerKey = rohKey === '' ? '' : (perWhatsApp ? 'wa:' : 'mail:') + rohKey
+    const schonErinnert = empfaengerKey !== '' && bereitsErinnert.has(empfaengerKey)
+
+    const ok = schonErinnert
+      ? null
+      : perWhatsApp
+        ? await sendeWhatsAppReminder(lead, step)
+        : await sendLeadReminderEmail({ ...lead, email: lead.email as string }, step)
+    if (schonErinnert) {
+      doppelsendUnterdrueckt += 1
+      console.warn(
+        `[AAR-477] Lead ${lead.id} Stufe ${step}: Empfaenger hatte in diesem Lauf schon eine Erinnerung — Doppelsend unterdrueckt`,
+      )
+    } else if (ok !== null && empfaengerKey !== '') {
+      // Nur ein echter Sendeversuch verbraucht den Platz — eine still markierte Stufe
+      // (Nicht-WhatsApp-Stufe, Konversations-Guard) hat niemanden erreicht.
+      bereitsErinnert.add(empfaengerKey)
+    }
     if (ok === false) {
       failed += 1
       return
@@ -310,6 +339,9 @@ export async function GET(request: Request) {
     // nachgefasst wurde — und wie viele Stufen nur markiert (nicht gesendet) wurden.
     sent_whatsapp: sentWhatsApp,
     still_markiert: stillMarkiert,
+    // Doppelsend-Guard: Lead-Zeilen, die uebersprungen wurden, weil derselbe Empfaenger
+    // in diesem Lauf bereits eine Erinnerung bekommen hat (Duplikat-Leads).
+    doppelsend_unterdrueckt: doppelsendUnterdrueckt,
     cohorts: {
       r1: cohort1.length,
       r2: cohort2.length,
