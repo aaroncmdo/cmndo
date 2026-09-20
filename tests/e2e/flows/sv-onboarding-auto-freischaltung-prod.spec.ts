@@ -1,7 +1,8 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test'
+import os from 'node:os'
 import { createClient } from '@supabase/supabase-js'
 import { ladeSeedFixture } from '../lib/seed-fixture'
-import { loginContext, serviceClient, skipIfAuthWall } from './_golden-path-lib'
+import { loginContextOrSkip, serviceClient, skipIfAuthWall } from './_golden-path-lib'
 import { CLAIMS } from '../../../scripts/test-fixtures/ids'
 
 // Regel-4-Prod-Smoke: „SV-Onboarding von überall — Freischaltung automatisch" (19.09.2026).
@@ -49,14 +50,53 @@ const MINI_PDF = Buffer.from(
     '0000000009 00000 n \n0000000052 00000 n \n0000000101 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n160\n%%EOF\n',
 )
 
+// Das Einmalpasswort aus der Registrierung muss beim ersten Login geändert werden
+// (Portal-Guard → /passwort-aendern). Das ist ein echter Schritt des Nutzerwegs, kein
+// Test-Artefakt: der Gutachter setzt sein Passwort, DANN beginnt der Wizard. Das neue
+// Passwort gilt für alle späteren Logins dieses Laufs (Re-Visit E12/E21).
+let aktuellesPasswort: string | null = null
+
+// Belege fürs Auge (Regel 5): je Zelle ein Screenshot — NICHT nach test-results/ (Playwright
+// leert das Verzeichnis bei jedem Lauf), sondern in ABNAHME_SHOTS_DIR bzw. das System-Temp.
+const SHOTS = process.env.ABNAHME_SHOTS_DIR ?? os.tmpdir()
+async function beleg(page: Page, name: string) {
+  await page.screenshot({ path: `${SHOTS}/${name}.png`, fullPage: true }).catch(() => {})
+}
+
 async function loginSvPerUi(browser: Browser): Promise<{ ctx: BrowserContext; page: Page }> {
+  // Hat ein früherer Test (anderer Worker → Modul-State weg) das Einmalpasswort schon
+  // geändert, steht force_password_change=false — dann gilt das abgeleitete Passwort.
+  if (aktuellesPasswort == null) {
+    const { data } = await serviceClient().from('profiles').select('force_password_change').eq('id', seed.uid).maybeSingle()
+    if (data && data.force_password_change === false) aktuellesPasswort = `${seed.password}-Neu1!`
+  }
   const ctx = await browser.newContext({ baseURL: APP, viewport: { width: 1440, height: 1200 }, serviceWorkers: 'block' })
   const page = await ctx.newPage()
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
   await page.locator('input[type="email"], input[name="email"]').first().fill(seed.email)
-  await page.locator('input[type="password"]').first().fill(seed.password)
+  await page.locator('input[type="password"]').first().fill(aktuellesPasswort ?? seed.password)
   await page.locator('button[type="submit"]').first().click()
-  await page.waitForURL(/\/gutachter/, { timeout: 45_000 })
+  try {
+    await page.waitForURL(/\/gutachter|\/passwort-aendern/, { timeout: 30_000 })
+  } catch {
+    // Ein früherer Lauf hat das Einmalpasswort schon geändert (neuer Worker → Modul-State weg):
+    // mit dem abgeleiteten neuen Passwort erneut anmelden.
+    aktuellesPasswort = `${seed.password}-Neu1!`
+    await page.goto('/login', { waitUntil: 'domcontentloaded' })
+    await page.locator('input[type="email"], input[name="email"]').first().fill(seed.email)
+    await page.locator('input[type="password"]').first().fill(aktuellesPasswort)
+    await page.locator('button[type="submit"]').first().click()
+    await page.waitForURL(/\/gutachter|\/passwort-aendern/, { timeout: 45_000 })
+  }
+
+  if (/\/passwort-aendern/.test(page.url())) {
+    const neu = `${seed.password}-Neu1!`
+    await page.getByPlaceholder('Mindestens 12 Zeichen').fill(neu)
+    await page.getByPlaceholder('Passwort wiederholen').fill(neu)
+    await page.getByRole('button', { name: 'Passwort ändern' }).click()
+    await page.waitForURL(/\/gutachter/, { timeout: 45_000 })
+    aktuellesPasswort = neu
+  }
   return { ctx, page }
 }
 
@@ -96,20 +136,26 @@ test('E1 · Basic-Wizard bis zur Unterschrift → sofort freigeschaltet, verifiz
       if (await page.getByText('Geschafft!').isVisible().catch(() => false)) { fertig = true; break }
 
       const text = (await page.locator('main, body').first().innerText()).replace(/\s+/g, ' ')
-      if (/Ihr Profil/.test(text) && (await page.locator('textarea').count()) > 0) {
-        await page.locator('textarea').first().fill(
+      // Die Schritt-Erkennung hängt am Feld, das es NUR in diesem Schritt gibt (Regel-4-Skill:
+      // kein generischer Text, kein `.first()` auf ein Element, das auch die Navigation hat —
+      // im 2. Lauf traf `textarea.first()` eine unsichtbare Support-Textarea, die Kurzbeschreibung
+      // blieb leer, der Wizard meldete „Pflichtfeld").
+      const kurzbeschreibung = page.getByPlaceholder('Worauf sind Sie spezialisiert?')
+      if (await kurzbeschreibung.isVisible().catch(() => false)) {
+        await kurzbeschreibung.fill(
           `E2E-Wegwerf-Gutachter (Lauf ${seed.runId}) — prüft die automatische Freischaltung ohne Dokumentenprüfung.`,
         )
+        await expect(kurzbeschreibung).toHaveValue(/E2E-Wegwerf-Gutachter/)
         await weiter(page)
       } else if (/Kalender verbinden/.test(text)) {
         await page.getByText('Ich nutze keines dieser Tools').first().click()
         await page.getByRole('button', { name: 'Weiter ohne Kalender' }).click()
         await weiter(page)
       } else if (/Ihr Widget/.test(text)) {
-        const name = page.getByLabel('Name Ihres Widgets')
-        if (await name.count()) await name.fill(`E2E Widget ${seed.runId}`)
-        else await page.getByPlaceholder('z. B. Kfz-Gutachter Müller').fill(`E2E Widget ${seed.runId}`)
+        await page.getByPlaceholder('z. B. Kfz-Gutachter Müller').fill(`E2E Widget ${seed.runId}`)
         await page.getByRole('button', { name: 'Ich habe noch keine Website' }).click()
+        // Self-persisting: erst wenn das Widget angelegt ist, gibt der Wizard „Weiter" frei.
+        await expect(page.getByTestId('wizard-weiter')).toBeEnabled({ timeout: 30_000 })
         await weiter(page)
       } else if (/Ihre Dokumente/.test(text)) {
         // Der NEUE Schritt: optional, ein Upload läuft, „Weiter" ist auch ohne Upload frei.
@@ -124,13 +170,25 @@ test('E1 · Basic-Wizard bis zur Unterschrift → sofort freigeschaltet, verifiz
       } else if (/Vertrag/.test(text) && (await page.locator('canvas').count()) > 0) {
         await unterschreiben(page)
         await weiter(page)
-        await expect(page.getByText('Geschafft!')).toBeVisible({ timeout: 90_000 })
+        // Nach finalize ersetzt der Server den Wizard per revalidate durch den
+        // Abschluss-Bildschirm. Zeigt der Client zwischendurch seinen eigenen
+        // Completed-Screen, hilft ein Reload — der Zustand liegt in der DB.
+        const geschafft = page.getByText('Geschafft!')
+        try {
+          await expect(geschafft).toBeVisible({ timeout: 45_000 })
+        } catch {
+          await page.goto('/gutachter/willkommen', { waitUntil: 'domcontentloaded' })
+          await expect(geschafft).toBeVisible({ timeout: 45_000 })
+        }
         fertig = true
       } else if (/Ihr Standort/.test(text)) {
         await weiter(page)
       } else {
         await page.waitForTimeout(1_500)
       }
+      // Dem Wizard Zeit geben, den nächsten Schritt zu rendern — sonst liest die nächste
+      // Runde noch den alten Schritt und klickt zweimal.
+      await page.waitForTimeout(800)
     }
     expect(fertig, 'Wizard erreicht den Abschluss-Bildschirm').toBe(true)
     expect(dokumentHochgeladen, 'der Dokumenten-Schritt war im Wizard und nahm einen Upload an').toBe(true)
@@ -191,18 +249,27 @@ test('E15/E16 · anon sieht ihn (Karten-Policy), sv-in-naehe listet ihn (MCP-Pfa
     .is('geloescht_am', null)
   expect(dispatchbar?.length).toBe(1)
 
-  // MCP-/LLM-Pfad: /api/v1/sv-in-naehe cached 5 Minuten in-process → bis zu 7 Minuten pollen.
+  // MCP-/LLM-Pfad: /api/v1/sv-in-naehe liefert Tier-1 bewusst OHNE id (Privacy-Projektion:
+  // stadt, Initiale, Spezialisierungen, Bewertung, entfernung_km). Der Nachweis läuft deshalb
+  // über die Entfernung: VOR der Freischaltung gemessen (20.09. 04:5x UTC, plz=25849&radius=60):
+  // gesamt 47, tier1 0, tier1 unter 5 km 0. Pellworm hat keinen anderen Partner-Gutachter — ein
+  // Tier-1-Treffer unter 5 km ist unser SV. Route cached 5 Minuten in-process → bis 7 Min pollen.
   const deadline = Date.now() + 7 * 60_000
   let gefunden = false
+  let letzterStand = ''
   while (Date.now() < deadline && !gefunden) {
     const res = await request.get(`${APP}/api/v1/sv-in-naehe?plz=${seed.plz}&radius=60`)
     if (res.ok()) {
-      const json = (await res.json()) as { sv_liste?: Array<{ id?: string }> }
-      gefunden = (json.sv_liste ?? []).some((s) => s.id === seed.svId)
+      const json = (await res.json()) as { sv_liste?: Array<{ tier?: number; entfernung_km?: number }> }
+      const liste = json.sv_liste ?? []
+      const tier1Nah = liste.filter((s) => s.tier === 1 && (s.entfernung_km ?? 99) <= 5)
+      letzterStand = `gesamt=${liste.length} tier1=${liste.filter((s) => s.tier === 1).length} tier1<=5km=${tier1Nah.length}`
+      gefunden = tier1Nah.length >= 1
     }
     if (!gefunden) await new Promise((r) => setTimeout(r, 30_000))
   }
-  expect(gefunden, 'sv-in-naehe (MCP-Pfad) listet den Gutachter binnen Cache-TTL').toBe(true)
+  console.log(`[E15] sv-in-naehe Pellworm nachher: ${letzterStand} (vorher: tier1=0)`)
+  expect(gefunden, `sv-in-naehe (MCP-Pfad) listet einen Partner-Gutachter unter 5 km bei Pellworm — ${letzterStand}`).toBe(true)
 })
 
 test('E12/E21 · Re-Visit: Portal ohne Frist-Banner, Nachweise zeigen den Upload (RLS-Positivkontrolle)', async ({ browser }) => {
@@ -210,8 +277,10 @@ test('E12/E21 · Re-Visit: Portal ohne Frist-Banner, Nachweise zeigen den Upload
   try {
     await page.goto('/gutachter', { waitUntil: 'domcontentloaded' })
     await expect(page).not.toHaveURL(/willkommen/)
+    await expect(page.getByText('Wird geladen')).toHaveCount(0, { timeout: 30_000 })
     const body = (await page.locator('body').innerText()).replace(/\s+/g, ' ')
     expect(body).not.toMatch(/pausieren wir Ihre Fälle|Fälle sind pausiert|Frist überschritten/)
+    await beleg(page, 'e12-portal-ohne-frist-banner')
 
     await page.goto('/gutachter/verifizierung', { waitUntil: 'domcontentloaded' })
     await expect(page.getByTestId('nachweise-zaehler')).toContainText('1 von', { timeout: 30_000 })
@@ -219,21 +288,37 @@ test('E12/E21 · Re-Visit: Portal ohne Frist-Banner, Nachweise zeigen den Upload
     const seite = (await page.locator('body').innerText()).replace(/\s+/g, ' ')
     expect(seite).not.toMatch(/14-Tage-Frist|Dispatch-Zugang|Prüf-Task/)
     expect(seite).toMatch(/Alles optional/)
+    await beleg(page, 'e21-nachweise-upload-sichtbar')
   } finally {
     await ctx.close()
   }
 })
 
 test('E10/E20 · Admin: Akte zeigt „Im Finder sichtbar", keine Freigabe-Warteschlange für ihn', async ({ browser }) => {
-  const ctx = await loginContext(browser, 'admin')
+  // DB-Gegenprobe zuerst — sie läuft auch ohne Admin-Login (TOTP-Secret liegt nur in CI):
+  // die Warteschlange filtert paket=basic + portal=false; der frisch freigeschaltete SV
+  // darf dort nicht mehr auftauchen.
+  const db = serviceClient()
+  const { data: queue } = await db
+    .from('sachverstaendige')
+    .select('id')
+    .eq('id', seed.svId)
+    .eq('paket', 'basic')
+    .eq('portal_zugang_freigeschaltet', false)
+  expect(queue ?? [], 'Basic-Freigabe-Warteschlange enthält den SV nicht mehr').toEqual([])
+
+  const ctx = await loginContextOrSkip(browser, 'admin')
   const page = await ctx.newPage()
   try {
     await page.goto(`/admin/sachverstaendige/${seed.svId}`, { waitUntil: 'domcontentloaded' })
     skipIfAuthWall(page)
     await expect(page.getByText('Im Finder sichtbar').first()).toBeVisible({ timeout: 30_000 })
+    await beleg(page, 'e20-admin-akte-im-finder-sichtbar')
     await page.goto('/admin/sachverstaendige/basic-freigaben', { waitUntil: 'domcontentloaded' })
+    await expect(page.getByText('Wird geladen')).toHaveCount(0, { timeout: 30_000 })
     const liste = (await page.locator('body').innerText()).replace(/\s+/g, ' ')
     expect(liste).not.toContain(seed.email)
+    await beleg(page, 'e10-basic-freigaben-ohne-den-sv')
   } finally {
     await ctx.close()
   }
@@ -250,12 +335,13 @@ test('E17 · Kunde: das Siegel „Verifiziert" steht in der Fallakte beim frisch
   const { error: setErr } = await db.from('claims').update({ sv_id: seed.svId }).eq('id', claimId)
   expect(setErr).toBeNull()
   try {
-    const ctx = await loginContext(browser, 'kunde')
+    const ctx = await loginContextOrSkip(browser, 'kunde')
     const page = await ctx.newPage()
     try {
       await page.goto(`/kunde/faelle/${claimId}`, { waitUntil: 'domcontentloaded' })
       skipIfAuthWall(page)
       await expect(page.getByText('Verifiziert', { exact: true }).first()).toBeVisible({ timeout: 30_000 })
+      await beleg(page, 'e17-kunde-fallakte-siegel')
     } finally {
       await ctx.close()
     }

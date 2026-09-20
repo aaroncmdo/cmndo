@@ -15,11 +15,12 @@ import { getKundeWelcomeStrings } from './KundeWelcome.i18n'
 
 type TerminInfo = { datum: string; uhrzeit: string; adresse: string; svName: string | null }
 
-// AAR-127: Login-Info für Magic-Link + Email/Passwort-Block
+// AAR-127: Login-Info für Magic-Link. KEIN Passwort im Typ — der Zugang laeuft ueber den
+// Magic-Link (Login -> Passwort selbst setzen, force_password_change). 20.09.2026: Klartext-
+// Passwort aus WhatsApp UND Welcome-Mail entfernt; ein Leak ist strukturell unmoeglich.
 export type LoginInfo = {
   magicLink: string | null
   email: string
-  password: string
   // AAR-phone-login: konditionaler Hinweis, wenn auth.users.phone gesetzt wurde
   phoneLoginAktiviert?: boolean
 }
@@ -128,7 +129,6 @@ export function KundeWelcomeEmail(props: Props) {
               <Text style={{ fontSize: 12, color: email.color.textMuted, margin: `${email.space(1)} 0 ${email.space(3)}` }}>{s.zugangsdatenHint}</Text>
               <InfoRow label={s.labelPortal} value={`${APP_URL.replace(/^https?:\/\//, '')}/login`} />
               <InfoRow label={s.labelEmail} value={<span style={{ fontFamily: 'monospace' }}>{props.loginInfo.email}</span>} />
-              <InfoRow label={s.labelPasswort} value={<span style={{ fontFamily: 'monospace' }}>{props.loginInfo.password}</span>} />
               <Note>{s.passwortHint}</Note>
             </div>
             {props.loginInfo.phoneLoginAktiviert ? <Note>{s.telefonLoginHint}</Note> : null}
