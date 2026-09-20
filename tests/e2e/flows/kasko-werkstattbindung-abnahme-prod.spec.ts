@@ -136,6 +136,37 @@ async function waehleMarke(page: Page, marke: string): Promise<void> {
   await page.getByRole('option', { name: marke, exact: true }).click()
 }
 
+/**
+ * Nimmt den Bestaetigungsschritt aus #5864 mit, falls er erscheint.
+ *
+ * Seit dem 05.09.2026 entscheidet der Klick auf eine Tarif-Karte NICHT mehr sofort: bei
+ * einem GEBUNDENEN Tarif steht „Bitte kurz bestaetigen" („Ja, das ist mein Tarif" /
+ * „Nein, zurueck zur Auswahl") dazwischen. Bei einem freien Tarif kommt der Schritt nicht
+ * (siehe T11) — deshalb wird hier nicht hart erwartet, sondern zur Laufzeit erkannt.
+ *
+ * Das ist auch noetig, weil der Journey-Gate T1/T2 gegen STAGING faehrt, den Rest gegen
+ * prod: haetten beide Ziele unterschiedliche Staende, wuerde ein harter Check falsch rot.
+ * Muster uebernommen aus T5, wo es sich bereits bewaehrt hat.
+ *
+ * Belegt am 19.09.2026: T4, T7 und T14 liefen genau hier rot — der Fehler-Screenshot zeigte
+ * die Bestaetigungskarte, waehrend die Spec schon die Endseite erwartete. Test-Drift, kein
+ * Produktbefund. #5995 hatte nur T1 nachgezogen.
+ */
+async function bestaetigeTarifFallsNoetig(page: Page, marker: string): Promise<boolean> {
+  const ja = page
+    .getByTestId('kasko-bestaetigen-ja')
+    .or(page.getByRole('button', { name: /Ja, das ist mein Tarif/i }))
+    .first()
+  const sichtbar = await ja
+    .waitFor({ state: 'visible', timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false)
+  if (!sichtbar) return false
+  await shot(page, marker)
+  await ja.click()
+  return true
+}
+
 async function login(page: Page, email: string, password: string, totpSecret?: string): Promise<void> {
   await page.goto(`${APP}/login`, { waitUntil: 'domcontentloaded' })
   await page.fill('input[type="email"], input[name="email"]', email)
@@ -539,6 +570,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await expect(page.getByRole('heading', { name: /Enthält Ihr Vertrag einen Werkstattbindungs-Baustein/i })).toBeVisible({ timeout: 15_000 })
     await shot(page, 't4-01-generische-marker-frage')
     await page.getByRole('button', { name: /Ja, das steht auf meinem Schein/i }).click()
+    await bestaetigeTarifFallsNoetig(page, 't4-01b-bestaetigung')
     await expect(page.getByRole('heading', { name: /Ihr Kasko-Tarif enthält eine Werkstattbindung/i })).toBeVisible({ timeout: 30_000 })
     await expect(page.getByText('Wird geladen …')).toHaveCount(0, { timeout: 30_000 })
     await expect(page.getByText(/80 %/).first(), 'GDV-Default-Sanktion').toBeVisible({ timeout: 30_000 })
@@ -784,6 +816,7 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await shot(page, 't7-02-tarif-card')
     await waehleMarke(page, 'HUK-COBURG')
     await page.getByText('Classic SELECT', { exact: true }).click()
+    await bestaetigeTarifFallsNoetig(page, 't7-02b-bestaetigung')
     await expect(page.getByText(/Ihr Kasko-Tarif enthält eine Werkstattbindung/i)).toBeVisible({ timeout: 40_000 })
     await expect(page.getByRole('heading', { name: /Werkstatt finden/i })).toHaveCount(0)
     await shot(page, 't7-03-bindungs-card')
@@ -861,6 +894,9 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
 
     await waehleMarke(page, 'HUK-COBURG')
     await page.getByText(v.tarif, { exact: true }).click()
+    // Nur der gebundene Tarif fuehrt ueber die Bestaetigung; bei 'Classic' (frei) kommt sie
+    // nicht — die Laufzeit-Erkennung deckt beide Varianten dieser Schleife ab.
+    await bestaetigeTarifFallsNoetig(page, `t14-01b-bestaetigung-${v.name}`)
     if (v.tarif === 'Classic SELECT') {
       const endseite = page.getByRole('heading', { name: /Ihr Kasko-Tarif enthält eine Werkstattbindung/i })
       await expect(endseite).toBeVisible({ timeout: 30_000 })
