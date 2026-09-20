@@ -262,7 +262,7 @@ export default function FallKarte({
 
         {/* Fahrzeuginfo */}
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold truncate">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo/60 font-semibold truncate">
             {fall.claim_nummer ?? fall.id.slice(0, 8)}
           </p>
           <p className="text-sm font-bold text-claimondo-navy leading-tight truncate">
@@ -278,7 +278,7 @@ export default function FallKarte({
         {/* Rechts: Ungelesene-Badge + Phase-Dots */}
         <div className="shrink-0 flex flex-col items-end gap-2">
           {typeof ungeleseneNachrichten === 'number' && ungeleseneNachrichten > 0 && (
-            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold bg-claimondo-ondo text-white leading-none">
+            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-body-xs font-bold bg-claimondo-ondo text-white leading-none">
               {ungeleseneNachrichten}
             </span>
           )}
@@ -372,7 +372,7 @@ export default function FallKarte({
                       {aktionTexte.titel}
                     </p>
                     {aktionTexte.beschreibung && (
-                      <p className={`text-[11px] ${cfg.textColor} mt-0.5 leading-snug line-clamp-2`}>
+                      <p className={`text-body-sm ${cfg.textColor} mt-0.5 leading-snug line-clamp-2`}>
                         {aktionTexte.beschreibung}
                       </p>
                     )}

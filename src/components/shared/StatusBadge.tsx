@@ -38,8 +38,8 @@ const SIZE_TO_BADGE: Record<'xs' | 'sm', BadgeSize> = {
 
 // Soft-Slot-Pille (Registry-Modus): gleiche Grössen-Skala wie der colorCls-Pfad.
 const REGISTRY_SIZE_CLS: Record<'xs' | 'sm', string> = {
-  xs: 'text-[10px] px-2 py-0.5',
-  sm: 'text-xs px-2.5 py-1',
+  xs: 'text-xs px-2 py-0.5',
+  sm: 'text-body-sm px-2.5 py-1',
 }
 
 type StatusBadgeProps = {
@@ -92,8 +92,8 @@ export function StatusBadge({
   // u. ä., wo die Farben aus DB-/Config-Maps kommen.
   if (colorCls) {
     const sizeCls = size === 'xs'
-      ? 'text-[10px] px-2 py-0.5'
-      : 'text-xs px-2.5 py-1'
+      ? 'text-xs px-2 py-0.5'
+      : 'text-body-sm px-2.5 py-1'
     return (
       <span
         className={`inline-flex items-center gap-1 rounded-full font-medium ${sizeCls} ${colorCls} ${className}`}

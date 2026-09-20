@@ -70,8 +70,10 @@ export function ClaimChatPanel({
   }
 
   return (
-    <div className="flex h-full min-h-0">
-      <div className="w-44 shrink-0 space-y-1 overflow-y-auto border-r border-claimondo-border p-2">
+    <div className="flex h-full min-h-0 flex-col md:flex-row">
+      {/* Mobil (19.09.): Thread-Liste als Streifen ueber dem Verlauf statt fester 176-px-Spalte —
+          die Spalte + Verlauf waren 477 px breit und liefen im 390-px-Viewport links aus dem Bild. */}
+      <div className="max-h-36 shrink-0 space-y-1 overflow-y-auto border-b border-claimondo-border p-2 md:max-h-none md:w-44 md:border-b-0 md:border-r">
         <Button variant="ghost" size="sm" fullWidth onClick={() => setShowNeu((s) => !s)} iconLeft={<PlusIcon className="w-4 h-4" />}>
           Neue Nachricht
         </Button>
