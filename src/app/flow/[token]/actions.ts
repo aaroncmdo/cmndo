@@ -384,7 +384,7 @@ export async function createKundeAccount(
         await admin.auth.admin.updateUserById(existingFall.kunde_id, { password })
         // CMM-14: Browser-Reload-Pfad — neuen Magic-Link generieren damit der
         // Kunde auch beim 2. Aufruf direkt ins Portal kann.
-        const { magicLink } = await sendWelcomeWithLogin(admin, fallId, normalizedEmail, password)
+        const { magicLink } = await sendWelcomeWithLogin(admin, fallId, normalizedEmail)
         return { success: true, password, magicLink }
       }
       // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
@@ -656,7 +656,7 @@ async function finalizeKundeSetup(
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
   // CMM-14: Magic-Link weiterreichen damit der Wizard direkt einen
   // "Zu meinem Portal"-Button anbieten kann.
-  return await sendWelcomeWithLogin(admin, fallId, email, password, phoneLoginAktiviert, kundeMagicLink)
+  return await sendWelcomeWithLogin(admin, fallId, email, phoneLoginAktiviert, kundeMagicLink)
 }
 
 // AAR-127: generiert den Kunde-Magic-Link via Supabase Auth Admin API.
@@ -685,7 +685,7 @@ async function generateKundeMagicLink(
   }
 }
 
-// AAR-127: schickt die Welcome-Mail mit Magic-Link + Zugangsdaten als Fallback.
+// AAR-127: schickt die Welcome-Mail mit Magic-Link. KEIN Klartext-Passwort mehr (20.09.2026).
 // `vorabMagicLink`: hat der Aufrufer (finalizeKundeSetup fuer die WhatsApp) den Link schon
 // erzeugt, wird DERSELBE genutzt — ein zweiter generateLink wuerde den ersten Token invalidieren.
 // Magic-Link-Generierung ist non-fatal: bei Fehler geht die Mail trotzdem raus, nur ohne Button.
@@ -693,7 +693,6 @@ async function sendWelcomeWithLogin(
   adminDb: ReturnType<typeof createAdminClient>,
   fallId: string,
   email: string,
-  password: string,
   phoneLoginAktiviert: boolean = false,
   vorabMagicLink?: string | null,
 ): Promise<{ magicLink: string | null }> {
@@ -701,7 +700,7 @@ async function sendWelcomeWithLogin(
 
   try {
     const { sendKundeWelcome } = await import('@/lib/email/google/flows')
-    await sendKundeWelcome(fallId, { magicLink, email, password, phoneLoginAktiviert })
+    await sendKundeWelcome(fallId, { magicLink, email, phoneLoginAktiviert })
   } catch (err) {
     console.error('[AAR-127] Welcome-Mail-Versand fehlgeschlagen:', err)
   }
