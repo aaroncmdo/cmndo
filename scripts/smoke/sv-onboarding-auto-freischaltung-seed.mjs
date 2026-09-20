@@ -77,6 +77,10 @@ async function create() {
       telefon: null,
       // Telefon-Schritt gilt als erledigt (die SMS-Bestaetigung ist per Playwright nicht fahrbar).
       twofa_telefon_verifiziert_am: new Date().toISOString(),
+      // Wie die echte Registrierung (registriereSvBasicNeu, force_password_change): der erste
+      // Login fuehrt auf /passwort-aendern. Die Spec faehrt diesen Schritt per UI mit — er
+      // gehoert zum Nutzerweg, nicht zum Test-Aufbau.
+      force_password_change: true,
     },
     { onConflict: 'id' },
   )
@@ -143,6 +147,12 @@ async function purgeSv(svId) {
   const pfade = (docs ?? []).map((d) => d.dokument_url).filter(Boolean)
   if (pfade.length) await db.storage.from('fall-dokumente').remove(pfade).catch(() => {})
   await db.from('pflichtdokumente').delete().eq('sv_id', svId)
+  // Der unterschriebene Partnervertrag liegt als PDF im Bucket `vertraege`
+  // (vertraege_unterzeichnet.pdf_storage_path = "<svId>/<vertragId>.pdf") — mit entfernen,
+  // sonst bleibt je Lauf ein verwaistes PDF liegen.
+  const { data: vertraege } = await db.from('vertraege_unterzeichnet').select('pdf_storage_path').eq('sv_id', svId)
+  const pdfPfade = (vertraege ?? []).map((v) => v.pdf_storage_path).filter(Boolean)
+  if (pdfPfade.length) await db.storage.from('vertraege').remove(pdfPfade).catch(() => {})
   await db.from('vertraege_unterzeichnet').delete().eq('sv_id', svId)
   await db.from('tasks').delete().eq('entity_id', svId)
   await db.from('e2e_test_fixtures').delete().eq('sv_id', svId)
