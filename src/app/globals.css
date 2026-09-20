@@ -276,13 +276,13 @@ p, li, blockquote, article, .prose {
      Werte synchron zu src/lib/design-tokens.ts (colors.success/-Soft/-Text etc.).
      Via @theme als Tailwind-Utilities bg-success / bg-success-soft /
      text-success-strong exponiert. *-strong == design-tokens *Text. */
-  --claimondo-success: #10B981;
+  --claimondo-success: #047857;
   --claimondo-success-soft: #ecfdf5;
   --claimondo-success-strong: #047857;
-  --claimondo-warning: #F59E0B;
+  --claimondo-warning: #B45309;
   --claimondo-warning-soft: #fffbeb;
   --claimondo-warning-strong: #92400e;
-  --claimondo-danger: #F43F5E;
+  --claimondo-danger: #E11D48;
   --claimondo-danger-soft: #fff1f2;
   --claimondo-danger-strong: #9f1239;
   --claimondo-info: #4573A2;

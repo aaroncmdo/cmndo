@@ -22,9 +22,11 @@ export const colors = {
   bg: '#f8f9fb',
   white: '#ffffff',
   // Semantische Farben (bleiben, tragen Bedeutung)
-  success: '#10B981', // emerald-500
-  warning: '#F59E0B', // amber-500
-  danger: '#F43F5E', // rose-500
+  // 19.09. (Mobil-Audit, WCAG AA): weisse Schrift auf den Vollflaechen — emerald-500 3,8:1, amber-500 2,2:1,
+  // rose-500 3,7:1 (109 Stellen `bg-* text-white`). Jetzt emerald-700 5,5:1 / amber-700 4,5:1 / rose-600 4,6:1.
+  success: '#047857', // emerald-700
+  warning: '#B45309', // amber-700
+  danger: '#E11D48', // rose-600
   info: '#4573A2', // == ondo
   // AAR-783: Darker Text-Varianten für Lesbarkeit auf hellem Tint
   successText: '#047857', // emerald-700

@@ -30,7 +30,7 @@ const glassToneMap: Record<BadgeTone, ToneStyle> = {
 }
 
 const heightMap: Record<BadgeSize, number> = { sm: 18, md: 22 }
-const fontMap: Record<BadgeSize, number> = { sm: 10, md: 11 }
+const fontMap: Record<BadgeSize, number> = { sm: 11, md: 12 }
 
 export function Badge({
   children,

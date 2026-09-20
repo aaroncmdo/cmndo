@@ -20,20 +20,20 @@ const TONE_TEXT: Record<NonNullable<StatBarItem['tone']>, string> = {
 
 /**
  * Verbundene Metrik-Leiste — ersetzt N gleich-grosse StatCards durch eine
- * zusammenhaengende Leiste (kein "identical card grid"). Responsiv: 3-Spalten-
+ * zusammenhaengende Leiste (kein "identical card grid"). Responsiv: 2-Spalten-
  * Grid mobil, Flex-Reihe ab sm. 1px-Divider via gap-px auf dunklem Grund.
  */
 export function StatBar({ items, className }: { items: StatBarItem[]; className?: string }) {
   return (
     <div className={cn('overflow-hidden rounded-ios-md border border-claimondo-border bg-claimondo-border', className)}>
-      <div className="grid grid-cols-3 gap-px sm:flex">
+      <div className="grid grid-cols-2 gap-px sm:flex">
         {items.map((it) => {
           const Icon = it.icon
           const body = (
             <>
               <span className="flex items-center gap-1.5 text-caption uppercase text-claimondo-ondo">
                 {Icon ? <Icon className="h-3 w-3 shrink-0" /> : null}
-                <span className="truncate">{it.label}</span>
+                <span className="leading-tight">{it.label}</span>
               </span>
               <span
                 className={cn(

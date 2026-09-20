@@ -158,14 +158,14 @@ export default async function DispatchTasksSeite({
               const inhalt = (
                 <>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 items-start gap-2">
                       {/* Farbe + Label aus der Registry-Domain `task-prioritaet` statt aus
                           einem Farb-Ternary — genau die streuen dieselbe Zuordnung ueber
                           viele Dateien, bis sie auseinanderlaeuft (Status-Registry-Gate). */}
                       <span className="shrink-0">
                         <StatusBadge domain="task-prioritaet" code={t.prioritaet} />
                       </span>
-                      <p className="truncate text-body-sm font-medium text-claimondo-navy">{t.titel}</p>
+                      <p className="break-words text-body-sm font-medium text-claimondo-navy">{t.titel}</p>
                     </div>
                     {t.beschreibung ? (
                       <p className="mt-1 line-clamp-2 text-body-xs text-claimondo-ondo">{t.beschreibung}</p>

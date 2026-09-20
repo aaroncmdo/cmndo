@@ -35,7 +35,7 @@ export function ClaimThreadChat({
   const [text, setText] = useState('')
   const [laden, setLaden] = useState(true)
   const [sende, setSende] = useState(false)
-  const endeRef = useRef<HTMLDivElement>(null)
+  const listeRef = useRef<HTMLDivElement>(null)
 
   // Initial laden + als gelesen markieren
   useEffect(() => {
@@ -70,9 +70,13 @@ export function ClaimThreadChat({
     }
   }, [threadId])
 
-  // Auto-scroll ans Ende bei neuen Nachrichten
+  // Auto-scroll ans Ende bei neuen Nachrichten — NUR die Nachrichtenliste, nicht die Seite.
+  // scrollIntoView() scrollte jeden Vorfahren mit: in der SV-Fallakte (Chat eingebettet in <main>)
+  // oeffnete die Seite mobil mitten im Chat (main.scrollTop 7.737) und der overflow-hidden-Rahmen
+  // war seitlich um 116 px verschoben (Sonde 19.09.). scrollTop auf dem Listen-Container bleibt lokal.
   useEffect(() => {
-    endeRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const liste = listeRef.current
+    if (liste) liste.scrollTo({ top: liste.scrollHeight, behavior: 'smooth' })
   }, [nachrichten.length])
 
   async function senden() {
@@ -109,7 +113,7 @@ export function ClaimThreadChat({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 p-3">
+      <div ref={listeRef} className="flex-1 min-h-0 overflow-y-auto space-y-4 p-3">
         {laden ? (
           <p className="text-body-sm text-claimondo-ondo text-center py-6">Wird geladen…</p>
         ) : nachrichten.length === 0 ? (
@@ -136,7 +140,6 @@ export function ClaimThreadChat({
             </div>
           ))
         )}
-        <div ref={endeRef} />
       </div>
       <div className="border-t border-claimondo-border p-2">
         {whatsappHinweis && (
