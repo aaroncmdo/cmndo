@@ -21,6 +21,7 @@ import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { klassifiziereReservierungsGrund } from './reservierung-grund'
+import type { PlaneTerminFehlerCode } from '@/lib/termine/engine/plane-termin'
 import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
@@ -285,6 +286,7 @@ export async function POST(req: Request) {
   // bleibt der weiche Hold (gfa.wunschtermin + zugeordneter_sv_id) -> /flow terminPending.
   let reserviert = false
   let reservierungFehler: string | null = null
+  let reservierungCode: PlaneTerminFehlerCode | null = null
   if (input.sv_id && input.slot_start && input.slot_end) {
     try {
       const buchung = await bucheTerminFlow(issued.token, input.sv_id, input.slot_start, input.slot_end)
@@ -297,6 +299,7 @@ export async function POST(req: Request) {
         if (tidErr) console.error('[melde-schaden] gfa.termin_id-Update fehlgeschlagen:', tidErr.message)
       } else {
         reservierungFehler = buchung.error ?? 'Reservierung nicht möglich.'
+        reservierungCode = buchung.code ?? null
         console.error('[melde-schaden] Reservierung nicht möglich (Soft-Hold bleibt):', buchung.error)
       }
     } catch (err) {
@@ -347,7 +350,9 @@ export async function POST(req: Request) {
       // Diagnose-Luecke-Fix (Handoff 11.07.): SICHERER Grund-Code, wenn die harte
       // Reservierung nicht feuerte — ein curl/Smoke sieht sofort z.B. 'test_sv_guard'
       // (ohne VPS/pm2, ohne rohe DB-Message zu leaken).
-      ...(reservierungFehler ? { reservierung_grund: klassifiziereReservierungsGrund(reservierungFehler) } : {}),
+      ...(reservierungFehler
+        ? { reservierung_grund: klassifiziereReservierungsGrund(reservierungFehler, reservierungCode) }
+        : {}),
       kanal: issued.kanal,
       hinweis:
         issued.kanal === 'none'

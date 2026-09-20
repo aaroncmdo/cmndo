@@ -120,6 +120,19 @@ describe('planeTermin — Router-Branches', () => {
     expect(r).toMatchObject({ ok: false, code: 'belegt' })
   })
 
+  it('FIX + buchen → Test-SV-Guard blockt → code=test_guard (nicht mehr auf db gemappt)', async () => {
+    // 20.09. (Regel-4-Probe #5990): der Guard-Grund reiste als 'db' weiter, die API meldete
+    // 'nicht_reserviert' statt 'test_sv_guard'. Der Code muss die Schicht ueberleben — der
+    // kundentaugliche Text (seit 12.08.) traegt das Wort "Test-Guard" bewusst nicht mehr.
+    mockReserviere.mockResolvedValue({
+      ok: false,
+      code: 'test_guard',
+      error: 'Diese Buchung konnte leider nicht abgeschlossen werden. Bitte melden Sie sich kurz bei uns — wir vereinbaren Ihren Termin persönlich.',
+    })
+    const r = await planeTermin({ ...base, modus: 'buchen', assignee: sv('sv-fix'), ...wunsch })
+    expect(r).toMatchObject({ ok: false, code: 'test_guard' })
+  })
+
   it('FIX + vorschlagen → max 3 Slots des fixen Assignees (kein reserviere)', async () => {
     mockFreieSlots.mockResolvedValue([tag('2026-06-12', ['09:00', '10:00', '11:00', '12:00'])])
     const r = await planeTermin({ ...base, assignee: sv('sv-fix') })
