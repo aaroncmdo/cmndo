@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildIcs } from '@/lib/ical'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
+import { kundeBesitztLead } from '@/lib/kunde/besitz'
 
 export async function GET(
   _req: Request,
@@ -70,16 +71,8 @@ export async function GET(
   // Ownership-Check
   let owned = fall.kunde_id === user.id
   if (!owned && fall.lead_id) {
-    const { data: lead } = await admin
-      .from('leads')
-      .select('email')
-      .eq('id', fall.lead_id)
-      .maybeSingle()
-    owned = !!(
-      lead?.email &&
-      user.email &&
-      lead.email.toLowerCase() === user.email.toLowerCase()
-    )
+    // Stufe 2: E-Mail ODER Telefon-Suffix (Kunden ohne E-Mail bekommen ihren ICS-Eintrag genauso).
+    owned = await kundeBesitztLead(admin, user, fall.lead_id)
   }
   if (!owned) return new NextResponse('Keine Berechtigung', { status: 403 })
 
