@@ -428,6 +428,12 @@ export type MeldeSchadenInput = {
   wunschtermin?: string
   name: string
   telefon: string
+  /**
+   * Optionale E-Mail = die Rueckfallebene der Versand-Kaskade (WhatsApp -> SMS -> Email).
+   * Ohne sie endet ein Lead mit nicht-WhatsApp-faehiger Nummer auf kanal='none': kein Link,
+   * keine Spur, kein Rueckweg fuer den Kunden (gemessen 19.09.2026: 0 von 21 zugestellt).
+   */
+  email?: string
   /** MUSS true sein + NUR nach ausdruecklicher Nutzer-Einwilligung gesetzt werden (Stage-1-Consent). */
   einwilligung_erteilt: boolean
 }
@@ -453,6 +459,7 @@ export async function meldeSchaden(
     slot_end: input.slot_end,
     name: input.name,
     telefon: input.telefon,
+    email: input.email,
     einwilligung: { zugestimmt: input.einwilligung_erteilt, policy_version: MCP_CONSENT_POLICY_VERSION },
   }
   const controller = new AbortController()

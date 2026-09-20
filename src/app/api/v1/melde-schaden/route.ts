@@ -91,6 +91,17 @@ const MeldeSchadenSchema = z.object({
   schuldfrage: z.string().trim().max(40).optional(),
   name: z.string().trim().min(2).max(80),
   telefon: z.string().trim().regex(PHONE_RE),
+  /**
+   * Rueckfallebene der Versand-Kaskade (WhatsApp -> SMS -> Email, issue-canonical-flowlink.ts).
+   * Eine Nummer, die kein WhatsApp/SMS empfaengt (Festnetz, Zahlendreher), hinterlaesst ohne
+   * dieses Feld kanal='none': kein Link, keine Zustellspur, kein Rueckweg fuer den Kunden.
+   * Gemessen 19.09.2026: 0 von 21 MCP-Leads hatten je eine Zustellung.
+   *
+   * BEWUSST locker validiert — gleiche Begruendung wie bei `schuldfrage` oben: eine vom
+   * Modell vertippte Adresse darf die Schadenmeldung nicht mit 400 abweisen. Was nicht wie
+   * eine Adresse aussieht, faellt unten still auf undefined und der Kanal bleibt wie bisher.
+   */
+  email: z.string().trim().max(120).optional(),
   /** Stage-1-Einwilligung — Pflicht. zugestimmt MUSS true sein, sonst kein Write. */
   einwilligung: z.object({
     zugestimmt: z.literal(true),
@@ -184,9 +195,16 @@ export async function POST(req: Request) {
   // Stage-1-Consent-Zeitpunkt (Server-Zeit der bestaetigten in-chat-Einwilligung).
   const consentTs = new Date().toISOString()
 
+  // Nur was wie eine Adresse aussieht, wandert weiter — sonst undefined (s. Schema-Kommentar).
+  // Dieselbe Minimalpruefung, die auch die Versand-Kaskade fahrt (`email.includes('@')`),
+  // hier einmal zentral, damit im Datensatz kein Fragment landet, das nie zustellbar waere.
+  const kundenEmail =
+    input.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.email) ? input.email : undefined
+
   const payload: EmbedAnfrageInput = {
     name: input.name,
     telefon: input.telefon,
+    email: kundenEmail,
     schadentyp: input.schadenart,
     schadens_kurzbeschreibung: input.hergang,
     source: 'mcp',
@@ -292,6 +310,35 @@ export async function POST(req: Request) {
     : input.slot_start
       ? 'Wunschtermin vorgemerkt (finale Bestätigung im Link). '
       : ''
+
+  // Kein Kanal getragen -> der Kunde hat KEINEN Weg zurueck in seinen Vorgang.
+  // Bis hierher war das ein stiller Verlust: der Lead stand auf 'neu', niemand
+  // erfuhr davon, und die Antwort unten versprach trotzdem "Dispatch kontaktiert
+  // manuell" — ein Versprechen ohne Mechanik. Diese Aufgabe ist die Mechanik.
+  // Gemessen 19.09.2026: 0 von 21 MCP-Leads hatten je eine Zustellung.
+  if (issued.kanal === 'none') {
+    const { error: kontaktTaskFehler } = await admin.from('tasks').insert({
+      lead_id: issued.leadId,
+      typ: 'lead-kontakt-herstellen',
+      titel: `Kein Kontakt-Kanal erreichbar: ${input.name}`,
+      beschreibung:
+        `Über den KI-Assistenten gemeldet (${input.schadenart}, PLZ ${input.plz}). ` +
+        `Weder WhatsApp noch SMS noch E-Mail konnten zugestellt werden — der Kunde hat ` +
+        `keinen Link und kommt von allein nicht in seinen Vorgang. ` +
+        `Telefon: ${input.telefon}${kundenEmail ? ` · E-Mail: ${kundenEmail}` : ' · keine E-Mail hinterlegt'}. ` +
+        `Bitte telefonisch Kontakt aufnehmen und eine erreichbare Adresse nachtragen.`,
+      status: 'offen',
+      prioritaet: 'dringend',
+      empfaenger_rolle: 'dispatch',
+      auto_erstellt: true,
+      entity_type: 'lead',
+      entity_id: issued.leadId,
+      task_code: 'mcp-lead-ohne-kanal',
+    })
+    if (kontaktTaskFehler) {
+      console.error('[melde-schaden] Kontakt-Task NICHT erstellt — Lead bleibt still:', kontaktTaskFehler.message)
+    }
+  }
   return json(
     {
       ok: true,

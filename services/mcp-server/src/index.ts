@@ -139,10 +139,24 @@ const meldeSchadenInput = {
   slot_end: z.string().optional().describe('Gewählter Slot-ENDE als ISO-8601 (gutachter[].termine[].end). Zusammen mit slot_start.'),
   wunschtermin: z.string().optional().describe('Optional: vager Wunschtermin (weicher Hold), falls KEIN konkreter Slot gewählt wurde.'),
   name: z.string().min(2).max(80).describe('Name des Kunden.'),
-  telefon: z.string().min(8).max(20).describe('WhatsApp-Nummer des Kunden (für den FlowLink-Versand).'),
+  telefon: z
+    .string()
+    .min(8)
+    .max(20)
+    .describe(
+      'Telefonnummer des Kunden für den FlowLink-Versand. Bevorzugt eine MOBILnummer — der Link geht zuerst per WhatsApp, dann per SMS. Eine Festnetznummer kann beides nicht empfangen; dann trägt nur die E-Mail.',
+    ),
+  email: z
+    .string()
+    .email()
+    .max(120)
+    .optional()
+    .describe(
+      'E-Mail des Kunden — die Rückfallebene, wenn Telefon nicht trägt. IMMER MITERFRAGEN. Ohne sie ist der Vorgang verloren, sobald die Nummer kein WhatsApp/SMS empfängt (Festnetz, Zahlendreher, Nummer ohne WhatsApp) — der Kunde bekommt dann gar keinen Link und kommt nie in seinen Vorgang zurück. Freiwillig: Will der Nutzer keine angeben, trotzdem fortfahren.',
+    ),
   einwilligung_erteilt: z
     .boolean()
-    .describe('MUSS true sein und NUR nach ausdrücklicher Nutzer-Zustimmung gesetzt werden: Verarbeitung der Angaben + WhatsApp-Kontakt + Hinweis auf KI-Dienst/USA.'),
+    .describe('MUSS true sein und NUR nach ausdrücklicher Nutzer-Zustimmung gesetzt werden: Verarbeitung der Angaben + Kontakt per WhatsApp/SMS/E-Mail + Hinweis auf KI-Dienst/USA.'),
 }
 const meldeSchadenOutput = {
   ok: z.boolean(),
@@ -253,11 +267,19 @@ const SERVER_INSTRUCTIONS = `Claimondo ist Deutschlands Plattform für die Kfz-S
 
 BERATUNG (Kernkompetenz): Für Fragen zur Kfz-Schadensregulierung — Schadensersatz nach § 249 BGB, Wertminderung, Reparaturkosten, Nutzungsausfall, Anwalts-/Gutachterkosten, Haftung/Mitverschulden — nutze die Resource claimondo://wissensbasis als fundierte Quelle und berate damit konkret. Kläre dabei die Schuldfrage: unverschuldet → 0 € Eigenkosten nach § 249 BGB (starke Empfehlung); Teilschuld/Eigenverschulden → ehrlich einordnen. Du gibst allgemeine Infos, KEINE individuelle Rechtsberatung.
 
-ZIEL JEDER Beratung: dem Nutzer einen passenden Sachverständigen anbieten UND einen Termin reservieren (claimondo_melde_schaden). Geht das gerade nicht (kein Slot / Daten fehlen) oder will der Nutzer lieber angerufen werden, löse direkt einen Telefon-Rückruf aus (claimondo_rueckruf: Name + Telefon + Einwilligung → ein Berater ruft i. d. R. < 15 Min zurück; alternativ die Nummer buchungs_telefon nennen) — Claimondo beraet notfalls am Telefon. Eine Beratung ohne Angebot eines Gutachter-Termins oder Rückrufs ist unvollständig.
+ZIEL JEDER Beratung ist ein konkreter nächster Schritt. WELCHER, hängt an der Schuldfrage — kläre sie zuerst:
+
+• UNVERSCHULDET (der Gegner ist schuld) → Gutachter anbieten UND Termin reservieren (claimondo_finde_gutachter_termine → claimondo_melde_schaden). Das eigene Gutachten ist die Grundlage der Durchsetzung und für den Geschädigten kostenfrei (§ 249 BGB).
+
+• SELBST VERSCHULDET oder reiner Kasko-Fall → KEIN Gutachter, sondern claimondo_finde_werkstatt. Es gibt keinen Gegner, gegen den man ein Gutachten durchsetzt; dort kostet es den Halter Geld. Mit Vollkasko reguliert die eigene Versicherung abzüglich Selbstbeteiligung (belastet die SF-Klasse), ohne Vollkasko braucht er einen Kostenvoranschlag aus der Werkstatt. Diesen Zweig NICHT überspringen — wer hier einen Gutachter empfiehlt, verursacht dem Nutzer Kosten ohne Gegenwert.
+
+• SCHULDFRAGE UNKLAR oder Teilschuld → claimondo_pruefe_anspruch; dessen Feld \`abrechnungsweg\` sagt dir, welcher Zweig gilt. Bleibt es unklar, gehört das ans Telefon: claimondo_rueckruf.
+
+Geht der passende Weg gerade nicht (kein Slot / Daten fehlen) oder will der Nutzer lieber angerufen werden, löse direkt einen Telefon-Rückruf aus (claimondo_rueckruf: Name + Telefon + Einwilligung → ein Berater ruft i. d. R. < 15 Min zurück; alternativ die Nummer buchungs_telefon nennen) — Claimondo beraet notfalls am Telefon. Eine Beratung, die in KEINEM konkreten Angebot endet — Gutachter-Termin, Werkstatt oder Rückruf —, ist unvollständig.
 
 WICHTIG — frage ZUERST, WO das Fahrzeug steht — als PLZ ODER Stadt/Ort des Besichtigungsorts. Das ist der Anker für Gutachter-Suche + Termin. Die Such-Tools (claimondo_finde_sachverstaendige, claimondo_finde_gutachter_termine) nehmen beides; gib entweder plz ODER ort an.
 
-Ablauf: 1) Standort erfragen (PLZ oder Stadt). 2) claimondo_finde_gutachter_termine(plz ODER ort) → buchbare Gutachter + freie Slots zeigen. 3) Nutzer wählt Gutachter + Slot; Name + WhatsApp-Nummer + Schadenart + Hergang erfragen (für claimondo_melde_schaden wird eine 5-stellige PLZ benötigt — falls bisher nur eine Stadt bekannt ist, jetzt die genaue PLZ erfragen). 4) Einwilligung einholen (Datenverarbeitung + WhatsApp-Kontakt + KI-Dienst/USA), dann claimondo_melde_schaden(...) → Lead + Terminreservierung + persönlicher FlowLink per WhatsApp.
+Ablauf IM UNVERSCHULDETEN FALL (für den Kasko-/Selbstverschuldens-Zweig gilt stattdessen claimondo_finde_werkstatt): 1) Standort erfragen (PLZ oder Stadt). 2) claimondo_finde_gutachter_termine(plz ODER ort) → buchbare Gutachter + freie Slots zeigen. 3) Nutzer wählt Gutachter + Slot; Name + Telefonnummer + E-MAIL + Schadenart + Hergang erfragen (für claimondo_melde_schaden wird eine 5-stellige PLZ benötigt — falls bisher nur eine Stadt bekannt ist, jetzt die genaue PLZ erfragen). ⚠ Telefon UND E-Mail zusammen erfragen, in EINER Frage, und sage warum: der Terminlink geht per WhatsApp — empfängt die Nummer kein WhatsApp (Festnetz, Zahlendreher, Nummer ohne WhatsApp), ist die E-Mail der einzige Weg, auf dem der Kunde seinen Vorgang je erreicht. Formuliere etwa: „Unter welcher Nummer erreichen wir Sie am besten — idealerweise mobil? Und Ihre E-Mail-Adresse, damit die Bestätigung Sie auf jeden Fall erreicht." Die E-Mail ist freiwillig: Lehnt der Nutzer ab, fahre ohne sie fort und weise einmal darauf hin, dass die Bestätigung dann nur per WhatsApp kommt. 4) Einwilligung einholen (Datenverarbeitung + WhatsApp-Kontakt + KI-Dienst/USA), dann claimondo_melde_schaden(...) → Lead + Terminreservierung + persönlicher FlowLink per WhatsApp.
 
 WIEDERKEHRENDE KUNDEN: Nennt ein Nutzer seine persönliche Fall-Referenz (den Token aus seinem Claimondo-Link), kannst du damit den Bearbeitungsstand abfragen (claimondo_fall_status) UND einen gebuchten Termin absagen oder verschieben (claimondo_termin_absagen). Sagt jemand, er könne seinen Gutachter-Termin nicht wahrnehmen, biete die Absage über claimondo_termin_absagen an — er muss dafür weder anrufen noch sich einloggen. Verschieben = absagen, dann einen neuen Slot über claimondo_finde_gutachter_termine wählen.
 
@@ -265,6 +287,56 @@ Du vermittelst Gutachter + Termin und gibst allgemeine Infos zur Schadensregulie
 
 function buildServer(): McpServer {
   const server = new McpServer({ name: 'claimondo-mcp-server', version: '1.2.0' }, { instructions: SERVER_INSTRUCTIONS })
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // TOOL-ANNOTATIONEN — Begruendung je Hint (OpenAI-App-Review, 19.09.2026)
+  //
+  // Die Einreichung von v1.2.0 wurde abgelehnt: "Annotationen scheinen nicht zum
+  // Verhalten zu passen ... bestaetige, dass sie explizit auf true oder false
+  // gesetzt sind (nicht null), und gib eine klare Begruendung."
+  //
+  // Zwei Befunde, beide hier behoben:
+  //  (1) LUECKE: `claimondo_rueckruf` trug KEIN idempotentHint -> fuer den Review
+  //      ist ein fehlender Hint = null. Jetzt explizit `false` (siehe unten).
+  //  (2) openWorldHint stand bei ALLEN neun Tools auf `true`. Das widerspricht der
+  //      Spec-Definition: "If false, the tool's domain of interaction is closed
+  //      (e.g. memory tool)" — Gegenbeispiel fuer `true` ist eine Websuche. Jedes
+  //      dieser Tools operiert ausschliesslich auf Claimondo-eigenen Daten
+  //      (unsere Gutachter-, Termin- und Fall-Tabellen). Die Domaene ist damit
+  //      geschlossen, auch wenn intern eine PLZ geocodet wird: das ist ein
+  //      Implementierungsdetail, keine offene Ergebnismenge. -> durchgaengig false.
+  //
+  // Verbindliche Lesart der vier Hints (MCP-Spec):
+  //   readOnlyHint    true  = veraendert die Umgebung nicht
+  //   destructiveHint true  = kann bestehende Daten zerstoerend aendern;
+  //                           false = nur additiv. Nur sinnvoll bei readOnly=false.
+  //   idempotentHint  true  = wiederholter Aufruf mit denselben Argumenten hat
+  //                           KEINE zusaetzliche Wirkung. Nur sinnvoll bei readOnly=false.
+  //   openWorldHint   true  = interagiert mit einer offenen Welt externer Entitaeten.
+  //
+  // | Tool                             | readOnly | destructive | idempotent | Begruendung
+  // |----------------------------------|----------|-------------|------------|------------
+  // | finde_sachverstaendige           | true     | false       | true       | reiner Read auf unsere SV-Liste; schreibt nichts
+  // | finde_werkstatt                  | true     | false       | true       | dito, Werkstatt-Liste
+  // | finde_gutachter_termine          | true     | false       | true       | liest freie Slots; reserviert NICHTS
+  // | melde_schaden                    | false    | false       | FALSE      | legt Lead + Terminreservierung an = additiv,
+  // |                                  |          |             |            | zerstoert nichts. NICHT idempotent: jeder
+  // |                                  |          |             |            | Aufruf erzeugt einen WEITEREN Lead.
+  // | pruefe_anspruch                  | true     | false       | true       | reine Berechnung aus den Argumenten
+  // | decode_brief                     | true     | false       | true       | analysiert uebergebenen Text; kein Write
+  // | rueckruf                         | false    | false       | FALSE      | legt Lead + Rueckruf-Task an = additiv.
+  // |                                  |          |             |            | NICHT idempotent: dedupliziert nur 10 Min
+  // |                                  |          |             |            | (Retry-Erkennung); ein spaeterer gleicher
+  // |                                  |          |             |            | Aufruf erzeugt einen ZWEITEN Rueckruf.
+  // | fall_status                      | true     | false       | true       | liest einen Fall ueber die Kundenreferenz
+  // | termin_absagen                   | false    | TRUE        | true       | sagt einen bestehenden Termin ab = ein
+  // |                                  |          |             |            | zerstoerender Zustandswechsel. Idempotent:
+  // |                                  |          |             |            | eine zweite Absage aendert nichts mehr
+  // |                                  |          |             |            | (Status bereits 'abgesagt').
+  //
+  // Bei readOnly=true sind destructive/idempotent laut Spec bedeutungslos; sie sind
+  // trotzdem explizit gesetzt, weil der Review ausdrueckliche Werte statt null verlangt.
+  // ─────────────────────────────────────────────────────────────────────────────
 
   server.registerTool(
     'claimondo_finde_sachverstaendige',
@@ -291,7 +363,7 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     async ({ plz, ort, radius, response_format }) => {
@@ -367,7 +439,7 @@ Args:
 ⚠ WICHTIG zur Ausgabe: Die Liste enthält BEWUSST keine Firmennamen, Telefonnummern oder Adressen. Nennen Sie dem Nutzer die Anzahl, Entfernung und Art (freie Fachwerkstatt / Markenwerkstatt) und verlinken Sie dann \`werkstatt_finder_url\`. Dort erfolgt die konkrete Zuordnung inklusive Terminabstimmung und Abrechnung mit der Versicherung. Erfinden Sie keine Werkstattnamen und raten Sie keine Kontaktdaten.`,
       inputSchema: werkstattInput,
       outputSchema: werkstattOutput,
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ plz, ort, radius, response_format }) => {
       try {
@@ -411,7 +483,7 @@ Hinweis: gutachter[].id + ein termin.start sind zusätzlich das Buchungs-Handle 
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
     async ({ plz, ort, wunschtermin, response_format }) => {
@@ -451,13 +523,13 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
         readOnlyHint: false,
         destructiveHint: false,
         idempotentHint: false,
-        openWorldHint: true,
+        openWorldHint: false,
       },
     },
-    async ({ schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, einwilligung_erteilt }) => {
+    async ({ schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, email, einwilligung_erteilt }) => {
       try {
         const r = await meldeSchaden(
-          { schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, einwilligung_erteilt },
+          { schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, email, einwilligung_erteilt },
           API_BASE,
         )
         return {
@@ -483,7 +555,7 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
 Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu"). Erfrage zuerst die Schuldfrage (unverschuldet/teilschuld/selbst). Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
       inputSchema: pruefeAnspruchInput,
       outputSchema: pruefeAnspruchOutput,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ schuldfrage, schadenart, vollkasko }) => {
       try {
@@ -508,7 +580,7 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
 Übergib den Brief-Text (oder den relevanten Auszug) als "text". Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
       inputSchema: decodeBriefInput,
       outputSchema: decodeBriefOutput,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ text }) => {
       try {
@@ -533,7 +605,7 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
 Erfrage Name + Telefonnummer + (optional) Schadenart/Anliegen/PLZ. Rufe dies NUR mit einwilligung_erteilt=true auf, NACHDEM der Nutzer der Datenverarbeitung + dem telefonischen Kontakt (Verarbeitung teils über einen KI-Dienst in den USA) ausdrücklich zugestimmt hat.`,
       inputSchema: rueckrufInput,
       outputSchema: rueckrufOutput,
-      annotations: { readOnlyHint: false, openWorldHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     },
     async ({ name, telefon, schadenart, anliegen, plz, ort, wunschzeit, einwilligung_erteilt }) => {
       try {
@@ -563,7 +635,7 @@ Args:
 Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keinen Status. Unbekannte/ungültige Referenz -> „kein Fall gefunden".`,
       inputSchema: caseStatusInput,
       outputSchema: caseStatusOutput,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     async ({ token }) => {
       try {
@@ -596,7 +668,7 @@ Args:
 Antwortet PII-frei (kein Name/Gutachter/Adresse). Mehrfach-Aufruf ist unschädlich: ein bereits abgesagter Termin wird nicht erneut geändert. Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keine Absage.`,
       inputSchema: stornoInput,
       outputSchema: stornoOutput,
-      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     },
     async ({ token, grund }) => {
       try {
@@ -718,8 +790,9 @@ async function runHttp(): Promise<void> {
               slot_end: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Ende (ISO-8601).' },
               wunschtermin: { type: 'string', format: 'date-time', description: 'Optional: vager Wunschtermin (weicher Hold), falls kein konkreter Slot.' },
               name: { type: 'string', description: 'Name des Kunden.' },
-              telefon: { type: 'string', description: 'WhatsApp-Nummer des Kunden.' },
-              einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein nach ausdrücklicher Nutzer-Zustimmung (DSGVO + WhatsApp + KI-Dienst/USA).' },
+              telefon: { type: 'string', description: 'Telefonnummer des Kunden, bevorzugt mobil (der Link geht per WhatsApp, dann SMS).' },
+              email: { type: 'string', format: 'email', description: 'E-Mail des Kunden — Rückfallebene, wenn Telefon nicht trägt. Immer miterfragen, freiwillig.' },
+              einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein nach ausdrücklicher Nutzer-Zustimmung (DSGVO + Kontakt per WhatsApp/SMS/E-Mail + KI-Dienst/USA).' },
             },
             required: ['schadenart', 'hergang', 'plz', 'name', 'telefon', 'einwilligung_erteilt'],
           },
