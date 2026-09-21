@@ -12661,6 +12661,8 @@ export type Database = {
           sprache: string | null
           status: Database["public"]["Enums"]["lead_status"]
           telefon: string | null
+          telefon_geprueft_am: string | null
+          telefon_typ: string | null
           telefon_ziffern: string | null
           timeline: Json | null
           tsn: string | null
@@ -12893,6 +12895,8 @@ export type Database = {
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           telefon?: string | null
+          telefon_geprueft_am?: string | null
+          telefon_typ?: string | null
           telefon_ziffern?: string | null
           timeline?: Json | null
           tsn?: string | null
@@ -13125,6 +13129,8 @@ export type Database = {
           sprache?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           telefon?: string | null
+          telefon_geprueft_am?: string | null
+          telefon_typ?: string | null
           telefon_ziffern?: string | null
           timeline?: Json | null
           tsn?: string | null
