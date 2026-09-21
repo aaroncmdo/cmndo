@@ -249,7 +249,7 @@ lesen statt konstruieren · Erfolg am **DB-Zustand** messen, nicht an der Anzeig
 
 Gefahren gegen **prod** (`claimondo.de` + `app.claimondo.de`), 28.08.2026 ab 08:00 UTC.
 Identität intern (`epsweep-*@claimondo.de`) → Test-SV-Guard + Send-Isolation greifen wie vorgesehen;
-Telefon `+491633628571` (Aaron-Freigabe) für den Zustellnachweis.
+Telefon `+49 163 … (Team A)` (Aaron-Freigabe) für den Zustellnachweis.
 
 ### 5.1 E1 · Mini-Wizard `/schaden-melden` → Claim `CLM-2026-05610` — **durchgelaufen**
 

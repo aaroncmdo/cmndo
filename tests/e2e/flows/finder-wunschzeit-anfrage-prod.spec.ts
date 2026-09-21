@@ -238,7 +238,7 @@ async function absenden(page: Page, email: string): Promise<string> {
   await vis(page, 'button:has-text("Auffahrunfall")').click()
   await vis(page, 'input[autocomplete="given-name"]').fill('E2eWunschzeit')
   await vis(page, 'input[autocomplete="family-name"]').fill('Smoke')
-  await vis(page, 'input[autocomplete="tel"]').fill('+491633628571')
+  await vis(page, 'input[autocomplete="tel"]').fill('+491231234567')
   await vis(page, 'input[autocomplete="email"]').fill(email)
   await vis(page, 'input[type="checkbox"]').check()
   // Der Submit sitzt im Kontakt-Step; "Anfrage absenden" des Rueckruf-Zweigs erscheint erst

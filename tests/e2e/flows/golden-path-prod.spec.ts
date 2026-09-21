@@ -56,7 +56,7 @@ test('Stage 1 — Kunde: /schaden-melden erzeugt Lead', async ({ page }) => {
   await page.locator('#unfallort').first().fill('Domkloster 4, 50667 Köln')
   await page.locator('#vorname').first().fill(`E2eGolden${runId}`).catch(() => {})
   await page.locator('#nachname').first().fill('Smoke').catch(() => {})
-  await page.locator('#telefon').first().fill('+491633628571').catch(() => {}) // Test-WA
+  await page.locator('#telefon').first().fill('+491231234567').catch(() => {}) // Test-WA
   await page.locator('#email').first().fill(email)
   await page.locator('[data-slot="checkbox"], input[type="checkbox"]').first().click().catch(() => {})
   await page.getByRole('button', { name: /link erhalten|sicheren link|jetzt melden|anfrage/i }).first().click()

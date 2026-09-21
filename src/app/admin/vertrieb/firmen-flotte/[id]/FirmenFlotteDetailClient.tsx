@@ -456,7 +456,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
                       <input
                         value={waNummer[k.konto_id] ?? ''}
                         onChange={(e) => setWaNummer((m) => ({ ...m, [k.konto_id]: e.target.value }))}
-                        placeholder="z. B. +49 163 3628571"
+                        placeholder="z. B. +49 170 1234567"
                         inputMode="tel"
                         className={`${FELD_CLS} mt-0.5 w-full`}
                       />

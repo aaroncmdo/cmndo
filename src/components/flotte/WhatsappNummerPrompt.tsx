@@ -73,7 +73,7 @@ export function WhatsappNummerPrompt({ nummer, onSpeichern }: Props) {
             <input
               value={wert}
               onChange={(e) => setWert(e.target.value)}
-              placeholder="z. B. +49 163 3628571"
+              placeholder="z. B. +49 170 1234567"
               inputMode="tel"
               autoComplete="tel"
               className={`${FELD_CLS} mt-0.5 w-full`}

@@ -39,7 +39,7 @@ const alsDb = (m: ReturnType<typeof mockDb>) => m.client as any
 describe('istPartnerNummer', () => {
   it('erkennt einen Sachverstaendigen ueber sein Profil', async () => {
     const m = mockDb({ profiles: { data: [{ rolle: 'sachverstaendiger', vorname: 'Gaith', nachname: 'Hamed' }] } })
-    const r = await istPartnerNummer(alsDb(m), '+491735633541')
+    const r = await istPartnerNummer(alsDb(m), '+495205060708')
     expect(r.istPartner).toBe(true)
     expect(r.quelle).toBe('profil')
     expect(r.bezeichnung).toBe('sachverstaendiger Gaith Hamed')
@@ -68,7 +68,7 @@ describe('istPartnerNummer', () => {
 
   it('schliesst Kunden aus — die profiles-Query filtert rolle != kunde', async () => {
     const m = mockDb({})
-    await istPartnerNummer(alsDb(m), '+491633628571')
+    await istPartnerNummer(alsDb(m), '+491231234567')
     expect(m.gerufeneFilter.profiles).toContain('neq:rolle')
   })
 
@@ -87,7 +87,7 @@ describe('istPartnerNummer', () => {
 
   it('bei DB-Fehler sicherheitshalber als Partner behandeln (kein Lead)', async () => {
     const m = mockDb({ profiles: { error: { message: 'connection lost' } } })
-    const r = await istPartnerNummer(alsDb(m), '+491735633541')
+    const r = await istPartnerNummer(alsDb(m), '+495205060708')
     expect(r.istPartner).toBe(true)
     expect(r.quelle).toBeNull()
   })

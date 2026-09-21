@@ -163,7 +163,7 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     vorname: 'Aaron',
     nachname: 'Sprafke',
     email: 'aaron.sprafke+kunde15@claimondo.de',
-    telefon: '+4917620289514',
+    telefon: '+491239876543',
     sa_unterschrieben,
     vollmacht_signiert_am,
     // WS6/Kasko: derive_abrechnungsweg (View-Seite) braucht die Lead-Quali-Felder,
