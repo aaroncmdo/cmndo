@@ -208,6 +208,7 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 **Sicherheit — kein Kollateralschaden auf Prod:**
 
 * Immer **Test-Konten** nutzen (`telefon = NULL`) → es gehen **keine** echten SMS/WhatsApp/Emails an reale Kunden raus.
+  Namen und Nummern dabei **nie erfinden** — siehe Regel 7 unten.
 * Flows, die zwingend echte Kunden-Comms oder destruktive/irreversible Writes auslösen würden: über Test-Lead/Test-Konto fahren; wenn technisch unmöglich, per Read-Surface + Live-DB-Verifikation absichern und **im Marker begründen**, warum der UI-Trigger nicht lief.
 * **Niemals** Prod-Daten echter Kunden mutieren oder löschen.
 
@@ -300,6 +301,49 @@ Begründung: Aaron 05.09.2026 („immer am Anfang die operative Richtigkeit kurz
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
+## Regel 7 — In Tests keine Namen und Telefonnummern erfinden
+
+**Aaron 21.09.2026:** „bei tests keine namen erfinden und telefonnummern das ist für uns schwer
+auseinander zu halten."
+
+Erfundene, plausibel klingende Testdaten sind im Betrieb **nicht** von echten Kunden zu
+unterscheiden. Wer im Dashboard, in einer Alarm-Nachricht oder in einer DB-Zeile steht, muss auf
+den ersten Blick als Test erkennbar sein — **ohne** Nachschlagen, ohne Heuristik, ohne Rückfrage.
+
+**Pflicht:**
+
+* **Namen:** keine erfundenen Personennamen. Test-Identitäten tragen ein Präfix, das sofort liest:
+  `SMOKE-…`, `TEST-…`, `Abnahme …`. Kein „Julia Sommer", kein „Thomas Baumgartner".
+* **Telefon:** keine ausgedachten, plausiblen Nummern. Entweder **`telefon = NULL`** (Regel 4,
+  Standard für Test-Konten) oder ein Muster, das `istDummyTelefon()` erkennt
+  (`+49 123…`, enthält `1234567`/`7654321`, sechs gleiche Ziffern in Folge).
+* **E-Mail:** `@claimondo.test` oder ein `test`/`smoke`/`e2e`-Marker im Local-Part — das ist,
+  was `istInterneEmail()` prüft.
+* **Zugehörigkeit deklarieren, nicht an der Optik erkennen:** der Eintrag gehört in
+  `testdaten_fixtures`. Die Optik ist ein Komfort für den Menschen, das Register ist die Wahrheit
+  für den Code (§ „Fixtures deklarieren, nicht erraten").
+
+**Begründung — drei Schäden an zwei Tagen, alle aus derselben Wurzel:**
+
+1. **19.09.:** `source_channel='mcp'` galt als Testmerkmal → **alle 20 KI-Leads hart gelöscht**,
+   darunter ein echter Kunde. Ein erfundener Name sah aus wie ein Testdatum.
+2. **20.09.:** Im Team-Alarm-Audit trugen **8 von 34** Alarmen eine „plausible Berliner
+   Festnetznummer" aus dem Harness — strukturell nicht als Test erkennbar. Der geplante
+   strukturelle Filter hätte **4 von 34** erwischt und wurde deshalb verworfen.
+3. **21.09.:** Eine Session meldete „**eine echte Kundin** bekam zwei WhatsApps". Falsch — es war
+   ein Test-Lead mit erfundenem Namen und Telefon auf `…12345678`. Die Fehleinschätzung ging so
+   an Aaron raus.
+
+⚠ **Die Regel gilt für BEIDE Richtungen.** Ein Platzhalter-Muster nützt nur, wenn der Code es
+auch prüft: `istDummyTelefon()` existierte seit dem 19.09. mit Unit-Tests und hatte **null
+Aufrufer** — der WhatsApp-Chokepoint prüfte nur `istInternesTelefon()` (DB-Rückschlag auf interne
+E-Mail). Ein Test-Lead mit Platzhalter-Nummer **ohne** E-Mail fiel durch und bekam echte,
+zugestellte WhatsApps. Wer ein Test-Merkmal einführt, verdrahtet es auch.
+
+**Verboten:** erfundene Personennamen und plausible Telefonnummern in Seeds, Fixtures, Specs und
+Smoke-Harnessen; ein Test-Merkmal einführen, ohne es im Sendepfad auszuwerten; Testdaten allein an
+ihrer Optik erkennen wollen statt am Register.
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
