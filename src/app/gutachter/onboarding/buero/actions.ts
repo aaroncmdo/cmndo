@@ -71,6 +71,18 @@ export async function createBueroOrganisation(data: {
     const standortAnzahlung = berechneStandortAnzahlung(std.paket)
     gesamtAnzahlung += standortAnzahlung
 
+    // Koordinaten kommen aus dem Adress-Vorschlag im Browser — wer die Anschrift frei tippt,
+    // liefert keine mit. Ohne sie ist der Standort auf der Karte unsichtbar und im Dispatch
+    // unerreichbar, deshalb server-seitig nachziehen (Aaron 21.09.2026). Der Helfer gibt die
+    // Browser-Werte unveraendert zurueck, wenn sie da sind.
+    const { ermittleStandort } = await import('@/lib/sv/standort-geocoding')
+    const geo = await ermittleStandort(db, {
+      adresse: std.anschrift || null,
+      plz: std.plz || null,
+      lat: std.lat,
+      lng: std.lng,
+    })
+
     const { error: subErr } = await db.from('sachverstaendige').insert({
       organisation_id: org.id,
       rolle_in_organisation: 'mitarbeiter',
@@ -78,8 +90,8 @@ export async function createBueroOrganisation(data: {
       paket_faelle_gesamt: PAKET_KONTINGENT[std.paket],
       standort_adresse: std.anschrift || null,
       standort_plz: std.plz || null,
-      standort_lat: std.lat,
-      standort_lng: std.lng,
+      standort_lat: geo.ok ? geo.lat : std.lat,
+      standort_lng: geo.ok ? geo.lng : std.lng,
       standort_place_id: std.place_id || null,
       gebiet_plz: std.plz ? [std.plz] : [],
       onboarding_status: 'pending',
