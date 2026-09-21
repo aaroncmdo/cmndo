@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { dokumentZustand, type DokumentZustand } from '@/lib/sv/unterschriftsfeld'
 import { redirect } from 'next/navigation'
 import WillkommenClient from './WillkommenClient'
 import WillkommenWaiting from './WillkommenWaiting'
@@ -189,15 +190,24 @@ export default async function GutachterWillkommenPage({
   ] as const
   const { data: pflichtdokumenteRows } = await supabase
     .from('pflichtdokumente')
-    .select('dokument_typ, status, begruendung')
+    .select('dokument_typ, status, begruendung, dokument_url, signatur_position')
     .eq('sv_id', sv.id)
     .in('dokument_typ', PFLICHT_SLOTS as unknown as string[])
 
-  const pflichtMap = new Map<string, { status: string; notiz: string | null }>()
+  // 20.09.2026 (Aaron: „das Unterschriftsfeld muss gesetzt werden"): neben dem rohen Status
+  // wandert der Zustand mit — „Datei da, aber Feld fehlt" zählt NICHT als erledigt, weil das
+  // Dokument dem Kunden dann nicht vorgelegt wird.
+  const pflichtMap = new Map<string, { status: string; notiz: string | null; zustand: DokumentZustand }>()
   for (const r of pflichtdokumenteRows ?? []) {
     pflichtMap.set(r.dokument_typ as string, {
       status: (r.status as string) ?? 'ausstehend',
       notiz: (r.begruendung as string | null) ?? null,
+      zustand: dokumentZustand({
+        dokument_typ: r.dokument_typ as string,
+        status: (r.status as string | null) ?? null,
+        dokument_url: (r.dokument_url as string | null) ?? null,
+        signatur_position: (r as { signatur_position?: unknown }).signatur_position ?? null,
+      }),
     })
   }
 
@@ -214,8 +224,8 @@ export default async function GutachterWillkommenPage({
     .maybeSingle()
   const caldavConnected = !!caldavRow
   const isSlotFilled = (slot: string) => {
-    const s = pflichtMap.get(slot)?.status
-    return s === 'hochgeladen' || s === 'geprueft'
+    const z = pflichtMap.get(slot)?.zustand
+    return z === 'aktiv' || z === 'aktiv_ohne_feld'
   }
   const hatAbtretung = isSlotFilled('sv_sicherungsabtretung') || isSlotFilled('sv_honorarvereinbarung')
   const hatDatenschutz = isSlotFilled('sv_datenschutzerklaerung')
@@ -363,16 +373,11 @@ export default async function GutachterWillkommenPage({
   }
 
   // AAR-714: Pflichtdokumente-States für den Wizard-Step.
-  const dokumenteSlots = PFLICHT_SLOTS.map((slotId) => {
-    const row = pflichtMap.get(slotId)
-    const dbStatus = row?.status ?? null
-    const status: 'leer' | 'hochgeladen' | 'geprueft' | 'abgelehnt' =
-      dbStatus === 'hochgeladen' ? 'hochgeladen'
-      : dbStatus === 'geprueft' ? 'geprueft'
-      : dbStatus === 'abgelehnt' ? 'abgelehnt'
-      : 'leer'
-    return { slotId, status, adminNotiz: row?.notiz ?? null }
-  })
+  const dokumenteSlots = PFLICHT_SLOTS.map((slotId) => ({
+    slotId,
+    status: pflichtMap.get(slotId)?.zustand ?? ('leer' as DokumentZustand),
+    adminNotiz: pflichtMap.get(slotId)?.notiz ?? null,
+  }))
 
   return (
     <WillkommenClient

@@ -35,6 +35,33 @@ Prod-Smoke mit externer Wegwerf-Identität.
 ### C · Kanzlei
 7. **Einladung** — KB legt die Kanzlei an (KB-Kanzlei-Lifecycle #4630, kb-Whitelist) → `/kanzlei`-Portal, `kanzlei_faelle`-Scope (RLS). Bekommt Fall-Pakete (J6).
 
+### Soll-Delta 20.09.2026 — Partnervertrag für Basic wird nachgeholt
+
+Aaron am 20.09.2026, auf die Frage, ob die Basic-Gutachter ohne Partnervertrag beim nächsten Login
+einmalig, nicht blockierend zur Unterschrift geführt werden: **„3 ja."**
+
+Gemessen am selben Tag auf prod: **16 von 22** freigeschalteten Basic-Konten hatten keinen
+unterschriebenen Partnervertrag, **0** von ihnen eine Zeile in `vertraege_unterzeichnet`. Ursache:
+die Auto-Freischaltung vom 19.09. schaltet frei, ohne den Wizard-Abschluss zu verlangen, der den
+Vertrag sonst erzeugt hätte.
+
+**Soll:**
+
+1. Ein Basic-Gutachter ohne unterschriebenen Vertrag wird beim nächsten Aufruf des Portals **einmal**
+   auf `/gutachter/vertrag?nachholen=1` geleitet. Der Marker `sachverstaendige.partnervertrag_hinweis_am`
+   wird **vor** der Umleitung gesetzt, deshalb greift sie höchstens einmal je Konto.
+2. Die Seite zeigt die echte Vorlage `sv_basic_partnervertrag` — nicht mehr die Kooperations­vereinbarung
+   mit Paket-Staffel und Anzahlung, die für ein Basic-Konto inhaltlich falsch war.
+3. Unterschreibt er, läuft dieselbe Pipeline wie im Basic-Wizard: PDF im Bucket `vertraege` plus Zeile
+   in `vertraege_unterzeichnet`, `vertrag_unterschrieben=true`.
+4. Klickt er „Später erledigen", passiert **nichts Negatives**: Zugang, Sichtbarkeit, Buchbarkeit und
+   laufende Fälle bleiben unverändert. Ein stilles Hinweisband im Portal führt weiterhin zur
+   Unterschrift, bis sie vorliegt.
+
+**Messbar erreicht,** wenn die Zahl der Basic-Konten mit `vertrag_unterschrieben=false` sinkt und je
+Unterschrift eine Zeile in `vertraege_unterzeichnet` mit `vorlage_typ='sv_basic_partnervertrag'` und
+gefülltem `pdf_storage_path` entsteht.
+
 ## Varianten / Abzweige
 
 - **Bestands-SV mit `paket`** — Per-Fall-Pakete werden **nicht mehr verkauft** (retired); Bestand behält Fulfillment und wird als Netzwerkpartner **comped** (`paket` = Legacy-Fulfillment, **nie überschreiben** — 5 Consumer).

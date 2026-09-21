@@ -1,5 +1,6 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { dokumentZustand } from '@/lib/sv/unterschriftsfeld'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
@@ -209,7 +210,7 @@ export default async function SvDetailPage({
       const [alleSlots, pflichtRes] = await Promise.all([
         getAlleSlots(supabase),
         dbAdmin.from('pflichtdokumente')
-          .select('id, dokument_typ, status, hochgeladen_am, dokument_url, begruendung')
+          .select('id, dokument_typ, status, hochgeladen_am, dokument_url, begruendung, signatur_position')
           .eq('sv_id', id),
       ])
       const pflichtRows = (pflichtRes.data ?? []) as Array<{
@@ -298,6 +299,14 @@ export default async function SvDetailPage({
           dokumentUrl: dokUrl,
           signedUrl: signed,
           adminNotiz: (row as { begruendung?: string | null } | undefined)?.begruendung ?? null,
+          // 20.09.2026: „Datei da, aber Kunden-Unterschriftsfeld fehlt" ist ein eigener
+          // Zustand — ohne Feld legt der Flow das Dokument dem Kunden nicht vor.
+          zustand: dokumentZustand({
+            dokument_typ: slot.slot_id,
+            status: (row?.status as string | null) ?? null,
+            dokument_url: dokUrl,
+            signatur_position: (row as { signatur_position?: unknown } | undefined)?.signatur_position ?? null,
+          }),
         })
       }
 

@@ -25,7 +25,11 @@ import {
   uploadAdminPflichtdokument,
   gibBasicSvFrei,
   lehneBasicSvAb,
+  holeAdminDokumentVorschau,
+  setzeAdminUnterschriftsfeld,
 } from './verifizierung-actions'
+import { UnterschriftsfeldKnopf } from '@/components/sv/UnterschriftsfeldKnopf'
+import { istSignaturSlot, type DokumentZustand } from '@/lib/sv/unterschriftsfeld'
 import { useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -52,6 +56,8 @@ export type PflichtdokumentSlot = {
   dokumentUrl: string | null
   signedUrl: string | null
   adminNotiz: string | null
+  /** Zustand inkl. „Datei da, Kunden-Unterschriftsfeld fehlt" (Aaron 20.09.2026). */
+  zustand: DokumentZustand
 }
 
 export type Tier2Slot = {
@@ -308,6 +314,7 @@ function PflichtdokumenteCard({
   pflichtdokumente: PflichtdokumentSlot[]
   svVerifiziert: boolean
 }) {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [fehler, setFehler] = useState<string | null>(null)
   const [rejectingSlot, setRejectingSlot] = useState<string | null>(null)
@@ -418,9 +425,16 @@ function PflichtdokumenteCard({
                     abgelehnt
                   </StatusBadge>
                 )}
-                {(d.status === null || d.status === 'ausstehend') && (
-                  <StatusBadge tone="gray">fehlt</StatusBadge>
+                {d.zustand === 'feld_fehlt' && (
+                  <StatusBadge tone="amber">
+                    <ClockIcon className="w-3 h-3" />
+                    Unterschriftsfeld fehlt
+                  </StatusBadge>
                 )}
+                {d.zustand === 'aktiv_ohne_feld' && (
+                  <StatusBadge tone="gray">Unterschrift auf Anhangseite</StatusBadge>
+                )}
+                {d.zustand === 'leer' && <StatusBadge tone="gray">fehlt</StatusBadge>}
               </div>
               {d.hochgeladenAm && (
                 <p className="text-[10px] text-claimondo-ondo mt-0.5">
@@ -505,6 +519,18 @@ function PflichtdokumenteCard({
                 slotId={d.slotId}
                 hasFile={!!d.dokumentUrl}
               />
+              {istSignaturSlot(d.slotId) && d.dokumentUrl && (
+                <UnterschriftsfeldKnopf
+                  slotId={d.slotId}
+                  slotLabel={d.label}
+                  gesetzt={d.zustand === 'aktiv'}
+                  bestandOhneFeld={d.zustand === 'aktiv_ohne_feld'}
+                  kompakt
+                  laden={(slotId) => holeAdminDokumentVorschau(svId, slotId)}
+                  speichern={(slotId, position) => setzeAdminUnterschriftsfeld(svId, slotId, position)}
+                  onGespeichert={() => router.refresh()}
+                />
+              )}
             </div>
           </div>
         ))}

@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istSignaturSlot } from '@/lib/sv/unterschriftsfeld'
+import type { PdfMasse, SignaturPosition } from '@/lib/sv/unterschriftsfeld'
+import { ladeDokumentVorschau, speichereSignaturPosition, wrapBildZuPdf } from '@/lib/sv/unterschriftsfeld-server'
 import { freigebeBasicSvCore } from '@/lib/sv-basic/freigabe'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
@@ -569,17 +572,33 @@ export async function uploadAdminPflichtdokument(
   }
 
   const db = createAdminClient()
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
+  const signaturSlot = istSignaturSlot(slotId)
+  let ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
+  let contentType = file.type || 'application/octet-stream'
+  let payload: Blob = file
+
+  // 20.09.2026 (Aaron: „das Unterschriftsfeld muss gesetzt werden"): für die vier Unterlagen,
+  // die der Kunde mit-signiert, wird ein Foto/Scan zu einem PDF — der Editor zeigt nur PDFs
+  // und das SA-Tool kann nur PDFs mergen. 15 von 17 SV-Dokumenten auf prod hat der Admin
+  // hochgeladen, dieser Weg ist also der Hauptweg, nicht die Ausnahme.
+  if (signaturSlot && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+    try {
+      const pdfBytes = await wrapBildZuPdf(new Uint8Array(await file.arrayBuffer()), file.type)
+      payload = new Blob([pdfBytes as BlobPart], { type: 'application/pdf' })
+      ext = 'pdf'
+      contentType = 'application/pdf'
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      return { success: false, error: `Bild konnte nicht in ein PDF umgewandelt werden: ${msg}` }
+    }
+  }
 
   // Identischer Pfad wie uploadSvPflichtdokument — der SA-Tool-Generator
   // und alle Loader prüfen exakt diesen Pfad-Pattern.
   const path = `sv-pflicht/${svId}/${slotId}/${Date.now()}.${ext}`
   const { error: uploadErr } = await db.storage
     .from('fall-dokumente')
-    .upload(path, file, {
-      contentType: file.type || 'application/octet-stream',
-      upsert: true,
-    })
+    .upload(path, payload, { contentType, upsert: true })
   if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   // Row upsert — wenn der SV bereits hochgeladen hatte, überschreiben
@@ -591,15 +610,20 @@ export async function uploadAdminPflichtdokument(
     .eq('dokument_typ', slotId)
     .maybeSingle()
 
+  // Ein Signatur-Slot wartet nach dem Upload auf das Kunden-Unterschriftsfeld und geht
+  // solange NICHT in den Kundenflow; jede neue Datei verwirft die alte Position.
+  const zielStatus = signaturSlot ? 'ausstehend' : 'geprueft'
+
   if (existing) {
     const { error: updErr } = await db
       .from('pflichtdokumente')
       .update({
-        status: 'geprueft',
+        status: zielStatus,
         dokument_url: path,
         hochgeladen_am: new Date().toISOString(),
         quelle: 'admin',
         begruendung: null,
+        ...(signaturSlot ? { signatur_position: null } : {}),
       })
       .eq('id', existing.id)
     if (updErr) return { success: false, error: `DB-Update fehlgeschlagen: ${updErr.message}` }
@@ -607,7 +631,7 @@ export async function uploadAdminPflichtdokument(
     const { error: insErr } = await db.from('pflichtdokumente').insert({
       sv_id: svId,
       dokument_typ: slotId,
-      status: 'geprueft',
+      status: zielStatus,
       pflicht: true,
       quelle: 'admin',
       dokument_url: path,
@@ -628,4 +652,56 @@ export async function uploadAdminPflichtdokument(
 
   revalidateBoth(svId)
   return { success: true, storage_path: path }
+}
+
+// ---------------------------------------------------------------------------
+// Kunden-Unterschriftsfeld auf SV-Dokumenten (Aaron 20.09.2026: „ja aber das
+// Unterschriftsfeld muss gesetzt werden"). Admin-Pendant zu den gleichnamigen
+// Gutachter-Actions in src/lib/actions/sv-verifizierung-actions.ts — gleiche Logik,
+// andere Auth und Zielstatus 'geprueft' (Admin-Upload gilt als geprüft).
+
+export type AdminDokumentVorschauResult =
+  | {
+      ok: true
+      slot_id: string
+      status: string | null
+      signed_url: string
+      masse: PdfMasse
+      position: SignaturPosition | null
+    }
+  | { ok: false; error: string }
+
+export async function holeAdminDokumentVorschau(
+  svId: string,
+  slotId: string,
+): Promise<AdminDokumentVorschauResult> {
+  const auth = await requireAdmin()
+  if (!auth.success) return { ok: false, error: auth.error ?? 'Kein Admin-Zugriff' }
+  const res = await ladeDokumentVorschau(createAdminClient(), svId, slotId)
+  if (!res.ok) return res
+  return {
+    ok: true,
+    slot_id: res.vorschau.slotId,
+    status: res.vorschau.status,
+    signed_url: res.vorschau.signedUrl,
+    masse: res.vorschau.masse,
+    position: res.vorschau.position,
+  }
+}
+
+export type AdminUnterschriftsfeldResult =
+  | { ok: true; slot_id: string; status: string }
+  | { ok: false; error: string }
+
+export async function setzeAdminUnterschriftsfeld(
+  svId: string,
+  slotId: string,
+  position: unknown,
+): Promise<AdminUnterschriftsfeldResult> {
+  const auth = await requireAdmin()
+  if (!auth.success) return { ok: false, error: auth.error ?? 'Kein Admin-Zugriff' }
+  const res = await speichereSignaturPosition(createAdminClient(), svId, slotId, position, 'geprueft')
+  if (!res.ok) return res
+  revalidateBoth(svId)
+  return { ok: true, slot_id: slotId, status: res.status }
 }
