@@ -40,6 +40,15 @@ export async function sendPlainSms(
   if (!to || to.trim().length < 6) return { success: false, error: 'Telefonnummer zu kurz' }
   if (!body || !body.trim()) return { success: false, error: 'Leerer SMS-Text' }
 
+  // Send-Isolation (21.09.2026) — wie in send-sms-template.ts: dieser Weg ging direkt an
+  // Twilio, ohne jeden Empfaenger-Guard.
+  const { pruefeSendeIsolation } = await import('@/lib/testdaten/test-sv-guard')
+  const isolation = await pruefeSendeIsolation(to)
+  if (isolation.unterdruecken) {
+    console.warn(`[send-isolation:leaf] Plain-SMS an ${to} unterdrueckt (Grund: ${isolation.grund})`)
+    return { success: true, sid: isolation.kennung }
+  }
+
   const params = new URLSearchParams()
   // MessagingServiceSid überschreibt From falls gesetzt (Twilio-Best-Practice).
   if (smsFrom.startsWith('MG')) params.set('MessagingServiceSid', smsFrom)
