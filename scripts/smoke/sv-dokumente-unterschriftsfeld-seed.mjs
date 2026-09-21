@@ -210,7 +210,7 @@ async function create() {
 }
 
 async function cleanup() {
-  const geloescht = { profile: 0, sv: 0, leads: 0, claims: 0, termine: 0, dokumente: 0, dateien: 0 }
+  const geloescht = { profile: 0, sv: 0, leads: 0, claims: 0, termine: 0, dokumente: 0, dateien: 0, auftraege: 0, mitteilungen: 0 }
 
   // Verwaiste SV-Zeilen (profiles schon weg, SV noch da) ueber den Standort-Marker einsammeln.
   const { data: verwaiste } = await db
@@ -265,13 +265,59 @@ async function cleanup() {
       if (tErr) console.warn(`  gutachter_termine: ${tErr.message}`)
       else geloescht.termine += 1
 
+      // 21.09.: Die Kunden-Unterschrift konvertiert den Lead zum Fall und legt dabei einen
+      // AUFTRAG am Gutachter an. Ohne ihn zu loeschen blockt
+      // auftraege_sv_id_fkey das Loeschen der SV-Zeile — gemessen bei der Generalprobe.
+      const { error: aErr, count: aAnzahl } = await db
+        .from('auftraege')
+        .delete({ count: 'exact' })
+        .eq('sv_id', s.id)
+      if (aErr) console.warn(`  auftraege: ${aErr.message}`)
+      else geloescht.auftraege += aAnzahl ?? 0
+
       const { error: svDelErr } = await db.from('sachverstaendige').delete().eq('id', s.id)
       if (svDelErr) console.warn(`  sachverstaendige: ${svDelErr.message}`)
       else geloescht.sv += 1
     }
 
+    // Mitteilungen blocken das Loeschen des Profils (mitteilungen_empfaenger_id_fkey).
+    // Dieselbe Klasse wie beim Aufraeum-Cron vom 19.09.: der Schaden sind nicht die Konten,
+    // sondern ihre Satelliten. Beide Konten bekommen eine — der Gutachter seine Begruessung,
+    // der Kunde sein Willkommens-Set aus der Konversion.
+    const { error: mErr, count: mAnzahl } = await db
+      .from('mitteilungen')
+      .delete({ count: 'exact' })
+      .eq('empfaenger_id', prof.id)
+    if (mErr) console.warn(`  mitteilungen: ${mErr.message}`)
+    else geloescht.mitteilungen += mAnzahl ?? 0
+
     const { error: authDelErr } = await db.auth.admin.deleteUser(prof.id)
     if (authDelErr) console.warn(`  auth.deleteUser: ${authDelErr.message}`)
+    else geloescht.profile += 1
+  }
+
+  // Der Kunde bekommt bei der Konversion ein eigenes Konto — es traegt das Kunden-Praefix
+  // und wuerde vom Gutachter-Durchlauf oben nicht erfasst.
+  const { data: kundenProfile } = await db
+    .from('profiles')
+    .select('id')
+    .like('email', `${KUNDE_PREFIX}%`)
+  for (const kp of kundenProfile ?? []) {
+    const { data: kundenClaims } = await db.from('claims').select('id').eq('kunde_id', kp.id)
+    for (const c of kundenClaims ?? []) {
+      await db.from('fall_dokumente').delete().eq('fall_id', c.id)
+      await db.from('auftraege').delete().eq('claim_id', c.id)
+      const { error } = await db.from('claims').delete().eq('id', c.id)
+      if (error) console.warn(`  claim ${c.id}: ${error.message}`)
+      else geloescht.claims += 1
+    }
+    const { count: kmAnzahl } = await db
+      .from('mitteilungen')
+      .delete({ count: 'exact' })
+      .eq('empfaenger_id', kp.id)
+    geloescht.mitteilungen += kmAnzahl ?? 0
+    const { error: kaErr } = await db.auth.admin.deleteUser(kp.id)
+    if (kaErr) console.warn(`  auth.deleteUser (Kunde): ${kaErr.message}`)
     else geloescht.profile += 1
   }
 
@@ -307,6 +353,8 @@ async function cleanup() {
 
   if (existsSync(SEED_PATH)) unlinkSync(SEED_PATH)
 
+  // Zaehlt BEIDE Praefixe: der Kunde traegt 'e2e-svdok-kunde-', was mit 'e2e-svdok-' schon
+  // mitgezaehlt wird — genau deshalb steht hier das gemeinsame Praefix.
   const { count: restSv } = await db
     .from('profiles')
     .select('id', { count: 'exact', head: true })

@@ -72,13 +72,10 @@ export function UnterschriftsfeldKnopf({
         </p>
       )}
 
-      <Button
-        size="sm"
-        variant={fertig ? 'ghost' : 'navy'}
-        disabled={disabled}
-        onClick={() => setOffen(true)}
-        data-testid={`unterschriftsfeld-knopf-${slotId}`}
-      >
+      {/* Kein data-testid: der Button-Primitive reicht unbekannte Props nicht ans DOM durch.
+          Tests adressieren den Knopf über seinen sichtbaren Text — das misst ohnehin näher am
+          Nutzer, der ihn genauso findet. */}
+      <Button size="sm" variant={fertig ? 'ghost' : 'navy'} disabled={disabled} onClick={() => setOffen(true)}>
         <MousePointerClickIcon className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
         {fertig ? 'Unterschriftsfeld ändern' : 'Unterschriftsfeld setzen'}
       </Button>
