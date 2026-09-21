@@ -142,7 +142,7 @@ export function UnterschriftsfeldEditor({
       <div className="flex items-start gap-2 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy">
         <MousePointerClickIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" aria-hidden="true" />
         <div>
-          <p className="font-semibold">Wo unterschreibt Ihr Kunde auf „{slotLabel}"?</p>
+          <p className="font-semibold">Wo unterschreibt Ihr Kunde auf „{slotLabel}&ldquo;?</p>
           <p className="text-xs text-claimondo-ondo">
             Klicken Sie auf die Stelle im Dokument. Das Feld lässt sich danach in der Größe anpassen; Datum und Name sind optional.
             <span className="lg:hidden"> Am besten am Computer — auf dem Handy wird die Vorschau oft nicht angezeigt.</span>

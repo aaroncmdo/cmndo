@@ -56,7 +56,7 @@ export default function BasicPartnervertragClient({
   if (fertig) {
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 space-y-4">
+        <div className="bg-white rounded-ios-xl shadow-xl max-w-2xl w-full p-8 space-y-4">
           <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4 flex items-start gap-3">
             <CheckIcon className="w-5 h-5 text-success flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div className="text-sm text-success-strong">
@@ -79,7 +79,7 @@ export default function BasicPartnervertragClient({
 
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
+      <div className="bg-white rounded-ios-xl shadow-xl max-w-2xl w-full overflow-hidden">
         <div className="bg-[var(--brand-primary)] px-8 py-6 text-white text-center">
           <span className="text-3xl font-bold tracking-tight">
             <span className="text-white">Claim</span>

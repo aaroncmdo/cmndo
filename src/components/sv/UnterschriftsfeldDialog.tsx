@@ -41,28 +41,51 @@ export function UnterschriftsfeldDialog({
   const [fehler, setFehler] = useState<string | null>(null)
   const [daten, setDaten] = useState<{ url: string; masse: PdfMasse; position: SignaturPosition | null } | null>(null)
 
-  const nachladen = useCallback(async () => {
+  // Lädt und schreibt das Ergebnis — der erste State-Wechsel passiert erst NACH dem await,
+  // nie synchron im Effect-Körper (sonst kaskadierende Renders, react-hooks/set-state-in-effect).
+  const lade = useCallback(
+    async (nochAktuell: () => boolean) => {
+      try {
+        const res = await laden(slotId)
+        if (!nochAktuell()) return
+        if (!res.ok) {
+          setFehler(res.error)
+          setZustand('fehler')
+          return
+        }
+        setDaten({ url: res.signed_url, masse: res.masse, position: res.position })
+        setZustand('bereit')
+      } catch (err) {
+        if (!nochAktuell()) return
+        setFehler(err instanceof Error ? err.message : 'Dokument konnte nicht geladen werden.')
+        setZustand('fehler')
+      }
+    },
+    [laden, slotId],
+  )
+
+  // Für den „Erneut versuchen"-Knopf: hier ist der Ladezustand ein Klick-Ergebnis, kein Effekt.
+  const nachladen = useCallback(() => {
     setZustand('laedt')
     setFehler(null)
-    try {
-      const res = await laden(slotId)
-      if (!res.ok) {
-        setFehler(res.error)
-        setZustand('fehler')
-        return
-      }
-      setDaten({ url: res.signed_url, masse: res.masse, position: res.position })
-      setZustand('bereit')
-    } catch (err) {
-      setFehler(err instanceof Error ? err.message : 'Dokument konnte nicht geladen werden.')
-      setZustand('fehler')
-    }
-  }, [laden, slotId])
+    void lade(() => true)
+  }, [lade])
 
   useEffect(() => {
     if (!offen) return
-    void nachladen()
-  }, [offen, nachladen])
+    // Beim Öffnen steht der Zustand bereits auf 'laedt' (Anfangswert bzw. nach dem Schließen
+    // zurückgesetzt) — der Effect startet nur den Ladevorgang.
+    let aktuell = true
+    // Der Regel-Scanner verfolgt die Aufrufkette und sieht nur, dass lade() irgendwo setState
+    // ruft — nicht, dass das erst NACH dem await passiert und nur, wenn der Dialog noch offen
+    // ist. Genau die Form, die die React-Doku fuer ein externes System erlaubt. Praezedenz im
+    // Repo: src/app/embed/anspruch-pruefen/_components/AnspruchWizard.tsx.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void lade(() => aktuell)
+    return () => {
+      aktuell = false
+    }
+  }, [offen, lade])
 
   async function speichereUndSchliesse(konfig: SignaturKonfig) {
     const res = await speichern(slotId, konfig)
@@ -86,7 +109,7 @@ export function UnterschriftsfeldDialog({
           <p className="text-sm font-semibold text-claimondo-navy">Dokument konnte nicht geöffnet werden</p>
           <p className="rounded-ios-lg border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger-strong">{fehler}</p>
           <div className="flex gap-2">
-            <Button variant="navy" onClick={() => void nachladen()}>
+            <Button variant="navy" onClick={nachladen}>
               Erneut versuchen
             </Button>
             <Button variant="ghost" onClick={onSchliessen}>
