@@ -362,7 +362,8 @@ function NeuSchritt({
         Neu registrieren
       </h2>
       <p className="mb-5 text-sm text-claimondo-shield">
-        Legen Sie ein neues Profil an. Nach unserer Prüfung schalten wir Sie frei.
+        Legen Sie Ihr Profil an. Danach führt Sie das Onboarding in wenigen Minuten zur
+        Freischaltung — ohne Wartezeit und ohne Prüfung durch uns.
       </p>
 
       <div className="flex flex-col gap-4">
