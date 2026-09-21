@@ -1062,6 +1062,66 @@ jobs:
           # auseinanderlaufen.
           SMOKE_PHONE_LOGIN_PASSWORD: ${{ secrets.TEST_DISPATCH_PASSWORD }}
 
+      # ── Aufraeumen: was dieser Job geseedet hat, raeumt er auch ab ────────────────
+      # Aaron 21.09.2026: „die testdaten raus, immer fuers testen seeden und loeschen".
+      #
+      # Alle sechs Seeds kennen `--clean` seit jeher — aufgerufen wurde bis heute nur der
+      # von J7. Folge auf prod (gemessen 21.09.): 7 von 28 aktiven Werkstaetten waren
+      # Testdaten und standen damit in der Werkstattsuche echter Kunden; die Zahl wuchs
+      # mit jedem Lauf. Aufraeum-Code ohne Aufrufer ist dieselbe Klasse wie der „stumme
+      # Waechter" — er steht da, ist getestet, und wirkt nie.
+      #
+      # ⚠ BEWUSST am JOB-ENDE und nicht je Smoke: spaetere Steps nutzen fruehere Fixtures
+      # (der J5-Delta-Step laeuft nach dem Kasko-Seed). Ein Cleanup direkt nach dem
+      # jeweiligen Smoke wuerde sie brechen.
+      #
+      # ⚠ `if: always()` ist Pflicht: genau der rote oder abgebrochene Lauf hinterlaesst
+      # sonst seine Testdaten auf prod. `continue-on-error`, damit ein fehlschlagendes
+      # Aufraeumen nicht einen gruenen Testlauf rot faerbt — die Reste fangen dann der
+      # naechtliche Cron und das kurze Smoke-Fenster ab.
+      - name: Cleanup J4 reparatur-weg-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/reparatur-weg-e2e-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Cleanup J5 Kasko-Reparatur-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/kasko-reparatur-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Cleanup J10 Werkstatt-Finder-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/werkstatt-finder-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Cleanup J3 SA-Vollmacht-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/sa-vollmacht-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Cleanup J6 Kanzlei-Uebergabe-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/kanzlei-uebergabe-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Cleanup J2 Meldung-Kanaele-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/meldung-kanaele-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
       # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn
       # am dringendsten braucht. Belegt am 19. + 20.08.: beide nightly-Laeufe liefen in das

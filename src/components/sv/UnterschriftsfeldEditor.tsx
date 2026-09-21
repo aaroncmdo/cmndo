@@ -157,11 +157,11 @@ export function UnterschriftsfeldEditor({
         <Button size="sm" variant={ziel === 'name' ? 'navy' : 'ghost'} onClick={() => setZiel('name')}>Name (optional)</Button>
         {masse.seiten > 1 && (
           <span className="ml-auto inline-flex items-center gap-1 text-xs text-claimondo-navy">
-            <Button size="icon" variant="ghost" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))} aria-label="Vorherige Seite">
+            <Button size="icon" variant="ghost" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))} ariaLabel="Vorherige Seite">
               <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
             </Button>
             Seite {page + 1} von {masse.seiten}
-            <Button size="icon" variant="ghost" disabled={page >= masse.seiten - 1} onClick={() => setPage((p) => Math.min(masse.seiten - 1, p + 1))} aria-label="Nächste Seite">
+            <Button size="icon" variant="ghost" disabled={page >= masse.seiten - 1} onClick={() => setPage((p) => Math.min(masse.seiten - 1, p + 1))} ariaLabel="Nächste Seite">
               <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
             </Button>
           </span>

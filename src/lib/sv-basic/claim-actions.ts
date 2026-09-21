@@ -365,6 +365,27 @@ export async function beanspracheSvLead(input: {
 
   // ─── Sub-Operationen (alle non-critical, eigener try/catch) ─────────────
 
+  // 8·0 Einsatzgebiet (Isochrone) sicherstellen.
+  //
+  // Der Lead bringt Koordinaten immer mit (gemessen 21.09.: 0 von 10.019 ohne) — eine
+  // Isochrone aber fast nie: **9.557 von 10.019** haben keine, weil der Backfill-Cron 20 pro
+  // Tag schafft. Wer heute seinen Lead beansprucht, erbt also mit 95 % Wahrscheinlichkeit
+  // KEIN Einsatzgebiet und ist fuer das Dispatch-Matching unerreichbar, obwohl sein Profil
+  // vollstaendig aussieht. Der Freigabe-Guard heilt das beim Freischalten; hier entsteht es
+  // gleich mit, damit der Halbzustand gar nicht erst existiert.
+  const geerbteLat = svInsert.standort_lat
+  const geerbteLng = svInsert.standort_lng
+  if (!svInsert.isochrone_polygon && geerbteLat != null && geerbteLng != null) {
+    const { stelleIsochroneSicher, STANDARD_UMKREIS_KM } = await import('@/lib/sv/standort-geocoding')
+    await stelleIsochroneSicher(
+      adminDb,
+      svId,
+      Number(geerbteLat),
+      Number(geerbteLng),
+      svInsert.paket_umkreis_km ?? STANDARD_UMKREIS_KM,
+    )
+  }
+
   // 8a. WhatsApp-Verfuegbarkeits-Cache (fire-and-forget)
   try {
     const { checkAndCacheAvailability } = await import('@/lib/whatsapp/availability')
@@ -510,21 +531,46 @@ export async function registriereSvBasicNeu(input: {
     }
   }
 
-  // 5. Geocoding der Adresse — best-effort, blockiert NICHT bei Fehler.
-  // Das pendende Konto ist bis zur P3-Freigabe ohnehin nicht kartensichtbar.
+  // 5. Standort ermitteln — ueber den gemeinsamen Helfer (Mapbox mit PLZ, dann
+  // PLZ-Mittelpunkt als Rueckfallebene). Das Registrier-Formular liefert nur dann
+  // Koordinaten, wenn jemand einen Vorschlag anklickt; frei getippt kamen bisher gar keine.
+  //
+  // Die zwei Fehlerfaelle werden BEWUSST verschieden behandelt:
+  //  • 'keine-angabe' = die Eingabe traegt keinen Ortsbezug (weder PLZ-Feld noch PLZ im
+  //    Text). Das ist ein Eingabefehler, in fuenf Sekunden korrigierbar, und er braucht
+  //    keinen fremden Dienst, um erkannt zu werden -> zurueckmelden, bevor ein Konto
+  //    entsteht, das spaeter still am Freigabe-Guard haengt.
+  //  • 'nicht-aufloesbar' = Mapbox UND die PLZ-Tabelle haben nichts gefunden. Von einem
+  //    Dienstausfall ist das nicht zu unterscheiden -> durchlassen wie bisher. Eine
+  //    Registrierung darf nicht daran scheitern, dass ein fremder Dienst gerade schweigt.
   let geoLat: number | null = null
   let geoLng: number | null = null
   try {
-    const { geocodeAdresse } = await import('@/lib/mapbox/geocode')
-    const geo = await geocodeAdresse(input.adresse.trim())
-    if (geo) {
+    const { ermittleStandort } = await import('@/lib/sv/standort-geocoding')
+    const geo = await ermittleStandort(adminDb, {
+      adresse: input.adresse.trim(),
+      plz: input.plz ?? null,
+    })
+    if (geo.ok) {
       geoLat = geo.lat
       geoLng = geo.lng
+    } else if (geo.grund === 'keine-angabe') {
+      // Sie-Form: das Registrier-Formular siezt durchgehend (11 Sie-Formen, keine
+      // Du-Form). Eine geduzte Fehlermeldung mitten darin waere genau die gemischte
+      // Anrede, die der Copy-Lint seit r505 gatet.
+      return {
+        ok: false,
+        error:
+          'Bitte ergänzen Sie die Adresse um Postleitzahl und Ort — sonst können wir Ihren Standort nicht auf der Karte zeigen und Ihnen keine Aufträge in Ihrer Region zuweisen.',
+      }
     } else {
-      console.warn('[sv-basic/registriereSvBasicNeu] Geocoding lieferte kein Ergebnis fuer Adresse:', input.adresse)
+      console.warn(
+        '[sv-basic/registriereSvBasicNeu] Standort nicht ermittelbar fuer Adresse:',
+        input.adresse,
+      )
     }
   } catch (err) {
-    console.error('[sv-basic/registriereSvBasicNeu] Geocoding fehlgeschlagen (non-blocking):', err)
+    console.error('[sv-basic/registriereSvBasicNeu] Standort-Ermittlung fehlgeschlagen (non-blocking):', err)
   }
 
   // 6. Auth-User anlegen
@@ -631,6 +677,16 @@ export async function registriereSvBasicNeu(input: {
   }
 
   const svId = (svRow as { id: string }).id
+
+  // 8b. Einsatzgebiet (Isochrone) anlegen. Bis 21.09.2026 blieb es hier LEER — der SV war
+  // angelegt, sah ein fertiges Profil und war fuer das Dispatch-Matching trotzdem
+  // unerreichbar, weil dessen Umkreis-Pruefung ohne Polygon nichts findet. Der
+  // Freigabe-Guard heilt das inzwischen beim Freischalten; hier entsteht es gleich mit,
+  // damit der Halbzustand gar nicht erst auftritt.
+  if (geoLat != null && geoLng != null) {
+    const { stelleIsochroneSicher } = await import('@/lib/sv/standort-geocoding')
+    await stelleIsochroneSicher(adminDb, svId, geoLat, geoLng)
+  }
 
   // ─── Sub-Operationen (alle non-critical, eigener try/catch) ─────────────
 

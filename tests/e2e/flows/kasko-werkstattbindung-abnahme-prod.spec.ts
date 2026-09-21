@@ -1168,6 +1168,32 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     await tarifUnbekanntWaehlen(page)
     await expect(page.getByTestId('kasko-unklar-hinweis')).toBeVisible({ timeout: 30_000 })
     await shot(page, 't17-01-korrektur-unbekannt-hinweis')
+
+    // ⚠ Der Klick steht VOR den DB-Pruefungen, und das ist der Fix fuer den Dauer-Timeout
+    // (nightly rot seit 18.09.: `locator.click: Test timeout 300000ms` auf kasko-unklar-weiter,
+    // der Screenshot zeigte die Seite laengst im Wizard-Schritt 1).
+    //
+    // Ursache: zwischen „Hinweis sichtbar" und dem Klick lagen ein `expect.poll` mit 30 s Budget
+    // und ein weiterer DB-Read — bis zu einer Minute. In dieser Zeit faellt das Gate weg (die
+    // Korrektur hat freie_werkstattwahl auf NULL gesetzt, der Lead ist nicht mehr gebunden), die
+    // Seite rendert den Wizard, und der Button existiert nicht mehr. Der Test wartete dann fuenf
+    // Minuten auf ein Element, das seine eigene Vorbedingung beseitigt hatte.
+    //
+    // Die Umstellung aendert die Aussage NICHT: `onWeiter` ist im Gate schlicht
+    // `window.location.reload()` (FlowKaskoBindungGate.tsx) — kein Schreibpfad. Die Lead-Felder
+    // unten tragen also nach dem Klick denselben Wert wie davor.
+    //
+    // Schlaegt der Klick trotzdem fehl, ist das ein ECHTER Befund und kein Testartefakt: dann
+    // waere die Seite von selbst weitergesprungen, und ein Kunde haette den Hinweis
+    // („beauftragen Sie die Reparatur erst, wenn Sie das geprueft haben") nie lesen koennen.
+    await page.getByTestId('kasko-unklar-weiter').click()
+
+    // „Verstanden – weiter" -> Neuladen -> kein Gate mehr, der Wizard uebernimmt (Werkstatt-Strecke)
+    await expect(page.getByRole('heading', { name: /Kasko-Tarif enthält eine Werkstattbindung/i })).toHaveCount(0, { timeout: 30_000 })
+    await expect(page.getByRole('button', { name: /kann die Werkstatt frei wählen|vorerst überspringen|^überspringen$|^weiter/i }).first()).toBeVisible({ timeout: 30_000 })
+    await shot(page, 't17-02-nach-korrektur-wizard')
+
+    // Erst jetzt der DB-Nachweis der Korrektur — er haengt an keiner fluechtigen Oberflaeche mehr.
     await expect.poll(async () => (await leadZeile(db, leadId))?.werkstattbindung_quelle, { timeout: 30_000 }).toBe('unbekannt')
     const lead = (await leadZeile(db, leadId))!
     console.log('[T17] Lead nach Korrektur gebunden -> unbekannt:', JSON.stringify(lead))
@@ -1175,11 +1201,6 @@ test.describe('Abnahme Kasko-Werkstattbindung Phase 1 (prod, gated RUN_KASKO_WB_
     expect(lead.disqualifiziert, 're-qualifiziert').not.toBe(true)
     expect(lead.disqualifiziert_grund_key).toBeNull()
     expect(lead.status).toBe('neu')
-    // „Verstanden – weiter" -> Neuladen -> kein Gate mehr, der Wizard uebernimmt (Werkstatt-Strecke)
-    await page.getByTestId('kasko-unklar-weiter').click()
-    await expect(page.getByRole('heading', { name: /Kasko-Tarif enthält eine Werkstattbindung/i })).toHaveCount(0, { timeout: 30_000 })
-    await expect(page.getByRole('button', { name: /kann die Werkstatt frei wählen|vorerst überspringen|^überspringen$|^weiter/i }).first()).toBeVisible({ timeout: 30_000 })
-    await shot(page, 't17-02-nach-korrektur-wizard')
   })
 
   test('T18 Gegenabnahme Kunde-Portal: gebunden -> „Angaben korrigieren" -> Tarif unbekannt -> keine Bindungs-Card; Claim + Lead freie_werkstattwahl NULL, Lead „umgewandelt"', async ({ page }) => {
