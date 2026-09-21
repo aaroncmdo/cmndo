@@ -189,3 +189,48 @@ export function istDummyTelefon(telefon: string | null | undefined): boolean {
   if (national.includes('1234567') || national.includes('7654321')) return true
   return false
 }
+
+
+/**
+ * Warum ein Send unterdrueckt wurde. 'dummy' = Platzhalter-Nummer (reine Logik, keine DB),
+ * 'intern' = die Nummer gehoert einem internen/Test-Konto (DB-Rueckschlag ueber die E-Mail).
+ */
+export type SendeIsolation =
+  | { unterdruecken: true; grund: 'dummy' | 'intern'; kennung: string }
+  | { unterdruecken: false }
+
+/**
+ * Die Empfaenger-Pruefung der SMS-Leafs: erst die reine Platzhalter-Pruefung, dann der
+ * DB-gestuetzte Rueckschlag auf interne Konten.
+ *
+ * Warum beide und in dieser Reihenfolge — am 21.09.2026 auf prod gemessen:
+ * `istInternesTelefon` schlaegt die Nummer in profiles/leads nach und prueft deren E-MAIL.
+ * Alle elf Platzhalter-Nummern im Bestand haben KEINE E-Mail, der DB-Zweig ist bei genau
+ * dieser Gruppe strukturell blind. Die reine Pruefung faengt sie und kostet dabei keinen
+ * Datenbank-Aufruf.
+ *
+ * Fail-open bleibt erhalten: `istInternesTelefon` faengt seine Fehler selbst ab und liefert
+ * dann false (senden). `istDummyTelefon` ist rein und kann nicht ausfallen.
+ *
+ * ⚠ WhatsApp nutzt diesen Helfer bewusst NICHT, sondern prueft in `baileys-client.ts` selbst —
+ * dort steht die Platzhalter-Pruefung VOR und AUSSERHALB der `skipInternalGuard`-Weiche, damit
+ * sie auch bei Team-Alarmen greift. Die SMS-Leafs kennen keine solche Weiche, hier ist die
+ * Reihenfolge die ganze Logik. Kennungen und Semantik sind zu WhatsApp identisch gehalten.
+ *
+ * ⚠ Die Heuristik normalisiert nur deutsche Nummern. Eine auslaendische Nummer, die zufaellig
+ * '1234567' enthaelt, wuerde getroffen — im prod-Bestand kommt das nicht vor (21.09. gemessen:
+ * 11 Treffer, alle Testdaten, 0 echte Kunden). Deshalb unterdrueckt diese Funktion nicht still:
+ * der Aufrufer protokolliert die Kennung, ein Fehlalarm wird dadurch sichtbar.
+ */
+export async function pruefeSendeIsolation(
+  telefon: string,
+  db?: SupabaseClient,
+): Promise<SendeIsolation> {
+  if (istDummyTelefon(telefon)) {
+    return { unterdruecken: true, grund: 'dummy', kennung: 'dummy-recipient-suppressed' }
+  }
+  if (await istInternesTelefon(telefon, db)) {
+    return { unterdruecken: true, grund: 'intern', kennung: 'internal-recipient-suppressed' }
+  }
+  return { unterdruecken: false }
+}

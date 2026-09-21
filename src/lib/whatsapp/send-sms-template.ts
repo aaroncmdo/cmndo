@@ -31,6 +31,18 @@ export async function sendSmsTemplate(
     }
   }
 
+  // Send-Isolation (21.09.2026): dieser Weg ging bis hier OHNE jeden Guard direkt an Twilio —
+  // weder Platzhalter- noch interne Nummern wurden geprueft. Heute faengt der 21660-Schutz
+  // oben die meisten Sends ab, aber der haengt an einer Umgebungsvariable: sobald eine echte
+  // SMS-Nummer gesetzt wird, sendet dieser Weg ungefiltert. Ein Schutz, der an einer Config
+  // haengt, ist keiner.
+  const { pruefeSendeIsolation } = await import('@/lib/testdaten/test-sv-guard')
+  const isolation = await pruefeSendeIsolation(to)
+  if (isolation.unterdruecken) {
+    console.warn(`[send-isolation:leaf] SMS-Template an ${to} unterdrueckt (Grund: ${isolation.grund})`)
+    return { success: true, sid: isolation.kennung }
+  }
+
   // E.164 normalisieren
   let normalTo = to.replace(/\s/g, '')
   if (normalTo.startsWith('0')) normalTo = '+49' + normalTo.slice(1)

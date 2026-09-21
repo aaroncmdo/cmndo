@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { entscheideTestSvGuard, pruefeTestSvKonsistenz, istInternesTelefon, istDummyTelefon } from '../test-sv-guard'
+import {
+  entscheideTestSvGuard,
+  pruefeTestSvKonsistenz,
+  istInternesTelefon,
+  istDummyTelefon,
+  pruefeSendeIsolation,
+} from '../test-sv-guard'
 
 // Der Guard sitzt in reserviere() (der einen Buchungs-Chokepoint) und verhindert, dass
 // eine interne/Test-Buchung einen echten SV erreicht (und umgekehrt ein echter Kunde einen
@@ -273,5 +279,70 @@ describe('pruefeTestSvKonsistenz — Telefon als zweite Identitaetsachse (B1, 19
     )
     const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
     expect(res.blockieren).toBe(false)
+  })
+})
+
+
+// ── pruefeSendeIsolation: die EINE Empfaenger-Pruefung der Versand-Leafs ──────────────
+//
+// Hintergrund (21.09.2026, auf prod gemessen): der DB-Zweig prueft die E-MAIL des Kontakts
+// hinter der Nummer. Alle elf Platzhalter-Nummern im Bestand haben keine E-Mail — deshalb
+// gingen 9 von 279 ausgehenden WhatsApps in 60 Tagen an Platzhalter-Nummern raus, alle mit
+// Status 'zugestellt'. Die reine Nummern-Pruefung schliesst genau diese Luecke.
+describe('pruefeSendeIsolation — Platzhalter UND interne Nummern', () => {
+  // Bewusst KEINE neuen Nummern erfunden (Regel 7, Aaron 21.09.): alle hier verwendeten
+  // stehen bereits in den Tests darueber.
+  const INTERN = '+491735633541'
+  const PLATZHALTER = '+491600000000' // sieben Nullen -> sechs-gleiche-Regel
+
+  it('Platzhalter-Nummer wird unterdrueckt, Grund "dummy"', async () => {
+    const db = fakeDbList({ profiles: [], leads: [] })
+    await expect(pruefeSendeIsolation(PLATZHALTER, db)).resolves.toEqual({
+      unterdruecken: true,
+      grund: 'dummy',
+      kennung: 'dummy-recipient-suppressed',
+    })
+  })
+
+  it('bei einer Platzhalter-Nummer wird die Datenbank GAR NICHT erst befragt', async () => {
+    // Positivkontrolle fuer die Reihenfolge: die reine Pruefung kommt zuerst.
+    let befragt = 0
+    const spion = {
+      from: () => {
+        befragt += 1
+        return { select: () => ({ ilike: async () => ({ data: [], error: null }) }) }
+      },
+    } as unknown as SupabaseClient
+    await pruefeSendeIsolation(PLATZHALTER, spion)
+    expect(befragt).toBe(0)
+  })
+
+  it('interne Nummer wird unterdrueckt, Grund "intern"', async () => {
+    const db = fakeDbList({
+      profiles: [],
+      leads: [{ email: 'aaron.sprafke@claimondo.de', telefon: INTERN }],
+    })
+    await expect(pruefeSendeIsolation(INTERN, db)).resolves.toEqual({
+      unterdruecken: true,
+      grund: 'intern',
+      kennung: 'internal-recipient-suppressed',
+    })
+  })
+
+  it('echter externer Kunde wird NICHT unterdrueckt — der Guard darf nie einen Kunden kosten', async () => {
+    const db = fakeDbList({
+      profiles: [{ email: 'anja.harig@icloud.com', telefon: INTERN }],
+      leads: [],
+    })
+    await expect(pruefeSendeIsolation(INTERN, db)).resolves.toEqual({ unterdruecken: false })
+  })
+
+  it('Datenbank-Fehler laesst den Send durch (fail-open)', async () => {
+    const kaputt = {
+      from: () => {
+        throw new Error('DB weg')
+      },
+    } as unknown as SupabaseClient
+    await expect(pruefeSendeIsolation(INTERN, kaputt)).resolves.toEqual({ unterdruecken: false })
   })
 })
