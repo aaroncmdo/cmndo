@@ -12,16 +12,16 @@ describe('normalizeWhatsappNummer', () => {
     expect(normalizeWhatsappNummer('   ')).toEqual({ ok: true, value: null })
   })
   it('deutsche 0-Nummer -> +49', () => {
-    expect(normalizeWhatsappNummer('0163 3628571')).toEqual({ ok: true, value: '+491633628571' })
+    expect(normalizeWhatsappNummer('0123 1234567')).toEqual({ ok: true, value: '+491231234567' })
   })
   it('bereits +E.164 bleibt unveraendert', () => {
-    expect(normalizeWhatsappNummer('+491633628571')).toEqual({ ok: true, value: '+491633628571' })
+    expect(normalizeWhatsappNummer('+491231234567')).toEqual({ ok: true, value: '+491231234567' })
   })
   it('Formatierungszeichen (Klammern/Bindestrich/Punkt) werden entfernt', () => {
-    expect(normalizeWhatsappNummer('+49 (163) 362-8571')).toEqual({ ok: true, value: '+491633628571' })
+    expect(normalizeWhatsappNummer('+49 (123) 123-4567')).toEqual({ ok: true, value: '+491231234567' })
   })
   it('00-Praefix -> +', () => {
-    expect(normalizeWhatsappNummer('0049 163 3628571')).toEqual({ ok: true, value: '+491633628571' })
+    expect(normalizeWhatsappNummer('0049 123 1234567')).toEqual({ ok: true, value: '+491231234567' })
   })
   it('zu kurz -> Fehler', () => {
     expect(normalizeWhatsappNummer('123').ok).toBe(false)

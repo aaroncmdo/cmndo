@@ -42,7 +42,7 @@ describe('sendWhatsAppText — interner-Empfaenger-Guard am Chokepoint', () => {
     mockedGuard.mockResolvedValue(true)
     const fetchMock = vi.mocked(fetch)
 
-    const result = await sendWhatsAppText('+491633628571', 'hi')
+    const result = await sendWhatsAppText('+491231234567', 'hi')
 
     expect(fetchMock).not.toHaveBeenCalled()
     expect(result).toEqual({
@@ -58,7 +58,7 @@ describe('sendWhatsAppText — interner-Empfaenger-Guard am Chokepoint', () => {
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockResolvedValue(okResponse())
 
-    const result = await sendWhatsAppText('+491633628571', 'hi', { skipInternalGuard: true })
+    const result = await sendWhatsAppText('+491231234567', 'hi', { skipInternalGuard: true })
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(mockedGuard).not.toHaveBeenCalled()

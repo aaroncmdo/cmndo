@@ -193,7 +193,7 @@ test('Phase 1: /gutachter-finden Wizard → Anfrage submitten', async ({ page })
   await field(page, 'vorname').fill(DATA.anspruchsteller.vorname)
   await field(page, 'nachname').fill(DATA.anspruchsteller.nachname)
   // Aaron-Anweisung: NIE PDF-Telefon (Miljkovic 017632851069). Test-Empfänger:
-  await field(page, 'telefon').fill('+491633628571')
+  await field(page, 'telefon').fill('+491231234567')
   await field(page, 'email').fill(smokeEmail)
   await fieldOption(page, 'bevorzugter_kanal', 'whatsapp').click()
   await shot(page, 'p5-kontakt-ausgefuellt')

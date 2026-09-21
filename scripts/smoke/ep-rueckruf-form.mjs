@@ -19,7 +19,7 @@ const id = process.argv[2]
 if (!ZIELE[id]) { console.error('e6 | e7 | e9'); process.exit(1) }
 
 const ident = identitaet(id.toUpperCase())
-const TEL = process.env.EP_TELEFON || '+491633628571'
+const TEL = process.env.EP_TELEFON || '+491231234567'
 const NAME = `${ident.vorname} ${ident.nachname}`
 console.log(`\n### ${id.toUpperCase()} — ${ZIELE[id]}`)
 console.log('Name:', NAME)

@@ -19,7 +19,7 @@ const BASE = process.env.EP_BASE || 'https://claimondo.de'
 const PFAD = process.env.EP_PFAD || '/'
 const MARKER = 'EPSWEEP'
 const NAME = `${MARKER} Startseite`
-const TEL = process.env.EP_TELEFON || '+491633628571'
+const TEL = process.env.EP_TELEFON || '+491231234567'
 const ORT = 'Domkloster 4, 50667 Köln'
 
 function svc() {

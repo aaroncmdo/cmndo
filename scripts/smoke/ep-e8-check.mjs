@@ -20,7 +20,7 @@ import { mkdirSync } from 'node:fs'
 
 const MARKER = 'EPSWEEP'
 const NAME = `${MARKER} Achtcheck`
-const TEL = process.env.EP_TELEFON || '+491633628571'
+const TEL = process.env.EP_TELEFON || '+491231234567'
 const ORT_EINGABE = 'Domkloster 4, 50667 Köln'
 // Gegen prod (Default) ODER gegen einen lokalen Dev-Server (EP_BASE=http://localhost:3001),
 // um einen Fix VOR dem Merge zu beweisen statt erst nach dem Deploy.
