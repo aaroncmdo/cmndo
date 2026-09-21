@@ -13,6 +13,7 @@ Das Soll ist **ein Intake mit garantierten Nachwirkungen** (Verfassung §5, → 
 gemeldet wird, dieselben sechs Dinge passieren.
 
 1. **Melder gibt die Schadenmeldung ab** (Formular/Wizard/API/Anruf/QR-Tap) → System:
+   *Über den KI-Assistenten (B-3) seit 21.09.: die **E-Mail ist Pflichtangabe** — der Assistent muss entweder eine Adresse liefern oder ausdrücklich `keine` senden (als optionales Feld kamen 20 von 21 Leads ohne Adresse an). Der Server ermittelt vorab den **Leitungstyp** der Nummer (Twilio Lookup, `leads.telefon_typ`): bei Festnetz sind WhatsApp und SMS aussichtslos, und die Tool-Antwort fordert die E-Mail gezielt ein, bevor ein Lead ohne jeden Kanal entsteht. ⚠ Der Lookup erkennt **nicht**, ob eine Nummer vergeben ist — das klärt erst der SMS-Code (Soll-Blatt `2026-09-21-mcp-eingang-haerten.md`).*
    - **legt den Fall an** — als **Lead** (Muster *lead-first*: Claim entsteht später bei /flow) oder direkt als **Claim** (Muster *Direkt-Claim*: Gegner-Flow, Admin-manuell). Status-Cursor initial `ersterfassung` (bzw. `sv-termin`, wenn schon ein Termin gebucht wurde).
    - **legt die Pflichtdok-Slots an** (`pflichtdokumente` je Szenario: Haftpflicht = Vollmacht/Gutachten/Versicherer; Reduced-Repair = nur Fahrzeugschein) — damit ab Sekunde 1 klar ist, was fehlt.
    - **erzeugt den FlowLink** (kanonischer Magic-Link `flow_links`) — der Weiterführungs-Anker für den account-losen Melder.
