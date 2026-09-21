@@ -37,7 +37,7 @@ test('A · Weg 2 Schritt 1-2: bekannter Lead ohne Konto fordert den Anmelde-Link
   test.skip(!!seed?.magicLinkUrl, 'Schritt 1-2 lief im ersten Lauf; erneutes Anfordern ersetzt den Mail-Token')
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
   // E-Mail-Tab ist der Standard-Tab; das Feld wird getippt, kein Passwort noetig.
-  await page.locator('input[name="email"]').first().fill(seed!.email)
+  await page.locator('input[name="email"]').first().fill(seed!.email!)
   await page.getByRole('button', { name: /Anmelde-Link per E-Mail senden/ }).click()
   // Soll: neutraler Satz — derselbe wie fuer eine unbekannte Adresse (Enumeration-Schutz).
   await expect(page.getByText(NEUTRALER_SATZ)).toBeVisible({ timeout: 20_000 })
@@ -66,7 +66,7 @@ test('N · Weg 2: unbekannte Adresse sieht denselben neutralen Satz', async ({ p
   test.skip(!seed, 'Seed-Fixture fehlt — local-only Prod-Smoke (kunde-login-ohne-link-seed.mjs)')
   test.skip(!seed?.negativEmail, 'Telefon-Seed (--telefon): E-Mail-Weg nicht Teil dieses Laufs')
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
-  await page.locator('input[name="email"]').first().fill(seed!.negativEmail)
+  await page.locator('input[name="email"]').first().fill(seed!.negativEmail!)
   await page.getByRole('button', { name: /Anmelde-Link per E-Mail senden/ }).click()
   await expect(page.getByText(NEUTRALER_SATZ)).toBeVisible({ timeout: 20_000 })
   // Dass dabei KEIN Konto entsteht, prueft `--verify` (auth.users fuer negativEmail = 0).
