@@ -56,7 +56,7 @@ Gemessen unter den bisherigen 20 WhatsApp-Absendern:
 
 | Nummer | Nachrichten | Rolle |
 |---|---|---|
-| `4917620289514` | **17** | **admin — Nicolas Kitta** |
+| `49176…(Team B)` | **17** | **admin — Nicolas Kitta** |
 | `491735633541` | 6 | sachverständiger — Gaith Hamed |
 | `4915127115565` | 2 | sachverständiger — Kelvin Tyron Gall |
 | `491722036183` | 2 | sachverständiger — Hasan Cakmak |

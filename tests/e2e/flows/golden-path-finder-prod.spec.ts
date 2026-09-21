@@ -137,7 +137,7 @@ test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async (
   // ── Step 4 (Kontakt): Formular + DSGVO -> reservieren ──
   await vis(page, 'input[autocomplete="given-name"]').fill('E2eFinder')
   await vis(page, 'input[autocomplete="family-name"]').fill('Smoke')
-  await vis(page, 'input[autocomplete="tel"]').fill('+491633628571') // Test-WA (send-isolation greift ohnehin)
+  await vis(page, 'input[autocomplete="tel"]').fill('+491231234567') // Test-WA (send-isolation greift ohnehin)
   await vis(page, 'input[autocomplete="email"]').fill(email)
   await vis(page, 'input[type="checkbox"]').check()
 

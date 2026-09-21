@@ -6,18 +6,18 @@ import { normalizeE164 } from '../send-sms-plain'
 // 0-Nummer fehlinterpretiert.
 describe('normalizeE164', () => {
   it('00-Präfix → +', () => {
-    expect(normalizeE164('00491633628571')).toBe('+491633628571')
+    expect(normalizeE164('00491231234567')).toBe('+491231234567')
   })
   it('führende 0 → +49 (deutsche Nummer)', () => {
-    expect(normalizeE164('01633628571')).toBe('+491633628571')
+    expect(normalizeE164('01231234567')).toBe('+491231234567')
   })
   it('bereits +E.164 bleibt unverändert', () => {
-    expect(normalizeE164('+491633628571')).toBe('+491633628571')
+    expect(normalizeE164('+491231234567')).toBe('+491231234567')
   })
   it('Leerzeichen werden entfernt', () => {
-    expect(normalizeE164('+49 163 3628571')).toBe('+491633628571')
+    expect(normalizeE164('+49 123 1234567')).toBe('+491231234567')
   })
   it('nackte Nummer ohne Präfix bekommt +', () => {
-    expect(normalizeE164('491633628571')).toBe('+491633628571')
+    expect(normalizeE164('491231234567')).toBe('+491231234567')
   })
 })

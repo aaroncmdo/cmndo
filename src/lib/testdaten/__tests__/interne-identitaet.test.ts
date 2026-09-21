@@ -84,13 +84,13 @@ describe('nurExterneEmpfaenger — interne/Test-Adressen rausfiltern (Send-Guard
 
 describe('letzte9Ziffern — robuste Telefon-Normalisierung', () => {
   it('extrahiert die letzten 9 Ziffern formatunabhaengig', () => {
-    expect(letzte9Ziffern('+491735633541')).toBe('735633541')
-    expect(letzte9Ziffern('+49 173 5633541')).toBe('735633541')
-    expect(letzte9Ziffern('0173 5633541')).toBe('735633541')
+    expect(letzte9Ziffern('+495205060708')).toBe('205060708')
+    expect(letzte9Ziffern('+49 520 5060708')).toBe('205060708')
+    expect(letzte9Ziffern('0520 5060708')).toBe('205060708')
   })
   it('matcht malformte und korrekte Schreibweise auf dieselben 9 Ziffern', () => {
-    // Anja: gespeichert "+49016093388133" vs korrekt "+4916093388133"
-    expect(letzte9Ziffern('+49016093388133')).toBe(letzte9Ziffern('+4916093388133'))
+    // Real aufgetreten: gespeichert "+49015205060708" vs korrekt "+4915205060708"
+    expect(letzte9Ziffern('+49015205060708')).toBe(letzte9Ziffern('+4915205060708'))
   })
   it('leer bei zu wenigen Ziffern / leerer Eingabe', () => {
     expect(letzte9Ziffern('123')).toBe('')

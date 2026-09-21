@@ -96,14 +96,14 @@ Um 20:12 gingen drei WhatsApps raus (alle `zugestellt`):
 
 ```
 20:12:44 → 491775799941   (Kunde)  "Hier dein sicherer Login-Link …"   lead_id = NULL
-20:12:45 → 4917620289514  (Team)   "🔔 Neuer Lead … Ernest Sefa …"     lead_id = 159eac57…
-20:12:46 → 491633628571   (Team)   dieselbe Nachricht                  lead_id = f34c09ce…
+20:12:45 → 49176…(Team B)  (Team)   "🔔 Neuer Lead … Ernest Sefa …"     lead_id = 159eac57…
+20:12:46 → 49163…(Team A)   (Team)   dieselbe Nachricht                  lead_id = f34c09ce…
 ```
 
 Ernests Lead ist `5c39b0ac…`. Die beiden anderen IDs sind nachgeschlagen:
 
-* `159eac57…` = Lead „Trst Namewn", Telefon **+4917620289514** — die Nummer des Empfängers
-* `f34c09ce…` = Lead „Aaron Sprafke", Telefon **+491633628571** — ebenfalls der Empfänger
+* `159eac57…` = Lead „Trst Namewn", Telefon **+49176…(Team B)** — die Nummer des Empfängers
+* `f34c09ce…` = Lead „Aaron Sprafke", Telefon **+49163…(Team A)** — ebenfalls der Empfänger
 
 Das Muster ist eindeutig: die Notification schreibt den Lead **des Empfängers** statt den Lead,
 über den sie informiert. Vermutlich wird der Empfänger über seine Telefonnummer aufgelöst und

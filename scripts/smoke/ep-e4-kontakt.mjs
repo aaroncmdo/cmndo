@@ -55,7 +55,7 @@ console.log('Kontaktfelder:', JSON.stringify(analyse, null, 2))
 const inputs = F.locator('input:visible')
 const n = await inputs.count()
 console.log('sichtbare inputs:', n)
-const werte = [ident.vorname, ident.nachname, process.env.EP_TELEFON || '+491633628571', ident.email]
+const werte = [ident.vorname, ident.nachname, process.env.EP_TELEFON || '+491231234567', ident.email]
 let wi = 0
 for (let i = 0; i < n; i++) {
   const el = inputs.nth(i)

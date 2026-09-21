@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { MARKETING, identitaet, svc, zustand, zusammenfassung } from './ep-lib.mjs'
 
 const ident = identitaet('E6R')
-const TEL = process.env.EP_TELEFON || '+491633628571'
+const TEL = process.env.EP_TELEFON || '+491231234567'
 console.log('Identitaet:', ident.email, '| Name:', ident.vorname, ident.nachname)
 
 const browser = await chromium.launch({ headless: true })

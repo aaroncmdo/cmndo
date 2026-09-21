@@ -74,7 +74,7 @@ vi.mock('@/lib/intake/create-case', () => ({
 // Bewusst die ECHTE Logik (Ziffern-Vergleich) statt eines Stubs — sonst wuerde der
 // Test gruen bleiben, egal was die Funktion tut, und die Team-Nummern-Ausnahme
 // waere nicht abgesichert.
-const TEAM_NUMMERN_TEST = ['+491633628571', '+4917620289514']
+const TEAM_NUMMERN_TEST = ['+491231234567', '+491239876543']
 vi.mock('@/lib/whatsapp/team-notify', () => ({
   notifyTeamWhatsApp: async (text: string) => {
     waTexte.push(text)
@@ -136,7 +136,7 @@ describe('baileys/inbound — Erstkontakt-Verzweigung', () => {
   it('Partner: KEIN Lead, aber Team-Benachrichtigung mit Bezeichnung', async () => {
     state.istPartner = true
     state.partnerBezeichnung = 'sachverstaendiger Gaith Hamed'
-    await POST(anfrage({ phone: '491735633541', text: 'Kurze Frage' }))
+    await POST(anfrage({ phone: '495205060708', text: 'Kurze Frage' }))
     expect(createCaseCalls).toHaveLength(0)
     expect(waTexte).toHaveLength(1)
     expect(waTexte[0]).toContain('Gaith Hamed')
@@ -188,7 +188,7 @@ describe('baileys/inbound — Team-WA nur EINMALIG bei Neukontakt', () => {
     state.istPartner = true
     state.partnerBezeichnung = 'sachverstaendiger Gaith Hamed'
     state.nachrichtenCount = 6
-    await POST(anfrage({ phone: '491735633541', text: 'dritte Nachricht' }))
+    await POST(anfrage({ phone: '495205060708', text: 'dritte Nachricht' }))
     expect(waTexte).toHaveLength(0)
   })
 
@@ -196,7 +196,7 @@ describe('baileys/inbound — Team-WA nur EINMALIG bei Neukontakt', () => {
     state.istPartner = true
     state.partnerBezeichnung = 'sachverstaendiger Gaith Hamed'
     state.nachrichtenCount = 1
-    await POST(anfrage({ phone: '491735633541', text: 'Hallo' }))
+    await POST(anfrage({ phone: '495205060708', text: 'Hallo' }))
     expect(waTexte).toHaveLength(1)
     expect(waTexte[0]).toContain('Gaith Hamed')
   })

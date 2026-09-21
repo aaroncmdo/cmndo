@@ -35,7 +35,7 @@ const AARON = {
   vorname: 'Aaron',
   nachname: 'Sprafke',
   email: 'aaron.sprafke@claimondo.de',
-  telefon: '+491633628571',
+  telefon: '+491231234567',
   kunde_strasse: 'Hohenzollernring 31',
   kunde_plz: '50672',
   kunde_stadt: 'Köln',

@@ -76,7 +76,7 @@ await page.locator('#email').fill(ident.email)
 // ⚠ Telefon ist hier PFLICHT (leeres Feld -> "Ungültiges Telefon-Format", Submit blockiert),
 // obwohl die Kopfzeile "per WhatsApp ODER E-Mail" verspricht. Deshalb Aarons freigegebene
 // Nummer — die Send-Isolation greift ohnehin ueber die interne @claimondo.de-Adresse.
-await page.locator('#telefon').fill(process.env.EP_TELEFON || '+491633628571')
+await page.locator('#telefon').fill(process.env.EP_TELEFON || '+491231234567')
 
 // ── DSGVO ── ⚠ die ERSTE Checkbox im DOM ist aria-hidden (Deko eines Custom-Controls);
 // .check() laeuft dort in den Timeout. Ueber das Label gehen, das den Einwilligungstext traegt.

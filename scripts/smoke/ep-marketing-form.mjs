@@ -25,7 +25,7 @@ if (!URLS[id]) { console.error('e6 | e7 | e8 | e9'); process.exit(1) }
 const SHOTS = join(process.cwd(), 'scripts/smoke/.ep-walk')
 mkdirSync(SHOTS, { recursive: true })
 const ident = identitaet(id.toUpperCase())
-const TEL = process.env.EP_TELEFON || '+491633628571'
+const TEL = process.env.EP_TELEFON || '+491231234567'
 console.log(`\n### ${id.toUpperCase()} — ${URLS[id]}`)
 console.log('Identitaet:', ident.email)
 

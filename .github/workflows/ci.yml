@@ -154,6 +154,16 @@ jobs:
       # Skizzen-Korrektur (16.08.). Siehe AGENTS.md Paragraph Stille-Write-Gate.
       - name: Stille-Write-Ratchet
         run: npm run check:silent-writes -- --ratchet
+      # Team-Nummern-Gate (Aaron 21.09.2026): "nimm fuer alle tests unsere nummern raus,
+      # nur das was echt ist soll bei uns ankommen". Unsere eigenen Mobilnummern standen in
+      # 24 Test-/Spec-/Smoke-Dateien; die neun scripts/smoke/ep-*.mjs fuellten sie ueber
+      # `process.env.EP_TELEFON || <Nummer>` in echte Formulare — und EP_TELEFON ist nirgends
+      # gesetzt, der Fallback war also IMMER aktiv. Jeder Lauf erzeugte einen Lead mit einer
+      # echten Teamnummer, und die Folge-WhatsApps kamen auf dem Geraet an, ununterscheidbar
+      # von echten Kundenmeldungen. Das Gate liest die Nummern aus WA_TEAM_EMPFAENGER
+      # (Quelle der Wahrheit) statt sie selbst zu enthalten. Siehe AGENTS.md Regel 7.
+      - name: Team-Nummern-Gate
+        run: npm run check:team-nummern -- --ratchet
       # Mengenbegrenzungs-Gate: PostgREST liefert ohne `range` HOECHSTENS 1.000 Zeilen —
       # ohne Fehler, ohne Warnung, die Antwort ist einfach kuerzer als die Wahrheit. Belegt
       # am 09.09.2026 (PR #5964): der Admin-Kalender zeigte am 3. September NULL Aufgaben,

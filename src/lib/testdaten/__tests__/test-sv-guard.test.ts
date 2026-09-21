@@ -173,9 +173,9 @@ describe('istInternesTelefon — Telefon-Reverse-Lookup (Send-Guard)', () => {
   it('true wenn ein Lead/Profile mit dem Telefon eine interne Email hat', async () => {
     const db = fakeDbList({
       profiles: [],
-      leads: [{ email: 'aaron.sprafke@claimondo.de', telefon: '+491735633541' }],
+      leads: [{ email: 'aaron.sprafke@claimondo.de', telefon: '+495205060708' }],
     })
-    expect(await istInternesTelefon('+491735633541', db)).toBe(true)
+    expect(await istInternesTelefon('+495205060708', db)).toBe(true)
   })
   it('false bei echtem externen Kunden', async () => {
     const db = fakeDbList({
@@ -190,7 +190,7 @@ describe('istInternesTelefon — Telefon-Reverse-Lookup (Send-Guard)', () => {
   })
   it('fail-open bei Lookup-Fehler', async () => {
     const db = { from() { throw new Error('db down') } } as unknown as SupabaseClient
-    expect(await istInternesTelefon('+491735633541', db)).toBe(false)
+    expect(await istInternesTelefon('+495205060708', db)).toBe(false)
   })
 })
 
@@ -211,7 +211,7 @@ describe('istDummyTelefon — Platzhalter-Nummern (reine Logik)', () => {
     expect(istDummyTelefon('0123 987654')).toBe(true)
   })
   it('laesst echte Nummern durch', () => {
-    expect(istDummyTelefon('+491735633541')).toBe(false)
+    expect(istDummyTelefon('+495205060708')).toBe(false)
     expect(istDummyTelefon('0176 22334455')).toBe(false)
     expect(istDummyTelefon('+380505954949')).toBe(false)
   })
@@ -255,9 +255,9 @@ describe('pruefeTestSvKonsistenz — Telefon als zweite Identitaetsachse (B1, 19
     const db = fakeDbBeides(
       {
         sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
-        leads: () => ({ data: { email: null, vorname: 'Jonas', nachname: 'Berger', telefon: '+491735633541' }, error: null }),
+        leads: () => ({ data: { email: null, vorname: 'Jonas', nachname: 'Berger', telefon: '+495205060708' }, error: null }),
       },
-      { profiles: [{ email: 'aaron.sprafke@claimondo.de', telefon: '+491735633541' }], leads: [] },
+      { profiles: [{ email: 'aaron.sprafke@claimondo.de', telefon: '+495205060708' }], leads: [] },
     )
     const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
     expect(res.blockieren).toBe(true)
