@@ -37,7 +37,7 @@ export default function DokumenteUnzugeordnetBox({
         <h3 className="text-xs font-semibold text-warning-strong uppercase tracking-wider flex items-center gap-2">
           <InboxIcon className="w-3.5 h-3.5" />
           Unzugeordnete Uploads
-          <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-warning/30 text-warning-strong text-[10px] tabular-nums">
+          <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-warning/30 text-warning-strong text-xs tabular-nums">
             {docs.length}
           </span>
         </h3>

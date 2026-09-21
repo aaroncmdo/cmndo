@@ -346,7 +346,7 @@ export default function DokumenteTab({
           <div className="px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg">
             <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
               <FileCheckIcon className="w-3.5 h-3.5" /> Zu prüfende Uploads
-              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-claimondo-ondo/10 text-claimondo-ondo text-[10px] tabular-nums">
+              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-claimondo-ondo/10 text-claimondo-ondo text-xs tabular-nums">
                 {zuPruefendeUploads.length}
               </span>
             </h3>

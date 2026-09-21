@@ -22,7 +22,7 @@ export default function FestgefahreneFaelleCard({ items }: { items: Festgefahren
         <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-danger" />
           Festgefahrene Fälle
-          <span className="ml-1 bg-danger-soft text-danger-strong text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <span className="ml-1 bg-danger-soft text-danger-strong text-xs font-bold px-2 py-0.5 rounded-full">
             {items.length}
           </span>
         </h2>
@@ -53,7 +53,7 @@ export default function FestgefahreneFaelleCard({ items }: { items: Festgefahren
                 </p>
               </div>
               <span
-                className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${
+                className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${
                   kritisch ? 'bg-danger-soft text-danger-strong' : 'bg-warning-soft text-warning-strong'
                 }`}
               >

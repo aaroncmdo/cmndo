@@ -322,7 +322,12 @@ export async function POST(req: Request) {
   if (issued.kanal === 'none') {
     const { error: kontaktTaskFehler } = await admin.from('tasks').insert({
       lead_id: issued.leadId,
-      typ: 'lead-kontakt-herstellen',
+      // ⚠ MUSS 'dispatch' sein, nicht ein sprechender Eigenname: /dispatch/tasks filtert
+      // `.eq('typ','dispatch')` (page.tsx:57/89) und der Alarm-Cron dispatch-lead-alert ebenso
+      // (route.ts:33). Mit 'lead-kontakt-herstellen' lag die Aufgabe zwar in der DB, war aber in
+      // KEINER Liste und in KEINEM Alarm sichtbar (gemessen 21.09. per Playwright gegen prod:
+      // 6 solcher Aufgaben, keine im Portal). Die Bedeutung traegt `task_code`, nicht `typ`.
+      typ: 'dispatch',
       titel: `Kein Kontakt-Kanal erreichbar: ${input.name}`,
       beschreibung:
         `Über den KI-Assistenten gemeldet (${input.schadenart}, PLZ ${input.plz}). ` +

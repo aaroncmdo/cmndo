@@ -128,7 +128,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                 {/* Column header: 28px */}
                 <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
                   <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                  <span className="text-claimondo-ondo text-[10px] font-medium bg-claimondo-bg px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
+                  <span className="text-claimondo-ondo text-xs font-medium bg-claimondo-bg px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                 </div>
                 <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 

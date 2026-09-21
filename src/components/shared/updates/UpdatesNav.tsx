@@ -125,7 +125,7 @@ export default function UpdatesNav({
         <BellIcon className="w-3.5 h-3.5" />
         <span>Updates</span>
         {actionCount > 0 && (
-          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-white/95 text-danger">
+          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-xs font-bold bg-white/95 text-danger">
             {actionCount > 99 ? '99+' : actionCount}
           </span>
         )}
