@@ -13,6 +13,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { kundeBesitztLead } from '@/lib/kunde/besitz'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { ziehVehicleNach } from '@/lib/vehicles/snapshot-update'
 import { schreibeFinAufFahrzeug } from '@/lib/vehicles/fin-schreiben'
@@ -78,7 +79,7 @@ export async function confirmZb1Korrekturen(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
-  const leadId = await resolveLeadIdForKunde(admin, fallId, user.id, user.email)
+  const leadId = await resolveLeadIdForKunde(admin, fallId, user)
   if (!leadId) return { ok: false, error: 'Kein Zugriff auf diesen Fall' }
 
   const update: Record<string, unknown> = {
@@ -178,7 +179,7 @@ export async function clearZb1Felder(fallId: string): Promise<Zb1ActionResult> {
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
-  const leadId = await resolveLeadIdForKunde(admin, fallId, user.id, user.email)
+  const leadId = await resolveLeadIdForKunde(admin, fallId, user)
   if (!leadId) return { ok: false, error: 'Kein Zugriff auf diesen Fall' }
 
   const { error } = await admin.from('leads').update({
@@ -213,9 +214,9 @@ type AdminDb = ReturnType<typeof createAdminClient>
 async function resolveLeadIdForKunde(
   admin: AdminDb,
   fallId: string,
-  userId: string,
-  userEmail: string | undefined,
+  user: { id: string; email?: string | null; phone?: string | null },
 ): Promise<string | null> {
+  const userId = user.id
   // CMM-49: faelle-frei — claims = SSoT. lead_id (Backfill 20260604225709 vollstaendig)
   // + geschaedigter_user_id (==kunde_id, 0-diff) direkt aus claims. Das app-seitige
   // kunde_id-Ownership-Gate wird value-preserving zu geschaedigter_user_id; die tiefere
@@ -236,18 +237,10 @@ async function resolveLeadIdForKunde(
     return leadId
   }
 
-  // Fallback: Email-Match auf leads (für Pre-Auth-Konvertierungen, wenn
-  // kunde_id noch nicht gesetzt wurde aber der eingeloggte User dieselbe
-  // Email hat wie der Lead).
-  if (userEmail) {
-    const { data: lead } = await admin
-      .from('leads')
-      .select('id, email')
-      .eq('id', leadId)
-      .maybeSingle()
-    if (lead && (lead as { email?: string | null }).email?.toLowerCase() === userEmail.toLowerCase()) {
-      return leadId
-    }
+  // Fallback: Kontakt-Match auf leads (für Pre-Auth-Konvertierungen, wenn
+  // geschaedigter_user_id noch nicht gesetzt ist) — E-Mail ODER Telefon (Stufe 2).
+  if (await kundeBesitztLead(admin, user, leadId)) {
+    return leadId
   }
 
   return null

@@ -315,6 +315,10 @@ export default function LoginClient({
                   maxLength={6}
                   className="w-full px-4 py-3 rounded-ios-md border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-claimondo-shield text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo transition-all"
                 />
+                <p className="text-xs text-claimondo-ondo">
+                  Der Code ist 60 Sekunden gültig. Kein Code angekommen? Prüfen Sie die Nummer — oder nutzen Sie den
+                  Anmelde-Link per E-Mail, falls Sie eine Adresse hinterlegt haben.
+                </p>
               </div>
               {phoneError && (
                 <p className="text-sm text-danger rounded-ios-md bg-danger-soft/50 border border-danger/30 px-4 py-3">{phoneError}</p>

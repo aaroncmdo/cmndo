@@ -6,9 +6,9 @@
 // nach aussen ununterscheidbar (Enumeration-Schutz, Muster requestPasswordReset).
 // Fail-closed: jeder Fehler auf dem Weg legt KEIN Konto an und schickt NICHTS.
 //
-// Stufe 1: ein Konto entsteht nur, wenn der Lead eine E-Mail traegt — profiles.email
-// ist NOT NULL + UNIQUE (gemessen 19.09.2026). Telefon-only-Konten sind Stufe 2
-// (Migration + 26-Stellen-Sweep), siehe Plan-Kopf docs/superpowers/plans/2026-09-19-….
+// Stufe 2 (20.09.2026, Migration 20260920155109): profiles.email ist nullable — ein Konto
+// entsteht auch fuer Leads OHNE E-Mail (createUser({ phone, phone_confirm })). Der Besitz von
+// Vorgaengen laeuft dann ueber lib/kunde/besitz.ts (E-Mail ODER Telefon, NULL nie gleich NULL).
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toE164 } from '@/lib/format/telefon'
 import { findeVorgaengeZuKontakt } from '@/lib/auth/lead-kontakt'
@@ -20,18 +20,24 @@ const MAX_LOGIN_MAILS_PRO_STUNDE = 3
 type Neutral = { ok: true }
 const NEUTRAL: Neutral = { ok: true }
 
-// Stufe 2 (Plan S2-3): profiles-Abfrage per telefon_ziffern/email statt listUsers.
-// Stufe 1 traegt das, weil prod 102 Kunden-Konten hat (gemessen 19.09.).
+// listUsers ist die einzige Admin-API, die nach Telefon suchen kann (auth.users.phone).
+// Seitenweise (1000/Seite), damit die Pruefung auch jenseits von 1000 Konten nicht still blind wird.
+const LIST_USERS_SEITE = 1000
 async function kontoVorhanden(
   admin: ReturnType<typeof createAdminClient>,
   pruefe: (u: { phone?: string | null; email?: string | null }) => boolean,
 ): Promise<boolean | null> {
-  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
-  if (error) {
-    console.error('[login-kontakt] listUsers:', error.message)
-    return null
+  for (let page = 1; page <= 50; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: LIST_USERS_SEITE })
+    if (error) {
+      console.error('[login-kontakt] listUsers:', error.message)
+      return null
+    }
+    const users = data?.users ?? []
+    if (users.some(pruefe)) return true
+    if (users.length < LIST_USERS_SEITE) return false
   }
-  return (data?.users ?? []).some(pruefe)
+  return false
 }
 
 export async function bereiteTelefonLoginVor(telefonRaw: string): Promise<Neutral> {
@@ -48,19 +54,19 @@ export async function bereiteTelefonLoginVor(telefonRaw: string): Promise<Neutra
     const vorhanden = await kontoVorhanden(admin, (u) => (u.phone ?? '').replace(/^\+/, '') === ohnePlus)
     if (vorhanden !== false) return NEUTRAL // true = Konto da, null = Fehler (fail-closed)
 
-    if (!vorgaenge.leadEmail) {
-      console.warn('[login-kontakt] Lead ohne E-Mail — Telefon-only-Konto ist Stufe 2, kein Konto angelegt')
-      return NEUTRAL
-    }
-
+    // Stufe 2: Konto auch ohne Lead-E-Mail — Supabase erlaubt reine Telefon-Konten,
+    // profiles.email ist seit 20260920155109 nullable.
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
-      email: vorgaenge.leadEmail,
       phone,
       phone_confirm: true,
-      email_confirm: true,
+      ...(vorgaenge.leadEmail ? { email: vorgaenge.leadEmail, email_confirm: true } : {}),
     })
     if (createErr || !created?.user) {
-      console.error('[login-kontakt] createUser fehlgeschlagen (evtl. Kollision):', createErr?.message)
+      // users_phone_key / "already registered": die Nummer haengt schon an einem Konto (z. B. Admin-
+      // Override enablePhoneLogin) — dann geht der OTP an dieses Konto, nichts anzulegen.
+      const kollision = /already registered|phone_exists|users_phone_key/i.test(createErr?.message ?? '')
+      if (kollision) console.warn('[login-kontakt] Nummer gehoert schon einem Konto — OTP geht dorthin')
+      else console.error('[login-kontakt] createUser fehlgeschlagen:', createErr?.message)
       return NEUTRAL
     }
 
@@ -68,7 +74,7 @@ export async function bereiteTelefonLoginVor(telefonRaw: string): Promise<Neutra
       {
         id: created.user.id,
         rolle: 'kunde',
-        email: vorgaenge.leadEmail,
+        email: vorgaenge.leadEmail ?? null,
         telefon: phone,
         vorname: vorgaenge.leadVorname,
         auth_provider: 'phone',
