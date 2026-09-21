@@ -171,7 +171,7 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
           –
           {end.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
         </p>
-        <span className="text-amber-400 text-[10px] font-medium bg-amber-50 px-2 py-0.5 rounded-full">Anfrage</span>
+        <span className="text-amber-400 text-xs font-medium bg-amber-50 px-2 py-0.5 rounded-full">Anfrage</span>
       </div>
 
       {!showReject ? (

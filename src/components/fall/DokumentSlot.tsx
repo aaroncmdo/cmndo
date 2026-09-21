@@ -140,7 +140,7 @@ export default function DokumentSlot({
           </div>
           {beschreibung && <p className="text-xs text-claimondo-ondo mt-0.5">{beschreibung}</p>}
         </div>
-        <span className={`text-[10px] font-medium px-2 py-1 rounded-full border ${badge.className}`}>
+        <span className={`text-xs font-medium px-2 py-1 rounded-full border ${badge.className}`}>
           {badge.label}
         </span>
       </div>

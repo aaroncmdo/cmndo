@@ -31,7 +31,7 @@ export default function RealtimeCountView({
   return (
     <span
       aria-label={`${count} neu`}
-      className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-danger text-white ${className}`}
+      className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-xs font-bold bg-danger text-white ${className}`}
     >
       {count > 99 ? '99+' : count}
     </span>

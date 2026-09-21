@@ -238,7 +238,7 @@ export default function KundeKbChat({
               {!ownMessage && (
                 <div className={`shrink-0 w-7 h-7 ${showAvatar ? 'visible' : 'invisible'}`}>
                   <div
-                    className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold text-white"
+                    className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white"
                     style={{ backgroundColor: accentColor }}
                   >
                     {sender?.avatarUrl ? (

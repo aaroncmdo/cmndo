@@ -142,7 +142,7 @@ export default function GespraechsleitfadenTimer({
           </span>
           <span className="text-xs text-claimondo-ondo/70">/ 08:00</span>
           {istUeberzogen && (
-            <span className="text-[10px] bg-danger-soft text-danger-strong px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
+            <span className="text-xs bg-danger-soft text-danger-strong px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
               Überzogen
             </span>
           )}

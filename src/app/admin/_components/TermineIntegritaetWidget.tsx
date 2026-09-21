@@ -69,7 +69,7 @@ export default function TermineIntegritaetWidget() {
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       f.severity === 'critical'
                         ? 'bg-danger-soft text-danger-strong'
                         : 'bg-warning-soft text-warning-strong'

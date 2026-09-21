@@ -155,7 +155,7 @@ export default function UebersichtTab() {
         </div>
         <div className="flex items-center gap-2">
           <span
-            className={`text-[10px] font-medium px-2 py-1 rounded-full border ${statusCls}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full border ${statusCls}`}
           >
             {statusLabel}
           </span>

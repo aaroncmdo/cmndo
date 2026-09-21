@@ -198,12 +198,12 @@ export default function RueckrufTerminPanel({
         <span className="text-sm font-semibold text-claimondo-navy">Rückruftermin</span>
         {loading && <Loader2Icon className="w-3.5 h-3.5 text-claimondo-ondo/60 animate-spin ml-auto" />}
         {!loading && terminStatus === 'erledigt' && (
-          <span className="ml-auto text-[10px] font-semibold bg-success-soft text-success-strong px-2 py-0.5 rounded-full">
+          <span className="ml-auto text-xs font-semibold bg-success-soft text-success-strong px-2 py-0.5 rounded-full">
             Erledigt
           </span>
         )}
         {!loading && terminStatus === 'offen' && inPast && (
-          <span className="ml-auto text-[10px] font-semibold bg-danger-soft text-danger-strong px-2 py-0.5 rounded-full">
+          <span className="ml-auto text-xs font-semibold bg-danger-soft text-danger-strong px-2 py-0.5 rounded-full">
             Überfällig
           </span>
         )}
@@ -342,7 +342,7 @@ export default function RueckrufTerminPanel({
                         <span className="text-[11px] font-medium text-claimondo-navy">
                           {fmtDt(h.zeitpunkt)}
                         </span>
-                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${badgeClass}`}>
+                        <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${badgeClass}`}>
                           {badgeText}
                         </span>
                       </div>

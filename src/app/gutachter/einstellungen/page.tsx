@@ -153,7 +153,7 @@ export default async function EinstellungenPage({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-claimondo-navy">{item.label}</p>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${toneClass}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${toneClass}`}>
                     {item.status}
                   </span>
                 </div>

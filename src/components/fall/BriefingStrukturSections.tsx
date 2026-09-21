@@ -86,7 +86,7 @@ export default function BriefingStrukturSections({
           <SparklesIcon className="w-3.5 h-3.5" />
           Struktur
           {localGeneratedBy === 'fallback' && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[9px] font-medium normal-case tracking-normal">
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[11px] font-medium normal-case tracking-normal">
               Fallback
             </span>
           )}

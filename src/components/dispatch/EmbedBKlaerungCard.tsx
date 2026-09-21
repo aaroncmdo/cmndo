@@ -59,7 +59,7 @@ export default function EmbedBKlaerungCard({ items }: { items: KlaerungItem[] })
         <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
           <CalendarClockIcon className="w-4 h-4 text-warning" />
           Ungeklärte Gutachter-Termine
-          <span className="ml-auto bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <span className="ml-auto bg-warning-soft text-warning-strong text-xs font-bold px-2 py-0.5 rounded-full">
             {items.length}
           </span>
         </h2>

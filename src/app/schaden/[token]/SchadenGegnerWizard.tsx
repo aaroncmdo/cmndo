@@ -233,7 +233,7 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                       }
                     : undefined
                 }
-                className={`grid h-7 w-7 place-items-center rounded-full border-2 text-[10px] font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
+                className={`grid h-7 w-7 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
                   s < step
                     ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                     : s === step

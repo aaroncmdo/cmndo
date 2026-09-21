@@ -57,7 +57,7 @@ export default async function AuszahlungCard({ betrag, eingegangenAm, zahlungswe
         <BanknoteIcon className="w-4 h-4 text-success-strong" />
         <p className="text-sm font-semibold text-claimondo-navy">{t('titel')}</p>
         <span
-          className={`ml-auto text-[10px] font-medium rounded-full px-2 py-0.5 ${
+          className={`ml-auto text-xs font-medium rounded-full px-2 py-0.5 ${
             eingegangen ? 'bg-success-soft text-success-strong' : 'bg-warning-soft text-warning-strong'
           }`}
         >

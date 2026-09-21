@@ -111,7 +111,7 @@ export default function FokusHeader({
       </div>
 
       <span
-        className={`text-[10px] uppercase tracking-wider rounded-full px-2 py-1 ${
+        className={`text-xs uppercase tracking-wider rounded-full px-2 py-1 ${
           isLight
             ? 'bg-claimondo-navy/10 text-claimondo-navy'
             : 'bg-[color:var(--brand-primary,var(--brand-secondary))]/20 text-[color:var(--brand-primary,var(--brand-accent))]'
