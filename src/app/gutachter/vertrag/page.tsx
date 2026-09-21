@@ -50,10 +50,12 @@ export default async function VertragPage() {
     db.from('profiles').select('vorname, nachname').eq('id', user.id).maybeSingle(),
     db
       .from('vertraege_unterzeichnet')
-      .select('id, unterschrieben_am, vorlage_version')
+      // Spaltennamen per information_schema geprueft: die Tabelle hat KEIN 'unterschrieben_am',
+      // der Zeitpunkt heisst 'unterschrift_datum'.
+      .select('id, unterschrift_datum, vorlage_version')
       .eq('sv_id', sv.id)
       .eq('vorlage_typ', 'sv_basic_partnervertrag')
-      .order('unterschrieben_am', { ascending: false })
+      .order('unterschrift_datum', { ascending: false })
       .limit(1)
       .maybeSingle(),
   ])
@@ -67,7 +69,7 @@ export default async function VertragPage() {
       version={(vorlage?.version as string | null) ?? null}
       inhaltHtml={(vorlage?.inhalt_html as string | null) ?? null}
       bereitsUnterschrieben={!!sv.vertrag_unterschrieben || !!vertragsZeile}
-      unterschriebenAm={(vertragsZeile?.unterschrieben_am as string | null) ?? null}
+      unterschriebenAm={(vertragsZeile?.unterschrift_datum as string | null) ?? null}
     />
   )
 }
