@@ -5,6 +5,7 @@ import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { kundeBesitztLead } from '@/lib/kunde/besitz'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { postChatSystemMessage } from '@/lib/chat/system-messages'
 import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/reminders/generate'
@@ -131,14 +132,9 @@ async function authKundePortal(fallId: string) {
   // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat; kunde_id/sv_id/lead_id SSoT, faelle-frei).
   const { data: fall } = await admin.from('v_claim_full').select('kunde_id, sv_id, lead_id').eq('fall_id', fallId).single()
   if (!fall) return { error: 'Fall nicht gefunden' }
-  // Ownership: kunde_id oder lead-email
+  // Ownership: kunde_id oder Lead-Kontakt (E-Mail ODER Telefon — Stufe 2, NULL nie gleich NULL)
   if (fall.kunde_id !== user.id) {
-    if (fall.lead_id) {
-      const { data: lead } = await admin.from('leads').select('email').eq('id', fall.lead_id).single()
-      if (lead?.email !== user.email) return { error: 'Kein Zugriff' }
-    } else {
-      return { error: 'Kein Zugriff' }
-    }
+    if (!fall.lead_id || !(await kundeBesitztLead(admin, user, fall.lead_id))) return { error: 'Kein Zugriff' }
   }
   return { userId: user.id, fallId, svId: fall.sv_id }
 }

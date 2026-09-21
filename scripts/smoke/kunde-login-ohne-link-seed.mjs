@@ -24,6 +24,12 @@
 //   5) node ... kunde-login-ohne-link-seed.mjs --verify   -> DB-Gegenprobe (profiles, flow_links, Timeline, Negativfall)
 //   6) node ... kunde-login-ohne-link-seed.mjs --clean    -> Lead, FlowLinks, Timeline, Wegwerf-Konto weg
 //
+// Stufe 2 (Telefon-Weg): `--telefon` seedet den Lead NUR mit der Musternummer +4915512345678 (keine
+// E-Mail). Test S in der Spec faehrt dann Telefon-Tab -> Code -> Portal — aber NUR, wenn die Nummer in
+// der Supabase-Auth-Config als Test-Telefonnummer mit festem Code eingetragen ist und der Code als
+// SMOKE_PHONE_OTP_CODE gesetzt wird. Ohne Test-Nummer wuerde Supabase eine ECHTE SMS an die Nummer
+// schicken — deshalb ist der Test ohne Code hart uebersprungen.
+//
 // SICHERHEIT (Regel 4): telefon = null -> keine SMS/WhatsApp. Die einzige Mail geht an
 // smoke-kunde+login-<ts>@claimondo.de (internes Postfach; sendLoginLink hat allowInternalRecipient).
 
@@ -34,6 +40,7 @@ const MARKER = 'SMOKE-LOGIN-OHNE-LINK'
 const OUT = 'scripts/smoke/.kunde-login-ohne-link-seed.json'
 const RESULT = 'scripts/smoke/.kunde-login-ohne-link-result.json'
 const MAIL_PREFIX = 'smoke-kunde+login-'
+const TEST_TELEFON = '+4915512345678' // Musternummer der Tests; auth.users.phone ohne '+'
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -72,7 +79,10 @@ async function loesche(name, query) {
 }
 
 async function aufraeumen() {
-  const { data: alte, error } = await db.from('leads').select('id, email').ilike('email', `${MAIL_PREFIX}%`)
+  const { data: alte, error } = await db
+    .from('leads')
+    .select('id, email')
+    .or(`email.ilike.${MAIL_PREFIX}%,and(telefon.eq.${TEST_TELEFON},unfallort.eq.${MARKER})`)
   if (error) throw new Error(`leads lesen: ${error.message}`)
   for (const l of alte ?? []) {
     // Falls ein Lauf den Flow weitergeklickt hat: Claim-Satelliten zuerst (Muster termin-absage-seed).
@@ -90,7 +100,7 @@ async function aufraeumen() {
   // Wegwerf-Konten, die der UI-Klick angelegt hat (+ ein etwaiger Negativfall-Ausreisser).
   const weg = (await alleUser()).filter((u) => {
     const e = (u.email ?? '').toLowerCase()
-    return e.startsWith(MAIL_PREFIX) || /^niemand-\d+@example\.test$/.test(e)
+    return e.startsWith(MAIL_PREFIX) || /^niemand-\d+@example\.test$/.test(e) || (u.phone ?? '') === TEST_TELEFON.replace(/^\+/, '')
   })
   for (const u of weg) {
     const { error: dErr } = await db.auth.admin.deleteUser(u.id) // profiles haengt per CASCADE dran
@@ -107,6 +117,10 @@ if (flag('--clean')) {
 
 if (flag('--link')) {
   const seed = liesSeed()
+  if (!seed.email) {
+    console.log('Telefon-Modus: kein Anmelde-Link — Test S faehrt den Code-Weg direkt (SMOKE_PHONE_OTP_CODE).')
+    process.exit(0)
+  }
   const user = await userZuEmail(seed.email)
   if (!user) {
     console.error(`BEFUND: kein auth.users-Konto fuer ${seed.email} — "Anmelde-Link senden" hat kein Konto angelegt.`)
@@ -145,15 +159,20 @@ if (flag('--link')) {
 if (flag('--verify')) {
   const seed = liesSeed()
   const fehler = []
-  const user = await userZuEmail(seed.email)
-  if (!user) fehler.push('auth.users: Konto fehlt')
+  const user = seed.email
+    ? await userZuEmail(seed.email)
+    : (await alleUser()).find((u) => (u.phone ?? '') === String(seed.telefon).replace(/^\+/, '')) ?? null
+  if (!user) fehler.push(seed.email ? 'auth.users: Konto fehlt' : `auth.users: kein Konto mit phone ${seed.telefon}`)
+  if (user && !seed.email && user.email) fehler.push(`auth.users.email sollte NULL sein, ist ${user.email}`)
   let prof = null
   if (user) {
     const { data } = await db.from('profiles').select('rolle, auth_provider, vorname, email').eq('id', user.id).maybeSingle()
     prof = data
   }
   if (prof?.rolle !== 'kunde') fehler.push(`profiles.rolle = ${prof?.rolle ?? 'FEHLT'} (erwartet kunde)`)
-  if (prof && prof.auth_provider !== 'email') fehler.push(`profiles.auth_provider = ${prof.auth_provider} (erwartet email)`)
+  const erwarteterProvider = seed.email ? 'email' : 'phone'
+  if (prof && prof.auth_provider !== erwarteterProvider) fehler.push(`profiles.auth_provider = ${prof.auth_provider} (erwartet ${erwarteterProvider})`)
+  if (prof && !seed.email && prof.email !== null) fehler.push(`profiles.email sollte NULL sein, ist ${prof.email}`)
 
   const { data: links } = await db.from('flow_links').select('token').eq('lead_id', seed.leadId)
   let result = null
@@ -175,7 +194,7 @@ if (flag('--verify')) {
     .eq('system_event', 'kunde_selbst_angemeldet')
   if (!(timeline ?? []).length) fehler.push('nachrichten: kein Eintrag system_event=kunde_selbst_angemeldet am Seed-Lead')
 
-  const neg = await userZuEmail(seed.negativEmail)
+  const neg = seed.negativEmail ? await userZuEmail(seed.negativEmail) : null
   if (neg) fehler.push(`Negativfall: fuer ${seed.negativEmail} wurde ein Konto angelegt (Signup-Leck)`)
 
   console.log(
@@ -204,15 +223,17 @@ if (flag('--verify')) {
 // ---- Seed ----------------------------------------------------------------------------------
 await aufraeumen()
 const ts = Date.now()
-const email = `${MAIL_PREFIX}${ts}@claimondo.de`
-const negativEmail = `niemand-${ts}@example.test`
+const telefonModus = flag('--telefon')
+const email = telefonModus ? null : `${MAIL_PREFIX}${ts}@claimondo.de`
+const negativEmail = telefonModus ? null : `niemand-${ts}@example.test`
+const telefon = telefonModus ? TEST_TELEFON : null
 
 const { data: lead, error: lErr } = await db
   .from('leads')
   .insert({
     status: 'flow-gesendet',
     email,
-    telefon: null, // Regel 4: keine echten Kunden-Comms
+    telefon, // Regel 4: null (E-Mail-Weg) oder die Musternummer (Telefon-Weg, nur mit Supabase-Test-Nummer)
     vorname: 'Smoke',
     nachname: 'Login ohne Link',
     schuldfrage: 'gegner',
@@ -246,6 +267,18 @@ if (fErr) throw new Error(`flow_links: ${fErr.message}`)
 
 writeFileSync(
   OUT,
-  JSON.stringify({ leadId: lead.id, email, negativEmail, flowToken: fl.token, erstelltAm: new Date().toISOString() }, null, 2),
+  JSON.stringify(
+    {
+      leadId: lead.id,
+      email,
+      telefon,
+      otpCode: telefonModus ? (process.env.SMOKE_PHONE_OTP_CODE ?? null) : null,
+      negativEmail,
+      flowToken: fl.token,
+      erstelltAm: new Date().toISOString(),
+    },
+    null,
+    2,
+  ),
 )
-console.log(`Seed: Lead ${lead.id} <${email}> ohne Claim, ohne Konto; FlowLink ${fl.token.slice(0, 8)}… -> ${OUT}`)
+console.log(`Seed: Lead ${lead.id} <${email ?? telefon}> ohne Claim, ohne Konto; FlowLink ${fl.token.slice(0, 8)}… -> ${OUT}`)
