@@ -10,7 +10,7 @@
 // (docs/2026-09-04-copy-audit-marketingseiten.md).
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join, relative, extname } from 'node:path'
-import { scanRdg, scanUmlaute, scanTitleBrandTwice, scanAnrede, scanAnredeImperativ } from './lib/copy-lint-scan.mjs'
+import { scanRdg, scanUmlaute, scanTitleBrandTwice, scanAnrede, scanAnredeImperativ, scanAnredeGemischt } from './lib/copy-lint-scan.mjs'
 
 const ROOT = process.cwd()
 const ROOTS = ['claimondo-marketing', 'autounfall-io', 'kfz-gutachter-koeln', 'kfz-gutachter-duesseldorf', 'kfz-gutachter-bonn', 'kfz-gutachter-aachen', 'kfz-gutachter-wuppertal']
@@ -177,6 +177,12 @@ for (const f of SCAN_FILES) {
     // Zweite Achse: Befehlsform ohne Pronomen ("Beschreibe das Problem"). Sie laeuft nur auf
     // kundensichtbaren Flaechen — intern bleibt das Du (Aaron 06.09.), s. imperativGeprueft.
     if (isGerman && !/\.json$/.test(rel) && imperativGeprueft(rel, nurAnrede) && !ANREDE_DATEI_AUSNAHMEN.some((a) => a.test(rel))) for (const w of scanAnredeImperativ(text)) findings.push({ file: rel, line, code: 'anrede-imperativ', match: w })
+    // Dritte Anrede-Achse: Sie UND Du im SELBEN Satz. Laeuft BEWUSST auch auf `.json` —
+    // der pauschale JSON-Ausschluss zwei Zeilen hoeher ist fuer DATEN-JSONs gedacht
+    // ("DU Beeckerwerth") und nimmt dabei `src/i18n/messages/de.json` mit, wo die meisten
+    // nutzersichtbaren Texte der App stehen. Eine Mischung ist dort immer ein Fehler,
+    // auch auf Flaechen, die bewusst duzen — deshalb ist diese Achse hier sicher.
+    if (isGerman && !ANREDE_DATEI_AUSNAHMEN.some((a) => a.test(rel))) for (const w of scanAnredeGemischt(text)) findings.push({ file: rel, line, code: 'anrede-gemischt', match: w })
     if (!nurAnrede && (/title/i.test(text) || /\|\s*Claimondo/.test(text))) if (scanTitleBrandTwice(text)) findings.push({ file: rel, line, code: 'title-brand-twice', match: text.slice(0, 80) })
   }
 }
@@ -185,7 +191,7 @@ const byFile = {}
 for (const f of findings) (byFile[f.file] ??= []).push(f)
 const files = Object.keys(byFile).sort()
 for (const file of files) { console.log(file); for (const f of byFile[file].slice(0, 12)) console.log(`  L${f.line} [${f.code}] ${f.match}`); if (byFile[file].length > 12) console.log(`  … +${byFile[file].length - 12}`) }
-console.log(`\ncopy-lint: ${findings.length} Treffer in ${files.length} Files (RDG: ${findings.filter(f => f.code.startsWith('rdg')).length}, Umlaut: ${findings.filter(f => f.code === 'umlaut').length}, Titel: ${findings.filter(f => f.code === 'title-brand-twice').length}, Anrede-Du: ${findings.filter(f => f.code === 'anrede-du').length}, Anrede-Imperativ: ${findings.filter(f => f.code === 'anrede-imperativ').length})`)
+console.log(`\ncopy-lint: ${findings.length} Treffer in ${files.length} Files (RDG: ${findings.filter(f => f.code.startsWith('rdg')).length}, Umlaut: ${findings.filter(f => f.code === 'umlaut').length}, Titel: ${findings.filter(f => f.code === 'title-brand-twice').length}, Anrede-Du: ${findings.filter(f => f.code === 'anrede-du').length}, Anrede-Imperativ: ${findings.filter(f => f.code === 'anrede-imperativ').length}, Anrede-gemischt: ${findings.filter(f => f.code === 'anrede-gemischt').length})`)
 
 if (mode === 'update') { writeFileSync(BASELINE, JSON.stringify({ files }, null, 2) + '\n'); console.log(`Baseline geschrieben: ${files.length} Files`); process.exit(0) }
 if (mode === 'ratchet') {

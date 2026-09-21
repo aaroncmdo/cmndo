@@ -501,7 +501,7 @@
     "step_summary": {
       "heading": "Hallo {name}!",
       "heading_ohne_name": "Hallo!",
-      "sub": "Bitte prüfen Sie und korrigier Ihre Daten.",
+      "sub": "Bitte prüfen und korrigieren Sie Ihre Daten.",
       "fields": {
         "vorname": "Vorname",
         "nachname": "Nachname",
@@ -5223,7 +5223,7 @@
     },
     "vollmachtUnterschreiben": {
       "titel": "Vollmacht unterschreiben",
-      "beschreibung": "Ihre Partnerkanzlei LexDrive schickt Ihnen die Vollmacht per WhatsApp. Bitte unterschreib sie dort — danach übernimmt LexDrive die Verhandlung mit der Versicherung.",
+      "beschreibung": "Ihre Partnerkanzlei LexDrive schickt Ihnen die Vollmacht per WhatsApp. Bitte unterschreiben Sie sie dort — danach übernimmt LexDrive die Verhandlung mit der Versicherung.",
       "cta": "Jetzt bestätigen"
     },
     "vsAntwortAbwarten": {
