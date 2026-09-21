@@ -22,8 +22,13 @@ import { useDropzone } from 'react-dropzone'
 import { UploadCloudIcon, CheckCircle2Icon, FileTextIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
 import { uploadSvPflichtdokument } from '@/lib/actions/sv-verifizierung-actions'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { SvUnterschriftsfeldKnopf } from '@/components/sv/UnterschriftsfeldKnopf'
+import type { DokumentZustand } from '@/lib/sv/unterschriftsfeld'
 
-export type DokumentSlotStatus = 'leer' | 'hochgeladen' | 'geprueft' | 'abgelehnt'
+// 20.09.2026: Der Schritt führt ausschließlich die vier Unterlagen, die der Kunde
+// mit-signiert. Für sie gilt seit Aarons Entscheidung „das Unterschriftsfeld muss gesetzt
+// werden": 'feld_fehlt' heißt Datei da, aber noch nicht im Kundenflow.
+export type DokumentSlotStatus = DokumentZustand
 
 export type DokumentSlotState = {
   slotId: string
@@ -84,6 +89,9 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
   })
   const [uploading, setUploading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Zählt je Slot hoch, sobald frisch hochgeladen wurde — remountet den Feld-Knopf, der sich
+  // dann selbst öffnet (der Editor kommt direkt nach dem Upload, ohne zweiten Klick).
+  const [frisch, setFrisch] = useState<Record<string, number>>({})
 
   const setSlot = useCallback((slotId: string, next: DokumentSlotState) => {
     setSlots((prev) => ({ ...prev, [slotId]: next }))
@@ -109,7 +117,14 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
           setError(result.error)
           return
         }
-        setSlot(slotId, { slotId, status: 'hochgeladen', adminNotiz: null })
+        setSlot(slotId, {
+          slotId,
+          status: result.braucht_unterschriftsfeld ? 'feld_fehlt' : 'aktiv',
+          adminNotiz: null,
+        })
+        if (result.braucht_unterschriftsfeld) {
+          setFrisch((prev) => ({ ...prev, [slotId]: (prev[slotId] ?? 0) + 1 }))
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
       } finally {
@@ -166,8 +181,10 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
               key={def.slotId}
               def={def}
               state={slots[def.slotId]}
+              frisch={frisch[def.slotId] ?? 0}
               uploading={uploading === def.slotId}
               onUpload={(file) => handleUpload(def.slotId, file)}
+              onFeldGesetzt={() => setSlot(def.slotId, { slotId: def.slotId, status: 'aktiv', adminNotiz: null })}
             />
           ))}
         </div>
@@ -182,8 +199,10 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
               key={def.slotId}
               def={def}
               state={slots[def.slotId]}
+              frisch={frisch[def.slotId] ?? 0}
               uploading={uploading === def.slotId}
               onUpload={(file) => handleUpload(def.slotId, file)}
+              onFeldGesetzt={() => setSlot(def.slotId, { slotId: def.slotId, status: 'aktiv', adminNotiz: null })}
             />
           ))}
         </div>
@@ -208,7 +227,8 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">
-        Hochgeladene Dokumente sind sofort aktiv. Sie können sie jederzeit unter „Nachweise“ ersetzen.
+        Nach dem Hochladen setzen Sie einmal die Stelle, an der Ihr Kunde unterschreibt — danach ist das
+        Dokument aktiv. Ersetzen geht jederzeit unter „Nachweise“.
       </p>
     </div>
   )
@@ -216,19 +236,23 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
 
 function isFilled(state?: DokumentSlotState): boolean {
   if (!state) return false
-  return state.status === 'hochgeladen' || state.status === 'geprueft'
+  return state.status === 'aktiv' || state.status === 'aktiv_ohne_feld'
 }
 
 function SlotTile({
   def,
   state,
+  frisch,
   uploading,
   onUpload,
+  onFeldGesetzt,
 }: {
   def: SlotDef
   state?: DokumentSlotState
+  frisch: number
   uploading: boolean
   onUpload: (file: File) => void
+  onFeldGesetzt: () => void
 }) {
   const status = state?.status ?? 'leer'
   const onDrop = useCallback(
@@ -247,10 +271,10 @@ function SlotTile({
   })
 
   const istAbgelehnt = status === 'abgelehnt'
-  const istFrisch = status === 'hochgeladen' || status === 'geprueft'
+  const istFrisch = status === 'aktiv' || status === 'aktiv_ohne_feld' || status === 'feld_fehlt'
 
   if (istFrisch) {
-    const istGeprueft = status === 'geprueft'
+    const feldFehlt = status !== 'aktiv'
     return (
       <div className="border border-claimondo-border rounded-ios-xl p-4 bg-white">
         <div className="flex items-start gap-3">
@@ -260,28 +284,26 @@ function SlotTile({
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-claimondo-navy truncate">{def.label}</p>
             <p className="text-[11px] text-claimondo-ondo flex items-center gap-1 mt-0.5">
-              {istGeprueft ? (
+              {feldFehlt ? (
                 <>
-                  <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600" />
-                  freigegeben
+                  <ClockIcon className="w-3.5 h-3.5 text-warning-strong" />
+                  Unterschriftsfeld fehlt
                 </>
               ) : (
                 <>
-                  <ClockIcon className="w-3.5 h-3.5 text-amber-600" />
-                  wird geprüft
+                  <CheckCircle2Icon className="w-3.5 h-3.5 text-success-strong" />
+                  hochgeladen, Feld gesetzt
                 </>
               )}
             </p>
           </div>
-          {!istGeprueft && (
-            <button
-              type="button"
-              onClick={() => document.getElementById(`reupload-${def.slotId}`)?.click()}
-              className="text-[11px] text-claimondo-ondo hover:underline flex-shrink-0"
-            >
-              Ersetzen
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => document.getElementById(`reupload-${def.slotId}`)?.click()}
+            className="text-[11px] text-claimondo-ondo hover:underline flex-shrink-0"
+          >
+            Ersetzen
+          </button>
           <input
             id={`reupload-${def.slotId}`}
             type="file"
@@ -292,6 +314,17 @@ function SlotTile({
               if (file) onUpload(file)
               e.target.value = ''
             }}
+          />
+        </div>
+        <div className="mt-2 flex flex-col items-start gap-1">
+          <SvUnterschriftsfeldKnopf
+            key={`${def.slotId}-${frisch}`}
+            slotId={def.slotId}
+            slotLabel={def.label}
+            gesetzt={status === 'aktiv'}
+            bestandOhneFeld={status === 'aktiv_ohne_feld'}
+            sofortOeffnen={frisch > 0}
+            onGespeichert={onFeldGesetzt}
           />
         </div>
       </div>

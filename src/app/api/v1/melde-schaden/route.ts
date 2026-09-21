@@ -27,6 +27,8 @@ import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonic
 import { pruefeSchuldfrage } from '@/lib/geo-deeplink/schuldfrage'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { findRecentMcpLead } from '@/lib/api-v1/recent-lead-dedup'
+import { pruefeTelefonTyp, kannKurznachrichtEmpfangen } from '@/lib/telefon/lookup'
+import { toE164 } from '@/lib/format/telefon'
 import {
   phoneWriteCapExceeded,
   globalWriteCapExceeded,
@@ -202,6 +204,14 @@ export async function POST(req: Request) {
   const kundenEmail =
     input.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.email) ? input.email : undefined
 
+  // Kanal-Weiche (Soll-Blatt 2026-09-21-mcp-eingang-haerten, 1c): Leitungstyp VOR der
+  // Versand-Kaskade ermitteln, damit die Antwort dem Assistenten sagen kann, ob WhatsApp/SMS
+  // ueberhaupt in Frage kommen. Fail-open — 'unbekannt' bei jedem Fehler, kein Lead haengt daran.
+  // ⚠ KEIN Phantom-Filter: Twilio haelt auch nicht vergebene deutsche Mobilnummern fuer gueltig
+  // und 'reachable' (gemessen 21.09.). Das klaert erst der SMS-Code.
+  const telefonPruefung = await pruefeTelefonTyp(toE164(input.telefon) ?? input.telefon)
+  const nummerTraegtKurznachricht = kannKurznachrichtEmpfangen(telefonPruefung.typ)
+
   const payload: EmbedAnfrageInput = {
     name: input.name,
     telefon: input.telefon,
@@ -308,6 +318,16 @@ export async function POST(req: Request) {
     }
   }
 
+  // Der Befund gehoert an den Lead, nicht nur in die Tool-Antwort: der Dispatcher sieht dort,
+  // WARUM kein Kanal getragen hat. Non-critical — ein Fehlschlag darf den Lead nicht kippen.
+  if (issued.leadId) {
+    const { error: typFehler } = await admin
+      .from('leads')
+      .update({ telefon_typ: telefonPruefung.typ, telefon_geprueft_am: new Date().toISOString() })
+      .eq('id', issued.leadId)
+    if (typFehler) console.warn('[melde-schaden] telefon_typ nicht gespeichert:', typFehler.message)
+  }
+
   const terminHinweis = reserviert
     ? 'Termin beim gewählten Gutachter reserviert. '
     : input.slot_start
@@ -359,10 +379,18 @@ export async function POST(req: Request) {
         ? { reservierung_grund: klassifiziereReservierungsGrund(reservierungFehler, reservierungCode) }
         : {}),
       kanal: issued.kanal,
+      telefon_typ: telefonPruefung.typ,
       hinweis:
         issued.kanal === 'none'
-          ? `${terminHinweis}Anfrage angelegt; kein Kontakt-Kanal erreichbar — Dispatch kontaktiert manuell.`
-          : `${terminHinweis}Lead angelegt; persönlicher FlowLink per ${issued.kanal} an den Kunden versandt. Kein Link im Chat (Datenschutz).`,
+          ? `${terminHinweis}Anfrage angelegt; kein Kontakt-Kanal erreichbar — Dispatch kontaktiert manuell.` +
+            (!nummerTraegtKurznachricht
+              ? ' Die angegebene Nummer ist ein FESTNETZ-Anschluss: WhatsApp und SMS erreichen den Kunden dort nicht.' +
+                ' Bitte frage nach einer E-Mail-Adresse und melde den Schaden damit erneut — sonst hat der Kunde keinen Weg in seinen Vorgang.'
+              : ' Bitte frage nach einer E-Mail-Adresse und melde den Schaden damit erneut.')
+          : `${terminHinweis}Lead angelegt; persönlicher FlowLink per ${issued.kanal} an den Kunden versandt. Kein Link im Chat (Datenschutz).` +
+            (!kundenEmail && issued.kanal !== 'email'
+              ? ' Hinweis: ohne E-Mail-Adresse gibt es keine Rückfallebene, falls die Nachricht nicht ankommt.'
+              : ''),
     },
     200,
   )

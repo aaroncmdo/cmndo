@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { CheckCircleIcon, ClockIcon, XCircleIcon, FileTextIcon, IdCardIcon } from 'lucide-react'
 import QualiSlotUpload from './QualiSlotUpload'
+import KundenUnterlageAktion from './KundenUnterlageAktion'
+import { dokumentZustand, type DokumentZustand } from '@/lib/sv/unterschriftsfeld'
 
 // AAR-359 W5 + AAR-515 v4.1 + AAR-360: Nachweise-Übersicht für SVs.
 //
@@ -27,6 +29,8 @@ type QualiSlot = {
   nummerLabel: string | null
   /** Wirkt im Kundenflow (SA-Tool/FlowLink) — im Gegensatz zu Nachweisen und Quali-Belegen. */
   kundenflow: boolean
+  /** Zustand inkl. „Datei da, aber Unterschriftsfeld fehlt" (Aaron 20.09.2026). */
+  zustand: DokumentZustand
 }
 
 export default async function VerifizierungPage() {
@@ -84,19 +88,36 @@ export default async function VerifizierungPage() {
   // (Policy-Zweig sv_id = eigener SV). Vorher lieferte dieser Read IMMER 0 Zeilen.
   const { data: pdRows } = await supabase
     .from('pflichtdokumente')
-    .select('dokument_typ, status, hochgeladen_am')
+    .select('dokument_typ, status, hochgeladen_am, dokument_url, signatur_position')
     .eq('sv_id', sv.id)
     .in('dokument_typ', slotDefs.map((s) => s.slotId))
   const rowBySlot = new Map(
-    (pdRows ?? []).map((r) => [r.dokument_typ as string, { status: r.status as string | null, hochgeladenAm: r.hochgeladen_am as string | null }]),
+    (pdRows ?? []).map((r) => [
+      r.dokument_typ as string,
+      {
+        status: r.status as string | null,
+        hochgeladenAm: r.hochgeladen_am as string | null,
+        dokumentUrl: (r.dokument_url as string | null) ?? null,
+        signaturPosition: (r as { signatur_position?: unknown }).signatur_position ?? null,
+      },
+    ]),
   )
 
-  const qualiSlots: QualiSlot[] = slotDefs.map((s) => ({
-    ...s,
-    status: rowBySlot.get(s.slotId)?.status ?? null,
-    hochgeladenAm: rowBySlot.get(s.slotId)?.hochgeladenAm ?? null,
-  }))
-  const anzahlDa = qualiSlots.filter((s) => s.status === 'hochgeladen' || s.status === 'geprueft').length
+  const qualiSlots: QualiSlot[] = slotDefs.map((s) => {
+    const row = rowBySlot.get(s.slotId)
+    return {
+      ...s,
+      status: row?.status ?? null,
+      hochgeladenAm: row?.hochgeladenAm ?? null,
+      zustand: dokumentZustand({
+        dokument_typ: s.slotId,
+        status: row?.status ?? null,
+        dokument_url: row?.dokumentUrl ?? null,
+        signatur_position: row?.signaturPosition ?? null,
+      }),
+    }
+  })
+  const anzahlDa = qualiSlots.filter((s) => s.zustand === 'aktiv' || s.zustand === 'aktiv_ohne_feld').length
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
@@ -114,8 +135,9 @@ export default async function VerifizierungPage() {
         </div>
         <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-ios-lg px-3 py-2">
           Sicherungsabtretung oder Honorarvereinbarung, Datenschutzerklärung und Widerrufsbelehrung legen wir
-          Ihren Kunden bei der Unterschrift im Claimondo-Flow vor — sobald Sie sie hochgeladen haben. Fehlt ein
-          Dokument, läuft die Unterschrift trotzdem; der Kunde sieht dann nur die Claimondo-Unterlagen.
+          Ihren Kunden bei der Unterschrift im Claimondo-Flow vor. Nach dem Hochladen setzen Sie einmal die Stelle,
+          an der Ihr Kunde unterschreibt — erst dann geht das Dokument mit. Fehlt ein Dokument, läuft die
+          Unterschrift trotzdem; der Kunde sieht dann nur die Claimondo-Unterlagen.
         </p>
       </section>
 
@@ -133,7 +155,7 @@ export default async function VerifizierungPage() {
             const istFreigegeben = slot.status === 'geprueft'
             const istHochgeladen = slot.status === 'hochgeladen' || !!slot.hochgeladenAm
             return (
-              <div key={slot.slotId} className="py-3 flex items-start justify-between gap-3" data-slot-id={slot.slotId} data-slot-status={slot.status ?? 'leer'}>
+              <div key={slot.slotId} className="py-3 flex items-start justify-between gap-3" data-slot-id={slot.slotId} data-slot-status={slot.status ?? 'leer'} data-slot-zustand={slot.zustand}>
                 <div className="flex items-start gap-2.5 flex-1 min-w-0">
                   <div className="w-8 h-8 rounded-ios-lg bg-claimondo-ondo/10 flex items-center justify-center shrink-0">
                     <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
@@ -160,12 +182,22 @@ export default async function VerifizierungPage() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <SlotBadge status={slot.status} hochgeladenAm={slot.hochgeladenAm} />
-                  <QualiSlotUpload
-                    slotId={slot.slotId}
-                    disabled={istFreigegeben}
-                    label={istHochgeladen ? 'Neu hochladen' : 'Hochladen'}
-                  />
+                  <SlotBadge zustand={slot.zustand} hochgeladenAm={slot.hochgeladenAm} />
+                  {slot.kundenflow ? (
+                    <KundenUnterlageAktion
+                      slotId={slot.slotId}
+                      label={slot.label}
+                      dateiDa={slot.zustand !== 'leer'}
+                      feldGesetzt={slot.zustand === 'aktiv'}
+                      bestandOhneFeld={slot.zustand === 'aktiv_ohne_feld'}
+                    />
+                  ) : (
+                    <QualiSlotUpload
+                      slotId={slot.slotId}
+                      disabled={istFreigegeben}
+                      label={istHochgeladen ? 'Neu hochladen' : 'Hochladen'}
+                    />
+                  )}
                 </div>
               </div>
             )
@@ -180,32 +212,32 @@ export default async function VerifizierungPage() {
   )
 }
 
-// Status-Werte aus pflichtdokumente.status: null (nichts da), 'ausstehend' (angefordert),
-// 'hochgeladen' (da, sofort aktiv), 'geprueft' (von Claimondo freigegeben — nur für
-// Quali-Nachweise relevant), 'abgelehnt'.
-function SlotBadge({ status, hochgeladenAm }: { status: string | null; hochgeladenAm: string | null }) {
-  if (status === 'geprueft') {
+// Zustände aus dokumentZustand(): 'leer' (nichts da), 'feld_fehlt' (Datei da, aber das
+// Kunden-Unterschriftsfeld fehlt — geht NICHT zum Kunden), 'aktiv_ohne_feld' (Bestand von vor
+// dem 20.09.: läuft mit angehängter Unterschriftsseite), 'aktiv', 'abgelehnt'.
+function SlotBadge({ zustand, hochgeladenAm }: { zustand: DokumentZustand; hochgeladenAm: string | null }) {
+  if (zustand === 'feld_fehlt') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-soft text-success-strong text-[10px] font-medium shrink-0">
-        <CheckCircleIcon className="w-3 h-3" /> Freigegeben
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[10px] font-medium shrink-0">
+        <ClockIcon className="w-3 h-3" /> Unterschriftsfeld fehlt
       </span>
     )
   }
-  if (status === 'abgelehnt') {
+  if (zustand === 'abgelehnt') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-danger-soft text-danger-strong text-[10px] font-medium shrink-0">
         <XCircleIcon className="w-3 h-3" /> Bitte erneut hochladen
       </span>
     )
   }
-  if (status === 'hochgeladen' || hochgeladenAm) {
+  if (zustand === 'aktiv' || zustand === 'aktiv_ohne_feld') {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-soft text-success-strong text-[10px] font-medium shrink-0">
         <CheckCircleIcon className="w-3 h-3" /> Hochgeladen
       </span>
     )
   }
-  if (status === 'ausstehend') {
+  if (hochgeladenAm) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[10px] font-medium shrink-0">
         <ClockIcon className="w-3 h-3" /> Angefordert

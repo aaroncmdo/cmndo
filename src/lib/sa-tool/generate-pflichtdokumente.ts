@@ -31,6 +31,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { waehleSignaturKonfig, type SignaturKonfig } from '@/lib/sv/unterschriftsfeld'
 
 // AAR-360 Follow-up: NUR signatur-pflichtige Dokumente. Datenschutzerklärung +
 // Widerrufsbelehrung sind entkoppelt (Zustimmung via FlowLink-Häkchen, nicht Signatur).
@@ -65,18 +66,9 @@ export const SIGNIERT_SICHTBAR_FUER: readonly string[] = [
   'kunde',
 ]
 
-/** Klick-Editor-Konfig je Slot (admin gepflegt unter /admin/vertraege). */
-type KlickKonfig = {
-  page: number
-  x: number
-  y: number
-  width: number
-  height: number
-  datum_x?: number
-  datum_y?: number
-  name_x?: number
-  name_y?: number
-}
+/** Klick-Editor-Konfig je Slot (admin gepflegt unter /admin/vertraege).
+ *  Deckungsgleich mit der Position, die der Gutachter selbst setzt — deshalb der geteilte Typ. */
+type KlickKonfig = SignaturKonfig
 
 /** Liest die jüngste Klick-Editor-Konfig für den Slot (JSON-Sidecar im
  *  Storage). Liefert null wenn kein Editor-Eintrag vorhanden. */
@@ -144,7 +136,7 @@ export async function generateGutachterPflichtdokumente(
   // Vorhandene Pflichtdokumente des SVs laden
   const { data: pflichtRows, error: pflichtErr } = await args.admin
     .from('pflichtdokumente')
-    .select('id, dokument_typ, status, dokument_url')
+    .select('id, dokument_typ, status, dokument_url, signatur_position')
     .eq('sv_id', args.svId)
     .in('dokument_typ', PFLICHT_SLOTS as unknown as string[])
 
@@ -197,10 +189,18 @@ export async function generateGutachterPflichtdokumente(
     }
 
     try {
-      // Klick-Konfig aus dem Vertragseditor laden (falls Admin gepflegt).
-      // Wenn vorhanden: Position-Merge direkt aufs Original-PDF;
-      // sonst: Fallback auf Anhang-Seite.
-      const klickKonfig = await loadKlickKonfig(args.admin, slotId)
+      // Wo unterschreibt der Kunde? Drei Stufen, in dieser Reihenfolge (Aaron 20.09.2026:
+      // „ja aber das Unterschriftsfeld muss gesetzt werden“):
+      //   1. die Position, die DIESER Gutachter auf SEINEM Dokument gesetzt hat
+      //      (pflichtdokumente.signatur_position — seit Migration 20260920160631),
+      //   2. sonst die globale Admin-Vorlage aus /admin/vertraege (JSON-Sidecar),
+      //   3. sonst: Anhang-Seite (Bestandsverhalten für Dokumente von vor dem 20.09.).
+      // Der Sidecar wird nur gelesen, wenn Stufe 1 fehlt — spart einen Storage-List-Aufruf.
+      const eigenePosition = (row as { signatur_position?: unknown }).signatur_position ?? null
+      const klickKonfig = waehleSignaturKonfig(
+        eigenePosition,
+        eigenePosition ? null : await loadKlickKonfig(args.admin, slotId),
+      )
 
       const result = await mergeOneDoc({
         admin: args.admin,
