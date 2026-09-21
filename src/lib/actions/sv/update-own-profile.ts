@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 
 // BUG-91: Server Action fuer das eigene SV-Profil. Erlaubt einem
 // Sachverstaendigen, seine eigenen Stammdaten + Firmen-Felder zu pflegen.
@@ -79,14 +78,56 @@ export async function updateOwnProfile(
     hrb: input.hrb?.trim() || null,
   }
 
-  // Standort nur updaten wenn vom Frontend mitgeschickt (Google Places hat
-  // das Place-Objekt, lat/lng ohne Adresse waere ungueltig).
+  // Standort nur updaten wenn vom Frontend mitgeschickt.
+  //
+  // ⚠ Die Koordinaten des Browsers sind NICHT verlaesslich (Aaron 21.09.2026). Sie stammen
+  // aus dem Adress-Vorschlag; wer die Anschrift frei tippt — und im Fallback-Feld ohne
+  // Vorschlagsliste geht es gar nicht anders — schickt die ALTEN lat/lng zur NEUEN Adresse
+  // zurueck. Ergebnis war eine stille Drift: umgezogener SV, Kartenpunkt und Einsatzgebiet
+  // bleiben am alten Ort. Das ist schaedlicher als eine fehlende Koordinate, weil es wie ein
+  // gepflegter Datensatz aussieht.
+  //
+  // Deshalb: hat sich die Adresse geaendert, ohne dass FRISCHE Koordinaten mitkamen, wird
+  // server-seitig neu ermittelt (Mapbox mit PLZ, dann PLZ-Mittelpunkt).
+  let neueKoordinaten: { lat: number; lng: number } | null = null
+
   if (input.standort_adresse) {
+    const { data: bisher } = await supabase
+      .from('sachverstaendige')
+      .select('standort_adresse, standort_lat, standort_lng')
+      .eq('profile_id', user.id)
+      .limit(1)
+      .maybeSingle()
+
+    const adresseGeaendert =
+      (bisher?.standort_adresse ?? '').trim().toLowerCase() !==
+      input.standort_adresse.trim().toLowerCase()
+    const koordinatenSindDieAlten =
+      input.standort_lat != null &&
+      input.standort_lng != null &&
+      Number(bisher?.standort_lat) === input.standort_lat &&
+      Number(bisher?.standort_lng) === input.standort_lng
+    const koordinatenFehlen = input.standort_lat == null || input.standort_lng == null
+
+    if (adresseGeaendert && (koordinatenFehlen || koordinatenSindDieAlten)) {
+      const { ermittleStandort } = await import('@/lib/sv/standort-geocoding')
+      const geo = await ermittleStandort(supabase, {
+        adresse: input.standort_adresse,
+        plz: input.standort_plz ?? null,
+      })
+      if (geo.ok) neueKoordinaten = { lat: geo.lat, lng: geo.lng }
+    } else if (!koordinatenFehlen) {
+      neueKoordinaten = { lat: input.standort_lat!, lng: input.standort_lng! }
+    }
+
     svUpdate.standort_adresse = input.standort_adresse
     svUpdate.standort_plz = input.standort_plz ?? null
-    svUpdate.standort_lat = input.standort_lat ?? null
-    svUpdate.standort_lng = input.standort_lng ?? null
-    svUpdate.standort_place_id = input.standort_place_id ?? null
+    svUpdate.standort_lat = neueKoordinaten?.lat ?? null
+    svUpdate.standort_lng = neueKoordinaten?.lng ?? null
+    // Die place_id gehoert zum Vorschlag. Wurde server-seitig neu ermittelt, passt sie nicht
+    // mehr zur Koordinate und wird fallengelassen, statt eine falsche Herkunft zu behaupten.
+    svUpdate.standort_place_id =
+      neueKoordinaten && koordinatenFehlen ? null : input.standort_place_id ?? null
   }
 
   const { error: svErr } = await supabase
@@ -100,31 +141,29 @@ export async function updateOwnProfile(
 
   // BUG-90: Wenn der SV seinen Standort geaendert hat, Isochrone neu berechnen
   // (fuettert die Dispatch-/Mitarbeiter-Umkreis-Views + die Termin-Engine).
-  // Defensive try/catch — Profil-Update klappt auch wenn die Berechnung failt.
-  if (input.standort_lat != null && input.standort_lng != null) {
-    try {
-      const { data: svRow } = await supabase
-        .from('sachverstaendige')
-        .select('id, paket_umkreis_km')
-        .eq('profile_id', user.id)
-        .limit(1)
-        .maybeSingle()
-      if (svRow) {
-        const radiusKm = svRow.paket_umkreis_km ?? 15
-        const polygon = await calculateIsochrone(
-          input.standort_lat,
-          input.standort_lng,
-          radiusKm,
-        )
-        if (polygon.length > 0) {
-          await supabase
-            .from('sachverstaendige')
-            .update({ isochrone_polygon: polygon })
-            .eq('id', svRow.id)
-        }
-      }
-    } catch (err) {
-      console.error('[BUG-90] Isochrone-Recalc nach Profil-Update fehlgeschlagen:', err)
+  //
+  // 21.09.2026: laeuft auf den TATSAECHLICH gespeicherten Koordinaten, nicht mehr auf denen
+  // aus dem Browser — sonst haette ein umgezogener SV ein Einsatzgebiet um seinen alten Ort
+  // bekommen. Die Berechnung selbst liegt im gemeinsamen Helfer, den auch die
+  // Selbst-Registrierung nutzt.
+  if (neueKoordinaten) {
+    const { data: svRow } = await supabase
+      .from('sachverstaendige')
+      .select('id, paket_umkreis_km')
+      .eq('profile_id', user.id)
+      .limit(1)
+      .maybeSingle()
+    if (svRow) {
+      const { stelleIsochroneSicher, STANDARD_UMKREIS_KM } = await import(
+        '@/lib/sv/standort-geocoding'
+      )
+      await stelleIsochroneSicher(
+        supabase,
+        svRow.id,
+        neueKoordinaten.lat,
+        neueKoordinaten.lng,
+        svRow.paket_umkreis_km ?? STANDARD_UMKREIS_KM,
+      )
     }
   }
 
