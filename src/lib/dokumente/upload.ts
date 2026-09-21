@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 
 // KFZ-172 Phase 2: Upload-Server-Action fuer Fall-Dokumente.
 // Speichert in Supabase Storage Bucket 'fall-dokumente' und erstellt
@@ -111,13 +112,31 @@ export async function uploadFallDokument(
   revalidatePath(`/gutachter/fall/${fallId}`, 'page')
 
   // KFZ-172 Phase 3: OCR triggern (fire & forget, async)
+  //
+  // Ein server-seitiger fetch() hat KEINEN Cookie-Jar. /api/ocr-trigger weist per
+  // Cookie aus (createClient + auth.getUser) und antwortet ohne Session mit 401 —
+  // und zwar VOR dem ersten Status-Schreiben ('processing'). Genau deshalb lagen am
+  // 21.09.2026 281 Dokumente auf 'pending' (davon 198 Fahrzeugscheine) und KEINES
+  // auf processing/done/failed: die Route wurde nie erreicht. Positivkontrolle:
+  // POST ohne Cookie gegen prod -> 401 {"error":"Nicht angemeldet"}, auch bei
+  // leerem Body (die Auth-Weiche greift vor jeder anderen Pruefung).
+  // Die Cookies des Aufrufers muessen darum explizit mitgereicht werden.
   if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+    const cookieHeader = (await cookies())
+      .getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join('; ')
     fetch(`${baseUrl}/api/ocr-trigger`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
       body: JSON.stringify({ dokument_id: row.id }),
-    }).catch(() => {})
+    })
+      .then((res) => {
+        // Antwort NICHT verwerfen: ein abgelehnter Anstoss war bisher unsichtbar.
+        if (!res.ok) console.error(`[OCR] Anstoss fuer ${row.id} abgelehnt: HTTP ${res.status}`)
+      })
+      .catch((err) => console.error(`[OCR] Anstoss fuer ${row.id} nicht zugestellt:`, err))
   }
 
   return { success: true, dokumentId: row.id }
