@@ -432,19 +432,19 @@ export default function SvDispatchPanel({
             <ul className="space-y-1 pl-1">
               {!hardGateDetails.q1 && (
                 <li className="text-xs text-warning-strong flex items-center gap-2">
-                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-warning-soft text-[10px] font-bold shrink-0">1</span>
+                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-warning-soft text-xs font-bold shrink-0">1</span>
                   Unfallhergang + Schuldfrage fehlt (oder Teilschuld noch nicht bestätigt)
                 </li>
               )}
               {!hardGateDetails.q2 && (
                 <li className="text-xs text-warning-strong flex items-center gap-2">
-                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-warning-soft text-[10px] font-bold shrink-0">2</span>
+                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-warning-soft text-xs font-bold shrink-0">2</span>
                   Schaden nicht bestätigt (Schaden sichtbar, Personenschaden, Mietwagen oder Nutzungsausfall)
                 </li>
               )}
               {!hardGateDetails.q3 && (
                 <li className="text-xs text-warning-strong flex items-center gap-2">
-                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-warning-soft text-[10px] font-bold shrink-0">3</span>
+                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-warning-soft text-xs font-bold shrink-0">3</span>
                   Polizei vor Ort — noch nicht beantwortet (Ja oder Nein)
                 </li>
               )}

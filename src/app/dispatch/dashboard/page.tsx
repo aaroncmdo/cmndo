@@ -260,7 +260,7 @@ export default async function DispatchDashboard() {
                 )}
               </div>
               {isOverdue && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
                   <AlertCircleIcon className="w-3 h-3" />
                   Überfällig
                 </span>
@@ -287,7 +287,7 @@ export default async function DispatchDashboard() {
                   </p>
                   <p className="text-xs text-claimondo-ondo">{lead.telefon} {lead.schadens_fall_typ ? `· ${lead.schadens_fall_typ}` : ''}</p>
                 </div>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                   {PHASE_LABELS[lead.qualifizierungs_phase] ?? lead.qualifizierungs_phase}
                 </span>
                 <span className="text-[10px] text-claimondo-ondo/70 whitespace-nowrap">{timeSince(lead.created_at)}</span>

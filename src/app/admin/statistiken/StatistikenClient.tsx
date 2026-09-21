@@ -738,7 +738,7 @@ export default function StatistikenClient({
                     <div key={b.metrik} className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-sm font-medium text-claimondo-navy pr-2">{b.beschreibung}</h4>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
                           b.statusColor === 'green' ? 'bg-success-soft text-success-strong' :
                           b.statusColor === 'amber' ? 'bg-warning-soft text-warning-strong' :
                           b.statusColor === 'blue' ? 'bg-claimondo-ondo/10 text-claimondo-ondo' :

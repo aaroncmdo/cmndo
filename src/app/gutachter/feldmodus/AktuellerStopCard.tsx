@@ -385,7 +385,7 @@ export default function AktuellerStopCard({
             {formatUhrzeit(stop.start_zeit)}
           </span>
           {stop.schadentyp && (
-            <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
+            <span className="ml-auto text-[11px] px-1.5 py-0.5 rounded-full bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
               {stop.schadentyp}
             </span>
           )}

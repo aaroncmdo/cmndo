@@ -34,7 +34,7 @@ export default function LeadTerminGutachterBanner({
               <p className="text-sm font-medium text-claimondo-navy">
                 {formatTerminKurz(info.termin_start)}
                 <span
-                  className={`ml-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}
+                  className={`ml-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}
                 >
                   {terminStatusLabel(info.termin_status)}
                 </span>
@@ -54,7 +54,7 @@ export default function LeadTerminGutachterBanner({
               <p className="text-sm font-medium text-claimondo-navy">
                 {info.gutachter_name ?? 'Gutachter zugewiesen'}
                 <span
-                  className={`ml-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  className={`ml-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
                     info.gutachter_quelle === 'gebucht' ? TONE_BADGE.success : TONE_BADGE.neutral
                   }`}
                 >

@@ -689,7 +689,7 @@ export default function GutachterShell({
                     ? badgeCounts.neueTermine
                     : 0
               return n > 0 ? (
-                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-danger text-white">
+                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-xs font-bold bg-danger text-white">
                   {n > 99 ? '99+' : n}
                 </span>
               ) : null

@@ -94,7 +94,7 @@ export default function PflichtDocMatrix({
         </div>
         <div className="flex items-center gap-2">
           {pflichtOffen > 0 && (
-            <span className="text-[10px] font-medium text-danger bg-danger-soft border border-danger/30 rounded-full px-2 py-0.5">
+            <span className="text-xs font-medium text-danger bg-danger-soft border border-danger/30 rounded-full px-2 py-0.5">
               {pflichtOffen} offen
             </span>
           )}
@@ -182,7 +182,7 @@ export default function PflichtDocMatrix({
                         )}
                         {badge && (
                           <span
-                            className={`text-[10px] font-medium border rounded-full px-2 py-0.5 ${badge.color}`}
+                            className={`text-xs font-medium border rounded-full px-2 py-0.5 ${badge.color}`}
                           >
                             {badge.label}
                           </span>

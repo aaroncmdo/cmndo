@@ -64,7 +64,7 @@ export function DeadPinSlotStep({
               <p className={`text-[0.75rem] ${dunkel ? 'text-white/70' : 'text-claimondo-shield/70'}`}>{dp.distanzGerundet}</p>
             </div>
             {dunkel && (
-              <span className="ml-auto rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-claimondo-navy">
+              <span className="ml-auto rounded-full bg-white/90 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-claimondo-navy">
                 Empfohlen
               </span>
             )}

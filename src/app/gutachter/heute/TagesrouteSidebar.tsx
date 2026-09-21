@@ -88,7 +88,7 @@ function JetztPill({ startIso, endIso }: { startIso: string; endIso: string | nu
     ? 'bg-claimondo-border/40 text-claimondo-ondo/70 border-claimondo-border/60'
     : 'bg-claimondo-ondo/10 text-claimondo-navy border-claimondo-ondo/20'
   return (
-    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${cls}`}>
+    <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded-full border ${cls}`}>
       {label}
     </span>
   )
@@ -174,7 +174,7 @@ export default function TagesrouteSidebar({
         </div>
         {/* Quick-Stats — Pflicht-Dokumente offen, Anzahl Stops mit Adresse */}
         {offeneDokuTotal > 0 && (
-          <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium bg-warning-soft text-warning-strong border border-warning/30 px-2 py-1 rounded-full">
+          <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium bg-warning-soft text-warning-strong border border-warning/30 px-2 py-1 rounded-full">
             <AlertTriangleIcon className="w-3 h-3" />
             <span>{offeneDokuTotal} {offeneDokuTotal === 1 ? 'Pflichtdokument' : 'Pflichtdokumente'} offen</span>
           </div>
@@ -250,7 +250,7 @@ export default function TagesrouteSidebar({
                     </div>
                   )}
                   <span
-                    className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white ${
+                    className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white ${
                       isActive
                         ? 'bg-claimondo-ondo text-white'
                         : 'bg-claimondo-navy text-white'
@@ -273,13 +273,13 @@ export default function TagesrouteSidebar({
                     {!istVerlegt && <JetztPill startIso={t.start_zeit} endIso={t.end_zeit} />}
                     <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                     {pflicht && pflicht.offen > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-warning-soft text-warning-strong px-1.5 py-0.5 rounded-full border border-warning/30">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-warning-soft text-warning-strong px-1.5 py-0.5 rounded-full border border-warning/30">
                         <AlertTriangleIcon className="w-2.5 h-2.5" />
                         {pflicht.offen} Doku offen
                       </span>
                     )}
                     {pflicht && pflicht.offen === 0 && pflicht.gesamt > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-success-soft text-success-strong px-1.5 py-0.5 rounded-full border border-success/30">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-success-soft text-success-strong px-1.5 py-0.5 rounded-full border border-success/30">
                         <CheckCircle2Icon className="w-2.5 h-2.5" />
                         Doku komplett
                       </span>

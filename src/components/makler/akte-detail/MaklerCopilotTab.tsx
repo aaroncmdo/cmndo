@@ -70,7 +70,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
       suggestions={buildSuggestions(gegnerVsName)}
       headerBadge={
         kontextLoaded ? (
-          <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full bg-success/20 text-success-soft border border-success/30">
+          <span className="shrink-0 inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-success/20 text-success-soft border border-success/30">
             <span className="w-1.5 h-1.5 rounded-full bg-success" />
             Fall-Kontext geladen
           </span>
