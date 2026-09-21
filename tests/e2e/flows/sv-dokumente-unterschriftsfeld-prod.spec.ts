@@ -273,18 +273,44 @@ test('E5 · Kunde unterschreibt → signiertes Dokument mit unveränderter Seite
     await page.waitForLoadState('networkidle').catch(() => {})
     await beleg(page, 'e5-flow-start')
 
-    // Bis zum Unterschrifts-Schritt klicken. Der Seed hat alle erhobenen Felder gesetzt, die
-    // Schrittfolge sollte direkt dort stehen — falls doch ein Zwischenschritt kommt, weiter.
+    // Bis zum Unterschrifts-Schritt klicken. Die Strecke ist am 21.09. gegen prod ausgemessen
+    // worden und hat mit diesem Seed drei Klicks:
+    //   1 „Hallo …"        Zusammenfassung, Datenschutz-Häkchen → Weiter
+    //   2 „Ihr persönlicher Gutachter"  zeigt den geseedeten Termin → Weiter
+    //     (der Termin-Schritt entfällt genau deshalb — der Seed hat ihn vorbelegt)
+    //   3 „Wählen Sie Ihre Werkstatt"   → Überspringen
+    //   4 „Beauftragung unterzeichnen"  Canvas
+    // Die Schleife bleibt trotzdem allgemein: sie hakt vor jedem Schritt alle sichtbaren
+    // Zustimmungen an und nimmt den ersten passenden Knopf.
     const canvas = page.locator('canvas').first()
-    for (let runde = 0; runde < 6; runde += 1) {
+    for (let runde = 0; runde < 8; runde += 1) {
       if (await canvas.isVisible().catch(() => false)) break
-      const weiter = page.getByRole('button', { name: /Weiter|Fortfahren|Bestätigen/ }).first()
+      const boxen = page.locator('input[type="checkbox"]:visible')
+      const anzahl = await boxen.count()
+      for (let i = 0; i < anzahl; i += 1) {
+        const box = boxen.nth(i)
+        if (!(await box.isChecked().catch(() => true))) await box.check({ force: true }).catch(() => {})
+      }
+      const weiter = page
+        .getByRole('button', { name: /^(Weiter|Fortfahren|Bestätigen|Überspringen)/ })
+        .first()
       if (!(await weiter.isVisible().catch(() => false))) break
+      if (await weiter.isDisabled().catch(() => false)) break
       await weiter.click()
       await page.waitForLoadState('networkidle').catch(() => {})
-      await page.waitForTimeout(800)
+      await page.waitForTimeout(1500)
     }
     await expect(canvas, 'Signatur-Feld erreicht').toBeVisible({ timeout: 30_000 })
+
+    // Der Unterschrifts-Schritt verlangt eine Wahl: Abrechnungsweg und Serviceumfang. Ohne sie
+    // bleibt „Beauftragung unterschreiben" deaktiviert.
+    for (const wahl of ['Reparatur (in der Werkstatt)', 'Komplettservice']) {
+      const knopf = page.getByRole('button', { name: new RegExp(`^${wahl}`) }).first()
+      if (await knopf.isVisible().catch(() => false)) {
+        await knopf.click().catch(() => {})
+        await page.waitForTimeout(500)
+      }
+    }
 
     const box = await canvas.boundingBox()
     if (!box) throw new Error('Signatur-Canvas ohne BoundingBox')
@@ -296,8 +322,10 @@ test('E5 · Kunde unterschreibt → signiertes Dokument mit unveränderter Seite
     await page.mouse.up()
     await beleg(page, 'e5-unterschrift-gezeichnet')
 
-    await page.getByRole('button', { name: /unterschreiben|Unterschreiben|abschließen/ }).first().click()
-    await page.waitForTimeout(8000) // Konversion + SA-Tool-Merge
+    const absenden = page.getByRole('button', { name: 'Beauftragung unterschreiben' })
+    await expect(absenden, 'Absenden ist freigegeben').toBeEnabled({ timeout: 20_000 })
+    await absenden.click()
+    await page.waitForTimeout(10_000) // Konversion Lead → Fall + SA-Tool-Merge
 
     // Gegenprobe in der Datenbank: entstand ein signiertes Dokument für diesen Slot?
     const db = serviceClient()

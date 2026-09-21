@@ -36,6 +36,9 @@ const KUNDE_PREFIX = 'e2e-svdok-kunde-'
 // Pellworm — weit weg von jedem echten Gutachter, damit der Wegwerf-SV keine echten Leads
 // anzieht und umgekehrt kein echter SV in die Messung geraet.
 const STANDORT = { plz: '25849', ort: 'Pellworm', lat: 54.5206, lng: 8.6494, adresse: 'Pellworm' }
+// Eindeutiger Marker in standort_adresse: daran findet das Aufraeumen auch einen SV wieder,
+// dessen profiles-Zeile schon weg ist (halb fehlgeschlagener Lauf).
+const STANDORT_MARKER = 'E2E-SVDOK Pellworm (Abnahme-Smoke, nicht anrufen)'
 
 const cmd = process.argv[2]
 
@@ -72,18 +75,28 @@ async function create() {
     .insert({
       profile_id: uid,
       firmenname: `Smoke Dokumente ${runId}`,
-      email,
-      telefon: null,
       paket: 'basic',
-      strasse: 'Inselweg 1',
-      plz: STANDORT.plz,
-      ort: STANDORT.ort,
+      // Kontaktdaten liegen auf profiles, NICHT auf sachverstaendige — die Tabelle hat weder
+      // email noch telefon (gepruefte Spalten: firmenname, gebiet_plz, standort_*).
+      // Regel-4-Sicherheit (telefon = NULL) sitzt daher oben im profiles-Upsert.
+      standort_adresse: STANDORT_MARKER,
+      standort_plz: STANDORT.plz,
       standort_lat: STANDORT.lat,
       standort_lng: STANDORT.lng,
+      gutachter_typ: 'kfz-gutachter',
+      onboarding_quelle: 'self_service_neu',
+      onboarding_status: 'abgeschlossen',
+      paket_umkreis_km: 20,
+      paket_faelle_gesamt: 0,
+      paket_faelle_genutzt: 0,
+      offene_faelle: 0,
+      ablehnungen_30_tage: 0,
+      isochrone_polygon: null,
       portal_zugang_freigeschaltet: true,
       ist_aktiv: true,
       verifiziert: true,
       verifiziert_am: new Date().toISOString(),
+      verifizierung_status: 'geprueft',
       vertrag_unterschrieben: false,
       partnervertrag_hinweis_am: null,
       basic_onboarding_abgeschlossen_am: new Date().toISOString(),
@@ -198,6 +211,18 @@ async function create() {
 
 async function cleanup() {
   const geloescht = { profile: 0, sv: 0, leads: 0, claims: 0, termine: 0, dokumente: 0, dateien: 0 }
+
+  // Verwaiste SV-Zeilen (profiles schon weg, SV noch da) ueber den Standort-Marker einsammeln.
+  const { data: verwaiste } = await db
+    .from('sachverstaendige')
+    .select('id, profile_id')
+    .eq('standort_adresse', STANDORT_MARKER)
+    .is('profile_id', null)
+  for (const s of verwaiste ?? []) {
+    const { error } = await db.from('sachverstaendige').delete().eq('id', s.id)
+    if (error) console.warn(`  verwaister SV ${s.id}: ${error.message}`)
+    else geloescht.sv += 1
+  }
 
   const { data: profs, error: profErr } = await db
     .from('profiles')
