@@ -283,6 +283,50 @@ jobs:
         env:
           RUN_MELDUNG_SMOKE: '1'
 
+
+      # ── Aufraeumen: was dieses Tor geseedet hat, raeumt es auch ab ────────────────
+      # Aaron 21.09.2026: „die testdaten raus, immer fuers testen seeden und loeschen".
+      #
+      # ⚠ DIESES TOR war der eigentliche Treiber, nicht der nightly-Job: es faehrt bei
+      # JEDEM PR gegen main, also mehrmals taeglich, und seedet dieselben sechs Fixtures
+      # auf dieselbe prod-DB. Gemessen 21.09.: acht neue Smoke-Werkstaetten in ZWEI
+      # Stunden — nicht in einer Nacht. Alle sechs Seeds kennen `--clean` seit jeher;
+      # aufgerufen hat es hier keiner.
+      #
+      # `if: always()`: gerade der ROTE Lauf darf seine Testdaten nicht hinterlassen —
+      # und rot zu werden ist der Zweck dieses Tores. `continue-on-error`, damit ein
+      # fehlschlagendes Aufraeumen kein gruenes Tor rot faerbt; Reste fangen dann der
+      # stuendliche Cron und sein Zwei-Stunden-Fenster ab (Migration 20260921112500).
+      #
+      # Die Supabase-Secrets stehen workflow-weit (oben, vor `jobs:`) — keine eigene
+      # env-Sektion noetig.
+      # `seed-smoke-enroll.mjs` steht bewusst NICHT hier: es legt nichts an, sondern
+      # setzt ein dauerhaftes Konto faktorfrei zurueck.
+      - name: Cleanup J4 reparatur-weg-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/reparatur-weg-e2e-seed.mjs --clean
+      - name: Cleanup J5 Kasko-Reparatur-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/kasko-reparatur-seed.mjs --clean
+      - name: Cleanup J10 Werkstatt-Finder-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/werkstatt-finder-seed.mjs --clean
+      - name: Cleanup J3 SA-Vollmacht-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/sa-vollmacht-seed.mjs --clean
+      - name: Cleanup J6 Kanzlei-Uebergabe-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/kanzlei-uebergabe-seed.mjs --clean
+      - name: Cleanup J2 Meldung-Kanaele-Fixture
+        if: always()
+        continue-on-error: true
+        run: node scripts/smoke/meldung-kanaele-seed.mjs --clean
+
       - name: Trace-Artefakte
         if: failure()
         uses: actions/upload-artifact@v4
