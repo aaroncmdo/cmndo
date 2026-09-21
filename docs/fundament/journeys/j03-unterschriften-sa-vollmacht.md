@@ -25,6 +25,41 @@ Partnerkanzlei zur rechtlichen Vertretung.
    Damit ist der Fall **kanzlei-übergabe-bereit** (J1-Schritt 7 / J6). **Notif:** — (intern; keine Kunde-Notif nötig).
 4. **Beide Signaturen liegen vor** → der Fall ist vollständig mandatiert; die Direktabrechnungs- + Vertretungs-Kette ist scharf.
 
+### Soll-Delta 20.09.2026 — die SV-Unterlagen tragen die Unterschrift an der Stelle, die der Gutachter setzt
+
+Aaron am 20.09.2026, auf die Frage, ob ein Gutachter-Upload ohne Vier-Augen-Prüfung direkt in den
+Kundenflow darf: **„ja aber das Unterschriftsfeld muss gesetzt werden."**
+
+Mit derselben Unterschrift, mit der der Kunde die SA leistet, werden vier **Unterlagen des
+Gutachters** mit-signiert (Aaron 04.07.): Sicherungsabtretung, Honorarvereinbarung,
+Datenschutzerklärung, Widerrufsbelehrung. Seit dem 19.09. prüft kein Admin mehr, was ein Gutachter
+hochlädt — das gesetzte Feld ist damit die einzige Sicherung, dass die Unterschrift **auf** dem
+Dokument landet.
+
+**Soll je Rolle:**
+
+- **Gutachter:** lädt eine Unterlage hoch (Wizard, Nachweise-Seite oder bezahltes Onboarding) und
+  setzt direkt danach per Klick im angezeigten Dokument die Stelle, an der sein Kunde unterschreibt;
+  Datum und Name sind zusätzlich setzbar. Solange das Feld fehlt, steht am Slot „Unterschriftsfeld
+  fehlt" und das Dokument geht **nicht** zum Kunden. Blockiert wird nichts: Onboarding, Sichtbarkeit,
+  Buchbarkeit und laufende Fälle sind davon unberührt (Beschluss 19.09.).
+- **Admin:** kann dieselbe Stelle in der SV-Akte setzen — er lädt 15 von 17 Unterlagen selbst hoch
+  und ist damit der Hauptweg, nicht die Ausnahme.
+- **Kunde:** unterschreibt wie bisher **einmal** im FlowLink. Das signierte PDF trägt seine
+  Unterschrift ab jetzt an der gesetzten Stelle statt auf einer angehängten Extra-Seite.
+- **Folgezustand:** je Unterlage ein PDF unter `claims/{claimId}/sa/` und eine Zeile in
+  `fall_dokumente` (`kategorie='vertrag-signiert'`), sichtbar für Kunde, SV, KB, Admin, Kanzlei.
+
+**Reihenfolge der Position beim Erzeugen** (`src/lib/sa-tool/generate-pflichtdokumente.ts`):
+1. die Position, die der Gutachter für **sein** Dokument gesetzt hat
+   (`pflichtdokumente.signatur_position`, Migration `20260920160631`);
+2. sonst die globale Admin-Vorlage aus `/admin/vertraege` (JSON-Sidecar);
+3. sonst die angehängte Unterschriftsseite — Bestandsverhalten für Dokumente von vor dem 20.09.
+
+**Messbar erreicht,** wenn nach der ersten Kunden-Unterschrift ein `fall_dokumente`-Eintrag mit
+`kategorie='vertrag-signiert'` existiert, dessen PDF **dieselbe Seitenzahl** hat wie das Original
+(keine Anhangseite). Stand 20.09.2026: **0** solche Zeilen auf prod, seit es die Funktion gibt.
+
 ## Varianten / Abzweige
 
 - **`nur_gutachter`** (Kunde reguliert selbst): **nur SA** (Abtretung an den SV fürs Honorar), **keine Vollmacht** (keine Kanzlei).

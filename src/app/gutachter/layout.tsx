@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import Link from 'next/link'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import GutachterShell from './GutachterShell'
 import { svEigenBrandingErlaubt } from '@/lib/branding/gate'
@@ -21,7 +22,9 @@ export default async function GutachterLayout({
   // AAR-359 W5 / AAR-360: verifizierung_* + gesperrt_* Felder für die
   // Sidebar-Sichtbarkeit (SA-Vorlage-Tier-1 mit AAR-360 entfernt).
   // AAR-512: `gcal_connected` für den generalisierten Onboarding-Banner ergänzt.
-  const svSelect = 'id, logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
+  // 20.09.2026: paket + partnervertrag_hinweis_am für den einmaligen Partnervertrags-Hinweis
+  // an Basic-Gutachter (Aaron: „3 ja" — einmalig, nicht blockierend).
+  const svSelect = 'id, logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected, paket, partnervertrag_hinweis_am'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -78,10 +81,43 @@ export default async function GutachterLayout({
   const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
   const isWillkommenPath = pathname.includes('/gutachter/willkommen')
   const isOnboardingPath = isWillkommenPath || pathname.includes('/gutachter/onboarding')
+  const isVertragPath = pathname.includes('/gutachter/vertrag')
 
   if (!sv || sv.portal_zugang_freigeschaltet === false) {
     if (!isOnboardingPath) {
       redirect('/gutachter/willkommen')
+    }
+  }
+
+  // Aaron 20.09.2026 auf die Frage, ob die Basic-Gutachter ohne Partnervertrag beim nächsten
+  // Login einmalig zur Unterschrift geführt werden: „3 ja".
+  //
+  // Gemessen am selben Tag auf prod: 16 von 22 freigeschalteten Basic-Konten hatten keinen
+  // unterschriebenen Partnervertrag — die Auto-Freischaltung vom 19.09. läuft ohne den
+  // Wizard-Abschluss, der den Vertrag sonst erzeugt.
+  //
+  // EINMALIG und NICHT blockierend: der Marker wird vor dem Redirect gesetzt, deshalb greift
+  // er höchstens einmal je Konto. Wer auf der Vertragsseite „Später erledigen" klickt, landet
+  // im Portal und wird nie wieder umgeleitet — den Weg zurück zeigt der stille Hinweis in der
+  // Oberfläche (GutachterShell), bis unterschrieben ist.
+  const partnervertragOffen =
+    !!sv &&
+    sv.portal_zugang_freigeschaltet === true &&
+    (sv.paket ?? 'standard') === 'basic' &&
+    sv.vertrag_unterschrieben !== true
+  if (partnervertragOffen && !sv.partnervertrag_hinweis_am && !isOnboardingPath && !isVertragPath) {
+    // Marker zuerst: schlägt der Write fehl, wird NICHT umgeleitet — eine Schleife wäre
+    // schlimmer als ein ausgefallener Hinweis.
+    const { error: markerErr } = await supabase
+      .from('sachverstaendige')
+      .update({ partnervertrag_hinweis_am: new Date().toISOString() })
+      .eq('id', sv.id)
+      .is('partnervertrag_hinweis_am', null)
+      .select('id')
+    if (markerErr) {
+      console.error('[gutachter/layout] Partnervertrags-Marker:', markerErr.message)
+    } else {
+      redirect('/gutachter/vertrag?nachholen=1')
     }
   }
 
@@ -114,6 +150,19 @@ export default async function GutachterLayout({
       svId={sv?.id ? String(sv.id) : null}
       onboardingModus={sv?.portal_zugang_freigeschaltet === false}
     >
+      {/* Partnervertrag fehlt (Aaron 20.09.2026: „3 ja") — still und dauerhaft, bis
+          unterschrieben ist. Die Umleitung oben greift nur EINMAL; dieses Band ist danach
+          der einzige Weg zurück zur Unterschrift. Es blockiert nichts: der Gutachter sieht
+          weiterhin alles und bekommt weiterhin Fälle. */}
+      {partnervertragOffen && !isVertragPath && (
+        <div className="border-b border-claimondo-border bg-claimondo-bg px-4 py-2 text-center text-xs text-claimondo-navy">
+          Ihr Partnervertrag ist noch nicht unterschrieben.{' '}
+          <Link href="/gutachter/vertrag" className="font-semibold text-claimondo-ondo underline">
+            Jetzt in einer Minute erledigen
+          </Link>
+        </div>
+      )}
+
       {/* Deaktiviert-Banner */}
       {isDeactivated && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2.5 text-center text-xs text-red-700 font-medium">

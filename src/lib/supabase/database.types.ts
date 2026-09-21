@@ -17093,6 +17093,7 @@ export type Database = {
           person_id: string | null
           pflicht: boolean | null
           quelle: string | null
+          signatur_position: Json | null
           sort_order: number
           spaeter_nachreichen_markiert_am: string | null
           status: string | null
@@ -17115,6 +17116,7 @@ export type Database = {
           person_id?: string | null
           pflicht?: boolean | null
           quelle?: string | null
+          signatur_position?: Json | null
           sort_order?: number
           spaeter_nachreichen_markiert_am?: string | null
           status?: string | null
@@ -17137,6 +17139,7 @@ export type Database = {
           person_id?: string | null
           pflicht?: boolean | null
           quelle?: string | null
+          signatur_position?: Json | null
           sort_order?: number
           spaeter_nachreichen_markiert_am?: string | null
           status?: string | null
@@ -19131,6 +19134,7 @@ export type Database = {
           paket_preis: number | null
           paket_umkreis_km: number | null
           partner_seit: string
+          partnervertrag_hinweis_am: string | null
           portal_zugang_freigeschaltet: boolean
           profile_id: string | null
           qualifikationen_neu: string[]
@@ -19228,6 +19232,7 @@ export type Database = {
           paket_preis?: number | null
           paket_umkreis_km?: number | null
           partner_seit?: string
+          partnervertrag_hinweis_am?: string | null
           portal_zugang_freigeschaltet?: boolean
           profile_id?: string | null
           qualifikationen_neu?: string[]
@@ -19325,6 +19330,7 @@ export type Database = {
           paket_preis?: number | null
           paket_umkreis_km?: number | null
           partner_seit?: string
+          partnervertrag_hinweis_am?: string | null
           portal_zugang_freigeschaltet?: boolean
           profile_id?: string | null
           qualifikationen_neu?: string[]

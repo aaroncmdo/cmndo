@@ -69,10 +69,12 @@ export const SV_DOKUMENTE_SLOTS: readonly SvDokumentSlotDef[] = [
   },
 ] as const
 
-export type SvDokumentStatus = 'leer' | 'hochgeladen' | 'geprueft' | 'abgelehnt' | 'ausstehend'
+// 20.09.2026: Der Transport traegt den ZUSTAND aus dokumentZustand() — inkl. 'feld_fehlt'
+// (Datei da, Kunden-Unterschriftsfeld nicht gesetzt → nicht im Kundenflow).
+export type { DokumentZustand as SvDokumentStatus } from '@/lib/sv/unterschriftsfeld'
 
 /**
- * Baut die Phase. `status` = aktueller Stand je Slot aus `pflichtdokumente` (fehlend = 'leer');
+ * Baut die Phase. `status` = Zustand je Slot aus `dokumentZustand()` (fehlend = 'leer');
  * er wandert als `optionen` (value = slotId, label = status) in das Feld — derselbe Transport
  * wie bei calendar-connect (svId/gcal/caldav), damit der Renderer ohne eigenen Read auskommt.
  */

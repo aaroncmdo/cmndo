@@ -11,6 +11,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { localizePhase, localizeFeld } from './localize'
 import { filterFelderByAudience } from './filter-felder-by-audience'
 import { baueSvDokumentePhase, SV_DOKUMENTE_SLOTS } from './sv-dokumente-phase'
+import { dokumentZustand } from '@/lib/sv/unterschriftsfeld'
 import type {
   OnboardingPhase,
   OnboardingFeld,
@@ -311,7 +312,7 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
     const svIdFuerDocs = (sv as unknown as Record<string, unknown>).id as string
     const { data: docRows, error: docErr } = await admin
       .from('pflichtdokumente')
-      .select('dokument_typ, status')
+      .select('dokument_typ, status, dokument_url, signatur_position')
       .eq('sv_id', svIdFuerDocs)
       .in('dokument_typ', SV_DOKUMENTE_SLOTS.map((s) => s.slotId))
     if (docErr) {
@@ -319,8 +320,18 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
       // laedt der SV ein Dokument erneut hoch (Upsert je Slot, kein Duplikat).
       console.error('[ladeSvOnboardingPhasen] pflichtdokumente-Read fehlgeschlagen:', docErr.message)
     }
+    // 20.09.2026: transportiert wird der ZUSTAND, nicht der rohe Status — der Renderer muss
+    // „Datei da, aber Unterschriftsfeld fehlt“ von „aktiv“ unterscheiden koennen (Aaron:
+    // „das Unterschriftsfeld muss gesetzt werden“).
     const status: Record<string, string> = {}
-    for (const r of docRows ?? []) status[r.dokument_typ as string] = (r.status as string) ?? 'leer'
+    for (const r of docRows ?? []) {
+      status[r.dokument_typ as string] = dokumentZustand({
+        dokument_typ: r.dokument_typ as string,
+        status: (r.status as string | null) ?? null,
+        dokument_url: (r.dokument_url as string | null) ?? null,
+        signatur_position: (r as { signatur_position?: unknown }).signatur_position ?? null,
+      })
+    }
     phasen.push(baueSvDokumentePhase(status))
     phasen.sort((a, b) => a.reihenfolge - b.reihenfolge)
   }
