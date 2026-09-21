@@ -146,13 +146,16 @@ const meldeSchadenInput = {
     .describe(
       'Telefonnummer des Kunden für den FlowLink-Versand. Bevorzugt eine MOBILnummer — der Link geht zuerst per WhatsApp, dann per SMS. Eine Festnetznummer kann beides nicht empfangen; dann trägt nur die E-Mail.',
     ),
+  // PFLICHTFELD seit 21.09.2026 (Soll-Blatt 2026-09-21-mcp-eingang-haerten): als optionales Feld
+  // mit der Bitte "IMMER MITERFRAGEN" kamen ueber 30 Tage 20 von 21 Leads OHNE E-Mail an — eine
+  // Beschreibung ist eine Bitte, ein Pflichtfeld ist eine Bedingung. Der Ausweichwert 'keine'
+  // haelt den Weg offen, zwingt das Modell aber zu einer ausdruecklichen Aussage statt zum
+  // Weglassen. Die Server-Route verwirft alles, was nicht wie eine Adresse aussieht.
   email: z
     .string()
-    .email()
     .max(120)
-    .optional()
     .describe(
-      'E-Mail des Kunden — die Rückfallebene, wenn Telefon nicht trägt. IMMER MITERFRAGEN. Ohne sie ist der Vorgang verloren, sobald die Nummer kein WhatsApp/SMS empfängt (Festnetz, Zahlendreher, Nummer ohne WhatsApp) — der Kunde bekommt dann gar keinen Link und kommt nie in seinen Vorgang zurück. Freiwillig: Will der Nutzer keine angeben, trotzdem fortfahren.',
+      'E-Mail des Kunden — PFLICHTANGABE. Frage sie aktiv ab. Sie ist die Rückfallebene, wenn das Telefon nicht trägt: ohne sie ist der Vorgang verloren, sobald die Nummer kein WhatsApp/SMS empfängt (Festnetz, Zahlendreher, Nummer ohne WhatsApp) — der Kunde bekommt dann gar keinen Link. Will der Nutzer ausdrücklich keine angeben, sende exakt "keine" — dann übernimmt Dispatch den Anruf.',
     ),
   einwilligung_erteilt: z
     .boolean()
@@ -791,10 +794,10 @@ async function runHttp(): Promise<void> {
               wunschtermin: { type: 'string', format: 'date-time', description: 'Optional: vager Wunschtermin (weicher Hold), falls kein konkreter Slot.' },
               name: { type: 'string', description: 'Name des Kunden.' },
               telefon: { type: 'string', description: 'Telefonnummer des Kunden, bevorzugt mobil (der Link geht per WhatsApp, dann SMS).' },
-              email: { type: 'string', format: 'email', description: 'E-Mail des Kunden — Rückfallebene, wenn Telefon nicht trägt. Immer miterfragen, freiwillig.' },
+              email: { type: 'string', description: 'E-Mail des Kunden — PFLICHTANGABE. Rückfallebene, wenn das Telefon nicht trägt. Will der Nutzer keine angeben: exakt "keine" senden.' },
               einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein nach ausdrücklicher Nutzer-Zustimmung (DSGVO + Kontakt per WhatsApp/SMS/E-Mail + KI-Dienst/USA).' },
             },
-            required: ['schadenart', 'hergang', 'plz', 'name', 'telefon', 'einwilligung_erteilt'],
+            required: ['schadenart', 'hergang', 'plz', 'name', 'telefon', 'email', 'einwilligung_erteilt'],
           },
         },
         {

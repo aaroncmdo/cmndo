@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
+import { after } from 'next/server'
+import { verarbeiteDokumentOcr } from '@/lib/ocr/verarbeite-dokument'
 
 // KFZ-172 Phase 2: Upload-Server-Action fuer Fall-Dokumente.
 // Speichert in Supabase Storage Bucket 'fall-dokumente' und erstellt
@@ -111,32 +112,32 @@ export async function uploadFallDokument(
   revalidatePath(`/faelle/${fallId}`, 'page')
   revalidatePath(`/gutachter/fall/${fallId}`, 'page')
 
-  // KFZ-172 Phase 3: OCR triggern (fire & forget, async)
+  // KFZ-172 Phase 3: OCR anstossen — NACH der Antwort, nicht davor.
   //
-  // Ein server-seitiger fetch() hat KEINEN Cookie-Jar. /api/ocr-trigger weist per
-  // Cookie aus (createClient + auth.getUser) und antwortet ohne Session mit 401 —
-  // und zwar VOR dem ersten Status-Schreiben ('processing'). Genau deshalb lagen am
-  // 21.09.2026 281 Dokumente auf 'pending' (davon 198 Fahrzeugscheine) und KEINES
-  // auf processing/done/failed: die Route wurde nie erreicht. Positivkontrolle:
-  // POST ohne Cookie gegen prod -> 401 {"error":"Nicht angemeldet"}, auch bei
-  // leerem Body (die Auth-Weiche greift vor jeder anderen Pruefung).
-  // Die Cookies des Aufrufers muessen darum explizit mitgereicht werden.
+  // Frueher ging das per fetch() auf die EIGENE oeffentliche Adresse. Ein
+  // server-seitiger fetch() hat keinen Cookie-Jar, also antwortete die cookie-
+  // basierte Wache der Route mit 401 — VOR dem ersten Status-Schreiben, weshalb es
+  // ueber fuenf Wochen kein einziges 'processing' gab und die Erkennung fuer
+  // NIEMANDEN lief (#6017). Netz-Umlauf und Ausweis-Runde entfallen jetzt ganz:
+  // es ist eine Funktion im selben Prozess.
+  //
+  // Berechtigung ist oben bereits geklaert — und zwar strenger, als die Route es
+  // konnte: Anmeldung UND v_claim_full-Sichtbarkeit auf genau diesen Fall. Die
+  // Route prueft nur, ob ueberhaupt jemand angemeldet ist.
+  //
+  // after() laeuft nach der Antwort (Projekt-Konvention, vgl. api/embed/config),
+  // der Upload bleibt also so schnell wie vorher. Fehler sind non-fatal, aber
+  // SICHTBAR — ein stiller Fehlschlag war der ganze Befund.
   if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-    const cookieHeader = (await cookies())
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ')
-    fetch(`${baseUrl}/api/ocr-trigger`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
-      body: JSON.stringify({ dokument_id: row.id }),
+    const dokumentId = row.id
+    after(async () => {
+      try {
+        const ergebnis = await verarbeiteDokumentOcr(dokumentId)
+        if (!ergebnis.ok) console.error(`[OCR] ${dokumentId}: ${ergebnis.grund} — ${ergebnis.fehler}`)
+      } catch (err) {
+        console.error(`[OCR] Verarbeitung fuer ${dokumentId} abgebrochen:`, err)
+      }
     })
-      .then((res) => {
-        // Antwort NICHT verwerfen: ein abgelehnter Anstoss war bisher unsichtbar.
-        if (!res.ok) console.error(`[OCR] Anstoss fuer ${row.id} abgelehnt: HTTP ${res.status}`)
-      })
-      .catch((err) => console.error(`[OCR] Anstoss fuer ${row.id} nicht zugestellt:`, err))
   }
 
   return { success: true, dokumentId: row.id }

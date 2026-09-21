@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// 21.09.2026: verifizierung-actions zieht seit dem Unterschriftsfeld-PR den Server-Helfer
+// src/lib/sv/unterschriftsfeld-server.ts, und der traegt den Next-RSC-Guard 'server-only' — der wirft in der vitest-Node-Umgebung
+// schon BEIM IMPORT.
+// Gleiches Muster wie in extract.test.ts und route.test.ts.
+vi.mock('server-only', () => ({}))
+
 // Gutachter-Onboarding-Audit (Befund #3): gibBasicSvFrei setzt ist_aktiv +
 // portal_zugang + verifiziert -> map-sichtbar + dispatchbar. ABER die Karten-RLS
 // (isochrone_polygon + lat/lng NOT NULL) und das Dispatch-Matching (Isochrone

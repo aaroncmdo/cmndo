@@ -22,6 +22,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { uploadSvUnterschrift } from '@/lib/actions/unterschrift-upload'
 import { revalidatePath } from 'next/cache'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { signAndStoreContract } from '@/lib/contracts/sign-and-store'
+import { headers } from 'next/headers'
 
 /**
  * Markiert den Kooperationsvertrag des eingeloggten SV als unterschrieben und
@@ -64,6 +67,96 @@ export async function signVertragUnterschrift(
     })
     .eq('id', sv.id)
 
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/gutachter/vertrag')
+  revalidatePath('/gutachter')
+  return { ok: true }
+}
+
+// ---------------------------------------------------------------------------
+// Basic-Partnervertrag nachholen (Aaron 20.09.2026: "3 ja")
+//
+// Gemessen am 20.09. auf prod: 16 von 22 freigeschalteten Basic-Gutachtern hatten
+// keinen unterschriebenen Partnervertrag und NULL von ihnen eine Zeile in
+// vertraege_unterzeichnet. Ursache: die Auto-Freischaltung (19.09.) laeuft ohne den
+// Wizard-Abschluss, der den Vertrag sonst erzeugt haette.
+//
+// Diese Action ist der Nachhol-Weg. Anders als signVertragUnterschrift (oben) schreibt
+// sie nicht nur zwei Flags, sondern geht durch dieselbe Pipeline wie der Basic-Wizard:
+// signAndStoreContract erzeugt das PDF im Bucket `vertraege` und die Zeile in
+// `vertraege_unterzeichnet` (vorlage_typ 'sv_basic_partnervertrag').
+//
+// Nicht blockierend: wer nicht unterschreibt, behaelt seinen Zugang und seine Faelle.
+
+export async function signBasicPartnervertrag(
+  signaturePngDataUri: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!signaturePngDataUri) return { ok: false, error: 'Unterschrift fehlt.' }
+
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser<{ id: string; paket: string | null }>(
+    supabase,
+    user.id,
+    'id, paket',
+  )
+  if (!sv) return { ok: false, error: 'Kein SV-Profil gefunden' }
+  if ((sv.paket ?? 'standard') !== 'basic') {
+    return { ok: false, error: 'Dieser Vertrag gilt nur fuer Basic-Konten.' }
+  }
+
+  const admin = createAdminClient()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('vorname, nachname')
+    .eq('id', user.id)
+    .maybeSingle()
+  const unterschriftName =
+    [profile?.vorname, profile?.nachname].filter(Boolean).join(' ').trim() || 'Sachverständiger'
+
+  const h = await headers()
+  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? null
+  const userAgent = h.get('user-agent') ?? null
+
+  try {
+    await signAndStoreContract({
+      vorlage_typ: 'sv_basic_partnervertrag',
+      unterschrift_name: unterschriftName,
+      unterschrift_ip: ip,
+      unterschrift_user_agent: userAgent,
+      signature_png_data_uri: signaturePngDataUri,
+      sv_id: sv.id,
+      rolle: 'Solo-Sachverstaendiger',
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[signBasicPartnervertrag] signAndStoreContract:', msg)
+    return { ok: false, error: `Vertrag konnte nicht erzeugt werden: ${msg}` }
+  }
+
+  // Signatur zusaetzlich als wiederverwendbare Unterschrift ablegen (best effort,
+  // wie in signVertragUnterschrift): das PDF traegt sie ohnehin eingebrannt.
+  let unterschriftUrl: string | null = null
+  try {
+    const sig = await uploadSvUnterschrift(sv.id, signaturePngDataUri)
+    if (sig.ok) unterschriftUrl = sig.url
+    else console.error('[signBasicPartnervertrag] Unterschrift-Upload:', sig.error)
+  } catch (err) {
+    console.error('[signBasicPartnervertrag] Unterschrift-Upload throw:', err)
+  }
+
+  const { error } = await admin
+    .from('sachverstaendige')
+    .update({
+      vertrag_unterschrieben: true,
+      vertrag_unterschrieben_am: new Date().toISOString(),
+      partnervertrag_hinweis_am: new Date().toISOString(),
+      ...(unterschriftUrl ? { unterschrift_url: unterschriftUrl } : {}),
+    })
+    .eq('id', sv.id)
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/gutachter/vertrag')

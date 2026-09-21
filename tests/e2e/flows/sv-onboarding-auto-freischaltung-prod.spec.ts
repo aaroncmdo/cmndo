@@ -164,7 +164,10 @@ test('E1 · Basic-Wizard bis zur Unterschrift → sofort freigeschaltet, verifiz
         await page
           .locator('input[aria-label="Berufshaftpflicht hochladen"]')
           .setInputFiles({ name: 'berufshaftpflicht.pdf', mimeType: 'application/pdf', buffer: MINI_PDF })
-        await expect(page.locator('[data-slot-status="hochgeladen"]').first()).toBeVisible({ timeout: 30_000 })
+        // 21.09.2026: Der Wizard-Schritt traegt jetzt den ZUSTAND statt des rohen Status —
+        // ein Nachweis-Slot mit Datei ist "aktiv". Die vier Kunden-Unterlagen haetten hier
+        // "feld_fehlt", weil sie erst mit gesetztem Unterschriftsfeld wirken (Aaron 20.09.).
+        await expect(page.locator('[data-slot-zustand="aktiv"]').first()).toBeVisible({ timeout: 30_000 })
         dokumentHochgeladen = true
         await weiter(page)
       } else if (/Vertrag/.test(text) && (await page.locator('canvas').count()) > 0) {
