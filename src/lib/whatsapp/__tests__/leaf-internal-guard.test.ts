@@ -127,7 +127,14 @@ describe('sendWhatsAppText — Dummy-/Platzhalter-Nummern-Guard', () => {
     const result = await sendWhatsAppText('+4915112345678', 'hi', { skipInternalGuard: true })
 
     expect(fetchMock).not.toHaveBeenCalled()
-    expect(result.messageId).toBe('dummy-recipient-suppressed')
+    // SendResult ist eine diskriminierte Union ueber `ok` — ein direkter Zugriff auf
+    // result.messageId typecheckt nicht. Ganzes Objekt vergleichen, wie im Test darueber.
+    expect(result).toEqual({
+      ok: true,
+      messageId: 'dummy-recipient-suppressed',
+      jid: '',
+      timestamp: expect.any(String),
+    })
   })
 
   it('laesst eine echte Nummer durch (Dummy-Pruefung liefert false)', async () => {
