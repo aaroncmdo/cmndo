@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSvKontakt } from '@/lib/kunde/get-kontakt'
+import { kundeBesitztLead } from '@/lib/kunde/besitz'
 import { redirect, notFound } from 'next/navigation'
 import KundeTerminDetailClient from './KundeTerminDetailClient'
 
@@ -52,18 +53,11 @@ export default async function KundeTerminDetailPage({
   if (!fall) notFound()
   const fallClaim = fall
 
+  // Stufe 2 (Konto nur mit Telefon): Besitz per E-Mail ODER Telefon-Suffix. Der fruehere Vergleich
+  // `lead?.email !== user.email` war mit NULL auf beiden Seiten ein Treffer (Wildcard).
   const owned = fall.kunde_id === user.id
   if (!owned) {
-    if (fall.lead_id) {
-      const { data: lead } = await admin
-        .from('leads')
-        .select('email')
-        .eq('id', fall.lead_id)
-        .single()
-      if (lead?.email !== user.email) notFound()
-    } else {
-      notFound()
-    }
+    if (!fall.lead_id || !(await kundeBesitztLead(admin, user, fall.lead_id))) notFound()
   }
 
   // SV-Profil + verifiziert-Badge (geteilter get-kontakt-Loader statt inline sachverstaendige->profiles-Join)

@@ -5,17 +5,18 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
+import { passtKontaktZuLead } from '@/lib/kunde/besitz'
 
-type User = { id: string; email: string | null }
+type User = { id: string; email: string | null; phone?: string | null }
 
 /** Reiner Kunde-Owner-Check (testbar, kein DB-Zugriff). */
 export function istKundeOwner(
-  fall: { kunde_id: string | null; lead_email: string | null },
+  fall: { kunde_id: string | null; lead_email: string | null; lead_telefon?: string | null },
   user: User,
 ): boolean {
   if (fall.kunde_id && fall.kunde_id === user.id) return true
-  if (fall.lead_email && user.email && fall.lead_email.toLowerCase() === user.email.toLowerCase()) return true
-  return false
+  // Stufe 2: E-Mail ODER Telefon-Suffix; NULL/leer ist auf keiner Seite je ein Treffer.
+  return passtKontaktZuLead(user, { email: fall.lead_email, telefon: fall.lead_telefon ?? null })
 }
 
 export type TerminVerwaltenResult = { ok: boolean; kundenbetreuerId: string | null; claimNummer: string | null }
@@ -39,11 +40,13 @@ export async function kannTerminFallVerwalten(
 
   // 1) Kunde-Owner (kunde_id ODER Lead-Email).
   let leadEmail: string | null = null
+  let leadTelefon: string | null = null
   if (fallRow.lead_id) {
-    const { data: lead } = await admin.from('leads').select('email').eq('id', fallRow.lead_id as string).maybeSingle()
+    const { data: lead } = await admin.from('leads').select('email, telefon').eq('id', fallRow.lead_id as string).maybeSingle()
     leadEmail = (lead?.email as string | null) ?? null
+    leadTelefon = (lead?.telefon as string | null) ?? null
   }
-  if (istKundeOwner({ kunde_id: fallRow.kunde_id as string | null, lead_email: leadEmail }, user)) {
+  if (istKundeOwner({ kunde_id: fallRow.kunde_id as string | null, lead_email: leadEmail, lead_telefon: leadTelefon }, user)) {
     return { ok: true, kundenbetreuerId, claimNummer }
   }
 
