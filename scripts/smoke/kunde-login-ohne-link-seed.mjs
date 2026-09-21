@@ -40,7 +40,11 @@ const MARKER = 'SMOKE-LOGIN-OHNE-LINK'
 const OUT = 'scripts/smoke/.kunde-login-ohne-link-seed.json'
 const RESULT = 'scripts/smoke/.kunde-login-ohne-link-result.json'
 const MAIL_PREFIX = 'smoke-kunde+login-'
-const TEST_TELEFON = '+4915512345678' // Musternummer der Tests; auth.users.phone ohne '+'
+// Supabase-Test-Telefonnummer (Auth-Config `sms_test_otp`, gesetzt 21.09.2026, gueltig bis 21.10.):
+// fuer sie sendet Auth KEINE SMS und akzeptiert nur den festen Code aus SMOKE_PHONE_OTP_CODE.
+// Nummer aus dem fuer Drama/Test reservierten Berliner Block, in keinem echten Lead vorhanden.
+// ⚠ Der CODE steht NICHT im Repo (oeffentlich) — nur in .env.local / als Secret.
+const TEST_TELEFON = process.env.SMOKE_PHONE_TEST_NUMBER ?? '+4930231255555' // auth.users.phone ohne '+'
 const APP = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
