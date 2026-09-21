@@ -7,6 +7,9 @@ import { revalidatePath } from 'next/cache'
 import { getSlotsFuerFall, type DokumentKatalogRow, type DokumentKategorie } from '@/lib/dokumente/katalog'
 import { buildKatalogContext } from '@/lib/dokumente/ruleEvaluator'
 import { getStorageUrl } from '@/lib/storage/url'
+import { after } from 'next/server'
+import { isOcrSupported } from '@/lib/ocr/claude-extract'
+import { verarbeiteDokumentOcr } from '@/lib/ocr/verarbeite-dokument'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
@@ -708,7 +711,12 @@ export async function uploadPflichtdokument(
 
     // CMM-21: pflichtdokument_id direkt verlinken — eine fall_dokumente-Row
     // pro hochgeladenem File, der Slot wird über die FK aggregiert.
-    const { error: slotDokFehler } = await admin.from('fall_dokumente').insert({
+    // 21.09.2026: `ocr_status` wird jetzt EXPLIZIT gesetzt. Vorher liess der Insert die
+    // Spalte offen -> DB-Default 'pending', auch fuer Fotos, fuer die es gar kein
+    // OCR-Schema gibt. Daher der wachsende 'pending'-Berg (203 Fahrzeugscheine + Fotos,
+    // 0 jemals verarbeitet). 'skipped' sagt die Wahrheit: hier wird nie etwas laufen.
+    const ocrMoeglich = isOcrSupported(slotTyp)
+    const { data: dokRow, error: slotDokFehler } = await admin.from('fall_dokumente').insert({
       fall_id: fallId,
       pflichtdokument_id: pflichtdokumentId,
       dokument_typ: slotTyp,
@@ -719,11 +727,36 @@ export async function uploadPflichtdokument(
       hochgeladen_von_user_id: user.id,
       uploaded_by_kunde: true,
       hochgeladen_am: new Date().toISOString(),
+      ocr_status: ocrMoeglich ? 'pending' : 'skipped',
       // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
       sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-    })
+    }).select('id').single()
     if (slotDokFehler) {
       console.error(`[onboarding] Slot-Dokument nicht in der Akte (fall ${fallId}, slot ${slotTyp}):`, slotDokFehler.message)
+    }
+
+    // Texterkennung anstossen — der Weg, ueber den ALLE Fahrzeugscheine hereinkommen.
+    // Bis heute stiess diese Action gar nichts an: der 401-Defekt aus #6017 betraf
+    // `uploadFallDokument` (SV-Portal, 7 Dokumente), waehrend die 203 Fahrzeugscheine
+    // hier landeten und nie gelesen wurden. Gefunden erst durch den Regel-4-Lauf per
+    // Oberflaeche — am Speicherpfad, nicht am Code.
+    //
+    // NUR fuer Typen mit Schema (isOcrSupported): von den Pflicht-Slots trifft das
+    // allein `fahrzeugschein`. Schadens- und Unfallfotos werden nie an Claude
+    // geschickt — das begrenzt den Aufwand auf einen Aufruf je Fahrzeugschein.
+    //
+    // after() laeuft nach der Antwort (Projekt-Konvention, vgl. api/embed/config),
+    // der Upload bleibt also so schnell wie vorher. Fehler non-fatal, aber sichtbar.
+    if (ocrMoeglich && !slotDokFehler && dokRow?.id) {
+      const dokId = dokRow.id as string
+      after(async () => {
+        try {
+          const ergebnis = await verarbeiteDokumentOcr(dokId)
+          if (!ergebnis.ok) console.error(`[onboarding/OCR] ${dokId}: ${ergebnis.grund} — ${ergebnis.fehler}`)
+        } catch (err) {
+          console.error(`[onboarding/OCR] Verarbeitung fuer ${dokId} abgebrochen:`, err)
+        }
+      })
     }
 
     // CMM-23: Polizeibericht-Upload triggert automatisch BKat-OCR (fire-and-forget).

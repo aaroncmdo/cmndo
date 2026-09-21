@@ -29,11 +29,21 @@
 //
 // Konkret NICHT ausgegeben: name, telefon, website, adresse_strasse. Wer das wieder
 // aufnimmt, oeffnet den Umgehungsweg erneut.
+//
+// ⚠ KEINE TEST-WERKSTAETTEN. Jeder andere Kundenweg (Embed-Finder, FlowLink-Selbst-
+// bedienung, Kundenportal) ruft `filterEchteWerkstaetten` mit `nurEchte: true` auf —
+// diese Route tat es als EINZIGE nicht. Gemessen am 21.09.2026: 9 von 32 aktiven
+// Werkstaetten waren Smoke-Artefakte, und alle neun standen hier im Ergebnis. Der
+// Filter existierte seit jeher, hat Unit-Tests und lief an jeder anderen Stelle;
+// er war nur an der einen Stelle nicht verdrahtet, an der anonyme Kunden lesen.
+// Die `email` wird dafuer intern mitgelesen und VOR dem Cachen wieder entfernt —
+// sie darf die Projektion oben nie erreichen.
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { geocodeAdresse, type GeocodeResult } from '@/lib/mapbox/geocode'
 import { haversineKm } from '@/lib/geo/distance'
 import { SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { filterEchteWerkstaetten } from '@/lib/werkstatt/finder'
 
 export const runtime = 'nodejs'
 
@@ -101,12 +111,15 @@ async function ladeWerkstaettenCached(): Promise<WerkstattRow[]> {
   // sind hier BEWUSST nicht enthalten — siehe Kopfkommentar.
   const { data, error } = await db
     .from('werkstaetten')
-    .select('id, adresse_plz, adresse_ort, lat, lng, marken, faehigkeiten, fahrzeug_gruppen, ist_freie_werkstatt, google_rating, google_review_count, partner, verifiziert')
+    .select('id, adresse_plz, adresse_ort, lat, lng, marken, faehigkeiten, fahrzeug_gruppen, ist_freie_werkstatt, google_rating, google_review_count, partner, verifiziert, email')
     .eq('status', 'aktiv')
     .not('lat', 'is', null)
     .not('lng', 'is', null)
   if (error) throw new Error(error.message)
-  const rows = (data ?? []) as WerkstattRow[]
+  // Test-/interne Werkstaetten raus (SSoT interne-identitaet), danach die email verwerfen:
+  // ab hier existiert sie weder im Cache noch in der Antwort.
+  const mitEmail = (data ?? []) as Array<WerkstattRow & { email: string | null }>
+  const rows: WerkstattRow[] = filterEchteWerkstaetten(mitEmail).map(({ email: _email, ...r }) => r)
   // Nur cachen, wenn der Read ok war — sonst friert ein transienter DB-Fehler eine leere
   // Liste fuer 5 Minuten ein und die API meldet „keine Werkstaetten", wo welche sind.
   cache = { rows, ts: now }
