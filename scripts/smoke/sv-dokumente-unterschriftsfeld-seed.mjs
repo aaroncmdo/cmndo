@@ -95,6 +95,88 @@ async function create() {
     .single()
   if (svErr || !sv) throw new Error(`sachverstaendige: ${svErr?.message}`)
 
+  // --- Kundenseite: Lead + FlowLink + gebuchter Termin bei genau diesem Gutachter -----------
+  //
+  // Das ist der Ausgangszustand, den die vorgelagerten Schritte (Quali, Feststellung,
+  // Terminwahl) hergestellt haetten — Regel 4 erlaubt den Seed genau dafuer. Der Schritt, den
+  // dieser Smoke beweist (der Kunde unterschreibt), bleibt ein echter Klick.
+  //
+  // Die Lead-Felder sind so gesetzt, dass die DB-getriebene Step-Matrix den Kunden bis zum
+  // 'sa'-Schritt durchfallen laesst: Szenario 'haftpflicht' verlangt schuldfrage='gegner', und
+  // jeder Schritt verschwindet, sobald ALLE seine erhebt_felder befuellt sind.
+  const { data: lead, error: leadErr } = await db
+    .from('leads')
+    .insert({
+      vorname: 'Smoke',
+      nachname: `Kunde-${runId}`,
+      email: kundenEmail,
+      telefon: null, // Regel 4: keine echten SMS/WhatsApp
+      service_typ: 'komplett',
+      source_channel: 'self_service',
+      status: 'neu',
+      qualifizierungs_phase: 'erstkontakt',
+      sprache: 'de',
+      // Szenario-Weiche: nur 'haftpflicht' hat den sa-Schritt
+      schuldfrage: 'gegner',
+      // feststellung-Schritt: alle vier Felder, sonst bleibt er stehen
+      schadentyp: 'auffahrunfall',
+      kennzeichen: `NF-SM ${runId.slice(0, 3).toUpperCase()}`,
+      unfallhergang: 'Auffahrunfall beim Anfahren an der Ampel (Abnahme-Smoke, keine echten Daten).',
+      unfallort: STANDORT.adresse,
+      gegner_versicherung: 'HUK-Coburg',
+      // ort_besichtigung + ort_fahrzeug
+      besichtigungsort_adresse: STANDORT.adresse,
+      besichtigungsort_lat: STANDORT.lat,
+      besichtigungsort_lng: STANDORT.lng,
+      fahrzeug_standort_adresse: STANDORT.adresse,
+      fahrzeug_standort_lat: STANDORT.lat,
+      fahrzeug_standort_lng: STANDORT.lng,
+    })
+    .select('id')
+    .single()
+  if (leadErr || !lead) throw new Error(`leads: ${leadErr?.message}`)
+
+  const token = randomBytes(16).toString('hex')
+  const { error: flErr } = await db.from('flow_links').insert({
+    token,
+    lead_id: lead.id,
+    status: 'aktiv',
+    expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+  })
+  if (flErr) throw new Error(`flow_links: ${flErr.message}`)
+
+  // Termin BEZUG-NATIV (bezug_typ/bezug_id), niemals zusaetzlich lead_id — ein doppelter
+  // Bezug reizt den Validate-Trigger. assignee_typ MUSS 'sachverstaendiger' sein, sonst
+  // leitet der Flow keine sv_id ab und das SA-Tool laeuft nie. typ='sv_begutachtung' ist
+  // fuer den Lookup der Flow-Seite Pflicht (seit 09.09.2026).
+  //
+  // Slot zufaellig: ein Exclusion-Constraint verbietet ueberlappende Termine desselben
+  // Assignees — ein fixer Slot liefe beim zweiten Lauf in 23P01.
+  const tagVersatz = 3 + Math.floor(Math.random() * 25)
+  const stunde = 8 + Math.floor(Math.random() * 8)
+  const start = new Date(Date.now() + tagVersatz * 24 * 60 * 60 * 1000)
+  start.setUTCHours(stunde, 0, 0, 0)
+  const ende = new Date(start.getTime() + 40 * 60 * 1000)
+  const { data: termin, error: tErr } = await db
+    .from('gutachter_termine')
+    .insert({
+      assignee_typ: 'sachverstaendiger',
+      assignee_id: sv.id,
+      start_zeit: start.toISOString(),
+      end_zeit: ende.toISOString(),
+      status: 'bestaetigt',
+      quelle: 'self_service',
+      typ: 'sv_begutachtung',
+      bezug_typ: 'lead',
+      bezug_id: lead.id,
+      besichtigungsort_adresse: STANDORT.adresse,
+      besichtigungsort_lat: STANDORT.lat,
+      besichtigungsort_lng: STANDORT.lng,
+    })
+    .select('id')
+    .single()
+  if (tErr || !termin) throw new Error(`gutachter_termine: ${tErr?.message}`)
+
   const seed = {
     runId,
     email,
@@ -102,11 +184,16 @@ async function create() {
     kundenEmail,
     uid,
     svId: sv.id,
+    leadId: lead.id,
+    token,
+    terminId: termin.id,
     plz: STANDORT.plz,
     erzeugt: new Date().toISOString(),
   }
   writeFileSync(SEED_PATH, JSON.stringify(seed, null, 2))
-  console.log(JSON.stringify({ ok: true, email, svId: sv.id, seedPath: SEED_PATH }, null, 2))
+  console.log(
+    JSON.stringify({ ok: true, email, svId: sv.id, leadId: lead.id, token, seedPath: SEED_PATH }, null, 2),
+  )
 }
 
 async function cleanup() {
