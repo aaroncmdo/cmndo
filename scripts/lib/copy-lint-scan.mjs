@@ -122,11 +122,77 @@ const ANREDE_IMPERATIV_VERBEN = [
 // Wortzeichen — "Öffne" und "Ändere" waeren damit STUMM geblieben. Beim Selbsttest aufgefallen
 // (10/12 statt 12/12): ein Gate, das zwei seiner achtzehn Verben nie sieht, meldet gruen und
 // bewacht sie trotzdem nicht. Die Zeichenklassen unten schliessen Umlaute ausdruecklich ein.
+// ── Dritte Achse: die APOKOPIERTE Befehlsform ("korrigier" statt "korrigiere") ────────────
+// Die Liste oben faengt nur GROSSgeschriebene Vollformen am Satzanfang — eine dokumentierte
+// Grenze, weil sich "fordere" (Befehl) und "ich fordere" (1. Person) sonst nicht trennen
+// lassen. Genau durch diese Luecke fielen am 21.09.2026 DREI kundensichtbare Stellen, alle
+// mitten im Satz, alle mit Sie und Du GEMISCHT:
+//
+//   "Bitte pruefen Sie und korrigier Ihre Daten."                      (i18n de.json)
+//   "…hat Ihren Vorgang vorbereitet. Bitte pruef die Angaben und unterschreib …"
+//                                                                      (Signatur-Flow)
+//   "…schickt Ihnen die Vollmacht per WhatsApp. Bitte unterschreib sie dort …"  (Vollmacht)
+//
+// WARUM DIESE ACHSE SICHER IST, wo die Vollform es nicht war: Die verkuerzte Form ist
+// EINDEUTIG Imperativ. Es gibt kein "ich korrigier", "ich pruef", "ich unterschreib" —
+// die 1. Person Singular traegt das -e zwingend. Deshalb darf hier auch klein und mitten
+// im Satz gesucht werden, was bei der Vollform gerade nicht geht.
+//
+// Vorab gemessen ueber alle gescannten Wurzeln (claimondo-marketing, autounfall-io,
+// src/{app,components,lib,i18n}): exakt die drei Stellen oben, KEIN Fehltreffer. Die
+// einzige weitere Fundstelle lag in einer Testdatei und faellt bereits durch SKIP.
+//
+// ⚠ Der Bindestrich gehoert in den Lookahead: "Pruef-Protokoll" ist ein Kompositum, kein
+// Befehl — und eine ASCII-Wortgrenze wuerde ihn nicht abfangen (derselbe Grund wie unten).
+const ANREDE_IMPERATIV_STAEMME = [
+  'korrigier', 'prüf', 'änder', 'beschreib', 'bestätig', 'kontaktier',
+  'erstell', 'verwend', 'wähl', 'nutz', 'unterschreib',
+]
+// ⚠ 'speicher' fehlt mit Absicht: "der Speicher" ist ein Substantiv. In der Vorab-Messung
+// schlug es in der Datenschutzerklaerung an — ein Fehltreffer, der die Flotte rot gefaerbt
+// haette. Dieselbe Sorgfalt wie bei der Vollform-Liste weiter unten.
+const ANREDE_IMPERATIV_KURZ = new RegExp(
+  '(?<![A-Za-zÄÖÜäöüß])(' + ANREDE_IMPERATIV_STAEMME.join('|') +
+    ')(?![A-Za-zÄÖÜäöüß-])',
+  'gi',
+)
+
 const ANREDE_IMPERATIV = new RegExp(
   '(?<![A-Za-zÄÖÜäöüß])(' + ANREDE_IMPERATIV_VERBEN.join('|') +
     ')(?![A-Za-zÄÖÜäöüß])(?!\\s*[-–—…]|\\s*\\.\\.\\.|\\s+Sie\\b)',
   'g',
 )
+
+const SIE_FORM = /(?<![A-Za-zÄÖÜäöüß])(Sie|Ihre|Ihren|Ihrem|Ihrer|Ihnen|Ihr)(?![A-Za-zÄÖÜäöüß])/
+
+/**
+ * GEMISCHTE Anrede: eine Sie-Form und eine duzende Befehlsform im SELBEN Text.
+ *
+ * Diese Achse existiert, weil die beiden anderen an `src/i18n/messages/de.json` nicht
+ * herankommen — der Aufrufer nimmt `.json` pauschal aus (Begruendung dort: eine DATEN-JSON
+ * meldete die Messstelle "DU Beeckerwerth" als Duzen). Der Ausschluss ist fuer Daten richtig
+ * und fuer die SPRACH-Datei falsch: dort stehen die meisten nutzersichtbaren Texte der App.
+ *
+ * Warum sie trotzdem sicher auf i18n laufen darf, wo `scanAnrede` es nicht duerfte: In den
+ * Messages stehen AUCH interne Portaltexte, und die duzen bewusst (Aaron 06.09.). Ein
+ * einzelnes "du" ist dort also kein Befund. Ein Satz, der Sie UND Du mischt, ist dagegen
+ * IMMER falsch — unabhaengig davon, fuer welche Flaeche er gedacht ist. Genau diese
+ * Schnittmenge prueft diese Funktion, und nur sie.
+ *
+ * Gemessen 21.09.2026, alle drei kundensichtbar und seit dem 06.09. live:
+ *   de.json          "Bitte pruefen Sie und korrigier Ihre Daten."
+ *   Signatur-Flow    "…hat Ihren Vorgang vorbereitet. Bitte pruef die Angaben und unterschreib …"
+ *   de.json          "…schickt Ihnen die Vollmacht … Bitte unterschreib sie dort …"
+ *
+ * @returns {string[]} die gefundenen Befehlsformen (leer = keine Mischung)
+ */
+export function scanAnredeGemischt(text) {
+  if (!text) return []
+  for (const aus of ANREDE_AUSNAHMEN) if (aus.test(text)) return []
+  for (const aus of ANREDE_KONTEXT_AUSNAHMEN) if (aus.test(text)) return []
+  if (!SIE_FORM.test(text)) return []
+  return [...new Set(text.match(ANREDE_IMPERATIV_KURZ) || [])]
+}
 
 /**
  * Duzende Befehlsform ohne Pronomen in einem nutzersichtbaren Text.
@@ -137,7 +203,10 @@ export function scanAnredeImperativ(text) {
   if (!text) return []
   for (const aus of ANREDE_AUSNAHMEN) if (aus.test(text)) return []
   for (const aus of ANREDE_KONTEXT_AUSNAHMEN) if (aus.test(text)) return []
-  return [...new Set(text.match(ANREDE_IMPERATIV) || [])]
+  return [...new Set([
+    ...(text.match(ANREDE_IMPERATIV) || []),
+    ...(text.match(ANREDE_IMPERATIV_KURZ) || []),
+  ])]
 }
 
 // Stellen, an denen dieselbe Buchstabenfolge kein deutsches Duzen ist.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { scanRdg, scanUmlaute, scanHeadingCode, scanTitleBrandTwice, scanAnredeImperativ } from './copy-lint-scan.mjs'
+import { scanRdg, scanUmlaute, scanHeadingCode, scanTitleBrandTwice, scanAnredeImperativ, scanAnredeGemischt } from './copy-lint-scan.mjs'
 
 describe('scanRdg — RDG-Rollentrennung', () => {
   it('flaggt Erstperson-Rechtsverben (alle am 04.09. live gefundenen Formen)', () => {
@@ -117,5 +117,47 @@ describe('scanAnredeImperativ — duzende Befehlsform ohne Pronomen', () => {
     // Der 2FA-Satz wurde über die GROSSE Form im selben Satz gefunden.
     expect(scanAnredeImperativ('und fordere ihn erneut an')).toHaveLength(0)
     expect(scanAnredeImperativ('beschreibe ich kurz')).toHaveLength(0)
+  })
+})
+
+describe('scanAnredeGemischt — Sie und Du im selben Satz', () => {
+  // Die Achse existiert, weil der Aufrufer `.json` pauschal ausnimmt (gedacht fuer DATEN-
+  // JSONs wie "DU Beeckerwerth") und dabei src/i18n/messages/de.json mitnimmt — die Datei
+  // mit den meisten nutzersichtbaren Texten der App. Alle drei Positivfaelle sind am
+  // 21.09.2026 dort bzw. im Signatur-Flow real gefunden worden, seit dem 06.09. live.
+  it('flaggt die drei real gefundenen Stellen', () => {
+    expect(scanAnredeGemischt('Bitte prüfen Sie und korrigier Ihre Daten.')).toHaveLength(1)
+    expect(
+      scanAnredeGemischt('Ihre Partnerkanzlei schickt Ihnen die Vollmacht. Bitte unterschreib sie dort.'),
+    ).toHaveLength(1)
+    expect(
+      scanAnredeGemischt('Ihre Werkstatt hat Ihren Vorgang vorbereitet. Bitte prüf die Angaben.'),
+    ).toHaveLength(1)
+  })
+
+  it('schweigt bei durchgehendem Sie — auch mit denselben Verben', () => {
+    expect(scanAnredeGemischt('Bitte prüfen und korrigieren Sie Ihre Daten.')).toHaveLength(0)
+    expect(scanAnredeGemischt('Bitte unterschreiben Sie sie dort.')).toHaveLength(0)
+    expect(scanAnredeGemischt('Ihre Werkstatt hat Ihren Vorgang vorbereitet.')).toHaveLength(0)
+  })
+
+  it('schweigt bei durchgehendem Du — interne Portale duzen bewusst (Aaron 06.09.)', () => {
+    expect(scanAnredeGemischt('Bitte prüf die Angaben und unterschreib die Abtretung.')).toHaveLength(0)
+    expect(scanAnredeGemischt('Korrigier deine Daten.')).toHaveLength(0)
+  })
+
+  it('verwechselt Substantive und Komposita nicht mit Befehlsformen', () => {
+    // "der Speicher" stand real in der Datenschutzerklaerung und war der Grund, den Stamm
+    // aus der Liste zu nehmen. Der Bindestrich im Lookahead deckt Komposita ab.
+    expect(scanAnredeGemischt('Ihre Daten liegen im Speicher des Anbieters.')).toHaveLength(0)
+    expect(scanAnredeGemischt('Sie finden das Prüf-Protokoll in Ihrem Konto.')).toHaveLength(0)
+    expect(scanAnredeGemischt('Sie erhalten Ihre Nutz-Daten auf Anfrage.')).toHaveLength(0)
+  })
+
+  it('bleibt blind fuer die Mischung UEBER Zeilengrenzen — dokumentierte Grenze', () => {
+    // Der Extraktor liefert pro String. Steht das "Ihre" in der einen und der Befehl in der
+    // naechsten JSX-Zeile, sieht diese Achse nur den halben Satz. Genau so lag der dritte
+    // Fall im Signatur-Flow; gefunden wurde er per Volltextsuche, nicht vom Gate.
+    expect(scanAnredeGemischt('Bitte prüf die Angaben und unterschreib')).toHaveLength(0)
   })
 })
