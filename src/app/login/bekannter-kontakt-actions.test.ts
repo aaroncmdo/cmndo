@@ -46,10 +46,23 @@ describe('bereiteTelefonLoginVor', () => {
     expect(createUser).toHaveBeenCalledWith({ email: 'k@example.test', phone: '+491775799941', phone_confirm: true, email_confirm: true })
     expect(upsert).toHaveBeenCalledWith('profiles', expect.objectContaining({ id: 'U9', rolle: 'kunde', email: 'k@example.test', telefon: '+491775799941', auth_provider: 'phone', force_password_change: false }))
   })
-  it('bekannter Lead OHNE E-Mail (Stufe 2): ok, aber kein Konto — profiles.email ist NOT NULL', async () => {
-    finde.mockResolvedValue({ leadIds: ['L1'], claimIds: [], leadEmail: null, leadVorname: null })
+  it('bekannter Lead OHNE E-Mail (Stufe 2): legt reines Telefon-Konto an — createUser ohne email, Profil email null', async () => {
+    finde.mockResolvedValue({ leadIds: ['L1'], claimIds: [], leadEmail: null, leadVorname: 'Thomas' })
     listUsers.mockResolvedValue({ data: { users: [] }, error: null })
+    createUser.mockResolvedValue({ data: { user: { id: 'U7' } }, error: null })
     expect(await bereiteTelefonLoginVor('+491775799941')).toEqual({ ok: true })
+    expect(createUser).toHaveBeenCalledWith({ phone: '+491775799941', phone_confirm: true })
+    expect(upsert).toHaveBeenCalledWith('profiles', expect.objectContaining({ id: 'U7', rolle: 'kunde', email: null, telefon: '+491775799941', vorname: 'Thomas', auth_provider: 'phone' }))
+  })
+  it('Konto jenseits der ersten listUsers-Seite wird gefunden (Seite 1 voll, Treffer auf Seite 2)', async () => {
+    finde.mockResolvedValue({ leadIds: ['L1'], claimIds: [], leadEmail: null, leadVorname: null })
+    const seite1 = Array.from({ length: 1000 }, (_, i) => ({ id: `X${i}`, phone: `4900000${i}` }))
+    listUsers
+      .mockResolvedValueOnce({ data: { users: seite1 }, error: null })
+      .mockResolvedValueOnce({ data: { users: [{ id: 'U1', phone: '491775799941' }] }, error: null })
+    expect(await bereiteTelefonLoginVor('+491775799941')).toEqual({ ok: true })
+    expect(listUsers).toHaveBeenCalledTimes(2)
+    expect(listUsers).toHaveBeenLastCalledWith({ page: 2, perPage: 1000 })
     expect(createUser).not.toHaveBeenCalled()
   })
   it('Konto existiert bereits: ok, nichts anlegen', async () => {

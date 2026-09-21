@@ -8,6 +8,7 @@ import KundeWillkommensHero from '@/components/kunde/KundeWillkommensHero'
 // Login ohne Link (19.09.): offene Schadenmeldung (Lead ohne Claim) sichtbar + fortsetzbar.
 import OffeneSchadenmeldungKarte from '@/components/kunde/OffeneSchadenmeldungKarte'
 import { ladeOffeneLeadsFuerKunde } from '@/lib/kunde/offene-leads'
+import { findeVorgaengeZuKontakt } from '@/lib/auth/lead-kontakt'
 import KundeSchadenUebersicht from '@/components/kunde/KundeSchadenUebersicht'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
@@ -57,11 +58,15 @@ export default async function KundeStartseite() {
   try {
     const { createAdminClient: createAdmin } = await import('@/lib/supabase/admin')
     const admin = createAdmin()
-    const { data: kaltLeads } = await admin
-      .from('leads')
-      .select('id, vorname, nachname')
-      .eq('email', user.email!)
-      .eq('qualifizierungs_phase', 'kalt')
+    // Stufe 2: Kunden ohne E-Mail — Leads per E-Mail ODER Telefon-Suffix finden, nie `.eq('email', null)`.
+    const kontakt = await findeVorgaengeZuKontakt(admin, { email: user.email ?? null, telefon: user.phone ?? null })
+    const { data: kaltLeads } = kontakt.leadIds.length
+      ? await admin
+          .from('leads')
+          .select('id, vorname, nachname')
+          .in('id', kontakt.leadIds)
+          .eq('qualifizierungs_phase', 'kalt')
+      : { data: [] as { id: string; vorname: string | null; nachname: string | null }[] }
     for (const lead of kaltLeads ?? []) {
       // Die Phase ist zugleich der Wiederholungs-Schutz. Bleibt der Lead 'kalt', legt
       // JEDER weitere Aufruf der Portal-Startseite denselben Task erneut an — deshalb

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { kundeBesitztLead } from '@/lib/kunde/besitz'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { startOutboundCall, findFreeRelaySeat } from './client'
 
@@ -39,13 +40,8 @@ export async function startBridgeCall({
   // Authorisierung
   if (initiator === 'kunde') {
     if (claim.geschaedigter_user_id !== user.id) {
-      // Fallback: Lead-Email check
-      if (claim.lead_id) {
-        const { data: lead } = await db.from('leads').select('email').eq('id', claim.lead_id).single()
-        if (lead?.email !== user.email) return { error: 'Kein Zugriff' }
-      } else {
-        return { error: 'Kein Zugriff' }
-      }
+      // Fallback: Lead-Kontakt (E-Mail ODER Telefon — Stufe 2; NULL ist nie ein Treffer)
+      if (!claim.lead_id || !(await kundeBesitztLead(db, user, claim.lead_id))) return { error: 'Kein Zugriff' }
     }
   } else {
     // SV muss dem Fall zugewiesen sein

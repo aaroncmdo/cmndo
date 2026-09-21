@@ -66,3 +66,33 @@ describe('send-lead-reminders — Kaskaden-Gate (17.07.2026)', () => {
     expect(src()).toContain('MIN_STUFEN_ABSTAND_MS')
   })
 })
+
+describe('send-lead-reminders — Doppelsend-Guard (20.09.2026)', () => {
+  // Auf prod GEMESSEN: zwei Lead-Zeilen derselben Person (beide source_channel=mcp, 15 Minuten
+  // auseinander angelegt) erzeugten im selben Lauf zwei identische WhatsApps an dieselbe Nummer
+  // (18:45:03.976 + 18:45:04.424, 0,45 s Abstand). Die Stufen-Marker haengen an der LEAD-Zeile
+  // und koennen das grundsaetzlich nicht verhindern — der Guard muss am EMPFAENGER sitzen.
+  it('dedupliziert pro Lauf auf Empfaenger-Ebene, nicht auf Lead-Ebene', () => {
+    expect(src()).toContain('const bereitsErinnert = new Set<string>()')
+    expect(src()).toContain('bereitsErinnert.has(empfaengerKey)')
+    expect(src()).toContain('bereitsErinnert.add(empfaengerKey)')
+  })
+
+  it('trennt die Kanaele (Telefon-Suffix bzw. E-Mail) statt sie zu vermischen', () => {
+    expect(src()).toContain(".replace(/[^0-9]/g, '').slice(-9)")
+    expect(src()).toContain("(perWhatsApp ? 'wa:' : 'mail:') + rohKey")
+  })
+
+  it('setzt den Stufen-Marker trotzdem — sonst feuert die Stufe im naechsten Lauf nach', () => {
+    // schonErinnert -> ok === null -> processStep nimmt den Markier-Pfad, NICHT den
+    // failed-Pfad (der kehrte ohne Marker zurueck und wuerde beim naechsten Tick erneut senden).
+    expect(src()).toContain('const ok = schonErinnert')
+    expect(src()).toContain('doppelsend_unterdrueckt')
+  })
+
+  it('verbraucht den Platz nur bei einem echten Sendeversuch', () => {
+    // Eine still markierte Stufe (Nicht-WhatsApp-Stufe, Konversations-Guard) hat niemanden
+    // erreicht — sie darf die eine echte Erinnerung des Empfaengers nicht verdraengen.
+    expect(src()).toContain("} else if (ok !== null && empfaengerKey !== '') {")
+  })
+})

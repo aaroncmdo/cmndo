@@ -17552,7 +17552,7 @@ export type Database = {
           avatar_url: string | null
           community_id: string | null
           created_at: string | null
-          email: string
+          email: string | null
           entstanden_aus_airdrop_id: string | null
           entstanden_aus_claim_id: string | null
           entstanden_via: string | null
@@ -17611,7 +17611,7 @@ export type Database = {
           avatar_url?: string | null
           community_id?: string | null
           created_at?: string | null
-          email: string
+          email?: string | null
           entstanden_aus_airdrop_id?: string | null
           entstanden_aus_claim_id?: string | null
           entstanden_via?: string | null
@@ -17670,7 +17670,7 @@ export type Database = {
           avatar_url?: string | null
           community_id?: string | null
           created_at?: string | null
-          email?: string
+          email?: string | null
           entstanden_aus_airdrop_id?: string | null
           entstanden_aus_claim_id?: string | null
           entstanden_via?: string | null
