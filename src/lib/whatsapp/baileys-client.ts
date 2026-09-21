@@ -113,6 +113,28 @@ export async function sendWhatsAppText(
     return { ok: false, error: 'empty text', code: 'invalid_phone' }
   }
 
+  // Dummy-/Platzhalter-Nummern werden IMMER unterdrueckt — auch bei skipInternalGuard. Eine
+  // erfundene Nummer ist nie ein legitimes Ziel; Team-Alarme gehen an echte interne Nummern.
+  // istDummyTelefon ist REIN (kein DB-Zugriff, also kein fail-open-Risiko) und bewusst eng
+  // gehalten, damit eine echte Kundennummer hier nie haengen bleibt.
+  //
+  // Aaron 21.09.2026: "bei tests keine namen erfinden und telefonnummern, das ist fuer uns
+  // schwer auseinander zu halten". Wo trotzdem eine Platzhalter-Nummer auftaucht, darf sie das
+  // System nicht verlassen. Die Funktion existierte seit dem 19.09. samt Unit-Tests, hatte aber
+  // NULL Aufrufer — ein stummer Waechter. Folge, real belegt: ein Test-Lead mit Telefon auf
+  // ...12345678 bekam am 20.09. um 18:45 ZWEI echt zugestellte WhatsApps, weil der Chokepoint
+  // nur istInternesTelefon prueft und an dieser Nummer keine interne E-Mail hing.
+  const { istDummyTelefon } = await import('@/lib/testdaten/test-sv-guard')
+  if (istDummyTelefon(phone)) {
+    console.warn(`[send-isolation:leaf] WhatsApp an Dummy-/Platzhalter-Nummer ${phone} unterdrueckt`)
+    return {
+      ok: true,
+      messageId: 'dummy-recipient-suppressed',
+      jid: '',
+      timestamp: new Date().toISOString(),
+    }
+  }
+
   // Send-Isolation am zentralen Chokepoint (2026-09-19): dies ist die EINE Stelle, durch die
   // jeder WhatsApp-Send laeuft — auch die ~21 Aufrufer, die den Guard in sendWhatsApp umgehen
   // (sendNachricht, direkter sendWhatsAppText). Kunden-WhatsApp an eine interne/Test-Nummer
