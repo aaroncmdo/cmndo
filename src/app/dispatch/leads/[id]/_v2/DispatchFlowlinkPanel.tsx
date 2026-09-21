@@ -53,6 +53,12 @@ export function DispatchFlowlinkPanel({
   const telefon = ((lead.telefon as string | null) ?? '').trim()
   const email = ((lead.email as string | null) ?? '').trim()
   const whatsappVerfuegbar = lead.whatsapp_verfuegbar === true
+  // Leitungstyp aus dem Eingang (Twilio Lookup, seit #6026). 'landline' heisst: WhatsApp und SMS
+  // koennen diese Nummer strukturell nicht erreichen — der Dispatcher soll das SEHEN und nicht erst
+  // am ausbleibenden Versand merken (Soll-Blatt 2026-09-21-mcp-eingang-haerten, Abschnitt 6a).
+  // Kein Import aus @/lib/telefon/lookup: das Modul ist server-only.
+  const telefonTyp = (lead.telefon_typ as string | null) ?? null
+  const telefonGeprueftAm = (lead.telefon_geprueft_am as string | null) ?? null
   const [pending, startSend] = useTransition()
   const [status, setStatus] = useState<{ kanal: string; ok: boolean; text: string } | null>(null)
   // P4-D: warnen, wenn die Kunden-E-Mail einem SV-Account gehört (sonst Zweit-Account).
@@ -116,6 +122,25 @@ export function DispatchFlowlinkPanel({
           <AlertTriangleIcon className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
           <p className="text-[11px] text-warning-strong">
             Keine Telefonnummer hinterlegt — kein Versand per WhatsApp/SMS möglich.
+          </p>
+        </div>
+      )}
+      {telefon && telefonTyp === 'landline' && (
+        <div className="flex items-start gap-2 rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2">
+          <AlertTriangleIcon className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+          <p className="text-[11px] text-warning-strong">
+            Festnetz-Anschluss — WhatsApp und SMS erreichen den Kunden unter dieser Nummer nicht.
+            {telefonGeprueftAm
+              ? ' Geprüft am ' +
+                new Date(telefonGeprueftAm).toLocaleString('de-DE', {
+                  timeZone: 'Europe/Berlin',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : ''}
           </p>
         </div>
       )}
