@@ -236,7 +236,7 @@ function SlotKachel({
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-claimondo-navy">{def.label}</p>
           <p className="mt-0.5 text-[11px] leading-snug text-claimondo-ondo">{def.beschreibung}</p>
-          <p className="mt-1 text-[11px] font-medium text-claimondo-navy" data-slot-status={zustand}>
+          <p className="mt-1 text-[11px] font-medium text-claimondo-navy" data-slot-zustand={zustand}>
             {zustandText(zustand)}
           </p>
         </div>
