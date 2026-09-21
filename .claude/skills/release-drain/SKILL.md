@@ -103,7 +103,7 @@ Drain-Session der frühere Serialisierungspunkt. Diese fünf ersetzen ihn:
 
 | | Prüfung | Kommando |
 |---|---|---|
-| **D1** | CI-Erfolg auf **genau** dem transportierten `staging`-Kopf | `gh run list --branch staging --json headSha,…` |
+| **D1** | CI-Erfolg (`event: push`) auf **genau** dem transportierten `staging`-Kopf | `gh api "repos/<o>/<r>/actions/runs?head_sha=<sha>"` |
 | **D2** | `staging`-SHA protokollieren, vor dem Merge als Vorfahr prüfen | `git merge-base --is-ancestor "$S" origin/staging` |
 | **D3** | Kollisionsprobe: jede Löschung bis zum verursachenden PR zurückverfolgen | `git diff --name-only --diff-filter=D origin/main origin/staging` |
 | **D4** | Migration-File-Parität | `npm run check:migration-files -- --ratchet` |
@@ -116,6 +116,22 @@ Bewegt sich `staging` während des Wartens: **alles neu messen**, nicht nur D1.
 
 ⚠ **D1 ist nicht „neulich grün".** Zwei PRs, je einzeln grün, können in ihrer **Kombination**
 rot sein — und die Kombination entsteht erst mit dem zweiten Merge.
+
+⚠⭐ **D1 nicht mit `gh run list --branch` messen — das Werkzeug ist hier unzuverlässig.**
+Am 21.09.2026 lieferte dieselbe Abfrage binnen Minuten zwei falsche Bilder: einmal **leer**,
+obwohl ein gruener Lauf auf dem Kopf existierte (haette die Runde unnoetig angehalten), einmal
+einen **roten** Lauf, der gar nicht das Merge-Gate ist (haette einen Fehlalarm ueber eine fremde
+Runde ausgeloest). Deterministisch ist die Abfrage nach dem Commit:
+
+```bash
+gh api "repos/<owner>/<repo>/actions/runs?head_sha=$S&per_page=20" --jq '.workflow_runs[] | "\(.name) \(.event) \(.status)/\(.conclusion)"'
+```
+
+⭐ **Und das `event` mitlesen.** Ein Kopf kann mehrere CI-Laeufe haben: der **`push`**-Lauf ist
+das Merge-Gate. Ein `workflow_dispatch`- oder `schedule`-Lauf fuehrt zusaetzlich den `e2e`-Job
+aus (der bei `push` per `if:` uebersprungen wird) und darf rot sein, ohne die Runde zu blocken.
+Real belegt: `e475c3d60` hatte `push` = **success** und `workflow_dispatch` = **failure**. Wer nur
+die Farbe sieht und nicht das Event, haelt eine saubere Runde fuer einen Gate-Bruch.
 
 ⚠ **D4 verlangt die Summenzeile mit `0 neu`, nicht `exit 0`.** Ein abgestürzter Check liefert
 ebenfalls Exit ≠ 0 und ist sonst nicht von einem Fund zu unterscheiden. Den Lauf **ohne**

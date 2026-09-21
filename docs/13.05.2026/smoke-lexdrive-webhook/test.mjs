@@ -116,7 +116,7 @@ await test('Unbekannter fall_nr → 200 skipped', async () => {
     event_type: 'vollmacht_bestaetigt',
     event_id: `test-skip-${Date.now()}`,
     fall_nr: 'NOT-EXISTING-CASE-999',
-    aaron_smoke: 'phone +491633628571',
+    smoke_nummer: 'phone +491231234567',
   })
   expect(r.status === 200, `expected 200 got ${r.status} body=${JSON.stringify(r.body)}`)
   expect(r.body?.skipped === true, `expected skipped=true got ${JSON.stringify(r.body)}`)
@@ -128,7 +128,7 @@ await test('Bekannter Fall SMK-SV-2026-001 → processed', async () => {
     event_type: 'vollmacht_bestaetigt',
     event_id: `aaron-smoke-${Date.now()}`,
     fall_nr: 'SMK-SV-2026-001',
-    mandant: { name: 'Aaron Sprafke', telefon: '+491633628571' },
+    mandant: { name: 'SMOKE-Mandant Test', telefon: '+491231234567' },
     aaron_smoke: true,
   })
   expect(r.status === 200, `expected 200 got ${r.status} body=${JSON.stringify(r.body)}`)

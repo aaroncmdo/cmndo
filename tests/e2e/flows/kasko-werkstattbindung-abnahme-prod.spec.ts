@@ -37,7 +37,7 @@ test.use({ httpCredentials: basicAuthFuerZiel() })
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string
 const SHOTS = process.env.ABNAHME_SHOTS_DIR ?? 'test-results/abnahme-kwb'
-const TEST_TELEFON = '+491633628571'
+const TEST_TELEFON = '+491231234567'
 const KUNDE_PASSWORT = 'Kf-Smoke-Test-2026!'
 const HUK_MARKE_ID = '99bec874-c6dd-4563-8365-b7575df89ed1'
 const HUK_SCHADEN_TEL = '0800 2485445'

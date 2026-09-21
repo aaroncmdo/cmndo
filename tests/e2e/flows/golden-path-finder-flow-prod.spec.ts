@@ -203,7 +203,7 @@ test('Kette: Finder-Buchung → derselbe FlowLink → Claim, Auftrag, Kundenport
 
   await vis(page, 'input[autocomplete="given-name"]').fill('E2eKette')
   await vis(page, 'input[autocomplete="family-name"]').fill('Smoke')
-  await vis(page, 'input[autocomplete="tel"]').fill('+491633628571')
+  await vis(page, 'input[autocomplete="tel"]').fill('+491231234567')
   await vis(page, 'input[autocomplete="email"]').fill(bucherEmail)
   await vis(page, 'input[type="checkbox"]').check()
 

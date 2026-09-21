@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // AAR-Smoke Komplettpaket-Push an LexDrive Salesforce
 //
-// Sendet einen echten Mandanten (Aaron Sprafke, +491633628571) an LexDrive's
+// Sendet einen Test-Mandanten (Platzhalter-Nummer, siehe AGENTS.md Regel 7) an LexDrive's
 // Apex-REST-Endpoint /services/apexrest/mandate.
 // Triggert auf deren Seite den Flow → Vollmacht-Versand an den Mandanten.
 //
@@ -32,7 +32,7 @@ const AARON = {
   kunde_vorname: 'Aaron',
   kunde_nachname: 'Sprafke',
   kunde_email: 'aaron.sprafke@claimondo.de',
-  kunde_telefon: '+491633628571',
+  kunde_telefon: '+491231234567',
   kunde_strasse: 'Hohenzollernring 31',
   kunde_plz: '50672',
   kunde_stadt: 'Köln',

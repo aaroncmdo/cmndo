@@ -42,7 +42,7 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string
 // Loginbarer Test-SV (nicolas.kitta+testsv). Assignee des geseedeten Termins.
 const TEST_SV_ID = 'b7387f81-482c-4cc5-8ced-bcaa5e92a5ff'
 // Etabliertes Test-Telefon (NIE eine echte Kundennummer). Sends schlagen fehl/sind isoliert.
-const TEST_TELEFON = '+491633628571'
+const TEST_TELEFON = '+491231234567'
 const KUNDE_PASSWORT = 'Kf-Smoke-Test-2026!'
 
 function svc(): SupabaseClient {

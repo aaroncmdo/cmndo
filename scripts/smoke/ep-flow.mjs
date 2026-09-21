@@ -172,7 +172,7 @@ for (let schritt = 1; schritt <= MAX; schritt++) {
       if (f.typ === 'checkbox') continue // separat (aria-hidden-Fallen)
       else if (/kennzeichen/.test(beschriftung)) await loc.fill(KENNZEICHEN)
       else if (f.tag === 'textarea' || /hergang|passiert|beschreib/.test(beschriftung)) await loc.fill(HERGANG)
-      else if (/telefon/.test(beschriftung)) await loc.fill(process.env.EP_TELEFON || '+491633628571')
+      else if (/telefon/.test(beschriftung)) await loc.fill(process.env.EP_TELEFON || '+491231234567')
       else if (/mail/.test(beschriftung)) continue // vorbefuellt lassen
       else if (f.typ === 'date') await loc.fill(new Date(Date.now() - 864e5).toISOString().slice(0, 10))
       else if (/adresse|stra|ort|wo steht/.test(beschriftung)) {

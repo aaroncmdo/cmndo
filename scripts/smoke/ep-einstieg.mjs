@@ -33,7 +33,7 @@ if (!ziel) { console.error('Unbekannte ID. ' + Object.keys(ZIELE).join(' | ')); 
 const SHOTS = join(process.cwd(), 'scripts/smoke/.ep-walk')
 mkdirSync(SHOTS, { recursive: true })
 const ident = identitaet(id.toUpperCase())
-const TEL = process.env.EP_TELEFON || '+491633628571'
+const TEL = process.env.EP_TELEFON || '+491231234567'
 const HERGANG = 'Ich stand an der roten Ampel, der Hintermann bremste zu spaet und fuhr mir ins Heck. Stossfaenger und Heckklappe sind eingedrueckt.'
 console.log(`\n### ${id.toUpperCase()} — ${ziel.name}`)
 console.log('Identitaet:', ident.email)
