@@ -141,7 +141,7 @@ export default function BasisFreigabenDrawerContent() {
                   </Td>
                   <Td className="text-xs text-claimondo-ondo">{region}</Td>
                   <Td>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-claimondo-bg text-claimondo-ondo border border-claimondo-border">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-claimondo-bg text-claimondo-ondo border border-claimondo-border">
                       {quelleLabel}
                     </span>
                   </Td>

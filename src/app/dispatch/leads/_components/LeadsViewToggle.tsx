@@ -477,7 +477,7 @@ function ListView({
                       {leadAnzeigeName(lead)}
                     </Link>
                     {istFlottenLead(lead) && (
-                      <span className="ml-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-claimondo-ondo/10 text-claimondo-navy">Flotte</span>
+                      <span className="ml-2 text-xs font-medium px-1.5 py-0.5 rounded-full bg-claimondo-ondo/10 text-claimondo-navy">Flotte</span>
                     )}
                     {lead.konvertiert_zu_claim_id && (
                       <Link href={`/faelle/${lead.konvertiert_zu_claim_id}`} className="ml-1.5 text-[10px] font-medium text-claimondo-ondo hover:underline">
@@ -583,7 +583,7 @@ function KanbanView({
         return (
           <div key={phase} className="min-w-[260px] w-[260px] bg-claimondo-navy/[0.04] rounded-2xl p-3 space-y-2 flex-shrink-0 border border-claimondo-navy/[0.06]">
             <div className="flex items-center justify-between px-1">
-              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-claimondo-border text-claimondo-ondo'}`}>
+              <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-claimondo-border text-claimondo-ondo'}`}>
                 {PHASE_LABELS[phase] ?? phase}
               </span>
               <span className="text-[10px] text-claimondo-ondo/70 tabular-nums">{bucket.length}</span>
@@ -606,7 +606,7 @@ function KanbanView({
                       {leadAnzeigeName(lead)}
                     </p>
                     {istFlottenLead(lead) && (
-                      <span className="mt-0.5 inline-block text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-claimondo-ondo/10 text-claimondo-navy">Flotte</span>
+                      <span className="mt-0.5 inline-block text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-claimondo-ondo/10 text-claimondo-navy">Flotte</span>
                     )}
                     {lead.telefon && (
                       <p className="text-[10px] text-claimondo-ondo flex items-center gap-1 mt-0.5">
@@ -615,7 +615,7 @@ function KanbanView({
                       </p>
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
+                      <span className={`text-[11px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
                       <span className="ml-auto inline-flex items-center gap-1">
                         <DispatcherAvatar lead={lead} size="xs" />
                         {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
@@ -652,7 +652,7 @@ function TerminGutachterCell({ info }: { info?: TerminGutachterInfo }) {
   return (
     <div className="flex flex-col items-start gap-1">
       {info.hat_termin ? (
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}>
           <CalendarCheckIcon className="h-3 w-3" />
           {formatTerminKurz(info.termin_start)}
         </span>
@@ -669,12 +669,12 @@ function TerminGutachterCell({ info }: { info?: TerminGutachterInfo }) {
           {info.gutachter_divergiert ? (
             <span
               title={`Kunde wählte ursprünglich ${info.kunden_pick_name ?? '—'}`}
-              className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${TONE_BADGE.warning}`}
+              className={`shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-medium ${TONE_BADGE.warning}`}
             >
               ≠ Wunsch
             </span>
           ) : info.gutachter_quelle === 'kunden_pick' ? (
-            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] ${TONE_BADGE.neutral}`}>Wunsch</span>
+            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[11px] ${TONE_BADGE.neutral}`}>Wunsch</span>
           ) : null}
         </span>
       ) : (
@@ -692,7 +692,7 @@ function TerminGutachterMini({ info }: { info?: TerminGutachterInfo }) {
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-1">
       {info.hat_termin && (
-        <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}>
+        <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}>
           <CalendarCheckIcon className="h-2.5 w-2.5" />
           {formatTerminKurz(info.termin_start)}
         </span>
@@ -700,7 +700,7 @@ function TerminGutachterMini({ info }: { info?: TerminGutachterInfo }) {
       {info.hat_gutachter && (
         <span
           title={info.gutachter_name ?? undefined}
-          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${info.gutachter_divergiert ? TONE_BADGE.warning : 'bg-claimondo-navy/[0.06] text-claimondo-navy'}`}
+          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium ${info.gutachter_divergiert ? TONE_BADGE.warning : 'bg-claimondo-navy/[0.06] text-claimondo-navy'}`}
         >
           <UserCheckIcon className="h-2.5 w-2.5" />
           <span className="max-w-[90px] truncate">{info.gutachter_name ?? 'SV'}</span>

@@ -138,7 +138,7 @@ export default function AuftragCard(props: AuftragCardProps) {
             </span>
           </p>
         </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo whitespace-nowrap">
+        <span className="text-xs font-medium px-2 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo whitespace-nowrap">
           {props.statusLabel}
         </span>
       </div>

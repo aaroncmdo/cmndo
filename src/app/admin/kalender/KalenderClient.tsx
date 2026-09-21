@@ -363,7 +363,7 @@ export default function KalenderClient({
                       {format(day, 'EEEE, d. MMMM', { locale: de })}
                     </span>
                     {todayFlag && (
-                      <span className="text-[10px] font-medium text-white bg-claimondo-navy px-1.5 py-0.5 rounded-full">Heute</span>
+                      <span className="text-xs font-medium text-white bg-claimondo-navy px-1.5 py-0.5 rounded-full">Heute</span>
                     )}
                   </div>
                   <div className="divide-y divide-claimondo-border/50">

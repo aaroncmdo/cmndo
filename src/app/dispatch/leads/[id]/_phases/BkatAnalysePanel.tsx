@@ -172,7 +172,7 @@ export default function BkatAnalysePanel({
           <div className="flex items-center gap-2 text-xs text-claimondo-ondo">
             <span>Quelle: <span className="font-medium text-claimondo-navy">{sourceLabel}</span></span>
             {data.schuld_hint && SCHULD_LABEL[data.schuld_hint] && (
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${SCHULD_LABEL[data.schuld_hint].cls}`}>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${SCHULD_LABEL[data.schuld_hint].cls}`}>
                 <ScaleIcon className="w-3 h-3" />
                 {SCHULD_LABEL[data.schuld_hint].label}
               </span>
@@ -191,7 +191,7 @@ export default function BkatAnalysePanel({
                 {/* 2026-05-11: Manueller Uebernehmen-Button entfernt — Auto-Save in analyze() macht das schon. */}
               </div>
               {autoSaved && (
-                <span className="inline-flex items-center gap-1 text-[10px] text-success-strong bg-success-soft border border-success/30 rounded-full px-2 py-0.5 font-medium">
+                <span className="inline-flex items-center gap-1 text-xs text-success-strong bg-success-soft border border-success/30 rounded-full px-2 py-0.5 font-medium">
                   <CheckCircleIcon className="w-3 h-3" />
                   Automatisch übernommen
                 </span>

@@ -57,7 +57,7 @@ export default function KartenAnzeigeToggle() {
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-semibold text-claimondo-navy">Mein Gebiet auf Karte</p>
           <span
-            className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+            className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full border ${
               enabled
                 ? 'bg-success-soft text-success-strong border-success/30'
                 : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'

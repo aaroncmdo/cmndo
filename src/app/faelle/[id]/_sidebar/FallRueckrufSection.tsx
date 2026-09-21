@@ -79,10 +79,10 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
       <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy">
         <PhoneCallIcon className="w-3.5 h-3.5 text-warning" /> Rückruf
         {isErledigt && (
-          <span className="ml-auto text-[10px] bg-success-soft text-success-strong px-1.5 py-0.5 rounded-full">Erledigt</span>
+          <span className="ml-auto text-xs bg-success-soft text-success-strong px-1.5 py-0.5 rounded-full">Erledigt</span>
         )}
         {hasDatum && inPast && !isErledigt && (
-          <span className="ml-auto text-[10px] bg-danger-soft text-danger-strong px-1.5 py-0.5 rounded-full font-semibold">Überfällig</span>
+          <span className="ml-auto text-xs bg-danger-soft text-danger-strong px-1.5 py-0.5 rounded-full font-semibold">Überfällig</span>
         )}
       </div>
 

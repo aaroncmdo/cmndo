@@ -194,7 +194,7 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                       <Td className="text-center !text-claimondo-ondo text-xs">{fmtDate(abr.versand_datum)}</Td>
                       <Td className="text-center !text-claimondo-ondo text-xs">{fmtDate(abr.faellig_am)}</Td>
                       <Td className="text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${ABRECHNUNG_STATUS_COLORS[abr.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ABRECHNUNG_STATUS_COLORS[abr.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                           {ABRECHNUNG_STATUS_LABELS[abr.status] ?? abr.status}
                         </span>
                       </Td>

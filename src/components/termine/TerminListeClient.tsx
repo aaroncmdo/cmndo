@@ -198,7 +198,7 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
 
   const inner = (
     <>
-      <span className={`flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
+      <span className={`flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
         <Icon className="w-3 h-3" />
         {meta.label}
       </span>
